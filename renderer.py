@@ -42,6 +42,9 @@ class CursorSVGRenderer(object):
         dwg.save()
 
 
+class CursorGCodeRenderer(object):
+    pass
+
 if __name__ == "__main__":
     path = 'data/recordings/'
     loader = loader.CursorLoader(path=path)
