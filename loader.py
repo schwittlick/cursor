@@ -13,9 +13,7 @@ class Loader(object):
             with open(full_path) as json_file:
                 json_string = json_file.readline()
                 data = jsonpickle.decode(json_string)
-                resolution = data['resolution']
-                for line in data['mouse']:
-                    self.recordings.append(line)
+                self.recordings.append(data['mouse'])
                 for keys in data['keys']:
                     self.keyboard_recordings.append((keys[0], keys[1]))
         print('Loaded ' + str(len(self.recordings)) + ' paths from ' + str(len(all_json_files)) + ' recording-files.')
@@ -44,5 +42,5 @@ if __name__ == "__main__":
     rec = loader.get(0)
     print(rec)
 
-    all = loader.get_all()
-    print(all)
+    #all = loader.get_all()
+    #print(all)

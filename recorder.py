@@ -56,19 +56,17 @@ class SystemTray(object):
 
 class CursorRecorder(InputListener):
     SAVE_PATH = 'data/recordings/'
-    mouse_recordings = []
     keyboard_recodings = []
     current_line = path.Path()
     started = False
     start_time_stamp = None
     current = set()
-    SCREEN_RESOLUTION = None
 
     def __init__(self):
         super(CursorRecorder, self).__init__()
         self.start_time_stamp = self._get_utc_timestamp()
         atexit.register(self.save)
-        self.SCREEN_RESOLUTION = pyautogui.size()
+        self.mouse_recordings = path.PathCollection(pyautogui.size())
 
         tray = SystemTray()
 
@@ -95,18 +93,18 @@ class CursorRecorder(InputListener):
         return utc_timestamp
 
     def on_move(self, x, y):
-        _x = x / self.SCREEN_RESOLUTION.width
-        _y = y / self.SCREEN_RESOLUTION.height
+        _x = x / self.mouse_recordings.resolution.width
+        _y = y / self.mouse_recordings.resolution.height
         self.current_line.add(_x, _y, self._get_utc_timestamp())
 
     def on_click(self, x, y, button, pressed):
         if not self.started and pressed:
-            _x = x / self.SCREEN_RESOLUTION.width
-            _y = y / self.SCREEN_RESOLUTION.height
+            _x = x / self.mouse_recordings.resolution.width
+            _y = y / self.mouse_recordings.resolution.height
             self.current_line.add(_x, _y, self._get_utc_timestamp())
             self.started = True
         elif self.started and pressed:
-            self.mouse_recordings.append(self.current_line.copy())
+            self.mouse_recordings.add(self.current_line.copy(), self.mouse_recordings.resolution)
             self.current_line.clear()
 
     def on_press(self, btn):
@@ -132,8 +130,7 @@ class CursorRecorder(InputListener):
             os.makedirs(self.SAVE_PATH)
 
         recs = {'mouse': self.mouse_recordings,
-                'keys': self.keyboard_recodings,
-                'resolution': self.SCREEN_RESOLUTION
+                'keys': self.keyboard_recodings
                 }
 
         fname = self.SAVE_PATH + str(self.start_time_stamp) + '.json'
