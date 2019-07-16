@@ -51,7 +51,7 @@ class SystemTray(object):
         self.tray = sg.SystemTray(menu=menu_def, filename=r'mouse-icon.gif')
 
     def read(self):
-        return self.tray.Read()
+        return self.tray.Read(timeout=0.1)
 
 
 class CursorRecorder(InputListener):
@@ -75,14 +75,18 @@ class CursorRecorder(InputListener):
         print('Running recorder.. Saving to ' + self.SAVE_PATH)
 
         while True:
-            menu_item = tray.read()
-            print(menu_item)
-            if menu_item == 'Exit':
-                break
-            elif menu_item == 'Open':
-                sg.Popup('Menu item chosen', menu_item)
-            elif menu_item == 'Save':
+            try:
+                time.sleep(0.001)
+                menu_item = tray.read()
+                if menu_item == 'Exit':
+                    break
+                elif menu_item == 'Open':
+                    sg.Popup('Menu item chosen', menu_item)
+                elif menu_item == 'Save':
+                    self.save()
+            except KeyboardInterrupt as e:
                 self.save()
+                return
 
     @staticmethod
     def _get_utc_timestamp():
@@ -127,7 +131,10 @@ class CursorRecorder(InputListener):
         if not os.path.exists(self.SAVE_PATH):
             os.makedirs(self.SAVE_PATH)
 
-        recs = {'mouse': self.mouse_recordings, 'keys': self.keyboard_recodings}
+        recs = {'mouse': self.mouse_recordings,
+                'keys': self.keyboard_recodings,
+                'resolution': self.SCREEN_RESOLUTION
+                }
 
         fname = self.SAVE_PATH + str(self.start_time_stamp) + '.json'
         with open(fname, 'w') as fp:
