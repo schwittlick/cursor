@@ -7,18 +7,19 @@ class Loader(object):
     keyboard_recordings = []
 
     def __init__(self, path):
-        onlyfiles = [f for f in os.listdir(path) if self.is_file_and_json(os.path.join(path, f))]
-        for file in onlyfiles:
+        all_json_files = [f for f in os.listdir(path) if self.is_file_and_json(os.path.join(path, f))]
+        for file in all_json_files:
             full_path = os.path.join(path, file)
             with open(full_path) as json_file:
-                lines = json_file.readlines()
-                data = jsonpickle.decode(lines[0])
+                json_string = json_file.readline()
+                data = jsonpickle.decode(json_string)
+                resolution = data['resolution']
                 for line in data['mouse']:
                     self.recordings.append(line)
                 for keys in data['keys']:
                     self.keyboard_recordings.append((keys[0], keys[1]))
-        print('Loaded ' + str(len(self.recordings)) + ' paths from ' + str(len(onlyfiles)) + ' recording-files.')
-        print('Loaded ' + str(len(self.keyboard_recordings)) + ' keys from ' + str(len(onlyfiles)) + ' recording-files.')
+        print('Loaded ' + str(len(self.recordings)) + ' paths from ' + str(len(all_json_files)) + ' recording-files.')
+        print('Loaded ' + str(len(self.keyboard_recordings)) + ' keys from ' + str(len(all_json_files)) + ' recording-files.')
 
     @staticmethod
     def is_file_and_json(path):

@@ -10,31 +10,28 @@ class CursorSVGRenderer(object):
         pass
 
     def render(self, paths):
-
         dwg = svgwrite.Drawing(self.SAVE_PATH + 'test.svg', profile='tiny', size=(2500, 2500))
 
         prev_x = None
         prev_y = None
-        for recording in paths:
+        for path in paths:
             is_first_line = True
-            print(type(recording))
-            for line in recording.vertices:
+            for point in path.vertices:
                 if is_first_line:
-                    very_first = recording.vertices[0]
+                    very_first = path.start_pos()
                     x1 = very_first.x
                     y1 = very_first.y
-                    x2 = line.x
-                    y2 = line.y
+                    x2 = point.x
+                    y2 = point.y
                     prev_x = x2
                     prev_y = y2
                 else:
                     x1 = prev_x
                     y1 = prev_y
-                    x2 = line.x
-                    y2 = line.y
+                    x2 = point.x
+                    y2 = point.y
                     prev_x = x2
                     prev_y = y2
-                print('drawing ' + str((x1, y1)) + ' to ' + str((x2, y2)))
                 dwg.add(dwg.line((x1, y1), (x2, y2), stroke=svgwrite.rgb(0, 0, 0, '%')))
 
                 is_first_line = False
@@ -57,10 +54,10 @@ class CursorGCodeRenderer(object):
 
         with open(self.SAVE_PATH + 'test.gcode', 'w') as file:
             file.write('G00 X0.0 Y0.0 Z0.0\n')
-            for recording in paths:
-                file.write('G00 X' + str(recording.vertices[0].x) + ' Y' + str(recording.vertices[0].y) + '\n')
+            for path in paths:
+                file.write('G00 X' + str(path.start_pos.x) + ' Y' + str(path.start_pos().y) + '\n')
                 file.write('G01 Z' + str(self.z_down) + '\n')
-                for line in recording.vertices:
+                for line in path.vertices:
                     x = line.x
                     y = line.y
                     file.write('G01 X' + str(x) + ' Y' + str(y) + '\n')
