@@ -1,5 +1,5 @@
 import os
-import json
+import jsonpickle
 
 
 class Loader(object):
@@ -11,12 +11,10 @@ class Loader(object):
         for file in onlyfiles:
             full_path = os.path.join(path, file)
             with open(full_path) as json_file:
-                data = json.load(json_file)
+                lines = json_file.readlines()
+                data = jsonpickle.decode(lines[0])
                 for line in data['mouse']:
-                    current_line = []
-                    for point in line:
-                        current_line.append((point[0], point[1], point[2]))
-                    self.recordings.append(current_line)
+                    self.recordings.append(line)
                 for keys in data['keys']:
                     self.keyboard_recordings.append((keys[0], keys[1]))
         print('Loaded ' + str(len(self.recordings)) + ' paths from ' + str(len(onlyfiles)) + ' recording-files.')
@@ -28,10 +26,10 @@ class Loader(object):
             return True
         return False
 
-    def get(self, id=None):
-        if id is None:
-            return self.recordings
+    def get_all(self):
+        return self.recordings
 
+    def get(self, id):
         max_index = len(self.recordings) - 1
         if id > max_index:
             raise IndexError('Specified index too high. (> '+str(max_index)+')')
@@ -44,3 +42,6 @@ if __name__ == "__main__":
     loader = Loader(path=path)
     rec = loader.get(0)
     print(rec)
+
+    all = loader.get_all()
+    print(all)
