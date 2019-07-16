@@ -2,8 +2,9 @@ import os
 import json
 
 
-class CursorLoader(object):
+class Loader(object):
     recordings = []
+    keyboard_recordings = []
 
     def __init__(self, path):
         onlyfiles = [f for f in os.listdir(path) if self.is_file_and_json(os.path.join(path, f))]
@@ -11,12 +12,15 @@ class CursorLoader(object):
             full_path = os.path.join(path, file)
             with open(full_path) as json_file:
                 data = json.load(json_file)
-                for line in data:
+                for line in data['mouse']:
                     current_line = []
                     for point in line:
                         current_line.append((point[0], point[1], point[2]))
                     self.recordings.append(current_line)
+                for keys in data['keys']:
+                    self.keyboard_recordings.append((keys[0], keys[1]))
         print('Loaded ' + str(len(self.recordings)) + ' paths from ' + str(len(onlyfiles)) + ' recording-files.')
+        print('Loaded ' + str(len(self.keyboard_recordings)) + ' keys from ' + str(len(onlyfiles)) + ' recording-files.')
 
     @staticmethod
     def is_file_and_json(path):
@@ -37,6 +41,6 @@ class CursorLoader(object):
 
 if __name__ == "__main__":
     path = 'data/recordings/'
-    loader = CursorLoader(path=path)
-    rec = loader.get(29)
+    loader = Loader(path=path)
+    rec = loader.get(0)
     print(rec)

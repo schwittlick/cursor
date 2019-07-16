@@ -6,11 +6,28 @@ import atexit
 import os
 import PySimpleGUIQt as sg
 from pynput.mouse import Listener as MouseListener
+from pynput.keyboard import Listener as KeyboardListener
 from interrupt_handler import GracefulInterruptHandler
 
 
-class CursorRecorder(object):
+class InputListener(object):
+    def __init__(self, mouse=True, keys=True):
+        if mouse:
+            mouse_listener = MouseListener(
+                on_move=self.on_move,
+                on_click=self.on_click)
+            mouse_listener.start()
+        if keys:
+            key_listener = KeyboardListener(
+                on_press=self.on_press,
+                on_release=self.on_release
+            )
+            key_listener.start()
+
+
+class CursorRecorder(InputListener):
     recordings = []
+    keyboard_recodings = []
     current_line = []
     started = False
     start_time_stamp = None
@@ -22,13 +39,9 @@ class CursorRecorder(object):
         return utc_timestamp
 
     def __init__(self):
+        super(CursorRecorder, self).__init__()
         self.start_time_stamp = self._get_utc_timestamp()
         atexit.register(self.save)
-
-        mouse_listener = MouseListener(
-                on_move=self.on_move,
-                on_click=self.on_click)
-        mouse_listener.start()
 
         menu_def = ['BLANK', ['&Open', '---', 'E&xit']]
         tray = sg.SystemTray(menu=menu_def, filename=r'mouse-icon.gif')
@@ -54,6 +67,12 @@ class CursorRecorder(object):
             self.recordings.append(self.current_line.copy())
             self.current_line.clear()
 
+    def on_press(self, btn):
+        pass
+
+    def on_release(self, btn):
+        self.keyboard_recodings.append((btn.char, self._get_utc_timestamp()))
+
     def save(self):
         print('save')
         fname = self.SAVE_PATH + str(self.start_time_stamp) + '.json'
@@ -61,9 +80,10 @@ class CursorRecorder(object):
         if not os.path.exists(self.SAVE_PATH):
             os.makedirs(self.SAVE_PATH)
 
+        recs = {'mouse': self.recordings, 'keys': self.keyboard_recodings}
+
         with open(fname, 'w') as fp:
-            print(len(self.recordings))
-            json.dump(self.recordings, fp=fp)
+            json.dump(recs, fp=fp)
 
 
 if __name__ == "__main__":

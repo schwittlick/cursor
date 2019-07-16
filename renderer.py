@@ -2,6 +2,7 @@ import svgwrite
 import os
 import loader
 
+
 class CursorSVGRenderer(object):
     SAVE_PATH = 'data/svgs/'
 
@@ -47,7 +48,7 @@ class CursorGCodeRenderer(object):
 
 if __name__ == "__main__":
     path = 'data/recordings/'
-    loader = loader.CursorLoader(path=path)
+    loader = loader.Loader(path=path)
 
     rec = loader.get()
 
