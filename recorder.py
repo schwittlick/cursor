@@ -7,6 +7,7 @@ import os
 import jsonpickle
 import PySimpleGUIQt as sg
 import pynput
+import pyautogui
 from pynput.mouse import Listener as MouseListener
 from pynput.keyboard import Listener as KeyboardListener
 from interrupt_handler import GracefulInterruptHandler
@@ -18,13 +19,14 @@ class InputListener(object):
     START_STOP_COMBINATION = {
         pynput.keyboard.Key.pause
     }
-    running = False
+    running = True
 
     def __init__(self, mouse=True, keys=True):
         if mouse:
             self.mouse_listener = MouseListener(
                 on_move=self.on_move,
                 on_click=self.on_click)
+            self.mouse_listener.start()
 
         if keys:
             self.key_listener = KeyboardListener(
@@ -60,16 +62,13 @@ class CursorRecorder(InputListener):
     started = False
     start_time_stamp = None
     current = set()
-
-    def _get_utc_timestamp(self):
-        now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
-        utc_timestamp = datetime.datetime.timestamp(now)
-        return utc_timestamp
+    SCREEN_RESOLUTION = None
 
     def __init__(self):
         super(CursorRecorder, self).__init__()
         self.start_time_stamp = self._get_utc_timestamp()
         atexit.register(self.save)
+        self.SCREEN_RESOLUTION = pyautogui.size()
 
         tray = SystemTray()
 
@@ -85,12 +84,22 @@ class CursorRecorder(InputListener):
             elif menu_item == 'Save':
                 self.save()
 
+    @staticmethod
+    def _get_utc_timestamp():
+        now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+        utc_timestamp = datetime.datetime.timestamp(now)
+        return utc_timestamp
+
     def on_move(self, x, y):
-        self.current_line.add(x, y, self._get_utc_timestamp())
+        _x = x / self.SCREEN_RESOLUTION.width
+        _y = y / self.SCREEN_RESOLUTION.height
+        self.current_line.add(_x, _y, self._get_utc_timestamp())
 
     def on_click(self, x, y, button, pressed):
         if not self.started and pressed:
-            self.current_line.add(x, y, self._get_utc_timestamp())
+            _x = x / self.SCREEN_RESOLUTION.width
+            _y = y / self.SCREEN_RESOLUTION.height
+            self.current_line.add(_x, _y, self._get_utc_timestamp())
             self.started = True
         elif self.started and pressed:
             self.mouse_recordings.append(self.current_line.copy())
