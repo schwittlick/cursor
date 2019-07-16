@@ -17,20 +17,21 @@ class CursorSVGRenderer(object):
         prev_y = None
         for recording in paths:
             is_first_line = True
-            for line in recording:
+            print(type(recording))
+            for line in recording.vertices:
                 if is_first_line:
-                    very_first = recording[0]
-                    x1 = very_first[0]
-                    y1 = very_first[1]
-                    x2 = line[0]
-                    y2 = line[1]
+                    very_first = recording.vertices[0]
+                    x1 = very_first.x
+                    y1 = very_first.y
+                    x2 = line.x
+                    y2 = line.y
                     prev_x = x2
                     prev_y = y2
                 else:
                     x1 = prev_x
                     y1 = prev_y
-                    x2 = line[0]
-                    y2 = line[1]
+                    x2 = line.x
+                    y2 = line.y
                     prev_x = x2
                     prev_y = y2
                 print('drawing ' + str((x1, y1)) + ' to ' + str((x2, y2)))
@@ -57,11 +58,11 @@ class CursorGCodeRenderer(object):
         with open(self.SAVE_PATH + 'test.gcode', 'w') as file:
             file.write('G00 X0.0 Y0.0 Z0.0\n')
             for recording in paths:
-                file.write('G00 X' + str(recording[0][0]) + ' Y' + str(recording[0][1]) + '\n')
+                file.write('G00 X' + str(recording.vertices[0].x) + ' Y' + str(recording.vertices[0].y) + '\n')
                 file.write('G01 Z' + str(self.z_down) + '\n')
-                for line in recording:
-                    x = line[0]
-                    y = line[1]
+                for line in recording.vertices:
+                    x = line.x
+                    y = line.y
                     file.write('G01 X' + str(x) + ' Y' + str(y) + '\n')
                 file.write('G00 Z' + str(self.z_up) + '\n')
 
@@ -69,7 +70,7 @@ if __name__ == "__main__":
     path = 'data/recordings/'
     loader = loader.Loader(path=path)
 
-    rec = loader.get()
+    rec = loader.get_all()
 
     vis = CursorSVGRenderer()
     vis.render(rec)

@@ -138,9 +138,7 @@ class CursorRecorder(InputListener):
 
         fname = self.SAVE_PATH + str(self.start_time_stamp) + '.json'
         with open(fname, 'w') as fp:
-            j = jsonpickle.encode(recs)
-            fp.write(j)
-            #json.dump(recs, fp=fp)
+            fp.write(jsonpickle.encode(recs))
 
 
 if __name__ == "__main__":
