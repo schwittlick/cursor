@@ -2,6 +2,7 @@ import time
 import datetime
 import json
 import pytz
+import pyautogui
 from pynput.mouse import Listener as MouseListener
 from interrupt_handler import GracefulInterruptHandler
 
@@ -13,14 +14,11 @@ class CursorRecorder(object):
     started = False
     start_time_stamp = None
     SAVE_PATH = 'data/recordings/'
-
-    def _get_utc_timestamp(self):
-        now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
-        utc_timestamp = datetime.datetime.timestamp(now)
-        return utc_timestamp
+    SCREEN_RESOLUTION = None
 
     def __init__(self):
         self.start_time_stamp = self._get_utc_timestamp()
+        self.SCREEN_RESOLUTION = pyautogui.size()
 
         mouse_listener = MouseListener(
                 on_move=self.on_move,
@@ -34,12 +32,23 @@ class CursorRecorder(object):
                     self.save()
                     break
 
+    @staticmethod
+    def _get_utc_timestamp():
+        now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+        utc_timestamp = datetime.datetime.timestamp(now)
+        return utc_timestamp
+
     def on_move(self, x, y):
-        self.current_line.append((x, y, self._get_utc_timestamp()))
+        _x = x / self.SCREEN_RESOLUTION.width
+        _y = y / self.SCREEN_RESOLUTION.height
+        self.current_line.append((_x, _y, self._get_utc_timestamp()))
 
     def on_click(self, x, y, button, pressed):
         if not self.started and pressed:
-            self.current_line.append((x, y, self._get_utc_timestamp()))
+            _x = x / self.SCREEN_RESOLUTION.width
+            _y = y / self.SCREEN_RESOLUTION.height
+
+            self.current_line.append((_x, _y, self._get_utc_timestamp()))
             self.started = True
         elif self.started and pressed:
             print(len(self.current_line))
