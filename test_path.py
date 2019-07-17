@@ -25,6 +25,8 @@ def test_path_add():
 
     assert len(p) == 100
 
+    p.clear()
+
 
 def test_path_clear():
     p = path.Path()
@@ -46,6 +48,8 @@ def test_path_copy():
     p3 = p
     assert p is p3
 
+    p.clear()
+
 
 def test_path_start_end():
     p = path.Path()
@@ -60,3 +64,26 @@ def test_path_start_end():
     assert end.x == 10
     assert end.y == 11
 
+    p.clear()
+
+
+def test_path_morph():
+    p = path.Path()
+
+    p.add(5, 5, 10000)
+    p.add(10, 11, 10001)
+    p.add(11, 11, 10002)
+    p.add(20, 20, 10003)
+    p.add(30, 31, 10004)
+    p.add(40, 41, 10005)
+
+    pm = p.morph((0, 0), (100, 100))
+
+    start = pm.start_pos()
+    end = pm.end_pos()
+    assert start.x == 0
+    assert start.y == 0
+    assert end.x == 100
+    assert end.y == 100
+
+    p.clear()
