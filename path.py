@@ -14,11 +14,12 @@ class TimedPosition(object):
         return self.timestamp
 
     def __repr__(self):
-        return f"TimedPosition({self.x:.2f}, {self.y:.2f})"
+        return f"({self.x:.2f}, {self.y:.2f}, {self.timestamp})"
 
 
 class Path(object):
-    vertices = []
+    def __init__(self):
+        self.vertices = []
 
     def add(self, x, y, timestamp):
         self.vertices.append(TimedPosition(x, y, timestamp))
@@ -75,27 +76,16 @@ class PathCollection(object):
         self.paths.append(path)
 
     def __repr__(self):
-        return f"PathCollection({self.paths})"
-
+        return f"PathCollection({self.resolution}, {self.paths})"
 
     def min(self):
-        minx = 1000
-        miny = 1000
-        for path in self.paths:
-            for point in path.vertices:
-                if point.x < minx:
-                    minx = point.x
-                if point.y < miny:
-                    miny = point.y
+        all_chained = [point for path in self.paths for point in path.vertices]
+        minx = min(all_chained, key = lambda pos: pos.x).x
+        miny = min(all_chained, key = lambda pos: pos.y).y
         return minx, miny
 
     def max(self):
-        maxx = 0
-        maxy = 0
-        for path in self.paths:
-            for point in path.vertices:
-                if point.x > maxx:
-                    maxx = point.x
-                if point.y > maxy:
-                    maxy = point.y
+        all_chained = [point for path in self.paths for point in path.vertices]
+        maxx = max(all_chained, key=lambda pos: pos.x).x
+        maxy = max(all_chained, key=lambda pos: pos.y).y
         return maxx, maxy
