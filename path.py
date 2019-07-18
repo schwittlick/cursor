@@ -13,10 +13,8 @@ class TimedPosition(object):
     def time(self):
         return self.timestamp
 
-    def __str__(self):
-        x_str = "{0:.2f}".format(self.x)
-        y_str = "{0:.2f}".format(self.y)
-        return x_str + ' ' + y_str
+    def __repr__(self):
+        return f"TimedPosition({self.x:.2f}, {self.y:.2f})"
 
 
 class Path(object):
@@ -59,11 +57,8 @@ class Path(object):
 
         return path
 
-    def __str__(self):
-        return_string = ''
-        for vertex in self.vertices:
-            return_string += str(vertex) + ' '
-        return return_string
+    def __repr__(self):
+        return f"Path({self.vertices})"
 
     def __len__(self):
         return len(self.vertices)
@@ -79,11 +74,9 @@ class PathCollection(object):
             raise Exception('New resolution is different to current. This should be handled somehow ..')
         self.paths.append(path)
 
-    def __str__(self):
-        return_string = ''
-        for path in self.paths:
-            return_string += str(path) + '\n'
-        return return_string
+    def __repr__(self):
+        return f"PathCollection({self.paths})"
+
 
     def min(self):
         minx = 1000
