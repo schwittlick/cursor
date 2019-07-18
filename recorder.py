@@ -15,7 +15,7 @@ from interrupt_handler import GracefulInterruptHandler
 import path
 
 
-class InputListener(object):
+class InputListener():
     START_STOP_COMBINATION = {
         pynput.keyboard.Key.pause
     }
@@ -45,7 +45,7 @@ class InputListener(object):
         self.running = not self.running
 
 
-class SystemTray(object):
+class SystemTray():
     def __init__(self):
         menu_def = ['BLANK', ['&Open', '---', 'E&xit', 'Save']]
         self.tray = sg.SystemTray(menu=menu_def, filename=r'mouse-icon.gif')

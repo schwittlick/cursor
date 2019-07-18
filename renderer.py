@@ -3,7 +3,7 @@ import os
 import loader
 
 
-class CursorSVGRenderer(object):
+class CursorSVGRenderer():
     def __init__(self):
         self.SAVE_PATH = 'data/svgs/'
 
@@ -41,7 +41,7 @@ class CursorSVGRenderer(object):
         dwg.save()
 
 
-class CursorGCodeRenderer(object):
+class CursorGCodeRenderer():
     def __init__(self):
         self.SAVE_PATH = 'data/gcode/'
         self.z_down = 1.5
@@ -74,6 +74,11 @@ class CursorGCodeRenderer(object):
                             y = -y
                         file.write('G01 X' + str(x) + ' Y' + str(y) + '\n')
                     file.write('G00 Z' + str(self.z_up) + '\n')
+
+
+class JpegRenderer():
+    def __init__(self):
+        pass
 
 
 if __name__ == "__main__":
