@@ -1,5 +1,5 @@
 import numpy as np
-
+import math
 
 class TimedPosition(object):
     def __init__(self, x, y, timestamp):
@@ -43,18 +43,51 @@ class Path(object):
 
         return self.vertices[-1]
 
+    def rot(self, v, rot):
+        co = np.cos(rot)
+        si = np.sin(rot)
+        xx = co * v.x - si * v.y
+        yy = si * v.x + co * v.y
+        return TimedPosition(xx, yy, v.timestamp)
+
     def morph(self, start, end):
         path = Path()
+        end_np = np.array(self.end_pos().pos(), dtype=float)
+        start_np = np.array(self.start_pos().pos(), dtype=float)
+
         for point in self.vertices:
-            nparr = np.array(point)
-            end_np = np.array(self.end_pos().pos())
-            start_np = np.array(self.start_pos().pos())
-            print(end_np)
-            print(start_np)
+            nparr = np.array(point.pos(), dtype=float)
+
             dir_old = np.subtract(end_np, start_np)
-            dir_new = np.subtract(np.array(start), np.array(end))
-            print(dir_old)
-            print(dir_new)
+            dir_new = np.subtract(np.array(end, dtype=float), np.array(start, dtype=float))
+            magdiff = np.linalg.norm(dir_new) / np.linalg.norm(dir_old)
+            nparr = nparr * magdiff
+            path.add(nparr[0], nparr[1], point.timestamp)
+
+        current_end = np.array(path.end_pos().pos(), dtype=float)
+        current_start = np.array(path.start_pos().pos(), dtype=float)
+        current_start_to_end = np.subtract(current_end, current_start)
+
+        new_end = np.array(end, dtype=float)
+        new_start = np.array(start, dtype=float)
+        new_start_to_end = np.subtract(new_end, new_start)
+
+        current_start_to_end = current_start_to_end / np.linalg.norm(current_start_to_end)
+        new_start_to_end = new_start_to_end / np.linalg.norm(new_start_to_end)
+
+        angle = np.arccos(np.clip(np.dot(current_start_to_end, new_start_to_end), -math.pi, math.pi))
+
+        for p in path.vertices:
+            rotated = self.rot(p, angle)
+            p.x = rotated.x
+            p.y = rotated.y
+
+        translation = np.subtract(new_start, start_np)
+        for p in path.vertices:
+            _p = np.array(p.pos(), dtype=float)
+            _p = _p + translation
+            p.x = _p[0]
+            p.y = _p[1]
 
         return path
 
