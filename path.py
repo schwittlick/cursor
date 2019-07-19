@@ -24,6 +24,14 @@ class TimedPosition:
         self.x *= _x
         self.y *= _y
 
+    def rot(self, delta):
+        co = np.cos(delta)
+        si = np.sin(delta)
+        xx = co * self.x - si * self.y
+        yy = si * self.x + co * self.y
+        self.x = xx
+        self.y = yy
+
     def __repr__(self):
         return f"({self.x:.2f}, {self.y:.2f}, {self.timestamp})"
 
@@ -54,13 +62,6 @@ class Path:
 
         return self.vertices[-1]
 
-    def rot(self, v, rot):
-        co = np.cos(rot)
-        si = np.sin(rot)
-        xx = co * v.x - si * v.y
-        yy = si * v.x + co * v.y
-        return TimedPosition(xx, yy, v.timestamp)
-
     def morph(self, start, end):
         path = Path()
         end_np = self.end_pos().arr()
@@ -89,9 +90,7 @@ class Path:
         angle = np.arccos(np.clip(np.dot(current_start_to_end, new_start_to_end), -math.pi, math.pi))
 
         for p in path.vertices:
-            rotated = self.rot(p, angle)
-            p.x = rotated.x
-            p.y = rotated.y
+            p.rot(angle)
 
         translation = np.subtract(new_start_np, path.start_pos().arr())
         for p in path.vertices:
