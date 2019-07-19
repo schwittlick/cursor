@@ -1,6 +1,43 @@
+from path import TimedPosition
+
 import svgwrite
 import os
 import loader
+from PIL import Image, ImageDraw
+
+
+class PathIterator:
+    def __init__(self, paths):
+        self.paths = paths
+
+    def points(self):
+        for collection in self.paths:
+            for path in collection.paths:
+                for point in path.vertices:
+                    yield point, collection.resolution
+
+    def connections(self, scaled=False):
+        prev = TimedPosition()
+
+        for collection in self.paths:
+            for path in collection.paths:
+                is_first_vertex = True
+                for point in path.vertices:
+                    if is_first_vertex:
+                        prev = point.copy()
+                        is_first_vertex = False
+
+                        continue
+
+                    start = prev
+                    end = point.copy()
+                    prev = point.copy()
+
+                    if scaled:
+                        start.scale(collection.resolution.width, collection.resolution.height)
+                        end.scale(collection.resolution.width, collection.resolution.height)
+
+                    yield start, end, collection.resolution
 
 
 class CursorSVGRenderer:
@@ -10,31 +47,12 @@ class CursorSVGRenderer:
     def render(self, paths, size):
         dwg = svgwrite.Drawing(self.SAVE_PATH + 'test.svg', profile='tiny', size=size)
 
-        prev_x = None
-        prev_y = None
-        for collection in paths:
-            print(type(collection))
-            for path in collection.paths:
-                is_first_vertex = True
-                print(path)
-                for point in path.vertices:
-                    if is_first_vertex:
-                        prev_x = point.x
-                        prev_y = point.y
-                        is_first_vertex = False
+        it = PathIterator(paths)
+        for conn in it.connections(scaled=True):
+            start = conn[0]
+            end = conn[1]
 
-                        continue
-
-                    x1 = prev_x
-                    y1 = prev_y
-
-                    x2 = point.x
-                    y2 = point.y
-
-                    dwg.add(dwg.line((x1, y1), (x2, y2), stroke=svgwrite.rgb(0, 0, 0, '%')))
-
-                    prev_x = x2
-                    prev_y = y2
+            dwg.add(dwg.line(start.pos(), end.pos(), stroke=svgwrite.rgb(0, 0, 0, '%')))
 
         if not os.path.exists(self.SAVE_PATH):
             os.makedirs(self.SAVE_PATH)
@@ -80,6 +98,21 @@ class JpegRenderer:
     def __init__(self):
         pass
 
+    def render(self, paths):
+        img = Image.new('RGB', (3000, 3000), 'white')
+        img_draw = ImageDraw.ImageDraw(img)
+
+        it = PathIterator(paths)
+
+        for conn in it.connections(scaled=True):
+            start = conn[0]
+            end = conn[1]
+
+            img_draw.line(xy=(start.x, start.y, end.x, end.y), fill='black', width=3)
+
+        img.save('custouttt.jpg', 'JPEG')
+
+
 
 if __name__ == "__main__":
     path = 'data/recordings/'
@@ -92,3 +125,6 @@ if __name__ == "__main__":
 
     gc = CursorGCodeRenderer()
     gc.render(rec)
+
+    jr = JpegRenderer()
+    jr.render(rec)

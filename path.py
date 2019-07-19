@@ -2,7 +2,7 @@ import numpy as np
 import math
 
 class TimedPosition:
-    def __init__(self, x, y, timestamp):
+    def __init__(self, x=0.0, y=0.0, timestamp=0):
         self.x = x
         self.y = y
         self.timestamp = timestamp
@@ -15,6 +15,14 @@ class TimedPosition:
 
     def time(self):
         return self.timestamp
+
+    def copy(self):
+        newone = type(self)(self.x, self.y, self.timestamp)
+        return newone
+
+    def scale(self, _x, _y):
+        self.x *= _x
+        self.y *= _y
 
     def __repr__(self):
         return f"({self.x:.2f}, {self.y:.2f}, {self.timestamp})"
