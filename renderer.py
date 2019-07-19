@@ -114,20 +114,3 @@ class JpegRenderer:
             img_draw.line(xy=(start.x, start.y, end.x, end.y), fill='black', width=3)
 
         img.save(self.save_path + 'custouttt.jpg', 'JPEG')
-
-
-
-if __name__ == "__main__":
-    path = 'data/recordings/'
-    loader = loader.Loader(path=path)
-
-    rec = loader.all()
-
-    vis = CursorSVGRenderer()
-    vis.render(rec, (1920, 1080))
-
-    gc = CursorGCodeRenderer()
-    gc.render(rec)
-
-    jr = JpegRenderer()
-    jr.render(rec)

@@ -37,13 +37,3 @@ class Loader:
             raise IndexError('Specified index too high. (> '+str(max_index)+')')
         single_recording = self.recordings[index]
         return single_recording
-
-
-if __name__ == "__main__":
-    path = 'data/recordings/'
-    loader = Loader(path=path)
-    rec = loader.single(0)
-    print(rec)
-
-    #all = loader.get_all()
-    #print(all)
