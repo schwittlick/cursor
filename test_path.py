@@ -64,9 +64,9 @@ def test_path_start_end():
 def test_path_morph():
     p = path.Path()
 
-    p.add(0, 0, 10000)
+    p.add(19, 34, 10000)
     p.add(10, 10, 10000)
-    p.add(2, 10, 10001)
+    p.add(600, 10, 10001)
 
     pm = p.morph((0, 0), (10, 100))
 

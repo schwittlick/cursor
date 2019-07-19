@@ -10,6 +10,9 @@ class TimedPosition:
     def pos(self):
         return self.x, self.y
 
+    def arr(self):
+        return np.array(self.pos, dtype=float)
+
     def time(self):
         return self.timestamp
 
@@ -82,7 +85,7 @@ class Path:
             p.x = rotated.x
             p.y = rotated.y
 
-        translation = np.subtract(new_start, start_np)
+        translation = np.subtract(new_start, np.array(path.start_pos().pos(), dtype=float))
         for p in path.vertices:
             _p = np.array(p.pos(), dtype=float)
             _p = _p + translation
