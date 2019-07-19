@@ -17,7 +17,7 @@ class PathIterator:
                     yield point, collection.resolution
 
     def connections(self, scaled=False):
-        prev = TimedPosition()
+        prev = None
 
         for collection in self.paths:
             for path in collection.paths:
@@ -37,15 +37,15 @@ class PathIterator:
                         start.scale(collection.resolution.width, collection.resolution.height)
                         end.scale(collection.resolution.width, collection.resolution.height)
 
-                    yield start, end, collection.resolution
+                    yield start, end
 
 
 class CursorSVGRenderer:
     def __init__(self):
-        self.SAVE_PATH = 'data/svgs/'
+        self.save_path = 'data/svgs/'
 
     def render(self, paths, size):
-        dwg = svgwrite.Drawing(self.SAVE_PATH + 'test.svg', profile='tiny', size=size)
+        dwg = svgwrite.Drawing(self.save_path + 'test.svg', profile='tiny', size=size)
 
         it = PathIterator(paths)
         for conn in it.connections(scaled=True):
@@ -54,14 +54,14 @@ class CursorSVGRenderer:
 
             dwg.add(dwg.line(start.pos(), end.pos(), stroke=svgwrite.rgb(0, 0, 0, '%')))
 
-        if not os.path.exists(self.SAVE_PATH):
-            os.makedirs(self.SAVE_PATH)
+        if not os.path.exists(self.save_path):
+            os.makedirs(self.save_path)
         dwg.save()
 
 
 class CursorGCodeRenderer:
     def __init__(self):
-        self.SAVE_PATH = 'data/gcode/'
+        self.save_path = 'data/gcode/'
         self.z_down = 1.5
         self.z_up = 0.0
         self.feedrate_up = 1000
@@ -69,10 +69,10 @@ class CursorGCodeRenderer:
         self.invert_y = True
 
     def render(self, paths):
-        if not os.path.exists(self.SAVE_PATH):
-            os.makedirs(self.SAVE_PATH)
+        if not os.path.exists(self.save_path):
+            os.makedirs(self.save_path)
 
-        with open(self.SAVE_PATH + 'test.gcode', 'w') as file:
+        with open(self.save_path + 'test.gcode', 'w') as file:
             file.write('G00 X0.0 Y0.0 Z0.0\n')
             for collection in paths:
                 min = collection.min()
@@ -96,9 +96,12 @@ class CursorGCodeRenderer:
 
 class JpegRenderer:
     def __init__(self):
-        pass
+        self.save_path = 'data/jpgs/'
 
     def render(self, paths):
+        if not os.path.exists(self.save_path):
+            os.makedirs(self.save_path)
+
         img = Image.new('RGB', (3000, 3000), 'white')
         img_draw = ImageDraw.ImageDraw(img)
 
@@ -110,7 +113,7 @@ class JpegRenderer:
 
             img_draw.line(xy=(start.x, start.y, end.x, end.y), fill='black', width=3)
 
-        img.save('custouttt.jpg', 'JPEG')
+        img.save(self.save_path + 'custouttt.jpg', 'JPEG')
 
 
 

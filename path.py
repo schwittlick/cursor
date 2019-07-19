@@ -119,6 +119,9 @@ class PathCollection:
             raise Exception('New resolution is different to current. This should be handled somehow ..')
         self.paths.append(path)
 
+    def __len__(self):
+        return len(self.paths)
+
     def __repr__(self):
         return f"PathCollection({self.resolution}, {self.paths})"
 

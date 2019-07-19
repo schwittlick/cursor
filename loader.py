@@ -3,10 +3,10 @@ import jsonpickle
 
 
 class Loader:
-    recordings = []
-    keyboard_recordings = []
-
     def __init__(self, path):
+        self.recordings = []
+        self.keyboard_recordings = []
+
         all_json_files = [f for f in os.listdir(path) if self.is_file_and_json(os.path.join(path, f))]
         for file in all_json_files:
             full_path = os.path.join(path, file)
