@@ -17,8 +17,7 @@ class TimedPosition:
         return self.timestamp
 
     def copy(self):
-        newone = type(self)(self.x, self.y, self.timestamp)
-        return newone
+        return type(self)(self.x, self.y, self.timestamp)
 
     def scale(self, _x, _y):
         self.x *= _x
@@ -32,13 +31,20 @@ class TimedPosition:
         self.x = xx
         self.y = yy
 
+    def translate(self, x, y):
+        self.x += x
+        self.y += y
+
     def __repr__(self):
         return f"({self.x:.2f}, {self.y:.2f}, {self.timestamp})"
 
 
 class Path:
-    def __init__(self):
-        self.vertices = []
+    def __init__(self, vertices=None):
+        if vertices:
+            self.vertices = list(vertices)
+        else:
+            self.vertices = []
 
     def add(self, x, y, timestamp):
         self.vertices.append(TimedPosition(x, y, timestamp))
@@ -47,9 +53,7 @@ class Path:
         self.vertices.clear()
 
     def copy(self):
-        newone = type(self)()
-        newone.vertices = self.vertices.copy()
-        return newone
+        return type(self)(self.vertices.copy())
 
     def start_pos(self):
         if len(self.vertices) == 0:
@@ -94,10 +98,7 @@ class Path:
 
         translation = np.subtract(new_start_np, path.start_pos().arr())
         for p in path.vertices:
-            _p = np.array(p.pos(), dtype=float)
-            _p = _p + translation
-            p.x = _p[0]
-            p.y = _p[1]
+            p.translate(translation[0], translation[1])
 
         return path
 
