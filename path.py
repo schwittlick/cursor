@@ -119,6 +119,11 @@ class PathCollection:
             raise Exception('New resolution is different to current. This should be handled somehow ..')
         self.paths.append(path)
 
+    def get(self, index):
+        if len(self.paths) < index:
+            raise IndexError('Index too high')
+        return self.paths[index]
+
     def __len__(self):
         return len(self.paths)
 

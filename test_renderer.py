@@ -10,7 +10,7 @@ def test_svgrenderer():
     rec = loader.all()
 
     vis = CursorSVGRenderer()
-    vis.render(rec, (1920, 1080))
+    vis.render(rec, rec[0].resolution, 'test1')
     
 def test_gcoderenderer():
     path = 'data/recordings/'
@@ -19,7 +19,7 @@ def test_gcoderenderer():
     rec = loader.all()
 
     vis = CursorGCodeRenderer()
-    vis.render(rec)
+    vis.render(rec, 'test1')
 
 def test_jpegrenderer():
     path = 'data/recordings/'
@@ -28,4 +28,4 @@ def test_jpegrenderer():
     rec = loader.all()
 
     vis = JpegRenderer()
-    vis.render(rec)
+    vis.render(rec, rec[0].resolution, 'test1')
