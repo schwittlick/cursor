@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-class TimedPosition():
+class TimedPosition:
     def __init__(self, x, y, timestamp):
         self.x = x
         self.y = y
@@ -17,7 +17,7 @@ class TimedPosition():
         return f"({self.x:.2f}, {self.y:.2f}, {self.timestamp})"
 
 
-class Path():
+class Path:
     def __init__(self):
         self.vertices = []
 
@@ -98,7 +98,7 @@ class Path():
         return len(self.vertices)
 
 
-class PathCollection():
+class PathCollection:
     def __init__(self, resolution):
         self.paths = []
         self.resolution = resolution

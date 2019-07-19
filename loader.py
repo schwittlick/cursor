@@ -2,7 +2,7 @@ import os
 import jsonpickle
 
 
-class Loader(object):
+class Loader:
     recordings = []
     keyboard_recordings = []
 
@@ -25,21 +25,24 @@ class Loader(object):
             return True
         return False
 
-    def get_all(self):
-        return self.recordings
+    def all(self):
+        """
+        :return: a copy of all recordings
+        """
+        return list(self.recordings)
 
-    def get(self, id):
+    def single(self, index):
         max_index = len(self.recordings) - 1
-        if id > max_index:
+        if index > max_index:
             raise IndexError('Specified index too high. (> '+str(max_index)+')')
-        single_recording = self.recordings[id]
+        single_recording = self.recordings[index]
         return single_recording
 
 
 if __name__ == "__main__":
     path = 'data/recordings/'
     loader = Loader(path=path)
-    rec = loader.get(0)
+    rec = loader.single(0)
     print(rec)
 
     #all = loader.get_all()
