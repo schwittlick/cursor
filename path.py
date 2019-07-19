@@ -11,7 +11,7 @@ class TimedPosition:
         return self.x, self.y
 
     def arr(self):
-        return np.array(self.pos, dtype=float)
+        return np.array(self.pos(), dtype=float)
 
     def time(self):
         return self.timestamp
@@ -55,25 +55,25 @@ class Path:
 
     def morph(self, start, end):
         path = Path()
-        end_np = np.array(self.end_pos().pos(), dtype=float)
-        start_np = np.array(self.start_pos().pos(), dtype=float)
+        end_np = self.end_pos().arr()
+        start_np = self.start_pos().arr()
+        new_end_np = np.array(end, dtype=float)
+        new_start_np = np.array(start, dtype=float)
 
         for point in self.vertices:
-            nparr = np.array(point.pos(), dtype=float)
+            nparr = point.arr()
 
             dir_old = np.subtract(end_np, start_np)
-            dir_new = np.subtract(np.array(end, dtype=float), np.array(start, dtype=float))
-            magdiff = np.linalg.norm(dir_new) / np.linalg.norm(dir_old)
-            nparr = nparr * magdiff
+            dir_new = np.subtract(new_end_np, new_start_np)
+            mag_diff = np.linalg.norm(dir_new) / np.linalg.norm(dir_old)
+            nparr = nparr * mag_diff
             path.add(nparr[0], nparr[1], point.timestamp)
 
-        current_end = np.array(path.end_pos().pos(), dtype=float)
-        current_start = np.array(path.start_pos().pos(), dtype=float)
+        current_end = path.end_pos().arr()
+        current_start = path.start_pos().arr()
         current_start_to_end = np.subtract(current_end, current_start)
 
-        new_end = np.array(end, dtype=float)
-        new_start = np.array(start, dtype=float)
-        new_start_to_end = np.subtract(new_end, new_start)
+        new_start_to_end = np.subtract(new_end_np, new_start_np)
 
         current_start_to_end = current_start_to_end / np.linalg.norm(current_start_to_end)
         new_start_to_end = new_start_to_end / np.linalg.norm(new_start_to_end)
@@ -85,7 +85,7 @@ class Path:
             p.x = rotated.x
             p.y = rotated.y
 
-        translation = np.subtract(new_start, np.array(path.start_pos().pos(), dtype=float))
+        translation = np.subtract(new_start_np, path.start_pos().arr())
         for p in path.vertices:
             _p = np.array(p.pos(), dtype=float)
             _p = _p + translation
