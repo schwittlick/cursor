@@ -66,6 +66,14 @@ class Path:
 
         return self.vertices[-1]
 
+    def bb(self):
+        minx = min(self.vertices, key=lambda pos: pos.x).x
+        miny = min(self.vertices, key=lambda pos: pos.y).y
+        maxx = max(self.vertices, key=lambda pos: pos.x).x
+        maxy = max(self.vertices, key=lambda pos: pos.y).y
+
+        return minx, miny, maxx, maxy
+
     def morph(self, start, end):
         path = Path()
         end_np = self.end_pos().arr()
@@ -129,6 +137,11 @@ class PathCollection:
 
     def __repr__(self):
         return f"PathCollection({self.resolution}, {self.paths})"
+
+    def bb(self):
+        mi = self.min()
+        ma = self.max()
+        return mi[0], mi[1], ma[0], ma[1]
 
     def min(self):
         all_chained = [point for path in self.paths for point in path.vertices]

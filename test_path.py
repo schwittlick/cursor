@@ -61,6 +61,20 @@ def test_path_start_end():
     assert end.y == 11
 
 
+def test_path_bb():
+    p = path.Path()
+    p.add(0, 0, 10000)
+    p.add(140, 11, 10000)
+    p.add(23, 141, 10000)
+    p.add(141, 4511, 10000)
+
+    bb = p.bb()
+    assert bb[0] == 0
+    assert bb[1] == 0
+    assert bb[2] == 141
+    assert bb[3] == 4511
+
+
 def test_path_morph():
     p = path.Path()
 
