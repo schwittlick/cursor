@@ -127,6 +127,11 @@ class PathCollection:
             raise Exception('New resolution is different to current. This should be handled somehow ..')
         self.paths.append(path)
 
+    def add_all(self, paths, resolution):
+        if resolution.width != self.resolution.width or resolution.height != self.resolution.height:
+            raise Exception('New resolution is different to current. This should be handled somehow ..')
+        self.paths.extend(paths)
+
     def get(self, index):
         if len(self.paths) < index:
             raise IndexError('Index too high')
@@ -134,6 +139,16 @@ class PathCollection:
 
     def __len__(self):
         return len(self.paths)
+
+    def __add__(self, other):
+        if other.resolution.width != self.resolution.width or other.resolution.height != self.resolution.height:
+            raise Exception('New resolution is different to current. This should be handled somehow ..')
+
+        new_paths = self.paths + other.paths
+        p = PathCollection(self.resolution)
+        p.add_all(new_paths, self.resolution)
+        return p
+
 
     def __repr__(self):
         return f"PathCollection({self.resolution}, {self.paths})"
