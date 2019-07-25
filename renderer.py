@@ -1,8 +1,5 @@
-from path import TimedPosition
-
 import svgwrite
 import os
-import loader
 from PIL import Image, ImageDraw
 
 
@@ -48,7 +45,7 @@ class CursorSVGRenderer:
         dwg = svgwrite.Drawing(self.save_path + filename + '.svg', profile='tiny', size=(resolution.width, resolution.height))
 
         it = PathIterator(paths)
-        for conn in it.connections(scaled=True):
+        for conn in it.connections(scaled=False):
             start = conn[0]
             end = conn[1]
 
@@ -62,10 +59,10 @@ class CursorSVGRenderer:
 class CursorGCodeRenderer:
     def __init__(self):
         self.save_path = 'data/gcode/'
-        self.z_down = 0.8
+        self.z_down = 4.5
         self.z_up = 0.0
-        self.feedrate_up = 100
-        self.feedrate_down = 100
+        self.feedrate_xy = 2000
+        self.feedrate_z = 1000
         self.invert_y = True
 
     def render(self, paths, filename):
@@ -73,7 +70,8 @@ class CursorGCodeRenderer:
             os.makedirs(self.save_path)
 
         with open(self.save_path + filename + '.nc', 'w') as file:
-            file.write('G00 X0.0 Y0.0 Z0.0 F' + str(self.feedrate_up) + '\n')
+            file.write(F'G01 Z0.0 F{self.feedrate_z}\n')
+            file.write(F'G01 X0.0 Y0.0 F{self.feedrate_xy}\n')
             for collection in paths:
                 min = collection.min()
                 max = collection.max()
@@ -83,15 +81,15 @@ class CursorGCodeRenderer:
                     y = path.start_pos().y
                     if self.invert_y:
                         y = -y
-                    file.write('G00 X' + str(x) + ' Y' + str(y) + ' F' + str(self.feedrate_up) + '\n')
-                    file.write('G01 Z' + str(self.z_down) + ' F' + str(self.feedrate_down) + '\n')
+                    file.write(F'G01 X{x:.4f} Y{y:.4f} F{self.feedrate_xy}\n')
+                    file.write(F'G01 Z{self.z_down} F{self.feedrate_z}\n')
                     for line in path.vertices:
                         x = line.x
                         y = line.y
                         if self.invert_y:
                             y = -y
-                        file.write('G01 X' + str(x) + ' Y' + str(y) + ' F' + str(self.feedrate_down) + '\n')
-                    file.write('G00 Z' + str(self.z_up) + ' F' + str(self.feedrate_down) + '\n')
+                        file.write(F'G01 X{x:.4f} Y{y:.4f} F{self.feedrate_xy}\n')
+                    file.write(F'G01 Z{self.z_up} F{self.feedrate_z}\n')
 
 
 class JpegRenderer:
