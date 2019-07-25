@@ -1,6 +1,5 @@
 import time
 import datetime
-import json
 import pytz
 import atexit
 import os
@@ -10,7 +9,6 @@ import pynput
 import pyautogui
 from pynput.mouse import Listener as MouseListener
 from pynput.keyboard import Listener as KeyboardListener
-from interrupt_handler import GracefulInterruptHandler
 
 import path
 
