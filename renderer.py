@@ -57,13 +57,13 @@ class CursorSVGRenderer:
 
 
 class CursorGCodeRenderer:
-    def __init__(self):
+    def __init__(self, feedrate_xy=2000, feedrate_z=1000, z_down=4.5, z_up=0.0, invert_y=True):
         self.save_path = 'data/gcode/'
-        self.z_down = 4.5
-        self.z_up = 0.0
-        self.feedrate_xy = 2000
-        self.feedrate_z = 1000
-        self.invert_y = True
+        self.z_down = z_down
+        self.z_up = z_up
+        self.feedrate_xy = feedrate_xy
+        self.feedrate_z = feedrate_z
+        self.invert_y = invert_y
 
     def render(self, paths, filename):
         if not os.path.exists(self.save_path):

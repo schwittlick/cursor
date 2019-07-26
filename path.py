@@ -1,5 +1,45 @@
 import numpy as np
 import math
+import json
+import pyautogui
+
+
+class MyJsonEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, PathCollection):
+            return {'paths': o.paths, 'resolution': {'w': o.resolution.width, 'h': o.resolution.height}}
+
+        if isinstance(o, Path):
+            return o.vertices
+
+        if isinstance(o, TimedPosition):
+            return {'x': o.x, 'y': o.y, 'ts': o.timestamp}
+
+        if isinstance(o, pyautogui.Size):
+            return {'w': o.width, 'h': o.height}
+
+        return super(MyJsonEncoder, self).default(o)
+
+class MyJsonDecoder(json.JSONDecoder):
+    def __init__(self, *args, **kwargs):
+        json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
+
+    def object_hook(self, dct):
+        if 'x' in dct and 'y' in dct and 'ts' in dct:
+            p = TimedPosition(dct['x'], dct['y'], dct['ts'])
+            return p
+        if 'w' in dct and 'h' in dct:
+            s = pyautogui.Size(dct['w'], dct['h'])
+            return s
+        if 'paths' in dct and 'resolution' in dct:
+            res = dct['resolution']
+            pc = PathCollection(res)
+            pc.add_all(dct['paths'], res)
+            return pc
+        #if 'mouse' in dct:
+        #    return dct['mouse']
+        return dct
+
 
 class TimedPosition:
     def __init__(self, x=0.0, y=0.0, timestamp=0):
@@ -35,8 +75,29 @@ class TimedPosition:
         self.x += x
         self.y += y
 
+    def __eq__(self, o):
+        """
+        compare equality by comparing all fields
+        """
+        if not isinstance(o, TimedPosition):
+            return NotImplemented
+
+        return self.x == o.x and self.y == o.y and self.timestamp == o.timestamp
+
+    def __lt__(self, o):
+        """
+        compare by timestamp
+        """
+        return self.timestamp < o.timestamp
+
+    def __gt__(self, o):
+        """
+        compare by timestamp
+        """
+        return self.timestamp > o.timestamp
+
     def __repr__(self):
-        return f"({self.x:.2f}, {self.y:.2f}, {self.timestamp})"
+        return F"({self.x:.3f}, {self.y:.3f}, {self.timestamp:.3f})"
 
 
 class Path:
@@ -111,10 +172,17 @@ class Path:
         return path
 
     def __repr__(self):
-        return f"Path({self.vertices})"
+        return str(self.vertices)
 
     def __len__(self):
         return len(self.vertices)
+
+    def __iter__(self):
+        for v in self.vertices:
+            yield v
+
+    def __getitem__(self, item):
+        return self.vertices[item]
 
 
 class PathCollection:
@@ -149,9 +217,19 @@ class PathCollection:
         p.add_all(new_paths, self.resolution)
         return p
 
-
     def __repr__(self):
         return f"PathCollection({self.resolution}, {self.paths})"
+
+    def __eq__(self, other):
+        if not isinstance(other, PathCollection):
+            return NotImplemented
+
+        if len(self.paths) != len(other.paths):
+            return False
+
+        # todo: do more in depth test
+
+        return True
 
     def bb(self):
         mi = self.min()

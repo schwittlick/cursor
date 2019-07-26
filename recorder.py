@@ -3,17 +3,18 @@ import datetime
 import pytz
 import atexit
 import os
-import jsonpickle
 import PySimpleGUIQt as sg
 import pynput
 import pyautogui
+import json
 from pynput.mouse import Listener as MouseListener
 from pynput.keyboard import Listener as KeyboardListener
 
 import path
+json.encoder.FLOAT_REPR = lambda x: format(x, '.2f')
 
 
-class InputListener():
+class InputListener:
     START_STOP_COMBINATION = {
         pynput.keyboard.Key.pause
     }
@@ -43,7 +44,7 @@ class InputListener():
         self.running = not self.running
 
 
-class SystemTray():
+class SystemTray:
     def __init__(self):
         menu_def = ['BLANK', ['&Open', '---', 'E&xit', 'Save']]
         self.tray = sg.SystemTray(menu=menu_def, filename=r'mouse-icon.gif')
@@ -133,7 +134,8 @@ class CursorRecorder(InputListener):
 
         fname = self.SAVE_PATH + str(self.start_time_stamp) + '.json'
         with open(fname, 'w') as fp:
-            fp.write(jsonpickle.encode(recs))
+            dump = json.dumps(recs, cls=path.MyJsonEncoder)
+            fp.write(dump)
 
 
 if __name__ == "__main__":

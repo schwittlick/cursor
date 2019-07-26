@@ -1,18 +1,19 @@
 import os
-import jsonpickle
-
+import json
+import path
 
 class Loader:
-    def __init__(self, path):
+    def __init__(self, directory):
         self.recordings = []
         self.keyboard_recordings = []
 
-        all_json_files = [f for f in os.listdir(path) if self.is_file_and_json(os.path.join(path, f))]
+        all_json_files = [f for f in os.listdir(directory) if self.is_file_and_json(os.path.join(directory, f))]
         for file in all_json_files:
-            full_path = os.path.join(path, file)
+            full_path = os.path.join(directory, file)
+            print(full_path)
             with open(full_path) as json_file:
                 json_string = json_file.readline()
-                data = jsonpickle.decode(json_string)
+                data = json.loads(json_string, cls=path.MyJsonDecoder)
                 self.recordings.append(data['mouse'])
                 for keys in data['keys']:
                     self.keyboard_recordings.append((keys[0], keys[1]))

@@ -90,3 +90,23 @@ def test_path_morph():
     assert round(start.y) == 0
     assert round(end.x) == 10
     assert round(end.y) == 100
+
+def test_timedpos_comparison():
+    t1 = path.TimedPosition(0, 0, 0)
+    t2 = path.TimedPosition(0, 0, 1)
+    r = t1 < t2
+    assert r == True
+
+def test_sort_path():
+    p = path.Path()
+
+    p.add(19, 34, 10040)
+    p.add(10, 10, 10000)
+    p.add(600, 10, 10001)
+
+    print(p)
+    s = path.Path(sorted(p))
+    print(s)
+
+    assert s[0].timestamp == 10000
+    assert s[2].timestamp == 10040
