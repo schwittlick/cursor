@@ -13,12 +13,9 @@ def test_pathcollection_serializable():
 
     coll.add(p, size)
 
-    print('1', coll)
-
     j = json.dumps(coll, cls=path.MyJsonEncoder)
-    print('2', j)
 
-    fname = 'data/test_recordings/testing.json'
+    fname = 'data/testing.json'
 
     recs = {'mouse': [coll],
             'keys': []
@@ -28,15 +25,10 @@ def test_pathcollection_serializable():
         dump = json.dumps(recs, cls=path.MyJsonEncoder)
         fp.write(dump)
 
-    with open('data/test_recordings/testing.json') as json_file:
+    with open('data/testing.json') as json_file:
         json_string = json_file.readline()
         data = json.loads(json_string, cls=path.MyJsonDecoder)
         ob = data
 
-    #ob = json.loads(j, cls=path.MyJsonDecoder)
-    #print('4', ob)
-
-    print(ob)
-
     # todo: test more thorougly
-    assert ob == recs['mouse']
+    assert ob['mouse'] == recs['mouse']

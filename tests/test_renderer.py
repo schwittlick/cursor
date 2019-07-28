@@ -4,8 +4,8 @@ from renderer import CursorGCodeRenderer
 from renderer import JpegRenderer
 
 def test_svgrenderer():
-    path = 'data/recordings/'
-    loader = Loader(path=path)
+    path = '../data/test_recordings/'
+    loader = Loader(directory=path)
 
     rec = loader.all()
 
@@ -13,8 +13,8 @@ def test_svgrenderer():
     vis.render(rec, rec[0].resolution, 'test1')
     
 def test_gcoderenderer():
-    path = 'data/recordings/'
-    loader = Loader(path=path)
+    path = '../data/test_recordings/'
+    loader = Loader(directory=path)
 
     rec = loader.all()
 
@@ -22,8 +22,8 @@ def test_gcoderenderer():
     vis.render(rec, 'test1')
 
 def test_jpegrenderer():
-    path = 'data/recordings/'
-    loader = Loader(path=path)
+    path = '../data/test_recordings/'
+    loader = Loader(directory=path)
 
     rec = loader.all()
 
