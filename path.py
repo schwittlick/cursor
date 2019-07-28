@@ -34,7 +34,8 @@ class MyJsonDecoder(json.JSONDecoder):
         if 'paths' in dct and 'resolution' in dct:
             res = dct['resolution']
             pc = PathCollection(res)
-            pc.add_all(dct['paths'], res)
+            for p in dct['paths']:
+                pc.add(Path(p), res)
             return pc
         #if 'mouse' in dct:
         #    return dct['mouse']
@@ -171,6 +172,11 @@ class Path:
 
         return path
 
+    def empty(self):
+        if len(self.vertices) == 0:
+            return True
+        return False
+
     def __repr__(self):
         return str(self.vertices)
 
@@ -193,11 +199,18 @@ class PathCollection:
     def add(self, path, resolution):
         if resolution.width != self.resolution.width or resolution.height != self.resolution.height:
             raise Exception('New resolution is different to current. This should be handled somehow ..')
+
+        if path.empty():
+            return
+
         self.paths.append(path)
 
     def add_all(self, paths, resolution):
         if resolution.width != self.resolution.width or resolution.height != self.resolution.height:
             raise Exception('New resolution is different to current. This should be handled somehow ..')
+
+        paths = [x for x in paths if not x.empty()]
+
         self.paths.extend(paths)
 
     def get(self, index):
@@ -237,13 +250,13 @@ class PathCollection:
         return mi[0], mi[1], ma[0], ma[1]
 
     def min(self):
-        all_chained = [point for path in self.paths for point in path.vertices]
+        all_chained = [point for path in self.paths for point in path]
         minx = min(all_chained, key = lambda pos: pos.x).x
         miny = min(all_chained, key = lambda pos: pos.y).y
         return minx, miny
 
     def max(self):
-        all_chained = [point for path in self.paths for point in path.vertices]
+        all_chained = [point for path in self.paths for point in path]
         maxx = max(all_chained, key=lambda pos: pos.x).x
         maxy = max(all_chained, key=lambda pos: pos.y).y
         return maxx, maxy

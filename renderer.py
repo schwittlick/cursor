@@ -19,7 +19,7 @@ class PathIterator:
         for collection in self.paths:
             for path in collection.paths:
                 is_first_vertex = True
-                for point in path.vertices:
+                for point in path:
                     if is_first_vertex:
                         prev = point.copy()
                         is_first_vertex = False
