@@ -1,4 +1,4 @@
-import path
+from ..cursor import path
 import pytest
 
 
@@ -91,11 +91,18 @@ def test_path_morph():
     assert round(end.x) == 10
     assert round(end.y) == 100
 
+
 def test_timedpos_comparison():
     t1 = path.TimedPosition(0, 0, 0)
     t2 = path.TimedPosition(0, 0, 1)
     r = t1 < t2
-    assert r == True
+    assert r is True
+
+
+def test_timedpos_simple():
+    t = path.TimedPosition(0, 0, 100)
+    assert t.time() == 100
+
 
 def test_sort_path():
     p = path.Path()

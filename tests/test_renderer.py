@@ -1,29 +1,34 @@
-from loader import Loader
-from renderer import CursorSVGRenderer
-from renderer import CursorGCodeRenderer
-from renderer import JpegRenderer
+from ..cursor.loader import Loader
+from ..cursor.renderer import CursorSVGRenderer
+from ..cursor.renderer import CursorGCodeRenderer
+from ..cursor.renderer import JpegRenderer
+
+import os
+
 
 def test_svgrenderer():
-    path = '../data/test_recordings/'
-    loader = Loader(directory=path)
+    path = 'tests/data/test_recordings/'
+    loader = Loader(directory=os.path.abspath(path))
 
     rec = loader.all()
 
     vis = CursorSVGRenderer()
     vis.render(rec, rec[0].resolution, 'test1')
-    
+
+
 def test_gcoderenderer():
-    path = '../data/test_recordings/'
-    loader = Loader(directory=path)
+    path = 'tests/data/test_recordings/'
+    loader = Loader(directory=os.path.abspath(path))
 
     rec = loader.all()
 
     vis = CursorGCodeRenderer()
     vis.render(rec, 'test1')
 
+
 def test_jpegrenderer():
-    path = '../data/test_recordings/'
-    loader = Loader(directory=path)
+    path = 'tests/data/test_recordings/'
+    loader = Loader(directory=os.path.abspath(path))
 
     rec = loader.all()
 

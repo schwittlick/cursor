@@ -1,4 +1,4 @@
-import path
+from ..cursor import path
 import pyautogui
 import json
 
@@ -13,8 +13,6 @@ def test_pathcollection_serializable():
 
     coll.add(p, size)
 
-    j = json.dumps(coll, cls=path.MyJsonEncoder)
-
     fname = 'data/testing.json'
 
     recs = {'mouse': [coll],
@@ -25,7 +23,7 @@ def test_pathcollection_serializable():
         dump = json.dumps(recs, cls=path.MyJsonEncoder)
         fp.write(dump)
 
-    with open('data/testing.json') as json_file:
+    with open(fname, 'r') as json_file:
         json_string = json_file.readline()
         data = json.loads(json_string, cls=path.MyJsonDecoder)
         ob = data

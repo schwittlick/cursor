@@ -20,6 +20,7 @@ class MyJsonEncoder(json.JSONEncoder):
 
         return super(MyJsonEncoder, self).default(o)
 
+
 class MyJsonDecoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
         json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
@@ -37,8 +38,6 @@ class MyJsonDecoder(json.JSONDecoder):
             for p in dct['paths']:
                 pc.add(Path(p), res)
             return pc
-        #if 'mouse' in dct:
-        #    return dct['mouse']
         return dct
 
 

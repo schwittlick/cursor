@@ -1,0 +1,6 @@
+data/
+.idea
+.coverage
+__pycache__
+*.pyc
+.cache/

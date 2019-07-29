@@ -1,5 +1,6 @@
-import path
+from ..cursor import path
 import pyautogui
+
 
 def test_pathcollection_minmax():
     size = pyautogui.Size(100, 100)

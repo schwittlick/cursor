@@ -1,6 +1,8 @@
+from ..cursor import path
+
 import os
 import json
-import path
+
 
 class Loader:
     def __init__(self, directory):
