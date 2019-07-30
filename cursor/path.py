@@ -7,18 +7,13 @@ import pyautogui
 class MyJsonEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, PathCollection):
-            return {'paths': o.paths, 'resolution': {'w': o.resolution.width, 'h': o.resolution.height}}
+            return {'paths': o.get_all(), 'resolution': {'w': o.resolution.width, 'h': o.resolution.height}}
 
         if isinstance(o, Path):
             return o.vertices
 
         if isinstance(o, TimedPosition):
             return {'x': o.x, 'y': o.y, 'ts': o.timestamp}
-
-        if isinstance(o, pyautogui.Size):
-            return {'w': o.width, 'h': o.height}
-
-        return super(MyJsonEncoder, self).default(o)
 
 
 class MyJsonDecoder(json.JSONDecoder):
@@ -59,10 +54,6 @@ class TimedPosition:
     def copy(self):
         return type(self)(self.x, self.y, self.timestamp)
 
-    def scale(self, _x, _y):
-        self.x *= _x
-        self.y *= _y
-
     def rot(self, delta):
         co = np.cos(delta)
         si = np.sin(delta)
@@ -80,7 +71,7 @@ class TimedPosition:
         compare equality by comparing all fields
         """
         if not isinstance(o, TimedPosition):
-            return NotImplemented
+            raise NotImplementedError
 
         return self.x == o.x and self.y == o.y and self.timestamp == o.timestamp
 
@@ -192,7 +183,7 @@ class Path:
 
 class PathCollection:
     def __init__(self, resolution):
-        self.paths = []
+        self.__paths = []
         self.resolution = resolution
 
     def add(self, path, resolution):
@@ -202,46 +193,59 @@ class PathCollection:
         if path.empty():
             return
 
-        self.paths.append(path)
+        self.__paths.append(path)
 
-    def add_all(self, paths, resolution):
-        if resolution.width != self.resolution.width or resolution.height != self.resolution.height:
-            raise Exception('New resolution is different to current. This should be handled somehow ..')
+    def empty(self):
+        if len(self.__paths) == 0:
+            return True
+        return False
 
-        paths = [x for x in paths if not x.empty()]
-
-        self.paths.extend(paths)
-
-    def get(self, index):
-        if len(self.paths) < index:
-            raise IndexError('Index too high')
-        return self.paths[index]
+    def get_all(self):
+        return self.__paths
 
     def __len__(self):
-        return len(self.paths)
+        return len(self.__paths)
 
     def __add__(self, other):
         if other.resolution.width != self.resolution.width or other.resolution.height != self.resolution.height:
             raise Exception('New resolution is different to current. This should be handled somehow ..')
 
-        new_paths = self.paths + other.paths
-        p = PathCollection(self.resolution)
-        p.add_all(new_paths, self.resolution)
-        return p
+        if isinstance(other, PathCollection):
+            new_paths = self.__paths + other.get_all()
+            p = PathCollection(self.resolution)
+            p.__paths.extend(new_paths)
+            return p
+        if isinstance(other, list):
+            new_paths = self.__paths + other
+            p = PathCollection(self.resolution)
+            p.__paths.extend(new_paths)
+            return p
+        else:
+            raise Exception('You can only add another PathCollection or a list of paths')
+
 
     def __repr__(self):
-        return f"PathCollection({self.resolution}, {self.paths})"
+        return f"PathCollection({self.resolution}, {self.__paths})"
 
     def __eq__(self, other):
         if not isinstance(other, PathCollection):
             return NotImplemented
 
-        if len(self.paths) != len(other.paths):
+        if len(self) != len(other):
             return False
 
         # todo: do more in depth test
 
         return True
+
+    def __iter__(self):
+        for p in self.__paths:
+            yield p
+
+    def __getitem__(self, item):
+        if len(self.__paths) < item + 1:
+            raise IndexError('Index too high')
+        return self.__paths[item]
 
     def bb(self):
         mi = self.min()
@@ -249,13 +253,13 @@ class PathCollection:
         return mi[0], mi[1], ma[0], ma[1]
 
     def min(self):
-        all_chained = [point for path in self.paths for point in path]
+        all_chained = [point for path in self.__paths for point in path]
         minx = min(all_chained, key = lambda pos: pos.x).x
         miny = min(all_chained, key = lambda pos: pos.y).y
         return minx, miny
 
     def max(self):
-        all_chained = [point for path in self.paths for point in path]
+        all_chained = [point for path in self.__paths for point in path]
         maxx = max(all_chained, key=lambda pos: pos.x).x
         maxy = max(all_chained, key=lambda pos: pos.y).y
         return maxx, maxy

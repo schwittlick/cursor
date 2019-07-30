@@ -7,7 +7,7 @@ import os
 
 
 def test_svgrenderer():
-    path = 'tests/data/test_recordings/'
+    path = 'data/test_recordings/'
     loader = Loader(directory=os.path.abspath(path))
 
     rec = loader.all()
@@ -17,7 +17,7 @@ def test_svgrenderer():
 
 
 def test_gcoderenderer():
-    path = 'tests/data/test_recordings/'
+    path = 'data/test_recordings/'
     loader = Loader(directory=os.path.abspath(path))
 
     rec = loader.all()
@@ -27,7 +27,7 @@ def test_gcoderenderer():
 
 
 def test_jpegrenderer():
-    path = 'tests/data/test_recordings/'
+    path = 'data/test_recordings/'
     loader = Loader(directory=os.path.abspath(path))
 
     rec = loader.all()

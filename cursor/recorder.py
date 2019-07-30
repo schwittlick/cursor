@@ -10,7 +10,10 @@ import json
 from pynput.mouse import Listener as MouseListener
 from pynput.keyboard import Listener as KeyboardListener
 
-from cursor import path
+try:
+    from cursor import path
+except:
+    import path
 
 json.encoder.FLOAT_REPR = lambda x: format(x, '.2f')
 

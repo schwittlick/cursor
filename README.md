@@ -1,7 +1,9 @@
 ### how to run tests
 
-    python -m pytest tests/
+    cd tests
+    python -m pytest .
 
 ### with coverage
 
-    python -m pytest --cov=cursor tests/
+    cd tests
+    python -m pytest --cov=cursor .

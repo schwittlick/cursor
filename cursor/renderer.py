@@ -9,7 +9,7 @@ class PathIterator:
 
     def points(self):
         for collection in self.paths:
-            for path in collection.paths:
+            for path in collection:
                 for point in path.vertices:
                     yield point, collection.resolution
 
@@ -17,7 +17,7 @@ class PathIterator:
         prev = None
 
         for collection in self.paths:
-            for path in collection.paths:
+            for path in collection:
                 is_first_vertex = True
                 for point in path:
                     if is_first_vertex:
@@ -76,7 +76,7 @@ class CursorGCodeRenderer:
                 min = collection.min()
                 max = collection.max()
                 print(min, max)
-                for path in collection.paths:
+                for path in collection:
                     x = path.start_pos().x
                     y = path.start_pos().y
                     if self.invert_y:

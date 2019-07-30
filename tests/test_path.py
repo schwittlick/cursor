@@ -28,6 +28,8 @@ def test_path_add():
 
 def test_path_clear():
     p = path.Path()
+    assert p.empty() == True
+
     p.add(0, 0, 100)
 
     assert len(p) == 1
@@ -35,6 +37,8 @@ def test_path_clear():
     p.clear()
 
     assert len(p) == 0
+
+    assert p.empty() == True
 
 
 def test_path_copy():
@@ -97,6 +101,16 @@ def test_timedpos_comparison():
     t2 = path.TimedPosition(0, 0, 1)
     r = t1 < t2
     assert r is True
+
+    r2 = t1 > t2
+    assert r2 is False
+
+    eq = t1 == t2
+    assert eq is False
+
+    b = False
+    with pytest.raises(NotImplementedError):
+        r = b == t1
 
 
 def test_timedpos_simple():
