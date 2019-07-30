@@ -61,6 +61,39 @@ def test_pathcollection_add():
         pcol.add(p1, size2)
 
 
+def test_pathcollection_add2():
+    size = pyautogui.Size(100, 100)
+    pcol1 = path.PathCollection(size)
+    p1 = path.Path()
+    p1.add(5, 5111, 10000)
+    p1.add(10, 11, 10001)
+    pcol1.add(p1, size)
+
+    pcol2 = path.PathCollection(size)
+    p2 = path.Path()
+    p2.add(545, 54, 10000)
+    p2.add(160, 11, 10001)
+    pcol2.add(p2, size)
+
+    pcol3 = pcol1 + pcol2
+
+    assert len(pcol3) == 2
+
+    pcol4 = pcol1 + pcol2.get_all() + pcol2.get_all()
+
+    assert len(pcol4) == 3
+
+    with pytest.raises(Exception):
+        _ = pcol1 + p1
+
+    size2 = pyautogui.Size(101, 100)
+    pcol5 = path.PathCollection(size2)
+    with pytest.raises(Exception):
+        _ = pcol1 + pcol5
+
+
+
+
 def test_pathcollection_get():
     size = pyautogui.Size(100, 100)
     pcol = path.PathCollection(size)

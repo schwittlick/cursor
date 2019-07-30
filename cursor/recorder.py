@@ -15,8 +15,6 @@ try:
 except:
     import path
 
-json.encoder.FLOAT_REPR = lambda x: format(x, '.2f')
-
 
 class InputListener:
     START_STOP_COMBINATION = {
@@ -51,7 +49,7 @@ class InputListener:
 class SystemTray:
     def __init__(self):
         menu_def = ['BLANK', ['&Open', '---', 'E&xit', 'Save']]
-        self.tray = sg.SystemTray(menu=menu_def, filename=r'mouse-icon.gif')
+        self.tray = sg.SystemTray(menu=menu_def, filename=r'../mouse-icon.gif')
 
     def read(self):
         return self.tray.Read(timeout=0.1)
@@ -80,6 +78,7 @@ class CursorRecorder(InputListener):
                 time.sleep(0.001)
                 menu_item = tray.read()
                 if menu_item == 'Exit':
+                    self.save()
                     break
                 elif menu_item == 'Open':
                     sg.Popup('Menu item chosen', menu_item)

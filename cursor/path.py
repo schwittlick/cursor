@@ -3,7 +3,6 @@ import math
 import json
 import pyautogui
 
-
 class MyJsonEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, PathCollection):
@@ -13,7 +12,7 @@ class MyJsonEncoder(json.JSONEncoder):
             return o.vertices
 
         if isinstance(o, TimedPosition):
-            return {'x': o.x, 'y': o.y, 'ts': o.timestamp}
+            return {'x': round(o.x, 4), 'y': round(o.y, 4), 'ts': round(o.timestamp, 2)}
 
 
 class MyJsonDecoder(json.JSONDecoder):
@@ -207,10 +206,10 @@ class PathCollection:
         return len(self.__paths)
 
     def __add__(self, other):
-        if other.resolution.width != self.resolution.width or other.resolution.height != self.resolution.height:
-            raise Exception('New resolution is different to current. This should be handled somehow ..')
-
         if isinstance(other, PathCollection):
+            if other.resolution.width != self.resolution.width or other.resolution.height != self.resolution.height:
+                raise Exception('New resolution is different to current. This should be handled somehow ..')
+
             new_paths = self.__paths + other.get_all()
             p = PathCollection(self.resolution)
             p.__paths.extend(new_paths)
