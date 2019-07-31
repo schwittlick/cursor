@@ -81,14 +81,14 @@ class CursorGCodeRenderer:
                     y = path.start_pos().y
                     if self.invert_y:
                         y = -y
-                    file.write(F'G01 X{x:.4f} Y{y:.4f} F{self.feedrate_xy}\n')
+                    file.write(F'G01 X{x:.2f} Y{y:.2f} F{self.feedrate_xy}\n')
                     file.write(F'G01 Z{self.z_down} F{self.feedrate_z}\n')
                     for line in path.vertices:
                         x = line.x
                         y = line.y
                         if self.invert_y:
                             y = -y
-                        file.write(F'G01 X{x:.4f} Y{y:.4f} F{self.feedrate_xy}\n')
+                        file.write(F'G01 X{x:.2f} Y{y:.2f} F{self.feedrate_xy}\n')
                     file.write(F'G01 Z{self.z_up} F{self.feedrate_z}\n')
 
 
