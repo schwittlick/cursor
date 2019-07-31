@@ -1,11 +1,17 @@
-from ..cursor import path
+try:
+    from cursor import path
+except:
+    import path
 
 import os
 import json
+import time
 
 
 class Loader:
     def __init__(self, directory):
+        start_benchmark = time.time()
+
         self._recordings = []
         self._keyboard_recordings = []
 
@@ -19,8 +25,13 @@ class Loader:
                 self._recordings.append(data['mouse'])
                 for keys in data['keys']:
                     self._keyboard_recordings.append((keys[0], keys[1]))
-        print('Loaded ' + str(len(self._recordings)) + ' paths from ' + str(len(all_json_files)) + ' recording-files.')
-        print('Loaded ' + str(len(self._keyboard_recordings)) + ' keys from ' + str(len(all_json_files)) + ' recording-files.')
+
+        absolut_path_count = sum(len(pc) for pc in self._recordings)
+
+        elapsed = time.time() - start_benchmark
+        print(F"Loaded {absolut_path_count} paths from {len(self._recordings)} recordings.")
+        print(F"Loaded {len(self._keyboard_recordings)} keys from {len(all_json_files)} recordings.")
+        print(F"This took {round(elapsed * 1000)}ms.")
 
     @staticmethod
     def is_file_and_json(path):

@@ -57,7 +57,7 @@ class CursorSVGRenderer:
 
 
 class CursorGCodeRenderer:
-    def __init__(self, feedrate_xy=2000, feedrate_z=1000, z_down=4.5, z_up=0.0, invert_y=True):
+    def __init__(self, feedrate_xy=2000, feedrate_z=1000, z_down=3.5, z_up=0.0, invert_y=True):
         self.save_path = 'data/gcode/'
         self.z_down = z_down
         self.z_up = z_up
