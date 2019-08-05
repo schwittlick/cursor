@@ -1,7 +1,10 @@
 import numpy as np
 import math
+import datetime
+import pytz
 import json
 import pyautogui
+
 
 class MyJsonEncoder(json.JSONEncoder):
     def default(self, o):
@@ -181,8 +184,14 @@ class Path:
 
 
 class PathCollection:
-    def __init__(self, resolution):
+    def __init__(self, resolution, timestamp=None):
         self.__paths = []
+        if timestamp:
+            self._timestamp = timestamp
+        else:
+            now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+            utc_timestamp = datetime.datetime.timestamp(now)
+            self._timestamp = utc_timestamp
         self.resolution = resolution
 
     def add(self, path, resolution):
@@ -222,7 +231,6 @@ class PathCollection:
         else:
             raise Exception('You can only add another PathCollection or a list of paths')
 
-
     def __repr__(self):
         return f"PathCollection({self.resolution}, {self.__paths})"
 
@@ -231,6 +239,9 @@ class PathCollection:
             return NotImplemented
 
         if len(self) != len(other):
+            return False
+
+        if self.timestamp() != other.timestamp():
             return False
 
         # todo: do more in depth test
@@ -245,6 +256,9 @@ class PathCollection:
         if len(self.__paths) < item + 1:
             raise IndexError('Index too high')
         return self.__paths[item]
+
+    def timestamp(self):
+        return self._timestamp
 
     def bb(self):
         mi = self.min()
