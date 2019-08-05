@@ -75,7 +75,6 @@ class CursorGCodeRenderer:
             for collection in paths:
                 min = collection.min()
                 max = collection.max()
-                print(min, max)
                 for path in collection:
                     x = path.start_pos().x
                     y = path.start_pos().y
