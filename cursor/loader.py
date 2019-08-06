@@ -1,11 +1,15 @@
 try:
     from ..cursor import path
 except:
-    import path
+    try:
+        import path
+    except:
+        from cursor import path
 
 import os
 import json
 import time
+import itertools
 
 
 class Loader:
@@ -43,11 +47,17 @@ class Loader:
             return True
         return False
 
-    def all(self):
+    def all_collections(self):
         """
         :return: a copy of all recordings
         """
         return list(self._recordings)
+
+    def all_paths(self):
+        paths = []
+        for coll in self._recordings:
+            paths.extend(coll.get_all())
+        return paths
 
     def single(self, index):
         max_index = len(self._recordings) - 1

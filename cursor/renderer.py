@@ -69,7 +69,9 @@ class CursorGCodeRenderer:
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
 
-        with open(self.save_path + filename + '.nc', 'w') as file:
+        filepath = os.path.abspath(self.save_path + filename + '.nc')
+        print(F"Saving to {filepath}")
+        with open(filepath, 'w') as file:
             file.write(F'G01 Z0.0 F{self.feedrate_z}\n')
             file.write(F'G01 X0.0 Y0.0 F{self.feedrate_xy}\n')
             for collection in paths:
@@ -95,11 +97,11 @@ class JpegRenderer:
     def __init__(self):
         self.save_path = 'data/jpgs/'
 
-    def render(self, paths, resolution, filename):
+    def render(self, paths, bb, filename):
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
 
-        img = Image.new('RGB', (resolution.width, resolution.height), 'white')
+        img = Image.new('RGB', (int(abs(bb[0]) + abs(bb[2])), int(abs(bb[1]) + abs(bb[3]))), 'white')
         img_draw = ImageDraw.ImageDraw(img)
 
         it = PathIterator(paths)
@@ -108,6 +110,17 @@ class JpegRenderer:
             start = conn[0]
             end = conn[1]
 
+            # offset paths when passed bb starts in negative space
+            if bb[0] < 0:
+                start.x += abs(bb[0])
+                end.x += abs(bb[0])
+
+            if bb[1] < 0:
+                start.y += abs(bb[1])
+                end.y += abs(bb[1])
+
             img_draw.line(xy=(start.x, start.y, end.x, end.y), fill='black', width=1)
 
-        img.save(self.save_path + filename + '.jpg', 'JPEG')
+        filepath = os.path.abspath(self.save_path + filename + '.jpg')
+        print(F"Saving to {filepath}")
+        img.save(filepath, 'JPEG')
