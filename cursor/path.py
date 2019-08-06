@@ -1,6 +1,8 @@
 import numpy as np
 import math
 import json
+import base64
+import zlib
 import pyautogui
 
 class MyJsonEncoder(json.JSONEncoder):
@@ -33,6 +35,44 @@ class MyJsonDecoder(json.JSONDecoder):
                 pc.add(Path(p), res)
             return pc
         return dct
+
+
+class JsonCompressor:
+    ZIPJSON_KEY = 'base64(zip(o))'
+
+    def json_zip(self, j):
+
+        j = {
+            self.ZIPJSON_KEY: base64.b64encode(
+                zlib.compress(
+                    json.dumps(j, cls=MyJsonEncoder).encode('utf-8')
+                )
+            ).decode('ascii')
+        }
+
+        return j
+
+    def json_unzip(self, j, insist=True):
+        try:
+            assert (j[self.ZIPJSON_KEY])
+            assert (set(j.keys()) == {self.ZIPJSON_KEY})
+        except:
+            if insist:
+                raise RuntimeError("JSON not in the expected format {" + str(self.ZIPJSON_KEY) + ": zipstring}")
+            else:
+                return j
+
+        try:
+            j = zlib.decompress(base64.b64decode(j[self.ZIPJSON_KEY]))
+        except:
+            raise RuntimeError("Could not decode/unzip the contents")
+
+        try:
+            j = json.loads(j, cls=MyJsonDecoder)
+        except:
+            raise RuntimeError("Could interpret the unzipped contents")
+
+        return j
 
 
 class TimedPosition:
@@ -231,6 +271,9 @@ class PathCollection:
             return NotImplemented
 
         if len(self) != len(other):
+            return False
+
+        if other.resolution.width != self.resolution.width or other.resolution.height != self.resolution.height:
             return False
 
         # todo: do more in depth test

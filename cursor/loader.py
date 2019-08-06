@@ -1,5 +1,5 @@
 try:
-    from cursor import path
+    from ..cursor import path
 except:
     import path
 
@@ -21,7 +21,11 @@ class Loader:
             print(full_path)
             with open(full_path) as json_file:
                 json_string = json_file.readline()
-                data = json.loads(json_string, cls=path.MyJsonDecoder)
+                try:
+                    jd = eval(json_string)
+                    data = path.JsonCompressor().json_unzip(jd)
+                except RuntimeError:
+                    data = json.loads(json_string, cls=path.MyJsonDecoder)
                 self._recordings.append(data['mouse'])
                 for keys in data['keys']:
                     self._keyboard_recordings.append((keys[0], keys[1]))
