@@ -11,7 +11,7 @@ import pyautogui
 class MyJsonEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, PathCollection):
-            return {'paths': o.get_all(), 'resolution': {'w': o.resolution.width, 'h': o.resolution.height}}
+            return {'paths': o.get_all(), 'resolution': {'w': o.resolution.width, 'h': o.resolution.height}, 'timestamp': o.timestamp()}
 
         if isinstance(o, Path):
             return o.vertices
@@ -31,9 +31,10 @@ class MyJsonDecoder(json.JSONDecoder):
         if 'w' in dct and 'h' in dct:
             s = pyautogui.Size(dct['w'], dct['h'])
             return s
-        if 'paths' in dct and 'resolution' in dct:
+        if 'paths' in dct and 'resolution' in dct and 'timestamp' in dct:
             res = dct['resolution']
-            pc = PathCollection(res)
+            ts = dct['timestamp']
+            pc = PathCollection(res, ts)
             for p in dct['paths']:
                 pc.add(Path(p), res)
             return pc

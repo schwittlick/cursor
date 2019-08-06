@@ -7,7 +7,7 @@ def test_loader_simple():
     path = './data/test_recordings/'
     l = loader.Loader(directory=os.path.abspath(path))
     rec = l.single(0)
-    assert len(rec) == 8
+    assert len(rec) == 18
 
     l2 = loader.Loader(directory=os.path.abspath(path))
 
