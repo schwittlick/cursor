@@ -4,9 +4,10 @@ from cursor import path
 
 import os
 
+
 def composition52(n):
     print(F"Creating Composition #52 with n={n}")
-    p = os.path.abspath('../data/recordings/')
+    p = os.path.abspath('cursor/data/recordings/')
     l = loader.Loader(directory=p)
     rec = l.single(0)
 
@@ -38,7 +39,8 @@ def composition52(n):
     #coll.add(path.Path([path.TimedPosition(bb[0], bb[3]), path.TimedPosition(bb[0], bb[1])]), rec.resolution)
 
     r.render([coll], 'composition52_double_final_sp2.5_3.0_' + str(n))
-    jpeg_renderer.render([coll], rec.resolution, 'composition52_double_final_sp2.5_down_3.0_' + str(n))
+
+    jpeg_renderer.render([coll], coll.bb(), 'composition52_double_final_sp2.5_down_3.0_' + str(n))
 
 if __name__ == '__main__':
-    composition52(19)
+    composition52(0)
