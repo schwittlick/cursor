@@ -11,7 +11,7 @@ def test_loader_simple():
 
     l2 = loader.Loader(directory=os.path.abspath(path))
 
-    rec2 = l2.all()
+    rec2 = l2.all_collections()
     assert len(rec2) == 4
 
 def test_compressed_uncompressed():

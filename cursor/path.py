@@ -150,6 +150,9 @@ class Path:
     def copy(self):
         return type(self)(self.vertices.copy())
 
+    def reverse(self):
+        self.vertices.reverse()
+
     def start_pos(self):
         if len(self.vertices) == 0:
             raise IndexError
@@ -298,7 +301,7 @@ class PathCollection:
 
     def __getitem__(self, item):
         if len(self.__paths) < item + 1:
-            raise IndexError('Index too high')
+            raise IndexError(F"Index too high. Maximum is {len(self.__paths)}")
         return self.__paths[item]
 
     def timestamp(self):
