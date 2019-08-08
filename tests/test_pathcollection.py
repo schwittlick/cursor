@@ -92,8 +92,6 @@ def test_pathcollection_add2():
         _ = pcol1 + pcol5
 
 
-
-
 def test_pathcollection_get():
     size = pyautogui.Size(100, 100)
     pcol = path.PathCollection(size)
@@ -129,3 +127,25 @@ def test_pathcollection_compare():
 
     r2 = pcol == True
     assert r2 == False
+
+
+def test_pathcollection_clean():
+    size = pyautogui.Size(100, 100)
+    pcol = path.PathCollection(size)
+    p0 = path.Path()
+
+    p0.add(5, 5111, 10000)
+
+    p1 = path.Path()
+
+    p1.add(5, 5111, 10000)
+    p1.add(40, 41, 10005)
+
+    pcol.add(p0, size)
+    pcol.add(p1, size)
+
+    assert len(pcol) == 2
+
+    pcol.clean()
+
+    assert len(pcol) == 1

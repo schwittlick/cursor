@@ -78,7 +78,6 @@ def test_path_bb():
     assert bb[2] == 141
     assert bb[3] == 4511
 
-
 def test_path_morph():
     p = path.Path()
 
@@ -95,6 +94,21 @@ def test_path_morph():
     assert round(end.x) == 10
     assert round(end.y) == 100
 
+def test_path_morph2():
+    p = path.Path()
+
+    p.add(19, 34, 10000)
+    p.add(10, 10, 10000)
+    p.add(600, 10, 10001)
+
+    pm = p.morph((10, 100), (0, 0))
+
+    start = pm.start_pos()
+    end = pm.end_pos()
+    assert round(start.x) == 10
+    assert round(start.y) == 100
+    assert round(end.x) == 0
+    assert round(end.y) == 0
 
 def test_timedpos_comparison():
     t1 = path.TimedPosition(0, 0, 0)
