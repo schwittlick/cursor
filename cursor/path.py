@@ -199,6 +199,11 @@ class Path:
 
         angle = np.arccos(np.clip(np.dot(current_start_to_end, new_start_to_end), -math.pi, math.pi))
 
+        # acos can't properly calculate angle more than 180°.
+        # solution taken from here: http://www.gamedev.net/topic/556500-angle-between-vectors/
+        if current_start_to_end[0] * new_start_to_end[1] < current_start_to_end[1] * new_start_to_end[0]:
+            angle = 2 * math.pi - angle
+
         for p in path.vertices:
             p.rot(angle)
 
@@ -246,6 +251,12 @@ class PathCollection:
             return
 
         self.__paths.append(path)
+
+    def clean(self):
+        """
+        removes all paths with only one point
+        """
+        self.__paths = [path for path in self.__paths if len(path) > 1]
 
     def empty(self):
         if len(self.__paths) == 0:
