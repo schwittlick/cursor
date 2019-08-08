@@ -9,7 +9,6 @@ except:
 import os
 import json
 import time
-import itertools
 
 
 class Loader:
@@ -36,6 +35,9 @@ class Loader:
 
         absolut_path_count = sum(len(pc) for pc in self._recordings)
 
+        for pc in self._recordings:
+            pc.clean()
+
         elapsed = time.time() - start_benchmark
         print(F"Loaded {absolut_path_count} paths from {len(self._recordings)} recordings.")
         print(F"Loaded {len(self._keyboard_recordings)} keys from {len(all_json_files)} recordings.")
@@ -54,10 +56,8 @@ class Loader:
         return list(self._recordings)
 
     def all_paths(self):
-        paths = []
-        for coll in self._recordings:
-            paths.extend(coll.get_all())
-        return paths
+        from functools import reduce
+        return reduce(lambda pcol1, pcol2: pcol1 + pcol2, self._recordings)
 
     def single(self, index):
         max_index = len(self._recordings) - 1
