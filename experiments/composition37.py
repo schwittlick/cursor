@@ -5,20 +5,11 @@ from cursor import path
 import os
 
 
-def composition37(offset):
-    print(F"Creating Composition #37 with offset={offset}")
-    p = os.path.abspath('cursor/data/recordings/')
-    l = loader.Loader(directory=p)
-    rec = l.single(0)
-    all_paths = l.all_paths()
-
+def composition37(p0, p1, offset):
     r = renderer.CursorGCodeRenderer(z_down=3.0)
     jpeg_renderer = renderer.JpegRenderer()
 
     coll = path.PathCollection(rec.resolution)
-
-    p0 = all_paths[offset]
-    p1 = all_paths[offset+1]
 
     start = (100, 100)
     end = (400, 100)
@@ -29,9 +20,6 @@ def composition37(offset):
     toppath = p0.morph(start, end)
     bottompath = p0.morph(endbottom, startbottom)
 
-    print(toppath)
-    print(bottompath)
-
     bottompath.reverse()
 
     coll.add(toppath, rec.resolution)
@@ -40,18 +28,26 @@ def composition37(offset):
     for i in range(len(toppath)):
         st = toppath[i]
         en = bottompath[i]
-        print(st)
-        print(en)
-        newpath = p1.morph(st.pos(), en.pos())
+        newpath = p1.morph(en.pos(), st.pos())
         coll.add(newpath, rec.resolution)
 
     print(coll.bb())
 
-    r.render([coll], F"composition37_{offset}")
+    #r.render([coll], F"composition37_{offset}")
     jpeg_renderer.render([coll], coll.bb(), F"composition37_{offset}")
 
 
 if __name__ == '__main__':
-    #for i in range(30):
-    #    composition37(i)
-    composition37(23)
+
+    p = os.path.abspath('../cursor/data/recordings/')
+    l = loader.Loader(directory=p)
+    rec = l.single(0)
+    all_paths = l.all_paths()
+
+    print(len(all_paths))
+    for i in range(50):
+        print(F"Creating Composition #37 with offset={i}")
+        p0 = all_paths[i]
+        p1 = all_paths[i + 1]
+        composition37(p0, p1, i)
+    #composition37(23)
