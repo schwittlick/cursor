@@ -110,6 +110,24 @@ def test_path_morph2():
     assert round(end.x) == 0
     assert round(end.y) == 0
 
+
+def test_path_interp():
+    p = path.Path()
+    p.add(0, 0, 10000)
+    p.add(100, 0, 10001)
+
+    p1 = path.Path()
+    p1.add(0, 100, 10000)
+    p1.add(100, 100, 10001)
+
+    interped = p.interp(p1, 0.5)
+
+    assert int(interped[0].y) == 50
+    assert int(interped[1].y) == 50
+    assert int(interped[0].x) == 0
+    assert int(interped[1].x) == 100
+
+
 def test_timedpos_comparison():
     t1 = path.TimedPosition(0, 0, 0)
     t2 = path.TimedPosition(0, 0, 1)

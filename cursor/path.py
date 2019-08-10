@@ -213,6 +213,29 @@ class Path:
 
         return path
 
+    def interp(self, newpath, perc):
+        path = Path()
+
+        maxpoint = max(len(newpath), len(self))
+
+        for i in range(maxpoint):
+            idxthis = int((float(i) / maxpoint) * len(self))
+            idxnew = int((float(i) / maxpoint) * len(newpath))
+
+            pthis = self[idxthis]
+            pnew = newpath[idxnew]
+            x_interp = self.mix(pthis.x, pnew.x, perc)
+            y_interp = self.mix(pthis.y, pnew.y, perc)
+            time_interp = self.mix(pthis.timestamp, pnew.timestamp, perc)
+
+            path.add(x_interp, y_interp, time_interp)
+
+        return path
+
+    @staticmethod
+    def mix(begin, end, perc):
+        return ((end - begin) * perc) + begin;
+
     def empty(self):
         if len(self.vertices) == 0:
             return True
