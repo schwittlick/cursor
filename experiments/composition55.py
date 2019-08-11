@@ -11,13 +11,15 @@ def composition55(p0, p1, offset):
 
     coll = path.PathCollection(rec.resolution)
 
+
+
     start = (100, 100)
-    end = (400, 100)
+    end = (1000, 100)
 
-    startbottom = (100, 600)
-    endbottom = (400, 600)
+    startbottom = (100, 1500)
+    endbottom = (1000, 1500)
 
-    lines = 100
+    lines = 500
     for i in range(lines):
         perc = (1.0 / lines) * i
         interped = p0.interp(p1, perc)
@@ -34,7 +36,11 @@ def composition55(p0, p1, offset):
     print(coll.bb())
 
     #r.render([coll], F"composition37_{offset}")
-    jpeg_renderer.render([coll], coll.bb(), F"composition55_{offset}")
+    try:
+        jpeg_renderer.render([coll], F"composition55_{offset}_high2", 5.0)
+    except MemoryError as me:
+        print("Memory error ignored..")
+        return
 
 
 if __name__ == '__main__':
@@ -45,7 +51,7 @@ if __name__ == '__main__':
     all_paths = l.all_paths()
 
     print(len(all_paths))
-    for i in range(50):
+    for i in range(25, 50):
         print(F"Creating Composition #37 with offset={i}")
         p0 = all_paths[i]
         p1 = all_paths[i + 1]
