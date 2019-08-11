@@ -33,4 +33,4 @@ def test_jpegrenderer():
     rec = loader.all_collections()
 
     vis = JpegRenderer()
-    vis.render(rec, rec[0].bb(), 'test1')
+    vis.render(rec, 'test1')

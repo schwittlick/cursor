@@ -40,7 +40,7 @@ def composition52(n):
 
     r.render([coll], 'composition52_double_final_sp2.5_3.0_' + str(n))
 
-    jpeg_renderer.render([coll], coll.bb(), 'composition52_double_final_sp2.5_down_3.0_' + str(n))
+    jpeg_renderer.render([coll], 'composition52_double_final_sp2.5_down_3.0_' + str(n))
 
 if __name__ == '__main__':
     composition52(0)

@@ -97,11 +97,18 @@ class JpegRenderer:
     def __init__(self):
         self.save_path = 'data/jpgs/'
 
-    def render(self, paths, bb, filename):
+    def render(self, paths, filename, scale=1.0):
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
 
-        img = Image.new('RGB', (int(abs(bb[0]) + abs(bb[2])), int(abs(bb[1]) + abs(bb[3]))), 'white')
+        if len(paths) == 0:
+            return
+
+        bb = paths[0].bb()
+
+        abs_scaled_bb = (abs(bb[0] * scale), abs(bb[1] * scale), abs(bb[2] * scale), abs(bb[3] * scale))
+
+        img = Image.new('RGB', (int(abs_scaled_bb[0] + abs_scaled_bb[2]), int(abs_scaled_bb[1] + abs_scaled_bb[3])), 'white')
         img_draw = ImageDraw.ImageDraw(img)
 
         it = PathIterator(paths)
@@ -111,15 +118,15 @@ class JpegRenderer:
             end = conn[1]
 
             # offset paths when passed bb starts in negative space
-            if bb[0] < 0:
-                start.x += abs(bb[0])
-                end.x += abs(bb[0])
+            if bb[0] * scale < 0:
+                start.x += abs_scaled_bb[0]
+                end.x += abs_scaled_bb[0]
 
             if bb[1] < 0:
-                start.y += abs(bb[1])
-                end.y += abs(bb[1])
+                start.y += abs_scaled_bb[1]
+                end.y += abs_scaled_bb[1]
 
-            img_draw.line(xy=(start.x, start.y, end.x, end.y), fill='black', width=1)
+            img_draw.line(xy=(start.x * scale, start.y * scale, end.x * scale, end.y * scale), fill='black', width=1)
 
         filepath = os.path.abspath(self.save_path + filename + '.jpg')
         print(F"Saving to {filepath}")
