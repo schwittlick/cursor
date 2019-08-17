@@ -11,19 +11,28 @@ def composition55(p0, p1, offset):
 
     coll = path.PathCollection(rec.resolution)
 
+    xoffset = 142.5
+    yoffset = 147
+
+    xmaxsize = 2111.85
+    ymaxsize = 1452
+
+    start = (xoffset, yoffset)
+    end = (xmaxsize, yoffset)
+
+    startbottom = (xoffset, ymaxsize + yoffset)
+    endbottom = (xmaxsize, ymaxsize + yoffset)
 
 
-    start = (100, 100)
-    end = (1000, 100)
+    xspacing = 2.5
 
-    startbottom = (100, 1500)
-    endbottom = (1000, 1500)
-
-    lines = 500
+    lines = 1500
+    #while coll.bb()[2] < 2138:
     for i in range(lines):
         perc = (1.0 / lines) * i
         interped = p0.interp(p1, perc)
         currstartx = path.Path.mix(start[0], end[0], perc)
+        print(currstartx)
         currstarty = path.Path.mix(start[1], end[1], perc)
         currendx = path.Path.mix(startbottom[0], endbottom[0], perc)
         currendy = path.Path.mix(startbottom[1], endbottom[1], perc)
@@ -35,7 +44,7 @@ def composition55(p0, p1, offset):
 
     print(coll.bb())
 
-    #r.render([coll], F"composition37_{offset}")
+    r.render([coll], F"composition55_{offset}")
     try:
         jpeg_renderer.render([coll], F"composition55_{offset}_high2", 5.0)
     except MemoryError as me:
@@ -51,8 +60,8 @@ if __name__ == '__main__':
     all_paths = l.all_paths()
 
     print(len(all_paths))
-    for i in range(25, 50):
-        print(F"Creating Composition #37 with offset={i}")
+    for i in range(1, 2):
+        print(F"Creating Composition #55 with offset={i}")
         p0 = all_paths[i]
         p1 = all_paths[i + 1]
         composition55(p0, p1, i)
