@@ -34,7 +34,7 @@ def composition37(p0, p1, offset):
     print(coll.bb())
 
     #r.render([coll], F"composition37_{offset}")
-    jpeg_renderer.render([coll], coll.bb(), F"composition37_{offset}")
+    jpeg_renderer.render([coll], F"composition37_{offset}")
 
 
 if __name__ == '__main__':
