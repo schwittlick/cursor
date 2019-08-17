@@ -134,6 +134,16 @@ class TimedPosition:
         return F"({self.x:.3f}, {self.y:.3f}, {self.timestamp:.3f})"
 
 
+class BoundingBox:
+    def __init__(self, x, y, w, h):
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+
+    def __repr__(self):
+        return F"BB(x={self.x}, y={self.y}, w={self.w}, h={self.h})"
+
 class Path:
     def __init__(self, vertices=None):
         if vertices:
@@ -344,7 +354,8 @@ class PathCollection:
     def bb(self):
         mi = self.min()
         ma = self.max()
-        return mi[0], mi[1], ma[0], ma[1]
+        bb = BoundingBox(mi[0], mi[1], ma[0] - mi[0], ma[1] - mi[1])
+        return bb
 
     def min(self):
         all_chained = [point for path in self.__paths for point in path]

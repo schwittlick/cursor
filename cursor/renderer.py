@@ -75,8 +75,6 @@ class CursorGCodeRenderer:
             file.write(F'G01 Z0.0 F{self.feedrate_z}\n')
             file.write(F'G01 X0.0 Y0.0 F{self.feedrate_xy}\n')
             for collection in paths:
-                min = collection.min()
-                max = collection.max()
                 for path in collection:
                     x = path.start_pos().x
                     y = path.start_pos().y
@@ -106,7 +104,7 @@ class JpegRenderer:
 
         bb = paths[0].bb()
 
-        abs_scaled_bb = (abs(bb[0] * scale), abs(bb[1] * scale), abs(bb[2] * scale), abs(bb[3] * scale))
+        abs_scaled_bb = (abs(bb.x * scale), abs(bb.y * scale), abs((bb.x + bb.w) * scale), abs((bb.y + bb.h) * scale))
 
         img = Image.new('RGB', (int(abs_scaled_bb[0] + abs_scaled_bb[2]), int(abs_scaled_bb[1] + abs_scaled_bb[3])), 'white')
         img_draw = ImageDraw.ImageDraw(img)
@@ -118,11 +116,11 @@ class JpegRenderer:
             end = conn[1]
 
             # offset paths when passed bb starts in negative space
-            if bb[0] * scale < 0:
+            if bb.x * scale < 0:
                 start.x += abs_scaled_bb[0]
                 end.x += abs_scaled_bb[0]
 
-            if bb[1] < 0:
+            if bb.y < 0:
                 start.y += abs_scaled_bb[1]
                 end.y += abs_scaled_bb[1]
 
