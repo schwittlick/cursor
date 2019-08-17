@@ -163,3 +163,40 @@ def test_sort_path():
 
     assert s[0].timestamp == 10000
     assert s[2].timestamp == 10040
+
+def test_entropy():
+    p1 = path.Path()
+    p1.add(100, 34, 10040)
+    p1.add(200, 10, 10000)
+    p1.add(100, 10, 10001)
+    p1.add(200, 10, 10001)
+    p1.add(100, 10, 10001)
+    p1.add(200, 10, 10001)
+
+    p2 = path.Path()
+    p2.add(200, 10, 10000)
+    p2.add(200, 10, 10001)
+    p2.add(200, 10, 10001)
+    p2.add(200, 10, 10001)
+    p2.add(200, 10, 10001)
+
+    sx1 = p1.shannon_x()
+    sx2 = p2.shannon_x()
+    assert sx1 > sx2
+
+    sy1 = p1.shannon_y()
+    sy2 = p2.shannon_y()
+    assert sy1 > sy2
+
+def test_bb():
+    p1 = path.Path()
+    p1.add(100, 34, 10040)
+    p1.add(200, 10, 10000)
+
+    bb = path.BoundingBox(0, 0, 300, 300)
+
+    assert bb.inside(p1) is True
+
+    p1.add(500, 500, 10023)
+
+    assert bb.inside(p1) is False

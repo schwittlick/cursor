@@ -1,3 +1,11 @@
+try:
+    from ..cursor import filter
+except:
+    try:
+        import filter
+    except:
+        from cursor import filter
+
 import numpy as np
 import math
 import datetime
@@ -144,6 +152,15 @@ class BoundingBox:
     def __repr__(self):
         return F"BB(x={self.x}, y={self.y}, w={self.w}, h={self.h})"
 
+    def __inside(self, point):
+        return self.x < point.x < self.x + self.w and self.y < point.y < self.y + self.h
+
+    def inside(self, path):
+        for p in path:
+            if not self.__inside(p):
+                return False
+        return True
+
 class Path:
     def __init__(self, vertices=None):
         if vertices:
@@ -244,7 +261,71 @@ class Path:
 
     @staticmethod
     def mix(begin, end, perc):
-        return ((end - begin) * perc) + begin;
+        return ((end - begin) * perc) + begin
+
+    @staticmethod
+    def __entropy2(labels, base=None):
+        from math import log, e
+        """ Computes entropy of label distribution. """
+
+        n_labels = len(labels)
+
+        if n_labels <= 1:
+            return 0
+
+        value, counts = np.unique(labels, return_counts=True)
+        probs = counts / n_labels
+        n_classes = np.count_nonzero(probs)
+
+        if n_classes <= 1:
+            return 0
+
+        ent = 0.
+
+        # Compute entropy
+        base = e if base is None else base
+        for i in probs:
+            ent -= i * log(i, base)
+
+        return ent
+
+    def shannon_x(self):
+        distances = []
+
+        first = True
+        prevx = None
+        for v in self.vertices:
+            if first:
+                prevx = v.x
+                first = False
+                continue
+
+            dist = v.x - prevx
+            distances.append(dist)
+
+            prevx = v.x
+
+        entropy = self.__entropy2(distances)
+        return entropy
+
+    def shannon_y(self):
+        distances = []
+
+        first = True
+        prevy = None
+        for v in self.vertices:
+            if first:
+                prevy = v.y
+                first = False
+                continue
+
+            dist = v.y - prevy
+            distances.append(dist)
+
+            prevy = v.y
+
+        entropy = self.__entropy2(distances)
+        return entropy
 
     def empty(self):
         if len(self.vertices) == 0:
@@ -298,6 +379,12 @@ class PathCollection:
 
     def get_all(self):
         return self.__paths
+
+    def filter(self, pathfilter):
+        if isinstance(pathfilter, filter.Filter):
+            pathfilter.filter(self.__paths)
+        else:
+            raise Exception(F"Cant filter with a class of type {type(pathfilter)}")
 
     def __len__(self):
         return len(self.__paths)
