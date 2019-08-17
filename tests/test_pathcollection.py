@@ -34,10 +34,10 @@ def test_pathcollection_minmax():
     max = pcol.max()
     bb = pcol.bb()
 
-    assert min[0] == bb[0]
-    assert min[1] == bb[1]
-    assert max[0] == bb[2]
-    assert max[1] == bb[3]
+    assert min[0] == bb.x
+    assert min[1] == bb.y
+    assert max[0] == bb.w + bb.x
+    assert max[1] == bb.h + bb.y
 
     assert min[0] == 5
     assert min[1] == 11
