@@ -7,7 +7,7 @@ import os
 
 def composition52(n):
     print(F"Creating Composition #52 with n={n}")
-    p = os.path.abspath('cursor/data/recordings/')
+    p = os.path.abspath('../cursor/data/recordings/')
     l = loader.Loader(directory=p)
     rec = l.single(0)
 
