@@ -14,6 +14,7 @@ import json
 import base64
 import zlib
 import pyautogui
+import random
 
 
 class MyJsonEncoder(json.JSONEncoder):
@@ -179,6 +180,9 @@ class Path:
 
     def reverse(self):
         self.vertices.reverse()
+
+    def random(self):
+        return self.__getitem__(random.randint(0, self.__len__()))
 
     def start_pos(self):
         if len(self.vertices) == 0:

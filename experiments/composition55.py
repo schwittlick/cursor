@@ -1,6 +1,7 @@
 from cursor import loader
 from cursor import renderer
 from cursor import path
+from cursor import filter
 
 import os
 
@@ -26,13 +27,12 @@ def composition55(p0, p1, offset):
 
     xspacing = 2.5
 
-    lines = 1500
+    lines = 1200
     #while coll.bb()[2] < 2138:
     for i in range(lines):
         perc = (1.0 / lines) * i
         interped = p0.interp(p1, perc)
         currstartx = path.Path.mix(start[0], end[0], perc)
-        print(currstartx)
         currstarty = path.Path.mix(start[1], end[1], perc)
         currendx = path.Path.mix(startbottom[0], endbottom[0], perc)
         currendy = path.Path.mix(startbottom[1], endbottom[1], perc)
@@ -59,9 +59,15 @@ if __name__ == '__main__':
     rec = l.single(0)
     all_paths = l.all_paths()
 
+    entropy_filter = filter.EntropyFilter(1.5, 1.5)
+    all_paths.filter(entropy_filter)
+
+    import random
+
     print(len(all_paths))
-    for i in range(1, 2):
+    for i in range(10):
         print(F"Creating Composition #55 with offset={i}")
-        p0 = all_paths[i]
-        p1 = all_paths[i + 1]
-        composition55(p0, p1, i)
+        r1 = random.randint(0, len(all_paths))
+        p0 = all_paths[r1]
+        p1 = all_paths[r1 +1]
+        composition55(p0, p1, r1)
