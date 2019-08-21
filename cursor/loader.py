@@ -12,13 +12,17 @@ import time
 
 
 class Loader:
-    def __init__(self, directory):
+    def __init__(self, directory, limit_files=None):
         start_benchmark = time.time()
 
         self._recordings = []
         self._keyboard_recordings = []
 
         all_json_files = [f for f in os.listdir(directory) if self.is_file_and_json(os.path.join(directory, f))]
+
+        if limit_files:
+            all_json_files = all_json_files[:limit_files]
+
         for file in all_json_files:
             full_path = os.path.join(directory, file)
             print(full_path)
@@ -68,3 +72,6 @@ class Loader:
 
     def keys(self):
         return self._keyboard_recordings
+
+    def __len__(self):
+        return len(self._recordings)

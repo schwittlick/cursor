@@ -1,22 +1,22 @@
 from ..cursor import loader
+from ..cursor import data
 
-import os
 import pytest
 
 def test_loader_simple():
-    path = './data/test_recordings/'
-    l = loader.Loader(directory=os.path.abspath(path))
+    dir = data.DataHandler.test_recordings()
+    l = loader.Loader(directory=dir)
     rec = l.single(0)
     assert len(rec) == 18
 
-    l2 = loader.Loader(directory=os.path.abspath(path))
+    l2 = loader.Loader(directory=dir)
 
     rec2 = l2.all_collections()
     assert len(rec2) == 4
 
 def test_compressed_uncompressed():
-    path = './data/test_recordings/'
-    l = loader.Loader(directory=os.path.abspath(path))
+    dir = data.DataHandler.test_recordings()
+    l = loader.Loader(directory=dir)
 
     s1 = l.single(0)
     s2 = l.single(2)
@@ -29,19 +29,27 @@ def test_compressed_uncompressed():
     assert eq2 is False
 
 def test_loader_keys():
-    path = './data/test_recordings/'
-    l = loader.Loader(directory=os.path.abspath(path))
+    dir = data.DataHandler.test_recordings()
+    l = loader.Loader(directory=dir)
     rec = l.keys()
     assert len(rec) == 6
 
 def test_loader_index_too_high_exception():
-    path = './data/test_recordings/'
-    l = loader.Loader(directory=os.path.abspath(path))
+    dir = data.DataHandler.test_recordings()
+    l = loader.Loader(directory=dir)
     with pytest.raises(IndexError):
         l.single(100)
 
 def test_loader_isfileandjson():
-    l = loader.Loader(directory=os.path.abspath('.'))
-    l.is_file_and_json('hey')
+    is1 = loader.Loader.is_file_and_json('hey')
+    assert not is1
+    # TODO: test for true
 
+def test_loader_limit_files():
+    dir = data.DataHandler.test_recordings()
+    l1 = loader.Loader(directory=dir)
+    l2 = loader.Loader(directory=dir, limit_files=1)
+
+    assert len(l2) == 1
+    assert len(l1) > len(l2)
 
