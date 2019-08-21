@@ -60,7 +60,7 @@ class SystemTray:
 
 
 class CursorRecorder(InputListener):
-    SAVE_PATH = data.DataHandler().data_path()
+    SAVE_PATH = data.DataHandler().recordings()
     keyboard_recodings = []
     current_line = path.Path()
     started = False

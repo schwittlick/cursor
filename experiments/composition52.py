@@ -8,7 +8,7 @@ import os
 
 def composition52(n):
     print(F"Creating Composition #52 with n={n}")
-    p = data.DataHandler().data_path()
+    p = data.DataHandler().recordings()
     l = loader.Loader(directory=p)
     rec = l.single(0)
 

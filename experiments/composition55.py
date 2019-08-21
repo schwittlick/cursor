@@ -54,7 +54,7 @@ def composition55(p0, p1, offset):
 
 
 if __name__ == '__main__':
-    p = data.DataHandler().data_path()
+    p = data.DataHandler().recordings()
     l = loader.Loader(directory=p)
     rec = l.single(0)
     all_paths = l.all_paths()
