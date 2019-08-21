@@ -2,12 +2,13 @@ from cursor import loader
 from cursor import renderer
 from cursor import path
 from cursor import filter
+from cursor import data
 
 import os
 
 
 def composition55(p0, p1, offset):
-    r = renderer.CursorGCodeRenderer(z_down=3.0)
+    gcode_renderer = renderer.CursorGCodeRenderer(z_down=3.0)
     jpeg_renderer = renderer.JpegRenderer()
 
     coll = path.PathCollection(rec.resolution)
@@ -27,7 +28,7 @@ def composition55(p0, p1, offset):
 
     xspacing = 2.5
 
-    lines = 1200
+    lines = 800
     #while coll.bb()[2] < 2138:
     for i in range(lines):
         perc = (1.0 / lines) * i
@@ -44,17 +45,16 @@ def composition55(p0, p1, offset):
 
     print(coll.bb())
 
-    r.render([coll], F"composition55_{offset}")
+    gcode_renderer.render([coll], F"composition55_special_{offset}")
     try:
-        jpeg_renderer.render([coll], F"composition55_{offset}_high2", 5.0)
+        jpeg_renderer.render([coll], F"composition55_special_{offset}_high2", 5.0)
     except MemoryError as me:
         print("Memory error ignored..")
         return
 
 
 if __name__ == '__main__':
-
-    p = os.path.abspath('../cursor/data/recordings/')
+    p = data.DataHandler().data_path()
     l = loader.Loader(directory=p)
     rec = l.single(0)
     all_paths = l.all_paths()
@@ -64,10 +64,15 @@ if __name__ == '__main__':
 
     import random
 
-    print(len(all_paths))
-    for i in range(10):
-        print(F"Creating Composition #55 with offset={i}")
-        r1 = random.randint(0, len(all_paths))
-        p0 = all_paths[r1]
-        p1 = all_paths[r1 +1]
-        composition55(p0, p1, r1)
+    r1 = 261
+    p0 = all_paths[r1]
+    p1 = all_paths[r1 + 1]
+    composition55(p0, p1, r1)
+
+    #print(len(all_paths))
+    #for i in range(10):
+    #    print(F"Creating Composition #55 with offset={i}")
+    #    r1 = random.randint(0, len(all_paths))
+    #    p0 = all_paths[r1]
+    #    p1 = all_paths[r1 +1]
+    #    composition55(p0, p1, r1)
