@@ -156,11 +156,18 @@ class BoundingBox:
     def __inside(self, point):
         return self.x < point.x < self.x + self.w and self.y < point.y < self.y + self.h
 
-    def inside(self, path):
-        for p in path:
-            if not self.__inside(p):
-                return False
-        return True
+    def inside(self, data):
+        if isinstance(data, Path):
+            for p in data:
+                if not self.__inside(p):
+                    return False
+            return True
+        if isinstance(data, PathCollection):
+            for path in data:
+                for p in path:
+                    if not self.__inside(p):
+                        return False
+            return True
 
 class Path:
     def __init__(self, vertices=None):
@@ -180,9 +187,6 @@ class Path:
 
     def reverse(self):
         self.vertices.reverse()
-
-    def random(self):
-        return self.__getitem__(random.randint(0, self.__len__()))
 
     def start_pos(self):
         if len(self.vertices) == 0:
@@ -216,6 +220,8 @@ class Path:
             dir_old = np.subtract(end_np, start_np)
             dir_new = np.subtract(new_end_np, new_start_np)
             mag_diff = np.linalg.norm(dir_new) / np.linalg.norm(dir_old)
+            if math.isinf(mag_diff):
+                mag_diff = 1.0
             nparr = nparr * mag_diff
             path.add(nparr[0], nparr[1], point.timestamp)
 
@@ -383,6 +389,9 @@ class PathCollection:
 
     def get_all(self):
         return self.__paths
+
+    def random(self):
+        return self.__getitem__(random.randint(0, self.__len__()))
 
     def filter(self, pathfilter):
         if isinstance(pathfilter, filter.Filter):
