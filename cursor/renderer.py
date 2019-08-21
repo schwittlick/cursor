@@ -47,7 +47,7 @@ class PathIterator:
 
 class CursorSVGRenderer:
     def __init__(self, folder):
-        self.save_path = os.path.join(data.DataHandler.svgs(), folder)
+        self.save_path = os.path.join(data.DataHandler.svgs(), folder + '/')
 
     def render(self, paths, filename):
         if len(paths) == 0:
@@ -74,7 +74,7 @@ class CursorSVGRenderer:
 
 class CursorGCodeRenderer:
     def __init__(self, folder, feedrate_xy=2000, feedrate_z=1000, z_down=3.5, z_up=0.0, invert_y=True):
-        self.save_path = os.path.join(data.DataHandler.gcodes(), folder)
+        self.save_path = os.path.join(data.DataHandler.gcodes(), folder + '/')
         self.z_down = z_down
         self.z_up = z_up
         self.feedrate_xy = feedrate_xy
@@ -109,7 +109,7 @@ class CursorGCodeRenderer:
 
 class JpegRenderer:
     def __init__(self, folder):
-        self.save_path = os.path.join(data.DataHandler.images(), folder)
+        self.save_path = os.path.join(data.DataHandler.images(), folder + '/')
 
     def render(self, paths, filename, scale=1.0):
         if not os.path.exists(self.save_path):
