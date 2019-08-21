@@ -1,13 +1,14 @@
 from cursor import loader
 from cursor import renderer
 from cursor import path
+from cursor import data
 
 import os
 
 
 def composition52(n):
     print(F"Creating Composition #52 with n={n}")
-    p = os.path.abspath('../cursor/data/recordings/')
+    p = data.DataHandler().data_path()
     l = loader.Loader(directory=p)
     rec = l.single(0)
 

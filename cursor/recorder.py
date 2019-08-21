@@ -7,8 +7,6 @@ import PySimpleGUIQt as sg
 import pynput
 import pyautogui
 import json
-import zlib
-import base64
 from pynput.mouse import Listener as MouseListener
 from pynput.keyboard import Listener as KeyboardListener
 
@@ -17,6 +15,10 @@ try:
 except:
     import path
 
+try:
+    from cursor import data
+except:
+    import data
 
 class InputListener:
     START_STOP_COMBINATION = {
@@ -58,7 +60,7 @@ class SystemTray:
 
 
 class CursorRecorder(InputListener):
-    SAVE_PATH = 'data/recordings/'
+    SAVE_PATH = data.DataHandler().data_path()
     keyboard_recodings = []
     current_line = path.Path()
     started = False
@@ -137,15 +139,15 @@ class CursorRecorder(InputListener):
                 'keys': self.keyboard_recodings
                 }
 
-        fname_compressed = self.SAVE_PATH + str(self.start_time_stamp) + '_compressed.json'
+        fname_compressed = os.path.join(self.SAVE_PATH, str(self.start_time_stamp) + '_compressed.json')
         with open(fname_compressed, 'w') as fp:
             dump = path.JsonCompressor().json_zip(recs)
             fp.write(str(dump))
 
-        fname_uncompressed = self.SAVE_PATH + str(self.start_time_stamp) + '_uncompressed.json'
-        with open(fname_uncompressed, 'w') as fp:
-            dump = json.dumps(recs, cls=path.MyJsonEncoder)
-            fp.write(dump)
+        #fname_uncompressed = os.path.join(self.SAVE_PATH, str(self.start_time_stamp) + '_uncompressed.json')
+        #with open(fname_uncompressed, 'w') as fp:
+        #    dump = json.dumps(recs, cls=path.MyJsonEncoder)
+        #     fp.write(dump)
 
 
 if __name__ == "__main__":

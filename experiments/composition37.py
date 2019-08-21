@@ -1,6 +1,7 @@
 from cursor import loader
 from cursor import renderer
 from cursor import path
+from cursor import data
 
 import os
 
@@ -38,8 +39,7 @@ def composition37(p0, p1, offset):
 
 
 if __name__ == '__main__':
-
-    p = os.path.abspath('../cursor/data/recordings/')
+    p = data.DataHandler().data_path()
     l = loader.Loader(directory=p)
     rec = l.single(0)
     all_paths = l.all_paths()
