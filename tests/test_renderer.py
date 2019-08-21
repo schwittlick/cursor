@@ -13,7 +13,7 @@ def test_svgrenderer():
     rec = loader.all_collections()
 
     vis = CursorSVGRenderer()
-    vis.render(rec, rec[0].resolution, 'test1')
+    vis.render(rec, 'test1')
 
 
 def test_gcoderenderer():

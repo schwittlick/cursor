@@ -41,18 +41,26 @@ class CursorSVGRenderer:
     def __init__(self):
         self.save_path = 'data/svgs/'
 
-    def render(self, paths, resolution, filename):
-        dwg = svgwrite.Drawing(self.save_path + filename + '.svg', profile='tiny', size=(resolution.width, resolution.height))
+    def render(self, paths, filename):
+        if len(paths) == 0:
+            return
+
+        bb = paths[0].bb()
+
+        fname = os.path.abspath(self.save_path + filename + '.svg')
+        dwg = svgwrite.Drawing(fname, profile='tiny', size=(bb.w + bb.x, bb.h + bb.y))
 
         it = PathIterator(paths)
         for conn in it.connections(scaled=False):
             start = conn[0]
             end = conn[1]
 
-            dwg.add(dwg.line(start.pos(), end.pos(), stroke=svgwrite.rgb(0, 0, 0, '%')))
+            dwg.add(dwg.line(start.pos(), end.pos(), stroke_width=0.5, stroke=svgwrite.rgb(0, 0, 0, '%')))
 
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
+
+        print(F"Saving to {fname}")
         dwg.save()
 
 
