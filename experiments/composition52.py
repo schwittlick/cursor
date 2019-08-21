@@ -3,8 +3,6 @@ from cursor import renderer
 from cursor import path
 from cursor import data
 
-import os
-
 
 def composition52(n):
     print(F"Creating Composition #52 with n={n}")
@@ -12,8 +10,8 @@ def composition52(n):
     l = loader.Loader(directory=p)
     rec = l.single(0)
 
-    r = renderer.CursorGCodeRenderer(z_down=3.0)
-    jpeg_renderer = renderer.JpegRenderer()
+    r = renderer.CursorGCodeRenderer('composition52', z_down=3.0)
+    jpeg_renderer = renderer.JpegRenderer('composition52')
 
     coll = path.PathCollection(rec.resolution)
 

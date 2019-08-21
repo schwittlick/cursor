@@ -3,12 +3,10 @@ from cursor import renderer
 from cursor import path
 from cursor import data
 
-import os
-
 
 def composition37(p0, p1, offset):
-    r = renderer.CursorGCodeRenderer(z_down=3.0)
-    jpeg_renderer = renderer.JpegRenderer()
+    r = renderer.CursorGCodeRenderer('composition37', z_down=3.0)
+    jpeg_renderer = renderer.JpegRenderer('composition37')
 
     coll = path.PathCollection(rec.resolution)
 

@@ -4,12 +4,10 @@ from cursor import path
 from cursor import filter
 from cursor import data
 
-import os
-
 
 def composition55(p0, p1, offset):
-    gcode_renderer = renderer.CursorGCodeRenderer(z_down=3.0)
-    jpeg_renderer = renderer.JpegRenderer()
+    gcode_renderer = renderer.CursorGCodeRenderer('composition55', z_down=3.0)
+    jpeg_renderer = renderer.JpegRenderer('composition55')
 
     coll = path.PathCollection(rec.resolution)
 
