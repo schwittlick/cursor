@@ -15,4 +15,18 @@ class BoundingBoxFilter(Filter):
         self.bb = bb
 
     def filter(self, paths):
-        paths[:] = [p for p in paths if not self.bb.inside(p)]
+        paths[:] = [p for p in paths if self.bb.inside(p)]
+
+class MinPointCountFilter(Filter):
+    def __init__(self, point_count):
+        self.point_count = point_count
+
+    def filter(self, paths):
+        paths[:] = [p for p in paths if len(p) >= self.point_count]
+
+class MaxPointCountFilter(Filter):
+    def __init__(self, point_count):
+        self.point_count = point_count
+
+    def filter(self, paths):
+        paths[:] = [p for p in paths if len(p) <= self.point_count]
