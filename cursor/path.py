@@ -342,6 +342,20 @@ class Path:
             return True
         return False
 
+    def clean(self):
+        new_points = []
+        for i in range(1, len(self.vertices)):
+            current = self.__getitem__(i - 1)
+            next = self.__getitem__(i)
+            if current.x == next.x and current.y == next.y:
+                if i == len(self.vertices) - 1:
+                    new_points.append(current)
+                continue
+
+            new_points.append(current)
+
+        self.vertices = new_points
+
     def __repr__(self):
         return str(self.vertices)
 
@@ -381,6 +395,8 @@ class PathCollection:
         removes all paths with only one point
         """
         self.__paths = [path for path in self.__paths if len(path) > 1]
+        for p in self.__paths:
+            p.clean()
 
     def empty(self):
         if len(self.__paths) == 0:

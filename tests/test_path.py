@@ -200,3 +200,23 @@ def test_bb():
     p1.add(500, 500, 10023)
 
     assert bb.inside(p1) is False
+
+
+def test_path_clean():
+    p = path.Path()
+
+    p.add(5, 5111, 10000)
+    p.add(5, 5111, 10000)
+    p.add(5, 5112, 10000)
+    p.add(5, 5112, 10000)
+    p.add(5, 5112, 10000)
+    p.add(6, 5112, 10000)
+    p.add(6, 5112, 10000)
+    p.add(6, 5112, 10000)
+
+
+    assert len(p) == 8
+
+    p.clean()
+
+    assert len(p) == 3
