@@ -188,6 +188,11 @@ class Path:
     def reverse(self):
         self.vertices.reverse()
 
+    def reversed(self):
+        c = self.vertices.copy()
+        c.reverse()
+        return Path(c)
+
     def start_pos(self):
         if len(self.vertices) == 0:
             raise IndexError

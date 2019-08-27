@@ -220,3 +220,56 @@ def test_path_clean():
     p.clean()
 
     assert len(p) == 3
+
+def test_path_reverse():
+    p1 = path.Path()
+
+    p1.add(5, 5111, 10000)
+    p1.add(5, 5112, 10000)
+    p1.add(6, 5112, 10000)
+
+    assert p1[0].x == 5
+    assert p1[0].y == 5111
+
+    assert p1[1].x == 5
+    assert p1[1].y == 5112
+
+    assert p1[2].x == 6
+    assert p1[2].y == 5112
+
+    p1.reverse()
+
+    assert p1[0].x == 6
+    assert p1[0].y == 5112
+
+    assert p1[1].x == 5
+    assert p1[1].y == 5112
+
+    assert p1[2].x == 5
+    assert p1[2].y == 5111
+
+    p2 = path.Path()
+
+    p2.add(5, 5111, 10000)
+    p2.add(5, 5112, 10000)
+    p2.add(6, 5112, 10000)
+
+    p3 = p2.reversed()
+
+    assert p2[0].x == 5
+    assert p2[0].y == 5111
+
+    assert p2[1].x == 5
+    assert p2[1].y == 5112
+
+    assert p2[2].x == 6
+    assert p2[2].y == 5112
+
+    assert p3[0].x == 6
+    assert p3[0].y == 5112
+
+    assert p3[1].x == 5
+    assert p3[1].y == 5112
+
+    assert p3[2].x == 5
+    assert p3[2].y == 5111
