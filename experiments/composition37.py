@@ -42,10 +42,9 @@ if __name__ == '__main__':
     rec = l.single(0)
     all_paths = l.all_paths()
 
-    print(len(all_paths))
-    for i in range(50):
+    #print(len(all_paths))
+    for i in range(5):
         print(F"Creating Composition #37 with offset={i}")
         p0 = all_paths[i]
         p1 = all_paths[i + 1]
         composition37(p0, p1, i)
-    #composition37(23)
