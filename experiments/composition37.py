@@ -24,6 +24,9 @@ def composition37(p0, p1, offset):
     coll.add(toppath, rec.resolution)
     coll.add(bottompath, rec.resolution)
 
+    p1_morphed = p1.morph(toppath[0].pos(), bottompath[0].pos())
+    coll.add(p1_morphed, rec.resolution)
+
     for i in range(len(toppath)):
         st = toppath[i]
         en = bottompath[i]
@@ -38,12 +41,12 @@ def composition37(p0, p1, offset):
 
 if __name__ == '__main__':
     p = data.DataHandler().recordings()
-    l = loader.Loader(directory=p)
+    l = loader.Loader(directory=p, limit_files=1)
     rec = l.single(0)
     all_paths = l.all_paths()
 
     #print(len(all_paths))
-    for i in range(5):
+    for i in range(10):
         print(F"Creating Composition #37 with offset={i}")
         p0 = all_paths[i]
         p1 = all_paths[i + 1]
