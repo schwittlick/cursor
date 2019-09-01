@@ -118,6 +118,10 @@ class TimedPosition:
         self.x += x
         self.y += y
 
+    def scale(self, x, y):
+        self.x *= x
+        self.y *= y
+
     def __eq__(self, o):
         """
         compare equality by comparing all fields
@@ -168,6 +172,9 @@ class BoundingBox:
                     if not self.__inside(p):
                         return False
             return True
+
+    def center(self):
+        return self.x + self.w / 2, self.y + self.h / 2
 
 class Path:
     def __init__(self, vertices=None):
@@ -231,6 +238,14 @@ class Path:
             dist += d
 
         return dist
+
+    def translate(self, x, y):
+        for p in self.vertices:
+            p.translate(x, y)
+
+    def scale(self, x, y):
+        for p in self.vertices:
+            p.scale(x, y)
 
     def morph(self, start, end):
         path = Path()
@@ -509,3 +524,11 @@ class PathCollection:
         maxx = max(all_chained, key=lambda pos: pos.x).x
         maxy = max(all_chained, key=lambda pos: pos.y).y
         return maxx, maxy
+
+    def translate(self, x, y):
+        for p in self.__paths:
+            p.translate(x, y)
+
+    def scale(self, x, y):
+        for p in self.__paths:
+            p.scale(x, y)
