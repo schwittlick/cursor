@@ -212,6 +212,26 @@ class Path:
 
         return minx, miny, maxx, maxy
 
+    def distance(self, res):
+        """
+        Calculates the summed distance between all points in sequence
+        Also known as "travel distance"
+        """
+        dist = 0
+
+        def calculateDistance(x1, y1, x2, y2):
+            dist = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+            return dist
+
+        for i in range(self.__len__() - 1):
+            current = self.__getitem__(i)
+            next = self.__getitem__(i + 1)
+
+            d = calculateDistance(current.x * res.width, current.y * res.height, next.x * res.width, next.y * res.height)
+            dist += d
+
+        return dist
+
     def morph(self, start, end):
         path = Path()
         end_np = self.end_pos().arr()
@@ -412,7 +432,7 @@ class PathCollection:
         return self.__paths
 
     def random(self):
-        return self.__getitem__(random.randint(0, self.__len__()))
+        return self.__getitem__(random.randint(0, self.__len__() - 1))
 
     def filter(self, pathfilter):
         if isinstance(pathfilter, filter.Filter):
