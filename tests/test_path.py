@@ -273,3 +273,16 @@ def test_path_reverse():
 
     assert p3[2].x == 5
     assert p3[2].y == 5111
+
+def test_path_distance():
+    p = path.Path()
+    p.add(0, 0, 10000)
+    p.add(0, 10, 10000)
+    p.add(10, 10, 10000)
+
+    import pyautogui
+
+    size = pyautogui.Size(1, 1)
+    d = p.distance(size)
+
+    assert d == 20
