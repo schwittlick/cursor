@@ -35,18 +35,22 @@ def composition37(p0, p1, offset):
 
     print(coll.bb())
 
+    coll.fit(800, 1000, 50)
+
+    print(coll.bb())
+
     #r.render(coll, F"composition37_{offset}")
     jpeg_renderer.render(coll, F"composition37_{offset}")
 
 
 if __name__ == '__main__':
     p = data.DataHandler().recordings()
-    l = loader.Loader(directory=p, limit_files=1)
+    l = loader.Loader(directory=p, limit_files=5)
     rec = l.single(0)
     all_paths = l.all_paths()
 
     #print(len(all_paths))
-    for i in range(10):
+    for i in range(50):
         print(F"Creating Composition #37 with offset={i}")
         p0 = all_paths[i]
         p1 = all_paths[i + 1]

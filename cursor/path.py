@@ -532,3 +532,16 @@ class PathCollection:
     def scale(self, x, y):
         for p in self.__paths:
             p.scale(x, y)
+
+    def fit(self, width, height, padding):
+        # scaling
+        xfac = (width - padding * 2) / self.bb().w
+        yfac = (height - padding * 2) / self.bb().h
+        self.scale(xfac, yfac)
+
+        #centering
+        center = self.bb().center()
+        center_dims = width / 2, height / 2
+        diff = center_dims[0] - center[0], center_dims[1] - center[1]
+
+        self.translate(diff[0], diff[1])
