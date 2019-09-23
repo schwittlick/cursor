@@ -4,8 +4,9 @@ from cursor import path
 from cursor import data
 
 
+
 def composition37(p0, p1, offset):
-    r = renderer.CursorGCodeRenderer('composition37', z_down=3.0)
+    gcode_renderer = renderer.CursorGCodeRenderer('composition37', z_down=3.0)
     jpeg_renderer = renderer.JpegRenderer('composition37')
 
     coll = path.PathCollection(rec.resolution)
@@ -35,11 +36,11 @@ def composition37(p0, p1, offset):
 
     print(coll.bb())
 
-    coll.fit(800, 1000, 50)
+    coll.fit(path.Paper.a0_landscape(), 200)
 
     print(coll.bb())
 
-    #r.render(coll, F"composition37_{offset}")
+    gcode_renderer.render(coll, F"composition37_{offset}")
     jpeg_renderer.render(coll, F"composition37_{offset}")
 
 
@@ -50,7 +51,7 @@ if __name__ == '__main__':
     all_paths = l.all_paths()
 
     #print(len(all_paths))
-    for i in range(50):
+    for i in range(1):
         print(F"Creating Composition #37 with offset={i}")
         p0 = all_paths[i]
         p1 = all_paths[i + 1]

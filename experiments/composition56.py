@@ -7,33 +7,26 @@ from cursor import data
 def composition56(nr, pathlist):
     gcode_renderer = renderer.CursorGCodeRenderer('composition56', z_down=3.0)
     jpeg_renderer = renderer.JpegRenderer('composition56')
-    xoffset = 142.5
-    yoffset = 147
-
-    xmaxsize = 2111.85
-    ymaxsize = 1452
+    xoffset = 0
 
     xspacing = 2
     coll = path.PathCollection(rec.resolution)
 
-
     for p in pathlist:
         for i in range(150):
             xfrom = xspacing * i + xoffset
-            yfrom = yoffset
+            yfrom = 0
             xto = xspacing * i + xoffset
-            yto = 1452 + yoffset
+            yto = 1000
             morphed = p.morph((xfrom, yfrom), (xto, yto))
             coll.add(morphed, rec.resolution)
 
-        xoffset += 420
+        xoffset += 400
 
-    #print()
-    #bb = path.BoundingBox(0, 0, xmaxsize + 142.5, ymaxsize + 147)
-    #print(bb)
-    #if bb.inside(coll):
+    coll.fit(path.Paper.a1_landscape(), 50)
+
     print(F"rendering {nr}, {coll.bb()}")
-    gcode_renderer.render(coll, F"composition56_{nr}")
+    #gcode_renderer.render(coll, F"composition56_{nr}")
     jpeg_renderer.render(coll, F"composition56_{nr}")
 
 if __name__ == '__main__':
@@ -45,8 +38,8 @@ if __name__ == '__main__':
     entropy_filter = filter.EntropyFilter(1.2, 1.2)
     all_paths.filter(entropy_filter)
 
-    distance_filter = filter.DistanceFilter(100, rec.resolution)
-    all_paths.filter(distance_filter)
+    #distance_filter = filter.DistanceFilter(100, rec.resolution)
+    #all_paths.filter(distance_filter)
 
     for i in range(50):
         r1 = all_paths.random()
