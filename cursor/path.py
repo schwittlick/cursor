@@ -88,6 +88,31 @@ class JsonCompressor:
         return j
 
 
+class Paper:
+    X_FACTOR = 2.91666
+    Y_FACTOR = 2.83333
+
+    CUSTOM_36_48 = (360 * X_FACTOR, 480 * Y_FACTOR)
+    CUSTOM_48_36 = (480 * X_FACTOR, 360 * Y_FACTOR)
+    DIN_A1_LANDSCAPE = (841 * X_FACTOR, 594 * Y_FACTOR)
+    DIN_A0_LANDSCAPE = (1189 * X_FACTOR, 841 * Y_FACTOR)
+
+    @staticmethod
+    def custom_36_48_portrait():
+        return Paper.CUSTOM_36_48
+
+    @staticmethod
+    def custom_36_48_landscape():
+        return Paper.CUSTOM_48_36
+
+    @staticmethod
+    def a1_landscape():
+        return Paper.DIN_A1_LANDSCAPE
+
+    @staticmethod
+    def a0_landscape():
+        return Paper.DIN_A0_LANDSCAPE
+
 class TimedPosition:
     def __init__(self, x=0.0, y=0.0, timestamp=0):
         self.x = x
@@ -533,10 +558,15 @@ class PathCollection:
         for p in self.__paths:
             p.scale(x, y)
 
-    def fit(self, width, height, padding):
+    def fit(self, size, padding_mm):
+        width = size[0]
+        height = size[1]
+        padding_x = padding_mm * Paper.X_FACTOR
+        padding_y = padding_mm * Paper.Y_FACTOR
+
         # scaling
-        xfac = (width - padding * 2) / self.bb().w
-        yfac = (height - padding * 2) / self.bb().h
+        xfac = (width - padding_x * 2) / self.bb().w
+        yfac = (height - padding_y * 2) / self.bb().h
         self.scale(xfac, yfac)
 
         #centering
