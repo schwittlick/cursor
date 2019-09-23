@@ -115,6 +115,8 @@ class CursorGCodeRenderer:
                         y = -y
                     file.write(F'G01 X{x:.2f} Y{y:.2f} F{self.feedrate_xy}\n')
                 file.write(F'G01 Z{self.z_up} F{self.feedrate_z}\n')
+            file.write(F'G01 Z0.0 F{self.feedrate_z}\n')
+            file.write(F'G01 X0.0 Y0.0 F{self.feedrate_xy}\n')
 
 
 class JpegRenderer:
