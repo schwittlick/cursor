@@ -9,11 +9,11 @@ def composition56(nr, pathlist):
     jpeg_renderer = renderer.JpegRenderer('composition56')
     xoffset = 0
 
-    xspacing = 2
+    xspacing = 1
     coll = path.PathCollection(rec.resolution)
 
     for p in pathlist:
-        for i in range(150):
+        for i in range(250):
             xfrom = xspacing * i + xoffset
             yfrom = 0
             xto = xspacing * i + xoffset
@@ -25,9 +25,11 @@ def composition56(nr, pathlist):
 
     coll.fit(path.Paper.a1_landscape(), 50)
 
+    hash = pathlist[0].hash()
+
     print(F"rendering {nr}, {coll.bb()}")
-    #gcode_renderer.render(coll, F"composition56_{nr}")
-    jpeg_renderer.render(coll, F"composition56_{nr}")
+    gcode_renderer.render(coll, F"composition56_{hash}")
+    jpeg_renderer.render(coll, F"composition56_{hash}")
 
 if __name__ == '__main__':
     p = data.DataHandler().recordings()
@@ -38,14 +40,16 @@ if __name__ == '__main__':
     entropy_filter = filter.EntropyFilter(1.2, 1.2)
     all_paths.filter(entropy_filter)
 
-    #distance_filter = filter.DistanceFilter(100, rec.resolution)
-    #all_paths.filter(distance_filter)
+    distance_filter = filter.DistanceFilter(100, rec.resolution)
+    all_paths.filter(distance_filter)
 
-    for i in range(50):
+    for i in range(100):
         r1 = all_paths.random()
         r2 = all_paths.random()
         r3 = all_paths.random()
         r4 = all_paths.random()
         r5 = all_paths.random()
+
+        print(r1.hash())
 
         composition56(i, [r1, r2, r3, r4, r5])

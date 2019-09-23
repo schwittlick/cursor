@@ -15,6 +15,7 @@ import base64
 import zlib
 import pyautogui
 import random
+import hashlib
 
 
 class MyJsonEncoder(json.JSONEncoder):
@@ -207,6 +208,9 @@ class Path:
             self.vertices = list(vertices)
         else:
             self.vertices = []
+
+    def hash(self):
+        return hashlib.md5(str(self.vertices).encode('utf-8')).hexdigest()
 
     def add(self, x, y, timestamp):
         self.vertices.append(TimedPosition(x, y, timestamp))
