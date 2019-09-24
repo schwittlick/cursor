@@ -80,7 +80,7 @@ class CursorSVGRenderer:
         dwg.save()
 
 
-class CursorGCodeRenderer:
+class GCodeRenderer:
     def __init__(self, folder, feedrate_xy=2000, feedrate_z=1000, z_down=3.5, z_up=0.0, invert_y=True):
         self.save_path = os.path.join(data.DataHandler.gcodes(), folder + '/')
         self.z_down = z_down

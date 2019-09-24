@@ -467,6 +467,9 @@ class PathCollection:
         for p in self.__paths:
             p.clean()
 
+    def hash(self):
+        return hashlib.md5(str(self.__paths).encode('utf-8')).hexdigest()
+
     def empty(self):
         if len(self.__paths) == 0:
             return True
