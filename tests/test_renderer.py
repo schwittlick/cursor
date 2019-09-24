@@ -1,6 +1,6 @@
 from ..cursor.loader import Loader
 from ..cursor.renderer import CursorSVGRenderer
-from ..cursor.renderer import CursorGCodeRenderer
+from ..cursor.renderer import GCodeRenderer
 from ..cursor.renderer import JpegRenderer
 
 from ..cursor.data import DataHandler
@@ -25,7 +25,7 @@ def test_gcoderenderer():
 
     rec = loader.all_paths()
 
-    vis = CursorGCodeRenderer(DataHandler.test_gcodes())
+    vis = GCodeRenderer(DataHandler.test_gcodes())
     vis.render(rec, 'test1')
 
 
@@ -43,7 +43,7 @@ def test_jpegrenderer_fail():
     loader = Loader(directory=os.path.abspath(path))
 
     vis1 = JpegRenderer(DataHandler.test_images())
-    vis2 = CursorGCodeRenderer(DataHandler.test_gcodes())
+    vis2 = GCodeRenderer(DataHandler.test_gcodes())
     vis3 = CursorSVGRenderer(DataHandler.test_svgs())
 
     rec = loader.all_collections()
