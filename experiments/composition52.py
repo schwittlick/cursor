@@ -10,7 +10,7 @@ def composition52(n):
     l = loader.Loader(directory=p)
     rec = l.single(0)
 
-    r = renderer.CursorGCodeRenderer('composition52', z_down=3.0)
+    r = renderer.GCodeRenderer('composition52', z_down=3.0)
     jpeg_renderer = renderer.JpegRenderer('composition52')
 
     coll = path.PathCollection(rec.resolution)

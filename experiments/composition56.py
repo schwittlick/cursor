@@ -5,7 +5,7 @@ from cursor import filter
 from cursor import data
 
 def composition56(nr, pathlist):
-    gcode_renderer = renderer.CursorGCodeRenderer('composition56', z_down=3.0)
+    gcode_renderer = renderer.GCodeRenderer('composition56', z_down=3.0)
     jpeg_renderer = renderer.JpegRenderer('composition56')
     xoffset = 0
 

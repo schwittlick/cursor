@@ -6,7 +6,7 @@ from cursor import data
 
 
 def composition37(p0, p1, offset):
-    gcode_renderer = renderer.CursorGCodeRenderer('composition37', z_down=3.0)
+    gcode_renderer = renderer.GCodeRenderer('composition37', z_down=3.0)
     jpeg_renderer = renderer.JpegRenderer('composition37')
 
     coll = path.PathCollection(rec.resolution)
