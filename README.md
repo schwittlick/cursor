@@ -1,5 +1,7 @@
 # Cursor
 
+Use Python 3.6.8
+
 ## drawing
 
 ### axidraw

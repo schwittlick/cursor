@@ -4,11 +4,10 @@ import pytz
 import atexit
 import os
 import PySimpleGUIQt as sg
-import pynput
 import pyautogui
-import json
 from pynput.mouse import Listener as MouseListener
 from pynput.keyboard import Listener as KeyboardListener
+from sneakysnek.recorder import Recorder
 
 try:
     from cursor import path
@@ -20,10 +19,11 @@ try:
 except:
     import data
 
+
 class InputListener:
-    START_STOP_COMBINATION = {
-        pynput.keyboard.Key.pause
-    }
+    #START_STOP_COMBINATION = {
+    #    pynput.keyboard.Key.pause
+    #}
     running = True
 
     def __init__(self, mouse=True, keys=True):
@@ -59,6 +59,9 @@ class SystemTray:
         return self.tray.Read(timeout=0.1)
 
 
+def newEvent(ev):
+    print(ev)
+
 class CursorRecorder(InputListener):
     SAVE_PATH = data.DataHandler().recordings()
     keyboard_recodings = []
@@ -66,9 +69,13 @@ class CursorRecorder(InputListener):
     started = False
     start_time_stamp = None
     current = set()
+    recorder = None
 
     def __init__(self):
         super(CursorRecorder, self).__init__()
+
+        #self.recorder = Recorder(newEvent)
+
         self.start_time_stamp = self._get_utc_timestamp()
         atexit.register(self.save)
         self.mouse_recordings = path.PathCollection(pyautogui.size())
@@ -98,6 +105,9 @@ class CursorRecorder(InputListener):
         utc_timestamp = datetime.datetime.timestamp(now)
         return utc_timestamp
 
+    def event(self, ev):
+        print(ev)
+
     def on_move(self, x, y):
         _x = x / self.mouse_recordings.resolution.width
         _y = y / self.mouse_recordings.resolution.height
@@ -114,11 +124,12 @@ class CursorRecorder(InputListener):
             self.current_line.clear()
 
     def on_press(self, btn):
+        pass
         # in case this is a list of keys, for a combination
-        if btn in self.START_STOP_COMBINATION:
-            self.current.add(btn)
-            if all(k in self.current for k in self.START_STOP_COMBINATION):
-                self.toggle()
+        #if btn in self.START_STOP_COMBINATION:
+        #    self.current.add(btn)
+        #    if all(k in self.current for k in self.START_STOP_COMBINATION):
+        #        self.toggle()
 
     def on_release(self, btn):
         try:
@@ -150,5 +161,9 @@ class CursorRecorder(InputListener):
         #     fp.write(dump)
 
 
-if __name__ == "__main__":
+def runRecorder():
     rec = CursorRecorder()
+
+
+if __name__ == "__main__":
+    runRecorder()
