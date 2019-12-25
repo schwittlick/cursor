@@ -18,12 +18,8 @@ PyMsgBox==1.0.7
 pynput==1.4.2
 pyparsing==2.4.0
 pyperclip==1.7.0
-PyQt5==5.13.0
-PyQt5-sip==4.19.18
 PyRect==0.1.4
 PyScreeze==0.1.22
-PySimpleGUI==4.0.0
-PySimpleGUIQt==0.26.0
 pytest==5.0.1
 pytest-cov==2.7.1
 python-xlib==0.25

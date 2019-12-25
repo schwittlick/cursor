@@ -1,7 +1,11 @@
 # Cursor
 
 Use Python 3.6.8
-
+    
+    pyenv install 3.6.8
+    pyenv virtualenv 3.6.8 cursor
+    pyenv activate cursor
+    pip install -r requirements.txt
     ./install_and_run.sh
 
 ## drawing
