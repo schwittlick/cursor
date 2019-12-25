@@ -7,7 +7,6 @@ import PySimpleGUIQt as sg
 import pyautogui
 from pynput.mouse import Listener as MouseListener
 from pynput.keyboard import Listener as KeyboardListener
-from sneakysnek.recorder import Recorder
 
 try:
     from cursor import path
@@ -21,9 +20,9 @@ except:
 
 
 class InputListener:
-    #START_STOP_COMBINATION = {
+    # START_STOP_COMBINATION = {
     #    pynput.keyboard.Key.pause
-    #}
+    # }
     running = True
 
     def __init__(self, mouse=True, keys=True):
@@ -59,9 +58,6 @@ class SystemTray:
         return self.tray.Read(timeout=0.1)
 
 
-def newEvent(ev):
-    print(ev)
-
 class CursorRecorder(InputListener):
     SAVE_PATH = data.DataHandler().recordings()
     keyboard_recodings = []
@@ -73,8 +69,6 @@ class CursorRecorder(InputListener):
 
     def __init__(self):
         super(CursorRecorder, self).__init__()
-
-        #self.recorder = Recorder(newEvent)
 
         self.start_time_stamp = self._get_utc_timestamp()
         atexit.register(self.save)
@@ -126,7 +120,7 @@ class CursorRecorder(InputListener):
     def on_press(self, btn):
         pass
         # in case this is a list of keys, for a combination
-        #if btn in self.START_STOP_COMBINATION:
+        # if btn in self.START_STOP_COMBINATION:
         #    self.current.add(btn)
         #    if all(k in self.current for k in self.START_STOP_COMBINATION):
         #        self.toggle()
@@ -155,8 +149,8 @@ class CursorRecorder(InputListener):
             dump = path.JsonCompressor().json_zip(recs)
             fp.write(str(dump))
 
-        #fname_uncompressed = os.path.join(self.SAVE_PATH, str(self.start_time_stamp) + '_uncompressed.json')
-        #with open(fname_uncompressed, 'w') as fp:
+        # fname_uncompressed = os.path.join(self.SAVE_PATH, str(self.start_time_stamp) + '_uncompressed.json')
+        # with open(fname_uncompressed, 'w') as fp:
         #    dump = json.dumps(recs, cls=path.MyJsonEncoder)
         #     fp.write(dump)
 
