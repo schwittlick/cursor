@@ -3,49 +3,15 @@ import datetime
 import pytz
 import atexit
 import os
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
 import pyautogui
 from pynput.mouse import Listener as MouseListener
 from pynput.keyboard import Listener as KeyboardListener
 
-try:
-    from cursor import path
-except:
-    import path
-
-try:
-    from cursor import data
-except:
-    import data
+from cursor import path
+from cursor import data
 
 
-class Qt5Tray:
-    def __init__(self):
-        self.app = QApplication([])
-        self.app.setQuitOnLastWindowClosed(False)
-
-        # Create the icon
-        icon = QIcon('mouse-icon.gif')
-
-        # Create the tray
-        tray = QSystemTrayIcon()
-        tray.setIcon(icon)
-        tray.setVisible(True)
-
-        # Create the menu
-        menu = QMenu()
-        action = QAction("A menu item")
-        menu.addAction(action)
-
-        # Add the menu to the tray
-        tray.setContextMenu(menu)
-
-    def run(self):
-        self.app.exec_()
-
-
-class CursorRecorder():
+class CursorRecorder:
     SAVE_PATH = data.DataHandler().recordings()
     keyboard_recodings = []
     current_line = path.Path()
@@ -152,7 +118,3 @@ class CursorRecorder():
 
 def runRecorder():
     CursorRecorder()
-
-
-if __name__ == "__main__":
-    runRecorder()
