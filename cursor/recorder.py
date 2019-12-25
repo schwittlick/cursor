@@ -3,7 +3,8 @@ import datetime
 import pytz
 import atexit
 import os
-import PySimpleGUIQt as sg
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 import pyautogui
 from pynput.mouse import Listener as MouseListener
 from pynput.keyboard import Listener as KeyboardListener
@@ -19,25 +20,63 @@ except:
     import data
 
 
-class InputListener:
-    # START_STOP_COMBINATION = {
-    #    pynput.keyboard.Key.pause
-    # }
+class Qt5Tray:
+    def __init__(self):
+        self.app = QApplication([])
+        self.app.setQuitOnLastWindowClosed(False)
+
+        # Create the icon
+        icon = QIcon('mouse-icon.gif')
+
+        # Create the tray
+        tray = QSystemTrayIcon()
+        tray.setIcon(icon)
+        tray.setVisible(True)
+
+        # Create the menu
+        menu = QMenu()
+        action = QAction("A menu item")
+        menu.addAction(action)
+
+        # Add the menu to the tray
+        tray.setContextMenu(menu)
+
+    def run(self):
+        self.app.exec_()
+
+
+class CursorRecorder():
+    SAVE_PATH = data.DataHandler().recordings()
+    keyboard_recodings = []
+    current_line = path.Path()
+    started = False
+    start_time_stamp = None
+    current = set()
+    recorder = None
     running = True
 
-    def __init__(self, mouse=True, keys=True):
-        if mouse:
-            self.mouse_listener = MouseListener(
-                on_move=self.on_move,
-                on_click=self.on_click)
-            self.mouse_listener.start()
+    def __init__(self):
+        print(self.SAVE_PATH)
 
-        if keys:
-            self.key_listener = KeyboardListener(
-                on_press=self.on_press,
-                on_release=self.on_release
-            )
-            self.key_listener.start()
+        self.start_time_stamp = self._get_utc_timestamp()
+        atexit.register(self.save)
+        self.mouse_recordings = path.PathCollection(pyautogui.size())
+
+        self.mouse_listener = MouseListener(
+            on_move=self.on_move,
+            on_click=self.on_click)
+        self.mouse_listener.start()
+
+        self.key_listener = KeyboardListener(
+            on_press=self.on_press,
+            on_release=self.on_release
+        )
+        self.key_listener.start()
+
+        print('Running recorder.. Saving to ' + self.SAVE_PATH)
+
+        while True:
+            time.sleep(0.01)
 
     def toggle(self):
         if not self.running:
@@ -48,61 +87,14 @@ class InputListener:
             self.mouse_listener.stop()
         self.running = not self.running
 
-
-class SystemTray:
-    def __init__(self):
-        menu_def = ['BLANK', ['&Open', '---', 'E&xit', 'Save']]
-        self.tray = sg.SystemTray(menu=menu_def, filename=r'../mouse-icon.gif')
-
-    def read(self):
-        return self.tray.Read(timeout=0.1)
-
-
-class CursorRecorder(InputListener):
-    SAVE_PATH = data.DataHandler().recordings()
-    keyboard_recodings = []
-    current_line = path.Path()
-    started = False
-    start_time_stamp = None
-    current = set()
-    recorder = None
-
-    def __init__(self):
-        super(CursorRecorder, self).__init__()
-
-        self.start_time_stamp = self._get_utc_timestamp()
-        atexit.register(self.save)
-        self.mouse_recordings = path.PathCollection(pyautogui.size())
-
-        tray = SystemTray()
-
-        print('Running recorder.. Saving to ' + self.SAVE_PATH)
-
-        while True:
-            try:
-                time.sleep(0.001)
-                menu_item = tray.read()
-                if menu_item == 'Exit':
-                    self.save()
-                    break
-                elif menu_item == 'Open':
-                    sg.Popup('Menu item chosen', menu_item)
-                elif menu_item == 'Save':
-                    self.save()
-            except KeyboardInterrupt as e:
-                self.save()
-                return
-
     @staticmethod
     def _get_utc_timestamp():
         now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
         utc_timestamp = datetime.datetime.timestamp(now)
         return utc_timestamp
 
-    def event(self, ev):
-        print(ev)
-
     def on_move(self, x, y):
+        print("move " + str(x))
         _x = x / self.mouse_recordings.resolution.width
         _y = y / self.mouse_recordings.resolution.height
         self.current_line.add(_x, _y, self._get_utc_timestamp())
@@ -118,6 +110,7 @@ class CursorRecorder(InputListener):
             self.current_line.clear()
 
     def on_press(self, btn):
+        print("press " + str(btn))
         pass
         # in case this is a list of keys, for a combination
         # if btn in self.START_STOP_COMBINATION:
@@ -126,6 +119,7 @@ class CursorRecorder(InputListener):
         #        self.toggle()
 
     def on_release(self, btn):
+        print("release " + str(btn))
         try:
             self.current.remove(btn)
             return
@@ -137,6 +131,7 @@ class CursorRecorder(InputListener):
             print(ae)
 
     def save(self):
+        print("save")
         if not os.path.exists(self.SAVE_PATH):
             os.makedirs(self.SAVE_PATH)
 
@@ -156,7 +151,7 @@ class CursorRecorder(InputListener):
 
 
 def runRecorder():
-    rec = CursorRecorder()
+    CursorRecorder()
 
 
 if __name__ == "__main__":
