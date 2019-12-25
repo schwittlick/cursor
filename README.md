@@ -2,6 +2,8 @@
 
 Use Python 3.6.8
 
+    ./install_and_run.sh
+
 ## drawing
 
 ### axidraw
