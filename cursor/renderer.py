@@ -1,5 +1,5 @@
 import svgwrite
-import os
+import pathlib
 from PIL import Image, ImageDraw
 
 try:
@@ -55,7 +55,7 @@ class PathIterator:
 
 class CursorSVGRenderer:
     def __init__(self, folder):
-        self.save_path = os.path.join(data.DataHandler.svgs(), folder + '/')
+        self.save_path = folder
 
     def render(self, paths, filename):
         if not isinstance(paths, path.PathCollection):
@@ -63,7 +63,7 @@ class CursorSVGRenderer:
 
         bb = paths.bb()
 
-        fname = os.path.abspath(self.save_path + filename + '.svg')
+        fname = self.save_path.joinpath(filename + '.svg')
         dwg = svgwrite.Drawing(fname, profile='tiny', size=(bb.w + bb.x, bb.h + bb.y))
 
         it = PathIterator([paths])
@@ -73,8 +73,7 @@ class CursorSVGRenderer:
 
             dwg.add(dwg.line(start.pos(), end.pos(), stroke_width=0.5, stroke=svgwrite.rgb(0, 0, 0, '%')))
 
-        if not os.path.exists(self.save_path):
-            os.makedirs(self.save_path)
+        pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
         print(F"Saving to {fname}")
         dwg.save()
@@ -82,7 +81,7 @@ class CursorSVGRenderer:
 
 class GCodeRenderer:
     def __init__(self, folder, feedrate_xy=2000, feedrate_z=1000, z_down=3.5, z_up=0.0, invert_y=True):
-        self.save_path = os.path.join(data.DataHandler.gcodes(), folder + '/')
+        self.save_path = folder
         self.z_down = z_down
         self.z_up = z_up
         self.feedrate_xy = feedrate_xy
@@ -93,12 +92,11 @@ class GCodeRenderer:
         if not isinstance(paths, path.PathCollection):
             raise Exception('Only PathCollection and list of PathCollections allowed')
 
-        if not os.path.exists(self.save_path):
-            os.makedirs(self.save_path)
+        pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
-        filepath = os.path.abspath(self.save_path + filename + '.nc')
-        print(F"Saving to {filepath}")
-        with open(filepath, 'w') as file:
+        fname = self.save_path.joinpath(filename + '.nc')
+        print(F"Saving to {fname}")
+        with open(fname, 'w') as file:
             file.write(F'G01 Z0.0 F{self.feedrate_z}\n')
             file.write(F'G01 X0.0 Y0.0 F{self.feedrate_xy}\n')
             for p in paths:
@@ -121,14 +119,13 @@ class GCodeRenderer:
 
 class JpegRenderer:
     def __init__(self, folder):
-        self.save_path = os.path.join(data.DataHandler.images(), folder + '/')
+        self.save_path = folder
 
     def render(self, paths, filename, scale=1.0):
         if not isinstance(paths, path.PathCollection):
             raise Exception('Only PathCollection and list of PathCollections allowed')
 
-        if not os.path.exists(self.save_path):
-            os.makedirs(self.save_path)
+        pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
         if len(paths) == 0:
             return
@@ -157,6 +154,6 @@ class JpegRenderer:
 
             img_draw.line(xy=(start.x * scale, start.y * scale, end.x * scale, end.y * scale), fill='black', width=1)
 
-        filepath = os.path.abspath(self.save_path + filename + '.jpg')
-        print(F"Saving to {filepath}")
-        img.save(filepath, 'JPEG')
+        fname = self.save_path.joinpath(filename + '.jpg')
+        print(F"Saving to {fname}")
+        img.save(fname, 'JPEG')

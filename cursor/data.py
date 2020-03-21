@@ -1,36 +1,31 @@
-import os
-
+import pathlib
 
 class DataHandler:
-    @staticmethod
-    def images():
-        return os.path.abspath('data/jpgs/')
+    def __init__(self):
+        self.BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
+        self.main_data_dir = self.BASE_DIR.joinpath("data")
+        self.test_data_dir = self.BASE_DIR.joinpath("tests").joinpath("data")
 
-    @staticmethod
-    def gcodes():
-        return os.path.abspath('data/gcode/')
+    def images(self):
+        return self.main_data_dir.joinpath("jpgs")
 
-    @staticmethod
-    def svgs():
-        return os.path.abspath('data/svg/')
+    def gcodes(self):
+        return self.main_data_dir.joinpath("gcode")
 
-    @staticmethod
-    def recordings():
-        return os.path.abspath('data/recordings/')
+    def svgs(self):
+        return self.main_data_dir.joinpath("svg")
 
-    @staticmethod
-    def test_images():
-        return os.path.abspath('tests/data/jpgs/')
+    def recordings(self):
+        return self.main_data_dir.joinpath("recordings")
 
-    @staticmethod
-    def test_gcodes():
-        return os.path.abspath('tests/data/gcode/')
+    def test_images(self):
+        return self.test_data_dir.joinpath("jpgs")
 
-    @staticmethod
-    def test_svgs():
-        return os.path.abspath('tests/data/svg/')
+    def test_gcodes(self):
+        return self.test_data_dir.joinpath("gcode")
 
-    @staticmethod
-    def test_recordings():
-        return os.path.abspath('tests/data/test_recordings/')
+    def test_svgs(self):
+        return self.test_data_dir.joinpath("svg")
 
+    def test_recordings(self):
+        return self.test_data_dir.joinpath("test_recordings")
