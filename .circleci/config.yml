@@ -15,6 +15,9 @@ jobs:
             apt-get install -y x11vnc
             x11vnc -forever -nopw
           background: true
+      - run: 
+          name: "Setup custom environment variables"
+          command: echo 'export DISPLAY=":0.0"' >> $BASH_ENV # Redirect MY_ENV_VAR into $BASH_ENV
       - run:
           name: Run tests
           command: py.test --cov cursor --cov-report html
