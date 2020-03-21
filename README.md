@@ -1,5 +1,7 @@
 # Cursor
 
+![Cursor](https://github.com/schwittlick/cursor/workflows/Cursor/badge.svg)
+
 Use Python 3.6.8
     
     pyenv install 3.6.8
