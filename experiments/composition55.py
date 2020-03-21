@@ -23,11 +23,10 @@ def composition55(p0, p1, offset):
     startbottom = (xoffset, ymaxsize + yoffset)
     endbottom = (xmaxsize, ymaxsize + yoffset)
 
-
-    xspacing = 2.5
+    # xspacing = 2.5
 
     lines = 800
-    #while coll.bb()[2] < 2138:
+    # while coll.bb()[2] < 2138:
     for i in range(lines):
         perc = (1.0 / lines) * i
         interped = p0.interp(p1, perc)
@@ -47,28 +46,28 @@ def composition55(p0, p1, offset):
     try:
         jpeg_renderer.render(coll, F"composition55_special_{offset}_high2", 5.0)
     except MemoryError as me:
-        print("Memory error ignored..")
+        print("Memory error ignored.. " + me)
         return
 
 
 if __name__ == '__main__':
     p = data.DataHandler().recordings()
-    l = loader.Loader(directory=p)
-    rec = l.single(0)
-    all_paths = l.all_paths()
+    ll = loader.Loader(directory=p)
+    rec = ll.single(0)
+    all_paths = ll.all_paths()
 
     entropy_filter = filter.EntropyFilter(1.5, 1.5)
     all_paths.filter(entropy_filter)
 
-    import random
+    # import random
 
     r1 = 261
     p0 = all_paths[r1]
     p1 = all_paths[r1 + 1]
     composition55(p0, p1, r1)
 
-    #print(len(all_paths))
-    #for i in range(10):
+    # print(len(all_paths))
+    # for i in range(10):
     #    print(F"Creating Composition #55 with offset={i}")
     #    r1 = random.randint(0, len(all_paths))
     #    p0 = all_paths[r1]

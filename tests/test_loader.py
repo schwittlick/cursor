@@ -6,24 +6,24 @@ import pytest
 
 def test_loader_simple():
     dir = data.DataHandler().test_recordings()
-    l = loader.Loader(directory=dir)
+    ll = loader.Loader(directory=dir)
 
-    rec = l.all_collections()
+    rec = ll.all_collections()
     assert len(rec) == 4
 
 
 def test_loader_keys():
     dir = data.DataHandler().test_recordings()
-    l = loader.Loader(directory=dir)
-    rec = l.keys()
+    ll = loader.Loader(directory=dir)
+    rec = ll.keys()
     assert len(rec) == 6
 
 
 def test_loader_index_too_high_exception():
     dir = data.DataHandler().test_recordings()
-    l = loader.Loader(directory=dir)
+    ll = loader.Loader(directory=dir)
     with pytest.raises(IndexError):
-        l.single(100)
+        ll.single(100)
 
 
 def test_loader_isfileandjson():
@@ -39,4 +39,3 @@ def test_loader_limit_files():
 
     assert len(l2) == 1
     assert len(l1) > len(l2)
-

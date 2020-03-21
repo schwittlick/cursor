@@ -3,10 +3,11 @@ from cursor import renderer
 from cursor import path
 from cursor import data
 
+
 def simple_pattern1():
     p = data.DataHandler().recordings()
-    l = loader.Loader(directory=p, limit_files=1)
-    rec = l.single(0)
+    ll = loader.Loader(directory=p, limit_files=1)
+    rec = ll.single(0)
 
     r = renderer.GCodeRenderer('straight_lines', z_down=3.0)
     jpeg_renderer = renderer.JpegRenderer('straight_lines')
@@ -40,6 +41,7 @@ def simple_pattern1():
 
     r.render(coll, F'straight_lines_{coll.hash()}')
     jpeg_renderer.render(coll, F'straight_lines_{coll.hash()}')
+
 
 if __name__ == '__main__':
     simple_pattern1()
