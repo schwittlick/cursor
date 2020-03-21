@@ -4,7 +4,6 @@ from cursor import path
 from cursor import data
 
 
-
 def composition37(p0, p1, offset):
     gcode_renderer = renderer.GCodeRenderer('composition37', z_down=3.0)
     jpeg_renderer = renderer.JpegRenderer('composition37')
@@ -46,11 +45,11 @@ def composition37(p0, p1, offset):
 
 if __name__ == '__main__':
     p = data.DataHandler().recordings()
-    l = loader.Loader(directory=p, limit_files=5)
-    rec = l.single(0)
-    all_paths = l.all_paths()
+    ll = loader.Loader(directory=p, limit_files=5)
+    rec = ll.single(0)
+    all_paths = ll.all_paths()
 
-    #print(len(all_paths))
+    # print(len(all_paths))
     for i in range(1):
         print(F"Creating Composition #37 with offset={i}")
         p0 = all_paths[i]

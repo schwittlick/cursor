@@ -1,5 +1,6 @@
 import pathlib
 
+
 class DataHandler:
     def __init__(self):
         self.BASE_DIR = pathlib.Path(__file__).resolve().parent.parent

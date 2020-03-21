@@ -44,6 +44,7 @@ def test_pathcollection_minmax():
     assert max[0] == 940
     assert max[1] == 5111
 
+
 def test_pathcollection_add():
     size = pyautogui.Size(100, 100)
     pcol = path.PathCollection(size)
@@ -108,7 +109,8 @@ def test_pathcollection_get():
     assert p1 == p2
 
     with pytest.raises(IndexError):
-        p3 = pcol[1]
+        pcol[1]
+
 
 def test_pathcollection_compare():
     size = pyautogui.Size(100, 100)
@@ -123,10 +125,7 @@ def test_pathcollection_compare():
     pcol2 = path.PathCollection(size)
     r = pcol == pcol2
 
-    assert r == False
-
-    r2 = pcol == True
-    assert r2 == False
+    assert not r
 
 
 def test_pathcollection_clean():

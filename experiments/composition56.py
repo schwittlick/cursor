@@ -4,6 +4,7 @@ from cursor import path
 from cursor import filter
 from cursor import data
 
+
 def composition56(nr, pathlist):
     gcode_renderer = renderer.GCodeRenderer('composition56', z_down=3.0)
     jpeg_renderer = renderer.JpegRenderer('composition56')
@@ -31,11 +32,12 @@ def composition56(nr, pathlist):
     gcode_renderer.render(coll, F"composition56_{hash}")
     jpeg_renderer.render(coll, F"composition56_{hash}")
 
+
 if __name__ == '__main__':
     p = data.DataHandler().recordings()
-    l = loader.Loader(directory=p, limit_files=None)
-    rec = l.single(0)
-    all_paths = l.all_paths()
+    ll = loader.Loader(directory=p, limit_files=None)
+    rec = ll.single(0)
+    all_paths = ll.all_paths()
 
     entropy_filter = filter.EntropyFilter(1.2, 1.2)
     all_paths.filter(entropy_filter)

@@ -3,6 +3,7 @@ from ..cursor import filter
 import pyautogui
 import pytest
 
+
 def test_bb_filter():
     size = pyautogui.Size(100, 100)
     pcol = path.PathCollection(size)
@@ -40,6 +41,7 @@ def test_bb_filter():
 
     assert len(pcol) == 1
     assert pcol[0] is p1
+
 
 def test_point_count_filter():
     size = pyautogui.Size(100, 100)
