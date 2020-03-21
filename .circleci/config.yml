@@ -12,6 +12,7 @@ jobs:
       - run:
           name: Download and start X
           command: |
+            apt-get update
             apt-get install -y x11vnc
             x11vnc -forever -nopw
           background: true
