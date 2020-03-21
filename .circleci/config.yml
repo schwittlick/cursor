@@ -1,0 +1,33 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/cursor
+    docker:
+      - image: python:3.6-jessie
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: pip3 install -r requirements.txt
+      - run:
+          name: Download and start X
+          command: |
+            apt-get update
+            apt-get install -y xvfb
+          background: false
+      - run:
+          name: Running X virtual framebuffer
+          command: Xvfb -ac :99 -screen 0 1920x1080x16 +extension RANDR > /dev/null 2>&1
+          background: true
+      - run:
+          name: Run tests
+          command: |
+            export DISPLAY=:99
+            py.test --cov cursor --cov-report html
+      - store_artifacts:
+          path: htmlcov
+workflows:
+  version: 2
+  workflow:
+    jobs:
+    - build
