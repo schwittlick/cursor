@@ -3,7 +3,7 @@ from cursor import renderer
 from cursor import path
 from cursor import data
 
-def test_simple_pattern1():
+def simple_pattern1():
     p = data.DataHandler().recordings()
     l = loader.Loader(directory=p, limit_files=1)
     rec = l.single(0)
@@ -42,4 +42,4 @@ def test_simple_pattern1():
     jpeg_renderer.render(coll, F'straight_lines_{coll.hash()}')
 
 if __name__ == '__main__':
-    test_simple_pattern1()
+    simple_pattern1()
