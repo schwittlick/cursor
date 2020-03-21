@@ -12,21 +12,6 @@ def test_loader_simple():
     assert len(rec) == 4
 
 
-def test_compressed_uncompressed():
-    dir = data.DataHandler().test_recordings()
-    l = loader.Loader(directory=dir)
-
-    s1 = l.single(0)
-    s2 = l.single(2)
-    s3 = l.single(3)
-
-    eq1 = s2 == s3
-    eq2 = s1 == s3
-
-    assert eq1 is True
-    assert eq2 is False
-
-
 def test_loader_keys():
     dir = data.DataHandler().test_recordings()
     l = loader.Loader(directory=dir)
