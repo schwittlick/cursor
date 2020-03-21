@@ -1,6 +1,6 @@
 # Cursor
 
-![Cursor](https://github.com/schwittlick/cursor/workflows/Cursor/badge.svg)
+[![schwittlick](https://circleci.com/gh/schwittlick/cursor.svg?style=svg)](https://app.circleci.com/pipelines/github/schwittlick/cursor)
 
 Use Python 3.6.8
     
