@@ -3,6 +3,7 @@ attrs==19.1.0
 colorama==0.4.1
 coverage==4.5.4
 DateTime==4.3
+flake8==3.7.9
 importlib-metadata==0.18
 jsonpickle==1.2
 more-itertools==7.1.0
