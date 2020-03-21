@@ -21,7 +21,11 @@ import hashlib
 class MyJsonEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, PathCollection):
-            return {'paths': o.get_all(), 'resolution': {'w': o.resolution.width, 'h': o.resolution.height}, 'timestamp': o.timestamp()}
+            return {
+                'paths': o.get_all(),
+                'resolution':
+                    {'w': o.resolution.width, 'h': o.resolution.height},
+                'timestamp': o.timestamp()}
 
         if isinstance(o, Path):
             return o.vertices
@@ -114,6 +118,7 @@ class Paper:
     def a0_landscape():
         return Paper.DIN_A0_LANDSCAPE
 
+
 class TimedPosition:
     def __init__(self, x=0.0, y=0.0, timestamp=0):
         self.x = x
@@ -201,6 +206,7 @@ class BoundingBox:
 
     def center(self):
         return self.x + self.w / 2, self.y + self.h / 2
+
 
 class Path:
     def __init__(self, vertices=None):
@@ -576,7 +582,7 @@ class PathCollection:
         yfac = (height - padding_y * 2) / self.bb().h
         self.scale(xfac, yfac)
 
-        #centering
+        # centering
         center = self.bb().center()
         center_dims = width / 2, height / 2
         diff = center_dims[0] - center[0], center_dims[1] - center[1]

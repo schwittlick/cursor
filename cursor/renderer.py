@@ -25,17 +25,17 @@ class PathIterator:
 
     def points(self):
         for collection in self.paths:
-            for path in collection:
-                for point in path.vertices:
+            for p in collection:
+                for point in p.vertices:
                     yield point, collection.resolution
 
     def connections(self, scaled=False):
         prev = None
 
         for collection in self.paths:
-            for path in collection:
+            for p in collection:
                 is_first_vertex = True
-                for point in path:
+                for point in p:
                     if is_first_vertex:
                         prev = point.copy()
                         is_first_vertex = False
