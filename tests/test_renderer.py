@@ -5,13 +5,12 @@ from ..cursor.renderer import JpegRenderer
 
 from ..cursor.data import DataHandler
 
-import os
 import pytest
 
 
 def test_svgrenderer():
     path = DataHandler().test_recordings()
-    loader = Loader(directory=os.path.abspath(path))
+    loader = Loader(directory=path)
 
     rec = loader.all_paths()
 
@@ -21,7 +20,7 @@ def test_svgrenderer():
 
 def test_gcoderenderer():
     path = DataHandler().test_recordings()
-    loader = Loader(directory=os.path.abspath(path))
+    loader = Loader(directory=path)
 
     rec = loader.all_paths()
 
@@ -31,7 +30,7 @@ def test_gcoderenderer():
 
 def test_jpegrenderer():
     path = DataHandler().test_recordings()
-    loader = Loader(directory=os.path.abspath(path))
+    loader = Loader(directory=path)
 
     rec = loader.all_paths()
 
@@ -40,7 +39,7 @@ def test_jpegrenderer():
 
 def test_jpegrenderer_fail():
     path = DataHandler().test_recordings()
-    loader = Loader(directory=os.path.abspath(path))
+    loader = Loader(directory=path)
 
     vis1 = JpegRenderer(DataHandler().test_images())
     vis2 = GCodeRenderer(DataHandler().test_gcodes())
