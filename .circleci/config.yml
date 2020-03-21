@@ -13,15 +13,17 @@ jobs:
           name: Download and start X
           command: |
             apt-get update
-            apt-get install -y x11vnc
-            x11vnc -forever -nopw
+            apt-get install -y xvfb
+          background: false
+      - run:
+          name: Running X virtual framebuffer
+          command: Xvfb -ac :99 -screen 0 1920x1080x16 +extension RANDR > /dev/null 2>&1
           background: true
-      - run: 
-          name: "Setup custom environment variables"
-          command: echo 'export DISPLAY=":0.0"' >> $BASH_ENV # Redirect MY_ENV_VAR into $BASH_ENV
       - run:
           name: Run tests
-          command: py.test --cov cursor --cov-report html
+          command: |
+            export DISPLAY=:99
+            py.test --cov cursor --cov-report html
       - store_artifacts:
           path: htmlcov
 workflows:
