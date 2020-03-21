@@ -16,6 +16,8 @@ jobs:
           name: Test
       - store_artifacts:
           path: htmlcov
+      - store_test_results:
+          path: test-results
 
 workflows:
   main:
