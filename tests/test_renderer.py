@@ -37,6 +37,7 @@ def test_jpegrenderer():
     vis = JpegRenderer(DataHandler().test_images())
     vis.render(rec, 'test1')
 
+
 def test_jpegrenderer_fail():
     path = DataHandler().test_recordings()
     loader = Loader(directory=path)

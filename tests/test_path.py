@@ -28,7 +28,7 @@ def test_path_add():
 
 def test_path_clear():
     p = path.Path()
-    assert p.empty() == True
+    assert p.empty()
 
     p.add(0, 0, 100)
 
@@ -38,7 +38,7 @@ def test_path_clear():
 
     assert len(p) == 0
 
-    assert p.empty() == True
+    assert p.empty()
 
 
 def test_path_copy():
@@ -78,6 +78,7 @@ def test_path_bb():
     assert bb[2] == 141
     assert bb[3] == 4511
 
+
 def test_path_morph():
     p = path.Path()
 
@@ -93,6 +94,7 @@ def test_path_morph():
     assert round(start.y) == 0
     assert round(end.x) == 10
     assert round(end.y) == 100
+
 
 def test_path_morph2():
     p = path.Path()
@@ -164,6 +166,7 @@ def test_sort_path():
     assert s[0].timestamp == 10000
     assert s[2].timestamp == 10040
 
+
 def test_entropy():
     p1 = path.Path()
     p1.add(100, 34, 10040)
@@ -187,6 +190,7 @@ def test_entropy():
     sy1 = p1.shannon_y()
     sy2 = p2.shannon_y()
     assert sy1 > sy2
+
 
 def test_bb():
     p1 = path.Path()
@@ -214,12 +218,12 @@ def test_path_clean():
     p.add(6, 5112, 10000)
     p.add(6, 5112, 10000)
 
-
     assert len(p) == 8
 
     p.clean()
 
     assert len(p) == 3
+
 
 def test_path_reverse():
     p1 = path.Path()
@@ -273,6 +277,7 @@ def test_path_reverse():
 
     assert p3[2].x == 5
     assert p3[2].y == 5111
+
 
 def test_path_distance():
     p = path.Path()

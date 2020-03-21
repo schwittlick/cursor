@@ -1,10 +1,6 @@
-from cursor import loader
-from cursor import renderer
 from cursor import path
-from cursor import filter
-from cursor import data
-
 import pyautogui
+
 
 def center(pcol, dims):
     center = pcol.bb().center()
@@ -13,11 +9,13 @@ def center(pcol, dims):
 
     pcol.translate(diff[0], diff[1])
 
+
 def scale(pcol, dims, padding=0):
     xfac = (dims[0] - padding * 2) / pcol.bb().w
     yfac = (dims[1] - padding * 2) / pcol.bb().h
 
     pcol.scale(xfac, yfac)
+
 
 def test1():
     size = pyautogui.Size(1, 1)
@@ -35,6 +33,7 @@ def test1():
 
     scale(pcol, a3_size)
     center(pcol, a3_size)
+
 
 def test2():
     size = pyautogui.Size(1, 1)
@@ -55,6 +54,7 @@ def test2():
 
     print(pcol)
     print(pcol.bb())
+
 
 def test3():
     size = pyautogui.Size(1920, 1080)
@@ -77,8 +77,9 @@ def test3():
     print(pcol)
     print(pcol.bb())
 
+
 if __name__ == '__main__':
     test3()
 
-    #gcode_renderer = renderer.CursorGCodeRenderer("test_scale")
-    #gcode_renderer.render(pcol, "test_scale")
+    # gcode_renderer = renderer.CursorGCodeRenderer("test_scale")
+    # gcode_renderer.render(pcol, "test_scale")
