@@ -9,9 +9,12 @@ jobs:
       - run:
           name: Install dependencies
           command: pip3 install -r requirements.txt
-      - run: 
-          name: "Setup custom environment variables"
-          command: echo 'export DISPLAY=":0.0"' >> $BASH_ENV # Redirect MY_ENV_VAR into $BASH_ENV
+      - run:
+          name: Download and start X
+          command: |
+            sudo apt-get install -y x11vnc
+            x11vnc -forever -nopw
+          background: true
       - run:
           name: Run tests
           command: py.test --cov cursor --cov-report html
