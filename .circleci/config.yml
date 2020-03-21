@@ -1,25 +1,21 @@
-version: 2.1
-
-orbs:
-  python: circleci/python@0.2.1
-
+version: 2
 jobs:
-  build-and-test:
-    executor: python/default
+  build:
+    working_directory: ~/cursor
+    docker:
+      - image: python:3.6-jessie
     steps:
       - checkout
-      - python/load-cache
-      - python/install-deps
-      - python/save-cache
       - run:
+          name: Install dependencies
+          command: pip3 install -r requirements.txt
+      - run:
+          name: Run tests
           command: py.test --cov cursor --cov-report html
-          name: Test
       - store_artifacts:
           path: htmlcov
-      - store_test_results:
-          path: test-results
-
 workflows:
-  main:
+  version: 2
+  workflow:
     jobs:
-      - build-and-test
+    - build
