@@ -20,12 +20,18 @@ jobs:
           command: Xvfb -ac :99 -screen 0 1920x1080x16 +extension RANDR > /dev/null 2>&1
           background: true
       - run:
+          name: Run Flake8
+          command: |
+            mkdir tests/artifacts
+            flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --output-file tests/artifacts/flake8_report.txt
+      - run:
           name: Run tests
           command: |
             export DISPLAY=:99
             py.test --cov cursor --cov-report html
+            mv htmlcov tests/artifacts/
       - store_artifacts:
-          path: htmlcov
+          path: tests/artifacts
 workflows:
   version: 2
   workflow:
