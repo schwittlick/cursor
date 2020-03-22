@@ -29,6 +29,10 @@ jobs:
           command: |
             export DISPLAY=:99
             pwd
+            ls
+            cd cursor
+            pwd
+            ls
             py.test --cov cursor --cov-report html
             mv htmlcov cursor/tests/artifacts/
       - store_artifacts:
