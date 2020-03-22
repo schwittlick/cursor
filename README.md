@@ -11,7 +11,6 @@ setup
     pyenv virtualenv 3.6.8 cursor
     pyenv activate cursor
     pip install -r requirements.txt
-    ./install_and_run.sh
 
 
 test
@@ -24,6 +23,11 @@ test
     cd tests
     python -m pytest --cov=cursor .
 
+recorder
+
+    # check scripts folder
+    pip install -e .
+    cursor
 
 axidraw?
 
