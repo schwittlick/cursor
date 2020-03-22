@@ -26,6 +26,13 @@ def test_loader_index_too_high_exception():
         ll.single(100)
 
 
+def test_loader_single():
+    dir = data.DataHandler().test_recordings()
+    ll = loader.Loader(directory=dir)
+    path = ll.single(0)
+    assert len(path) > 0
+
+
 def test_loader_isfileandjson():
     is1 = loader.Loader.is_file_and_json("hey")
     assert not is1

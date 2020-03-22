@@ -68,8 +68,13 @@ def test_point_count_filter():
     pcol.add(p1, size)
     pcol.add(p2, size)
 
-    f2 = filter.MinPointCountFilter(6)
-    pcol.filter(f2)
+    min_filter = filter.MinPointCountFilter(6)
+    pcol.filter(min_filter)
 
     assert len(pcol) == 1
     assert pcol[0] is p1
+
+    max_filter = filter.MaxPointCountFilter(4)
+    pcol.filter(max_filter)
+
+    assert len(pcol) == 0
