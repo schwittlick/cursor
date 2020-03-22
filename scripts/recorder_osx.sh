@@ -1,10 +1,5 @@
 #!/bin/bash
 
-cd ..
-source ./venv/bin/activate
-python setup.py install
-
-echo "Running cursor recorder.."
+source ../venv/bin/activate
+pip install -e ..
 cursor
-echo ".. Done"
-cd -
