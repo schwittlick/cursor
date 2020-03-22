@@ -38,7 +38,7 @@ class CursorRecorder:
         )
         self.key_listener.start()
 
-        print("Running recorder.. Saving to " + self.SAVE_PATH)
+        print("Running recorder.. Saving to " + self.SAVE_PATH.as_posix())
 
         while True:
             time.sleep(0.01)
@@ -107,6 +107,9 @@ class CursorRecorder:
         fname_compressed = os.path.join(
             self.SAVE_PATH, str(self.start_time_stamp) + "_compressed.json"
         )
+
+        print(f"saving {fname_compressed}")
+
         with open(fname_compressed, "w") as fp:
             dump = path.JsonCompressor().json_zip(recs)
             fp.write(str(dump))
