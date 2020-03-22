@@ -9,6 +9,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
+            pip3 install --upgrade pip
             pip3 install -r requirements.txt
             pip3 install -e .
       - run:
@@ -30,11 +31,6 @@ jobs:
           name: Run tests
           command: |
             export DISPLAY=:99
-            pwd
-            ls
-            cd cursor
-            pwd
-            ls
             py.test --cov . --cov-report html
             mv htmlcov cursor/tests/artifacts/
       - store_artifacts:
