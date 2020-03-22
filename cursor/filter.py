@@ -10,9 +10,13 @@ class EntropyFilter(Filter):
 
     def filter(self, paths):
         len_before = len(paths)
-        paths[:] = [p for p in paths if not p.shannon_x() < self.max_x and p.shannon_y() < self.max_y]
+        paths[:] = [
+            p
+            for p in paths
+            if not p.shannon_x() < self.max_x and p.shannon_y() < self.max_y
+        ]
         len_after = len(paths)
-        print(F"EntropyFilter: reduced path count from {len_before} to {len_after}")
+        print(f"EntropyFilter: reduced path count from {len_before} to {len_after}")
 
 
 class BoundingBoxFilter(Filter):
@@ -48,4 +52,4 @@ class DistanceFilter(Filter):
         len_before = len(paths)
         paths[:] = [p for p in paths if p.distance(self.res) <= self.max_distance]
         len_after = len(paths)
-        print(F"DistanceFilter: reduced path count from {len_before} to {len_after}")
+        print(f"DistanceFilter: reduced path count from {len_before} to {len_after}")

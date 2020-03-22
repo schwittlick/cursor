@@ -6,8 +6,8 @@ from cursor import data
 
 
 def composition56(nr, pathlist):
-    gcode_renderer = renderer.GCodeRenderer('composition56', z_down=3.0)
-    jpeg_renderer = renderer.JpegRenderer('composition56')
+    gcode_renderer = renderer.GCodeRenderer("composition56", z_down=3.0)
+    jpeg_renderer = renderer.JpegRenderer("composition56")
     xoffset = 0
 
     xspacing = 1
@@ -28,12 +28,12 @@ def composition56(nr, pathlist):
 
     hash = pathlist[0].hash()
 
-    print(F"rendering {nr}, {coll.bb()}")
-    gcode_renderer.render(coll, F"composition56_{hash}")
-    jpeg_renderer.render(coll, F"composition56_{hash}")
+    print(f"rendering {nr}, {coll.bb()}")
+    gcode_renderer.render(coll, f"composition56_{hash}")
+    jpeg_renderer.render(coll, f"composition56_{hash}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     p = data.DataHandler().recordings()
     ll = loader.Loader(directory=p, limit_files=None)
     rec = ll.single(0)
