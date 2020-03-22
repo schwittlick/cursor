@@ -1,7 +1,7 @@
 version: 2
 jobs:
   build:
-    working_directory: ~/cursor/cursor
+    working_directory: ~/cursor
     docker:
       - image: python:3.6-jessie
     steps:
@@ -10,9 +10,8 @@ jobs:
           name: Install dependencies
           command: pip3 install -r requirements.txt
       - run:
-          name: Download and start X
+          name: Install xvfb
           command: |
-            apt-get update
             apt-get install -y xvfb
           background: false
       - run:
@@ -30,9 +29,9 @@ jobs:
             export DISPLAY=:99
             pwd
             py.test --cov cursor --cov-report html
-            mv htmlcov tests/artifacts/
+            mv htmlcov cursor/tests/artifacts/
       - store_artifacts:
-          path: tests/artifacts
+          path: cursor/tests/artifacts
 workflows:
   version: 2
   workflow:
