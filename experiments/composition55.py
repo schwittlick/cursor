@@ -6,8 +6,8 @@ from cursor import data
 
 
 def composition55(p0, p1, offset):
-    gcode_renderer = renderer.GCodeRenderer('composition55', z_down=3.0)
-    jpeg_renderer = renderer.JpegRenderer('composition55')
+    gcode_renderer = renderer.GCodeRenderer("composition55", z_down=3.0)
+    jpeg_renderer = renderer.JpegRenderer("composition55")
 
     coll = path.PathCollection(rec.resolution)
 
@@ -42,15 +42,15 @@ def composition55(p0, p1, offset):
 
     print(coll.bb())
 
-    gcode_renderer.render(coll, F"composition55_special_{offset}")
+    gcode_renderer.render(coll, f"composition55_special_{offset}")
     try:
-        jpeg_renderer.render(coll, F"composition55_special_{offset}_high2", 5.0)
+        jpeg_renderer.render(coll, f"composition55_special_{offset}_high2", 5.0)
     except MemoryError as me:
         print("Memory error ignored.. " + me)
         return
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     p = data.DataHandler().recordings()
     ll = loader.Loader(directory=p)
     rec = ll.single(0)

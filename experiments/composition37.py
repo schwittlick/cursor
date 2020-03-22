@@ -5,8 +5,8 @@ from cursor import data
 
 
 def composition37(p0, p1, offset):
-    gcode_renderer = renderer.GCodeRenderer('composition37', z_down=3.0)
-    jpeg_renderer = renderer.JpegRenderer('composition37')
+    gcode_renderer = renderer.GCodeRenderer("composition37", z_down=3.0)
+    jpeg_renderer = renderer.JpegRenderer("composition37")
 
     coll = path.PathCollection(rec.resolution)
 
@@ -39,11 +39,11 @@ def composition37(p0, p1, offset):
 
     print(coll.bb())
 
-    gcode_renderer.render(coll, F"composition37_{offset}")
-    jpeg_renderer.render(coll, F"composition37_{offset}")
+    gcode_renderer.render(coll, f"composition37_{offset}")
+    jpeg_renderer.render(coll, f"composition37_{offset}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     p = data.DataHandler().recordings()
     ll = loader.Loader(directory=p, limit_files=5)
     rec = ll.single(0)
@@ -51,7 +51,7 @@ if __name__ == '__main__':
 
     # print(len(all_paths))
     for i in range(1):
-        print(F"Creating Composition #37 with offset={i}")
+        print(f"Creating Composition #37 with offset={i}")
         p0 = all_paths[i]
         p1 = all_paths[i + 1]
         composition37(p0, p1, i)

@@ -27,7 +27,7 @@ def test_loader_index_too_high_exception():
 
 
 def test_loader_isfileandjson():
-    is1 = loader.Loader.is_file_and_json('hey')
+    is1 = loader.Loader.is_file_and_json("hey")
     assert not is1
     # TODO: test for true
 

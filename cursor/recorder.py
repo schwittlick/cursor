@@ -29,27 +29,26 @@ class CursorRecorder:
         self.mouse_recordings = path.PathCollection(pyautogui.size())
 
         self.mouse_listener = MouseListener(
-            on_move=self.on_move,
-            on_click=self.on_click)
+            on_move=self.on_move, on_click=self.on_click
+        )
         self.mouse_listener.start()
 
         self.key_listener = KeyboardListener(
-            on_press=self.on_press,
-            on_release=self.on_release
+            on_press=self.on_press, on_release=self.on_release
         )
         self.key_listener.start()
 
-        print('Running recorder.. Saving to ' + self.SAVE_PATH)
+        print("Running recorder.. Saving to " + self.SAVE_PATH)
 
         while True:
             time.sleep(0.01)
 
     def toggle(self):
         if not self.running:
-            print('Started')
+            print("Started")
             self.mouse_listener.start()
         else:
-            print('Stopped')
+            print("Stopped")
             self.mouse_listener.stop()
         self.running = not self.running
 
@@ -72,7 +71,9 @@ class CursorRecorder:
             self.current_line.add(_x, _y, self._get_utc_timestamp())
             self.started = True
         elif self.started and pressed:
-            self.mouse_recordings.add(self.current_line.copy(), self.mouse_recordings.resolution)
+            self.mouse_recordings.add(
+                self.current_line.copy(), self.mouse_recordings.resolution
+            )
             self.current_line.clear()
 
     def on_press(self, btn):
@@ -101,12 +102,12 @@ class CursorRecorder:
         if not os.path.exists(self.SAVE_PATH):
             os.makedirs(self.SAVE_PATH)
 
-        recs = {'mouse': self.mouse_recordings,
-                'keys': self.keyboard_recodings
-                }
+        recs = {"mouse": self.mouse_recordings, "keys": self.keyboard_recodings}
 
-        fname_compressed = os.path.join(self.SAVE_PATH, str(self.start_time_stamp) + '_compressed.json')
-        with open(fname_compressed, 'w') as fp:
+        fname_compressed = os.path.join(
+            self.SAVE_PATH, str(self.start_time_stamp) + "_compressed.json"
+        )
+        with open(fname_compressed, "w") as fp:
             dump = path.JsonCompressor().json_zip(recs)
             fp.write(str(dump))
 
