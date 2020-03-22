@@ -7,6 +7,15 @@ class DataHandler:
         self.main_data_dir = self.BASE_DIR.joinpath("data")
         self.test_data_dir = self.BASE_DIR.joinpath("tests").joinpath("data")
 
+    def gcode(self, subfolder):
+        return self.main_data_dir.joinpath("experiments").joinpath(subfolder).joinpath("gcode")
+
+    def jpg(self, subfolder):
+        return self.main_data_dir.joinpath("experiments").joinpath(subfolder).joinpath("jpg")
+
+    def svg(self, subfolder):
+        return self.main_data_dir.joinpath("experiments").joinpath(subfolder).joinpath("svg")
+
     def images(self):
         return self.main_data_dir.joinpath("jpgs")
 

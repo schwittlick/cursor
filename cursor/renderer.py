@@ -3,14 +3,6 @@ import pathlib
 from PIL import Image, ImageDraw
 
 try:
-    from ..cursor import data
-except:
-    try:
-        from . import data
-    except:
-        from cursor import data
-
-try:
     from ..cursor import path
 except:
     try:
@@ -59,6 +51,7 @@ class PathIterator:
 
 class CursorSVGRenderer:
     def __init__(self, folder):
+        assert isinstance(folder, pathlib.Path), "Only path objects allowed"
         self.save_path = folder
 
     def render(self, paths, filename):
@@ -100,6 +93,8 @@ class GCodeRenderer:
         z_up=0.0,
         invert_y=True,
     ):
+        assert isinstance(folder, pathlib.Path), "Only path objects allowed"
+
         self.save_path = folder
         self.z_down = z_down
         self.z_up = z_up
@@ -138,6 +133,7 @@ class GCodeRenderer:
 
 class JpegRenderer:
     def __init__(self, folder):
+        assert isinstance(folder, pathlib.Path), "Only path objects allowed"
         self.save_path = folder
 
     def render(self, paths, filename, scale=1.0):
@@ -158,14 +154,13 @@ class JpegRenderer:
             abs((bb.y + bb.h) * scale),
         )
 
-        img = Image.new(
-            "RGB",
-            (
-                int(abs_scaled_bb[0] + abs_scaled_bb[2]),
-                int(abs_scaled_bb[1] + abs_scaled_bb[3]),
-            ),
-            "white",
-        )
+        image_width = int(abs_scaled_bb[0] + abs_scaled_bb[2])
+        image_height = int(abs_scaled_bb[1] + abs_scaled_bb[3])
+
+        print(f"Creating image with size=({image_width}, {image_height})")
+        assert image_width < 20000 and image_height < 20000, "keep resolution lower"
+
+        img = Image.new("RGB", (image_width, image_height,), "white",)
         img_draw = ImageDraw.ImageDraw(img)
 
         it = PathIterator([paths])
