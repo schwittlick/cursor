@@ -22,7 +22,7 @@ jobs:
       - run:
           name: Run Flake8
           command: |
-            mkdir tests/artifacts
+            mkdir cursor/tests/artifacts
             flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics --output-file cursor/tests/artifacts/flake8_report.txt
       - run:
           name: Run tests
