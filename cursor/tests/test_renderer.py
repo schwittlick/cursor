@@ -1,9 +1,8 @@
-from ..cursor.loader import Loader
-from ..cursor.renderer import CursorSVGRenderer
-from ..cursor.renderer import GCodeRenderer
-from ..cursor.renderer import JpegRenderer
-
-from ..cursor.data import DataHandler
+from cursor.loader import Loader
+from cursor.renderer import CursorSVGRenderer
+from cursor.renderer import GCodeRenderer
+from cursor.renderer import JpegRenderer
+from cursor.data import DataHandler
 
 import pytest
 

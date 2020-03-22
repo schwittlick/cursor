@@ -8,9 +8,12 @@ jobs:
       - checkout
       - run:
           name: Install dependencies
-          command: pip3 install -r requirements.txt
+          command: |
+            pip3 install --upgrade pip
+            pip3 install -r requirements.txt
+            pip3 install -e .
       - run:
-          name: Download and start X
+          name: Install xvfb
           command: |
             apt-get update
             apt-get install -y xvfb
@@ -22,16 +25,16 @@ jobs:
       - run:
           name: Run Flake8
           command: |
-            mkdir tests/artifacts
-            flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics --output-file tests/artifacts/flake8_report.txt
+            mkdir cursor/tests/artifacts
+            flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics --output-file cursor/tests/artifacts/flake8_report.txt
       - run:
           name: Run tests
           command: |
             export DISPLAY=:99
-            py.test --cov cursor --cov-report html
-            mv htmlcov tests/artifacts/
+            py.test --cov . --cov-report html
+            mv htmlcov cursor/tests/artifacts/
       - store_artifacts:
-          path: tests/artifacts
+          path: cursor/tests/artifacts
 workflows:
   version: 2
   workflow:

@@ -1,4 +1,6 @@
+cursor/tests/data
 data/
+venv/
 .idea
 .coverage
 __pycache__
