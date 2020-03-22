@@ -1,5 +1,5 @@
-from ..cursor import loader
-from ..cursor import data
+from cursor import loader
+from cursor import data
 
 import pytest
 
