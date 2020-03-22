@@ -18,7 +18,7 @@ test
     
     # linux/osx
     py.test --cov cursor
-    flake8 --max-line-length=127
+    flake8 --max-line-length=88
 
     # windows
     cd tests
