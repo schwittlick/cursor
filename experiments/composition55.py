@@ -6,8 +6,11 @@ from cursor import data
 
 
 def composition55(p0, p1, offset):
-    gcode_renderer = renderer.GCodeRenderer("composition55", z_down=3.0)
-    jpeg_renderer = renderer.JpegRenderer("composition55")
+    gd = data.DataHandler().gcode("composition55")
+    gcode_renderer = renderer.GCodeRenderer(gd, z_down=3.0)
+
+    jd = data.DataHandler().jpg("composition55")
+    jpeg_renderer = renderer.JpegRenderer(jd)
 
     coll = path.PathCollection(rec.resolution)
 
@@ -52,7 +55,7 @@ def composition55(p0, p1, offset):
 
 if __name__ == "__main__":
     p = data.DataHandler().recordings()
-    ll = loader.Loader(directory=p)
+    ll = loader.Loader(directory=p, limit_files=5)
     rec = ll.single(0)
     all_paths = ll.all_paths()
 
@@ -61,7 +64,7 @@ if __name__ == "__main__":
 
     # import random
 
-    r1 = 261
+    r1 = 25
     p0 = all_paths[r1]
     p1 = all_paths[r1 + 1]
     composition55(p0, p1, r1)
