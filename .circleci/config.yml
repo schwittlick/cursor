@@ -1,7 +1,7 @@
 version: 2
 jobs:
   build:
-    working_directory: ~/cursor
+    working_directory: ~/cursor/cursor
     docker:
       - image: python:3.6-jessie
     steps:
@@ -22,8 +22,8 @@ jobs:
       - run:
           name: Run Flake8
           command: |
-            mkdir cursor/tests/artifacts
-            flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics --output-file cursor/tests/artifacts/flake8_report.txt
+            mkdir tests/artifacts
+            flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics --output-file tests/artifacts/flake8_report.txt
       - run:
           name: Run tests
           command: |
