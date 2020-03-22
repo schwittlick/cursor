@@ -8,17 +8,43 @@ import pyautogui
 
 
 def add_bb(bb, coll, res):
-    coll.add(path.Path([path.TimedPosition(bb.x, bb.y), path.TimedPosition(bb.x + bb.w, bb.y)]), res)
-    coll.add(path.Path([path.TimedPosition(bb.x + bb.w, bb.y), path.TimedPosition(bb.x + bb.w, bb.y + bb.h)]), res)
-    coll.add(path.Path([path.TimedPosition(bb.x + bb.w, bb.y + bb.h), path.TimedPosition(bb.x, bb.y + bb.h)]), res)
-    coll.add(path.Path([path.TimedPosition(bb.x, bb.y + bb.h), path.TimedPosition(bb.x, bb.y)]), res)
+    coll.add(
+        path.Path(
+            [path.TimedPosition(bb.x, bb.y), path.TimedPosition(bb.x + bb.w, bb.y)]
+        ),
+        res,
+    )
+    coll.add(
+        path.Path(
+            [
+                path.TimedPosition(bb.x + bb.w, bb.y),
+                path.TimedPosition(bb.x + bb.w, bb.y + bb.h),
+            ]
+        ),
+        res,
+    )
+    coll.add(
+        path.Path(
+            [
+                path.TimedPosition(bb.x + bb.w, bb.y + bb.h),
+                path.TimedPosition(bb.x, bb.y + bb.h),
+            ]
+        ),
+        res,
+    )
+    coll.add(
+        path.Path(
+            [path.TimedPosition(bb.x, bb.y + bb.h), path.TimedPosition(bb.x, bb.y)]
+        ),
+        res,
+    )
 
 
 def pen_sample(pa, id):
     padding = 0.25
 
-    jpeg_renderer = renderer.JpegRenderer('pen_sample_book')
-    svg_renderer = renderer.CursorSVGRenderer('pen_sample_book')
+    jpeg_renderer = renderer.JpegRenderer("pen_sample_book")
+    svg_renderer = renderer.CursorSVGRenderer("pen_sample_book")
     res = pyautogui.Size(140, 340)
     coll = path.PathCollection(res)
 
@@ -42,17 +68,17 @@ def pen_sample(pa, id):
     print(coll.bb())
     bb = path.BoundingBox(0, 0, res.width, res.height)
     if bb.inside(coll):
-        fname = F"pen_sample_test_{id}"
+        fname = f"pen_sample_test_{id}"
         # coll2 = path.PathCollection(res)
         # add_bb(coll.bb(), coll2, res)
 
         jpeg_renderer.render([coll], fname, 5.0)
         svg_renderer.render([coll], fname)
     else:
-        print(F"Not Saving {id}")
+        print(f"Not Saving {id}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     p = data.DataHandler().recordings()
     ll = loader.Loader(directory=p)
     rec = ll.single(0)

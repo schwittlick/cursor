@@ -5,13 +5,13 @@ from cursor import data
 
 
 def composition52(n):
-    print(F"Creating Composition #52 with n={n}")
+    print(f"Creating Composition #52 with n={n}")
     p = data.DataHandler().recordings()
     ll = loader.Loader(directory=p)
     rec = ll.single(0)
 
-    r = renderer.GCodeRenderer('composition52', z_down=3.0)
-    jpeg_renderer = renderer.JpegRenderer('composition52')
+    r = renderer.GCodeRenderer("composition52", z_down=3.0)
+    jpeg_renderer = renderer.JpegRenderer("composition52")
 
     coll = path.PathCollection(rec.resolution)
 
@@ -37,10 +37,10 @@ def composition52(n):
     # coll.add(path.Path([path.TimedPosition(bb[2], bb[3]), path.TimedPosition(bb[0], bb[3])]), rec.resolution)
     # coll.add(path.Path([path.TimedPosition(bb[0], bb[3]), path.TimedPosition(bb[0], bb[1])]), rec.resolution)
 
-    r.render(coll, 'composition52_double_final_sp2.5_3.0_' + str(n))
+    r.render(coll, "composition52_double_final_sp2.5_3.0_" + str(n))
 
-    jpeg_renderer.render(coll, 'composition52_double_final_sp2.5_down_3.0_' + str(n))
+    jpeg_renderer.render(coll, "composition52_double_final_sp2.5_down_3.0_" + str(n))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     composition52(0)
