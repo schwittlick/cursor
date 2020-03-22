@@ -28,6 +28,7 @@ jobs:
           name: Run tests
           command: |
             export DISPLAY=:99
+            cd cursor
             py.test --cov cursor --cov-report html
             mv htmlcov tests/artifacts/
       - store_artifacts:
