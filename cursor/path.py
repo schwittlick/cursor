@@ -1,10 +1,4 @@
-try:
-    from ..cursor import filter
-except:
-    try:
-        import filter
-    except:
-        from cursor import filter
+from cursor import filter
 
 import numpy as np
 import math

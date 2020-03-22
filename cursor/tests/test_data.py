@@ -1,4 +1,4 @@
-from ..cursor import data
+from cursor import data
 
 
 def test_images_path():

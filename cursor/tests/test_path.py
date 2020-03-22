@@ -1,4 +1,5 @@
-from ..cursor import path
+from cursor import path
+
 import pytest
 
 

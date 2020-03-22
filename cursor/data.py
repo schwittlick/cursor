@@ -5,7 +5,7 @@ class DataHandler:
     def __init__(self):
         self.BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
         self.data_dir = self.BASE_DIR.joinpath("data")
-        self.test_data_dir = self.BASE_DIR.joinpath("tests").joinpath("data")
+        self.test_data_dir = self.BASE_DIR.joinpath("cursor").joinpath("tests").joinpath("data")
 
     def gcode(self, folder):
         return self.data_dir.joinpath("experiments").joinpath(folder).joinpath("gcode")

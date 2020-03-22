@@ -1,10 +1,4 @@
-try:
-    from ..cursor import path
-except:
-    try:
-        import path
-    except:
-        from cursor import path
+from cursor import path
 
 import os
 import json

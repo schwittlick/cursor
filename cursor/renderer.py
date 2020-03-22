@@ -1,14 +1,8 @@
+from cursor import path
+
 import svgwrite
 import pathlib
 from PIL import Image, ImageDraw
-
-try:
-    from ..cursor import path
-except:
-    try:
-        from . import path
-    except:
-        from cursor import path
 
 
 class PathIterator:
