@@ -22,16 +22,16 @@ class MyJsonEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, PathCollection):
             return {
-                'paths': o.get_all(),
-                'resolution':
-                    {'w': o.resolution.width, 'h': o.resolution.height},
-                'timestamp': o.timestamp()}
+                "paths": o.get_all(),
+                "resolution": {"w": o.resolution.width, "h": o.resolution.height},
+                "timestamp": o.timestamp(),
+            }
 
         if isinstance(o, Path):
             return o.vertices
 
         if isinstance(o, TimedPosition):
-            return {'x': round(o.x, 4), 'y': round(o.y, 4), 'ts': round(o.timestamp, 2)}
+            return {"x": round(o.x, 4), "y": round(o.y, 4), "ts": round(o.timestamp, 2)}
 
 
 class MyJsonDecoder(json.JSONDecoder):
@@ -39,44 +39,46 @@ class MyJsonDecoder(json.JSONDecoder):
         json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
 
     def object_hook(self, dct):
-        if 'x' in dct and 'y' in dct and 'ts' in dct:
-            p = TimedPosition(dct['x'], dct['y'], dct['ts'])
+        if "x" in dct and "y" in dct and "ts" in dct:
+            p = TimedPosition(dct["x"], dct["y"], dct["ts"])
             return p
-        if 'w' in dct and 'h' in dct:
-            s = pyautogui.Size(dct['w'], dct['h'])
+        if "w" in dct and "h" in dct:
+            s = pyautogui.Size(dct["w"], dct["h"])
             return s
-        if 'paths' in dct and 'resolution' in dct and 'timestamp' in dct:
-            res = dct['resolution']
-            ts = dct['timestamp']
+        if "paths" in dct and "resolution" in dct and "timestamp" in dct:
+            res = dct["resolution"]
+            ts = dct["timestamp"]
             pc = PathCollection(res, ts)
-            for p in dct['paths']:
+            for p in dct["paths"]:
                 pc.add(Path(p), res)
             return pc
         return dct
 
 
 class JsonCompressor:
-    ZIPJSON_KEY = 'base64(zip(o))'
+    ZIPJSON_KEY = "base64(zip(o))"
 
     def json_zip(self, j):
 
         j = {
             self.ZIPJSON_KEY: base64.b64encode(
-                zlib.compress(
-                    json.dumps(j, cls=MyJsonEncoder).encode('utf-8')
-                )
-            ).decode('ascii')
+                zlib.compress(json.dumps(j, cls=MyJsonEncoder).encode("utf-8"))
+            ).decode("ascii")
         }
 
         return j
 
     def json_unzip(self, j, insist=True):
         try:
-            assert (j[self.ZIPJSON_KEY])
-            assert (set(j.keys()) == {self.ZIPJSON_KEY})
+            assert j[self.ZIPJSON_KEY]
+            assert set(j.keys()) == {self.ZIPJSON_KEY}
         except:
             if insist:
-                raise RuntimeError("JSON not in the expected format {" + str(self.ZIPJSON_KEY) + ": zipstring}")
+                raise RuntimeError(
+                    "JSON not in the expected format {"
+                    + str(self.ZIPJSON_KEY)
+                    + ": zipstring}"
+                )
             else:
                 return j
 
@@ -175,7 +177,7 @@ class TimedPosition:
         return self.timestamp > o.timestamp
 
     def __repr__(self):
-        return F"({self.x:.3f}, {self.y:.3f}, {self.timestamp:.3f})"
+        return f"({self.x:.3f}, {self.y:.3f}, {self.timestamp:.3f})"
 
 
 class BoundingBox:
@@ -186,7 +188,7 @@ class BoundingBox:
         self.h = h
 
     def __repr__(self):
-        return F"BB(x={self.x}, y={self.y}, w={self.w}, h={self.h})"
+        return f"BB(x={self.x}, y={self.y}, w={self.w}, h={self.h})"
 
     def __inside(self, point):
         return self.x < point.x < self.x + self.w and self.y < point.y < self.y + self.h
@@ -216,7 +218,7 @@ class Path:
             self.vertices = []
 
     def hash(self):
-        return hashlib.md5(str(self.vertices).encode('utf-8')).hexdigest()
+        return hashlib.md5(str(self.vertices).encode("utf-8")).hexdigest()
 
     def add(self, x, y, timestamp):
         self.vertices.append(TimedPosition(x, y, timestamp))
@@ -269,7 +271,12 @@ class Path:
             current = self.__getitem__(i)
             next = self.__getitem__(i + 1)
 
-            d = calculateDistance(current.x * res.width, current.y * res.height, next.x * res.width, next.y * res.height)
+            d = calculateDistance(
+                current.x * res.width,
+                current.y * res.height,
+                next.x * res.width,
+                next.y * res.height,
+            )
             dist += d
 
         return dist
@@ -306,14 +313,21 @@ class Path:
 
         new_start_to_end = np.subtract(new_end_np, new_start_np)
 
-        current_start_to_end = current_start_to_end / np.linalg.norm(current_start_to_end)
+        current_start_to_end = current_start_to_end / np.linalg.norm(
+            current_start_to_end
+        )
         new_start_to_end = new_start_to_end / np.linalg.norm(new_start_to_end)
 
-        angle = np.arccos(np.clip(np.dot(current_start_to_end, new_start_to_end), -math.pi, math.pi))
+        angle = np.arccos(
+            np.clip(np.dot(current_start_to_end, new_start_to_end), -math.pi, math.pi)
+        )
 
         # acos can't properly calculate angle more than 180°.
         # solution taken from here: http://www.gamedev.net/topic/556500-angle-between-vectors/
-        if current_start_to_end[0] * new_start_to_end[1] < current_start_to_end[1] * new_start_to_end[0]:
+        if (
+            current_start_to_end[0] * new_start_to_end[1]
+            < current_start_to_end[1] * new_start_to_end[0]
+        ):
             angle = 2 * math.pi - angle
 
         for p in path.vertices:
@@ -351,6 +365,7 @@ class Path:
     @staticmethod
     def __entropy2(labels, base=None):
         from math import log, e
+
         """ Computes entropy of label distribution. """
 
         n_labels = len(labels)
@@ -365,7 +380,7 @@ class Path:
         if n_classes <= 1:
             return 0
 
-        ent = 0.
+        ent = 0.0
 
         # Compute entropy
         base = e if base is None else base
@@ -457,8 +472,13 @@ class PathCollection:
         self.resolution = resolution
 
     def add(self, path, resolution):
-        if resolution.width != self.resolution.width or resolution.height != self.resolution.height:
-            raise Exception('New resolution is different to current. This should be handled somehow ..')
+        if (
+            resolution.width != self.resolution.width
+            or resolution.height != self.resolution.height
+        ):
+            raise Exception(
+                "New resolution is different to current. This should be handled somehow .."
+            )
 
         if path.empty():
             return
@@ -474,7 +494,7 @@ class PathCollection:
             p.clean()
 
     def hash(self):
-        return hashlib.md5(str(self.__paths).encode('utf-8')).hexdigest()
+        return hashlib.md5(str(self.__paths).encode("utf-8")).hexdigest()
 
     def empty(self):
         if len(self.__paths) == 0:
@@ -491,15 +511,20 @@ class PathCollection:
         if isinstance(pathfilter, filter.Filter):
             pathfilter.filter(self.__paths)
         else:
-            raise Exception(F"Cant filter with a class of type {type(pathfilter)}")
+            raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
 
     def __len__(self):
         return len(self.__paths)
 
     def __add__(self, other):
         if isinstance(other, PathCollection):
-            if other.resolution.width != self.resolution.width or other.resolution.height != self.resolution.height:
-                raise Exception('New resolution is different to current. This should be handled somehow ..')
+            if (
+                other.resolution.width != self.resolution.width
+                or other.resolution.height != self.resolution.height
+            ):
+                raise Exception(
+                    "New resolution is different to current. This should be handled somehow .."
+                )
 
             new_paths = self.__paths + other.get_all()
             p = PathCollection(self.resolution)
@@ -511,7 +536,9 @@ class PathCollection:
             p.__paths.extend(new_paths)
             return p
         else:
-            raise Exception('You can only add another PathCollection or a list of paths')
+            raise Exception(
+                "You can only add another PathCollection or a list of paths"
+            )
 
     def __repr__(self):
         return f"PathCollection({self.resolution}, {self.__paths})"
@@ -526,7 +553,10 @@ class PathCollection:
         if self.timestamp() != other.timestamp():
             return False
 
-        if other.resolution.width != self.resolution.width or other.resolution.height != self.resolution.height:
+        if (
+            other.resolution.width != self.resolution.width
+            or other.resolution.height != self.resolution.height
+        ):
             return False
 
         # todo: do more in depth test
@@ -539,7 +569,7 @@ class PathCollection:
 
     def __getitem__(self, item):
         if len(self.__paths) < item + 1:
-            raise IndexError(F"Index too high. Maximum is {len(self.__paths)}")
+            raise IndexError(f"Index too high. Maximum is {len(self.__paths)}")
         return self.__paths[item]
 
     def timestamp(self):
@@ -553,8 +583,8 @@ class PathCollection:
 
     def min(self):
         all_chained = [point for path in self.__paths for point in path]
-        minx = min(all_chained, key = lambda pos: pos.x).x
-        miny = min(all_chained, key = lambda pos: pos.y).y
+        minx = min(all_chained, key=lambda pos: pos.x).x
+        miny = min(all_chained, key=lambda pos: pos.y).y
         return minx, miny
 
     def max(self):

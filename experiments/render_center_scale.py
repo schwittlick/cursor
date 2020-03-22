@@ -78,7 +78,7 @@ def test3():
     print(pcol.bb())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test3()
 
     # gcode_renderer = renderer.CursorGCodeRenderer("test_scale")

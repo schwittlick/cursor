@@ -18,7 +18,11 @@ class Loader:
         self._recordings = []
         self._keyboard_recordings = []
 
-        all_json_files = [f for f in os.listdir(directory) if self.is_file_and_json(os.path.join(directory, f))]
+        all_json_files = [
+            f
+            for f in os.listdir(directory)
+            if self.is_file_and_json(os.path.join(directory, f))
+        ]
 
         if limit_files:
             all_json_files = all_json_files[:limit_files]
@@ -33,8 +37,8 @@ class Loader:
                     data = path.JsonCompressor().json_unzip(jd)
                 except RuntimeError:
                     data = json.loads(json_string, cls=path.MyJsonDecoder)
-                self._recordings.append(data['mouse'])
-                for keys in data['keys']:
+                self._recordings.append(data["mouse"])
+                for keys in data["keys"]:
                     self._keyboard_recordings.append((keys[0], keys[1]))
 
         absolut_path_count = sum(len(pc) for pc in self._recordings)
@@ -43,13 +47,17 @@ class Loader:
             pc.clean()
 
         elapsed = time.time() - start_benchmark
-        print(F"Loaded {absolut_path_count} paths from {len(self._recordings)} recordings.")
-        print(F"Loaded {len(self._keyboard_recordings)} keys from {len(all_json_files)} recordings.")
-        print(F"This took {round(elapsed * 1000)}ms.")
+        print(
+            f"Loaded {absolut_path_count} paths from {len(self._recordings)} recordings."
+        )
+        print(
+            f"Loaded {len(self._keyboard_recordings)} keys from {len(all_json_files)} recordings."
+        )
+        print(f"This took {round(elapsed * 1000)}ms.")
 
     @staticmethod
     def is_file_and_json(path):
-        if os.path.isfile(path) and path.endswith('.json'):
+        if os.path.isfile(path) and path.endswith(".json"):
             return True
         return False
 
@@ -61,12 +69,13 @@ class Loader:
 
     def all_paths(self):
         from functools import reduce
+
         return reduce(lambda pcol1, pcol2: pcol1 + pcol2, self._recordings)
 
     def single(self, index):
         max_index = len(self._recordings) - 1
         if index > max_index:
-            raise IndexError('Specified index too high. (> '+str(max_index)+')')
+            raise IndexError("Specified index too high. (> " + str(max_index) + ")")
         single_recording = self._recordings[index]
         return single_recording
 

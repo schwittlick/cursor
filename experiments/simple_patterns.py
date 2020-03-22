@@ -9,8 +9,8 @@ def simple_pattern1():
     ll = loader.Loader(directory=p, limit_files=1)
     rec = ll.single(0)
 
-    r = renderer.GCodeRenderer('straight_lines', z_down=3.0)
-    jpeg_renderer = renderer.JpegRenderer('straight_lines')
+    r = renderer.GCodeRenderer("straight_lines", z_down=3.0)
+    jpeg_renderer = renderer.JpegRenderer("straight_lines")
 
     coll = path.PathCollection(rec.resolution)
 
@@ -32,16 +32,42 @@ def simple_pattern1():
 
     bb = coll.bb()
 
-    coll.add(path.Path([path.TimedPosition(bb.x, bb.y), path.TimedPosition(bb.x + bb.w, bb.y)]), rec.resolution)
-    coll.add(path.Path([path.TimedPosition(bb.x + bb.w, bb.y), path.TimedPosition(bb.x + bb.w, bb.y + bb.h)]), rec.resolution)
-    coll.add(path.Path([path.TimedPosition(bb.x + bb.w, bb.y + bb.h), path.TimedPosition(bb.x, bb.y + bb.h)]), rec.resolution)
-    coll.add(path.Path([path.TimedPosition(bb.x, bb.y + bb.h), path.TimedPosition(bb.x, bb.y)]), rec.resolution)
+    coll.add(
+        path.Path(
+            [path.TimedPosition(bb.x, bb.y), path.TimedPosition(bb.x + bb.w, bb.y)]
+        ),
+        rec.resolution,
+    )
+    coll.add(
+        path.Path(
+            [
+                path.TimedPosition(bb.x + bb.w, bb.y),
+                path.TimedPosition(bb.x + bb.w, bb.y + bb.h),
+            ]
+        ),
+        rec.resolution,
+    )
+    coll.add(
+        path.Path(
+            [
+                path.TimedPosition(bb.x + bb.w, bb.y + bb.h),
+                path.TimedPosition(bb.x, bb.y + bb.h),
+            ]
+        ),
+        rec.resolution,
+    )
+    coll.add(
+        path.Path(
+            [path.TimedPosition(bb.x, bb.y + bb.h), path.TimedPosition(bb.x, bb.y)]
+        ),
+        rec.resolution,
+    )
 
     coll.fit(path.Paper.a1_landscape(), 50)
 
-    r.render(coll, F'straight_lines_{coll.hash()}')
-    jpeg_renderer.render(coll, F'straight_lines_{coll.hash()}')
+    r.render(coll, f"straight_lines_{coll.hash()}")
+    jpeg_renderer.render(coll, f"straight_lines_{coll.hash()}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     simple_pattern1()

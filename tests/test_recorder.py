@@ -13,20 +13,18 @@ def test_pathcollection_serializable():
 
     coll.add(p, size)
 
-    fname = 'data/testing.json'
+    fname = "data/testing.json"
 
-    recs = {'mouse': [coll],
-            'keys': []
-            }
+    recs = {"mouse": [coll], "keys": []}
 
-    with open(fname, 'w') as fp:
+    with open(fname, "w") as fp:
         dump = json.dumps(recs, cls=path.MyJsonEncoder)
         fp.write(dump)
 
-    with open(fname, 'r') as json_file:
+    with open(fname, "r") as json_file:
         json_string = json_file.readline()
         data = json.loads(json_string, cls=path.MyJsonDecoder)
         ob = data
 
     # todo: test more thorougly
-    assert ob['mouse'] == recs['mouse']
+    assert ob["mouse"] == recs["mouse"]
