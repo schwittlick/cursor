@@ -1,6 +1,17 @@
 from cursor import data
 
 
+def test_experiments_path():
+    custom_dir_gcode = data.DataHandler().gcode("custom")
+    assert custom_dir_gcode.as_posix().endswith("cursor/data/experiments/custom/gcode")
+
+    custom_dir_jpg = data.DataHandler().jpg("custom")
+    assert custom_dir_jpg.as_posix().endswith("cursor/data/experiments/custom/jpg")
+
+    custom_dir_svg = data.DataHandler().svg("custom")
+    assert custom_dir_svg.as_posix().endswith("cursor/data/experiments/custom/svg")
+
+
 def test_images_path():
     test_recordings_dir = data.DataHandler().images()
     assert test_recordings_dir.as_posix().endswith("cursor/data/jpgs")
