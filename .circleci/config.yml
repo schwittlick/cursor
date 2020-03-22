@@ -33,7 +33,7 @@ jobs:
             cd cursor
             pwd
             ls
-            py.test --cov cursor --cov-report html
+            py.test --cov . --cov-report html
             mv htmlcov cursor/tests/artifacts/
       - store_artifacts:
           path: cursor/tests/artifacts
