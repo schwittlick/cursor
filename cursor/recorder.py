@@ -70,7 +70,7 @@ class Recorder:
 
     def on_release(self, btn):
         try:
-            key = btn.char;
+            key = btn.char
         except AttributeError as ae:
             log.fail(f"Couldn't save key because of {ae}")
             return
@@ -114,7 +114,9 @@ def main(args=None):
     # 2. starts the recorder
     # loops forever until quit forcefully or via gui
 
-    icon_path = pathlib.Path(__file__).resolve().parent.parent.joinpath("mouse-icon.gif")
+    icon_path = (
+        pathlib.Path(__file__).resolve().parent.parent.joinpath("mouse-icon.gif")
+    )
     image = Image.open(icon_path.as_posix())
     icon = pystray.Icon(
         "Cursor", image, menu=pystray.Menu(pystray.MenuItem("Save & Exit", save_exit))
