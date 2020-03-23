@@ -1,5 +1,7 @@
-#!/bin/bash
+#!/bin/zsh
 
-source ../venv/bin/activate
-pip install -e ..
+echo "setup requirements"
+pip install -r ../requirements.txt --quiet
+pip install -e .. --quiet
+
 cursor_recorder

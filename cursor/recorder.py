@@ -125,7 +125,8 @@ def main(args=None):
     # 2. starts the recorder
     # loops forever until quit forcefully or via gui
 
-    image = Image.open("mouse-icon.gif")
+    icon_path = pathlib.Path(__file__).resolve().parent.parent.joinpath("mouse-icon.gif")
+    image = Image.open(icon_path.as_posix())
     icon = pystray.Icon(
         "Cursor", image, menu=pystray.Menu(pystray.MenuItem("Save & Exit", save_exit))
     )
