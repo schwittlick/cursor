@@ -9,10 +9,8 @@ import pyautogui
 import wasabi
 import pathlib
 import pystray
-from PIL import Image
 import pynput
-from pynput.mouse import Listener as MouseListener
-from pynput.keyboard import Listener as KeyboardListener
+from PIL import Image
 
 log = wasabi.Printer()
 
@@ -31,27 +29,18 @@ class Recorder:
         self.mouse_recordings = path.PathCollection(pyautogui.size())
 
         log.good("Setting up mouse hook")
-        self.mouse_listener = MouseListener(
+        self.mouse_listener = pynput.mouse.Listener(
             on_move=self.on_move, on_click=self.on_click
         )
         self.mouse_listener.start()
 
         log.good("Setting up keyboard hook")
-        self.key_listener = KeyboardListener(
+        self.key_listener = pynput.keyboard.Listener(
             on_press=self.on_press, on_release=self.on_release
         )
         self.key_listener.start()
 
         log.good("Started cursor recorder")
-
-    def toggle(self):
-        if not self.running:
-            print("Started")
-            self.mouse_listener.start()
-        else:
-            print("Stopped")
-            self.mouse_listener.stop()
-        self.running = not self.running
 
     @staticmethod
     def _get_utc_timestamp():
