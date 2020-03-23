@@ -27,7 +27,7 @@ recorder
 
     # check scripts folder
     pip install -e .
-    cursor
+    cursor_recorder
 
 axidraw?
 
