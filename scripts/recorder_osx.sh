@@ -2,4 +2,4 @@
 
 source ../venv/bin/activate
 pip install -e ..
-cursor
+cursor_recorder

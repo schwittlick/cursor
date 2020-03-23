@@ -1,7 +1,6 @@
 from cursor import path
 from cursor import data
 
-import time
 import datetime
 import pytz
 import atexit
@@ -10,13 +9,15 @@ import pyautogui
 import wasabi
 import pathlib
 import pystray
+from PIL import Image
+import pynput
 from pynput.mouse import Listener as MouseListener
 from pynput.keyboard import Listener as KeyboardListener
 
 log = wasabi.Printer()
 
 
-class CursorRecorder:
+class Recorder:
     keyboard_recodings = []
     current_line = path.Path()
     started = False
@@ -42,9 +43,6 @@ class CursorRecorder:
         self.key_listener.start()
 
         log.good("Started cursor recorder")
-
-        #while True:
-        #    time.sleep(0.01)
 
     def toggle(self):
         if not self.running:
@@ -83,9 +81,12 @@ class CursorRecorder:
 
     def on_release(self, btn):
         try:
-            self.keyboard_recodings.append((btn.char, self._get_utc_timestamp()))
+            key = btn.char;
         except AttributeError as ae:
             log.fail(f"Couldn't save key because of {ae}")
+            return
+
+        self.keyboard_recodings.append((key, self._get_utc_timestamp()))
 
     def save(self):
         save_path = data.DataHandler().recordings()
@@ -104,37 +105,33 @@ class CursorRecorder:
             dump = path.JsonCompressor().json_zip(recs)
             fp.write(str(dump))
 
-        # fname_uncompressed = os.path.join(self.SAVE_PATH, str(self.start_time_stamp) + '_uncompressed.json')
-        # with open(fname_uncompressed, 'w') as fp:
-        #    dump = json.dumps(recs, cls=path.MyJsonEncoder)
-        #     fp.write(dump)
 
-
-from PIL import Image
 rr = None
 
-def load_image():
-    im = Image.open("mouse-icon.gif")
-    return im
 
-def clicked(icon, item):
-    global rr
+def save_exit(icon, item):
     icon.stop()
 
-def after(icon):
+
+def recorder_setup(icon):
     global rr
-    rr = CursorRecorder()
+    rr = Recorder()
     icon.visible = True
 
 
-def create_menu():
-    image = load_image()
-    icon = pystray.Icon(
-        "Cursor", image, menu=pystray.Menu(pystray.MenuItem("Stop", clicked))
-    )
-    log.info("created menu")
-    icon.run(after)
+def main(args=None):
+    # the main recorder entry point
+    # 1. creates a gui
+    # 2. starts the recorder
+    # loops forever until quit forcefully or via gui
 
-def runRecorder():
-    create_menu()
-    #
+    image = Image.open("mouse-icon.gif")
+    icon = pystray.Icon(
+        "Cursor", image, menu=pystray.Menu(pystray.MenuItem("Save & Exit", save_exit))
+    )
+    log.info("Created menu")
+    icon.run(recorder_setup)
+
+
+if __name__ == "__main__":
+    main()
