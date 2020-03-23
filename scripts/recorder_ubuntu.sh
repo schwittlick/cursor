@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 # make sure to run this only with an activated venv
 
