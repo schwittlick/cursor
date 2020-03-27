@@ -63,6 +63,9 @@ class Recorder:
             self.mouse_recordings.add(
                 self.current_line.copy(), self.mouse_recordings.resolution
             )
+            global counter, icon
+            counter = f"mouse: {len(self.mouse_recordings)} keys: {len(self.keyboard_recodings)}"
+            icon.update_menu()
             self.current_line.clear()
 
     def on_press(self, btn):
@@ -96,6 +99,8 @@ class Recorder:
 
 
 rr = None
+counter = ""
+icon = None
 
 
 def save_exit(icon, item):
@@ -108,6 +113,10 @@ def recorder_setup(icon):
     icon.visible = True
 
 
+def update(icon):
+    icon.update_menu()
+
+
 def main(args=None):
     # the main recorder entry point
     # 1. creates a gui
@@ -118,8 +127,14 @@ def main(args=None):
         pathlib.Path(__file__).resolve().parent.parent.joinpath("mouse-icon.gif")
     )
     image = Image.open(icon_path.as_posix())
+    global icon
     icon = pystray.Icon(
-        "Cursor", image, menu=pystray.Menu(pystray.MenuItem("Save & Exit", save_exit))
+        "Cursor",
+        image,
+        menu=pystray.Menu(
+            pystray.MenuItem(lambda text: counter, update),
+            pystray.MenuItem("Save & Exit", save_exit),
+        ),
     )
     log.info("Created menu")
     icon.run(recorder_setup)
