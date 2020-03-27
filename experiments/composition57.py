@@ -9,7 +9,7 @@ from cursor import data
 @st.cache
 def load_data():
     p = data.DataHandler().recordings()
-    ll = loader.Loader(directory=p, limit_files=None)
+    ll = loader.Loader(directory=p, limit_files=3)
     return ll
 
 def composition57(pathlist):
@@ -41,7 +41,7 @@ def composition57(pathlist):
     img = jpeg_renderer.render(coll, f"composition56_{hash}")
     st.image(img, caption=f'Composition #57 {hash}', use_column_width = True)
 
-if __name__ == "__main__":
+def main():
     st.title('Composition #57')
     ll = load_data()
     rec = ll.single(0)
@@ -54,8 +54,8 @@ if __name__ == "__main__":
 
     st.write(len(all_p))
 
-    #distance_filter = filter.DistanceFilter(100, rec.resolution)
-    #all_paths.filter(distance_filter)
+    # distance_filter = filter.DistanceFilter(100, rec.resolution)
+    # all_paths.filter(distance_filter)
 
     r1 = all_p[st.number_input('first', 0, len(all_p), 0)]
     r2 = all_p[st.number_input('first', 0, len(all_p), 1)]
@@ -66,3 +66,6 @@ if __name__ == "__main__":
     print(r1.hash())
 
     composition57([r1, r2, r3, r4, r5])
+
+if __name__ == "__main__":
+    main()
