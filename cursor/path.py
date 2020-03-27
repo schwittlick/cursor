@@ -507,6 +507,15 @@ class PathCollection:
         else:
             raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
 
+    def filtered(self, pathfilter):
+        if isinstance(pathfilter, filter.Filter):
+
+            pc = PathCollection(self.resolution)
+            pc.__paths = pathfilter.filtered(self.__paths)
+            return pc
+        else:
+            raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
+
     def __len__(self):
         return len(self.__paths)
 
