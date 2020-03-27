@@ -53,7 +53,7 @@ def composition55(p0, p1, offset):
         return
 
 
-if __name__ == "__main__":
+def main():
     p = data.DataHandler().recordings()
     ll = loader.Loader(directory=p, limit_files=5)
     rec = ll.single(0)
@@ -76,3 +76,6 @@ if __name__ == "__main__":
     #    p0 = all_paths[r1]
     #    p1 = all_paths[r1 +1]
     #    composition55(p0, p1, r1)
+
+if __name__ == "__main__":
+    main()
