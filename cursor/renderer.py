@@ -180,4 +180,5 @@ class JpegRenderer:
 
         fname = self.save_path.joinpath(filename + ".jpg")
         print(f"Saving to {fname}")
-        img.save(fname, "JPEG")
+        #img.save(fname, "JPEG")
+        return img
