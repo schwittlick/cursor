@@ -17,7 +17,6 @@ class MyJsonEncoder(json.JSONEncoder):
         if isinstance(o, PathCollection):
             return {
                 "paths": o.get_all(),
-                "resolution": {"w": o.resolution.width, "h": o.resolution.height},
                 "timestamp": o.timestamp(),
             }
 
@@ -39,12 +38,11 @@ class MyJsonDecoder(json.JSONDecoder):
         if "w" in dct and "h" in dct:
             s = pyautogui.Size(dct["w"], dct["h"])
             return s
-        if "paths" in dct and "resolution" in dct and "timestamp" in dct:
-            res = dct["resolution"]
+        if "paths" in dct and "timestamp" in dct:
             ts = dct["timestamp"]
-            pc = PathCollection(res, ts)
+            pc = PathCollection(ts)
             for p in dct["paths"]:
-                pc.add(Path(p), res)
+                pc.add(Path(p))
             return pc
         return dct
 
@@ -455,7 +453,7 @@ class Path:
 
 
 class PathCollection:
-    def __init__(self, resolution, timestamp=None):
+    def __init__(self, timestamp=None):
         self.__paths = []
         if timestamp:
             self._timestamp = timestamp
@@ -463,17 +461,8 @@ class PathCollection:
             now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
             utc_timestamp = datetime.datetime.timestamp(now)
             self._timestamp = utc_timestamp
-        self.resolution = resolution
 
-    def add(self, path, resolution):
-        if (
-            resolution.width != self.resolution.width
-            or resolution.height != self.resolution.height
-        ):
-            raise Exception(
-                "New resolution is different to current. This should be handled somehow .."
-            )
-
+    def add(self, path):
         if path.empty():
             return
 
@@ -521,21 +510,13 @@ class PathCollection:
 
     def __add__(self, other):
         if isinstance(other, PathCollection):
-            if (
-                other.resolution.width != self.resolution.width
-                or other.resolution.height != self.resolution.height
-            ):
-                raise Exception(
-                    "New resolution is different to current. This should be handled somehow .."
-                )
-
             new_paths = self.__paths + other.get_all()
-            p = PathCollection(self.resolution)
+            p = PathCollection()
             p.__paths.extend(new_paths)
             return p
         if isinstance(other, list):
             new_paths = self.__paths + other
-            p = PathCollection(self.resolution)
+            p = PathCollection()
             p.__paths.extend(new_paths)
             return p
         else:
@@ -544,7 +525,7 @@ class PathCollection:
             )
 
     def __repr__(self):
-        return f"PathCollection({self.resolution}, {self.__paths})"
+        return f"PathCollection({self.__paths})"
 
     def __eq__(self, other):
         if not isinstance(other, PathCollection):
@@ -554,12 +535,6 @@ class PathCollection:
             return False
 
         if self.timestamp() != other.timestamp():
-            return False
-
-        if (
-            other.resolution.width != self.resolution.width
-            or other.resolution.height != self.resolution.height
-        ):
             return False
 
         # todo: do more in depth test

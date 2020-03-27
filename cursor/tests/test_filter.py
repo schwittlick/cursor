@@ -6,8 +6,7 @@ import pytest
 
 
 def test_bb_filter():
-    size = pyautogui.Size(100, 100)
-    pcol = path.PathCollection(size)
+    pcol = path.PathCollection()
 
     p1 = path.Path()
 
@@ -27,8 +26,8 @@ def test_bb_filter():
     p2.add(30, 31, 10004)
     p2.add(940, 941, 10005)
 
-    pcol.add(p1, size)
-    pcol.add(p2, size)
+    pcol.add(p1)
+    pcol.add(p2)
 
     assert len(pcol) == 2
 
@@ -45,8 +44,7 @@ def test_bb_filter():
 
 
 def test_point_count_filter():
-    size = pyautogui.Size(100, 100)
-    pcol = path.PathCollection(size)
+    pcol = path.PathCollection()
 
     p1 = path.Path()
 
@@ -65,8 +63,8 @@ def test_point_count_filter():
     p2.add(20, 20, 10003)
     p2.add(30, 31, 10004)
 
-    pcol.add(p1, size)
-    pcol.add(p2, size)
+    pcol.add(p1)
+    pcol.add(p2)
 
     min_filter = filter.MinPointCountFilter(6)
     pcol.filter(min_filter)
