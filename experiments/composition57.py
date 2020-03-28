@@ -14,7 +14,7 @@ ll = loader.Loader(directory=p, limit_files=1)
 
 
 def composition57(pc):
-    folder = data.DataHandler().jpg("composition56")
+    folder = data.DataHandler().jpg("composition57")
     jpeg_renderer = renderer.JpegRenderer(folder)
     xoffset = 0
 
