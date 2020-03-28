@@ -499,7 +499,7 @@ class PathCollection:
     def filtered(self, pathfilter):
         if isinstance(pathfilter, filter.Filter):
 
-            pc = PathCollection(self.resolution)
+            pc = PathCollection()
             pc.__paths = pathfilter.filtered(self.__paths)
             return pc
         else:
