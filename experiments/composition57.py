@@ -1,4 +1,7 @@
 import streamlit as st
+from timeit import default_timer as timer
+import pandas as pd
+import time
 
 from cursor import loader
 from cursor import renderer
@@ -6,66 +9,59 @@ from cursor import path
 from cursor import filter
 from cursor import data
 
-@st.cache
-def load_data():
-    p = data.DataHandler().recordings()
-    ll = loader.Loader(directory=p, limit_files=3)
-    return ll
+p = data.DataHandler().recordings()
+ll = loader.Loader(directory=p, limit_files=1)
 
-def composition57(pathlist):
+
+def composition57(pc):
     folder = data.DataHandler().jpg("composition56")
-    #gcode_renderer = renderer.GCodeRenderer("composition56", z_down=3.0)
     jpeg_renderer = renderer.JpegRenderer(folder)
     xoffset = 0
 
     xspacing = 1
-    coll = path.PathCollection(rec.resolution)
+    coll = path.PathCollection()
 
-    for p in pathlist:
+    for p in pc:
         for i in range(50):
             xfrom = xspacing * i + xoffset
             yfrom = 0
             xto = xspacing * i + xoffset
-            yto = 1000
+            yto = 100
             morphed = p.morph((xfrom, yfrom), (xto, yto))
-            coll.add(morphed, rec.resolution)
+            coll.add(morphed)
 
         xoffset += 400
 
     coll.fit(path.Paper.custom_36_48_landscape(), 50)
 
-    hash = pathlist[0].hash()
-
     print(f"rendering {coll.bb()}")
-    #gcode_renderer.render(coll, f"composition56_{hash}")
-    img = jpeg_renderer.render(coll, f"composition56_{hash}")
-    st.image(img, caption=f'Composition #57 {hash}', use_column_width = True)
+    t0 = time.time()
+    img = jpeg_renderer.render(coll, f"composition56_{pc.hash()}")
+    t1 = time.time() - t0
+    st.write(f"rendering took: {t1}s")
+    st.image(img, caption=f"Composition #57 {pc.hash()}", use_column_width=True)
+
 
 def main():
-    st.title('Composition #57')
-    ll = load_data()
-    rec = ll.single(0)
+    # st.title('Composition #57')
     all_paths = ll.all_paths()
 
-    min_slider = st.slider('min entropy', 0, 10, 0)
-    max_slider = st.slider('max entropy', 0, 10, 10)
+    st.sidebar.markdown("EntropyFilter")
+    min_slider = st.sidebar.slider("min entropy", 0.0, 10.0, 3.5)
+    max_slider = st.sidebar.slider("max entropy", 0.0, 10.0, 5.0)
     entropy_filter = filter.EntropyFilter(min_slider, max_slider)
     all_p = all_paths.filtered(entropy_filter)
 
-    st.write(len(all_p))
+    pc = path.PathCollection()
+    for i in range(6):
+        pc.add(all_p.random())
 
-    # distance_filter = filter.DistanceFilter(100, rec.resolution)
-    # all_paths.filter(distance_filter)
+    if st.sidebar.button("random"):
+        for i in range(6):
+            pc.add(all_p.random())
 
-    r1 = all_p[st.number_input('first', 0, len(all_p), 0)]
-    r2 = all_p[st.number_input('first', 0, len(all_p), 1)]
-    r3 = all_p[st.number_input('first', 0, len(all_p), 2)]
-    r4 = all_p[st.number_input('first', 0, len(all_p), 3)]
-    r5 = all_p[st.number_input('first', 0, len(all_p), 4)]
+    composition57(pc)
 
-    print(r1.hash())
-
-    composition57([r1, r2, r3, r4, r5])
 
 if __name__ == "__main__":
     main()
