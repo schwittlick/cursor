@@ -26,10 +26,12 @@ setup(
     include_package_data=True,
     install_requires=requires,
     extras_require=extras_require,
-    entry_points={"console_scripts": [
-        "cursor_recorder = cursor.recorder:main",
-        "composition57 = experiments.composition57:main"
-    ]},
+    entry_points={
+        "console_scripts": [
+            "cursor_recorder = cursor.recorder:main",
+            "composition57 = experiments.composition57:main",
+        ]
+    },
     license="MIT",
     url="https://github.com/schwittlick/cursor",
     zip_safe=False,
