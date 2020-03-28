@@ -5,6 +5,7 @@ class Filter:
     def filtered(self, paths):
         raise NotImplementedError("Not implemented in base class")
 
+
 class EntropyFilter(Filter):
     def __init__(self, max_x_entropy, max_y_entropy):
         self.max_x = max_x_entropy
