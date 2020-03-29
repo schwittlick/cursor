@@ -20,6 +20,7 @@ def composition57(pc):
 
     xspacing = 1
     coll = path.PathCollection()
+    scale = 1.0
 
     for p in pc:
         for i in range(50):
@@ -32,17 +33,15 @@ def composition57(pc):
 
         xoffset += 400
 
-    coll.fit(path.Paper.custom_36_48_landscape(), 50)
+    coll.fit(path.Paper.custom_36_48_landscape(), 10)
 
-    t0 = time.time()
-    img = jpeg_renderer.render(coll, f"composition56_{pc.hash()}")
-    #st.write(coll[0])
-    st.write(coll[0].bb())
-    img = jpeg_renderer.render_bb(coll[0].bb())
-    img = jpeg_renderer.render_bb(coll.bb())
-    t1 = time.time() - t0
-    st.write(f"rendering took: {t1}s")
-    st.image(img, caption=f"Composition #57 {pc.hash()}", use_column_width=True)
+    jpeg_renderer.render(coll, scale=scale, frame=True)
+    st.write(f"Image size: {jpeg_renderer.img.size}")
+    jpeg_renderer.render_bb(coll[0].bb())
+    jpeg_renderer.render_bb(coll.bb())
+    #jpeg_renderer.save(f"composition56_{pc.hash()}")
+
+    st.image(jpeg_renderer.img, caption=f"Composition #57 {pc.hash()}", use_column_width=True)
 
 
 def main():
@@ -58,10 +57,6 @@ def main():
     pc = path.PathCollection()
     for i in range(1):
         pc.add(all_p.random())
-
-    if st.sidebar.button("random"):
-        for i in range(1):
-            pc.add(all_p.random())
 
     composition57(pc)
 
