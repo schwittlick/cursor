@@ -193,5 +193,5 @@ class JpegRenderer:
         h = self.img.size[1]
         self.img_draw.line(xy=(0, 0, w, 0), fill="black", width=2)
         self.img_draw.line(xy=(0, 0, 0, h), fill="black", width=2)
-        self.img_draw.line(xy=(w-2, 0, w-2, h), fill="black", width=2)
-        self.img_draw.line(xy=(0, h-2, w, h-2), fill="black", width=2)
+        self.img_draw.line(xy=(w - 2, 0, w - 2, h), fill="black", width=2)
+        self.img_draw.line(xy=(0, h - 2, w, h - 2), fill="black", width=2)

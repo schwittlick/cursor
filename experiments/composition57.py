@@ -39,9 +39,11 @@ def composition57(pc):
     st.write(f"Image size: {jpeg_renderer.img.size}")
     jpeg_renderer.render_bb(coll[0].bb())
     jpeg_renderer.render_bb(coll.bb())
-    #jpeg_renderer.save(f"composition56_{pc.hash()}")
+    # jpeg_renderer.save(f"composition56_{pc.hash()}")
 
-    st.image(jpeg_renderer.img, caption=f"Composition #57 {pc.hash()}", use_column_width=True)
+    st.image(
+        jpeg_renderer.img, caption=f"Composition #57 {pc.hash()}", use_column_width=True
+    )
 
 
 def main():

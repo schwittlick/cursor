@@ -93,6 +93,7 @@ def test_path_bb():
     assert bb.w == 200
     assert bb.h == 200
 
+
 def test_path_morph():
     p = path.Path()
 
