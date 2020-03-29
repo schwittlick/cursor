@@ -589,8 +589,8 @@ class PathCollection:
         abs_scaled_bb = (
             abs(bb.x * scale),
             abs(bb.y * scale),
-            abs((bb.x + bb.w) * scale),
-            abs((bb.y + bb.h) * scale),
+            abs(bb.w * scale),
+            abs(bb.h * scale),
         )
         for p in self.__paths:
             if bb.x * scale < 0:
@@ -608,10 +608,7 @@ class PathCollection:
 
         # centering
         center = self.bb().center()
-        print(self.bb())
-        print(center)
         center_dims = width / 2, height / 2
         diff = center_dims[0] - center[0], center_dims[1] - center[1]
-        print(f"diff {diff}")
 
         self.translate(diff[0], diff[1])
