@@ -34,7 +34,8 @@ def test_jpegrenderer():
     rec = loader.all_paths()
 
     vis = JpegRenderer(DataHandler().test_images())
-    vis.render(rec, "test1")
+    vis.render(rec)
+    vis.save("test1")
 
 
 def test_jpegrenderer_fail():
