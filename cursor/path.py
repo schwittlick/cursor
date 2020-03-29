@@ -199,7 +199,9 @@ class BoundingBox:
             return True
 
     def center(self):
-        return self.x + self.w / 2, self.y + self.h / 2
+        center_x = ((self.w - self.x) / 2) + self.x
+        center_y = ((self.h - self.y) / 2) + self.y
+        return center_x, center_y
 
 
 class Path:
@@ -580,6 +582,20 @@ class PathCollection:
             p.scale(x, y)
 
     def fit(self, size, padding_mm):
+
+        # move into positive area
+        bb = self.bb()
+        scale = 1.0
+        abs_scaled_bb = (
+            abs(bb.x * scale),
+            abs(bb.y * scale),
+            abs((bb.x + bb.w) * scale),
+            abs((bb.y + bb.h) * scale),
+        )
+        for p in self.__paths:
+            if bb.x * scale < 0:
+                p.translate(abs_scaled_bb[0], abs_scaled_bb[1])
+
         width = size[0]
         height = size[1]
         padding_x = padding_mm * Paper.X_FACTOR
@@ -592,7 +608,10 @@ class PathCollection:
 
         # centering
         center = self.bb().center()
+        print(self.bb())
+        print(center)
         center_dims = width / 2, height / 2
         diff = center_dims[0] - center[0], center_dims[1] - center[1]
+        print(f"diff {diff}")
 
         self.translate(diff[0], diff[1])
