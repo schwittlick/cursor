@@ -245,8 +245,8 @@ class Path:
         miny = min(self.vertices, key=lambda pos: pos.y).y
         maxx = max(self.vertices, key=lambda pos: pos.x).x
         maxy = max(self.vertices, key=lambda pos: pos.y).y
-
-        return minx, miny, maxx, maxy
+        b = BoundingBox(minx, miny, maxx, maxy)
+        return b
 
     def distance(self, res):
         """
@@ -556,7 +556,7 @@ class PathCollection:
     def bb(self):
         mi = self.min()
         ma = self.max()
-        bb = BoundingBox(mi[0], mi[1], ma[0] - mi[0], ma[1] - mi[1])
+        bb = BoundingBox(mi[0], mi[1], ma[0], ma[1])
         return bb
 
     def min(self):
