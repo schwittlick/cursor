@@ -129,6 +129,8 @@ class JpegRenderer:
     def __init__(self, folder):
         assert isinstance(folder, pathlib.Path), "Only path objects allowed"
         self.save_path = folder
+        self.img = None
+        self.img_draw = None
 
     def render(self, paths, filename, scale=1.0):
         if not isinstance(paths, path.PathCollection):
@@ -154,8 +156,8 @@ class JpegRenderer:
         print(f"Creating image with size=({image_width}, {image_height})")
         assert image_width < 20000 and image_height < 20000, "keep resolution lower"
 
-        img = Image.new("RGB", (image_width, image_height,), "white",)
-        img_draw = ImageDraw.ImageDraw(img)
+        self.img = Image.new("RGB", (image_width, image_height,), "white",)
+        self.img_draw = ImageDraw.ImageDraw(self.img)
 
         it = PathIterator([paths])
 
@@ -168,11 +170,11 @@ class JpegRenderer:
                 start.x += abs_scaled_bb[0]
                 end.x += abs_scaled_bb[0]
 
-            if bb.y < 0:
+            if bb.y * scale < 0:
                 start.y += abs_scaled_bb[1]
                 end.y += abs_scaled_bb[1]
 
-            img_draw.line(
+            self.img_draw.line(
                 xy=(start.x * scale, start.y * scale, end.x * scale, end.y * scale),
                 fill="black",
                 width=1,
@@ -181,4 +183,21 @@ class JpegRenderer:
         fname = self.save_path.joinpath(filename + ".jpg")
         print(f"Saving to {fname}")
         # img.save(fname, "JPEG")
-        return img
+        return self.img
+
+    def render_bb(self, bb):
+        assert isinstance(bb, path.BoundingBox), "Only BoundingBox objects allowed"
+
+        self.img_draw.line(
+            xy=(bb.x, bb.y, bb.w, bb.y), fill="black", width=2,
+        )
+        self.img_draw.line(
+            xy=(bb.x, bb.y, bb.x, bb.h), fill="black", width=2,
+        )
+        self.img_draw.line(
+            xy=(bb.w, bb.y, bb.w, bb.h), fill="black", width=2,
+        )
+        self.img_draw.line(
+            xy=(bb.x, bb.h, bb.w, bb.h), fill="black", width=2,
+        )
+        return self.img

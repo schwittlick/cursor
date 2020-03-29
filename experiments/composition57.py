@@ -34,9 +34,12 @@ def composition57(pc):
 
     coll.fit(path.Paper.custom_36_48_landscape(), 50)
 
-    print(f"rendering {coll.bb()}")
     t0 = time.time()
     img = jpeg_renderer.render(coll, f"composition56_{pc.hash()}")
+    #st.write(coll[0])
+    st.write(coll[0].bb())
+    img = jpeg_renderer.render_bb(coll[0].bb())
+    img = jpeg_renderer.render_bb(coll.bb())
     t1 = time.time() - t0
     st.write(f"rendering took: {t1}s")
     st.image(img, caption=f"Composition #57 {pc.hash()}", use_column_width=True)
@@ -53,11 +56,11 @@ def main():
     all_p = all_paths.filtered(entropy_filter)
 
     pc = path.PathCollection()
-    for i in range(6):
+    for i in range(1):
         pc.add(all_p.random())
 
     if st.sidebar.button("random"):
-        for i in range(6):
+        for i in range(1):
             pc.add(all_p.random())
 
     composition57(pc)
