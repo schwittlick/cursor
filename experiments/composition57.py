@@ -26,10 +26,11 @@ def composition57(pc):
 
     line_count = st.sidebar.number_input("Line count", 1, 200, 100)
 
-
     counter = 0
     for p in pc:
-        offsets[counter] = st.sidebar.number_input(f"offset {p.hash()}", 0, 3000, offsets[counter])
+        offsets[counter] = st.sidebar.number_input(
+            f"offset {p.hash()}", 0, 3000, offsets[counter]
+        )
         for i in range(line_count):
             xfrom = xspacing * i + offsets[counter]
             yfrom = 0
@@ -39,7 +40,7 @@ def composition57(pc):
             coll.add(morphed)
 
         if counter < 4:
-            offsets[counter+1] = offsets[counter] + line_count
+            offsets[counter + 1] = offsets[counter] + line_count
 
         counter += 1
 
@@ -48,7 +49,7 @@ def composition57(pc):
     jpeg_renderer.render(coll, scale=scale, frame=True)
     st.write(f"Image size: {jpeg_renderer.img.size}")
 
-    #for p in coll:
+    # for p in coll:
     #    jpeg_renderer.render_bb(p.bb())
 
     if st.sidebar.checkbox("render bb"):
@@ -74,7 +75,7 @@ def offsets1():
 
 
 def main():
-    st.title('Composition #57')
+    st.title("Composition #57")
     all_paths = ll.all_paths()
 
     st.sidebar.markdown("EntropyFilter")
