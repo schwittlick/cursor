@@ -22,11 +22,12 @@ class Recorder:
     start_time_stamp = None
     recorder = None
     running = True
+    size = pyautogui.size()
 
     def __init__(self):
         self.start_time_stamp = self._get_utc_timestamp()
         atexit.register(self.save)
-        self.mouse_recordings = path.PathCollection(pyautogui.size())
+        self.mouse_recordings = path.PathCollection()
 
         log.good("Setting up mouse hook")
         self.mouse_listener = pynput.mouse.Listener(
@@ -49,20 +50,18 @@ class Recorder:
         return utc_timestamp
 
     def on_move(self, x, y):
-        _x = x / self.mouse_recordings.resolution.width
-        _y = y / self.mouse_recordings.resolution.height
+        _x = x / self.size[0]
+        _y = y / self.size[1]
         self.current_line.add(_x, _y, self._get_utc_timestamp())
 
     def on_click(self, x, y, button, pressed):
         if not self.started and pressed:
-            _x = x / self.mouse_recordings.resolution.width
-            _y = y / self.mouse_recordings.resolution.height
+            _x = x / self.size[0]
+            _y = y / self.size[1]
             self.current_line.add(_x, _y, self._get_utc_timestamp())
             self.started = True
         elif self.started and pressed:
-            self.mouse_recordings.add(
-                self.current_line.copy(), self.mouse_recordings.resolution
-            )
+            self.mouse_recordings.add(self.current_line.copy())
             global counter, icon
             counter = f"mouse: {len(self.mouse_recordings)} keys: {len(self.keyboard_recodings)}"
             icon.update_menu()
