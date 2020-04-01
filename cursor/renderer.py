@@ -36,26 +36,28 @@ class PathIterator:
 
 
 class CursorSVGRenderer:
-    def __init__(self, folder):
+    def __init__(self, folder, filename):
         assert isinstance(folder, pathlib.Path), "Only path objects allowed"
         self.save_path = folder
+        self.filename = filename
+        self.dwg = None
 
-    def render(self, paths, filename):
+    def render(self, paths):
         if not isinstance(paths, path.PathCollection):
             raise Exception("Only PathCollection and list of PathCollections allowed")
 
         bb = paths.bb()
 
-        fname = self.save_path.joinpath(filename + ".svg")
-        dwg = svgwrite.Drawing(fname, profile="tiny", size=(bb.w + bb.x, bb.h + bb.y))
+        fname = self.save_path.joinpath(self.filename + ".svg")
+        self.dwg = svgwrite.Drawing(fname, profile="tiny", size=(bb.w + bb.x, bb.h + bb.y))
 
         it = PathIterator([paths])
         for conn in it.connections():
             start = conn[0]
             end = conn[1]
 
-            dwg.add(
-                dwg.line(
+            self.dwg.add(
+                self.dwg.line(
                     start.pos(),
                     end.pos(),
                     stroke_width=0.5,
@@ -65,8 +67,8 @@ class CursorSVGRenderer:
 
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
-        print(f"Saving to {fname}")
-        dwg.save()
+    def save(self):
+        self.dwg.save()
 
 
 class GCodeRenderer:
@@ -95,7 +97,6 @@ class GCodeRenderer:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
         fname = self.save_path.joinpath(filename + ".nc")
-        print(f"Saving to {fname}")
         with open(fname, "w") as file:
             file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
             file.write(f"G01 X0.0 Y0.0 F{self.feedrate_xy}\n")
@@ -177,7 +178,6 @@ class JpegRenderer:
 
     def save(self, filename):
         fname = self.save_path.joinpath(filename + ".jpg")
-        print(f"Saving to {fname}")
         self.img.save(fname, "JPEG")
 
     def render_bb(self, bb):
