@@ -1,7 +1,4 @@
 import streamlit as st
-from timeit import default_timer as timer
-import pandas as pd
-import time
 import random
 
 from cursor import loader
@@ -16,12 +13,12 @@ ll = loader.Loader(directory=p, limit_files=1)
 
 def composition57(pc):
     folder = data.DataHandler().jpg("composition57")
+    gcode_folder = data.DataHandler().gcode("composition57")
     jpeg_renderer = renderer.JpegRenderer(folder)
+    gcode_renderer = renderer.GCodeRenderer(gcode_folder)
 
     xspacing = 1
     coll = path.PathCollection()
-    scale = 1.0
-
     offsets = offsets1()
 
     line_count = st.sidebar.number_input("Line count", 1, 200, 100)
@@ -46,11 +43,11 @@ def composition57(pc):
 
     coll.fit(path.Paper.a1_landscape(), 40)
 
-    jpeg_renderer.render(coll, scale=scale, frame=True)
-    st.write(f"Image size: {jpeg_renderer.img.size}")
+    filename = f"composition57_{pc.hash()}"
 
-    # for p in coll:
-    #    jpeg_renderer.render_bb(p.bb())
+    jpeg_renderer.render(coll, scale=3.0, frame=True)
+
+    st.write(f"Image size: {jpeg_renderer.img.size}")
 
     if st.sidebar.checkbox("render bb"):
         jpeg_renderer.render_bb(coll.bb())
@@ -60,8 +57,9 @@ def composition57(pc):
     )
 
     if st.sidebar.button("save"):
-        st.write(f"Saved {pc.hash()}")
-        jpeg_renderer.save(f"composition57_{pc.hash()}")
+        st.write(f"Saving {filename}")
+        gcode_renderer.render(coll, filename)
+        jpeg_renderer.save(filename)
 
 
 @st.cache(allow_output_mutation=True)
