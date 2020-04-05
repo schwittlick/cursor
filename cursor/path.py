@@ -8,8 +8,6 @@ import random
 import hashlib
 
 
-
-
 class TimedPosition:
     def __init__(self, x=0.0, y=0.0, timestamp=0):
         self.x = x
