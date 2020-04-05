@@ -70,10 +70,16 @@ def offsets1():
     return [0, 100, 200, 300, 400]
 
 
-@st.cache
+@st.cache(
+    hash_funcs={
+        loader.Loader: lambda _: None,
+        path.PathCollection: lambda _: None,
+        path.Path: lambda _: None,
+    }
+)
 def load_data():
     p = data.DataDirHandler().recordings()
-    ll = loader.Loader(directory=p, limit_files=1)
+    ll = loader.Loader(directory=p, limit_files=None)
     return ll.all_paths()
 
 
