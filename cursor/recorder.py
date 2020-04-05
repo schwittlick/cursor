@@ -93,7 +93,7 @@ class Recorder:
         log.good(f"Saving compressed to {fname_compressed}")
 
         with open(fname_compressed, "w") as fp:
-            dump = path.JsonCompressor().json_zip(recs)
+            dump = data.JsonCompressor().json_zip(recs)
             fp.write(str(dump))
 
 

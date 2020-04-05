@@ -2,7 +2,10 @@ from cursor import path
 
 import svgwrite
 import pathlib
+import wasabi
 from PIL import Image, ImageDraw
+
+log = wasabi.Printer()
 
 
 class PathIterator:
@@ -148,7 +151,7 @@ class JpegRenderer:
         image_width = int(abs_scaled_bb[0] + abs_scaled_bb[2])
         image_height = int(abs_scaled_bb[1] + abs_scaled_bb[3])
 
-        print(f"Creating image with size=({image_width}, {image_height})")
+        log.good(f"Creating image with size=({image_width}, {image_height})")
         assert image_width < 20000 and image_height < 20000, "keep resolution lower"
 
         self.img = Image.new("RGB", (image_width, image_height,), "white",)

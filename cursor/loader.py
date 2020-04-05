@@ -1,12 +1,17 @@
 from cursor import data
 
-import os
 import json
 import time
+import wasabi
+import pathlib
+from functools import reduce
+
+log = wasabi.Printer()
 
 
 class Loader:
     def __init__(self, directory, limit_files=None):
+        assert isinstance(directory, pathlib.Path), "Only path objects allowed"
         start_benchmark = time.time()
 
         self._recordings = []
@@ -14,17 +19,17 @@ class Loader:
 
         all_json_files = [
             f
-            for f in os.listdir(directory)
-            if self.is_file_and_json(os.path.join(directory, f))
+            for f in directory.iterdir()
+            if self.is_file_and_json(directory.joinpath(f))
         ]
 
         if limit_files:
             all_json_files = all_json_files[:limit_files]
 
         for file in all_json_files:
-            full_path = os.path.join(directory, file)
-            print(full_path)
-            with open(full_path) as json_file:
+            full_path = directory.joinpath(file)
+            log.good(f"Loading {full_path}")
+            with open(full_path.as_posix()) as json_file:
                 json_string = json_file.readline()
                 try:
                     jd = eval(json_string)
@@ -41,17 +46,18 @@ class Loader:
             pc.clean()
 
         elapsed = time.time() - start_benchmark
-        print(
+        log.good(
             f"Loaded {absolut_path_count} paths from {len(self._recordings)} recordings."
         )
-        print(
+        log.good(
             f"Loaded {len(self._keyboard_recordings)} keys from {len(all_json_files)} recordings."
         )
-        print(f"This took {round(elapsed * 1000)}ms.")
+        log.good(f"This took {round(elapsed * 1000)}ms.")
 
     @staticmethod
     def is_file_and_json(path):
-        if os.path.isfile(path) and path.endswith(".json"):
+        assert isinstance(path, pathlib.Path), "Only path objects allowed"
+        if path.is_file() and path.as_posix().endswith(".json"):
             return True
         return False
 
@@ -62,8 +68,6 @@ class Loader:
         return list(self._recordings)
 
     def all_paths(self):
-        from functools import reduce
-
         return reduce(lambda pcol1, pcol2: pcol1 + pcol2, self._recordings)
 
     def single(self, index):
