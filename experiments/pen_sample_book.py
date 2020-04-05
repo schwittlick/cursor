@@ -44,7 +44,7 @@ def pen_sample(pa, id):
     padding = 0.25
 
     jpeg_renderer = renderer.JpegRenderer("pen_sample_book")
-    svg_renderer = renderer.CursorSVGRenderer("pen_sample_book")
+    svg_renderer = renderer.SvgRenderer("pen_sample_book")
     res = pyautogui.Size(140, 340)
     coll = path.PathCollection(res)
 

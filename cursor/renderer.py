@@ -1,4 +1,5 @@
-from cursor import path
+from cursor.path import PathCollection
+from cursor.path import BoundingBox
 
 import svgwrite
 import pathlib
@@ -10,35 +11,34 @@ log = wasabi.Printer()
 
 class PathIterator:
     def __init__(self, paths):
+        assert isinstance(paths, PathCollection), "Only PathCollection objects allowed"
         self.paths = paths
 
     def points(self):
-        for collection in self.paths:
-            for p in collection:
-                for point in p.vertices:
-                    yield point, collection.resolution
+        for p in self.paths:
+            for point in p.vertices:
+                yield point
 
     def connections(self):
         prev = None
 
-        for collection in self.paths:
-            for p in collection:
-                is_first_vertex = True
-                for point in p:
-                    if is_first_vertex:
-                        prev = point.copy()
-                        is_first_vertex = False
-
-                        continue
-
-                    start = prev
-                    end = point.copy()
+        for p in self.paths:
+            is_first_vertex = True
+            for point in p:
+                if is_first_vertex:
                     prev = point.copy()
+                    is_first_vertex = False
 
-                    yield start, end
+                    continue
+
+                start = prev
+                end = point.copy()
+                prev = point.copy()
+
+                yield start, end
 
 
-class CursorSVGRenderer:
+class SvgRenderer:
     def __init__(self, folder, filename):
         assert isinstance(folder, pathlib.Path), "Only path objects allowed"
         self.save_path = folder
@@ -46,7 +46,7 @@ class CursorSVGRenderer:
         self.dwg = None
 
     def render(self, paths):
-        if not isinstance(paths, path.PathCollection):
+        if not isinstance(paths, PathCollection):
             raise Exception("Only PathCollection and list of PathCollections allowed")
 
         bb = paths.bb()
@@ -56,7 +56,7 @@ class CursorSVGRenderer:
             fname, profile="tiny", size=(bb.w + bb.x, bb.h + bb.y)
         )
 
-        it = PathIterator([paths])
+        it = PathIterator(paths)
         for conn in it.connections():
             start = conn[0]
             end = conn[1]
@@ -96,13 +96,13 @@ class GCodeRenderer:
         self.invert_y = invert_y
 
     def render(self, paths, filename):
-        if not isinstance(paths, path.PathCollection):
+        if not isinstance(paths, PathCollection):
             raise Exception("Only PathCollection and list of PathCollections allowed")
 
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
         fname = self.save_path.joinpath(filename + ".nc")
-        with open(fname, "w") as file:
+        with open(fname.as_posix(), "w") as file:
             file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
             file.write(f"G01 X0.0 Y0.0 F{self.feedrate_xy}\n")
             for p in paths:
@@ -131,7 +131,7 @@ class JpegRenderer:
         self.img_draw = None
 
     def render(self, paths, scale=1.0, frame=False):
-        if not isinstance(paths, path.PathCollection):
+        if not isinstance(paths, PathCollection):
             raise Exception("Only PathCollection allowed")
 
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
@@ -157,7 +157,7 @@ class JpegRenderer:
         self.img = Image.new("RGB", (image_width, image_height,), "white",)
         self.img_draw = ImageDraw.ImageDraw(self.img)
 
-        it = PathIterator([paths])
+        it = PathIterator(paths)
 
         for conn in it.connections():
             start = conn[0]
@@ -186,7 +186,7 @@ class JpegRenderer:
         self.img.save(fname, "JPEG")
 
     def render_bb(self, bb):
-        assert isinstance(bb, path.BoundingBox), "Only BoundingBox objects allowed"
+        assert isinstance(bb, BoundingBox), "Only BoundingBox objects allowed"
 
         self.img_draw.line(xy=(bb.x, bb.y, bb.w, bb.y), fill="black", width=2)
         self.img_draw.line(xy=(bb.x, bb.y, bb.x, bb.h), fill="black", width=2)
