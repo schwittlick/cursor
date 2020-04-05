@@ -4,6 +4,7 @@ import json
 import time
 import wasabi
 import pathlib
+from functools import reduce
 
 log = wasabi.Printer()
 
@@ -67,8 +68,6 @@ class Loader:
         return list(self._recordings)
 
     def all_paths(self):
-        from functools import reduce
-
         return reduce(lambda pcol1, pcol2: pcol1 + pcol2, self._recordings)
 
     def single(self, index):
