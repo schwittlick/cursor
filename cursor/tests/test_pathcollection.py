@@ -1,13 +1,14 @@
-from cursor import path
+from cursor.path import Path
+from cursor.path import PathCollection
+from cursor.path import BoundingBox
 
-import pyautogui
 import pytest
 
 
 def test_pathcollection_minmax():
-    pcol = path.PathCollection()
+    pcol = PathCollection()
 
-    p1 = path.Path()
+    p1 = Path()
 
     p1.add(5, 5111, 10000)
     p1.add(10, 11, 10001)
@@ -16,7 +17,7 @@ def test_pathcollection_minmax():
     p1.add(30, 31, 10004)
     p1.add(40, 41, 10005)
 
-    p2 = path.Path()
+    p2 = Path()
 
     p2.add(545, 54, 10000)
     p2.add(160, 11, 10001)
@@ -45,12 +46,31 @@ def test_pathcollection_minmax():
     assert max[1] == 5111
 
 
+def test_bb():
+    p1 = Path()
+    p1.add(100, 34, 10040)
+    p1.add(200, 10, 10000)
+
+    pc = PathCollection()
+    pc.add(p1)
+
+    bb = BoundingBox(0, 0, 300, 300)
+
+    assert bb.inside(p1) is True
+    assert bb.inside(pc) is True
+
+    p1.add(500, 500, 10023)
+
+    assert bb.inside(p1) is False
+    assert bb.inside(pc) is False
+
+
 def test_pathcollection_add():
-    pcol = path.PathCollection()
+    pcol = PathCollection()
 
     assert pcol.empty() is True
 
-    p1 = path.Path()
+    p1 = Path()
 
     pcol.add(p1)
 
@@ -58,14 +78,14 @@ def test_pathcollection_add():
 
 
 def test_pathcollection_add2():
-    pcol1 = path.PathCollection()
-    p1 = path.Path()
+    pcol1 = PathCollection()
+    p1 = Path()
     p1.add(5, 5111, 10000)
     p1.add(10, 11, 10001)
     pcol1.add(p1)
 
-    pcol2 = path.PathCollection()
-    p2 = path.Path()
+    pcol2 = PathCollection()
+    p2 = Path()
     p2.add(545, 54, 10000)
     p2.add(160, 11, 10001)
     pcol2.add(p2)
@@ -83,9 +103,9 @@ def test_pathcollection_add2():
 
 
 def test_pathcollection_get():
-    pcol = path.PathCollection()
+    pcol = PathCollection()
 
-    p1 = path.Path()
+    p1 = Path()
 
     p1.add(5, 5111, 10000)
     p1.add(40, 41, 10005)
@@ -101,27 +121,27 @@ def test_pathcollection_get():
 
 
 def test_pathcollection_compare():
-    pcol = path.PathCollection()
-    p1 = path.Path()
+    pcol = PathCollection()
+    p1 = Path()
 
     p1.add(5, 5111, 10000)
     p1.add(40, 41, 10005)
 
     pcol.add(p1)
 
-    pcol2 = path.PathCollection()
+    pcol2 = PathCollection()
     r = pcol == pcol2
 
     assert not r
 
 
 def test_pathcollection_clean():
-    pcol = path.PathCollection()
-    p0 = path.Path()
+    pcol = PathCollection()
+    p0 = Path()
 
     p0.add(5, 5111, 10000)
 
-    p1 = path.Path()
+    p1 = Path()
 
     p1.add(5, 5111, 10000)
     p1.add(40, 41, 10005)
