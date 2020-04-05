@@ -84,7 +84,7 @@ class JsonCompressor:
         return j
 
 
-class DataPathHandler:
+class DataDirHandler:
     def __init__(self):
         self.BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
         self.data_dir = self.BASE_DIR.joinpath("data")

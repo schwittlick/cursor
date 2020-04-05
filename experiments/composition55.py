@@ -6,10 +6,10 @@ from cursor import data
 
 
 def composition55(p0, p1, offset):
-    gd = data.DataPathHandler().gcode("composition55")
+    gd = data.DataDirHandler().gcode("composition55")
     gcode_renderer = renderer.GCodeRenderer(gd, z_down=3.0)
 
-    jd = data.DataPathHandler().jpg("composition55")
+    jd = data.DataDirHandler().jpg("composition55")
     jpeg_renderer = renderer.JpegRenderer(jd)
 
     coll = path.PathCollection(rec.resolution)
@@ -54,7 +54,7 @@ def composition55(p0, p1, offset):
 
 
 if __name__ == "__main__":
-    p = data.DataPathHandler().recordings()
+    p = data.DataDirHandler().recordings()
     ll = loader.Loader(directory=p, limit_files=5)
     rec = ll.single(0)
     all_paths = ll.all_paths()
