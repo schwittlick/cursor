@@ -70,15 +70,16 @@ def offsets1():
     return [0, 100, 200, 300, 400]
 
 
+@st.cache
 def load_data():
     p = data.DataDirHandler().recordings()
-    return loader.Loader(directory=p, limit_files=1)
+    ll = loader.Loader(directory=p, limit_files=1)
+    return ll.all_paths()
 
 
 def main():
     st.title("Composition #57")
-    ll = load_data()
-    all_paths = ll.all_paths()
+    all_paths = load_data()
 
     st.sidebar.markdown("EntropyFilter")
     min_slider = st.sidebar.slider("min entropy", 0.0, 10.0, 3.5)
