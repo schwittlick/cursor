@@ -5,7 +5,7 @@ from cursor import data
 
 
 def simple_pattern1():
-    p = data.DataHandler().recordings()
+    p = data.DataPathHandler().recordings()
     ll = loader.Loader(directory=p, limit_files=1)
     rec = ll.single(0)
 

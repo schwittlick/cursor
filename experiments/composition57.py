@@ -7,13 +7,13 @@ from cursor import path
 from cursor import filter
 from cursor import data
 
-p = data.DataHandler().recordings()
+p = data.DataPathHandler().recordings()
 ll = loader.Loader(directory=p, limit_files=1)
 
 
 def composition57(pc):
-    folder = data.DataHandler().jpg("composition57")
-    gcode_folder = data.DataHandler().gcode("composition57")
+    folder = data.DataPathHandler().jpg("composition57")
+    gcode_folder = data.DataPathHandler().gcode("composition57")
     jpeg_renderer = renderer.JpegRenderer(folder)
     gcode_renderer = renderer.GCodeRenderer(gcode_folder)
 

@@ -34,7 +34,7 @@ def composition56(nr, pathlist):
 
 
 if __name__ == "__main__":
-    p = data.DataHandler().recordings()
+    p = data.DataPathHandler().recordings()
     ll = loader.Loader(directory=p, limit_files=None)
     rec = ll.single(0)
     all_paths = ll.all_paths()

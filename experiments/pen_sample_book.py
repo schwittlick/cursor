@@ -79,7 +79,7 @@ def pen_sample(pa, id):
 
 
 if __name__ == "__main__":
-    p = data.DataHandler().recordings()
+    p = data.DataPathHandler().recordings()
     ll = loader.Loader(directory=p)
     rec = ll.single(0)
     all_paths = ll.all_paths()

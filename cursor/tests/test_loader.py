@@ -5,7 +5,7 @@ import pytest
 
 
 def test_loader_simple():
-    dir = data.DataHandler().test_recordings()
+    dir = data.DataPathHandler().test_recordings()
     ll = loader.Loader(directory=dir)
 
     rec = ll.all_collections()
@@ -13,21 +13,21 @@ def test_loader_simple():
 
 
 def test_loader_keys():
-    dir = data.DataHandler().test_recordings()
+    dir = data.DataPathHandler().test_recordings()
     ll = loader.Loader(directory=dir)
     rec = ll.keys()
     assert len(rec) == 6
 
 
 def test_loader_index_too_high_exception():
-    dir = data.DataHandler().test_recordings()
+    dir = data.DataPathHandler().test_recordings()
     ll = loader.Loader(directory=dir)
     with pytest.raises(IndexError):
         ll.single(100)
 
 
 def test_loader_single():
-    dir = data.DataHandler().test_recordings()
+    dir = data.DataPathHandler().test_recordings()
     ll = loader.Loader(directory=dir)
     path = ll.single(0)
     assert len(path) > 0
@@ -40,7 +40,7 @@ def test_loader_isfileandjson():
 
 
 def test_loader_limit_files():
-    dir = data.DataHandler().test_recordings()
+    dir = data.DataPathHandler().test_recordings()
     l1 = loader.Loader(directory=dir)
     l2 = loader.Loader(directory=dir, limit_files=1)
 
