@@ -1,3 +1,8 @@
+import wasabi
+
+log = wasabi.Printer()
+
+
 class Filter:
     def filter(self, paths):
         raise NotImplementedError("Not implemented in base class")
@@ -19,7 +24,7 @@ class EntropyFilter(Filter):
             if not p.shannon_x() < self.max_x and p.shannon_y() < self.max_y
         ]
         len_after = len(paths)
-        print(f"EntropyFilter: reduced path count from {len_before} to {len_after}")
+        log.good(f"EntropyFilter: reduced path count from {len_before} to {len_after}")
 
     def filtered(self, paths):
         copied_paths = paths.copy()
@@ -60,4 +65,4 @@ class DistanceFilter(Filter):
         len_before = len(paths)
         paths[:] = [p for p in paths if p.distance(self.res) <= self.max_distance]
         len_after = len(paths)
-        print(f"DistanceFilter: reduced path count from {len_before} to {len_after}")
+        log.good(f"DistanceFilter: reduced path count from {len_before} to {len_after}")
