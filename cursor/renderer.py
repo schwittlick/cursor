@@ -49,7 +49,9 @@ class CursorSVGRenderer:
         bb = paths.bb()
 
         fname = self.save_path.joinpath(self.filename + ".svg")
-        self.dwg = svgwrite.Drawing(fname, profile="tiny", size=(bb.w + bb.x, bb.h + bb.y))
+        self.dwg = svgwrite.Drawing(
+            fname, profile="tiny", size=(bb.w + bb.x, bb.h + bb.y)
+        )
 
         it = PathIterator([paths])
         for conn in it.connections():
