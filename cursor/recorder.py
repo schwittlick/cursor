@@ -82,7 +82,9 @@ class Recorder:
 
         recs = {"mouse": self._mouse_recordings, "keys": self._keyboard_recodings}
 
-        fname_compressed = save_path.joinpath(str(self._start_time_stamp) + "_compressed.json")
+        fname_compressed = save_path.joinpath(
+            str(self._start_time_stamp) + "_compressed.json"
+        )
 
         log.good(f"Saving mouse recordings: {len(self._mouse_recordings)}")
         log.good(f"Saving keyboard recordings: {len(self._keyboard_recodings)}")
