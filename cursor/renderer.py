@@ -15,7 +15,7 @@ class PathIterator:
                 for point in p.vertices:
                     yield point, collection.resolution
 
-    def connections(self, scaled=False):
+    def connections(self):
         prev = None
 
         for collection in self.paths:
@@ -32,38 +32,34 @@ class PathIterator:
                     end = point.copy()
                     prev = point.copy()
 
-                    if scaled:
-                        start.scale(
-                            collection.resolution.width, collection.resolution.height
-                        )
-                        end.scale(
-                            collection.resolution.width, collection.resolution.height
-                        )
-
                     yield start, end
 
 
 class CursorSVGRenderer:
-    def __init__(self, folder):
+    def __init__(self, folder, filename):
         assert isinstance(folder, pathlib.Path), "Only path objects allowed"
         self.save_path = folder
+        self.filename = filename
+        self.dwg = None
 
-    def render(self, paths, filename):
+    def render(self, paths):
         if not isinstance(paths, path.PathCollection):
             raise Exception("Only PathCollection and list of PathCollections allowed")
 
         bb = paths.bb()
 
-        fname = self.save_path.joinpath(filename + ".svg")
-        dwg = svgwrite.Drawing(fname, profile="tiny", size=(bb.w + bb.x, bb.h + bb.y))
+        fname = self.save_path.joinpath(self.filename + ".svg")
+        self.dwg = svgwrite.Drawing(
+            fname, profile="tiny", size=(bb.w + bb.x, bb.h + bb.y)
+        )
 
         it = PathIterator([paths])
-        for conn in it.connections(scaled=False):
+        for conn in it.connections():
             start = conn[0]
             end = conn[1]
 
-            dwg.add(
-                dwg.line(
+            self.dwg.add(
+                self.dwg.line(
                     start.pos(),
                     end.pos(),
                     stroke_width=0.5,
@@ -73,8 +69,8 @@ class CursorSVGRenderer:
 
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
-        print(f"Saving to {fname}")
-        dwg.save()
+    def save(self):
+        self.dwg.save()
 
 
 class GCodeRenderer:
@@ -103,7 +99,6 @@ class GCodeRenderer:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
         fname = self.save_path.joinpath(filename + ".nc")
-        print(f"Saving to {fname}")
         with open(fname, "w") as file:
             file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
             file.write(f"G01 X0.0 Y0.0 F{self.feedrate_xy}\n")
@@ -129,10 +124,12 @@ class JpegRenderer:
     def __init__(self, folder):
         assert isinstance(folder, pathlib.Path), "Only path objects allowed"
         self.save_path = folder
+        self.img = None
+        self.img_draw = None
 
-    def render(self, paths, filename, scale=1.0):
+    def render(self, paths, scale=1.0, frame=False):
         if not isinstance(paths, path.PathCollection):
-            raise Exception("Only PathCollection and list of PathCollections allowed")
+            raise Exception("Only PathCollection allowed")
 
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
@@ -144,8 +141,8 @@ class JpegRenderer:
         abs_scaled_bb = (
             abs(bb.x * scale),
             abs(bb.y * scale),
-            abs((bb.x + bb.w) * scale),
-            abs((bb.y + bb.h) * scale),
+            abs(bb.w * scale),
+            abs(bb.h * scale),
         )
 
         image_width = int(abs_scaled_bb[0] + abs_scaled_bb[2])
@@ -154,12 +151,12 @@ class JpegRenderer:
         print(f"Creating image with size=({image_width}, {image_height})")
         assert image_width < 20000 and image_height < 20000, "keep resolution lower"
 
-        img = Image.new("RGB", (image_width, image_height,), "white",)
-        img_draw = ImageDraw.ImageDraw(img)
+        self.img = Image.new("RGB", (image_width, image_height,), "white",)
+        self.img_draw = ImageDraw.ImageDraw(self.img)
 
         it = PathIterator([paths])
 
-        for conn in it.connections(scaled=False):
+        for conn in it.connections():
             start = conn[0]
             end = conn[1]
 
@@ -168,16 +165,35 @@ class JpegRenderer:
                 start.x += abs_scaled_bb[0]
                 end.x += abs_scaled_bb[0]
 
-            if bb.y < 0:
+            if bb.y * scale < 0:
                 start.y += abs_scaled_bb[1]
                 end.y += abs_scaled_bb[1]
 
-            img_draw.line(
+            self.img_draw.line(
                 xy=(start.x * scale, start.y * scale, end.x * scale, end.y * scale),
                 fill="black",
                 width=1,
             )
 
+        if frame:
+            self.render_frame()
+
+    def save(self, filename):
         fname = self.save_path.joinpath(filename + ".jpg")
-        print(f"Saving to {fname}")
-        img.save(fname, "JPEG")
+        self.img.save(fname, "JPEG")
+
+    def render_bb(self, bb):
+        assert isinstance(bb, path.BoundingBox), "Only BoundingBox objects allowed"
+
+        self.img_draw.line(xy=(bb.x, bb.y, bb.w, bb.y), fill="black", width=2)
+        self.img_draw.line(xy=(bb.x, bb.y, bb.x, bb.h), fill="black", width=2)
+        self.img_draw.line(xy=(bb.w, bb.y, bb.w, bb.h), fill="black", width=2)
+        self.img_draw.line(xy=(bb.x, bb.h, bb.w, bb.h), fill="black", width=2)
+
+    def render_frame(self):
+        w = self.img.size[0]
+        h = self.img.size[1]
+        self.img_draw.line(xy=(0, 0, w, 0), fill="black", width=2)
+        self.img_draw.line(xy=(0, 0, 0, h), fill="black", width=2)
+        self.img_draw.line(xy=(w - 2, 0, w - 2, h), fill="black", width=2)
+        self.img_draw.line(xy=(0, h - 2, w, h - 2), fill="black", width=2)

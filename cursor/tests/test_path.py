@@ -74,10 +74,24 @@ def test_path_bb():
     p.add(141, 4511, 10000)
 
     bb = p.bb()
-    assert bb[0] == 0
-    assert bb[1] == 0
-    assert bb[2] == 141
-    assert bb[3] == 4511
+    assert bb.x == 0
+    assert bb.y == 0
+    assert bb.w == 141
+    assert bb.h == 4511
+
+
+def test_path_bb():
+    p = path.Path()
+    p.add(100, 100, 0)
+    p.add(200, 100, 0)
+    p.add(100, 200, 0)
+    p.add(200, 200, 0)
+
+    bb = p.bb()
+    assert bb.x == 100
+    assert bb.y == 100
+    assert bb.w == 200
+    assert bb.h == 200
 
 
 def test_path_morph():

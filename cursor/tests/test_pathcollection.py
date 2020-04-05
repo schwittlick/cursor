@@ -36,8 +36,8 @@ def test_pathcollection_minmax():
 
     assert min[0] == bb.x
     assert min[1] == bb.y
-    assert max[0] == bb.w + bb.x
-    assert max[1] == bb.h + bb.y
+    assert max[0] == bb.w
+    assert max[1] == bb.h
 
     assert min[0] == 5
     assert min[1] == 11
