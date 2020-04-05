@@ -1,7 +1,6 @@
 from cursor import path
 from cursor import filter
 
-import pyautogui
 import pytest
 
 
