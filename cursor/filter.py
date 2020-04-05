@@ -2,6 +2,9 @@ class Filter:
     def filter(self, paths):
         raise NotImplementedError("Not implemented in base class")
 
+    def filtered(self, paths):
+        raise NotImplementedError("Not implemented in base class")
+
 
 class EntropyFilter(Filter):
     def __init__(self, max_x_entropy, max_y_entropy):
@@ -17,6 +20,11 @@ class EntropyFilter(Filter):
         ]
         len_after = len(paths)
         print(f"EntropyFilter: reduced path count from {len_before} to {len_after}")
+
+    def filtered(self, paths):
+        copied_paths = paths.copy()
+        self.filter(copied_paths)
+        return copied_paths
 
 
 class BoundingBoxFilter(Filter):

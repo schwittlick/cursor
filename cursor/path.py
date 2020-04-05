@@ -199,7 +199,9 @@ class BoundingBox:
             return True
 
     def center(self):
-        return self.x + self.w / 2, self.y + self.h / 2
+        center_x = ((self.w - self.x) / 2) + self.x
+        center_y = ((self.h - self.y) / 2) + self.y
+        return center_x, center_y
 
 
 class Path:
@@ -245,8 +247,8 @@ class Path:
         miny = min(self.vertices, key=lambda pos: pos.y).y
         maxx = max(self.vertices, key=lambda pos: pos.x).x
         maxy = max(self.vertices, key=lambda pos: pos.y).y
-
-        return minx, miny, maxx, maxy
+        b = BoundingBox(minx, miny, maxx, maxy)
+        return b
 
     def distance(self, res):
         """
@@ -496,6 +498,15 @@ class PathCollection:
         else:
             raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
 
+    def filtered(self, pathfilter):
+        if isinstance(pathfilter, filter.Filter):
+
+            pc = PathCollection()
+            pc.__paths = pathfilter.filtered(self.__paths)
+            return pc
+        else:
+            raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
+
     def __len__(self):
         return len(self.__paths)
 
@@ -547,7 +558,7 @@ class PathCollection:
     def bb(self):
         mi = self.min()
         ma = self.max()
-        bb = BoundingBox(mi[0], mi[1], ma[0] - mi[0], ma[1] - mi[1])
+        bb = BoundingBox(mi[0], mi[1], ma[0], ma[1])
         return bb
 
     def min(self):
@@ -571,6 +582,20 @@ class PathCollection:
             p.scale(x, y)
 
     def fit(self, size, padding_mm):
+
+        # move into positive area
+        bb = self.bb()
+        scale = 1.0
+        abs_scaled_bb = (
+            abs(bb.x * scale),
+            abs(bb.y * scale),
+            abs(bb.w * scale),
+            abs(bb.h * scale),
+        )
+        for p in self.__paths:
+            if bb.x * scale < 0:
+                p.translate(abs_scaled_bb[0], abs_scaled_bb[1])
+
         width = size[0]
         height = size[1]
         padding_x = padding_mm * Paper.X_FACTOR
