@@ -80,7 +80,7 @@ class Recorder:
         self.keyboard_recodings.append((key, self._get_utc_timestamp()))
 
     def save(self):
-        save_path = data.DataHandler().recordings()
+        save_path = data.DataDirHandler().recordings()
         pathlib.Path(save_path).mkdir(parents=True, exist_ok=True)
 
         recs = {"mouse": self.mouse_recordings, "keys": self.keyboard_recodings}

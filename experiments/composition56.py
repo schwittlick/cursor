@@ -3,6 +3,7 @@ from cursor import renderer
 from cursor import path
 from cursor import filter
 from cursor import data
+from cursor import device
 
 
 def composition56(nr, pathlist):
@@ -11,7 +12,7 @@ def composition56(nr, pathlist):
     xoffset = 0
 
     xspacing = 1
-    coll = path.PathCollection(rec.resolution)
+    coll = path.PathCollection()
 
     for p in pathlist:
         for i in range(250):
@@ -20,11 +21,11 @@ def composition56(nr, pathlist):
             xto = xspacing * i + xoffset
             yto = 1000
             morphed = p.morph((xfrom, yfrom), (xto, yto))
-            coll.add(morphed, rec.resolution)
+            coll.add(morphed)
 
         xoffset += 400
 
-    coll.fit(path.Paper.a1_landscape(), 50)
+    coll.fit(device.DrawingMachine.Paper.a1_landscape(), 50)
 
     hash = pathlist[0].hash()
 
@@ -34,7 +35,7 @@ def composition56(nr, pathlist):
 
 
 if __name__ == "__main__":
-    p = data.DataHandler().recordings()
+    p = data.DataDirHandler().recordings()
     ll = loader.Loader(directory=p, limit_files=None)
     rec = ll.single(0)
     all_paths = ll.all_paths()
