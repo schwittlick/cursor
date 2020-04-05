@@ -4,87 +4,8 @@ import numpy as np
 import math
 import datetime
 import pytz
-import json
-import base64
-import zlib
-import pyautogui
 import random
 import hashlib
-
-
-class MyJsonEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, PathCollection):
-            return {
-                "paths": o.get_all(),
-                "timestamp": o.timestamp(),
-            }
-
-        if isinstance(o, Path):
-            return o.vertices
-
-        if isinstance(o, TimedPosition):
-            return {"x": round(o.x, 4), "y": round(o.y, 4), "ts": round(o.timestamp, 2)}
-
-
-class MyJsonDecoder(json.JSONDecoder):
-    def __init__(self, *args, **kwargs):
-        json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
-
-    def object_hook(self, dct):
-        if "x" in dct and "y" in dct and "ts" in dct:
-            p = TimedPosition(dct["x"], dct["y"], dct["ts"])
-            return p
-        if "w" in dct and "h" in dct:
-            s = pyautogui.Size(dct["w"], dct["h"])
-            return s
-        if "paths" in dct and "timestamp" in dct:
-            ts = dct["timestamp"]
-            pc = PathCollection(ts)
-            for p in dct["paths"]:
-                pc.add(Path(p))
-            return pc
-        return dct
-
-
-class JsonCompressor:
-    ZIPJSON_KEY = "base64(zip(o))"
-
-    def json_zip(self, j):
-
-        j = {
-            self.ZIPJSON_KEY: base64.b64encode(
-                zlib.compress(json.dumps(j, cls=MyJsonEncoder).encode("utf-8"))
-            ).decode("ascii")
-        }
-
-        return j
-
-    def json_unzip(self, j, insist=True):
-        try:
-            assert j[self.ZIPJSON_KEY]
-            assert set(j.keys()) == {self.ZIPJSON_KEY}
-        except:
-            if insist:
-                raise RuntimeError(
-                    "JSON not in the expected format {"
-                    + str(self.ZIPJSON_KEY)
-                    + ": zipstring}"
-                )
-            else:
-                return j
-
-        try:
-            j = zlib.decompress(base64.b64decode(j[self.ZIPJSON_KEY]))
-        except:
-            raise RuntimeError("Could not decode/unzip the contents")
-
-        try:
-            j = json.loads(j, cls=MyJsonDecoder)
-        except:
-            raise RuntimeError("Could interpret the unzipped contents")
-
-        return j
 
 
 class Paper:

@@ -1,4 +1,4 @@
-from cursor import path
+from cursor import data
 
 import os
 import json
@@ -28,11 +28,11 @@ class Loader:
                 json_string = json_file.readline()
                 try:
                     jd = eval(json_string)
-                    data = path.JsonCompressor().json_unzip(jd)
+                    _data = data.JsonCompressor().json_unzip(jd)
                 except RuntimeError:
-                    data = json.loads(json_string, cls=path.MyJsonDecoder)
-                self._recordings.append(data["mouse"])
-                for keys in data["keys"]:
+                    _data = json.loads(json_string, cls=data.MyJsonDecoder)
+                self._recordings.append(_data["mouse"])
+                for keys in _data["keys"]:
                     self._keyboard_recordings.append((keys[0], keys[1]))
 
         absolut_path_count = sum(len(pc) for pc in self._recordings)

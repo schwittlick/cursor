@@ -44,7 +44,7 @@ def composition37(p0, p1, offset):
 
 
 if __name__ == "__main__":
-    p = data.DataHandler().recordings()
+    p = data.DataPathHandler().recordings()
     ll = loader.Loader(directory=p, limit_files=5)
     rec = ll.single(0)
     all_paths = ll.all_paths()

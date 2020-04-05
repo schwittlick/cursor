@@ -2,49 +2,49 @@ from cursor.loader import Loader
 from cursor.renderer import CursorSVGRenderer
 from cursor.renderer import GCodeRenderer
 from cursor.renderer import JpegRenderer
-from cursor.data import DataHandler
+from cursor.data import DataPathHandler
 
 import pytest
 
 
 def test_svgrenderer():
-    path = DataHandler().test_recordings()
+    path = DataPathHandler().test_recordings()
     loader = Loader(directory=path)
 
     rec = loader.all_paths()
 
-    vis = CursorSVGRenderer(DataHandler().test_svgs(), "test1")
+    vis = CursorSVGRenderer(DataPathHandler().test_svgs(), "test1")
     vis.render(rec)
 
 
 def test_gcoderenderer():
-    path = DataHandler().test_recordings()
+    path = DataPathHandler().test_recordings()
     loader = Loader(directory=path)
 
     rec = loader.all_paths()
 
-    vis = GCodeRenderer(DataHandler().test_gcodes())
+    vis = GCodeRenderer(DataPathHandler().test_gcodes())
     vis.render(rec, "test1")
 
 
 def test_jpegrenderer():
-    path = DataHandler().test_recordings()
+    path = DataPathHandler().test_recordings()
     loader = Loader(directory=path)
 
     rec = loader.all_paths()
 
-    vis = JpegRenderer(DataHandler().test_images())
+    vis = JpegRenderer(DataPathHandler().test_images())
     vis.render(rec)
     vis.save("test1")
 
 
 def test_jpegrenderer_fail():
-    path = DataHandler().test_recordings()
+    path = DataPathHandler().test_recordings()
     loader = Loader(directory=path)
 
-    vis1 = JpegRenderer(DataHandler().test_images())
-    vis2 = GCodeRenderer(DataHandler().test_gcodes())
-    vis3 = CursorSVGRenderer(DataHandler().test_svgs(), "test1")
+    vis1 = JpegRenderer(DataPathHandler().test_images())
+    vis2 = GCodeRenderer(DataPathHandler().test_gcodes())
+    vis3 = CursorSVGRenderer(DataPathHandler().test_svgs(), "test1")
 
     rec = loader.all_collections()
     with pytest.raises(Exception):
