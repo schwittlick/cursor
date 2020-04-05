@@ -4,7 +4,6 @@ from cursor import data
 import datetime
 import pytz
 import atexit
-import os
 import pyautogui
 import wasabi
 import pathlib
@@ -16,18 +15,16 @@ log = wasabi.Printer()
 
 
 class Recorder:
-    keyboard_recodings = []
-    current_line = path.Path()
-    started = False
-    start_time_stamp = None
-    recorder = None
-    running = True
-    size = pyautogui.size()
+    _mouse_recordings = path.PathCollection()
+    _keyboard_recodings = []
+    _current_line = path.Path()
+    _started = False
+    _start_time_stamp = None
+    _resolution = pyautogui.size()
 
     def __init__(self):
-        self.start_time_stamp = self._get_utc_timestamp()
+        self._start_time_stamp = self._get_utc_timestamp()
         atexit.register(self.save)
-        self.mouse_recordings = path.PathCollection()
 
         log.good("Setting up mouse hook")
         self.mouse_listener = pynput.mouse.Listener(
@@ -50,22 +47,22 @@ class Recorder:
         return utc_timestamp
 
     def on_move(self, x, y):
-        _x = x / self.size[0]
-        _y = y / self.size[1]
-        self.current_line.add(_x, _y, self._get_utc_timestamp())
+        _x = x / self._resolution[0]
+        _y = y / self._resolution[1]
+        self._current_line.add(_x, _y, self._get_utc_timestamp())
 
     def on_click(self, x, y, button, pressed):
-        if not self.started and pressed:
-            _x = x / self.size[0]
-            _y = y / self.size[1]
-            self.current_line.add(_x, _y, self._get_utc_timestamp())
-            self.started = True
-        elif self.started and pressed:
-            self.mouse_recordings.add(self.current_line.copy())
+        if not self._started and pressed:
+            _x = x / self._resolution[0]
+            _y = y / self._resolution[1]
+            self._current_line.add(_x, _y, self._get_utc_timestamp())
+            self._started = True
+        elif self._started and pressed:
+            self._mouse_recordings.add(self._current_line.copy())
             global counter, icon
-            counter = f"mouse: {len(self.mouse_recordings)} keys: {len(self.keyboard_recodings)}"
+            counter = f"mouse: {len(self._mouse_recordings)} keys: {len(self._keyboard_recodings)}"
             icon.update_menu()
-            self.current_line.clear()
+            self._current_line.clear()
 
     def on_press(self, btn):
         pass
@@ -77,22 +74,21 @@ class Recorder:
             log.fail(f"Couldn't save key because of {ae}")
             return
 
-        self.keyboard_recodings.append((key, self._get_utc_timestamp()))
+        self._keyboard_recodings.append((key, self._get_utc_timestamp()))
 
     def save(self):
         save_path = data.DataDirHandler().recordings()
-        pathlib.Path(save_path).mkdir(parents=True, exist_ok=True)
+        save_path.mkdir(parents=True, exist_ok=True)
 
-        recs = {"mouse": self.mouse_recordings, "keys": self.keyboard_recodings}
+        recs = {"mouse": self._mouse_recordings, "keys": self._keyboard_recodings}
 
-        fname_compressed = os.path.join(
-            save_path, str(self.start_time_stamp) + "_compressed.json"
-        )
-        log.good(f"Saving mouse recordings: {len(self.mouse_recordings)}")
-        log.good(f"Saving keyboard recordings: {len(self.keyboard_recodings)}")
-        log.good(f"Saving compressed to {fname_compressed}")
+        fname_compressed = save_path.joinpath(str(self._start_time_stamp) + "_compressed.json")
 
-        with open(fname_compressed, "w") as fp:
+        log.good(f"Saving mouse recordings: {len(self._mouse_recordings)}")
+        log.good(f"Saving keyboard recordings: {len(self._keyboard_recodings)}")
+        log.good(f"Saving compressed to {fname_compressed.as_posix()}")
+
+        with open(fname_compressed.as_posix(), "w") as fp:
             dump = data.JsonCompressor().json_zip(recs)
             fp.write(str(dump))
 
