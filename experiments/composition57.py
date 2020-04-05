@@ -6,6 +6,7 @@ from cursor import renderer
 from cursor import path
 from cursor import filter
 from cursor import data
+from cursor import device
 
 p = data.DataDirHandler().recordings()
 ll = loader.Loader(directory=p, limit_files=1)
@@ -41,7 +42,7 @@ def composition57(pc):
 
         counter += 1
 
-    coll.fit(path.Paper.a1_landscape(), 40)
+    coll.fit(device.DrawingMachine.Paper.a1_landscape(), 40)
 
     filename = f"composition57_{pc.hash()}"
 
