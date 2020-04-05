@@ -1,6 +1,7 @@
 from cursor.path import Path
 from cursor.path import PathCollection
 from cursor.path import BoundingBox
+from cursor.filter import Filter
 from cursor.filter import BoundingBoxFilter
 from cursor.filter import MinPointCountFilter
 from cursor.filter import MaxPointCountFilter
@@ -34,7 +35,7 @@ def test_bb_filter():
 
     assert len(pcol) == 2
 
-    f1 = filter.Filter()
+    f1 = Filter()
     with pytest.raises(Exception):
         pcol.filter(f1)
 
