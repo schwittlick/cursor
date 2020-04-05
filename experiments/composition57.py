@@ -6,14 +6,15 @@ from cursor import renderer
 from cursor import path
 from cursor import filter
 from cursor import data
+from cursor import device
 
-p = data.DataHandler().recordings()
+p = data.DataDirHandler().recordings()
 ll = loader.Loader(directory=p, limit_files=1)
 
 
 def composition57(pc):
-    folder = data.DataHandler().jpg("composition57")
-    gcode_folder = data.DataHandler().gcode("composition57")
+    folder = data.DataDirHandler().jpg("composition57")
+    gcode_folder = data.DataDirHandler().gcode("composition57")
     jpeg_renderer = renderer.JpegRenderer(folder)
     gcode_renderer = renderer.GCodeRenderer(gcode_folder)
 
@@ -41,7 +42,7 @@ def composition57(pc):
 
         counter += 1
 
-    coll.fit(path.Paper.a1_landscape(), 40)
+    coll.fit(device.DrawingMachine.Paper.a1_landscape(), 40)
 
     filename = f"composition57_{pc.hash()}"
 

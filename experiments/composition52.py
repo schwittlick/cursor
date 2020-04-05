@@ -6,7 +6,7 @@ from cursor import data
 
 def composition52(n):
     print(f"Creating Composition #52 with n={n}")
-    p = data.DataHandler().recordings()
+    p = data.DataDirHandler().recordings()
     ll = loader.Loader(directory=p)
     rec = ll.single(0)
 
