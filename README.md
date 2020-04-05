@@ -28,6 +28,12 @@ recorder
     # check scripts folder
     pip install -e .
     cursor_recorder
+    
+data handling
+
+    # remove recording files with <3kb in file size
+    cd data/recordings
+    find . -name "*.json" -type 'f' -size -3k -delete
 
 axidraw?
 

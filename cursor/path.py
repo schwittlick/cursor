@@ -1,4 +1,5 @@
 from cursor import filter
+from cursor import device
 
 import numpy as np
 import math
@@ -477,7 +478,6 @@ class PathCollection:
             p.scale(x, y)
 
     def fit(self, size, padding_mm):
-
         # move into positive area
         bb = self.bb()
         scale = 1.0
@@ -493,8 +493,8 @@ class PathCollection:
 
         width = size[0]
         height = size[1]
-        padding_x = padding_mm * Paper.X_FACTOR
-        padding_y = padding_mm * Paper.Y_FACTOR
+        padding_x = padding_mm * device.DrawingMachine.Paper.X_FACTOR
+        padding_y = padding_mm * device.DrawingMachine.Paper.Y_FACTOR
 
         # scaling
         xfac = (width - padding_x * 2) / self.bb().w

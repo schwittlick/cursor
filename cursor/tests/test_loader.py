@@ -34,9 +34,8 @@ def test_loader_single():
 
 
 def test_loader_isfileandjson():
-    is1 = loader.Loader.is_file_and_json("hey")
-    assert not is1
-    # TODO: test for true
+    with pytest.raises(AssertionError):
+        loader.Loader.is_file_and_json("hey")
 
 
 def test_loader_limit_files():

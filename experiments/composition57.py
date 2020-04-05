@@ -8,9 +8,6 @@ from cursor import filter
 from cursor import data
 from cursor import device
 
-p = data.DataDirHandler().recordings()
-ll = loader.Loader(directory=p, limit_files=1)
-
 
 def composition57(pc):
     folder = data.DataDirHandler().jpg("composition57")
@@ -46,7 +43,7 @@ def composition57(pc):
 
     filename = f"composition57_{pc.hash()}"
 
-    jpeg_renderer.render(coll, scale=3.0, frame=True)
+    jpeg_renderer.render(coll, scale=1.0, frame=True)
 
     st.write(f"Image size: {jpeg_renderer.img.size}")
 
@@ -72,9 +69,14 @@ def inputs1():
 def offsets1():
     return [0, 100, 200, 300, 400]
 
+def load_data():
+    p = data.DataDirHandler().recordings()
+    return loader.Loader(directory=p, limit_files=None)
+
 
 def main():
     st.title("Composition #57")
+    ll = load_data()
     all_paths = ll.all_paths()
 
     st.sidebar.markdown("EntropyFilter")
