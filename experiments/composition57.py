@@ -69,9 +69,10 @@ def inputs1():
 def offsets1():
     return [0, 100, 200, 300, 400]
 
+
 def load_data():
     p = data.DataDirHandler().recordings()
-    return loader.Loader(directory=p, limit_files=None)
+    return loader.Loader(directory=p, limit_files=1)
 
 
 def main():
