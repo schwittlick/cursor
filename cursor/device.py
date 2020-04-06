@@ -7,9 +7,17 @@ log = wasabi.Printer()
 
 class DrawingMachine:
     def __init__(self):
-        self.s = serial.Serial("COM4", 115200)
+        self.s = None
+
+    def connect(self, port, baud):
+        try:
+            self.s = serial.Serial(port, baud)
+        except serial.SerialException as se:
+            self.s = None
+            log.fail(se)
 
     def __send_and_print_reply(self, msg):
+        assert self.s is not None, "No serial connection open"
         _msg = msg + "\n"
         log.warn(f"Sending {_msg}")
         self.s.write(_msg.encode("utf-8"))
@@ -35,6 +43,7 @@ class DrawingMachine:
         self.__send_and_print_reply("G92X0Y0Z0")
 
     def stream(self, filename):
+        assert self.s is not None, "No serial connection open"
         filename = "H:\\cursor\\data\\experiments\\simple_square_test\\gcode\\straight_lines_af16bfbad06e78edbb059858c32e3b28.nc"
         self.s.write("\r\n\r\n".encode("utf-8"))
         time.sleep(2)  # Wait for grbl to initialize
