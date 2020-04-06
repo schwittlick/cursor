@@ -1,4 +1,5 @@
 import wasabi
+import time
 
 log = wasabi.Printer()
 
@@ -17,6 +18,7 @@ class EntropyFilter(Filter):
         self.max_y = max_y_entropy
 
     def filter(self, paths):
+        t0 = time.time()
         len_before = len(paths)
         paths[:] = [
             p
@@ -24,6 +26,9 @@ class EntropyFilter(Filter):
             if not p.shannon_x() < self.max_x and p.shannon_y() < self.max_y
         ]
         len_after = len(paths)
+
+        elapsed = time.time() - t0
+        log.good(f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
         log.good(f"EntropyFilter: reduced path count from {len_before} to {len_after}")
 
     def filtered(self, paths):
