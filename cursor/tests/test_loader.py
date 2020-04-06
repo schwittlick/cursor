@@ -1,47 +1,47 @@
-from cursor import loader
-from cursor import data
+from cursor.loader import Loader
+from cursor.data import DataDirHandler
 
 import pytest
 
 
 def test_loader_simple():
-    dir = data.DataDirHandler().test_recordings()
-    ll = loader.Loader(directory=dir)
+    dir = DataDirHandler().test_recordings()
+    ll = Loader(directory=dir)
 
     rec = ll.all_collections()
     assert len(rec) == 4
 
 
 def test_loader_keys():
-    dir = data.DataDirHandler().test_recordings()
-    ll = loader.Loader(directory=dir)
+    dir = DataDirHandler().test_recordings()
+    ll = Loader(directory=dir)
     rec = ll.keys()
     assert len(rec) == 6
 
 
 def test_loader_index_too_high_exception():
-    dir = data.DataDirHandler().test_recordings()
-    ll = loader.Loader(directory=dir)
+    dir = DataDirHandler().test_recordings()
+    ll = Loader(directory=dir)
     with pytest.raises(IndexError):
         ll.single(100)
 
 
 def test_loader_single():
-    dir = data.DataDirHandler().test_recordings()
-    ll = loader.Loader(directory=dir)
+    dir = DataDirHandler().test_recordings()
+    ll = Loader(directory=dir)
     path = ll.single(0)
     assert len(path) > 0
 
 
 def test_loader_isfileandjson():
     with pytest.raises(AssertionError):
-        loader.Loader.is_file_and_json("hey")
+        Loader.is_file_and_json("hey")
 
 
 def test_loader_limit_files():
-    dir = data.DataDirHandler().test_recordings()
-    l1 = loader.Loader(directory=dir)
-    l2 = loader.Loader(directory=dir, limit_files=1)
+    dir = DataDirHandler().test_recordings()
+    l1 = Loader(directory=dir)
+    l2 = Loader(directory=dir, limit_files=1)
 
     assert len(l2) == 1
     assert len(l1) > len(l2)

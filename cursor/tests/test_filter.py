@@ -1,13 +1,18 @@
-from cursor import path
-from cursor import filter
+from cursor.path import Path
+from cursor.path import PathCollection
+from cursor.path import BoundingBox
+from cursor.filter import Filter
+from cursor.filter import BoundingBoxFilter
+from cursor.filter import MinPointCountFilter
+from cursor.filter import MaxPointCountFilter
 
 import pytest
 
 
 def test_bb_filter():
-    pcol = path.PathCollection()
+    pcol = PathCollection()
 
-    p1 = path.Path()
+    p1 = Path()
 
     p1.add(5, 51, 10000)
     p1.add(10, 11, 10001)
@@ -16,7 +21,7 @@ def test_bb_filter():
     p1.add(30, 31, 10004)
     p1.add(40, 41, 10005)
 
-    p2 = path.Path()
+    p2 = Path()
 
     p2.add(545, 54, 10000)
     p2.add(160, 11, 10001)
@@ -30,12 +35,12 @@ def test_bb_filter():
 
     assert len(pcol) == 2
 
-    f1 = filter.Filter()
+    f1 = Filter()
     with pytest.raises(Exception):
         pcol.filter(f1)
 
-    bb = path.BoundingBox(0, 0, 100, 100)
-    f2 = filter.BoundingBoxFilter(bb)
+    bb = BoundingBox(0, 0, 100, 100)
+    f2 = BoundingBoxFilter(bb)
     pcol.filter(f2)
 
     assert len(pcol) == 1
@@ -43,9 +48,9 @@ def test_bb_filter():
 
 
 def test_point_count_filter():
-    pcol = path.PathCollection()
+    pcol = PathCollection()
 
-    p1 = path.Path()
+    p1 = Path()
 
     p1.add(5, 51, 10000)
     p1.add(10, 11, 10001)
@@ -54,7 +59,7 @@ def test_point_count_filter():
     p1.add(30, 31, 10004)
     p1.add(40, 41, 10005)
 
-    p2 = path.Path()
+    p2 = Path()
 
     p2.add(545, 54, 10000)
     p2.add(160, 11, 10001)
@@ -65,13 +70,13 @@ def test_point_count_filter():
     pcol.add(p1)
     pcol.add(p2)
 
-    min_filter = filter.MinPointCountFilter(6)
+    min_filter = MinPointCountFilter(6)
     pcol.filter(min_filter)
 
     assert len(pcol) == 1
     assert pcol[0] is p1
 
-    max_filter = filter.MaxPointCountFilter(4)
+    max_filter = MaxPointCountFilter(4)
     pcol.filter(max_filter)
 
     assert len(pcol) == 0
