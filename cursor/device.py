@@ -1,16 +1,38 @@
 import serial
 import time
+import wasabi
+
+log = wasabi.Printer()
 
 
 class DrawingMachine:
     def __init__(self):
         self.s = serial.Serial("COM4", 115200)
 
-    def send_and_print_reply(self, msg):
+    def __send_and_print_reply(self, msg):
         _msg = msg + "\n"
+        log.warn(f"Sending {_msg}")
         self.s.write(_msg.encode("utf-8"))
         grbl_out = self.s.readline()  # Wait for grbl response with carriage return
-        print(grbl_out.strip().decode("utf-8"))
+        log.good(grbl_out.strip().decode("utf-8"))
+
+    def feed_hold(self):
+        self.__send_and_print_reply("!")
+
+    def resume(self):
+        self.__send_and_print_reply("~")
+
+    def info(self):
+        self.__send_and_print_reply("?")
+
+    def kill_alarm(self):
+        self.__send_and_print_reply("$X")
+
+    def home(self):
+        self.__send_and_print_reply("$H")
+
+    def null_coords(self):
+        self.__send_and_print_reply("G92X0Y0Z0")
 
     def stream(self, filename):
         filename = "H:\\cursor\\data\\experiments\\simple_square_test\\gcode\\straight_lines_af16bfbad06e78edbb059858c32e3b28.nc"
@@ -18,16 +40,14 @@ class DrawingMachine:
         time.sleep(2)  # Wait for grbl to initialize
         self.s.reset_input_buffer()
 
-        self.send_and_print_reply("$X")
-        self.send_and_print_reply("$H")
-        self.send_and_print_reply("G92X0Y0Z0")
+        self.kill_alarm()
+        self.home()
+        self.null_coords()
+
         file = open(filename, "r")
         for line in file:
             l = line.strip()  # Strip all EOL characters for consistency
-            print("Sending: " + l)
-            self.s.write((l + "\n").encode("utf-8"))  # Send g-code block to grbl
-            grbl_out = self.s.readline()  # Wait for grbl response with carriage return
-            print(grbl_out.strip().decode("utf-8"))
+            self.__send_and_print_reply(l)
 
         input("  Press <Enter> to exit and disable grbl.")
 
