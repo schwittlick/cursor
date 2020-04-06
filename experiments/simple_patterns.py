@@ -1,29 +1,41 @@
-from cursor import loader
 from cursor import renderer
-from cursor.path import TimedPosition as TP
 from cursor.path import PathCollection
 from cursor.path import Path
-from cursor import data
 from cursor import device
+from cursor.data import DataDirHandler
+
+import streamlit as st
 
 
 def main():
-    gcode_renderer = renderer.GCodeRenderer("square_test", z_down=3.0)
-    jpeg_renderer = renderer.JpegRenderer("square_test")
+    st.title("Simple Testing")
+    gcode_dir = DataDirHandler().gcode("simple_square_test")
+    jpg_dir = DataDirHandler().jpg("simple_square_test")
+    gcode_renderer = renderer.GCodeRenderer(gcode_dir, z_down=3.0)
+    jpeg_renderer = renderer.JpegRenderer(jpg_dir)
 
-    coll = PathCollection()
+    pc = PathCollection()
 
     p = Path()
     p.add(0, 0)
     p.add(1, 1)
 
-    coll.fit(device.DrawingMachine.Paper.a1_landscape(), 50)
+    pc.add(p)
 
-    gcode_renderer.render(coll)
-    jpeg_renderer.render(coll)
+    pc.fit(device.DrawingMachine.Paper.CUSTOM_36_48, 50)
 
-    gcode_renderer.save(f"straight_lines_{coll.hash()}")
-    jpeg_renderer.save(f"straight_lines_{coll.hash()}")
+    gcode_renderer.render(pc)
+    jpeg_renderer.render(pc)
+
+    jpeg_renderer.render_bb(pc.bb())
+    gcode_renderer.render_bb(pc.bb())
+
+    st.image(
+        jpeg_renderer.img, caption=f"Sample {pc.hash()}", use_column_width=True
+    )
+    if st.sidebar.button("save"):
+        gcode_renderer.save(f"straight_lines_{pc.hash()}")
+        jpeg_renderer.save(f"straight_lines_{pc.hash()}")
 
 
 if __name__ == "__main__":
