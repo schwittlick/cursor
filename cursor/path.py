@@ -110,7 +110,7 @@ class Path:
     def hash(self):
         return hashlib.md5(str(self.vertices).encode("utf-8")).hexdigest()
 
-    def add(self, x, y, timestamp):
+    def add(self, x, y, timestamp=0):
         self.vertices.append(TimedPosition(x, y, timestamp))
 
     def clear(self):
