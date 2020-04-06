@@ -8,13 +8,13 @@ class DrawingMachine:
 
     def send_and_print_reply(self, msg):
         _msg = msg + "\n"
-        self.s.write(_msg.encode('utf-8'))
+        self.s.write(_msg.encode("utf-8"))
         grbl_out = self.s.readline()  # Wait for grbl response with carriage return
-        print(grbl_out.strip().decode('utf-8'))
+        print(grbl_out.strip().decode("utf-8"))
 
     def stream(self, filename):
         filename = "H:\\cursor\\data\\experiments\\simple_square_test\\gcode\\straight_lines_af16bfbad06e78edbb059858c32e3b28.nc"
-        self.s.write("\r\n\r\n".encode('utf-8'))
+        self.s.write("\r\n\r\n".encode("utf-8"))
         time.sleep(2)  # Wait for grbl to initialize
         self.s.reset_input_buffer()
 
@@ -25,9 +25,9 @@ class DrawingMachine:
         for line in file:
             l = line.strip()  # Strip all EOL characters for consistency
             print("Sending: " + l)
-            self.s.write((l + "\n").encode('utf-8'))  # Send g-code block to grbl
+            self.s.write((l + "\n").encode("utf-8"))  # Send g-code block to grbl
             grbl_out = self.s.readline()  # Wait for grbl response with carriage return
-            print(grbl_out.strip().decode('utf-8'))
+            print(grbl_out.strip().decode("utf-8"))
 
         input("  Press <Enter> to exit and disable grbl.")
 
