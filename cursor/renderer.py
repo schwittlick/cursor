@@ -94,18 +94,26 @@ class GCodeRenderer:
         self.feedrate_xy = feedrate_xy
         self.feedrate_z = feedrate_z
         self.invert_y = invert_y
+        self.paths = path.PathCollection()
+        self.bbs = []
 
-    def render(self, paths, filename):
+    def render(self, paths):
         if not isinstance(paths, path.PathCollection):
             raise Exception("Only PathCollection and list of PathCollections allowed")
 
-        pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
+        self.paths += paths
 
+    def render_bb(self, bb):
+        assert isinstance(bb, path.BoundingBox), "Only BoundingBox objects allowed"
+        self.bbs.append(bb)
+
+    def save(self, filename):
+        pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
         fname = self.save_path.joinpath(filename + ".nc")
-        with open(fname, "w") as file:
+        with open(fname.as_posix(), "w") as file:
             file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
             file.write(f"G01 X0.0 Y0.0 F{self.feedrate_xy}\n")
-            for p in paths:
+            for p in self.paths:
                 x = p.start_pos().x
                 y = p.start_pos().y
                 if self.invert_y:
@@ -119,6 +127,16 @@ class GCodeRenderer:
                         y = -y
                     file.write(f"G01 X{x:.2f} Y{y:.2f} F{self.feedrate_xy}\n")
                 file.write(f"G01 Z{self.z_up} F{self.feedrate_z}\n")
+
+            for bb in self.bbs:
+                file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
+                file.write(f"G01 X{bb.x:.2f} Y{bb.y:.2f} F{self.feedrate_xy}\n")
+                file.write(f"G01 Z{self.z_down} F{self.feedrate_z}\n")
+                file.write(f"G01 X{bb.x:.2f} Y{bb.h:.2f} F{self.feedrate_xy}\n")
+                file.write(f"G01 X{bb.w:.2f} Y{bb.h:.2f} F{self.feedrate_xy}\n")
+                file.write(f"G01 X{bb.w:.2f} Y{bb.y:.2f} F{self.feedrate_xy}\n")
+                file.write(f"G01 X{bb.x:.2f} Y{bb.y:.2f} F{self.feedrate_xy}\n")
+
             file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
             file.write(f"G01 X0.0 Y0.0 F{self.feedrate_xy}\n")
 
