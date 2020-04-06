@@ -83,6 +83,19 @@ def load_data():
     return ll.all_paths()
 
 
+@st.cache(
+    hash_funcs={
+        loader.Loader: lambda _: None,
+        path.PathCollection: lambda _: None,
+        path.Path: lambda _: None,
+        filter.EntropyFilter: lambda _: None,
+    }
+)
+def apply_filter(all_paths, _min, _max):
+    entropy_filter = filter.EntropyFilter(_min, _max)
+    return all_paths.filtered(entropy_filter)
+
+
 def main():
     st.title("Composition #57")
     all_paths = load_data()
@@ -90,8 +103,7 @@ def main():
     st.sidebar.markdown("EntropyFilter")
     min_slider = st.sidebar.slider("min entropy", 0.0, 10.0, 3.5)
     max_slider = st.sidebar.slider("max entropy", 0.0, 10.0, 5.0)
-    entropy_filter = filter.EntropyFilter(min_slider, max_slider)
-    all_p = all_paths.filtered(entropy_filter)
+    all_p = apply_filter(all_paths, min_slider, max_slider)
 
     st.sidebar.text(f"Before filtering: {len(all_paths)}")
     st.sidebar.text(f"After filtering: {len(all_p)}")
