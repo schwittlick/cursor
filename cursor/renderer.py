@@ -129,13 +129,21 @@ class GCodeRenderer:
                 file.write(f"G01 Z{self.z_up} F{self.feedrate_z}\n")
 
             for bb in self.bbs:
+                _x = bb.x
+                _y = bb.y
+                if self.invert_y:
+                    _y = -_y
+                _w = bb.w
+                _h = bb.h
+                if self.invert_y:
+                    _h = -_h
                 file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
-                file.write(f"G01 X{bb.x:.2f} Y{bb.y:.2f} F{self.feedrate_xy}\n")
+                file.write(f"G01 X{_x:.2f} Y{_y:.2f} F{self.feedrate_xy}\n")
                 file.write(f"G01 Z{self.z_down} F{self.feedrate_z}\n")
-                file.write(f"G01 X{bb.x:.2f} Y{bb.h:.2f} F{self.feedrate_xy}\n")
-                file.write(f"G01 X{bb.w:.2f} Y{bb.h:.2f} F{self.feedrate_xy}\n")
-                file.write(f"G01 X{bb.w:.2f} Y{bb.y:.2f} F{self.feedrate_xy}\n")
-                file.write(f"G01 X{bb.x:.2f} Y{bb.y:.2f} F{self.feedrate_xy}\n")
+                file.write(f"G01 X{_x:.2f} Y{_h:.2f} F{self.feedrate_xy}\n")
+                file.write(f"G01 X{_w:.2f} Y{_h:.2f} F{self.feedrate_xy}\n")
+                file.write(f"G01 X{_w:.2f} Y{_y:.2f} F{self.feedrate_xy}\n")
+                file.write(f"G01 X{_x:.2f} Y{_y:.2f} F{self.feedrate_xy}\n")
 
             file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
             file.write(f"G01 X0.0 Y0.0 F{self.feedrate_xy}\n")
@@ -155,6 +163,7 @@ class JpegRenderer:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
         if len(paths) == 0:
+            log.warn("Not creating image, empty paths")
             return
 
         bb = paths.bb()

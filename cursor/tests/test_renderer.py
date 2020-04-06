@@ -63,8 +63,8 @@ def test_svgrenderer():
     pc.add(p1)
     pc.add(p2)
 
-    vis = SvgRenderer(DataDirHandler().test_svgs(), "test1")
-    vis.render(pc)
+    r = SvgRenderer(DataDirHandler().test_svgs(), "test1")
+    r.render(pc)
 
 
 def test_gcoderenderer():
@@ -73,8 +73,9 @@ def test_gcoderenderer():
 
     rec = loader.all_paths()
 
-    vis = GCodeRenderer(DataDirHandler().test_gcodes())
-    vis.render(rec, "test1")
+    r = GCodeRenderer(DataDirHandler().test_gcodes())
+    r.render(rec)
+    r.save("test1")
 
 
 def test_jpegrenderer():
@@ -83,25 +84,25 @@ def test_jpegrenderer():
 
     rec = loader.all_paths()
 
-    vis = JpegRenderer(DataDirHandler().test_images())
-    vis.render(rec)
-    vis.save("test1")
+    r = JpegRenderer(DataDirHandler().test_images())
+    r.render(rec)
+    r.save("test1")
 
 
 def test_jpegrenderer_fail():
     path = DataDirHandler().test_recordings()
     loader = Loader(directory=path)
 
-    vis1 = JpegRenderer(DataDirHandler().test_images())
-    vis2 = GCodeRenderer(DataDirHandler().test_gcodes())
-    vis3 = SvgRenderer(DataDirHandler().test_svgs(), "test1")
+    jpeg_r = JpegRenderer(DataDirHandler().test_images())
+    gcode_r = GCodeRenderer(DataDirHandler().test_gcodes())
+    svg_r = SvgRenderer(DataDirHandler().test_svgs(), "test1")
 
     rec = loader.all_collections()
     with pytest.raises(Exception):
-        vis1.render(rec, "test1")
+        jpeg_r.render(rec, "test1")
 
     with pytest.raises(Exception):
-        vis2.render(rec, "test1")
+        gcode_r.render(rec, "test1")
 
     with pytest.raises(Exception):
-        vis3.render(rec)
+        svg_r.render(rec)
