@@ -1,23 +1,27 @@
-from cursor import path
+from cursor.path import Path
+from cursor.path import TimedPosition
+from cursor.path import BoundingBox
+
+import pyautogui
 
 import pytest
 
 
 def test_path_empty_start():
-    p = path.Path()
+    p = Path()
 
     with pytest.raises(IndexError):
         p.start_pos()
 
 
 def test_path_empty_end():
-    p = path.Path()
+    p = Path()
     with pytest.raises(IndexError):
         p.end_pos()
 
 
 def test_path_add():
-    p = path.Path()
+    p = Path()
 
     assert len(p) == 0
 
@@ -28,7 +32,7 @@ def test_path_add():
 
 
 def test_path_clear():
-    p = path.Path()
+    p = Path()
     assert p.empty()
 
     p.add(0, 0, 100)
@@ -43,7 +47,7 @@ def test_path_clear():
 
 
 def test_path_copy():
-    p = path.Path()
+    p = Path()
 
     p2 = p.copy()
     assert p is not p2
@@ -53,7 +57,7 @@ def test_path_copy():
 
 
 def test_path_start_end():
-    p = path.Path()
+    p = Path()
     p.add(0, 0, 10000)
     p.add(10, 11, 10000)
 
@@ -66,8 +70,32 @@ def test_path_start_end():
     assert end.y == 11
 
 
+def test_path_scale():
+    p = Path()
+    p.add(3, 5)
+    p.add(5, 9)
+    p.scale(2, 5)
+
+    assert p[0].x == 6
+    assert p[0].y == 25
+    assert p[1].x == 10
+    assert p[1].y == 45
+
+
+def test_path_translate():
+    p = Path()
+    p.add(3, 5)
+    p.add(5, 9)
+    p.translate(2, 5)
+
+    assert p[0].x == 5
+    assert p[0].y == 10
+    assert p[1].x == 7
+    assert p[1].y == 14
+
+
 def test_path_bb():
-    p = path.Path()
+    p = Path()
     p.add(0, 0, 10000)
     p.add(140, 11, 10000)
     p.add(23, 141, 10000)
@@ -80,8 +108,8 @@ def test_path_bb():
     assert bb.h == 4511
 
 
-def test_path_bb():
-    p = path.Path()
+def test_path_bb2():
+    p = Path()
     p.add(100, 100, 0)
     p.add(200, 100, 0)
     p.add(100, 200, 0)
@@ -95,7 +123,7 @@ def test_path_bb():
 
 
 def test_path_morph():
-    p = path.Path()
+    p = Path()
 
     p.add(19, 34, 10000)
     p.add(10, 10, 10000)
@@ -112,7 +140,7 @@ def test_path_morph():
 
 
 def test_path_morph2():
-    p = path.Path()
+    p = Path()
 
     p.add(19, 34, 10000)
     p.add(10, 10, 10000)
@@ -129,11 +157,11 @@ def test_path_morph2():
 
 
 def test_path_interp():
-    p = path.Path()
+    p = Path()
     p.add(0, 0, 10000)
     p.add(100, 0, 10001)
 
-    p1 = path.Path()
+    p1 = Path()
     p1.add(0, 100, 10000)
     p1.add(100, 100, 10001)
 
@@ -146,8 +174,8 @@ def test_path_interp():
 
 
 def test_timedpos_comparison():
-    t1 = path.TimedPosition(0, 0, 0)
-    t2 = path.TimedPosition(0, 0, 1)
+    t1 = TimedPosition(0, 0, 0)
+    t2 = TimedPosition(0, 0, 1)
     r = t1 < t2
     assert r is True
 
@@ -163,19 +191,26 @@ def test_timedpos_comparison():
 
 
 def test_timedpos_simple():
-    t = path.TimedPosition(0, 0, 100)
+    t = TimedPosition(0, 0, 100)
     assert t.time() == 100
 
 
+def test_timedpos_scale():
+    t = TimedPosition(1, 2, 100)
+    t.scale(5, 10)
+    assert t.x == 5.0
+    assert t.y == 20.0
+
+
 def test_sort_path():
-    p = path.Path()
+    p = Path()
 
     p.add(19, 34, 10040)
     p.add(10, 10, 10000)
     p.add(600, 10, 10001)
 
     print(p)
-    s = path.Path(sorted(p))
+    s = Path(sorted(p))
     print(s)
 
     assert s[0].timestamp == 10000
@@ -183,7 +218,7 @@ def test_sort_path():
 
 
 def test_entropy():
-    p1 = path.Path()
+    p1 = Path()
     p1.add(100, 34, 10040)
     p1.add(200, 10, 10000)
     p1.add(100, 10, 10001)
@@ -191,7 +226,7 @@ def test_entropy():
     p1.add(100, 10, 10001)
     p1.add(200, 10, 10001)
 
-    p2 = path.Path()
+    p2 = Path()
     p2.add(200, 10, 10000)
     p2.add(200, 10, 10001)
     p2.add(200, 10, 10001)
@@ -207,22 +242,15 @@ def test_entropy():
     assert sy1 > sy2
 
 
-def test_bb():
-    p1 = path.Path()
-    p1.add(100, 34, 10040)
-    p1.add(200, 10, 10000)
-
-    bb = path.BoundingBox(0, 0, 300, 300)
-
-    assert bb.inside(p1) is True
-
-    p1.add(500, 500, 10023)
-
-    assert bb.inside(p1) is False
+def test_bb_center():
+    bb = BoundingBox(100, 200, 300, 400)
+    cx, cy = bb.center()
+    assert cx == 200
+    assert cy == 300
 
 
 def test_path_clean():
-    p = path.Path()
+    p = Path()
 
     p.add(5, 5111, 10000)
     p.add(5, 5111, 10000)
@@ -241,7 +269,7 @@ def test_path_clean():
 
 
 def test_path_reverse():
-    p1 = path.Path()
+    p1 = Path()
 
     p1.add(5, 5111, 10000)
     p1.add(5, 5112, 10000)
@@ -267,7 +295,7 @@ def test_path_reverse():
     assert p1[2].x == 5
     assert p1[2].y == 5111
 
-    p2 = path.Path()
+    p2 = Path()
 
     p2.add(5, 5111, 10000)
     p2.add(5, 5112, 10000)
@@ -295,12 +323,10 @@ def test_path_reverse():
 
 
 def test_path_distance():
-    p = path.Path()
+    p = Path()
     p.add(0, 0, 10000)
     p.add(0, 10, 10000)
     p.add(10, 10, 10000)
-
-    import pyautogui
 
     size = pyautogui.Size(1, 1)
     d = p.distance(size)
