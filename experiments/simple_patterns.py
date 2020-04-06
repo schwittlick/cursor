@@ -30,9 +30,7 @@ def main():
     jpeg_renderer.render_bb(pc.bb())
     gcode_renderer.render_bb(pc.bb())
 
-    st.image(
-        jpeg_renderer.img, caption=f"Sample {pc.hash()}", use_column_width=True
-    )
+    st.image(jpeg_renderer.img, caption=f"Sample {pc.hash()}", use_column_width=True)
     if st.sidebar.button("save"):
         gcode_renderer.save(f"straight_lines_{pc.hash()}")
         jpeg_renderer.save(f"straight_lines_{pc.hash()}")
