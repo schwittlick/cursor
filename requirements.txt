@@ -18,10 +18,11 @@ PyAutoGUI==0.9.50
 PyGetWindow==0.0.8
 PyMsgBox==1.0.7
 pynput==1.6.8
-pyparsing==2.4.6
+pyparsing==2.4.7
 pyperclip==1.8.0
 PyRect==0.1.4
 PyScreeze==0.1.26
+pyserial==3.4
 pystray==0.15.0
 pytest==5.4.1
 pytest-cov==2.8.1
