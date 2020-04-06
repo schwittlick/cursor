@@ -20,8 +20,7 @@ test
     flake8 --max-line-length=88
 
     # windows
-    cd tests
-    python -m pytest --cov=cursor .
+    python -m pytest --cov=cursor . -v
 
 recorder
 
