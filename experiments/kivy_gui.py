@@ -111,8 +111,8 @@ class MyGrid(GridLayout):
         log.good(f"lines: {len(c)}")
 
         self.progress.max = len(c)
-        #thread1 = threading.Thread(target=self.simulate_progress)
-        #thread1.start()
+        # thread1 = threading.Thread(target=self.simulate_progress)
+        # thread1.start()
 
 
 class MyApp(App):
