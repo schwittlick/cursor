@@ -59,7 +59,7 @@ class DrawingMachine:
     def stream(self, filename):
         assert self.s is not None, "No serial connection open"
         assert self.ready, "Not calibrated&homed, yet."
-        
+
         file = open(filename, "r")
         for line in file:
             line = line.strip()
