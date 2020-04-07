@@ -8,6 +8,7 @@ log = wasabi.Printer()
 class DrawingMachine:
     def __init__(self):
         self.s = None
+        self.ready = False
 
     def connect(self, port, baud):
         try:
@@ -17,6 +18,17 @@ class DrawingMachine:
             self.s = None
             log.fail(se)
             return False
+
+    def calib(self):
+        self.s.write("\r\n\r\n".encode("utf-8"))
+        time.sleep(2)  # Wait for grbl to initialize
+        self.s.reset_input_buffer()
+
+        self.kill_alarm()
+        self.home()
+        self.null_coords()
+
+        self.ready = True
 
     def __send_and_print_reply(self, msg):
         assert self.s is not None, "No serial connection open"
@@ -46,21 +58,17 @@ class DrawingMachine:
 
     def stream(self, filename):
         assert self.s is not None, "No serial connection open"
-        filename = "H:\\cursor\\data\\experiments\\simple_square_test\\gcode\\straight_lines_af16bfbad06e78edbb059858c32e3b28.nc"
-        self.s.write("\r\n\r\n".encode("utf-8"))
-        time.sleep(2)  # Wait for grbl to initialize
-        self.s.reset_input_buffer()
-
-        self.kill_alarm()
-        self.home()
-        self.null_coords()
-
+        assert self.ready, "Not calibrated&homed, yet."
+        
         file = open(filename, "r")
         for line in file:
-            l = line.strip()  # Strip all EOL characters for consistency
-            self.__send_and_print_reply(l)
+            line = line.strip()
+            self.__send_and_print_reply(line)
 
-        input("  Press <Enter> to exit and disable grbl.")
+        # here should some kind of waiting happen.. for the machine to be done
+        # checking the info() function and evaluating some stuff there
+        # also the $10 in grbl config might have to be modified
+        # https://github.com/gnea/grbl/wiki/Grbl-v1.1-Configuration#10---status-report-mask
 
         file.close()
         self.s.close()
