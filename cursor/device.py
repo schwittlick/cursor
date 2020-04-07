@@ -12,9 +12,11 @@ class DrawingMachine:
     def connect(self, port, baud):
         try:
             self.s = serial.Serial(port, baud)
+            return True
         except serial.SerialException as se:
             self.s = None
             log.fail(se)
+            return False
 
     def __send_and_print_reply(self, msg):
         assert self.s is not None, "No serial connection open"
