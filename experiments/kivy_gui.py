@@ -32,7 +32,7 @@ class MyGrid(GridLayout):
         self.connect_area.add_widget(self.port)
 
         self.connect_area.add_widget(Label(text="Baudrate: "))
-        self.baud = TextInput(text="12500", multiline=False)
+        self.baud = TextInput(text="115200", multiline=False)
         self.connect_area.add_widget(self.baud)
 
         self.submit = Button(text="connect", font_size=20)
@@ -44,7 +44,7 @@ class MyGrid(GridLayout):
         self.file_status_area = GridLayout()
         self.file_status_area.cols = 1
         self.file_status_area.disabled = True
-        self.gcode_file_path = TextInput(text="", multiline=False)
+        self.gcode_file_path = TextInput(text="H:\cursor\data\experiments\composition57\gcode\composition57_de7c4e2b608a403be7a96e077f6aeab5.nc", multiline=False)
         self.file_status_area.add_widget(self.gcode_file_path)
 
         self.load_button = Button(text="load", font_size=20)
@@ -58,8 +58,11 @@ class MyGrid(GridLayout):
         self.add_widget(self.preview_area)
 
         self.start_pause_area = GridLayout()
-        self.start_pause_area.cols = 4
+        self.start_pause_area.cols = 5
         self.start_pause_area.disabled = True
+        self.calib = Button(text="calib", font_size=20)
+        self.calib.bind(on_press=self._calib)
+        self.start_pause_area.add_widget(self.calib)
         self.start = Button(text="start", font_size=20)
         self.start.bind(on_press=self._start)
         self.start_pause_area.add_widget(self.start)
@@ -77,6 +80,9 @@ class MyGrid(GridLayout):
     def _start(self, instance):
         self.machine.stream(self.gcode_file_path.text)
 
+    def _calib(self, instance):
+        self.machine.calib()
+
     def _pause(self, instance):
         self.machine.feed_hold()
 
@@ -84,7 +90,14 @@ class MyGrid(GridLayout):
         self.machine.resume()
 
     def connect(self, instance):
-        _connected = self.machine.connect(self.port.text, self.baud.text)
+        _connected = self.machine.connected()
+        if not _connected:
+            _connected = self.machine.connect(self.port.text, self.baud.text)
+            self.submit.text = "disconnect"
+        else:
+            self.machine.disconnect()
+            _connected = False
+            self.submit.text = "connect"
         self.preview_area.disabled = not _connected
         self.file_status_area.disabled = not _connected
         self.start_pause_area.disabled = not _connected
