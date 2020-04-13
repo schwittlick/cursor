@@ -1,8 +1,6 @@
 from cursor import path
 from cursor import data
 
-import datetime
-import pytz
 import atexit
 import pyautogui
 import wasabi
@@ -23,7 +21,7 @@ class Recorder:
     _resolution = pyautogui.size()
 
     def __init__(self):
-        self._start_time_stamp = self._get_utc_timestamp()
+        self._start_time_stamp = data.DateHandler.utc_timestamp()
         atexit.register(self.save)
 
         log.good("Setting up mouse hook")
@@ -40,22 +38,16 @@ class Recorder:
 
         log.good("Started cursor recorder")
 
-    @staticmethod
-    def _get_utc_timestamp():
-        now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
-        utc_timestamp = datetime.datetime.timestamp(now)
-        return utc_timestamp
-
     def on_move(self, x, y):
         _x = x / self._resolution[0]
         _y = y / self._resolution[1]
-        self._current_line.add(_x, _y, self._get_utc_timestamp())
+        self._current_line.add(_x, _y, data.DateHandler.utc_timestamp())
 
     def on_click(self, x, y, button, pressed):
         if not self._started and pressed:
             _x = x / self._resolution[0]
             _y = y / self._resolution[1]
-            self._current_line.add(_x, _y, self._get_utc_timestamp())
+            self._current_line.add(_x, _y, data.DateHandler.utc_timestamp())
             self._started = True
         elif self._started and pressed:
             self._mouse_recordings.add(self._current_line.copy())
@@ -74,7 +66,7 @@ class Recorder:
             log.fail(f"Couldn't save key because of {ae}")
             return
 
-        self._keyboard_recodings.append((key, self._get_utc_timestamp()))
+        self._keyboard_recodings.append((key, data.DateHandler.utc_timestamp()))
 
     def save(self):
         save_path = data.DataDirHandler().recordings()

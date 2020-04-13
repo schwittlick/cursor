@@ -9,6 +9,42 @@ from cursor import data
 from cursor import device
 
 
+@st.cache(allow_output_mutation=True)
+def inputs1():
+    return [0, 1, 2, 3, 4]
+
+
+@st.cache(allow_output_mutation=True)
+def offsets1():
+    return [0, 100, 200, 300, 400]
+
+
+@st.cache(
+    hash_funcs={
+        loader.Loader: lambda _: None,
+        path.PathCollection: lambda _: None,
+        path.Path: lambda _: None,
+    }
+)
+def load_data():
+    p = data.DataDirHandler().recordings()
+    ll = loader.Loader(directory=p, limit_files=None)
+    return ll.all_paths()
+
+
+@st.cache(
+    hash_funcs={
+        loader.Loader: lambda _: None,
+        path.PathCollection: lambda _: None,
+        path.Path: lambda _: None,
+        filter.EntropyFilter: lambda _: None,
+    }
+)
+def apply_filter(all_paths, _min, _max):
+    entropy_filter = filter.EntropyFilter(_min, _max)
+    return all_paths.filtered(entropy_filter)
+
+
 def composition57(pc):
     folder = data.DataDirHandler().jpg("composition57")
     gcode_folder = data.DataDirHandler().gcode("composition57")
@@ -103,39 +139,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-@st.cache(allow_output_mutation=True)
-def inputs1():
-    return [0, 1, 2, 3, 4]
-
-
-@st.cache(allow_output_mutation=True)
-def offsets1():
-    return [0, 100, 200, 300, 400]
-
-
-@st.cache(
-    hash_funcs={
-        loader.Loader: lambda _: None,
-        path.PathCollection: lambda _: None,
-        path.Path: lambda _: None,
-    }
-)
-def load_data():
-    p = data.DataDirHandler().recordings()
-    ll = loader.Loader(directory=p, limit_files=None)
-    return ll.all_paths()
-
-
-@st.cache(
-    hash_funcs={
-        loader.Loader: lambda _: None,
-        path.PathCollection: lambda _: None,
-        path.Path: lambda _: None,
-        filter.EntropyFilter: lambda _: None,
-    }
-)
-def apply_filter(all_paths, _min, _max):
-    entropy_filter = filter.EntropyFilter(_min, _max)
-    return all_paths.filtered(entropy_filter)

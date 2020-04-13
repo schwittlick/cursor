@@ -9,14 +9,14 @@ def test_loader_simple():
     ll = Loader(directory=dir)
 
     rec = ll.all_collections()
-    assert len(rec) == 4
+    assert len(rec) == 2
 
 
 def test_loader_keys():
     dir = DataDirHandler().test_recordings()
     ll = Loader(directory=dir)
     rec = ll.keys()
-    assert len(rec) == 6
+    assert len(rec) == 3
 
 
 def test_loader_index_too_high_exception():

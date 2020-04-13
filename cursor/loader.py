@@ -28,7 +28,9 @@ class Loader:
 
         for file in all_json_files:
             full_path = directory.joinpath(file)
-            log.good(f"Loading {full_path}")
+            _fn = full_path.stem.replace("_compressed", "")
+            ts = data.DateHandler.get_timestamp_from_utc(float(_fn))
+            log.good(f"Loading {full_path.stem}.json > {ts}")
             with open(full_path.as_posix()) as json_file:
                 json_string = json_file.readline()
                 try:
@@ -39,6 +41,7 @@ class Loader:
                 self._recordings.append(_data["mouse"])
                 for keys in _data["keys"]:
                     self._keyboard_recordings.append((keys[0], keys[1]))
+            log.good(f"..done {len(self._recordings[-1])}")
 
         absolut_path_count = sum(len(pc) for pc in self._recordings)
 

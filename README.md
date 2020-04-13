@@ -16,7 +16,7 @@ setup
 test
     
     # linux/osx
-    py.test --cov cursor
+    py.test --cov cursor -v
     flake8 --max-line-length=88
 
     # windows
