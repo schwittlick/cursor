@@ -1,7 +1,6 @@
 import serial
 import time
 import wasabi
-from kivy.clock import Clock
 
 log = wasabi.Printer()
 
@@ -131,7 +130,7 @@ class DrawingMachine:
                 log.warn(f"Not Successful")
             else:
                 i += 1
-        #for line in lines:
+        # for line in lines:
         #    line = line.strip()
         #    success = self.__send_and_print_reply(line)
 

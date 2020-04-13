@@ -3,6 +3,8 @@ import json
 import base64
 import zlib
 import pyautogui
+import datetime
+import pytz
 
 from cursor.path import Path
 from cursor.path import PathCollection
@@ -82,6 +84,19 @@ class JsonCompressor:
             raise RuntimeError("Could interpret the unzipped contents")
 
         return j
+
+
+class DateHandler:
+    @staticmethod
+    def utc_timestamp():
+        now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+        utc_timestamp = datetime.datetime.timestamp(now)
+        return utc_timestamp
+
+    @staticmethod
+    def get_timestamp_from_utc(ts):
+        dt = datetime.datetime.fromtimestamp(ts)
+        return dt.strftime("%d/%m/%y")
 
 
 class DataDirHandler:
