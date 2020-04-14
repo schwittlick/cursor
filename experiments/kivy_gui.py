@@ -21,13 +21,14 @@ kivy.require("2.0.0")
 
 log = wasabi.Printer()
 
-#p = pathlib.Path(__file__).resolve().parent.joinpath("kivy_gui.kv")
+# p = pathlib.Path(__file__).resolve().parent.joinpath("kivy_gui.kv")
 #   Builder.load_file(p.as_posix())
 
 
 class MyGrid(GridLayout):
 
     selected_file = None
+
     def init_connect_area(self):
         self.machine = DrawingMachine()
         self.cols = 1
@@ -98,8 +99,9 @@ class MyGrid(GridLayout):
         self.load.bind(on_press=self.ffind)
         bl.add_widget(self.load)
 
-        self._popup = Popup(title="Load file", content=bl,
-                            size_hint=(0.9, 0.9), auto_dismiss=False)
+        self._popup = Popup(
+            title="Load file", content=bl, size_hint=(0.9, 0.9), auto_dismiss=False
+        )
         self._popup.open()
 
     def ffind(self, el):
@@ -163,6 +165,7 @@ class MyGrid(GridLayout):
         for i in range(self.progress.max):
             self.progress.value = i
             time.sleep(0.00001)
+
 
 class MyApp(App):
     def build(self):
