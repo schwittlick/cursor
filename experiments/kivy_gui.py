@@ -136,7 +136,7 @@ class MyGrid(GridLayout):
         self.init_stream_area()
 
     def _start(self, instance):
-        self.machine.stream(self.gcode_file_path.text)
+        self.machine.stream(self.fs.selection[0])
 
     def _calib(self, instance):
         self.machine.calib()
