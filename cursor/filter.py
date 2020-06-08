@@ -13,7 +13,7 @@ class Filter:
 
 
 class EntropyFilter(Filter):
-    def __init__(self, max_x_entropy, max_y_entropy):
+    def __init__(self, max_x_entropy: float, max_y_entropy: float):
         self.max_x = max_x_entropy
         self.max_y = max_y_entropy
 
