@@ -9,7 +9,9 @@ class Filter:
         raise NotImplementedError("Not implemented in base class")
 
     def filtered(self, paths):
-        raise NotImplementedError("Not implemented in base class")
+        copied_paths = paths.copy()
+        self.filter(copied_paths)
+        return copied_paths
 
 
 class EntropyFilter(Filter):
@@ -30,11 +32,6 @@ class EntropyFilter(Filter):
         elapsed = time.time() - t0
         log.good(f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
         log.good(f"EntropyFilter: reduced path count from {len_before} to {len_after}")
-
-    def filtered(self, paths):
-        copied_paths = paths.copy()
-        self.filter(copied_paths)
-        return copied_paths
 
 
 class BoundingBoxFilter(Filter):
