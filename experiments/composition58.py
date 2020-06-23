@@ -35,9 +35,8 @@ def main():
             current_key_index += 1
         if current_key_index >= len(keys):
             running = False
-            print("done")
-            return
 
+    print("done")
 
 
 if __name__ == "__main__":
