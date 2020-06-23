@@ -96,7 +96,7 @@ class DateHandler:
     @staticmethod
     def get_timestamp_from_utc(ts):
         dt = datetime.datetime.fromtimestamp(ts)
-        return dt.strftime("%d/%m/%y")
+        return dt.strftime("%d/%m/%y %H:%M:%S.%f")
 
 
 class DataDirHandler:

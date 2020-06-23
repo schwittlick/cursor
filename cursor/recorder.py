@@ -60,6 +60,11 @@ class Recorder:
         pass
 
     def on_release(self, btn):
+        if btn == pynput.keyboard.Key.space:
+            key = ' '
+            self._keyboard_recodings.append((key, data.DateHandler.utc_timestamp()))
+            return
+
         try:
             key = btn.char
         except AttributeError as ae:
