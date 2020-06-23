@@ -5,6 +5,7 @@ from cursor import filter
 from cursor import data
 from cursor import device
 
+
 def main():
     p = data.DataDirHandler().recordings()
     p = p.joinpath("1592909088.66943_compressed.json")

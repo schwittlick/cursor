@@ -18,7 +18,6 @@ def test_recorder1():
     assert len(recorder._keyboard_recodings) == 1
     assert recorder._keyboard_recodings[0][0] == "k"
 
-
     space = KeyCode(char=" ")
     recorder.on_release(space)
     assert len(recorder._keyboard_recodings) == 2

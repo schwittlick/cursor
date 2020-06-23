@@ -61,7 +61,7 @@ class Recorder:
 
     def on_release(self, btn):
         if btn == pynput.keyboard.Key.space:
-            key = ' '
+            key = " "
             self._keyboard_recodings.append((key, data.DateHandler.utc_timestamp()))
             return
 
