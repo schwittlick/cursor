@@ -5,8 +5,13 @@ from cursor import filter
 from cursor import data
 from cursor import device
 
+import time
+from pythonosc import udp_client
+
 
 def main():
+    client = udp_client.SimpleUDPClient("127.0.0.1", 57120)
+
     p = data.DataDirHandler().recordings()
     p = p.joinpath("1592909088.66943_compressed.json")
     ll = loader.Loader()
@@ -24,10 +29,15 @@ def main():
     while running is True:
         ts = data.DateHandler.utc_timestamp() - diff
         if ts > keys[current_key_index][1]:
-            print(keys[current_key_index][0], end="")
+            k = keys[current_key_index][0]
+            print(k, end="")
+            client.send_message("/hello", ord(k))
             current_key_index += 1
         if current_key_index >= len(keys):
             running = False
+            print("done")
+            return
+
 
 
 if __name__ == "__main__":
