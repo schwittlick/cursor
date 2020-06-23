@@ -42,6 +42,7 @@ def test_loader_single_file():
     # that specific file has 18 paths
     assert len(ll.all_paths()) == 18
 
+
 def test_loader_isfileandjson():
     with pytest.raises(AssertionError):
         Loader.is_file_and_json("hey")
