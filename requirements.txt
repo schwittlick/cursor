@@ -40,3 +40,4 @@ wcwidth==0.1.9
 zipp==3.1.0
 zope.interface==5.0.2
 streamlit==0.57.3
+python-osc==1.7.4
