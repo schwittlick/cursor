@@ -11,14 +11,45 @@ SynthDef("kick_electro1", {
 	OffsetOut.ar(out, Pan2.ar(x,pan, amp));
 }).add;
 
+
+SynthDef(\tb101, {|out=0, freq=100, filt_freq=15000, atk=0.001, rel=0.2, rq=1, filt_atk=0.001, filt_rel=0.2, sub_amt=0.4, fdbk=0.2, dly=0.2, dlytime=0.4, amp=0.1|
+	var sub = SinOscFB.ar(freq*0.5, fdbk);
+	var snd = Mix.ar([LFSaw.ar(freq), LFPulse.ar(freq*1.002)*0.5, sub*sub_amt]);
+	snd = snd * EnvGen.ar(Env.perc(atk,rel), doneAction: Done.freeSelf);
+	snd = RLPF.ar(snd, EnvGen.ar(Env.new([filt_freq, filt_freq, filt_freq*0.25], [filt_atk,filt_rel], \exp)), rq);
+	snd = snd*amp;
+	Out.ar(out, Mix.ar([Pan2.ar(snd), AllpassC.ar(snd*dly, 1.5, [dlytime,dlytime * 1.02], 5.0)]));
+}).add;
+
+(instrument: \tb101, freq:1000, filt_freq:2000, atk:0.001, rel:0.1, rq:0.1, filt_atk:0.001, filt_rel:0.2, sub_amt:0.4, fdbk:0.1, dly:0.1, dlytime:0.01, amp:1.0).play;
+
+NetAddr.langPort;
+
 (
 OSCdef(\hello, { |msg|
-	msg[1].postln;
-	//(instrument: \kick_electro1).stop;
-	//(instrument: \kick_electro1, freq:msg[1] * 0.7, amp:1.0).play;
-	Synth(\drum1, [\freq, msg[1]*100, \freqMul, 500, \decay, 20.2, \fdecay, 20.5, \amp, 5.0]);
+	//msg[1].postln;
+	if(msg[1] == 32)
+	{
+		// extra bassy kick for space key
+		(instrument: \kick_electro1, freq:50, amp:1.0).play;
+		//(instrument: \kick_electro1, freq:msg[1] * 1.0, amp:1.0).play;
+	}{
+		//(instrument: \tb101, freq:msg[1] * 20.0, filt_freq:2000, atk:0.001, rel:0.1, rq:0.1, filt_atk:0.001, filt_rel:0.2, sub_amt:0.4, fdbk:0.1, dly:0.1, dlytime:0.01, amp:1.0).play;
+		(instrument: \kick_electro1, freq:msg[1] * 1.0, amp:1.0).play;
+	};
+
+
+	(instrument: \tb101, freq:msg[1] * 20.0, filt_freq:2000, atk:0.001, rel:0.1, rq:0.1, filt_atk:0.001, filt_rel:0.2, sub_amt:0.4, fdbk:0.1, dly:0.1, dlytime:0.01, amp:1.0).play;
+
+	// hyperdisko history extra stuff
+	// escape synth names with double backslash
+	// and format strings via % and .format(replacement)
+	//MFdef('historyForward').value("(instrument: \\tb101, freq:% * 0.7, amp:1.0).play;".format(msg[1]));
+	//History.enter("(instrument: \\tb, freq101:% * 0.7, amp:1.0).play;".format(msg[1]), q.myID);
 }, \hello);
 )
+
+(instrument: \kick_electro1, freq:50, amp:1.0).play;
 
 SynthDef(\drum1, {|out=0, t_trig=1, freq, freqMul=4, decay=0.1, fdecay=0.02, rq=0.2, amp=0.7, pan=0|
 	var snd, fenv, env = EnvGen.ar(Env.perc(1e-5, decay, curve:-8), t_trig, doneAction:2);
