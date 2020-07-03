@@ -60,31 +60,3 @@ SynthDef(\impulseSync, {
 }.play;
 
 )
-
-s.nextNodeID
-
-(
-SynthDef("grain", {
-
-    Out.ar(0, Line.kr(0.1, 0, 0.01, doneAction: Done.freeSelf) * FSinOsc.ar(12000))
-}).send(s);
-)
-
-(
-~freq = 100;
-
-Routine({
-    inf.do({
-		n = s.nextNodeID;
-		~freq.postln;
-		s.sendMsg("/s_new", \tb101, n);
-		s.sendMsg("/n_set", n, "freq", ~freq);
-		0.05.wait;
-		//s.sendMsg("/s_new", "grain", -1);
-        //0.5.wait;
-    })
-}).play;
-)
-n.postln
-~freq = 1000
-s.sendMsg("/n_set", n, "freq", 1000);
