@@ -121,15 +121,36 @@ class DrawingMachine:
         lines = file.readlines()
         file.close()
 
+        g_count = 0
+        c_line = []
+        l_count = 0
+        verbose = True
+        RX_BUFFER_SIZE = 128
+
         i = 0
         while i < len(lines):
             line = lines[i]
             log.good(f"i={i}")
-            success, msg = self.__send_and_print_reply(line)
-            if not success:
-                log.warn(f"Not Successful")
-            else:
-                i += 1
+            l_count += 1  # Iterate line counter
+            # l_block = re.sub('\s|\(.*?\)','',line).upper() # Strip comments/spaces/new line and capitalize
+            l_block = line.strip()
+            c_line.append(len(l_block) + 1)  # Track number of characters in grbl serial read buffer
+            grbl_out = ''
+            while sum(c_line) >= RX_BUFFER_SIZE - 1 | self.__serial.inWaiting():
+                out_temp = self.__serial.readline().strip().decode('utf-8')  # Wait for grbl response
+                print(out_temp)
+                if 'ok' not in out_temp and 'error' not in out_temp:
+                    print("  Debug: ", out_temp)  # Debug response
+                else:
+                    grbl_out += out_temp;
+                    g_count += 1  # Iterate g-code counter
+                    grbl_out += str(g_count);  # Add line finished indicator
+                    del c_line[0]  # Delete the block character count corresponding to the last 'ok'
+            if verbose:
+                print("SND: " + str(l_count) + " : " + l_block)
+            self.__serial.write(l_block.encode("utf-8"))  # Send g-code block to grbl
+            if verbose:
+                print("BUF:", str(sum(c_line)), "REC:", grbl_out)
         # for line in lines:
         #    line = line.strip()
         #    success = self.__send_and_print_reply(line)
