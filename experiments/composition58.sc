@@ -40,7 +40,7 @@ OSCdef(\keysboard_keys_ascii, { |msg|
 	};
 
 
-	//(instrument: \tb101, freq:msg[1] * 20.0, filt_freq:2000, atk:0.001, rel:0.1, rq:0.1, filt_atk:0.001, filt_rel:0.2, sub_amt:0.4, fdbk:0.1, dly:0.1, dlytime:0.01, amp:1.0).play;
+	(instrument: \tb101, freq:msg[1] * 20.0, filt_freq:2000, atk:0.001, rel:0.1, rq:0.1, filt_atk:0.001, filt_rel:0.2, sub_amt:0.4, fdbk:0.1, dly:0.1, dlytime:0.01, amp:1.0).play;
 	~freq = msg[1] * 5;
 	// hyperdisko history extra stuff
 	// escape synth names with double backslash
@@ -48,11 +48,22 @@ OSCdef(\keysboard_keys_ascii, { |msg|
 	//MFdef('historyForward').value("(instrument: \\tb101, freq:% * 0.7, amp:1.0).play;".format(msg[1]));
 	//History.enter("(instrument: \\tb, freq101:% * 0.7, amp:1.0).play;".format(msg[1]), q.myID);
 }, \keyboard_keys_ascii);
+
+
+(
+~freq = 100;
+
+Routine({
+    inf.do({
+		n = s.nextNodeID;
+		~freq.postln;
+		s.sendMsg("/s_new", \tb101, n);
+		s.sendMsg("/n_set", n, "freq", ~freq);
+		0.05.wait;
+    })
+}).play;
 )
-
-(instrument: \kick_electro1, freq:250, amp:1.0).play;
-(instrument: \tb101, freq:10 * 20.0, filt_freq:400, atk:0.1, rel:0.9, rq:0.54, filt_atk:0.001, filt_rel:0.1, sub_amt:0.01, fdbk:0.04, dly:0.1, dlytime:0.01, amp:1.0).play;
-
+)
 
 Synth(q.tonalDefs[15]).stop;
 a = Synth(q.tonalDefs[15], [\freq, 500, \freqMul, 5, \decay, 1, \fdecay, 0.1, \amp, 1]);
