@@ -34,10 +34,9 @@ def main():
             print(k, end="")
             client.send_message("/keyboard_keys_ascii", ord(k))
             current_key_index += 1
-        if current_key_index >= len(keys):
+        if current_key_index >= len(keys) - 1:
             running = False
         time.sleep(0.001)
-
 
     print("done")
 
