@@ -10,12 +10,16 @@ log = wasabi.Printer()
 
 
 class Loader:
-    def __init__(self, directory, limit_files=None):
-        assert isinstance(directory, pathlib.Path), "Only path objects allowed"
-        start_benchmark = time.time()
-
+    def __init__(self, directory=None, limit_files=None):
         self._recordings = []
         self._keyboard_recordings = []
+
+        if directory is not None:
+            self.load_all(directory=directory, limit_files=limit_files)
+
+    def load_all(self, directory, limit_files=None):
+        assert isinstance(directory, pathlib.Path), "Only path objects allowed"
+        start_benchmark = time.time()
 
         all_json_files = [
             f
@@ -28,20 +32,7 @@ class Loader:
 
         for file in all_json_files:
             full_path = directory.joinpath(file)
-            _fn = full_path.stem.replace("_compressed", "")
-            ts = data.DateHandler.get_timestamp_from_utc(float(_fn))
-            log.good(f"Loading {full_path.stem}.json > {ts}")
-            with open(full_path.as_posix()) as json_file:
-                json_string = json_file.readline()
-                try:
-                    jd = eval(json_string)
-                    _data = data.JsonCompressor().json_unzip(jd)
-                except RuntimeError:
-                    _data = json.loads(json_string, cls=data.MyJsonDecoder)
-                self._recordings.append(_data["mouse"])
-                for keys in _data["keys"]:
-                    self._keyboard_recordings.append((keys[0], keys[1]))
-            log.good(f"..done {len(self._recordings[-1])}")
+            self.load_file(full_path)
 
         absolut_path_count = sum(len(pc) for pc in self._recordings)
 
@@ -56,6 +47,22 @@ class Loader:
             f"Loaded {len(self._keyboard_recordings)} keys from {len(all_json_files)} recordings."
         )
         log.good(f"This took {round(elapsed * 1000)}ms.")
+
+    def load_file(self, path):
+        _fn = path.stem.replace("_compressed", "")
+        ts = data.DateHandler.get_timestamp_from_utc(float(_fn))
+        log.good(f"Loading {path.stem}.json > {ts}")
+        with open(path.as_posix()) as json_file:
+            json_string = json_file.readline()
+            try:
+                jd = eval(json_string)
+                _data = data.JsonCompressor().json_unzip(jd)
+            except RuntimeError:
+                _data = json.loads(json_string, cls=data.MyJsonDecoder)
+            self._recordings.append(_data["mouse"])
+            for keys in _data["keys"]:
+                self._keyboard_recordings.append((keys[0], keys[1]))
+        log.good(f"..done {len(self._recordings[-1])}")
 
     @staticmethod
     def is_file_and_json(path):
