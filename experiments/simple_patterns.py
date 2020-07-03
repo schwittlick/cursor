@@ -11,7 +11,7 @@ def main():
     st.title("Simple Testing")
     gcode_dir = DataDirHandler().gcode("simple_square_test")
     jpg_dir = DataDirHandler().jpg("simple_square_test")
-    gcode_renderer = renderer.GCodeRenderer(gcode_dir, z_down=3.0)
+    gcode_renderer = renderer.GCodeRenderer(gcode_dir, z_down=4.0)
     jpeg_renderer = renderer.JpegRenderer(jpg_dir)
 
     pc = PathCollection()
@@ -22,7 +22,7 @@ def main():
 
     pc.add(p)
 
-    pc.fit(device.DrawingMachine.Paper.CUSTOM_36_48, 50)
+    pc.fit(device.DrawingMachine.Paper.CUSTOM_48_36, 50)
 
     gcode_renderer.render(pc)
     jpeg_renderer.render(pc)
