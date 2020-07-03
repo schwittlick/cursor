@@ -2,6 +2,7 @@ from cursor.loader import Loader
 from cursor.data import DataDirHandler
 
 import pytest
+import pathlib
 
 
 def test_loader_simple():
@@ -31,6 +32,15 @@ def test_loader_single():
     ll = Loader(directory=dir)
     path = ll.single(0)
     assert len(path) > 0
+
+
+def test_loader_single_file():
+    dir = DataDirHandler().test_recordings()
+    single_file = dir.joinpath("1565088885.39372_compressed.json")
+    ll = Loader()
+    ll.load_file(single_file)
+    # that specific file has 18 paths
+    assert len(ll.all_paths()) == 18
 
 
 def test_loader_isfileandjson():
