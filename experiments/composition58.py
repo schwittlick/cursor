@@ -10,10 +10,10 @@ from pythonosc import udp_client
 
 
 def main():
-    client = udp_client.SimpleUDPClient("127.0.0.1", 57121)
+    client = udp_client.SimpleUDPClient("127.0.0.1", 57120)
 
     p = data.DataDirHandler().recordings()
-    p = p.joinpath("1593349002.059666_compressed.json")
+    p = p.joinpath("1593786160.064452_compressed.json")
     ll = loader.Loader()
     ll.load_file(p)
     keys = ll.keys()
@@ -27,14 +27,17 @@ def main():
     running = True
     current_key_index = 0
     while running is True:
+
         ts = data.DateHandler.utc_timestamp() - diff
         if ts > keys[current_key_index][1]:
             k = keys[current_key_index][0]
             print(k, end="")
-            client.send_message("/hello", ord(k))
+            client.send_message("/keyboard_keys_ascii", ord(k))
             current_key_index += 1
         if current_key_index >= len(keys):
             running = False
+        time.sleep(0.001)
+
 
     print("done")
 

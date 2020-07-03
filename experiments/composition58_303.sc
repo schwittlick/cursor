@@ -39,7 +39,7 @@ SynthDef(\impulseSync, {
 	var ampComp, cutoff, accMod=1;
 	nt = ~every.(24);
 	Poll.ar(nt, nt, \tr);
-	fr = ~seq.(nt, [100,100,400,200,100,100,800,050] *0.5); //freq
+	fr = ~seq.(nt, [~freq] *0.5); //freq
 	et = ~seq.(nt, [001,001,001,001,001,001,000,001]) * nt; //env trig
 	ac = ~seq.(nt, [001,000,000,001,000,000,001,000]) * nt; //accent
 	gt = ~seq.(nt, [001,001,001,001,001,001,000,001]); //gate
@@ -60,3 +60,31 @@ SynthDef(\impulseSync, {
 }.play;
 
 )
+
+s.nextNodeID
+
+(
+SynthDef("grain", {
+
+    Out.ar(0, Line.kr(0.1, 0, 0.01, doneAction: Done.freeSelf) * FSinOsc.ar(12000))
+}).send(s);
+)
+
+(
+~freq = 100;
+
+Routine({
+    inf.do({
+		n = s.nextNodeID;
+		~freq.postln;
+		s.sendMsg("/s_new", \tb101, n);
+		s.sendMsg("/n_set", n, "freq", ~freq);
+		0.05.wait;
+		//s.sendMsg("/s_new", "grain", -1);
+        //0.5.wait;
+    })
+}).play;
+)
+n.postln
+~freq = 1000
+s.sendMsg("/n_set", n, "freq", 1000);
