@@ -75,7 +75,7 @@ def composition57(pc):
 
         counter += 1
 
-    coll.fit(device.DrawingMachine.Paper.CUSTOM_48_36, 40)
+    coll.fit(device.DrawingMachine.Paper.a1_landscape(), 100)
 
     filename = f"composition57_{pc.hash()}"
 
