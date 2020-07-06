@@ -66,6 +66,7 @@ if __name__ == "__main__":
 
     for i in range(100):
         import random
+
         r = random.randint(0, len(all_paths) - 1)
         print(f"Creating Composition #37 with offset={r}")
         p0 = all_paths[r]
