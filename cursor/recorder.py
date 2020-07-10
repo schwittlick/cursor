@@ -57,21 +57,30 @@ class Recorder:
             self._current_line.clear()
 
     def on_press(self, btn):
-        pass
-
-    def on_release(self, btn):
-        if btn == pynput.keyboard.Key.space:
-            key = " "
-            self._keyboard_recodings.append((key, data.DateHandler.utc_timestamp()))
-            return
-
         try:
             key = btn.char
         except AttributeError as ae:
-            log.fail(f"Couldn't save key because of {ae}")
-            return
+            key = self.__convert_btn_to_key(btn)
+            if key is None:
+                log.fail(f"Couldn't save key because of {ae}")
+                return
 
-        self._keyboard_recodings.append((key, data.DateHandler.utc_timestamp()))
+        t = (key, data.DateHandler.utc_timestamp(), 1)
+        print(t)
+        self._keyboard_recodings.append(t)
+
+    def on_release(self, btn):
+        try:
+            key = btn.char
+        except AttributeError as ae:
+            key = self.__convert_btn_to_key(btn)
+            if key is None:
+                log.fail(f"Couldn't save key because of {ae}")
+                return
+
+        t = (key, data.DateHandler.utc_timestamp(), 0)
+        print(t)
+        self._keyboard_recodings.append(t)
 
     def save(self):
         save_path = data.DataDirHandler().recordings()
@@ -90,6 +99,62 @@ class Recorder:
         with open(fname_compressed.as_posix(), "w") as fp:
             dump = data.JsonCompressor().json_zip(recs)
             fp.write(str(dump))
+
+    @staticmethod
+    def __convert_btn_to_key(btn):
+        """
+        these keyboard keys dont have char representation
+        we make it ourselves
+        """
+        if btn == pynput.keyboard.Key.space:
+            return " "
+
+        if btn == pynput.keyboard.Key.delete:
+            return "DEL"
+
+        if btn == pynput.keyboard.Key.cmd:
+            return "CMD"
+
+        if btn == pynput.keyboard.Key.cmd_l:
+            return "CMD_L"
+
+        if btn == pynput.keyboard.Key.cmd_r:
+            return "CMD_R"
+
+        if btn == pynput.keyboard.Key.alt:
+            return "ALT"
+
+        if btn == pynput.keyboard.Key.alt_l:
+            return "ALT_L"
+
+        if btn == pynput.keyboard.Key.alt_r:
+            return "ALT_R"
+
+        if btn == pynput.keyboard.Key.enter:
+            return "ENTER"
+
+        if btn == pynput.keyboard.Key.backspace:
+            return "BACKSPACE"
+
+        if btn == pynput.keyboard.Key.shift:
+            return "SHIFT"
+
+        if btn == pynput.keyboard.Key.shift_l:
+            return "SHIFT_L"
+
+        if btn == pynput.keyboard.Key.shift_r:
+            return "SHIFT_R"
+
+        if btn == pynput.keyboard.Key.ctrl:
+            return "CTRL"
+
+        if btn == pynput.keyboard.Key.ctrl_l:
+            return "CTRL_L"
+
+        if btn == pynput.keyboard.Key.ctrl_r:
+            return "CTRL_R"
+
+        return None
 
 
 rr = None
