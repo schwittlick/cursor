@@ -75,7 +75,7 @@ def composition57(pc):
 
         counter += 1
 
-    coll.fit(device.DrawingMachine.Paper.a1_landscape(), 40)
+    coll.fit(device.DrawingMachine.Paper.a1_landscape(), 100)
 
     filename = f"composition57_{pc.hash()}"
 
@@ -92,7 +92,8 @@ def composition57(pc):
 
     if st.sidebar.button("save"):
         st.write(f"Saving {filename}")
-        gcode_renderer.render(coll, filename)
+        gcode_renderer.render(coll)
+        gcode_renderer.save(filename)
         jpeg_renderer.save(filename)
 
 

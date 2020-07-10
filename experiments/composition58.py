@@ -9,7 +9,12 @@ import time
 from pythonosc import udp_client
 
 
+# This is c58 which is using keys to control synthesizers in supercollider
+# no mouse lines used in this script
+
+
 def main():
+    # this port needs to be taken from SC via NetAddr.langPort;
     client = udp_client.SimpleUDPClient("127.0.0.1", 57120)
 
     p = data.DataDirHandler().recordings()

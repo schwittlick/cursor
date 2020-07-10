@@ -121,18 +121,9 @@ class DrawingMachine:
         lines = file.readlines()
         file.close()
 
-        i = 0
-        while i < len(lines):
-            line = lines[i]
-            log.good(f"i={i}")
-            success, msg = self.__send_and_print_reply(line)
-            if not success:
-                log.warn(f"Not Successful")
-            else:
-                i += 1
-        # for line in lines:
-        #    line = line.strip()
-        #    success = self.__send_and_print_reply(line)
+        for line in lines:
+            line = line.strip()
+            success = self.__send_and_print_reply(line)
 
         # here should some kind of waiting happen.. for the machine to be done
         # checking the info() function and evaluating some stuff there
