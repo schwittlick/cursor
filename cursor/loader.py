@@ -61,7 +61,7 @@ class Loader:
                 _data = json.loads(json_string, cls=data.MyJsonDecoder)
             self._recordings.append(_data["mouse"])
             for keys in _data["keys"]:
-                self._keyboard_recordings.append((keys[0], keys[1]))
+                self._keyboard_recordings.append(tuple(keys))
         log.good(f"..done {len(self._recordings[-1])}")
 
     @staticmethod
