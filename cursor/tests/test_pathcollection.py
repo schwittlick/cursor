@@ -154,3 +154,26 @@ def test_pathcollection_clean():
     pcol.clean()
 
     assert len(pcol) == 1
+
+
+def test_pathcollection_layer():
+    pcol = PathCollection()
+    p0 = Path(layer="custom")
+    p0.add(5, 5111, 10000)
+    p1 = Path()
+    p1.add(5, 5111, 10000)
+
+    p3 = Path()
+    p3.add(5, 5111, 10000)
+
+    pcol.add(p0)
+    pcol.add(p1)
+    pcol.add(p3)
+
+    layers = pcol.layer_names()
+    assert len(layers) == 2
+
+    v = pcol.get_layers()
+
+    assert len(v["default"]) == 2
+    assert len(v["custom"]) == 1
