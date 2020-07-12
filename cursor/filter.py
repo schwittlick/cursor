@@ -29,7 +29,9 @@ class EntropyMinFilter(Filter):
 
         elapsed = time.time() - t0
         log.good(f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
-        log.good(f"{__class__.__name__}: reduced path count from {len_before} to {len_after}")
+        log.good(
+            f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
+        )
 
     def filtered(self, paths):
         copied_paths = paths.copy()
@@ -55,7 +57,9 @@ class EntropyMaxFilter(Filter):
         len_after = len(paths)
         elapsed = time.time() - t0
         log.good(f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
-        log.good(f"{__class__.__name__}: reduced path count from {len_before} to {len_after}")
+        log.good(
+            f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
+        )
 
     def filtered(self, paths):
         copied_paths = paths.copy()
@@ -84,7 +88,9 @@ class MinPointCountFilter(Filter):
         len_after = len(paths)
         elapsed = time.time() - t0
         log.good(f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
-        log.good(f"{__class__.__name__}: reduced path count from {len_before} to {len_after}")
+        log.good(
+            f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
+        )
 
 
 class MaxPointCountFilter(Filter):
@@ -100,7 +106,9 @@ class MaxPointCountFilter(Filter):
         len_after = len(paths)
         elapsed = time.time() - t0
         log.good(f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
-        log.good(f"{__class__.__name__}: reduced path count from {len_before} to {len_after}")
+        log.good(
+            f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
+        )
 
 
 class DistanceFilter(Filter):

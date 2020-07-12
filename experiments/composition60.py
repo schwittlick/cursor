@@ -55,12 +55,16 @@ if __name__ == "__main__":
                 p1 = all_paths.random()
                 print(p1)
 
-                posx = x * xsize + (x*20) + random.uniform(-50, 50)
-                posy = y * ysize + (y*20) + random.uniform(-50, 50)
-                _p1 = p1.morph((posx, posy), (posx + xsize, posy)) # top
-                _p2 = p1.morph((posx, posy + ysize), (posx + xsize, posy + ysize)) # bottom
-                _p3 = p1.morph((posx, posy), (posx, posy + ysize)) # left
-                _p4 = p1.morph((posx + xsize, posy), (posx + xsize, posy + ysize)) # right
+                posx = x * xsize + (x * 20) + random.uniform(-50, 50)
+                posy = y * ysize + (y * 20) + random.uniform(-50, 50)
+                _p1 = p1.morph((posx, posy), (posx + xsize, posy))  # top
+                _p2 = p1.morph(
+                    (posx, posy + ysize), (posx + xsize, posy + ysize)
+                )  # bottom
+                _p3 = p1.morph((posx, posy), (posx, posy + ysize))  # left
+                _p4 = p1.morph(
+                    (posx + xsize, posy), (posx + xsize, posy + ysize)
+                )  # right
 
                 coll.add(_p1)
                 coll.add(_p2)
