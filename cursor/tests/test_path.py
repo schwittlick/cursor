@@ -332,3 +332,11 @@ def test_path_distance():
     d = p.distance(size)
 
     assert d == 20
+
+
+def test_path_layer():
+    p = Path()
+    assert p.layer is "default"
+
+    p.layer = "custom"
+    assert p.layer is "custom"
