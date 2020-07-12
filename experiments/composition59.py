@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
     fname = f"composition59_{coll.hash()}"
     print(fname)
-    #fname = f"composition59"
+    # fname = f"composition59"
     gcode_renderer.render(coll)
     gcode_renderer.save(fname)
     jpeg_renderer.render(coll)
