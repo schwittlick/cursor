@@ -180,6 +180,10 @@ class Path:
             p.scale(x, y)
 
     def morph(self, start, end):
+        if isinstance(start, TimedPosition) and isinstance(end, TimedPosition):
+            start = (start.x, start.y)
+            end = (end.x, end.y)
+
         path = Path()
         end_np = self.end_pos().arr()
         start_np = self.start_pos().arr()
@@ -337,7 +341,8 @@ class Path:
         self.vertices = new_points
 
     def __repr__(self):
-        return str(self.vertices)
+        rep = f"verts: {len(self.vertices)} shannx: {self.shannon_x()} shanny: {self.shannon_y()}"
+        return rep
 
     def __len__(self):
         return len(self.vertices)
