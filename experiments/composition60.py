@@ -17,7 +17,7 @@ if __name__ == "__main__":
     5. this means 3 diff gcode files
     """
     p = data.DataDirHandler().recordings()
-    ll = loader.Loader(directory=p, limit_files=10)
+    ll = loader.Loader(directory=p, limit_files=30)
     all_paths = ll.all_paths()
 
     entropy_filter_min = filter.EntropyMinFilter(0.1, 0.1)
@@ -55,8 +55,8 @@ if __name__ == "__main__":
                 p1 = all_paths.random()
                 print(p1)
 
-                posx = x * xsize + (x*20) + random.uniform(-10, 10)
-                posy = y * ysize + (y*20) + random.uniform(-10, 10)
+                posx = x * xsize + (x*20) + random.uniform(-50, 50)
+                posy = y * ysize + (y*20) + random.uniform(-50, 50)
                 _p1 = p1.morph((posx, posy), (posx + xsize, posy)) # top
                 _p2 = p1.morph((posx, posy + ysize), (posx + xsize, posy + ysize)) # bottom
                 _p3 = p1.morph((posx, posy), (posx, posy + ysize)) # left
@@ -77,7 +77,8 @@ if __name__ == "__main__":
 
                         coll.add(newpath)
 
-
-        coll.fit(device.DrawingMachine.Paper.a1_landscape(), 40)
+        coll.fit(device.DrawingMachine.Paper.custom_42_56_landscape(), 40)
         jpeg_renderer.render(coll)
         jpeg_renderer.save(f"composition60_{i}")
+        gcode_renderer.render(coll)
+        gcode_renderer.save(f"composition60_{i}")
