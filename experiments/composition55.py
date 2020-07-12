@@ -59,7 +59,7 @@ if __name__ == "__main__":
     rec = ll.single(0)
     all_paths = ll.all_paths()
 
-    entropy_filter = filter.EntropyFilter(1.5, 1.5)
+    entropy_filter = filter.EntropyMinFilter(1.5, 1.5)
     all_paths.filter(entropy_filter)
 
     # import random
