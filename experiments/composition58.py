@@ -10,7 +10,7 @@ from pythonosc import udp_client
 
 
 def main():
-    client = udp_client.SimpleUDPClient("127.0.0.1", 57120)
+    client = udp_client.SimpleUDPClient("127.0.0.1", 57121)
 
     p = data.DataDirHandler().recordings()
     p = p.joinpath("1593786160.064452_compressed.json")
