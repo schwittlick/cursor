@@ -44,7 +44,7 @@ OSCdef(\keyboard_keys_ascii, { |msg|
 		//(instrument: \kick_electro1, freq:msg[1] * 5.0, amp:1.0).play;
 	};
 
-	(instrument: \tb101, freq:msg[1] * 20.0, filt_freq:1000, atk:0.01, rel:0.1, rq:0.1, filt_atk:0.001, filt_rel:0.2, sub_amt:0.4, fdbk:0.1, dly:0.1, dlytime:0.01, amp:1.0).play;
+	(instrument: \tb101, freq:msg[1] * 20.0, filt_freq:1000, atk:0.01, rel:0.1, rq:0.1, filt_atk:0.01, filt_rel:0.2, sub_amt:0.4, fdbk:0.1, dly:0.1, dlytime:0.01, amp:1.0).play;
 	//MFdef('historyForward').value("(instrument: \\tb101, freq:% * 20.0, filt_freq:2000, atk:0.001, rel:0.1, rq:0.1, filt_atk:0.001, filt_rel:0.2, sub_amt:0.4, fdbk:0.1, dly:0.1, dlytime:0.01, amp:1.0).play;".format(msg[1]));
 	//History.enter("(instrument: \t\b101, freq:% * 20.0, filt_freq:2000, atk:0.001, rel:0.1, rq:0.1, filt_atk:0.001, filt_rel:0.2, sub_amt:0.4, fdbk:0.1, dly:0.1, dlytime:0.01, amp:1.0).play;".format(msg[1]), q.myID);
 
