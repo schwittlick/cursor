@@ -38,7 +38,7 @@ def main():
             k = keys[current_key_index][0]
             down = keys[current_key_index][2]
             print(down)
-            #print(k)
+            # print(k)
             if down:
                 try:
                     client.send_message("/keyboard_keys_ascii", ord(k))
