@@ -39,7 +39,7 @@ SynthDef(\impulseSync, {
 	var ampComp, cutoff, accMod=1;
 	nt = ~every.(24);
 	Poll.ar(nt, nt, \tr);
-	fr = ~seq.(nt, [~freq] *0.5); //freq
+	fr = ~seq.(nt, [100,100,400,200,100,100,800,050] *0.5); //freq
 	et = ~seq.(nt, [001,001,001,001,001,001,000,001]) * nt; //env trig
 	ac = ~seq.(nt, [001,000,000,001,000,000,001,000]) * nt; //accent
 	gt = ~seq.(nt, [001,001,001,001,001,001,000,001]); //gate
