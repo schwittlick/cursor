@@ -17,7 +17,7 @@ if __name__ == "__main__":
     5. this means 3 diff gcode files
     """
     p = data.DataDirHandler().recordings()
-    ll = loader.Loader(directory=p, limit_files=30)
+    ll = loader.Loader(directory=p, limit_files=1)
     all_paths = ll.all_paths()
 
     entropy_filter_min = filter.EntropyMinFilter(0.1, 0.1)
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     point_filter2 = filter.MinPointCountFilter(6)
     all_paths.filter(point_filter2)
 
-    for i in range(10):
+    for i in range(1):
         gcode_folder = data.DataDirHandler().gcode("composition60")
         folder = data.DataDirHandler().jpg("composition60")
         gcode_renderer = renderer.GCodeRenderer(gcode_folder, z_down=3.5)
@@ -78,11 +78,13 @@ if __name__ == "__main__":
                         counter += 1
 
                         newpath = _p3.morph(p, bottom_connection)
-
+                        newpath.layer = "filled"
                         coll.add(newpath)
 
         coll.fit(device.DrawingMachine.Paper.custom_42_56_landscape(), 40)
-        jpeg_renderer.render(coll)
-        jpeg_renderer.save(f"composition60_{i}")
-        gcode_renderer.render(coll)
-        gcode_renderer.save(f"composition60_{i}")
+
+        for layer, pc in coll.get_layers().items():
+            jpeg_renderer.render(pc)
+            jpeg_renderer.save(f"composition60_{i}_{layer}")
+            gcode_renderer.render(pc)
+            gcode_renderer.save(f"composition60_{i}_{layer}")
