@@ -52,6 +52,8 @@ class Loader:
         _fn = path.stem.replace("_compressed", "")
         ts = data.DateHandler.get_timestamp_from_utc(float(_fn))
         log.good(f"Loading {path.stem}.json > {ts}")
+
+        new_keys = []
         with open(path.as_posix()) as json_file:
             json_string = json_file.readline()
             try:
@@ -61,8 +63,11 @@ class Loader:
                 _data = json.loads(json_string, cls=data.MyJsonDecoder)
             self._recordings.append(_data["mouse"])
             for keys in _data["keys"]:
-                self._keyboard_recordings.append((keys[0], keys[1]))
-        log.good(f"..done {len(self._recordings[-1])}")
+                new_keys.append(tuple(keys))
+
+        self._keyboard_recordings.extend(new_keys)
+        log.good(f"Loaded {len(self._recordings[-1])} paths")
+        log.good(f"Loaded {len(new_keys)} keys")
 
     @staticmethod
     def is_file_and_json(path):

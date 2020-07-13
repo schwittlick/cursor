@@ -101,7 +101,8 @@ class BoundingBox:
 
 
 class Path:
-    def __init__(self, vertices=None):
+    def __init__(self, vertices=None, layer="default"):
+        self.layer = layer
         if vertices:
             self.vertices = list(vertices)
         else:
@@ -180,6 +181,10 @@ class Path:
             p.scale(x, y)
 
     def morph(self, start, end):
+        if isinstance(start, TimedPosition) and isinstance(end, TimedPosition):
+            start = (start.x, start.y)
+            end = (end.x, end.y)
+
         path = Path()
         end_np = self.end_pos().arr()
         start_np = self.start_pos().arr()
@@ -337,7 +342,8 @@ class Path:
         self.vertices = new_points
 
     def __repr__(self):
-        return str(self.vertices)
+        rep = f"verts: {len(self.vertices)} shannx: {self.shannon_x()} shanny: {self.shannon_y()} layer: {self.layer}"
+        return rep
 
     def __len__(self):
         return len(self.vertices)
@@ -450,6 +456,30 @@ class PathCollection:
 
     def timestamp(self):
         return self._timestamp
+
+    def layer_names(self):
+        layers = ["default"]
+        for p in self.__paths:
+            if p.layer not in layers:
+                layers.append(p.layer)
+
+        return layers
+
+    def get_layers(self):
+        layers = {}
+        for layer in self.layer_names():
+            layers[layer] = []
+
+        for p in self.__paths:
+            layers[p.layer].append(p)
+
+        layered_pcs = {}
+        for key in layers:
+            pc = PathCollection()
+            pc.__paths.extend(layers[key])
+            layered_pcs[key] = pc
+
+        return layered_pcs
 
     def bb(self):
         mi = self.min()
