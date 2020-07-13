@@ -37,11 +37,11 @@ def load_data():
         loader.Loader: lambda _: None,
         path.PathCollection: lambda _: None,
         path.Path: lambda _: None,
-        filter.EntropyFilter: lambda _: None,
+        filter.EntropyMinFilter: lambda _: None,
     }
 )
 def apply_filter(all_paths, _min, _max):
-    entropy_filter = filter.EntropyFilter(_min, _max)
+    entropy_filter = filter.EntropyMinFilter(_min, _max)
     return all_paths.filtered(entropy_filter)
 
 
@@ -75,7 +75,7 @@ def composition57(pc):
 
         counter += 1
 
-    coll.fit(device.DrawingMachine.Paper.CUSTOM_48_36, 40)
+    coll.fit(device.DrawingMachine.Paper.a1_landscape(), 100)
 
     filename = f"composition57_{pc.hash()}"
 
@@ -101,7 +101,7 @@ def main():
     st.title("Composition #57")
     all_paths = load_data()
 
-    st.sidebar.markdown("EntropyFilter")
+    st.sidebar.markdown("EntropyMinFilter")
     min_slider = st.sidebar.slider("min entropy", 0.0, 10.0, 3.5)
     max_slider = st.sidebar.slider("max entropy", 0.0, 10.0, 5.0)
     all_p = apply_filter(all_paths, min_slider, max_slider)

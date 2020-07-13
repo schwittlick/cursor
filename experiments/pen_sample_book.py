@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
     print(len(all_paths))
 
-    entropy_filter = filter.EntropyFilter(0.9, 0.9)
+    entropy_filter = filter.EntropyMinFilter(0.9, 0.9)
     all_paths.filter(entropy_filter)
 
     print(len(all_paths))

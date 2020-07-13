@@ -40,7 +40,7 @@ if __name__ == "__main__":
     rec = ll.single(0)
     all_paths = ll.all_paths()
 
-    entropy_filter = filter.EntropyFilter(1.2, 1.2)
+    entropy_filter = filter.EntropyMinFilter(1.2, 1.2)
     all_paths.filter(entropy_filter)
 
     distance_filter = filter.DistanceFilter(100, rec.resolution)

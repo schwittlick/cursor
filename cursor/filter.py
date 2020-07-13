@@ -12,10 +12,10 @@ class Filter:
         raise NotImplementedError("Not implemented in base class")
 
 
-class EntropyFilter(Filter):
-    def __init__(self, max_x_entropy, max_y_entropy):
-        self.max_x = max_x_entropy
-        self.max_y = max_y_entropy
+class EntropyMinFilter(Filter):
+    def __init__(self, min_x_entropy, min_y_entropy):
+        self.min_x = min_x_entropy
+        self.min_y = min_y_entropy
 
     def filter(self, paths):
         t0 = time.time()
@@ -23,13 +23,43 @@ class EntropyFilter(Filter):
         paths[:] = [
             p
             for p in paths
-            if not p.shannon_x() < self.max_x and p.shannon_y() < self.max_y
+            if p.shannon_x() > self.min_x and p.shannon_y() > self.min_y
         ]
         len_after = len(paths)
 
         elapsed = time.time() - t0
         log.good(f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
-        log.good(f"EntropyFilter: reduced path count from {len_before} to {len_after}")
+        log.good(
+            f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
+        )
+
+    def filtered(self, paths):
+        copied_paths = paths.copy()
+        self.filter(copied_paths)
+        return copied_paths
+
+
+class EntropyMaxFilter(Filter):
+    def __init__(self, max_x_entropy, max_y_entropy):
+        self.max_x = max_x_entropy
+        self.max_y = max_y_entropy
+
+    def filter(self, paths):
+        t0 = time.time()
+        len_before = len(paths)
+
+        paths[:] = [
+            p
+            for p in paths
+            if p.shannon_x() < self.max_x and p.shannon_y() < self.max_y
+        ]
+
+        len_after = len(paths)
+        elapsed = time.time() - t0
+        log.good(f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
+        log.good(
+            f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
+        )
 
     def filtered(self, paths):
         copied_paths = paths.copy()
@@ -50,7 +80,17 @@ class MinPointCountFilter(Filter):
         self.point_count = point_count
 
     def filter(self, paths):
+        t0 = time.time()
+        len_before = len(paths)
+
         paths[:] = [p for p in paths if len(p) >= self.point_count]
+
+        len_after = len(paths)
+        elapsed = time.time() - t0
+        log.good(f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
+        log.good(
+            f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
+        )
 
 
 class MaxPointCountFilter(Filter):
@@ -58,7 +98,17 @@ class MaxPointCountFilter(Filter):
         self.point_count = point_count
 
     def filter(self, paths):
+        t0 = time.time()
+        len_before = len(paths)
+
         paths[:] = [p for p in paths if len(p) <= self.point_count]
+
+        len_after = len(paths)
+        elapsed = time.time() - t0
+        log.good(f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
+        log.good(
+            f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
+        )
 
 
 class DistanceFilter(Filter):
