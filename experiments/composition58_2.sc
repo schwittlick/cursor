@@ -50,12 +50,12 @@ b = Bus.audio(s,1); // effects bus
 
 (
 // setup the synths as ndefs
-~imp = Ndef(\im, \Impulse, [\effectbus, b.index]).play;
-~imp.set(\freq, 0.5);
-~imp.set(\amp, 0);
+Ndef(\im, \Impulse, [\effectbus, b.index]).play;
+Ndef(\im).set(\freq, 0.5);
+Ndef(\im).set(\amp, 0);
 
-~mod = Ndef(\mo, \ImpulseMod, [\inbus, b.index, \outbus, 0]).play;
-~mod.set(\amp, 0);
+Ndef(\mo, \ImpulseMod, [\inbus, b.index, \outbus, 0]).play;
+Ndef(\mo).set(\amp, 0);
 
 // start gui mixer
 NdefMixer(s);
@@ -63,27 +63,27 @@ NdefMixer(s);
 
 (
 // change parameters
-~imp.set(\freq, 0.5);
-~imp.set(\attack, 0.0005);
-~imp.set(\decay, 0.1);
-~imp.set(\direct, 1);
+Ndef(\im).set(\freq, 0.5);
+Ndef(\im).set(\attack, 0.0005);
+Ndef(\im).set(\decay, 0.1);
+Ndef(\im).set(\direct, 1);
 )
 (
-~imp.set(\amp, 0);
-~mod.set(\amp, 0);
+Ndef(\im).set(\amp, 0);
+Ndef(\mo).set(\amp, 1);
 )
 
 (
 // stop them
-~imp.free;
-~mod.free;
+Ndef(\im).free;
+Ndef(\mo).free;
 )
 
 (
 OSCdef(\keyboard_keys_ascii, { arg msg;
 	var freq, direct;
 	freq = msg[1] / 10;
-	direct = (freq / 12);
+	direct = (freq / 13);
 	"msg: ".post;
 	msg[1].postln;
 	"freq: ".post;
@@ -91,11 +91,11 @@ OSCdef(\keyboard_keys_ascii, { arg msg;
 	"direct: ".post;
 	direct.postln;
 
-	~imp.set(\freq, freq);
-	~imp.set(\direct, direct);
-	~imp.set(\attack, 0.0000001);
-	~imp.set(\amp, 1);
-	~mod.set(\amp, 1);
+	Ndef(\im).set(\freq, freq);
+	Ndef(\im).set(\direct, direct);
+	Ndef(\im).set(\attack, 0.0000001);
+	Ndef(\im).set(\amp, 1);
+	Ndef(\mo).set(\amp, 1);
 }, \keyboard_keys_ascii);
 
 
