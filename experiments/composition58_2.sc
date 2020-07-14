@@ -1,6 +1,16 @@
 
 NetAddr.langPort;
 
+// https://doc.sccode.org/Reference/AudioDeviceSelection.html
+s.options
+s.options.outDevice = "Built-in Output";
+s.options.numOutputBusChannels = 2;
+s.options.numInputBusChannels = 2;
+s.options.sampleRate = 48000;
+s.reboot;
+TdefAllGui.new;
+NdefMixer(s).moveTo(300, 300);
+
 (
 
 SynthDef("kick_electro1", {
@@ -16,7 +26,7 @@ SynthDef("kick_electro1", {
 	OffsetOut.ar(out, Pan2.ar(x,pan, amp));
 }).add;
 
-SynthDef(\ImpulseTest, { arg outbus=0, effectbus, freq=0.5, phase=0.25, attack=0.01, decay=0.2, direct=0.5, amp=1.0;
+SynthDef(\Impulse, { arg outbus=0, effectbus, freq=0.1, phase=0.25, attack=0.01, decay=0.2, direct=0.5, amp=1.0;
 	var source;
 	//MouseX.kr(1, 20, 1).poll;
 	source = Impulse.ar(freq, phase);
@@ -39,33 +49,53 @@ b = Bus.audio(s,1); // effects bus
 )
 
 (
-x = Synth.new(\ImpulseTest, [\effectbus, b.index]);
-y = Synth.after(x, \ImpulseMod, [\inbus, b.index, \outbus, 0]);
+// setup the synths as ndefs
+~imp = Ndef(\im, \Impulse, [\effectbus, b.index]).play;
+~imp.set(\freq, 0.5);
+~imp.set(\amp, 0);
+
+~mod = Ndef(\mo, \ImpulseMod, [\inbus, b.index, \outbus, 0]).play;
+~mod.set(\amp, 0);
+
+// start gui mixer
+NdefMixer(s);
 )
 
-x.set(\freq, 0.5);
-x.set(\attack, 0.005);
-x.set(\decay, 0.2);
-x.set(\direct, 0);
-x.set(\amp, 1);
-y.set(\amp, 1);
-x.free; y.free;
+(
+// change parameters
+~imp.set(\freq, 0.5);
+~imp.set(\attack, 0.0005);
+~imp.set(\decay, 0.1);
+~imp.set(\direct, 1);
+)
+(
+~imp.set(\amp, 0);
+~mod.set(\amp, 0);
+)
+
+(
+// stop them
+~imp.free;
+~mod.free;
+)
 
 (
 OSCdef(\keyboard_keys_ascii, { arg msg;
 	var freq, direct;
 	freq = msg[1] / 10;
 	direct = (freq / 12);
-	//"msg: ".post;
-	//msg[1].postln;
-	//"freq: ".post;
-	//freq.postln;
-	//"direct: ".post;
-	//direct.postln;
+	"msg: ".post;
+	msg[1].postln;
+	"freq: ".post;
+	freq.postln;
+	"direct: ".post;
+	direct.postln;
 
-	x.set(\freq, freq);
-	x.set(\direct, direct);
-	x.set(\attack, 0.0005);
+	~imp.set(\freq, freq);
+	~imp.set(\direct, direct);
+	~imp.set(\attack, 0.0000001);
+	~imp.set(\amp, 1);
+	~mod.set(\amp, 1);
 }, \keyboard_keys_ascii);
 
 
