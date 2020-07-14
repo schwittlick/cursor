@@ -14,7 +14,7 @@ from pythonosc import udp_client
 
 
 def main():
-    client = udp_client.SimpleUDPClient("127.0.0.1", 57121)
+    client = udp_client.SimpleUDPClient("127.0.0.1", 57120)
     # this port needs to be taken from SC via NetAddr.langPort;
 
     p = data.DataDirHandler().recordings()
