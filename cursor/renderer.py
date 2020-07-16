@@ -14,7 +14,9 @@ class DrawingOutOfBoundsException(Exception):
     """
     Raised when trying to generate gcode that exceeds the drawing machine dimensions
     """
+
     pass
+
 
 class PathIterator:
     def __init__(self, paths):
