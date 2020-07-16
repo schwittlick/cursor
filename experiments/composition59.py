@@ -1,6 +1,4 @@
-from cursor import loader
 from cursor import renderer
-from cursor import filter
 from cursor import path
 from cursor import data
 from cursor import device
@@ -11,32 +9,46 @@ import math
 if __name__ == "__main__":
     gcode_folder = data.DataDirHandler().gcode("composition59")
     folder = data.DataDirHandler().jpg("composition59")
-    gcode_renderer = renderer.GCodeRenderer(gcode_folder, z_down=3.0)
+    gcode_renderer = renderer.GCodeRenderer(gcode_folder, z_down=4.5)
     jpeg_renderer = renderer.JpegRenderer(folder)
 
     coll = path.PathCollection()
 
-    path = path.Path()
+    path = path.Path(layer="round1")
     theta = 0
     yextra = 0
-    while theta < math.pi * 20:
-        h = 150
-        k = 150
+    while theta < math.pi * 80: # 80
         r = 50
-        y = h + r * math.cos(theta) * 2
-        x = k - r * math.sin(theta) + yextra
+        y = r * math.cos(theta) * 2
+        x = r * math.sin(theta) + yextra
         path.add(x, y, 0)
-        theta += math.pi / random.randint(1, 800)
+        theta += 0.02#math.pi / random.randint(1, 800)
         yextra += 0.15
 
+    reversed_path = path.reversed()
+    reversed_path.layer = "round2"
+
     coll.add(path)
+    #coll.add(reversed_path)
 
-    coll.fit(device.DrawingMachine.Paper.custom_36_48_landscape(), 0)
+    coll.fit(device.DrawingMachine.Paper.custom_70_100_landscape(), 100)
 
-    fname = f"composition59_{coll.hash()}"
-    print(fname)
-    # fname = f"composition59"
-    gcode_renderer.render(coll)
-    gcode_renderer.save(fname)
+    num = "test"
+    num = coll.hash()
+    fname = f"composition59_{num}"
+
     jpeg_renderer.render(coll)
-    jpeg_renderer.save(fname)
+    jpeg_renderer.save(f"{fname}")
+    gcode_renderer.render(coll)
+    gcode_renderer.save(f"{fname}")
+
+    exit(0)
+
+    separate_layers = coll.get_layers()
+    for layer, pc in separate_layers.items():
+        pc.fit(device.DrawingMachine.Paper.custom_70_100_landscape(), 100)
+
+        jpeg_renderer.render(pc)
+        jpeg_renderer.save(f"{fname}_{layer}")
+        gcode_renderer.render(pc)
+        gcode_renderer.save(f"{fname}_{layer}")

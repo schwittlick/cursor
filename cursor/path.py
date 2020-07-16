@@ -7,7 +7,9 @@ import datetime
 import pytz
 import random
 import hashlib
+import wasabi
 
+log = wasabi.Printer()
 
 class TimedPosition:
     def __init__(self, x=0.0, y=0.0, timestamp=0):
@@ -458,7 +460,7 @@ class PathCollection:
         return self._timestamp
 
     def layer_names(self):
-        layers = ["default"]
+        layers = []
         for p in self.__paths:
             if p.layer not in layers:
                 layers.append(p.layer)
@@ -517,9 +519,9 @@ class PathCollection:
             abs(bb.w * scale),
             abs(bb.h * scale),
         )
-        for p in self.__paths:
-            if bb.x * scale < 0:
-                p.translate(abs_scaled_bb[0], abs_scaled_bb[1])
+        if bb.x * scale < 0:
+            log.good(f"{__class__.__name__}: fit: translate by {abs_scaled_bb[0]} {abs_scaled_bb[1]}")
+            self.translate(abs_scaled_bb[0], abs_scaled_bb[1])
 
         width = size[0]
         height = size[1]
@@ -529,11 +531,16 @@ class PathCollection:
         # scaling
         xfac = (width - padding_x * 2) / self.bb().w
         yfac = (height - padding_y * 2) / self.bb().h
+
+        log.good(f"{__class__.__name__}: fit: scaled by {xfac} {yfac}")
+
         self.scale(xfac, yfac)
 
         # centering
         center = self.bb().center()
         center_dims = width / 2, height / 2
         diff = center_dims[0] - center[0], center_dims[1] - center[1]
+
+        log.good(f"{__class__.__name__}: fit: translated by {diff[0]} {diff[1]}")
 
         self.translate(diff[0], diff[1])

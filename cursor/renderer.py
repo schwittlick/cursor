@@ -1,5 +1,6 @@
 from cursor.path import PathCollection
 from cursor.path import BoundingBox
+from cursor.device import DrawingMachine
 
 import svgwrite
 import pathlib
@@ -8,6 +9,12 @@ from PIL import Image, ImageDraw
 
 log = wasabi.Printer()
 
+
+class DrawingOutOfBoundsException(Exception):
+    """
+    Raised when trying to generate gcode that exceeds the drawing machine dimensions
+    """
+    pass
 
 class PathIterator:
     def __init__(self, paths):
@@ -53,7 +60,7 @@ class SvgRenderer:
 
         fname = self.save_path.joinpath(self.filename + ".svg")
         self.dwg = svgwrite.Drawing(
-            fname, profile="tiny", size=(bb.w + bb.x, bb.h + bb.y)
+            fname.as_posix(), profile="tiny", size=(bb.w + bb.x, bb.h + bb.y)
         )
 
         it = PathIterator(paths)
@@ -101,6 +108,9 @@ class GCodeRenderer:
         if not isinstance(paths, PathCollection):
             raise Exception("Only PathCollection and list of PathCollections allowed")
 
+        log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
+        for path in paths:
+            log.good(f"with {len(path)} verts")
         self.paths += paths
 
     def render_bb(self, bb):
@@ -108,45 +118,54 @@ class GCodeRenderer:
         self.bbs.append(bb)
 
     def save(self, filename):
-        pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
-        fname = self.save_path.joinpath(filename + ".nc")
-        with open(fname.as_posix(), "w") as file:
-            file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
-            file.write(f"G01 X0.0 Y0.0 F{self.feedrate_xy}\n")
-            for p in self.paths:
-                x = p.start_pos().x
-                y = p.start_pos().y
-                if self.invert_y:
-                    y = -y
-                file.write(f"G01 X{x:.2f} Y{y:.2f} F{self.feedrate_xy}\n")
-                file.write(f"G01 Z{self.z_down} F{self.feedrate_z}\n")
-                for line in p.vertices:
-                    x = line.x
-                    y = line.y
+        try:
+            pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
+            fname = self.save_path.joinpath(filename + ".nc")
+            with open(fname.as_posix(), "w") as file:
+                file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
+                self.__append_to_file(file, 0.0, 0.0)
+                for p in self.paths:
+                    x = p.start_pos().x
+                    y = p.start_pos().y
                     if self.invert_y:
                         y = -y
-                    file.write(f"G01 X{x:.2f} Y{y:.2f} F{self.feedrate_xy}\n")
-                file.write(f"G01 Z{self.z_up} F{self.feedrate_z}\n")
+                    self.__append_to_file(file, x, y)
+                    file.write(f"G01 Z{self.z_down} F{self.feedrate_z}\n")
+                    for line in p.vertices:
+                        x = line.x
+                        y = line.y
+                        if self.invert_y:
+                            y = -y
+                        self.__append_to_file(file, x, y)
+                    file.write(f"G01 Z{self.z_up} F{self.feedrate_z}\n")
 
-            for bb in self.bbs:
-                _x = bb.x
-                _y = bb.y
-                if self.invert_y:
-                    _y = -_y
-                _w = bb.w
-                _h = bb.h
-                if self.invert_y:
-                    _h = -_h
+                for bb in self.bbs:
+                    _x = bb.x
+                    _y = bb.y
+                    if self.invert_y:
+                        _y = -_y
+                    _w = bb.w
+                    _h = bb.h
+                    if self.invert_y:
+                        _h = -_h
+                    file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
+                    self.__append_to_file(file, _x, _y)
+                    file.write(f"G01 Z{self.z_down} F{self.feedrate_z}\n")
+                    self.__append_to_file(file, _x, _h)
+                    self.__append_to_file(file, _w, _h)
+                    self.__append_to_file(file, _w, _y)
+                    self.__append_to_file(file, _x, _y)
+
                 file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
-                file.write(f"G01 X{_x:.2f} Y{_y:.2f} F{self.feedrate_xy}\n")
-                file.write(f"G01 Z{self.z_down} F{self.feedrate_z}\n")
-                file.write(f"G01 X{_x:.2f} Y{_h:.2f} F{self.feedrate_xy}\n")
-                file.write(f"G01 X{_w:.2f} Y{_h:.2f} F{self.feedrate_xy}\n")
-                file.write(f"G01 X{_w:.2f} Y{_y:.2f} F{self.feedrate_xy}\n")
-                file.write(f"G01 X{_x:.2f} Y{_y:.2f} F{self.feedrate_xy}\n")
+                self.__append_to_file(file, 0.0, 0.0)
+            log.good(f"Finished saving {fname}")
+        except DrawingOutOfBoundsException as e:
+            log.fail(f"Couldn't generate GCode- Out of Bounds with position {e}")
 
-            file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
-            file.write(f"G01 X0.0 Y0.0 F{self.feedrate_xy}\n")
+    def __append_to_file(self, file, x, y):
+        if y < DrawingMachine.Plotter.MAX_Y:
+            raise DrawingOutOfBoundsException(y)
+        file.write(f"G01 X{x:.2f} Y{y:.2f} F{self.feedrate_xy}\n")
 
 
 class JpegRenderer:
@@ -211,6 +230,7 @@ class JpegRenderer:
     def save(self, filename):
         fname = self.save_path.joinpath(filename + ".jpg")
         self.img.save(fname, "JPEG")
+        log.good(f"Finished saving {fname}")
 
     def render_bb(self, bb):
         assert isinstance(bb, BoundingBox), "Only BoundingBox objects allowed"

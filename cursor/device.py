@@ -130,6 +130,10 @@ class DrawingMachine:
         # also the $10 in grbl config might have to be modified
         # https://github.com/gnea/grbl/wiki/Grbl-v1.1-Configuration#10---status-report-mask
 
+
+    class Plotter:
+        MAX_Y = -1715
+
     class Paper:
         X_FACTOR = 2.91666
         Y_FACTOR = 2.83333
