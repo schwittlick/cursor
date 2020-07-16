@@ -17,19 +17,19 @@ if __name__ == "__main__":
     path = path.Path(layer="round1")
     theta = 0
     yextra = 0
-    while theta < math.pi * 80: # 80
+    while theta < math.pi * 80:  # 80
         r = 50
         y = r * math.cos(theta) * 2
         x = r * math.sin(theta) + yextra
         path.add(x, y, 0)
-        theta += 0.02#math.pi / random.randint(1, 800)
+        theta += 0.02  # math.pi / random.randint(1, 800)
         yextra += 0.15
 
     reversed_path = path.reversed()
     reversed_path.layer = "round2"
 
     coll.add(path)
-    #coll.add(reversed_path)
+    # coll.add(reversed_path)
 
     coll.fit(device.DrawingMachine.Paper.custom_70_100_landscape(), 100)
 
