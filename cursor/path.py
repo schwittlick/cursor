@@ -11,6 +11,7 @@ import wasabi
 
 log = wasabi.Printer()
 
+
 class TimedPosition:
     def __init__(self, x=0.0, y=0.0, timestamp=0):
         self.x = x
@@ -520,7 +521,9 @@ class PathCollection:
             abs(bb.h * scale),
         )
         if bb.x * scale < 0:
-            log.good(f"{__class__.__name__}: fit: translate by {abs_scaled_bb[0]} {abs_scaled_bb[1]}")
+            log.good(
+                f"{__class__.__name__}: fit: translate by {abs_scaled_bb[0]} {abs_scaled_bb[1]}"
+            )
             self.translate(abs_scaled_bb[0], abs_scaled_bb[1])
 
         width = size[0]
