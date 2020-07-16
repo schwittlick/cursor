@@ -130,7 +130,6 @@ class DrawingMachine:
         # also the $10 in grbl config might have to be modified
         # https://github.com/gnea/grbl/wiki/Grbl-v1.1-Configuration#10---status-report-mask
 
-
     class Plotter:
         MAX_Y = -1715
 
