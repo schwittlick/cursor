@@ -215,8 +215,6 @@ def test_pathcollection_fit1():
 
     pcol.fit((50, 50), padding_units=10)
 
-    print(pcol.bb())
-
     assert pcol.bb().x == 10
     assert pcol.bb().y == 10
     assert pcol.bb().w == 40
@@ -235,9 +233,6 @@ def test_pathcollection_fit2():
     pcol.translate(-340, 1349)
 
     pcol.fit((50, 50), padding_units=10)
-
-    bb = pcol.bb()
-    print(pcol.bb())
 
     assert pcol.bb().x == 10
     assert pcol.bb().y == 10
@@ -258,13 +253,11 @@ def test_pathcollection_fit3():
 
     pcol.fit((50, 50), padding_units=10)
 
-    bb = pcol.bb()
-    print(pcol.bb())
-
     assert pcol.bb().x == 10
     assert pcol.bb().y == 10
     assert pcol.bb().w == 40
     assert pcol.bb().w == 40
+
 
 def test_pathcollection_layer():
     pcol = PathCollection()
