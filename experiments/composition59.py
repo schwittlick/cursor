@@ -17,9 +17,12 @@ if __name__ == "__main__":
     path = path.Path(layer="round1")
     theta = 0
     yextra = 0
-    r = 1
+    # r = 1
+    r = 50
     while theta < math.pi * 80:  # 80
-        r += 0.05
+        # r += 0.4
+        r = (math.sin(theta) * 500) + 500
+        print(r)
         y = r * math.cos(theta) * 2
         x = r * math.sin(theta) + yextra
         path.add(x, y, 0)
@@ -32,10 +35,10 @@ if __name__ == "__main__":
     coll.add(path)
     # coll.add(reversed_path)
 
-    coll.fit(device.DrawingMachine.Paper.custom_70_70(), 95)
+    coll.fit(device.DrawingMachine.Paper.a1_landscape(), 50)
 
-    num = "upward_spiral"
-    #num = coll.hash()
+    num = "circleball_spiral"
+    # num = coll.hash()
     fname = f"composition59_{num}"
 
     print(coll.bb())
