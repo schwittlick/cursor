@@ -510,30 +510,43 @@ class PathCollection:
         for p in self.__paths:
             p.scale(x, y)
 
-    def fit(self, size, padding_mm):
+    def fit(self, size, padding_mm=None, padding_units=None):
         # move into positive area
-        bb = self.bb()
+        _bb = self.bb()
         scale = 1.0
         abs_scaled_bb = (
-            abs(bb.x * scale),
-            abs(bb.y * scale),
-            abs(bb.w * scale),
-            abs(bb.h * scale),
+            abs(_bb.x * scale),
+            abs(_bb.y * scale),
+            abs(_bb.w * scale),
+            abs(_bb.h * scale),
         )
-        if bb.x * scale < 0:
-            log.good(
-                f"{__class__.__name__}: fit: translate by {abs_scaled_bb[0]} {abs_scaled_bb[1]}"
-            )
-            self.translate(abs_scaled_bb[0], abs_scaled_bb[1])
+        if _bb.x * scale < 0:
+            log.good(f"{__class__.__name__}: fit: translate by {abs_scaled_bb[0]} {0.0}")
+            self.translate(abs_scaled_bb[0], 0.0)
+        else:
+            log.good(f"{__class__.__name__}: fit: translate by {-abs_scaled_bb[0]} {0.0}")
+            self.translate(-abs_scaled_bb[0], 0.0)
+
+        if _bb.y * scale < 0:
+            log.good(f"{__class__.__name__}: fit: translate by {0.0} {abs_scaled_bb[1]}")
+            self.translate(0.0, abs_scaled_bb[1])
+        else:
+            log.good(f"{__class__.__name__}: fit: translate by {0.0} {-abs_scaled_bb[1]}")
+            self.translate(0.0, -abs_scaled_bb[1])
 
         width = size[0]
         height = size[1]
-        padding_x = padding_mm * device.DrawingMachine.Paper.X_FACTOR
-        padding_y = padding_mm * device.DrawingMachine.Paper.Y_FACTOR
+        if padding_mm is not None:
+            padding_x = padding_mm * device.DrawingMachine.Paper.X_FACTOR
+            padding_y = padding_mm * device.DrawingMachine.Paper.Y_FACTOR
+        else:
+            padding_x = padding_units
+            padding_y = padding_units
 
         # scaling
-        xfac = (width - padding_x * 2) / self.bb().w
-        yfac = (height - padding_y * 2) / self.bb().h
+        _bb = self.bb()
+        xfac = (width - padding_x * 2.0) / (_bb.w - _bb.x)
+        yfac = (height - padding_y * 2.0) / (_bb.h - _bb.y)
 
         log.good(f"{__class__.__name__}: fit: scaled by {xfac} {yfac}")
 
@@ -541,7 +554,7 @@ class PathCollection:
 
         # centering
         center = self.bb().center()
-        center_dims = width / 2, height / 2
+        center_dims = width / 2.0, height / 2.0
         diff = center_dims[0] - center[0], center_dims[1] - center[1]
 
         log.good(f"{__class__.__name__}: fit: translated by {diff[0]} {diff[1]}")

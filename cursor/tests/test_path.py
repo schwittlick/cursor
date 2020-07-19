@@ -74,12 +74,16 @@ def test_path_scale():
     p = Path()
     p.add(3, 5)
     p.add(5, 9)
+    p.add(-3, -10)
+
     p.scale(2, 5)
 
     assert p[0].x == 6
     assert p[0].y == 25
     assert p[1].x == 10
     assert p[1].y == 45
+    assert p[2].x == -6
+    assert p[2].y == -50
 
 
 def test_path_translate():
@@ -247,6 +251,13 @@ def test_bb_center():
     cx, cy = bb.center()
     assert cx == 200
     assert cy == 300
+
+
+def test_bb_center2():
+    bb = BoundingBox(-100, -100, 100, 100)
+    cx, cy = bb.center()
+    assert cx == 0
+    assert cy == 0
 
 
 def test_path_clean():

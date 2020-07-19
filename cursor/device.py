@@ -141,6 +141,9 @@ class DrawingMachine:
         CUSTOM_48_36 = (480 * X_FACTOR, 360 * Y_FACTOR)
         CUSTOM_42_56 = (420 * X_FACTOR, 560 * Y_FACTOR)
         CUSTOM_56_42 = (560 * X_FACTOR, 420 * Y_FACTOR)
+        CUSTOM_50_70 = (500 * X_FACTOR, 700 * Y_FACTOR)
+        CUSTOM_70_50 = (700 * X_FACTOR, 500 * Y_FACTOR)
+        CUSTOM_70_70 = (700 * X_FACTOR, 700 * Y_FACTOR)
         CUSTOM_70_100 = (700 * X_FACTOR, 1000 * Y_FACTOR)
         CUSTOM_100_70 = (1000 * X_FACTOR, 700 * Y_FACTOR)
         DIN_A1_LANDSCAPE = (841 * X_FACTOR, 594 * Y_FACTOR)
@@ -161,6 +164,18 @@ class DrawingMachine:
         @staticmethod
         def custom_42_56_landscape():
             return DrawingMachine.Paper.CUSTOM_56_42
+
+        @staticmethod
+        def custom_70_50_landscape():
+            return DrawingMachine.Paper.CUSTOM_70_50
+
+        @staticmethod
+        def custom_70_50_portrait():
+            return DrawingMachine.Paper.CUSTOM_50_70
+
+        @staticmethod
+        def custom_70_70():
+            return DrawingMachine.Paper.CUSTOM_70_70
 
         @staticmethod
         def custom_70_100_landscape():
