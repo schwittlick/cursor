@@ -3,6 +3,7 @@ from cursor.path import PathCollection
 from cursor.path import BoundingBox
 
 import pytest
+import random
 
 
 def test_pathcollection_minmax():
@@ -230,7 +231,7 @@ def test_pathcollection_fit2():
 
     pcol.add(p0)
 
-    pcol.translate(-340, 1349)
+    pcol.translate(random.randint(-1000, 1000), random.randint(-1000, 1000))
 
     pcol.fit((50, 50), padding_units=10)
 
@@ -249,8 +250,33 @@ def test_pathcollection_fit3():
 
     pcol.add(p0)
 
-    pcol.translate(340, -1349)
+    pcol.translate(random.randint(-1000, 1000), random.randint(-1000, 1000))
 
+    pcol.fit((50, 50), padding_units=10)
+
+    assert pcol.bb().x == 10
+    assert pcol.bb().y == 10
+    assert pcol.bb().w == 40
+    assert pcol.bb().w == 40
+
+
+def test_pathcollection_fit4():
+    pcol = PathCollection()
+    p0 = Path()
+
+    p0.add(0, 0)
+    p0.add(100, 100)
+
+    pcol.add(p0)
+
+    pcol.translate(random.randint(-1000, 1000), random.randint(-1000, 1000))
+
+    pcol.fit((50, 50), padding_units=10)
+
+    pcol.translate(random.randint(-1000, 1000), random.randint(-1000, 1000))
+
+    pcol.fit((50, 50), padding_units=10)
+    pcol.fit((50, 50), padding_units=10)
     pcol.fit((50, 50), padding_units=10)
 
     assert pcol.bb().x == 10
