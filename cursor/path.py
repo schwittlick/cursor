@@ -521,17 +521,25 @@ class PathCollection:
             abs(_bb.h * scale),
         )
         if _bb.x * scale < 0:
-            log.good(f"{__class__.__name__}: fit: translate by {abs_scaled_bb[0]} {0.0}")
+            log.good(
+                f"{__class__.__name__}: fit: translate by {abs_scaled_bb[0]} {0.0}"
+            )
             self.translate(abs_scaled_bb[0], 0.0)
         else:
-            log.good(f"{__class__.__name__}: fit: translate by {-abs_scaled_bb[0]} {0.0}")
+            log.good(
+                f"{__class__.__name__}: fit: translate by {-abs_scaled_bb[0]} {0.0}"
+            )
             self.translate(-abs_scaled_bb[0], 0.0)
 
         if _bb.y * scale < 0:
-            log.good(f"{__class__.__name__}: fit: translate by {0.0} {abs_scaled_bb[1]}")
+            log.good(
+                f"{__class__.__name__}: fit: translate by {0.0} {abs_scaled_bb[1]}"
+            )
             self.translate(0.0, abs_scaled_bb[1])
         else:
-            log.good(f"{__class__.__name__}: fit: translate by {0.0} {-abs_scaled_bb[1]}")
+            log.good(
+                f"{__class__.__name__}: fit: translate by {0.0} {-abs_scaled_bb[1]}"
+            )
             self.translate(0.0, -abs_scaled_bb[1])
 
         width = size[0]
