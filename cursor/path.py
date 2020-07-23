@@ -237,6 +237,32 @@ class Path:
 
         return path
 
+    def intersect(self, newpath):
+        for p1 in range(len(newpath) - 1):
+            for p2 in range(len(newpath) - 1):
+                line1Start = newpath[p1]
+                line1End = newpath[p1 + 1]
+                line2Start = newpath[p2]
+                line2End = newpath[p2 + 1]
+
+                diffLAx = line1End.x - line1Start.x
+                diffLAy = line1End.y - line1Start.y
+                diffLBx = line2End.x - line2Start.x
+                diffLBy = line2End.y - line2Start.y
+                #diffLA = line1End - line1Start
+                #diffLB = line2End - line2Start
+                compareA = diffLAx * line1Start.y - diffLAy * line1Start.x
+                compareB = diffLBx * line2Start.y - diffLBy * line2Start.x
+                if ((diffLAx * line2Start.y - diffLAy * line2Start.x) < compareA) ^ ((diffLAx * line2End.y - diffLAy * line2End.x) < compareA) and ((diffLBx * line1Start.y - diffLBy * line1Start.x) < compareB) ^ ((diffLBx * line1End.y - diffLBy * line1End.x) < compareB):
+
+                    lDetDivInv = 1 / ((diffLAx * diffLBy) - (diffLAy * diffLBx))
+                    #intersectionx = -((diffLAx * compareB) - (compareA * diffLBx)) * lDetDivInv
+                    #intersectiony = -((diffLAy * compareB) - (compareA * diffLBy)) * lDetDivInv
+
+                    return True
+
+        return False
+
     def interp(self, newpath, perc):
         path = Path()
 

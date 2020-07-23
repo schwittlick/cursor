@@ -351,3 +351,16 @@ def test_path_layer():
 
     p.layer = "custom"
     assert p.layer is "custom"
+
+
+def test_path_intersection():
+    p = Path()
+    p.add(0, 0)
+    p.add(10, 10)
+
+    p2 = Path()
+    p2.add(10, 0)
+    p2.add(0, 10)
+
+    inter = p.intersect(p2)
+    assert inter == True
