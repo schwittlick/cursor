@@ -6,6 +6,52 @@ from cursor import device
 import random
 import math
 
+
+def plain_spiral(pp):
+    theta = 0
+    yextra = 0
+    # r = 1
+    r = 50
+    while theta < math.pi * 80:  # 80
+        y = r * math.cos(theta) * 2
+        x = r * math.sin(theta) + yextra
+        pp.add(x, y, 0)
+        theta += 0.02  # math.pi / random.randint(1, 800)
+        yextra += 0.15
+
+    return "spiral_plain"
+
+
+def circleball_spiral(pp):
+    theta = 0
+    yextra = 0
+    r = 1
+    while theta < math.pi * 80:  # 80
+        r += 0.4
+        y = r * math.cos(theta) * 2
+        x = r * math.sin(theta) + yextra
+        pp.add(x, y, 0)
+        theta += 0.02  # math.pi / random.randint(1, 800)
+        yextra += 0.15
+
+    return "circleball_spiral"
+
+
+def upward_spiral(pp):
+    theta = 0
+    yextra = 0
+    r = 1
+    while theta < math.pi * 80:  # 80
+        r += 0.03
+        y = r * math.cos(theta) * 2
+        x = r * math.sin(theta) + yextra
+        pp.add(x, y, 0)
+        theta += 0.02  # math.pi / random.randint(1, 800)
+        yextra += 0.15
+
+    return "upward_spiral"
+
+
 if __name__ == "__main__":
     gcode_folder = data.DataDirHandler().gcode("composition59")
     folder = data.DataDirHandler().jpg("composition59")
@@ -14,34 +60,21 @@ if __name__ == "__main__":
 
     coll = path.PathCollection()
 
-    path = path.Path(layer="round1")
-    theta = 0
-    yextra = 0
-    # r = 1
-    r = 50
-    while theta < math.pi * 80:  # 80
-        # r += 0.4
-        r = (math.sin(theta) * 500) + 500
-        print(r)
-        y = r * math.cos(theta) * 2
-        x = r * math.sin(theta) + yextra
-        path.add(x, y, 0)
-        theta += 0.02  # math.pi / random.randint(1, 800)
-        yextra += 0.15
+    pp = path.Path(layer="round1")
 
-    reversed_path = path.reversed()
+    #num = plain_spiral(pp)
+    #num = circleball_spiral(pp)
+    num = upward_spiral(pp)
+
+    reversed_path = pp.reversed()
     reversed_path.layer = "round2"
 
-    coll.add(path)
+    coll.add(pp)
     # coll.add(reversed_path)
 
-    coll.fit(device.DrawingMachine.Paper.a1_landscape(), 50)
+    coll.fit(device.DrawingMachine.Paper.a1_landscape(), 80)
 
-    num = "circleball_spiral"
-    # num = coll.hash()
     fname = f"composition59_{num}"
-
-    print(coll.bb())
 
     jpeg_renderer.render(coll)
     jpeg_renderer.save(f"{fname}")
@@ -52,7 +85,7 @@ if __name__ == "__main__":
 
     separate_layers = coll.get_layers()
     for layer, pc in separate_layers.items():
-        pc.fit(device.DrawingMachine.Paper.custom_70_100_landscape(), 100)
+        pc.fit(device.DrawingMachine.Paper.custom_70_100_landscape(), 80)
 
         jpeg_renderer.render(pc)
         jpeg_renderer.save(f"{fname}_{layer}")
