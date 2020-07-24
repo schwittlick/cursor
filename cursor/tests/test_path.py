@@ -351,3 +351,51 @@ def test_path_layer():
 
     p.layer = "custom"
     assert p.layer is "custom"
+
+
+def test_path_intersection1():
+    p = Path()
+    p.add(0, 0)
+    p.add(10, 10)
+
+    p2 = Path()
+    p2.add(10, 0)
+    p2.add(0, 10)
+
+    # classic cross intersection
+
+    inter = p.intersect(p2)
+    assert inter[0] is True
+    assert inter[1] == 5.0
+    assert inter[2] == 5.0
+
+
+def test_path_intersection2():
+    p = Path()
+    p.add(0, 0)
+    p.add(0, 10)
+
+    p2 = Path()
+    p2.add(1, 0)
+    p2.add(1, 10)
+
+    # two parallel lines
+
+    inter = p.intersect(p2)
+    assert inter[0] is False
+
+
+def test_path_intersection3():
+    p = Path()
+    p.add(0, 0)
+    p.add(0, 10)
+
+    p2 = Path()
+    p2.add(1, 0)
+    p2.add(5, 10)
+
+    # infinite lines will intersct
+    # line segments not
+
+    inter = p.intersect(p2)
+    assert inter[0] is False
