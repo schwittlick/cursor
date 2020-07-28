@@ -72,7 +72,7 @@ if __name__ == "__main__":
     # coll.add(pp)
     coll.add(reversed_path)
 
-    coll.fit(device.DrawingMachine.Paper.a1_landscape(), 90)
+    coll.fit(device.DrawingMachine.Paper.a1_landscape(), 100)
 
     fname = f"composition59_{num}_rev"
 
