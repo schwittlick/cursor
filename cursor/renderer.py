@@ -111,8 +111,8 @@ class GCodeRenderer:
             raise Exception("Only PathCollection and list of PathCollections allowed")
 
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
-        for path in paths:
-            log.good(f"with {len(path)} verts")
+        #for path in paths:
+        #    log.good(f"with {len(path)} verts")
         self.paths += paths
 
     def render_bb(self, bb):

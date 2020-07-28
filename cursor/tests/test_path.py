@@ -396,3 +396,23 @@ def test_path_intersection3():
 
     inter = p.intersect(p2)
     assert inter[0] is False
+
+
+def test_angles():
+    p = Path()
+    p.add(0, 0)
+    p.add(0, 1)
+    p.add(1, 1)
+    p.add(1, 0)
+    p.add(0.5, 0)
+
+    print(p.direction_changes())
+    changes = p.direction_changes()
+    assert changes[0] == 0.0
+    assert changes[1] == 45.00000000000001 #wat
+    assert changes[2] == 45.00000000000001
+    assert changes[3] == 0.0
+
+    #for i in range(100):
+    #    p.add(random.randint(-10, 10), random.randint(-10, 10))
+
