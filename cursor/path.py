@@ -197,6 +197,8 @@ class Path:
             dir_old = np.subtract(end_np, start_np)
             dir_new = np.subtract(new_end_np, new_start_np)
             mag_diff = np.linalg.norm(dir_new) / np.linalg.norm(dir_old)
+            if mag_diff is np.nan:
+                mag_diff = 0.0
             if math.isinf(mag_diff):
                 mag_diff = 1.0
             nparr = nparr * mag_diff
@@ -213,9 +215,12 @@ class Path:
         )
         new_start_to_end = new_start_to_end / np.linalg.norm(new_start_to_end)
 
-        angle = np.arccos(
-            np.clip(np.dot(current_start_to_end, new_start_to_end), -math.pi, math.pi)
-        )
+        try:
+            angle = np.arccos(
+                np.clip(np.dot(current_start_to_end, new_start_to_end), -math.pi, math.pi)
+            )
+        except RuntimeWarning as w:
+            print(w)
 
         # acos can't properly calculate angle more than 180°.
         # solution taken from here: http://www.gamedev.net/topic/556500-angle-between-vectors/
@@ -253,7 +258,6 @@ class Path:
                 ) and ((diffLBx * line1Start.y - diffLBy * line1Start.x) < compareB) ^ (
                     (diffLBx * line1End.y - diffLBy * line1End.x) < compareB
                 ):
-
                     lDetDivInv = 1 / ((diffLAx * diffLBy) - (diffLAy * diffLBx))
                     intersectionx = (
                         -((diffLAx * compareB) - (compareA * diffLBx)) * lDetDivInv
@@ -316,6 +320,54 @@ class Path:
 
         return ent
 
+    def direction_changes(self):
+        """
+        returns a list of radial direction changes from each point to the next len() = self.__len() - 1
+        :return:
+        """
+
+        def length(v):
+            return np.sqrt(v[0] ** 2 + v[1] ** 2)
+
+        def dot_product(v, w):
+            return v[0] * w[0] + v[1] * w[1]
+
+        def determinant(v, w):
+            return v[0] * w[1] - v[1] * w[0]
+
+        def inner_angle(v, w):
+            cosx = dot_product(v, w) / (length(v) * length(w))
+            rad = np.arccos(cosx)  # in radians
+            return rad * 180 / np.pi  # returns degrees
+
+        def angle_clockwise(A, B):
+            inner = inner_angle(A, B)
+            det = determinant(A, B)
+            if (
+                det < 0
+            ):  # this is a property of the det. If the det < 0 then B is clockwise of A
+                return inner
+            else:  # if the det > 0 then A is immediately clockwise of B
+                return 360 - inner
+
+        angles = []
+        idx = 0
+        for p in self.vertices:
+            if idx > 0:
+                f = self.vertices[idx - 1]
+                s = self.vertices[idx]
+                angle = angle_clockwise(f.pos(), s.pos())
+                # angle = angle_clockwise((1, 1), (1, -1))
+
+                if angle > 180:
+                    angle = 360 - angle
+
+                #angles.append(np.deg2rad(angle) % (2 * np.pi))
+                angles.append(angle % 360)
+            idx += 1
+
+        return angles
+
     @property
     def shannon_x(self):
         distances = []
@@ -356,6 +408,13 @@ class Path:
         entropy = self.__entropy2(distances)
         return entropy
 
+    @property
+    def shannon_direction_changes(self):
+        entropy = self.__entropy2(self.direction_changes())
+        if entropy is np.nan:
+            print("lol")
+        return entropy
+
     def empty(self):
         if len(self.vertices) == 0:
             return True
@@ -376,7 +435,7 @@ class Path:
         self.vertices = new_points
 
     def __repr__(self):
-        rep = f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} layer: {self.layer}"
+        rep = f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} shannchan: {self.shannon_direction_changes} layer: {self.layer}"
         return rep
 
     def __len__(self):
@@ -432,6 +491,12 @@ class PathCollection:
     def sort(self, pathsorter):
         if isinstance(pathsorter, filter.Sorter):
             pathsorter.sort(self.__paths)
+        else:
+            raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
+
+    def sorted(self, pathsorter):
+        if isinstance(pathsorter, filter.Sorter):
+            return  pathsorter.sorted(self.__paths)
         else:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
@@ -526,6 +591,8 @@ class PathCollection:
         mi = self.min()
         ma = self.max()
         bb = BoundingBox(mi[0], mi[1], ma[0], ma[1])
+        if bb.x is np.nan or bb.y is np.nan or bb.w is np.nan or bb.h is np.nan:
+            print("f8co")
         return bb
 
     def min(self):

@@ -7,8 +7,9 @@ log = wasabi.Printer()
 class Sorter:
     SHANNON_X = 1
     SHANNON_Y = 2
-    DISTANCE = 3
-    HASH = 4
+    SHANNON_DIRECTION_CHANGES = 3
+    DISTANCE = 4
+    HASH = 5
 
     def __init__(self, reverse=False, param=SHANNON_X):
         self.__reverse = reverse
@@ -29,6 +30,8 @@ class Sorter:
                 paths.sort(key=lambda x: x.shannon_x, reverse=self.__reverse)
             elif self.__param is self.SHANNON_Y:
                 paths.sort(key=lambda x: x.shannon_y, reverse=self.__reverse)
+            elif self.__param is self.SHANNON_DIRECTION_CHANGES:
+                paths.sort(key=lambda x: x.shannon_direction_changes, reverse=self.__reverse)
             elif self.__param is self.DISTANCE:
                 paths.sort(key=lambda x: x.distance, reverse=self.__reverse)
             elif self.__param is self.HASH:
@@ -52,6 +55,10 @@ class Sorter:
             elif self.__param is self.SHANNON_Y:
                 sorted_list = sorted(
                     paths, key=lambda x: x.shannon_y, reverse=self.__reverse
+                )
+            elif self.__param is self.SHANNON_DIRECTION_CHANGES:
+                sorted_list = sorted(
+                    paths, key=lambda x: x.shannon_direction_changes, reverse=self.__reverse
                 )
             elif self.__param is self.DISTANCE:
                 sorted_list = sorted(
