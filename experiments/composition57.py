@@ -60,7 +60,7 @@ def composition57(pc):
     counter = 0
     for p in pc:
         offsets[counter] = st.sidebar.number_input(
-            f"offset {p.hash()}", 0, 3000, offsets[counter]
+            f"offset {p.hash}", 0, 3000, offsets[counter]
         )
         for i in range(line_count):
             xfrom = xspacing * i + offsets[counter]
@@ -77,7 +77,7 @@ def composition57(pc):
 
     coll.fit(device.DrawingMachine.Paper.a1_landscape(), 100)
 
-    filename = f"composition57_{pc.hash()}"
+    filename = f"composition57_{pc.hash}"
 
     jpeg_renderer.render(coll, scale=1.0, frame=True)
 
@@ -87,7 +87,7 @@ def composition57(pc):
         jpeg_renderer.render_bb(coll.bb())
 
     st.image(
-        jpeg_renderer.img, caption=f"Composition #57 {pc.hash()}", use_column_width=True
+        jpeg_renderer.img, caption=f"Composition #57 {pc.hash}", use_column_width=True
     )
 
     if st.sidebar.button("save"):
