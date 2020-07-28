@@ -5,8 +5,11 @@ from cursor.filter import Filter
 from cursor.filter import BoundingBoxFilter
 from cursor.filter import MinPointCountFilter
 from cursor.filter import MaxPointCountFilter
+from cursor.filter import EntropySorter
+from cursor.filter import Sorter
 
 import pytest
+import random
 
 
 def test_bb_filter():
@@ -80,3 +83,31 @@ def test_point_count_filter():
     pcol.filter(max_filter)
 
     assert len(pcol) == 0
+
+
+def test_entropy_sort():
+    pcol = PathCollection()
+
+    for i in range(100):
+        p = Path()
+        for _ in range(100):
+            p.add(random.randint(-100, 100), random.randint(-100, 100))
+        pcol.add(p)
+
+    sorter = EntropySorter(param=Sorter.SHANNON_X)
+    pcol.sort(sorter)
+
+    for i in range(len(pcol) - 1):
+        p0 = pcol[i]
+        p1 = pcol[i + 1]
+
+        assert p0.shannon_x <= p1.shannon_x
+
+    sorter2 = EntropySorter(param=Sorter.SHANNON_Y)
+    pcol.sort(sorter2)
+
+    for i in range(len(pcol) - 1):
+        p0 = pcol[i]
+        p1 = pcol[i + 1]
+
+        assert p0.shannon_y <= p1.shannon_y

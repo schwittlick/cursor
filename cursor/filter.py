@@ -4,6 +4,74 @@ import time
 log = wasabi.Printer()
 
 
+class Sorter:
+    SHANNON_X = 1
+    SHANNON_Y = 2
+    DISTANCE = 3
+    HASH = 4
+
+    def sort(self, paths):
+        raise NotImplementedError("Not implemented in base class")
+
+    def sorted(self, paths):
+        raise NotImplementedError("Not implemented in base class")
+
+
+class EntropySorter(Sorter):
+    def __init__(self, reverse=False, param=Sorter.SHANNON_X):
+        self.__reverse = reverse
+        self.__param = param
+
+    def sort(self, paths):
+        if isinstance(paths, list):
+            t0 = time.time()
+            if self.__param is Sorter.SHANNON_X:
+                paths.sort(key=lambda x: x.shannon_x, reverse=self.__reverse)
+            elif self.__param is Sorter.SHANNON_Y:
+                paths.sort(key=lambda x: x.shannon_y, reverse=self.__reverse)
+            elif self.__param is Sorter.DISTANCE:
+                paths.sort(key=lambda x: x.distance, reverse=self.__reverse)
+            elif self.__param is Sorter.HASH:
+                paths.sort(key=lambda x: x.hash, reverse=self.__reverse)
+            else:
+                raise Exception(
+                    f"Unknown parameter {self.__param} for {__class__.__name__}"
+                )
+            elapsed = time.time() - t0
+            log.good(f"Sorted via {__class__.__name__} took {round(elapsed * 1000)}ms.")
+        else:
+            raise Exception(f"Only pass list objects to this {__class__.__name__}")
+
+    def sorted(self, paths):
+        if isinstance(paths, list):
+            t0 = time.time()
+            if self.__param is Sorter.SHANNON_X:
+                sorted_list = sorted(
+                    paths, key=lambda x: x.shannon_x, reverse=self.__reverse
+                )
+            elif self.__param is Sorter.SHANNON_Y:
+                sorted_list = sorted(
+                    paths, key=lambda x: x.shannon_y, reverse=self.__reverse
+                )
+            elif self.__param is Sorter.DISTANCE:
+                sorted_list = sorted(
+                    paths, key=lambda x: x.distance, reverse=self.__reverse
+                )
+            elif self.__param is Sorter.HASH:
+                sorted_list = sorted(
+                    paths, key=lambda x: x.hash, reverse=self.__reverse
+                )
+            else:
+                raise Exception(
+                    f"Did not understand parameter {self.__param} for {__class__.__name__}"
+                )
+            elapsed = time.time() - t0
+            log.good(f"Sorted via {__class__.__name__} took {round(elapsed * 1000)}ms.")
+            return sorted_list
+        else:
+            raise Exception(f"Only pass list objects to this {__class__.__name__}")
+
+
 class Filter:
     def filter(self, paths):
         raise NotImplementedError("Not implemented in base class")
@@ -112,12 +180,11 @@ class MaxPointCountFilter(Filter):
 
 
 class DistanceFilter(Filter):
-    def __init__(self, max_distance, res):
+    def __init__(self, max_distance):
         self.max_distance = max_distance
-        self.res = res
 
     def filter(self, paths):
         len_before = len(paths)
-        paths[:] = [p for p in paths if p.distance(self.res) <= self.max_distance]
+        paths[:] = [p for p in paths if p.distance() <= self.max_distance]
         len_after = len(paths)
         log.good(f"DistanceFilter: reduced path count from {len_before} to {len_after}")

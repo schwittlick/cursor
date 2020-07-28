@@ -111,6 +111,7 @@ class Path:
         else:
             self.vertices = []
 
+    @property
     def hash(self):
         return hashlib.md5(str(self.vertices).encode("utf-8")).hexdigest()
 
@@ -150,7 +151,8 @@ class Path:
         b = BoundingBox(minx, miny, maxx, maxy)
         return b
 
-    def distance(self, res):
+    @property
+    def distance(self):
         """
         Calculates the summed distance between all points in sequence
         Also known as "travel distance"
@@ -166,10 +168,10 @@ class Path:
             next = self.__getitem__(i + 1)
 
             d = calculateDistance(
-                current.x * res.width,
-                current.y * res.height,
-                next.x * res.width,
-                next.y * res.height,
+                current.x,
+                current.y,
+                next.x,
+                next.y,
             )
             dist += d
 
@@ -319,6 +321,7 @@ class Path:
 
         return ent
 
+    @property
     def shannon_x(self):
         distances = []
 
@@ -338,6 +341,7 @@ class Path:
         entropy = self.__entropy2(distances)
         return entropy
 
+    @property
     def shannon_y(self):
         distances = []
 
@@ -377,7 +381,7 @@ class Path:
         self.vertices = new_points
 
     def __repr__(self):
-        rep = f"verts: {len(self.vertices)} shannx: {self.shannon_x()} shanny: {self.shannon_y()} layer: {self.layer}"
+        rep = f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} layer: {self.layer}"
         return rep
 
     def __len__(self):
@@ -392,8 +396,9 @@ class Path:
 
 
 class PathCollection:
-    def __init__(self, timestamp=None):
+    def __init__(self, timestamp=None, name="noname"):
         self.__paths = []
+        self.__name = name
         if timestamp:
             self._timestamp = timestamp
         else:
@@ -428,6 +433,12 @@ class PathCollection:
 
     def random(self):
         return self.__getitem__(random.randint(0, self.__len__() - 1))
+
+    def sort(self, pathsorter):
+        if isinstance(pathsorter, filter.Sorter):
+            pathsorter.sort(self.__paths)
+        else:
+            raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
     def filter(self, pathfilter):
         if isinstance(pathfilter, filter.Filter):
@@ -464,7 +475,7 @@ class PathCollection:
             )
 
     def __repr__(self):
-        return f"PathCollection({self.__paths})"
+        return f"PathCollection({self.__name}) -> ({self.__paths})"
 
     def __eq__(self, other):
         if not isinstance(other, PathCollection):
