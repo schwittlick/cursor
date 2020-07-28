@@ -237,12 +237,12 @@ def test_entropy():
     p2.add(200, 10, 10001)
     p2.add(200, 10, 10001)
 
-    sx1 = p1.shannon_x()
-    sx2 = p2.shannon_x()
+    sx1 = p1.shannon_x
+    sx2 = p2.shannon_x
     assert sx1 > sx2
 
-    sy1 = p1.shannon_y()
-    sy2 = p2.shannon_y()
+    sy1 = p1.shannon_y
+    sy2 = p2.shannon_y
     assert sy1 > sy2
 
 
@@ -339,8 +339,7 @@ def test_path_distance():
     p.add(0, 10, 10000)
     p.add(10, 10, 10000)
 
-    size = pyautogui.Size(1, 1)
-    d = p.distance(size)
+    d = p.distance
 
     assert d == 20
 
