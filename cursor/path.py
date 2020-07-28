@@ -167,12 +167,7 @@ class Path:
             current = self.__getitem__(i)
             next = self.__getitem__(i + 1)
 
-            d = calculateDistance(
-                current.x,
-                current.y,
-                next.x,
-                next.y,
-            )
+            d = calculateDistance(current.x, current.y, next.x, next.y,)
             dist += d
 
         return dist

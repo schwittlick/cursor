@@ -10,28 +10,28 @@ class Sorter:
     DISTANCE = 3
     HASH = 4
 
-    def sort(self, paths):
-        raise NotImplementedError("Not implemented in base class")
-
-    def sorted(self, paths):
-        raise NotImplementedError("Not implemented in base class")
-
-
-class EntropySorter(Sorter):
-    def __init__(self, reverse=False, param=Sorter.SHANNON_X):
+    def __init__(self, reverse=False, param=SHANNON_X):
         self.__reverse = reverse
         self.__param = param
+
+    @property
+    def param(self):
+        return self.__param
+
+    @param.setter
+    def param(self, v):
+        self.__param = v
 
     def sort(self, paths):
         if isinstance(paths, list):
             t0 = time.time()
-            if self.__param is Sorter.SHANNON_X:
+            if self.__param is self.SHANNON_X:
                 paths.sort(key=lambda x: x.shannon_x, reverse=self.__reverse)
-            elif self.__param is Sorter.SHANNON_Y:
+            elif self.__param is self.SHANNON_Y:
                 paths.sort(key=lambda x: x.shannon_y, reverse=self.__reverse)
-            elif self.__param is Sorter.DISTANCE:
+            elif self.__param is self.DISTANCE:
                 paths.sort(key=lambda x: x.distance, reverse=self.__reverse)
-            elif self.__param is Sorter.HASH:
+            elif self.__param is self.HASH:
                 paths.sort(key=lambda x: x.hash, reverse=self.__reverse)
             else:
                 raise Exception(
@@ -45,19 +45,19 @@ class EntropySorter(Sorter):
     def sorted(self, paths):
         if isinstance(paths, list):
             t0 = time.time()
-            if self.__param is Sorter.SHANNON_X:
+            if self.__param is self.SHANNON_X:
                 sorted_list = sorted(
                     paths, key=lambda x: x.shannon_x, reverse=self.__reverse
                 )
-            elif self.__param is Sorter.SHANNON_Y:
+            elif self.__param is self.SHANNON_Y:
                 sorted_list = sorted(
                     paths, key=lambda x: x.shannon_y, reverse=self.__reverse
                 )
-            elif self.__param is Sorter.DISTANCE:
+            elif self.__param is self.DISTANCE:
                 sorted_list = sorted(
                     paths, key=lambda x: x.distance, reverse=self.__reverse
                 )
-            elif self.__param is Sorter.HASH:
+            elif self.__param is self.HASH:
                 sorted_list = sorted(
                     paths, key=lambda x: x.hash, reverse=self.__reverse
                 )

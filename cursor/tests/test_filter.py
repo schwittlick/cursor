@@ -5,7 +5,6 @@ from cursor.filter import Filter
 from cursor.filter import BoundingBoxFilter
 from cursor.filter import MinPointCountFilter
 from cursor.filter import MaxPointCountFilter
-from cursor.filter import EntropySorter
 from cursor.filter import Sorter
 
 import pytest
@@ -94,7 +93,7 @@ def test_entropy_sort():
             p.add(random.randint(-100, 100), random.randint(-100, 100))
         pcol.add(p)
 
-    sorter = EntropySorter(param=Sorter.SHANNON_X)
+    sorter = Sorter(param=Sorter.SHANNON_X)
     pcol.sort(sorter)
 
     for i in range(len(pcol) - 1):
@@ -103,8 +102,8 @@ def test_entropy_sort():
 
         assert p0.shannon_x <= p1.shannon_x
 
-    sorter2 = EntropySorter(param=Sorter.SHANNON_Y)
-    pcol.sort(sorter2)
+    sorter.param = Sorter.SHANNON_Y
+    pcol.sort(sorter)
 
     for i in range(len(pcol) - 1):
         p0 = pcol[i]
