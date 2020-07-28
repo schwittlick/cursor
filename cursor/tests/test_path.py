@@ -2,8 +2,6 @@ from cursor.path import Path
 from cursor.path import TimedPosition
 from cursor.path import BoundingBox
 
-import pyautogui
-
 import pytest
 
 
