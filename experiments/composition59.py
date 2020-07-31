@@ -22,6 +22,21 @@ def plain_spiral(pp):
     return "spiral_plain"
 
 
+def full_spiral(pp):
+    theta = 0
+    yextra = 0
+    # r = 1
+    r = 50
+    while theta < math.pi * 3 * 80:  # 80
+        y = r * math.cos(theta) * 2
+        x = r * math.sin(theta) + yextra
+        pp.add(x, y, 0)
+        theta += 0.02  # math.pi / random.randint(1, 800)
+        yextra += 0.01
+
+    return "full_plain"
+
+
 def circleball_spiral(pp):
     theta = 0
     yextra = 0
@@ -63,18 +78,19 @@ if __name__ == "__main__":
     pp = path.Path(layer="round1")
 
     # num = plain_spiral(pp)
-    num = circleball_spiral(pp)
+    # num = circleball_spiral(pp)
     # num = upward_spiral(pp)
+    num = full_spiral(pp)
 
     reversed_path = pp.reversed()
     reversed_path.layer = "round2"
 
-    coll.add(pp)
-    #coll.add(reversed_path)
+    #coll.add(pp)
+    coll.add(reversed_path)
 
-    coll.fit(device.DrawingMachine.Paper.a1_landscape(), 70)
+    coll.fit(device.DrawingMachine.Paper.a1_landscape(), 90)
 
-    fname = f"composition59_{num}_a1_rev"
+    fname = f"composition59_{num}_a1"
 
     jpeg_renderer.render(coll)
     jpeg_renderer.save(f"{fname}")
