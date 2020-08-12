@@ -56,12 +56,12 @@ def upward_spiral(pp):
     theta = 0
     yextra = 0
     r = 1
-    while theta < math.pi * 80:  # 80
+    while theta < math.pi * 300:  # 80
         r += 0.03
         y = r * math.cos(theta) * 2
         x = r * math.sin(theta) + yextra
         pp.add(x, y, 0)
-        theta += 0.02  # math.pi / random.randint(1, 800)
+        theta += 0.02
         yextra += 0.15
 
     return "upward_spiral"
@@ -79,8 +79,8 @@ if __name__ == "__main__":
 
     # num = plain_spiral(pp)
     # num = circleball_spiral(pp)
-    # num = upward_spiral(pp)
-    num = full_spiral(pp)
+    num = upward_spiral(pp)
+    #num = full_spiral(pp)
 
     reversed_path = pp.reversed()
     reversed_path.layer = "round2"
