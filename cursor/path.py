@@ -336,7 +336,12 @@ class Path:
             return v[0] * w[1] - v[1] * w[0]
 
         def inner_angle(v, w):
-            cosx = dot_product(v, w) / (length(v) * length(w))
+            dp = dot_product(v, w)
+            ll = (length(v) * length(w))
+            if ll == 0.0:
+                return 0.0
+
+            cosx = dp / ll
             rad = np.arccos(cosx)  # in radians
             return rad * 180 / np.pi  # returns degrees
 
@@ -352,7 +357,7 @@ class Path:
 
         angles = []
         idx = 0
-        for p in self.vertices:
+        for _ in self.vertices:
             if idx > 0:
                 f = self.vertices[idx - 1]
                 s = self.vertices[idx]
@@ -666,7 +671,8 @@ class PathCollection:
         self.scale(xfac, yfac)
 
         # centering
-        center = self.bb().center()
+        _bb = self.bb()
+        center = _bb.center()
         center_dims = width / 2.0, height / 2.0
         diff = center_dims[0] - center[0], center_dims[1] - center[1]
 
