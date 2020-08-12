@@ -8,6 +8,7 @@ import pytz
 import random
 import hashlib
 import wasabi
+import copy
 
 log = wasabi.Printer()
 
@@ -122,13 +123,13 @@ class Path:
         self.vertices.clear()
 
     def copy(self):
-        return type(self)(self.vertices.copy())
+        return type(self)(copy.deepcopy(self.vertices))
 
     def reverse(self):
         self.vertices.reverse()
 
     def reversed(self):
-        c = self.vertices.copy()
+        c = copy.deepcopy(self.vertices)
         c.reverse()
         return Path(c)
 
@@ -217,7 +218,9 @@ class Path:
 
         try:
             angle = np.arccos(
-                np.clip(np.dot(current_start_to_end, new_start_to_end), -math.pi, math.pi)
+                np.clip(
+                    np.dot(current_start_to_end, new_start_to_end), -math.pi, math.pi
+                )
             )
         except RuntimeWarning as w:
             print(w)
@@ -337,7 +340,7 @@ class Path:
 
         def inner_angle(v, w):
             dp = dot_product(v, w)
-            ll = (length(v) * length(w))
+            ll = length(v) * length(w)
             if ll == 0.0:
                 return 0.0
 
@@ -367,7 +370,7 @@ class Path:
                 if angle > 180:
                     angle = 360 - angle
 
-                #angles.append(np.deg2rad(angle) % (2 * np.pi))
+                # angles.append(np.deg2rad(angle) % (2 * np.pi))
                 angles.append(angle % 360)
             idx += 1
 
@@ -501,7 +504,7 @@ class PathCollection:
 
     def sorted(self, pathsorter):
         if isinstance(pathsorter, filter.Sorter):
-            return  pathsorter.sorted(self.__paths)
+            return pathsorter.sorted(self.__paths)
         else:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
@@ -623,35 +626,20 @@ class PathCollection:
     def fit(self, size, padding_mm=None, padding_units=None):
         # move into positive area
         _bb = self.bb()
-        scale = 1.0
-        abs_scaled_bb = (
-            abs(_bb.x * scale),
-            abs(_bb.y * scale),
-            abs(_bb.w * scale),
-            abs(_bb.h * scale),
-        )
-        if _bb.x * scale < 0:
-            log.good(
-                f"{__class__.__name__}: fit: translate by {abs_scaled_bb[0]} {0.0}"
-            )
-            self.translate(abs_scaled_bb[0], 0.0)
+        if _bb.x < 0:
+            log.good(f"{__class__.__name__}: fit: translate by {_bb.x} {0.0}")
+            self.translate(abs(_bb.x), 0.0)
         else:
-            log.good(
-                f"{__class__.__name__}: fit: translate by {-abs_scaled_bb[0]} {0.0}"
-            )
-            self.translate(-abs_scaled_bb[0], 0.0)
+            log.good(f"{__class__.__name__}: fit: translate by {-abs(_bb.x)} {0.0}")
+            self.translate(-abs(_bb.x), 0.0)
 
-        if _bb.y * scale < 0:
-            log.good(
-                f"{__class__.__name__}: fit: translate by {0.0} {abs_scaled_bb[1]}"
-            )
-            self.translate(0.0, abs_scaled_bb[1])
+        if _bb.y < 0:
+            log.good(f"{__class__.__name__}: fit: translate by {0.0} {abs(_bb.y)}")
+            self.translate(0.0, abs(_bb.y))
         else:
-            log.good(
-                f"{__class__.__name__}: fit: translate by {0.0} {-abs_scaled_bb[1]}"
-            )
-            self.translate(0.0, -abs_scaled_bb[1])
-
+            log.good(f"{__class__.__name__}: fit: translate by {0.0} {-abs(_bb.y)}")
+            self.translate(0.0, -abs(_bb.y))
+        _bb = self.bb()
         width = size[0]
         height = size[1]
         if padding_mm is not None:
@@ -663,13 +651,20 @@ class PathCollection:
 
         # scaling
         _bb = self.bb()
-        xfac = (width - padding_x * 2.0) / (_bb.w - _bb.x)
-        yfac = (height - padding_y * 2.0) / (_bb.h - _bb.y)
+        x1 = width - padding_x * 2.0
+        x2 = _bb.w - _bb.x
+
+        y1 = height - padding_y * 2.0
+        y2 = _bb.h - _bb.y
+
+        xfac = x1 / x2
+        yfac = y1 / y2
 
         log.good(f"{__class__.__name__}: fit: scaled by {xfac} {yfac}")
 
         self.scale(xfac, yfac)
 
+        print(self.bb())
         # centering
         _bb = self.bb()
         center = _bb.center()
@@ -679,3 +674,5 @@ class PathCollection:
         log.good(f"{__class__.__name__}: fit: translated by {diff[0]} {diff[1]}")
 
         self.translate(diff[0], diff[1])
+
+        print(self.bb())

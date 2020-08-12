@@ -1,5 +1,6 @@
 import wasabi
 import time
+import copy
 
 log = wasabi.Printer()
 
@@ -31,7 +32,9 @@ class Sorter:
             elif self.__param is self.SHANNON_Y:
                 paths.sort(key=lambda x: x.shannon_y, reverse=self.__reverse)
             elif self.__param is self.SHANNON_DIRECTION_CHANGES:
-                paths.sort(key=lambda x: x.shannon_direction_changes, reverse=self.__reverse)
+                paths.sort(
+                    key=lambda x: x.shannon_direction_changes, reverse=self.__reverse
+                )
             elif self.__param is self.DISTANCE:
                 paths.sort(key=lambda x: x.distance, reverse=self.__reverse)
             elif self.__param is self.HASH:
@@ -58,7 +61,9 @@ class Sorter:
                 )
             elif self.__param is self.SHANNON_DIRECTION_CHANGES:
                 sorted_list = sorted(
-                    paths, key=lambda x: x.shannon_direction_changes, reverse=self.__reverse
+                    paths,
+                    key=lambda x: x.shannon_direction_changes,
+                    reverse=self.__reverse,
                 )
             elif self.__param is self.DISTANCE:
                 sorted_list = sorted(
@@ -109,7 +114,7 @@ class EntropyMinFilter(Filter):
         )
 
     def filtered(self, paths):
-        copied_paths = paths.copy()
+        copied_paths = copy.deepcopy(paths)
         self.filter(copied_paths)
         return copied_paths
 
@@ -137,7 +142,7 @@ class EntropyMaxFilter(Filter):
         )
 
     def filtered(self, paths):
-        copied_paths = paths.copy()
+        copied_paths = copy.deepcopy(paths)
         self.filter(copied_paths)
         return copied_paths
 
