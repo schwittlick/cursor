@@ -5,6 +5,7 @@ from cursor.device import DrawingMachine
 import svgwrite
 import pathlib
 import wasabi
+import copy
 from PIL import Image, ImageDraw
 
 log = wasabi.Printer()
@@ -35,14 +36,14 @@ class PathIterator:
             is_first_vertex = True
             for point in p:
                 if is_first_vertex:
-                    prev = point.copy()
+                    prev = copy.deepcopy(point)
                     is_first_vertex = False
 
                     continue
 
                 start = prev
-                end = point.copy()
-                prev = point.copy()
+                end = copy.deepcopy(point)
+                prev = copy.deepcopy(point)
 
                 yield start, end
 
@@ -111,8 +112,8 @@ class GCodeRenderer:
             raise Exception("Only PathCollection and list of PathCollections allowed")
 
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
-        for path in paths:
-            log.good(f"with {len(path)} verts")
+        # for path in paths:
+        #    log.good(f"with {len(path)} verts")
         self.paths += paths
 
     def render_bb(self, bb):
