@@ -9,29 +9,31 @@ import random
 import hashlib
 import wasabi
 import copy
+import typing
 
 log = wasabi.Printer()
 
 
+
 class TimedPosition:
-    def __init__(self, x=0.0, y=0.0, timestamp=0):
+    def __init__(self, x: float = 0.0, y: float = 0.0, timestamp: int = 0):
         self.x = x
         self.y = y
         self.timestamp = timestamp
 
-    def pos(self):
+    def pos(self) -> typing.Tuple[float, float]:
         return self.x, self.y
 
-    def arr(self):
+    def arr(self) -> np.array:
         return np.array(self.pos(), dtype=float)
 
-    def time(self):
+    def time(self) -> int:
         return self.timestamp
 
-    def copy(self):
+    def copy(self) -> TimedPosition:
         return type(self)(self.x, self.y, self.timestamp)
 
-    def rot(self, delta):
+    def rot(self, delta: float) -> None:
         co = np.cos(delta)
         si = np.sin(delta)
         xx = co * self.x - si * self.y
@@ -39,11 +41,11 @@ class TimedPosition:
         self.x = xx
         self.y = yy
 
-    def translate(self, x, y):
+    def translate(self, x: float, y: float) -> None:
         self.x += x
         self.y += y
 
-    def scale(self, x, y):
+    def scale(self, x: float, y: float) -> None:
         self.x *= x
         self.y *= y
 
@@ -73,19 +75,19 @@ class TimedPosition:
 
 
 class BoundingBox:
-    def __init__(self, x, y, w, h):
+    def __init__(self, x: float, y: float, w: float, h: float):
         self.x = x
         self.y = y
         self.w = w
         self.h = h
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"BB(x={self.x}, y={self.y}, w={self.w}, h={self.h})"
 
-    def __inside(self, point):
+    def __inside(self, point: TimedPosition) -> bool:
         return self.x < point.x < self.x + self.w and self.y < point.y < self.y + self.h
 
-    def inside(self, data):
+    def inside(self, data: typing.Union['Path', 'PathCollection']) -> bool:
         if isinstance(data, Path):
             for p in data:
                 if not self.__inside(p):
@@ -98,14 +100,14 @@ class BoundingBox:
                         return False
             return True
 
-    def center(self):
-        center_x = ((self.w - self.x) / 2) + self.x
-        center_y = ((self.h - self.y) / 2) + self.y
+    def center(self) -> typing.Tuple[float, float]:
+        center_x = ((self.w - self.x) / 2.0) + self.x
+        center_y = ((self.h - self.y) / 2.0) + self.y
         return center_x, center_y
 
 
 class Path:
-    def __init__(self, vertices=None, layer="default"):
+    def __init__(self, vertices: typing.Optional[list] = None, layer: str = "default"):
         self.layer = layer
         if vertices:
             self.vertices = list(vertices)
@@ -113,38 +115,38 @@ class Path:
             self.vertices = []
 
     @property
-    def hash(self):
+    def hash(self) -> str:
         return hashlib.md5(str(self.vertices).encode("utf-8")).hexdigest()
 
-    def add(self, x, y, timestamp=0):
+    def add(self, x: float, y: float, timestamp:int = 0) -> None:
         self.vertices.append(TimedPosition(x, y, timestamp))
 
-    def clear(self):
+    def clear(self) -> None:
         self.vertices.clear()
 
-    def copy(self):
+    def copy(self) -> 'Path':
         return type(self)(copy.deepcopy(self.vertices))
 
-    def reverse(self):
+    def reverse(self) -> None:
         self.vertices.reverse()
 
-    def reversed(self):
+    def reversed(self) -> 'Path':
         c = copy.deepcopy(self.vertices)
         c.reverse()
         return Path(c)
 
-    def start_pos(self):
+    def start_pos(self) -> TimedPosition:
         if len(self.vertices) == 0:
             raise IndexError
         return self.vertices[0]
 
-    def end_pos(self):
+    def end_pos(self) -> TimedPosition:
         if len(self.vertices) == 0:
             raise IndexError
 
         return self.vertices[-1]
 
-    def bb(self):
+    def bb(self) -> BoundingBox:
         minx = min(self.vertices, key=lambda pos: pos.x).x
         miny = min(self.vertices, key=lambda pos: pos.y).y
         maxx = max(self.vertices, key=lambda pos: pos.x).x
@@ -153,7 +155,7 @@ class Path:
         return b
 
     @property
-    def distance(self):
+    def distance(self) -> float:
         """
         Calculates the summed distance between all points in sequence
         Also known as "travel distance"
@@ -173,15 +175,15 @@ class Path:
 
         return dist
 
-    def translate(self, x, y):
+    def translate(self, x: float, y: float) -> None:
         for p in self.vertices:
             p.translate(x, y)
 
-    def scale(self, x, y):
+    def scale(self, x: float, y: float) -> None:
         for p in self.vertices:
             p.scale(x, y)
 
-    def morph(self, start, end):
+    def morph(self, start: typing.Union[TimedPosition, typing.Tuple[float, float]], end: typing.Union[TimedPosition, typing.Tuple[float, float]]) -> 'Path':
         if isinstance(start, TimedPosition) and isinstance(end, TimedPosition):
             start = (start.x, start.y)
             end = (end.x, end.y)
@@ -242,7 +244,7 @@ class Path:
 
         return path
 
-    def intersect(self, newpath):
+    def intersect(self, newpath: 'Path') -> typing.Tuple[bool, float, float]:
         for p1 in range(len(newpath) - 1):
             for p2 in range(len(self) - 1):
                 line1Start = newpath[p1]
@@ -271,9 +273,9 @@ class Path:
 
                     return True, intersectionx, intersectiony
 
-        return (False,)
+        return False, 0.0, 0.0
 
-    def interp(self, newpath, perc):
+    def interp(self, newpath: 'Path', perc: float) -> 'Path':
         path = Path()
 
         maxpoint = max(len(newpath), len(self))
@@ -293,11 +295,11 @@ class Path:
         return path
 
     @staticmethod
-    def mix(begin, end, perc):
+    def mix(begin: float, end: float, perc: float):
         return ((end - begin) * perc) + begin
 
     @staticmethod
-    def __entropy2(labels, base=None):
+    def __entropy2(labels: list, base=None) -> float:
         from math import log, e
 
         """ Computes entropy of label distribution. """
@@ -323,7 +325,7 @@ class Path:
 
         return ent
 
-    def direction_changes(self):
+    def direction_changes(self) -> typing.List[float]:
         """
         returns a list of radial direction changes from each point to the next len() = self.__len() - 1
         :return:
@@ -377,7 +379,7 @@ class Path:
         return angles
 
     @property
-    def shannon_x(self):
+    def shannon_x(self) -> float:
         distances = []
 
         first = True
@@ -397,7 +399,7 @@ class Path:
         return entropy
 
     @property
-    def shannon_y(self):
+    def shannon_y(self) -> float:
         distances = []
 
         first = True
@@ -417,18 +419,18 @@ class Path:
         return entropy
 
     @property
-    def shannon_direction_changes(self):
+    def shannon_direction_changes(self) -> float:
         entropy = self.__entropy2(self.direction_changes())
         if entropy is np.nan:
             print("lol")
         return entropy
 
-    def empty(self):
+    def empty(self) -> bool:
         if len(self.vertices) == 0:
             return True
         return False
 
-    def clean(self):
+    def clean(self) -> None:
         new_points = []
         for i in range(1, len(self.vertices)):
             current = self.__getitem__(i - 1)
@@ -442,11 +444,11 @@ class Path:
 
         self.vertices = new_points
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         rep = f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} shannchan: {self.shannon_direction_changes} layer: {self.layer}"
         return rep
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.vertices)
 
     def __iter__(self):
@@ -458,8 +460,8 @@ class Path:
 
 
 class PathCollection:
-    def __init__(self, timestamp=None, name="noname"):
-        self.__paths = []
+    def __init__(self, timestamp: typing.Union[float, None] = None, name: str = "noname"):
+        self.__paths: typing.List[Path] = []
         self.__name = name
         if timestamp:
             self._timestamp = timestamp
@@ -468,13 +470,13 @@ class PathCollection:
             utc_timestamp = datetime.datetime.timestamp(now)
             self._timestamp = utc_timestamp
 
-    def add(self, path):
+    def add(self, path: Path) -> None:
         if path.empty():
             return
 
         self.__paths.append(path)
 
-    def clean(self):
+    def clean(self) -> None:
         """
         removes all paths with only one point
         """
@@ -482,39 +484,39 @@ class PathCollection:
         for p in self.__paths:
             p.clean()
 
-    def hash(self):
+    def hash(self) -> str:
         return hashlib.md5(str(self.__paths).encode("utf-8")).hexdigest()
 
-    def empty(self):
+    def empty(self) -> bool:
         if len(self.__paths) == 0:
             return True
         return False
 
-    def get_all(self):
+    def get_all(self) -> typing.List[Path]:
         return self.__paths
 
-    def random(self):
+    def random(self) -> Path:
         return self.__getitem__(random.randint(0, self.__len__() - 1))
 
-    def sort(self, pathsorter):
+    def sort(self, pathsorter: filter.Sorter) -> None:
         if isinstance(pathsorter, filter.Sorter):
             pathsorter.sort(self.__paths)
         else:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
-    def sorted(self, pathsorter):
+    def sorted(self, pathsorter: filter.Sorter) -> typing.List[Path]:
         if isinstance(pathsorter, filter.Sorter):
             return pathsorter.sorted(self.__paths)
         else:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
-    def filter(self, pathfilter):
+    def filter(self, pathfilter: filter.Filter) -> None:
         if isinstance(pathfilter, filter.Filter):
             pathfilter.filter(self.__paths)
         else:
             raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
 
-    def filtered(self, pathfilter):
+    def filtered(self, pathfilter: filter.Filter) -> 'PathCollection':
         if isinstance(pathfilter, filter.Filter):
 
             pc = PathCollection()
@@ -523,10 +525,10 @@ class PathCollection:
         else:
             raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.__paths)
 
-    def __add__(self, other):
+    def __add__(self, other: typing.Union[list, 'PathCollection']) -> 'PathCollection':
         if isinstance(other, PathCollection):
             new_paths = self.__paths + other.get_all()
             p = PathCollection()
@@ -542,10 +544,10 @@ class PathCollection:
                 "You can only add another PathCollection or a list of paths"
             )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"PathCollection({self.__name}) -> ({self.__paths})"
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if not isinstance(other, PathCollection):
             return NotImplemented
 
@@ -563,15 +565,15 @@ class PathCollection:
         for p in self.__paths:
             yield p
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int) -> Path:
         if len(self.__paths) < item + 1:
             raise IndexError(f"Index too high. Maximum is {len(self.__paths)}")
         return self.__paths[item]
 
-    def timestamp(self):
+    def timestamp(self) -> float:
         return self._timestamp
 
-    def layer_names(self):
+    def layer_names(self) -> typing.List[str]:
         layers = []
         for p in self.__paths:
             if p.layer not in layers:
@@ -595,7 +597,7 @@ class PathCollection:
 
         return layered_pcs
 
-    def bb(self):
+    def bb(self) -> BoundingBox:
         mi = self.min()
         ma = self.max()
         bb = BoundingBox(mi[0], mi[1], ma[0], ma[1])
@@ -603,41 +605,41 @@ class PathCollection:
             print("f8co")
         return bb
 
-    def min(self):
+    def min(self) -> typing.Tuple[float, float]:
         all_chained = [point for path in self.__paths for point in path]
         minx = min(all_chained, key=lambda pos: pos.x).x
         miny = min(all_chained, key=lambda pos: pos.y).y
         return minx, miny
 
-    def max(self):
+    def max(self) -> typing.Tuple[float, float]:
         all_chained = [point for path in self.__paths for point in path]
         maxx = max(all_chained, key=lambda pos: pos.x).x
         maxy = max(all_chained, key=lambda pos: pos.y).y
         return maxx, maxy
 
-    def translate(self, x, y):
+    def translate(self, x: float, y: float) -> None:
         for p in self.__paths:
             p.translate(x, y)
 
-    def scale(self, x, y):
+    def scale(self, x: float, y: float) -> None:
         for p in self.__paths:
             p.scale(x, y)
 
-    def fit(self, size, padding_mm=None, padding_units=None):
+    def fit(self, size: typing.Tuple[float, float], padding_mm: float = None, padding_units: float = None) -> None:
         # move into positive area
         _bb = self.bb()
         if _bb.x < 0:
-            log.good(f"{__class__.__name__}: fit: translate by {_bb.x} {0.0}")
+            log.good(f"{self.__class__.__name__}: fit: translate by {_bb.x} {0.0}")
             self.translate(abs(_bb.x), 0.0)
         else:
-            log.good(f"{__class__.__name__}: fit: translate by {-abs(_bb.x)} {0.0}")
+            log.good(f"{self.__class__.__name__}: fit: translate by {-abs(_bb.x)} {0.0}")
             self.translate(-abs(_bb.x), 0.0)
 
         if _bb.y < 0:
-            log.good(f"{__class__.__name__}: fit: translate by {0.0} {abs(_bb.y)}")
+            log.good(f"{self.__class__.__name__}: fit: translate by {0.0} {abs(_bb.y)}")
             self.translate(0.0, abs(_bb.y))
         else:
-            log.good(f"{__class__.__name__}: fit: translate by {0.0} {-abs(_bb.y)}")
+            log.good(f"{self.__class__.__name__}: fit: translate by {0.0} {-abs(_bb.y)}")
             self.translate(0.0, -abs(_bb.y))
         _bb = self.bb()
         width = size[0]
@@ -660,7 +662,7 @@ class PathCollection:
         xfac = x1 / x2
         yfac = y1 / y2
 
-        log.good(f"{__class__.__name__}: fit: scaled by {xfac} {yfac}")
+        log.good(f"{self.__class__.__name__}: fit: scaled by {xfac} {yfac}")
 
         self.scale(xfac, yfac)
 
@@ -671,7 +673,7 @@ class PathCollection:
         center_dims = width / 2.0, height / 2.0
         diff = center_dims[0] - center[0], center_dims[1] - center[1]
 
-        log.good(f"{__class__.__name__}: fit: translated by {diff[0]} {diff[1]}")
+        log.good(f"{self.__class__.__name__}: fit: translated by {diff[0]} {diff[1]}")
 
         self.translate(diff[0], diff[1])
 
