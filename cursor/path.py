@@ -29,7 +29,7 @@ class TimedPosition:
     def time(self) -> int:
         return self.timestamp
 
-    def copy(self) -> TimedPosition:
+    def copy(self) -> "TimedPosition":
         return type(self)(self.x, self.y, self.timestamp)
 
     def rot(self, delta: float) -> None:
@@ -83,7 +83,7 @@ class BoundingBox:
     def __repr__(self) -> str:
         return f"BB(x={self.x}, y={self.y}, w={self.w}, h={self.h})"
 
-    def __inside(self, point: TimedPosition) -> bool:
+    def __inside(self, point: "TimedPosition") -> bool:
         return self.x < point.x < self.x + self.w and self.y < point.y < self.y + self.h
 
     def inside(self, data: typing.Union["Path", "PathCollection"]) -> bool:
@@ -134,12 +134,12 @@ class Path:
         c.reverse()
         return Path(c)
 
-    def start_pos(self) -> TimedPosition:
+    def start_pos(self) -> "TimedPosition":
         if len(self.vertices) == 0:
             raise IndexError
         return self.vertices[0]
 
-    def end_pos(self) -> TimedPosition:
+    def end_pos(self) -> "TimedPosition":
         if len(self.vertices) == 0:
             raise IndexError
 
@@ -184,8 +184,8 @@ class Path:
 
     def morph(
         self,
-        start: typing.Union[TimedPosition, typing.Tuple[float, float]],
-        end: typing.Union[TimedPosition, typing.Tuple[float, float]],
+        start: typing.Union["TimedPosition", typing.Tuple[float, float]],
+        end: typing.Union["TimedPosition", typing.Tuple[float, float]],
     ) -> "Path":
         if isinstance(start, TimedPosition) and isinstance(end, TimedPosition):
             start = (start.x, start.y)
@@ -503,25 +503,25 @@ class PathCollection:
     def random(self) -> Path:
         return self.__getitem__(random.randint(0, self.__len__() - 1))
 
-    def sort(self, pathsorter: filter.Sorter) -> None:
+    def sort(self, pathsorter: "filter.Sorter") -> None:
         if isinstance(pathsorter, filter.Sorter):
             pathsorter.sort(self.__paths)
         else:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
-    def sorted(self, pathsorter: filter.Sorter) -> typing.List[Path]:
+    def sorted(self, pathsorter: "filter.Sorter") -> typing.List[Path]:
         if isinstance(pathsorter, filter.Sorter):
             return pathsorter.sorted(self.__paths)
         else:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
-    def filter(self, pathfilter: filter.Filter) -> None:
+    def filter(self, pathfilter: "filter.Filter") -> None:
         if isinstance(pathfilter, filter.Filter):
             pathfilter.filter(self.__paths)
         else:
             raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
 
-    def filtered(self, pathfilter: filter.Filter) -> "PathCollection":
+    def filtered(self, pathfilter: "filter.Filter") -> "PathCollection":
         if isinstance(pathfilter, filter.Filter):
 
             pc = PathCollection()
