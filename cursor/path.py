@@ -14,7 +14,6 @@ import typing
 log = wasabi.Printer()
 
 
-
 class TimedPosition:
     def __init__(self, x: float = 0.0, y: float = 0.0, timestamp: int = 0):
         self.x = x
@@ -87,7 +86,7 @@ class BoundingBox:
     def __inside(self, point: TimedPosition) -> bool:
         return self.x < point.x < self.x + self.w and self.y < point.y < self.y + self.h
 
-    def inside(self, data: typing.Union['Path', 'PathCollection']) -> bool:
+    def inside(self, data: typing.Union["Path", "PathCollection"]) -> bool:
         if isinstance(data, Path):
             for p in data:
                 if not self.__inside(p):
@@ -118,19 +117,19 @@ class Path:
     def hash(self) -> str:
         return hashlib.md5(str(self.vertices).encode("utf-8")).hexdigest()
 
-    def add(self, x: float, y: float, timestamp:int = 0) -> None:
+    def add(self, x: float, y: float, timestamp: int = 0) -> None:
         self.vertices.append(TimedPosition(x, y, timestamp))
 
     def clear(self) -> None:
         self.vertices.clear()
 
-    def copy(self) -> 'Path':
+    def copy(self) -> "Path":
         return type(self)(copy.deepcopy(self.vertices))
 
     def reverse(self) -> None:
         self.vertices.reverse()
 
-    def reversed(self) -> 'Path':
+    def reversed(self) -> "Path":
         c = copy.deepcopy(self.vertices)
         c.reverse()
         return Path(c)
@@ -183,7 +182,11 @@ class Path:
         for p in self.vertices:
             p.scale(x, y)
 
-    def morph(self, start: typing.Union[TimedPosition, typing.Tuple[float, float]], end: typing.Union[TimedPosition, typing.Tuple[float, float]]) -> 'Path':
+    def morph(
+        self,
+        start: typing.Union[TimedPosition, typing.Tuple[float, float]],
+        end: typing.Union[TimedPosition, typing.Tuple[float, float]],
+    ) -> "Path":
         if isinstance(start, TimedPosition) and isinstance(end, TimedPosition):
             start = (start.x, start.y)
             end = (end.x, end.y)
@@ -244,7 +247,7 @@ class Path:
 
         return path
 
-    def intersect(self, newpath: 'Path') -> typing.Tuple[bool, float, float]:
+    def intersect(self, newpath: "Path") -> typing.Tuple[bool, float, float]:
         for p1 in range(len(newpath) - 1):
             for p2 in range(len(self) - 1):
                 line1Start = newpath[p1]
@@ -275,7 +278,7 @@ class Path:
 
         return False, 0.0, 0.0
 
-    def interp(self, newpath: 'Path', perc: float) -> 'Path':
+    def interp(self, newpath: "Path", perc: float) -> "Path":
         path = Path()
 
         maxpoint = max(len(newpath), len(self))
@@ -460,7 +463,9 @@ class Path:
 
 
 class PathCollection:
-    def __init__(self, timestamp: typing.Union[float, None] = None, name: str = "noname"):
+    def __init__(
+        self, timestamp: typing.Union[float, None] = None, name: str = "noname"
+    ):
         self.__paths: typing.List[Path] = []
         self.__name = name
         if timestamp:
@@ -516,7 +521,7 @@ class PathCollection:
         else:
             raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
 
-    def filtered(self, pathfilter: filter.Filter) -> 'PathCollection':
+    def filtered(self, pathfilter: filter.Filter) -> "PathCollection":
         if isinstance(pathfilter, filter.Filter):
 
             pc = PathCollection()
@@ -528,7 +533,7 @@ class PathCollection:
     def __len__(self) -> int:
         return len(self.__paths)
 
-    def __add__(self, other: typing.Union[list, 'PathCollection']) -> 'PathCollection':
+    def __add__(self, other: typing.Union[list, "PathCollection"]) -> "PathCollection":
         if isinstance(other, PathCollection):
             new_paths = self.__paths + other.get_all()
             p = PathCollection()
@@ -625,21 +630,30 @@ class PathCollection:
         for p in self.__paths:
             p.scale(x, y)
 
-    def fit(self, size: typing.Tuple[float, float], padding_mm: float = None, padding_units: float = None) -> None:
+    def fit(
+        self,
+        size: typing.Tuple[float, float],
+        padding_mm: float = None,
+        padding_units: float = None,
+    ) -> None:
         # move into positive area
         _bb = self.bb()
         if _bb.x < 0:
             log.good(f"{self.__class__.__name__}: fit: translate by {_bb.x} {0.0}")
             self.translate(abs(_bb.x), 0.0)
         else:
-            log.good(f"{self.__class__.__name__}: fit: translate by {-abs(_bb.x)} {0.0}")
+            log.good(
+                f"{self.__class__.__name__}: fit: translate by {-abs(_bb.x)} {0.0}"
+            )
             self.translate(-abs(_bb.x), 0.0)
 
         if _bb.y < 0:
             log.good(f"{self.__class__.__name__}: fit: translate by {0.0} {abs(_bb.y)}")
             self.translate(0.0, abs(_bb.y))
         else:
-            log.good(f"{self.__class__.__name__}: fit: translate by {0.0} {-abs(_bb.y)}")
+            log.good(
+                f"{self.__class__.__name__}: fit: translate by {0.0} {-abs(_bb.y)}"
+            )
             self.translate(0.0, -abs(_bb.y))
         _bb = self.bb()
         width = size[0]
