@@ -101,9 +101,7 @@ class EntropyMinFilter(Filter):
         t0 = time.time()
         len_before = len(paths)
         paths[:] = [
-            p
-            for p in paths
-            if p.shannon_x > self.min_x and p.shannon_y > self.min_y
+            p for p in paths if p.shannon_x > self.min_x and p.shannon_y > self.min_y
         ]
         len_after = len(paths)
 
@@ -129,9 +127,7 @@ class EntropyMaxFilter(Filter):
         len_before = len(paths)
 
         paths[:] = [
-            p
-            for p in paths
-            if p.shannon_x < self.max_x and p.shannon_y < self.max_y
+            p for p in paths if p.shannon_x < self.max_x and p.shannon_y < self.max_y
         ]
 
         len_after = len(paths)
