@@ -41,8 +41,10 @@ def load_data():
     }
 )
 def apply_filter(all_paths, _min, _max):
-    entropy_filter = filter.EntropyMinFilter(_min, _max)
-    return all_paths.filtered(entropy_filter)
+    entropy_min_filter = filter.EntropyMinFilter(_min, _min)
+    entropy_max_filter = filter.EntropyMaxFilter(_max, _max)
+    r = all_paths.filtered(entropy_min_filter)
+    return r.filtered(entropy_max_filter)
 
 
 def composition57(pc):
@@ -50,6 +52,8 @@ def composition57(pc):
     gcode_folder = data.DataDirHandler().gcode("composition57")
     jpeg_renderer = renderer.JpegRenderer(folder)
     gcode_renderer = renderer.GCodeRenderer(gcode_folder)
+    svg_folder = data.DataDirHandler().svg("composition57")
+    svg_renderer = renderer.SvgRenderer(svg_folder)
 
     xspacing = 1
     coll = path.PathCollection()
@@ -77,7 +81,7 @@ def composition57(pc):
 
     coll.fit(device.DrawingMachine.Paper.a1_landscape(), 100)
 
-    filename = f"composition57_{pc.hash}"
+    filename = f"composition57_{pc.hash()}"
 
     jpeg_renderer.render(coll, scale=1.0, frame=True)
 
@@ -87,7 +91,7 @@ def composition57(pc):
         jpeg_renderer.render_bb(coll.bb())
 
     st.image(
-        jpeg_renderer.img, caption=f"Composition #57 {pc.hash}", use_column_width=True
+        jpeg_renderer.img, caption=f"Composition #57 {pc.hash()}", use_column_width=True
     )
 
     if st.sidebar.button("save"):
@@ -95,6 +99,8 @@ def composition57(pc):
         gcode_renderer.render(coll)
         gcode_renderer.save(filename)
         jpeg_renderer.save(filename)
+        svg_renderer.render(coll)
+        svg_renderer.save(filename)
 
 
 def main():

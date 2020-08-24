@@ -49,24 +49,32 @@ class PathIterator:
 
 
 class SvgRenderer:
-    def __init__(self, folder, filename):
+    def __init__(self, folder):
         assert isinstance(folder, pathlib.Path), "Only path objects allowed"
         self.save_path = folder
-        self.filename = filename
         self.dwg = None
+        self.paths = PathCollection()
 
     def render(self, paths):
         if not isinstance(paths, PathCollection):
             raise Exception("Only PathCollection and list of PathCollections allowed")
 
-        bb = paths.bb()
+        log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
+        # for path in paths:
+        #    log.good(f"with {len(path)} verts")
+        self.paths += paths
 
-        fname = self.save_path.joinpath(self.filename + ".svg")
+    def save(self, filename):
+        bb = self.paths.bb()
+
+        pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
+
+        fname = self.save_path.joinpath(filename + ".svg")
         self.dwg = svgwrite.Drawing(
             fname.as_posix(), profile="tiny", size=(bb.w + bb.x, bb.h + bb.y)
         )
 
-        it = PathIterator(paths)
+        it = PathIterator(self.paths)
         for conn in it.connections():
             start = conn[0]
             end = conn[1]
@@ -82,7 +90,6 @@ class SvgRenderer:
 
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
-    def save(self):
         self.dwg.save()
 
 
