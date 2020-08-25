@@ -68,19 +68,14 @@ def upward_spiral(pp):
 
 
 if __name__ == "__main__":
-    gcode_folder = data.DataDirHandler().gcode("composition59")
-    folder = data.DataDirHandler().jpg("composition59")
-    gcode_renderer = renderer.GCodeRenderer(gcode_folder, z_down=4.5)
-    jpeg_renderer = renderer.JpegRenderer(folder)
-
     coll = path.PathCollection()
 
     pp = path.Path(layer="round1")
 
     # num = plain_spiral(pp)
     # num = circleball_spiral(pp)
-    num = upward_spiral(pp)
-    # num = full_spiral(pp)
+    # num = upward_spiral(pp)
+    num = full_spiral(pp)
 
     reversed_path = pp.reversed()
     reversed_path.layer = "round2"
@@ -88,9 +83,9 @@ if __name__ == "__main__":
     coll.add(pp)
     coll.add(reversed_path)
 
-    coll.fit(device.DrawingMachine.Paper.a1_landscape(), 90)
+    coll.fit(device.DrawingMachine.Paper.custom_70_100_landscape(), padding_percent=0.16)
 
-    fname = f"composition59_{num}_a1"
+    fname = f"composition59_{num}_70x100"
 
     # jpeg_renderer.render(coll)
     # jpeg_renderer.save(f"{fname}")
@@ -99,9 +94,14 @@ if __name__ == "__main__":
 
     separate_layers = coll.get_layers()
     for layer, pc in separate_layers.items():
-        pc.fit(device.DrawingMachine.Paper.a1_landscape(), 90)
+        gcode_folder = data.DataDirHandler().gcode("composition59")
+        folder = data.DataDirHandler().jpg("composition59")
+        gcode_renderer = renderer.GCodeRenderer(gcode_folder, z_down=4.5)
+        jpeg_renderer = renderer.JpegRenderer(folder)
+
+        #pc.fit(device.DrawingMachine.Paper.a1_landscape(), 90)
 
         jpeg_renderer.render(pc)
-        jpeg_renderer.save(f"{fname}_a1_{layer}")
+        jpeg_renderer.save(f"{fname}_{layer}")
         gcode_renderer.render(pc)
-        gcode_renderer.save(f"{fname}_a1_{layer}")
+        gcode_renderer.save(f"{fname}_{layer}")
