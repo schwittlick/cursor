@@ -623,7 +623,7 @@ class PathCollection:
         for p in self.__paths:
             p.scale(x, y)
 
-    def fit(self, size, padding_mm=None, padding_units=None):
+    def fit(self, size, padding_mm=None, padding_units=None, padding_percent=None):
         # move into positive area
         _bb = self.bb()
         if _bb.x < 0:
@@ -642,12 +642,18 @@ class PathCollection:
         _bb = self.bb()
         width = size[0]
         height = size[1]
-        if padding_mm is not None:
+
+        if padding_mm is not None and padding_units is None and padding_percent is None:
             padding_x = padding_mm * device.DrawingMachine.Paper.X_FACTOR
             padding_y = padding_mm * device.DrawingMachine.Paper.Y_FACTOR
-        else:
+
+        if padding_mm is None and padding_units is not None and padding_percent is None:
             padding_x = padding_units
             padding_y = padding_units
+
+        if padding_mm is None and padding_units is None and padding_percent is not None:
+            padding_x = abs(width * padding_percent)
+            padding_y = abs(height * padding_percent)
 
         # scaling
         _bb = self.bb()
