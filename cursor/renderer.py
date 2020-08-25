@@ -175,6 +175,8 @@ class GCodeRenderer:
     def __append_to_file(self, file, x, y):
         if y < DrawingMachine.Plotter.MAX_Y:
             raise DrawingOutOfBoundsException(y)
+        if x > DrawingMachine.Plotter.MAX_X:
+            raise DrawingOutOfBoundsException(x)
         file.write(f"G01 X{x:.2f} Y{y:.2f} F{self.feedrate_xy}\n")
 
 

@@ -132,6 +132,7 @@ class DrawingMachine:
 
     class Plotter:
         MAX_Y = -1715
+        MAX_X = 3350
 
     class Paper:
         X_FACTOR = 2.85714
