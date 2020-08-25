@@ -83,7 +83,9 @@ if __name__ == "__main__":
     coll.add(pp)
     coll.add(reversed_path)
 
-    coll.fit(device.DrawingMachine.Paper.custom_70_100_landscape(), padding_percent=0.16)
+    coll.fit(
+        device.DrawingMachine.Paper.custom_70_100_landscape(), padding_percent=0.16
+    )
 
     fname = f"composition59_{num}_70x100"
 
@@ -99,7 +101,7 @@ if __name__ == "__main__":
         gcode_renderer = renderer.GCodeRenderer(gcode_folder, z_down=4.5)
         jpeg_renderer = renderer.JpegRenderer(folder)
 
-        #pc.fit(device.DrawingMachine.Paper.a1_landscape(), 90)
+        # pc.fit(device.DrawingMachine.Paper.a1_landscape(), 90)
 
         jpeg_renderer.render(pc)
         jpeg_renderer.save(f"{fname}_{layer}")
