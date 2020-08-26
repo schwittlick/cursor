@@ -67,6 +67,20 @@ def upward_spiral(pp):
     return "upward_spiral"
 
 
+def heart_spiral(pp):
+    theta = 0
+    yextra = 0
+    while theta < math.pi * 3 * 80:
+        r = (math.sin(theta) * 500) + 500
+        y = r * math.cos(theta) * 2
+        x = r * math.sin(theta) + yextra
+        pp.add(x, y, 0)
+        theta += 0.02
+        yextra += 0.09
+
+    return "heart_spiral"
+
+
 if __name__ == "__main__":
     coll = path.PathCollection()
 
@@ -75,7 +89,8 @@ if __name__ == "__main__":
     # num = plain_spiral(pp)
     # num = circleball_spiral(pp)
     # num = upward_spiral(pp)
-    num = full_spiral(pp)
+    # num = full_spiral(pp)
+    num = heart_spiral(pp)
 
     reversed_path = pp.reversed()
     reversed_path.layer = "round2"
@@ -84,10 +99,10 @@ if __name__ == "__main__":
     coll.add(reversed_path)
 
     coll.fit(
-        device.DrawingMachine.Paper.custom_70_100_landscape(), padding_percent=0.16
+        device.DrawingMachine.Paper.a1_landscape(), padding_percent=0.15
     )
 
-    fname = f"composition59_{num}_70x100"
+    fname = f"composition59_{num}_a1"
 
     # jpeg_renderer.render(coll)
     # jpeg_renderer.save(f"{fname}")
