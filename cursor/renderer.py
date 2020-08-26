@@ -1,4 +1,5 @@
 from cursor.path import PathCollection
+from cursor.path import Path
 from cursor.path import BoundingBox
 from cursor.device import DrawingMachine
 
@@ -54,6 +55,7 @@ class SvgRenderer:
         self.save_path = folder
         self.dwg = None
         self.paths = PathCollection()
+        self.bbs = []
 
     def render(self, paths):
         if not isinstance(paths, PathCollection):
@@ -63,6 +65,20 @@ class SvgRenderer:
         # for path in paths:
         #    log.good(f"with {len(path)} verts")
         self.paths += paths
+
+    def render_bb(self, bb):
+        assert isinstance(bb, BoundingBox), "Only BoundingBox objects allowed"
+
+        self.bbs.append(bb)
+
+        p1 = Path()
+        p1.add(bb.x, bb.y)
+        p1.add(bb.w, bb.y)
+        p1.add(bb.w, bb.h)
+        p1.add(bb.x, bb.h)
+        p1.add(bb.x, bb.y)
+
+        self.paths.add(p1)
 
     def save(self, filename):
         bb = self.paths.bb()
@@ -89,6 +105,8 @@ class SvgRenderer:
             )
 
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
+
+        log.good(f"Finished saving {fname}")
 
         self.dwg.save()
 
