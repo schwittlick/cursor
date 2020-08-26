@@ -3,20 +3,18 @@ from cursor import path
 from cursor import data
 from cursor import device
 
-import random
 import math
 
 
 def plain_spiral(pp):
     theta = 0
     yextra = 0
-    # r = 1
     r = 50
-    while theta < math.pi * 80:  # 80
+    while theta < 255:
         y = r * math.cos(theta) * 2
         x = r * math.sin(theta) + yextra
         pp.add(x, y, 0)
-        theta += 0.02  # math.pi / random.randint(1, 800)
+        theta += 0.02
         yextra += 0.15
 
     return "spiral_plain"
@@ -25,13 +23,12 @@ def plain_spiral(pp):
 def full_spiral(pp):
     theta = 0
     yextra = 0
-    # r = 1
     r = 50
-    while theta < math.pi * 3 * 80:  # 80
+    while theta < 800:
         y = r * math.cos(theta) * 2
         x = r * math.sin(theta) + yextra
         pp.add(x, y, 0)
-        theta += 0.02  # math.pi / random.randint(1, 800)
+        theta += 0.02
         yextra += 0.01
 
     return "full_plain"
@@ -41,12 +38,12 @@ def circleball_spiral(pp):
     theta = 0
     yextra = 0
     r = 1
-    while theta < math.pi * 80:  # 80
+    while theta < 255:
         r += 0.4
         y = r * math.cos(theta) * 2
         x = r * math.sin(theta) + yextra
         pp.add(x, y, 0)
-        theta += 0.02  # math.pi / random.randint(1, 800)
+        theta += 0.02
         yextra += 0.15
 
     return "circleball_spiral"
@@ -56,7 +53,7 @@ def upward_spiral(pp):
     theta = 0
     yextra = 0
     r = 1
-    while theta < math.pi * 300:  # 80
+    while theta < 940:
         r += 0.03
         y = r * math.cos(theta) * 2
         x = r * math.sin(theta) + yextra
@@ -70,7 +67,7 @@ def upward_spiral(pp):
 def heart_spiral(pp):
     theta = 0
     yextra = 0
-    while theta < math.pi * 3 * 80:
+    while theta < 800:
         r = (math.sin(theta) * 500) + 500
         y = r * math.cos(theta) * 2
         x = r * math.sin(theta) + yextra
@@ -98,16 +95,9 @@ if __name__ == "__main__":
     coll.add(pp)
     coll.add(reversed_path)
 
-    coll.fit(
-        device.DrawingMachine.Paper.a1_landscape(), padding_percent=0.15
-    )
+    coll.fit(device.DrawingMachine.Paper.a1_landscape(), padding_percent=0.14)
 
     fname = f"composition59_{num}_a1"
-
-    # jpeg_renderer.render(coll)
-    # jpeg_renderer.save(f"{fname}")
-    # gcode_renderer.render(coll)
-    # gcode_renderer.save(f"{fname}")
 
     separate_layers = coll.get_layers()
     for layer, pc in separate_layers.items():
