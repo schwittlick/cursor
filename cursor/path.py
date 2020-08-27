@@ -131,7 +131,7 @@ class Path:
     def reversed(self):
         c = copy.deepcopy(self.vertices)
         c.reverse()
-        return Path(c)
+        return Path(c, layer=self.layer)
 
     def start_pos(self):
         if len(self.vertices) == 0:
