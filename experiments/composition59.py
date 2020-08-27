@@ -73,7 +73,7 @@ def heart_spiral(pp):
         x = r * math.sin(theta) + yextra
         pp.add(x, y, 0)
         theta += 0.02
-        yextra += 0.09
+        yextra += 0.06
 
     return "heart_spiral"
 
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     coll.add(pp)
     coll.add(reversed_path)
 
-    coll.fit(device.DrawingMachine.Paper.a1_landscape(), padding_percent=0.14)
+    coll.fit(device.DrawingMachine.Paper.a1_landscape(), padding_mm=90)
 
     fname = f"composition59_{num}_a1"
 
