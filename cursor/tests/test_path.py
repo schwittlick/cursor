@@ -2,8 +2,6 @@ from cursor.path import Path
 from cursor.path import TimedPosition
 from cursor.path import BoundingBox
 
-import pyautogui
-
 import pytest
 
 
@@ -74,12 +72,16 @@ def test_path_scale():
     p = Path()
     p.add(3, 5)
     p.add(5, 9)
+    p.add(-3, -10)
+
     p.scale(2, 5)
 
     assert p[0].x == 6
     assert p[0].y == 25
     assert p[1].x == 10
     assert p[1].y == 45
+    assert p[2].x == -6
+    assert p[2].y == -50
 
 
 def test_path_translate():
@@ -233,12 +235,12 @@ def test_entropy():
     p2.add(200, 10, 10001)
     p2.add(200, 10, 10001)
 
-    sx1 = p1.shannon_x()
-    sx2 = p2.shannon_x()
+    sx1 = p1.shannon_x
+    sx2 = p2.shannon_x
     assert sx1 > sx2
 
-    sy1 = p1.shannon_y()
-    sy2 = p2.shannon_y()
+    sy1 = p1.shannon_y
+    sy2 = p2.shannon_y
     assert sy1 > sy2
 
 
@@ -247,6 +249,13 @@ def test_bb_center():
     cx, cy = bb.center()
     assert cx == 200
     assert cy == 300
+
+
+def test_bb_center2():
+    bb = BoundingBox(-100, -100, 100, 100)
+    cx, cy = bb.center()
+    assert cx == 0
+    assert cy == 0
 
 
 def test_path_clean():
@@ -328,7 +337,77 @@ def test_path_distance():
     p.add(0, 10, 10000)
     p.add(10, 10, 10000)
 
-    size = pyautogui.Size(1, 1)
-    d = p.distance(size)
+    d = p.distance
 
     assert d == 20
+
+
+def test_path_layer():
+    p = Path()
+    assert p.layer is "default"
+
+    p.layer = "custom"
+    assert p.layer is "custom"
+
+
+def test_path_intersection1():
+    p = Path()
+    p.add(0, 0)
+    p.add(10, 10)
+
+    p2 = Path()
+    p2.add(10, 0)
+    p2.add(0, 10)
+
+    # classic cross intersection
+
+    inter = p.intersect(p2)
+    assert inter[0] is True
+    assert inter[1] == 5.0
+    assert inter[2] == 5.0
+
+
+def test_path_intersection2():
+    p = Path()
+    p.add(0, 0)
+    p.add(0, 10)
+
+    p2 = Path()
+    p2.add(1, 0)
+    p2.add(1, 10)
+
+    # two parallel lines
+
+    inter = p.intersect(p2)
+    assert inter[0] is False
+
+
+def test_path_intersection3():
+    p = Path()
+    p.add(0, 0)
+    p.add(0, 10)
+
+    p2 = Path()
+    p2.add(1, 0)
+    p2.add(5, 10)
+
+    # infinite lines will intersct
+    # line segments not
+
+    inter = p.intersect(p2)
+    assert inter[0] is False
+
+
+def test_angles():
+    p = Path()
+    p.add(0, 0)
+    p.add(0, 1)
+    p.add(1, 1)
+    p.add(1, 0)
+    p.add(0.5, 0)
+
+    changes = p.direction_changes()
+    assert changes[0] == 0.0
+    assert changes[1] == 45.00000000000001  # wat
+    assert changes[2] == 45.00000000000001
+    assert changes[3] == 0.0

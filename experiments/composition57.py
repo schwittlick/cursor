@@ -37,12 +37,14 @@ def load_data():
         loader.Loader: lambda _: None,
         path.PathCollection: lambda _: None,
         path.Path: lambda _: None,
-        filter.EntropyFilter: lambda _: None,
+        filter.EntropyMinFilter: lambda _: None,
     }
 )
 def apply_filter(all_paths, _min, _max):
-    entropy_filter = filter.EntropyFilter(_min, _max)
-    return all_paths.filtered(entropy_filter)
+    entropy_min_filter = filter.EntropyMinFilter(_min, _min)
+    entropy_max_filter = filter.EntropyMaxFilter(_max, _max)
+    r = all_paths.filtered(entropy_min_filter)
+    return r.filtered(entropy_max_filter)
 
 
 def composition57(pc):
@@ -50,6 +52,8 @@ def composition57(pc):
     gcode_folder = data.DataDirHandler().gcode("composition57")
     jpeg_renderer = renderer.JpegRenderer(folder)
     gcode_renderer = renderer.GCodeRenderer(gcode_folder)
+    svg_folder = data.DataDirHandler().svg("composition57")
+    svg_renderer = renderer.SvgRenderer(svg_folder)
 
     xspacing = 1
     coll = path.PathCollection()
@@ -60,7 +64,7 @@ def composition57(pc):
     counter = 0
     for p in pc:
         offsets[counter] = st.sidebar.number_input(
-            f"offset {p.hash()}", 0, 3000, offsets[counter]
+            f"offset {p.hash}", 0, 3000, offsets[counter]
         )
         for i in range(line_count):
             xfrom = xspacing * i + offsets[counter]
@@ -95,13 +99,15 @@ def composition57(pc):
         gcode_renderer.render(coll)
         gcode_renderer.save(filename)
         jpeg_renderer.save(filename)
+        svg_renderer.render(coll)
+        svg_renderer.save(filename)
 
 
 def main():
     st.title("Composition #57")
     all_paths = load_data()
 
-    st.sidebar.markdown("EntropyFilter")
+    st.sidebar.markdown("EntropyMinFilter")
     min_slider = st.sidebar.slider("min entropy", 0.0, 10.0, 3.5)
     max_slider = st.sidebar.slider("max entropy", 0.0, 10.0, 5.0)
     all_p = apply_filter(all_paths, min_slider, max_slider)
