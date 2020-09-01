@@ -55,7 +55,7 @@ if __name__ == "__main__":
     ll = loader.Loader(directory=p, limit_files=15)
     all_paths = ll.all_paths()
 
-    entropy_filter = filter.EntropyFilter(2.5, 2.5)
+    entropy_filter = filter.EntropyMinFilter(2.5, 2.5)
     all_paths.filter(entropy_filter)
 
     mincount_filter = filter.MinPointCountFilter(20)

@@ -63,8 +63,9 @@ def test_svgrenderer():
     pc.add(p1)
     pc.add(p2)
 
-    r = SvgRenderer(DataDirHandler().test_svgs(), "test1")
+    r = SvgRenderer(DataDirHandler().test_svgs())
     r.render(pc)
+    r.save("test1")
 
 
 def test_gcoderenderer():
@@ -95,14 +96,17 @@ def test_jpegrenderer_fail():
 
     jpeg_r = JpegRenderer(DataDirHandler().test_images())
     gcode_r = GCodeRenderer(DataDirHandler().test_gcodes())
-    svg_r = SvgRenderer(DataDirHandler().test_svgs(), "test1")
+    svg_r = SvgRenderer(DataDirHandler().test_svgs())
 
     rec = loader.all_collections()
     with pytest.raises(Exception):
-        jpeg_r.render(rec, "test1")
+        jpeg_r.render(rec)
+        jpeg_r.save("test1")
 
     with pytest.raises(Exception):
-        gcode_r.render(rec, "test1")
+        gcode_r.render(rec)
+        gcode_r.save("test1")
 
     with pytest.raises(Exception):
         svg_r.render(rec)
+        svg_r.save("test1")

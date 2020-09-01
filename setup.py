@@ -17,7 +17,7 @@ extras_require = {}
 
 setup(
     name="cursor",
-    version="0.1.3",
+    version="20.07.20",
     description="cursor line handling",
     long_description=long_description,
     author="Marcel Schwittlick",

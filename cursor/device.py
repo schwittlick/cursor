@@ -130,12 +130,25 @@ class DrawingMachine:
         # also the $10 in grbl config might have to be modified
         # https://github.com/gnea/grbl/wiki/Grbl-v1.1-Configuration#10---status-report-mask
 
+    class Plotter:
+        MAX_Y = -1715
+        MAX_X = 3350
+
     class Paper:
-        X_FACTOR = 2.91666
-        Y_FACTOR = 2.83333
+        X_FACTOR = 2.85714
+        Y_FACTOR = 2.90572
 
         CUSTOM_36_48 = (360 * X_FACTOR, 480 * Y_FACTOR)
         CUSTOM_48_36 = (480 * X_FACTOR, 360 * Y_FACTOR)
+        CUSTOM_42_56 = (420 * X_FACTOR, 560 * Y_FACTOR)
+        CUSTOM_56_42 = (560 * X_FACTOR, 420 * Y_FACTOR)
+        CUSTOM_50_70 = (500 * X_FACTOR, 700 * Y_FACTOR)
+        CUSTOM_70_50 = (700 * X_FACTOR, 500 * Y_FACTOR)
+        CUSTOM_70_70 = (700 * X_FACTOR, 700 * Y_FACTOR)
+        CUSTOM_70_100 = (700 * X_FACTOR, 1000 * Y_FACTOR)
+        CUSTOM_100_70 = (1000 * X_FACTOR, 700 * Y_FACTOR)
+        DIN_A4_LANDSCAPE = (297 * X_FACTOR, 210 * Y_FACTOR)
+        DIN_A4_PORTRAIT = (210 * X_FACTOR, 297 * Y_FACTOR)
         DIN_A1_LANDSCAPE = (841 * X_FACTOR, 594 * Y_FACTOR)
         DIN_A0_LANDSCAPE = (1189 * X_FACTOR, 841 * Y_FACTOR)
 
@@ -146,6 +159,42 @@ class DrawingMachine:
         @staticmethod
         def custom_36_48_landscape():
             return DrawingMachine.Paper.CUSTOM_48_36
+
+        @staticmethod
+        def custom_42_56_portrait():
+            return DrawingMachine.Paper.CUSTOM_42_56
+
+        @staticmethod
+        def custom_42_56_landscape():
+            return DrawingMachine.Paper.CUSTOM_56_42
+
+        @staticmethod
+        def custom_70_50_landscape():
+            return DrawingMachine.Paper.CUSTOM_70_50
+
+        @staticmethod
+        def custom_70_50_portrait():
+            return DrawingMachine.Paper.CUSTOM_50_70
+
+        @staticmethod
+        def custom_70_70():
+            return DrawingMachine.Paper.CUSTOM_70_70
+
+        @staticmethod
+        def custom_70_100_landscape():
+            return DrawingMachine.Paper.CUSTOM_100_70
+
+        @staticmethod
+        def custom_70_100_portrait():
+            return DrawingMachine.Paper.CUSTOM_70_100
+
+        @staticmethod
+        def a4_landscape():
+            return DrawingMachine.Paper.DIN_A4_LANDSCAPE
+
+        @staticmethod
+        def a4_portrait():
+            return DrawingMachine.Paper.DIN_A4_PORTRAIT
 
         @staticmethod
         def a1_landscape():
