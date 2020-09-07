@@ -29,7 +29,7 @@ def two_split_spiral():
     p1 = path.Path(layer="top")
     p2 = path.Path(layer="bottom")
 
-    while theta < 800:
+    while theta < 801:
         y = r * math.cos(theta) * 2
         x = r * math.sin(theta) + yextra
 
@@ -38,7 +38,7 @@ def two_split_spiral():
 
         if theta < 800 * perc:
             p1.add(x, y)
-        elif theta > 800 - 800 * perc:
+        elif theta > 800 - 800 * 0.352:
             p2.add(x, y)
 
     pc.add(p1)
@@ -53,8 +53,8 @@ def middle_split_spiral():
     theta = 0
     yextra = 0
     r = 50
-    perc1 = 0.10
-    perc2 = 0.5
+    perc1 = 0.15
+    perc2 = 0.4
 
     p1 = path.Path(layer="top")
     p2 = path.Path(layer="middle")
@@ -114,12 +114,48 @@ def three_split_spiral():
     return "three_split_spiral", pc
 
 
+def dual_upward_spiral():
+    pc = path.PathCollection()
+
+    pp1 = path.Path(layer="top")
+    pp2 = path.Path(layer="bottom")
+
+    theta = 0
+    yextra = 0
+    r = 1
+    while theta < 940:
+        r += 0.03
+        y = r * math.cos(theta) * 2
+        x = r * math.sin(theta) + yextra
+        pp1.add(x, y, 0)
+        theta += 0.02
+        yextra += 0.15
+
+
+    theta = 0
+    yextra = 0
+    r = 1411
+    while theta < 940:
+        r -= 0.03
+        y = r * math.cos(theta) * 2
+        x = r * math.sin(theta) + yextra
+        pp2.add(x, y, 0)
+        theta += 0.02
+        yextra += 0.15
+
+    pc.add(pp1)
+    pc.add(pp2)
+
+    return "dual_upward_spiral", pc
+
+
 if __name__ == "__main__":
     coll = path.PathCollection()
 
-    # num, pc = two_split_spiral()
+    num, pc = two_split_spiral()
     # num, pc = three_split_spiral()
-    num, pc = middle_split_spiral()
+    # num, pc = middle_split_spiral()
+    # num, pc = dual_upward_spiral()
 
     pc.fit(device.DrawingMachine.Paper.a1_landscape(), padding_mm=90)
     save_wrapper(pc, "composition59_split", f"c59_{num}_together")

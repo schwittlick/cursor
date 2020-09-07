@@ -78,6 +78,20 @@ def heart_spiral(pp):
     return "heart_spiral"
 
 
+def fat_spiral(pp):
+    theta = 0
+    yextra = 0
+    r = 50
+    while theta < 600:
+        x = r * math.cos(theta) * 2
+        y = r * math.sin(theta) + yextra
+        pp.add(x, y, 0)
+        theta += 0.005
+        yextra += 0.01
+
+    return "fat_spiral"
+
+
 if __name__ == "__main__":
     coll = path.PathCollection()
 
@@ -87,7 +101,8 @@ if __name__ == "__main__":
     # num = circleball_spiral(pp)
     # num = upward_spiral(pp)
     # num = full_spiral(pp)
-    num = heart_spiral(pp)
+    # num = heart_spiral(pp)
+    num = fat_spiral(pp)
 
     reversed_path = pp.reversed()
     reversed_path.layer = "round2"
@@ -95,16 +110,23 @@ if __name__ == "__main__":
     coll.add(pp)
     coll.add(reversed_path)
 
-    coll.fit(device.DrawingMachine.Paper.a1_landscape(), padding_mm=90)
-
-    fname = f"composition59_{num}_a1"
+    axidraw = False
+    if axidraw:
+        coll.fit(size=device.AxiDraw.Paper.custom_36_48_landscape(), machine=device.AxiDraw(), padding_mm=64)
+        fname = f"composition59_axidraw_{num}_a1"
+    else:
+        coll.fit(device.DrawingMachine.Paper.a1_landscape(), padding_mm=90)
+        fname = f"composition59_{num}_a1"
 
     separate_layers = coll.get_layers()
     for layer, pc in separate_layers.items():
         gcode_folder = data.DataDirHandler().gcode("composition59")
         folder = data.DataDirHandler().jpg("composition59")
+        svg_dir = data.DataDirHandler().svg("composition59")
         gcode_renderer = renderer.GCodeRenderer(gcode_folder, z_down=4.5)
         jpeg_renderer = renderer.JpegRenderer(folder)
+        svg_renderer = renderer.SvgRenderer(svg_dir)
+
 
         # pc.fit(device.DrawingMachine.Paper.a1_landscape(), 90)
 
@@ -112,3 +134,5 @@ if __name__ == "__main__":
         jpeg_renderer.save(f"{fname}_{layer}")
         gcode_renderer.render(pc)
         gcode_renderer.save(f"{fname}_{layer}")
+        svg_renderer.render(pc)
+        svg_renderer.save(f"{fname}_{layer}")

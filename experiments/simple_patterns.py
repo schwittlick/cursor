@@ -24,7 +24,7 @@ def main():
 
     pc.add(p)
 
-    pc.fit(device.DrawingMachine.Paper.custom_36_48_landscape(), 50)
+    pc.fit(size=device.AxiDraw.Paper.custom_36_48_landscape(), machine=device.AxiDraw(), padding_mm=64)
 
     gcode_renderer.render(pc)
     jpeg_renderer.render(pc)
