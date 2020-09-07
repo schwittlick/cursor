@@ -5,7 +5,31 @@ import wasabi
 log = wasabi.Printer()
 
 
-class DrawingMachine:
+class Machine:
+    pass
+
+
+class AxiDraw(Machine):
+    class Plotter:
+        pass
+
+    class Paper:
+        X_FACTOR = 3.704
+        Y_FACTOR = 3.704
+
+        CUSTOM_48_36 = (480 * X_FACTOR, 360 * Y_FACTOR)
+        CUSTOM_36_48 = (360 * X_FACTOR, 480 * Y_FACTOR)
+
+        @staticmethod
+        def custom_36_48_portrait():
+            return AxiDraw.Paper.CUSTOM_36_48
+
+        @staticmethod
+        def custom_36_48_landscape():
+            return AxiDraw.Paper.CUSTOM_48_36
+
+
+class DrawingMachine(Machine):
     def __init__(self):
         self.__serial = None
         self.__error = False
