@@ -623,7 +623,14 @@ class PathCollection:
         for p in self.__paths:
             p.scale(x, y)
 
-    def fit(self, size, machine=device.DrawingMachine(), padding_mm=None, padding_units=None, padding_percent=None):
+    def fit(
+        self,
+        size,
+        machine=device.DrawingMachine(),
+        padding_mm=None,
+        padding_units=None,
+        padding_percent=None,
+    ):
         # move into positive area
         _bb = self.bb()
         if _bb.x < 0:

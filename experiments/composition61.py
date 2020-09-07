@@ -1,11 +1,7 @@
 from cursor import loader
 from cursor import renderer
-from cursor import filter
-from cursor import path
 from cursor import data
 from cursor import device
-
-import random
 
 from cursor.filter import Sorter
 from cursor.path import PathCollection

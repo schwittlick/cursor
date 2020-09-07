@@ -131,7 +131,6 @@ def dual_upward_spiral():
         theta += 0.02
         yextra += 0.15
 
-
     theta = 0
     yextra = 0
     r = 1411

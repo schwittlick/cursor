@@ -112,7 +112,11 @@ if __name__ == "__main__":
 
     axidraw = False
     if axidraw:
-        coll.fit(size=device.AxiDraw.Paper.custom_36_48_landscape(), machine=device.AxiDraw(), padding_mm=64)
+        coll.fit(
+            size=device.AxiDraw.Paper.custom_36_48_landscape(),
+            machine=device.AxiDraw(),
+            padding_mm=64,
+        )
         fname = f"composition59_axidraw_{num}_a1"
     else:
         coll.fit(device.DrawingMachine.Paper.a1_landscape(), padding_mm=90)
@@ -126,7 +130,6 @@ if __name__ == "__main__":
         gcode_renderer = renderer.GCodeRenderer(gcode_folder, z_down=4.5)
         jpeg_renderer = renderer.JpegRenderer(folder)
         svg_renderer = renderer.SvgRenderer(svg_dir)
-
 
         # pc.fit(device.DrawingMachine.Paper.a1_landscape(), 90)
 
