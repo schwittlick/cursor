@@ -1,9 +1,5 @@
 from cursor import loader
-from cursor import renderer
-from cursor import path
-from cursor import filter
 from cursor import data
-from cursor import device
 
 import time
 from pythonosc import udp_client
@@ -24,8 +20,8 @@ def main():
     keys = ll.keys()
     print(len(keys))
 
-    start_time = data.DateHandler.get_timestamp_from_utc(keys[0][1])
-    end_time = data.DateHandler.get_timestamp_from_utc(keys[-1][1])
+    #start_time = data.DateHandler.get_timestamp_from_utc(keys[0][1])
+    #end_time = data.DateHandler.get_timestamp_from_utc(keys[-1][1])
 
     diff = data.DateHandler.utc_timestamp() - keys[0][1]
 
