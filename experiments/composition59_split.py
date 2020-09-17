@@ -148,13 +148,135 @@ def dual_upward_spiral():
     return "dual_upward_spiral", pc
 
 
+def left_right_split_spiral():
+    pc = path.PathCollection()
+
+    pp1 = path.Path(layer="left")
+    pp2 = path.Path(layer="right")
+
+    theta = 0
+    yextra = 0
+    r = 50
+    while theta < 801:
+        y = r * math.cos(theta) * 2
+        x = r * math.sin(theta) + yextra
+        pp1.add(x, y, 0)
+        theta += 0.02
+        yextra += 0.01
+
+    theta = 0
+    yextra = 0
+    r = 50
+    while theta < 801:
+        y = (r * math.cos(theta) * 2) + 100
+        x = r * math.sin(theta) + yextra
+        pp2.add(x, y, 0)
+        theta += 0.02
+        yextra += 0.01
+
+
+    pc.add(pp1)
+    pc.add(pp2)
+
+    return "left_right_split_spiral", pc
+
+
+def many_split_left_right():
+    pc = path.PathCollection()
+
+    path_list1 = []
+    path_list2 = []
+
+    parts = 8
+    for i in range(parts):
+        p1 = path.Path(layer=f"left_{i}")
+        p2 = path.Path(layer=f"right_{i}")
+
+        path_list1.append(p1)
+        path_list2.append(p2)
+
+    c1 = get_random_chunksizes(parts, 801)
+    c2 = get_random_chunksizes(parts, 801)
+
+    theta = 0
+    yextra = 0
+    r = 50
+    curr = 0
+    while theta < 801:
+        y = r * math.cos(theta) * 2
+        x = r * math.sin(theta) + yextra
+
+        if c1[curr] < theta < c1[curr + 1]:
+            path_list1[curr].add(x, y)
+
+        if theta > c1[curr + 1]:
+            curr += 1
+
+        theta += 0.02
+        yextra += 0.01
+
+    theta = 0
+    yextra = 0
+    r = 50
+    curr = 0
+    while theta < 801:
+        y = (r * math.cos(theta) * 2) + 200
+        x = r * math.sin(theta) + yextra
+
+        if c2[curr] < theta < c2[curr + 1]:
+            path_list2[curr].add(x, y)
+
+        if theta > c2[curr + 1]:
+            curr += 1
+
+        theta += 0.02
+        yextra += 0.01
+
+    for p in path_list1:
+        pc.add(p)
+
+    for p in path_list2:
+        pc.add(p)
+
+    return "many_split_left_right", pc
+
+def get_random_chunksizes(chunknum, maxchunk):
+    splits = chunknum
+    import random
+    randnumbers = []
+    for _ in range(splits):
+        newrand = random.randint(0, 1000)
+        randnumbers.append(newrand)
+
+    summe = sum(randnumbers)
+
+    curr = 0.0
+
+    chunks = [0]
+    for i in range(splits):
+        chunk = (randnumbers[i]/summe) * maxchunk
+        chunks.append(chunk + curr)
+
+        curr += chunk
+
+    for c in chunks:
+        print(c)
+
+    return chunks
+
+
 if __name__ == "__main__":
+    #get_random_chunksizes(10, 801)
+    #exit(1)
+
     coll = path.PathCollection()
 
-    num, pc = two_split_spiral()
+    # num, pc = two_split_spiral()
     # num, pc = three_split_spiral()
     # num, pc = middle_split_spiral()
     # num, pc = dual_upward_spiral()
+    # num, pc = left_right_split_spiral()
+    num, pc = many_split_left_right()
 
     pc.fit(device.DrawingMachine.Paper.a1_landscape(), padding_mm=90)
     save_wrapper(pc, "composition59_split", f"c59_{num}_together")
