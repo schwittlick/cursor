@@ -2,6 +2,7 @@ from cursor.path import PathCollection
 from cursor.path import Path
 from cursor.path import BoundingBox
 from cursor.device import DrawingMachine
+from cursor.device import RolandDPX3300
 
 import svgwrite
 import pathlib
@@ -197,6 +198,57 @@ class GCodeRenderer:
             raise DrawingOutOfBoundsException(x)
         file.write(f"G01 X{x:.2f} Y{y:.2f} F{self.feedrate_xy}\n")
 
+
+class HPGLRenderer:
+    def __init__(self, folder):
+        assert isinstance(folder, pathlib.Path), "Only path objects allowed"
+
+        self.save_path = folder
+        self.paths = PathCollection()
+
+    def render(self, paths):
+        if not isinstance(paths, PathCollection):
+            raise Exception("Only PathCollection and list of PathCollections allowed")
+
+        log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
+        self.paths += paths
+
+    def save(self, filename):
+        try:
+            pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
+            fname = self.save_path.joinpath(filename + ".hpgl")
+
+            with open(fname.as_posix(), "w") as file:
+                #file.write(f"PA0,0;\n")
+                file.write(f"SP1;\n")
+                self.__append_to_file(file, 0.0, 0.0)
+                for p in self.paths:
+                    x = p.start_pos().x
+                    y = p.start_pos().y
+                    self.__append_to_file(file, x, y)
+                    file.write(f"PD;\n")
+                    for line in p.vertices:
+                        x = line.x
+                        y = line.y
+                        self.__append_to_file(file, x, y)
+                    file.write(f"PU;\n")
+
+                self.__append_to_file(file, 0.0, 0.0)
+                file.write(f"SP0;\n")
+            log.good(f"Finished saving {fname}")
+        except DrawingOutOfBoundsException as e:
+            log.fail(f"Couldn't generate GCode- Out of Bounds with position {e}")
+
+    def __append_to_file(self, file, x, y):
+        if y < RolandDPX3300.Plotter.MIN_Y:
+            raise DrawingOutOfBoundsException(y)
+        if y > RolandDPX3300.Plotter.MAX_Y:
+            raise DrawingOutOfBoundsException(y)
+        if x < RolandDPX3300.Plotter.MIN_X:
+            raise DrawingOutOfBoundsException(x)
+        if x > RolandDPX3300.Plotter.MAX_X:
+            raise DrawingOutOfBoundsException(x)
+        file.write(f"PA{int(x)},{int(y)}\n")
 
 class JpegRenderer:
     def __init__(self, folder):

@@ -9,6 +9,29 @@ class Machine:
     pass
 
 
+class RolandDPX3300(Machine):
+    class Plotter:
+        MAX_Y = 20000
+        MAX_X = 20000
+        MIN_X = -20000
+        MIN_Y = -20000
+
+    class Paper:
+        X_FACTOR = 1
+        Y_FACTOR = 1
+
+        CUSTOM_48_36 = (480 * X_FACTOR, 360 * Y_FACTOR)
+        CUSTOM_36_48 = (360 * X_FACTOR, 480 * Y_FACTOR)
+
+        @staticmethod
+        def custom_36_48_portrait():
+            return RolandDPX3300.Paper.CUSTOM_36_48
+
+        @staticmethod
+        def custom_36_48_landscape():
+            return RolandDPX3300.Paper.CUSTOM_48_36
+
+
 class AxiDraw(Machine):
     class Plotter:
         pass
