@@ -2,6 +2,7 @@ from cursor.loader import Loader
 from cursor.renderer import SvgRenderer
 from cursor.renderer import GCodeRenderer
 from cursor.renderer import JpegRenderer
+from cursor.renderer import HPGLRenderer
 from cursor.renderer import PathIterator
 from cursor.data import DataDirHandler
 from cursor.path import PathCollection
@@ -87,6 +88,33 @@ def test_jpegrenderer():
 
     r = JpegRenderer(DataDirHandler().test_images())
     r.render(rec)
+    r.save("test1")
+
+
+def test_hpglrenderer():
+    pc = PathCollection()
+    p1 = Path()
+    p1.add(-10000, -10000)
+    p1.add(10000, -10000)
+    p2 = Path()
+    p2.add(10000, -10000)
+    p2.add(10000, 10000)
+
+    p3 = Path()
+    p3.add(10000, 10000)
+    p3.add(-10000, 10000)
+
+    p4 = Path()
+    p4.add(-10000, 10000)
+    p4.add(-10000, -10000)
+
+    pc.add(p1)
+    pc.add(p2)
+    pc.add(p3)
+    pc.add(p4)
+
+    r = HPGLRenderer(DataDirHandler().test_hpgls())
+    r.render(pc)
     r.save("test1")
 
 

@@ -12,9 +12,11 @@ def main():
     gcode_dir = DataDirHandler().gcode("simple_square_test")
     jpg_dir = DataDirHandler().jpg("simple_square_test")
     svg_dir = DataDirHandler().svg("simple_square_test")
+    hpgl_dir = DataDirHandler().hpgl("simple_square_test")
     gcode_renderer = renderer.GCodeRenderer(gcode_dir, z_down=4.5)
     jpeg_renderer = renderer.JpegRenderer(jpg_dir)
     svg_renderer = renderer.SvgRenderer(svg_dir)
+    hpgl_renderer = renderer.HPGLRenderer(hpgl_dir)
 
     pc = PathCollection()
 
@@ -33,6 +35,7 @@ def main():
     gcode_renderer.render(pc)
     jpeg_renderer.render(pc)
     svg_renderer.render(pc)
+    hpgl_renderer.render(pc)
 
     print(pc.bb())
 
@@ -45,6 +48,7 @@ def main():
         gcode_renderer.save(f"straight_lines_{pc.hash()}")
         jpeg_renderer.save(f"straight_lines_{pc.hash()}")
         svg_renderer.save(f"straight_lines_{pc.hash()}")
+        hpgl_renderer.save(f"straight_lines_{pc.hash()}")
 
 
 if __name__ == "__main__":
