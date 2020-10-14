@@ -219,7 +219,7 @@ class HPGLRenderer:
             fname = self.save_path.joinpath(filename + ".hpgl")
 
             with open(fname.as_posix(), "w") as file:
-                #file.write(f"PA0,0;\n")
+                # file.write(f"PA0,0;\n")
                 file.write(f"SP1;\n")
                 self.__append_to_file(file, 0.0, 0.0)
                 for p in self.paths:
@@ -249,6 +249,7 @@ class HPGLRenderer:
         if x > RolandDPX3300.Plotter.MAX_X:
             raise DrawingOutOfBoundsException(x)
         file.write(f"PA{int(x)},{int(y)}\n")
+
 
 class JpegRenderer:
     def __init__(self, folder):

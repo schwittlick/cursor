@@ -20,8 +20,8 @@ def main():
     keys = ll.keys()
     print(len(keys))
 
-    #start_time = data.DateHandler.get_timestamp_from_utc(keys[0][1])
-    #end_time = data.DateHandler.get_timestamp_from_utc(keys[-1][1])
+    # start_time = data.DateHandler.get_timestamp_from_utc(keys[0][1])
+    # end_time = data.DateHandler.get_timestamp_from_utc(keys[-1][1])
 
     diff = data.DateHandler.utc_timestamp() - keys[0][1]
 

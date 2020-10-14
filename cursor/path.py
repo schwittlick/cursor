@@ -630,7 +630,7 @@ class PathCollection:
         padding_mm=None,
         padding_units=None,
         padding_percent=None,
-        center_point=None
+        center_point=None,
     ):
         # move into positive area
         _bb = self.bb()
