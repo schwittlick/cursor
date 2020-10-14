@@ -117,7 +117,9 @@ class DataDirHandler:
         return self.data_dir.joinpath("experiments").joinpath(subfolder).joinpath("svg")
 
     def hpgl(self, subfolder):
-        return self.data_dir.joinpath("experiments").joinpath(subfolder).joinpath("hpgl")
+        return (
+            self.data_dir.joinpath("experiments").joinpath(subfolder).joinpath("hpgl")
+        )
 
     def images(self):
         return self.data_dir.joinpath("jpgs")

@@ -174,7 +174,6 @@ def left_right_split_spiral():
         theta += 0.02
         yextra += 0.01
 
-
     pc.add(pp1)
     pc.add(pp2)
 
@@ -240,9 +239,11 @@ def many_split_left_right():
 
     return "many_split_left_right", pc
 
+
 def get_random_chunksizes(chunknum, maxchunk):
     splits = chunknum
     import random
+
     randnumbers = []
     for _ in range(splits):
         newrand = random.randint(0, 1000)
@@ -254,7 +255,7 @@ def get_random_chunksizes(chunknum, maxchunk):
 
     chunks = [0]
     for i in range(splits):
-        chunk = (randnumbers[i]/summe) * maxchunk
+        chunk = (randnumbers[i] / summe) * maxchunk
         chunks.append(chunk + curr)
 
         curr += chunk
@@ -266,8 +267,8 @@ def get_random_chunksizes(chunknum, maxchunk):
 
 
 if __name__ == "__main__":
-    #get_random_chunksizes(10, 801)
-    #exit(1)
+    # get_random_chunksizes(10, 801)
+    # exit(1)
 
     coll = path.PathCollection()
 
