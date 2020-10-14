@@ -630,6 +630,7 @@ class PathCollection:
         padding_mm=None,
         padding_units=None,
         padding_percent=None,
+        center_point=None
     ):
         # move into positive area
         _bb = self.bb()
@@ -681,10 +682,15 @@ class PathCollection:
         self.scale(xfac, yfac)
 
         print(self.bb())
+
         # centering
+
         _bb = self.bb()
         center = _bb.center()
-        center_dims = width / 2.0, height / 2.0
+        if center_point is None:
+            center_dims = width / 2.0, height / 2.0
+        else:
+            center_dims = center_point
         diff = center_dims[0] - center[0], center_dims[1] - center[1]
 
         log.good(f"{__class__.__name__}: fit: translated by {diff[0]} {diff[1]}")
