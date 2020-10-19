@@ -97,12 +97,12 @@ if __name__ == "__main__":
 
     pp = path.Path(layer="round1")
 
-    # num = plain_spiral(pp)
+    num = plain_spiral(pp)
     # num = circleball_spiral(pp)
     # num = upward_spiral(pp)
     # num = full_spiral(pp)
     # num = heart_spiral(pp)
-    num = fat_spiral(pp)
+    #num = fat_spiral(pp)
 
     reversed_path = pp.reversed()
     reversed_path.layer = "round2"
@@ -111,6 +111,7 @@ if __name__ == "__main__":
     coll.add(reversed_path)
 
     axidraw = False
+    dpx3300 = True
     if axidraw:
         coll.fit(
             size=device.AxiDraw.Paper.custom_36_48_landscape(),
@@ -118,6 +119,17 @@ if __name__ == "__main__":
             padding_mm=64,
         )
         fname = f"composition59_axidraw_{num}_a1"
+    elif dpx3300:
+        coll.fit(device.RolandDPX3300.Paper.a1_landscape(), machine=device.RolandDPX3300(), padding_mm=90, center_point=(-880, 600))
+        fname = f"composition59_dpx3300_{num}_a1"
+
+        hpgl_folder = data.DataDirHandler().hpgl("composition59")
+        hpgl_renderer = renderer.HPGLRenderer(hpgl_folder)
+        separate_layers = coll.get_layers()
+        for layer, pc in separate_layers.items():
+            hpgl_renderer.render(pc)
+            hpgl_renderer.save(f"{fname}_{layer}")
+        exit(0)
     else:
         coll.fit(device.DrawingMachine.Paper.a1_landscape(), padding_mm=90)
         fname = f"composition59_{num}_a1"
