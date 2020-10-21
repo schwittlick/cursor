@@ -20,11 +20,11 @@ def plain_spiral(pp):
     return "spiral_plain"
 
 
-def full_spiral(pp):
+def full_spiral(pp, rounds=800):
     theta = 0
     yextra = 0
     r = 50
-    while theta < 800:
+    while theta < rounds:
         y = r * math.cos(theta) * 2
         x = r * math.sin(theta) + yextra
         pp.add(x, y, 0)
@@ -97,12 +97,12 @@ if __name__ == "__main__":
 
     pp = path.Path(layer="round1")
 
-    num = plain_spiral(pp)
+    # num = plain_spiral(pp)
     # num = circleball_spiral(pp)
     # num = upward_spiral(pp)
-    # num = full_spiral(pp)
+    num = full_spiral(pp, 1600 * 5)
     # num = heart_spiral(pp)
-    #num = fat_spiral(pp)
+    # num = fat_spiral(pp)
 
     reversed_path = pp.reversed()
     reversed_path.layer = "round2"
@@ -120,7 +120,12 @@ if __name__ == "__main__":
         )
         fname = f"composition59_axidraw_{num}_a1"
     elif dpx3300:
-        coll.fit(device.RolandDPX3300.Paper.a1_landscape(), machine=device.RolandDPX3300(), padding_mm=90, center_point=(-880, 600))
+        coll.fit(
+            device.RolandDPX3300.Paper.a1_landscape(),
+            machine=device.RolandDPX3300(),
+            padding_mm=90,
+            center_point=(-880, 600),
+        )
         fname = f"composition59_dpx3300_{num}_a1"
 
         hpgl_folder = data.DataDirHandler().hpgl("composition59")
