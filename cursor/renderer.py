@@ -221,18 +221,24 @@ class HPGLRenderer:
             with open(fname.as_posix(), "w") as file:
                 # file.write(f"PA0,0;\n")
                 file.write(f"SP1;\n")
+
                 self.__append_to_file(file, 0.0, 0.0)
+
+                first = True
                 for p in self.paths:
+                    if first:
+                        file.write(f"PD;\n")
+                        first = False
                     x = p.start_pos().x
                     y = p.start_pos().y
                     self.__append_to_file(file, x, y)
-                    file.write(f"PA")
+                    # file.write(f"PA")
                     for line in p.vertices:
                         x = line.x
                         y = line.y
-                        file.write(f"{int(x)},{int(y)},")
-                        #self.__append_to_file(file, x, y)
-                    file.write(";\n")
+                        # file.write(f"{int(x)},{int(y)},")
+                        self.__append_to_file(file, x, y)
+                    # file.write(";\n")
                     file.write(f"PU;\n")
 
                 self.__append_to_file(file, 0.0, 0.0)
