@@ -7,13 +7,9 @@ from cursor import device
 
 
 def composition37(p0, p1, offset):
-    gcode_folder = data.DataDirHandler().gcode("composition37")
-    folder = data.DataDirHandler().jpg("composition37")
-    gcode_renderer = renderer.GCodeRenderer(gcode_folder, z_down=3.0)
-    jpeg_renderer = renderer.JpegRenderer(folder)
-
     coll = path.PathCollection()
-
+    folder = data.DataDirHandler().jpg("composition37")
+    jpeg_renderer = renderer.JpegRenderer(folder)
     start = (100, 100)
     end = (100, 700)
 
@@ -39,15 +35,24 @@ def composition37(p0, p1, offset):
 
     print(coll.bb())
 
-    coll.fit(device.DrawingMachine.Paper.a1_landscape(), 100)
+    coll.fit(
+        device.RolandDPX3300.Paper.custom_30_30(),
+        machine=device.RolandDPX3300(),
+        padding_mm=50,
+        center_point=(-880, 600),
+    )
+    fname = f"composition37_dpx3300_{offset}"
 
-    print(coll.bb())
+    hpgl_folder = data.DataDirHandler().hpgl("composition37")
+    hpgl_renderer = renderer.HPGLRenderer(hpgl_folder)
 
-    fname = f"composition37_broken_{offset}"
-    gcode_renderer.render(coll)
-    gcode_renderer.save(fname)
     jpeg_renderer.render(coll)
     jpeg_renderer.save(fname)
+
+    separate_layers = coll.get_layers()
+    for layer, pc in separate_layers.items():
+        hpgl_renderer.render(pc)
+        hpgl_renderer.save(f"{fname}_{layer}")
 
 
 if __name__ == "__main__":
@@ -64,7 +69,7 @@ if __name__ == "__main__":
     maxcount_filter = filter.MaxPointCountFilter(100)
     all_paths.filter(maxcount_filter)
 
-    for i in range(100):
+    for i in range(10):
         import random
 
         r = random.randint(0, len(all_paths) - 1)

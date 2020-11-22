@@ -7,6 +7,10 @@ import datetime
 import pytz
 import random
 import hashlib
+import wasabi
+import copy
+
+log = wasabi.Printer()
 
 
 class TimedPosition:
@@ -101,12 +105,14 @@ class BoundingBox:
 
 
 class Path:
-    def __init__(self, vertices=None):
+    def __init__(self, vertices=None, layer="default"):
+        self.layer = layer
         if vertices:
             self.vertices = list(vertices)
         else:
             self.vertices = []
 
+    @property
     def hash(self):
         return hashlib.md5(str(self.vertices).encode("utf-8")).hexdigest()
 
@@ -117,15 +123,15 @@ class Path:
         self.vertices.clear()
 
     def copy(self):
-        return type(self)(self.vertices.copy())
+        return type(self)(copy.deepcopy(self.vertices))
 
     def reverse(self):
         self.vertices.reverse()
 
     def reversed(self):
-        c = self.vertices.copy()
+        c = copy.deepcopy(self.vertices)
         c.reverse()
-        return Path(c)
+        return Path(c, layer=self.layer)
 
     def start_pos(self):
         if len(self.vertices) == 0:
@@ -146,7 +152,8 @@ class Path:
         b = BoundingBox(minx, miny, maxx, maxy)
         return b
 
-    def distance(self, res):
+    @property
+    def distance(self):
         """
         Calculates the summed distance between all points in sequence
         Also known as "travel distance"
@@ -161,12 +168,7 @@ class Path:
             current = self.__getitem__(i)
             next = self.__getitem__(i + 1)
 
-            d = calculateDistance(
-                current.x * res.width,
-                current.y * res.height,
-                next.x * res.width,
-                next.y * res.height,
-            )
+            d = calculateDistance(current.x, current.y, next.x, next.y,)
             dist += d
 
         return dist
@@ -180,6 +182,10 @@ class Path:
             p.scale(x, y)
 
     def morph(self, start, end):
+        if isinstance(start, TimedPosition) and isinstance(end, TimedPosition):
+            start = (start.x, start.y)
+            end = (end.x, end.y)
+
         path = Path()
         end_np = self.end_pos().arr()
         start_np = self.start_pos().arr()
@@ -192,6 +198,8 @@ class Path:
             dir_old = np.subtract(end_np, start_np)
             dir_new = np.subtract(new_end_np, new_start_np)
             mag_diff = np.linalg.norm(dir_new) / np.linalg.norm(dir_old)
+            if mag_diff is np.nan:
+                mag_diff = 0.0
             if math.isinf(mag_diff):
                 mag_diff = 1.0
             nparr = nparr * mag_diff
@@ -208,9 +216,14 @@ class Path:
         )
         new_start_to_end = new_start_to_end / np.linalg.norm(new_start_to_end)
 
-        angle = np.arccos(
-            np.clip(np.dot(current_start_to_end, new_start_to_end), -math.pi, math.pi)
-        )
+        try:
+            angle = np.arccos(
+                np.clip(
+                    np.dot(current_start_to_end, new_start_to_end), -math.pi, math.pi
+                )
+            )
+        except RuntimeWarning as w:
+            print(w)
 
         # acos can't properly calculate angle more than 180°.
         # solution taken from here: http://www.gamedev.net/topic/556500-angle-between-vectors/
@@ -228,6 +241,37 @@ class Path:
             p.translate(translation[0], translation[1])
 
         return path
+
+    def intersect(self, newpath):
+        for p1 in range(len(newpath) - 1):
+            for p2 in range(len(self) - 1):
+                line1Start = newpath[p1]
+                line1End = newpath[p1 + 1]
+                line2Start = self[p2]
+                line2End = self[p2 + 1]
+
+                diffLAx = line1End.x - line1Start.x
+                diffLAy = line1End.y - line1Start.y
+                diffLBx = line2End.x - line2Start.x
+                diffLBy = line2End.y - line2Start.y
+                compareA = diffLAx * line1Start.y - diffLAy * line1Start.x
+                compareB = diffLBx * line2Start.y - diffLBy * line2Start.x
+                if ((diffLAx * line2Start.y - diffLAy * line2Start.x) < compareA) ^ (
+                    (diffLAx * line2End.y - diffLAy * line2End.x) < compareA
+                ) and ((diffLBx * line1Start.y - diffLBy * line1Start.x) < compareB) ^ (
+                    (diffLBx * line1End.y - diffLBy * line1End.x) < compareB
+                ):
+                    lDetDivInv = 1 / ((diffLAx * diffLBy) - (diffLAy * diffLBx))
+                    intersectionx = (
+                        -((diffLAx * compareB) - (compareA * diffLBx)) * lDetDivInv
+                    )
+                    intersectiony = (
+                        -((diffLAy * compareB) - (compareA * diffLBy)) * lDetDivInv
+                    )
+
+                    return True, intersectionx, intersectiony
+
+        return (False,)
 
     def interp(self, newpath, perc):
         path = Path()
@@ -279,6 +323,60 @@ class Path:
 
         return ent
 
+    def direction_changes(self):
+        """
+        returns a list of radial direction changes from each point to the next len() = self.__len() - 1
+        :return:
+        """
+
+        def length(v):
+            return np.sqrt(v[0] ** 2 + v[1] ** 2)
+
+        def dot_product(v, w):
+            return v[0] * w[0] + v[1] * w[1]
+
+        def determinant(v, w):
+            return v[0] * w[1] - v[1] * w[0]
+
+        def inner_angle(v, w):
+            dp = dot_product(v, w)
+            ll = length(v) * length(w)
+            if ll == 0.0:
+                return 0.0
+
+            cosx = dp / ll
+            rad = np.arccos(cosx)  # in radians
+            return rad * 180 / np.pi  # returns degrees
+
+        def angle_clockwise(A, B):
+            inner = inner_angle(A, B)
+            det = determinant(A, B)
+            if (
+                det < 0
+            ):  # this is a property of the det. If the det < 0 then B is clockwise of A
+                return inner
+            else:  # if the det > 0 then A is immediately clockwise of B
+                return 360 - inner
+
+        angles = []
+        idx = 0
+        for _ in self.vertices:
+            if idx > 0:
+                f = self.vertices[idx - 1]
+                s = self.vertices[idx]
+                angle = angle_clockwise(f.pos(), s.pos())
+                # angle = angle_clockwise((1, 1), (1, -1))
+
+                if angle > 180:
+                    angle = 360 - angle
+
+                # angles.append(np.deg2rad(angle) % (2 * np.pi))
+                angles.append(angle % 360)
+            idx += 1
+
+        return angles
+
+    @property
     def shannon_x(self):
         distances = []
 
@@ -298,6 +396,7 @@ class Path:
         entropy = self.__entropy2(distances)
         return entropy
 
+    @property
     def shannon_y(self):
         distances = []
 
@@ -315,6 +414,13 @@ class Path:
             prevy = v.y
 
         entropy = self.__entropy2(distances)
+        return entropy
+
+    @property
+    def shannon_direction_changes(self):
+        entropy = self.__entropy2(self.direction_changes())
+        if entropy is np.nan:
+            print("lol")
         return entropy
 
     def empty(self):
@@ -337,7 +443,8 @@ class Path:
         self.vertices = new_points
 
     def __repr__(self):
-        return str(self.vertices)
+        rep = f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} shannchan: {self.shannon_direction_changes} layer: {self.layer}"
+        return rep
 
     def __len__(self):
         return len(self.vertices)
@@ -351,8 +458,9 @@ class Path:
 
 
 class PathCollection:
-    def __init__(self, timestamp=None):
+    def __init__(self, timestamp=None, name="noname"):
         self.__paths = []
+        self.__name = name
         if timestamp:
             self._timestamp = timestamp
         else:
@@ -370,9 +478,11 @@ class PathCollection:
         """
         removes all paths with only one point
         """
-        self.__paths = [path for path in self.__paths if len(path) > 1]
         for p in self.__paths:
             p.clean()
+
+        self.__paths = [path for path in self.__paths if len(path) > 1]
+
 
     def hash(self):
         return hashlib.md5(str(self.__paths).encode("utf-8")).hexdigest()
@@ -387,6 +497,18 @@ class PathCollection:
 
     def random(self):
         return self.__getitem__(random.randint(0, self.__len__() - 1))
+
+    def sort(self, pathsorter):
+        if isinstance(pathsorter, filter.Sorter):
+            pathsorter.sort(self.__paths)
+        else:
+            raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
+
+    def sorted(self, pathsorter):
+        if isinstance(pathsorter, filter.Sorter):
+            return pathsorter.sorted(self.__paths)
+        else:
+            raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
     def filter(self, pathfilter):
         if isinstance(pathfilter, filter.Filter):
@@ -423,7 +545,7 @@ class PathCollection:
             )
 
     def __repr__(self):
-        return f"PathCollection({self.__paths})"
+        return f"PathCollection({self.__name}) -> ({self.__paths})"
 
     def __eq__(self, other):
         if not isinstance(other, PathCollection):
@@ -451,10 +573,36 @@ class PathCollection:
     def timestamp(self):
         return self._timestamp
 
+    def layer_names(self):
+        layers = []
+        for p in self.__paths:
+            if p.layer not in layers:
+                layers.append(p.layer)
+
+        return layers
+
+    def get_layers(self):
+        layers = {}
+        for layer in self.layer_names():
+            layers[layer] = []
+
+        for p in self.__paths:
+            layers[p.layer].append(p)
+
+        layered_pcs = {}
+        for key in layers:
+            pc = PathCollection()
+            pc.__paths.extend(layers[key])
+            layered_pcs[key] = pc
+
+        return layered_pcs
+
     def bb(self):
         mi = self.min()
         ma = self.max()
         bb = BoundingBox(mi[0], mi[1], ma[0], ma[1])
+        if bb.x is np.nan or bb.y is np.nan or bb.w is np.nan or bb.h is np.nan:
+            print("f8co")
         return bb
 
     def min(self):
@@ -477,33 +625,78 @@ class PathCollection:
         for p in self.__paths:
             p.scale(x, y)
 
-    def fit(self, size, padding_mm):
+    def fit(
+        self,
+        size,
+        machine=device.DrawingMachine(),
+        padding_mm=None,
+        padding_units=None,
+        padding_percent=None,
+        center_point=None,
+    ):
         # move into positive area
-        bb = self.bb()
-        scale = 1.0
-        abs_scaled_bb = (
-            abs(bb.x * scale),
-            abs(bb.y * scale),
-            abs(bb.w * scale),
-            abs(bb.h * scale),
-        )
-        for p in self.__paths:
-            if bb.x * scale < 0:
-                p.translate(abs_scaled_bb[0], abs_scaled_bb[1])
+        _bb = self.bb()
+        if _bb.x < 0:
+            log.good(f"{__class__.__name__}: fit: translate by {_bb.x} {0.0}")
+            self.translate(abs(_bb.x), 0.0)
+        else:
+            log.good(f"{__class__.__name__}: fit: translate by {-abs(_bb.x)} {0.0}")
+            self.translate(-abs(_bb.x), 0.0)
 
+        if _bb.y < 0:
+            log.good(f"{__class__.__name__}: fit: translate by {0.0} {abs(_bb.y)}")
+            self.translate(0.0, abs(_bb.y))
+        else:
+            log.good(f"{__class__.__name__}: fit: translate by {0.0} {-abs(_bb.y)}")
+            self.translate(0.0, -abs(_bb.y))
+        _bb = self.bb()
         width = size[0]
         height = size[1]
-        padding_x = padding_mm * device.DrawingMachine.Paper.X_FACTOR
-        padding_y = padding_mm * device.DrawingMachine.Paper.Y_FACTOR
+
+        padding_x = 0
+        padding_y = 0
+
+        if padding_mm is not None and padding_units is None and padding_percent is None:
+            padding_x = padding_mm * machine.Paper.X_FACTOR
+            padding_y = padding_mm * machine.Paper.Y_FACTOR
+
+        if padding_mm is None and padding_units is not None and padding_percent is None:
+            padding_x = padding_units
+            padding_y = padding_units
+
+        if padding_mm is None and padding_units is None and padding_percent is not None:
+            padding_x = abs(width * padding_percent)
+            padding_y = abs(height * padding_percent)
 
         # scaling
-        xfac = (width - padding_x * 2) / self.bb().w
-        yfac = (height - padding_y * 2) / self.bb().h
+        _bb = self.bb()
+        x1 = width - padding_x * 2.0
+        x2 = _bb.w - _bb.x
+
+        y1 = height - padding_y * 2.0
+        y2 = _bb.h - _bb.y
+
+        xfac = x1 / x2
+        yfac = y1 / y2
+
+        log.good(f"{__class__.__name__}: fit: scaled by {xfac} {yfac}")
+
         self.scale(xfac, yfac)
 
+        print(self.bb())
+
         # centering
-        center = self.bb().center()
-        center_dims = width / 2, height / 2
+
+        _bb = self.bb()
+        center = _bb.center()
+        if center_point is None:
+            center_dims = width / 2.0, height / 2.0
+        else:
+            center_dims = center_point
         diff = center_dims[0] - center[0], center_dims[1] - center[1]
 
+        log.good(f"{__class__.__name__}: fit: translated by {diff[0]} {diff[1]}")
+
         self.translate(diff[0], diff[1])
+
+        print(self.bb())
