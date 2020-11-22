@@ -240,6 +240,50 @@ def many_split_left_right():
     return "many_split_left_right", pc
 
 
+def triple_fat_spiral():
+    pc = path.PathCollection()
+
+    p1 = path.Path(layer="left")
+    p2 = path.Path(layer="middle")
+    p3 = path.Path(layer="right")
+
+    theta = 0
+    yextra = 0
+    r = 50
+    while theta < 801:
+        x = r * math.cos(theta) * 2
+        y = r * math.sin(theta) + yextra
+        p1.add(x, y, 0)
+        theta += 0.02
+        yextra += 0.01
+
+    theta = 0
+    yextra = 0
+    r = 50
+    while theta < 801:
+        x = r * math.cos(theta) * 2 + 220
+        y = r * math.sin(theta) + yextra
+        p2.add(x, y, 0)
+        theta += 0.02
+        yextra += 0.01
+
+    theta = 0
+    yextra = 0
+    r = 50
+    while theta < 801:
+        x = r * math.cos(theta) * 2 + 440
+        y = r * math.sin(theta) + yextra
+        p3.add(x, y, 0)
+        theta += 0.02
+        yextra += 0.01
+
+    pc.add(p1)
+    pc.add(p2)
+    pc.add(p3)
+
+    return "triple_fat_spiral", pc
+
+
 def get_random_chunksizes(chunknum, maxchunk):
     splits = chunknum
     import random
@@ -277,7 +321,8 @@ if __name__ == "__main__":
     # num, pc = middle_split_spiral()
     # num, pc = dual_upward_spiral()
     # num, pc = left_right_split_spiral()
-    num, pc = many_split_left_right()
+    # num, pc = many_split_left_right()
+    num, pc = triple_fat_spiral()
 
     pc.fit(device.DrawingMachine.Paper.a1_landscape(), padding_mm=90)
     save_wrapper(pc, "composition59_split", f"c59_{num}_together")
@@ -306,3 +351,18 @@ if __name__ == "__main__":
         jpeg_renderer.save(f"{fname}_{layer}")
         gcode_renderer.render(pc)
         gcode_renderer.save(f"{fname}_{layer}")
+
+    coll.fit(
+        device.RolandDPX3300.Paper.custom_30_30(),
+        machine=device.RolandDPX3300(),
+        padding_mm=50,
+        center_point=(-880, 600),
+    )
+
+
+    separate_layers = coll.get_layers()
+    for layer, pc in separate_layers.items():
+        hpgl_folder = data.DataDirHandler().hpgl("composition59_split")
+        hpgl_renderer = renderer.HPGLRenderer(hpgl_folder)
+        hpgl_renderer.render(pc)
+        hpgl_renderer.save(f"{fname}_{layer}")

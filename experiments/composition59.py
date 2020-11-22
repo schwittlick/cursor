@@ -20,7 +20,7 @@ def plain_spiral(pp):
     return "spiral_plain"
 
 
-def full_spiral(pp, rounds=800):
+def full_spiral(pp, rounds=800, _yextra=0.01, _theta=0.02):
     theta = 0
     yextra = 0
     r = 50
@@ -28,8 +28,8 @@ def full_spiral(pp, rounds=800):
         y = r * math.cos(theta) * 2
         x = r * math.sin(theta) + yextra
         pp.add(x, y, 0)
-        theta += 0.02
-        yextra += 0.01
+        theta += _theta
+        yextra += _yextra
 
     return "full_plain"
 
@@ -92,6 +92,7 @@ def fat_spiral(pp):
     return "fat_spiral"
 
 
+
 if __name__ == "__main__":
     coll = path.PathCollection()
 
@@ -100,7 +101,7 @@ if __name__ == "__main__":
     # num = plain_spiral(pp)
     # num = circleball_spiral(pp)
     # num = upward_spiral(pp)
-    num = full_spiral(pp, 1600 * 5)
+    num = full_spiral(pp, 20000, 0.002, 0.2)
     # num = heart_spiral(pp)
     # num = fat_spiral(pp)
 
@@ -126,7 +127,7 @@ if __name__ == "__main__":
             padding_mm=90,
             center_point=(-880, 600),
         )
-        fname = f"composition59_dpx3300_{num}_a1"
+        fname = f"composition59_dpx3300_{num}_a1_rounder"
 
         hpgl_folder = data.DataDirHandler().hpgl("composition59")
         hpgl_renderer = renderer.HPGLRenderer(hpgl_folder)
@@ -134,10 +135,11 @@ if __name__ == "__main__":
         for layer, pc in separate_layers.items():
             hpgl_renderer.render(pc)
             hpgl_renderer.save(f"{fname}_{layer}")
+
         exit(0)
     else:
         coll.fit(device.DrawingMachine.Paper.a1_landscape(), padding_mm=90)
-        fname = f"composition59_{num}_a1"
+        fname = f"composition59_{num}_a1_rounder"
 
     separate_layers = coll.get_layers()
     for layer, pc in separate_layers.items():
