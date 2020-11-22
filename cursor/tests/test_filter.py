@@ -1,3 +1,5 @@
+from cursor.data import DataDirHandler
+from cursor.loader import Loader
 from cursor.path import Path
 from cursor.path import PathCollection
 from cursor.path import BoundingBox
@@ -5,8 +7,10 @@ from cursor.filter import Filter
 from cursor.filter import BoundingBoxFilter
 from cursor.filter import MinPointCountFilter
 from cursor.filter import MaxPointCountFilter
+from cursor.filter import Sorter
 
 import pytest
+import random
 
 
 def test_bb_filter():
@@ -80,3 +84,67 @@ def test_point_count_filter():
     pcol.filter(max_filter)
 
     assert len(pcol) == 0
+
+
+def test_entropy_sort():
+    pcol = PathCollection()
+
+    for i in range(100):
+        p = Path()
+        for _ in range(100):
+            p.add(random.randint(-100, 100), random.randint(-100, 100))
+        pcol.add(p)
+
+    sorter = Sorter(param=Sorter.SHANNON_X)
+    pcol.sort(sorter)
+
+    for i in range(len(pcol) - 1):
+        p0 = pcol[i]
+        p1 = pcol[i + 1]
+
+        assert p0.shannon_x <= p1.shannon_x
+
+    sorter.param = Sorter.SHANNON_Y
+    pcol.sort(sorter)
+
+    for i in range(len(pcol) - 1):
+        p0 = pcol[i]
+        p1 = pcol[i + 1]
+
+        assert p0.shannon_y <= p1.shannon_y
+
+    sorter.param = Sorter.SHANNON_DIRECTION_CHANGES
+    pcol.sort(sorter)
+
+    for i in range(len(pcol) - 1):
+        p0 = pcol[i]
+        p1 = pcol[i + 1]
+
+        assert p0.shannon_direction_changes <= p1.shannon_direction_changes
+
+
+def test_entropy_sort2():
+    pcol = PathCollection()
+    dir = DataDirHandler().recordings()
+    ll = Loader(directory=dir, limit_files=2)
+    pcol = ll.all_paths()
+    sorter = Sorter(param=Sorter.SHANNON_X, reverse=True)
+    pcol.sort(sorter)
+    for i in range(10):
+        print(pcol[i].hash)
+
+    sorter = Sorter(param=Sorter.SHANNON_Y, reverse=True)
+    pcol.sort(sorter)
+    for i in range(10):
+        print(pcol[i].hash)
+
+    sorter = Sorter(param=Sorter.SHANNON_DIRECTION_CHANGES, reverse=True)
+    pcol.sort(sorter)
+    for i in range(10):
+        print(pcol[i].hash)
+
+    print(1)
+
+
+def test_distance_filter():
+    raise 0

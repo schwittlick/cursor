@@ -116,6 +116,11 @@ class DataDirHandler:
     def svg(self, subfolder):
         return self.data_dir.joinpath("experiments").joinpath(subfolder).joinpath("svg")
 
+    def hpgl(self, subfolder):
+        return (
+            self.data_dir.joinpath("experiments").joinpath(subfolder).joinpath("hpgl")
+        )
+
     def images(self):
         return self.data_dir.joinpath("jpgs")
 
@@ -124,6 +129,9 @@ class DataDirHandler:
 
     def svgs(self):
         return self.data_dir.joinpath("svg")
+
+    def hpgls(self):
+        return self.data_dir.joinpath("hpgl")
 
     def recordings(self):
         return self.data_dir.joinpath("recordings")
@@ -136,6 +144,9 @@ class DataDirHandler:
 
     def test_svgs(self):
         return self.test_data_dir.joinpath("svg")
+
+    def test_hpgls(self):
+        return self.test_data_dir.joinpath("hpgl")
 
     def test_recordings(self):
         return self.test_data_dir.joinpath("test_recordings")

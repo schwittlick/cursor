@@ -27,7 +27,7 @@ def composition56(nr, pathlist):
 
     coll.fit(device.DrawingMachine.Paper.a1_landscape(), 50)
 
-    hash = pathlist[0].hash()
+    hash = pathlist[0].hash
 
     print(f"rendering {nr}, {coll.bb()}")
     gcode_renderer.render(coll, f"composition56_{hash}")
@@ -40,10 +40,10 @@ if __name__ == "__main__":
     rec = ll.single(0)
     all_paths = ll.all_paths()
 
-    entropy_filter = filter.EntropyFilter(1.2, 1.2)
+    entropy_filter = filter.EntropyMinFilter(1.2, 1.2)
     all_paths.filter(entropy_filter)
 
-    distance_filter = filter.DistanceFilter(100, rec.resolution)
+    distance_filter = filter.DistanceFilter(100)
     all_paths.filter(distance_filter)
 
     for i in range(100):
@@ -53,6 +53,6 @@ if __name__ == "__main__":
         r4 = all_paths.random()
         r5 = all_paths.random()
 
-        print(r1.hash())
+        print(r1.hash)
 
         composition56(i, [r1, r2, r3, r4, r5])
