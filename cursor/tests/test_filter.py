@@ -144,3 +144,7 @@ def test_entropy_sort2():
         print(pcol[i].hash)
 
     print(1)
+
+
+def test_distance_filter():
+    raise 0

@@ -227,12 +227,12 @@ class HPGLRenderer:
                 first = True
                 for p in self.paths:
                     if first:
-                        file.write(f"PD;\n")
+                        file.write(f"PU;\n")
                         first = False
                     x = p.start_pos().x
                     y = p.start_pos().y
                     self.__append_to_file(file, x, y)
-                    # file.write(f"PA")
+                    file.write(f"PD;\n")
                     for line in p.vertices:
                         x = line.x
                         y = line.y
