@@ -23,6 +23,7 @@ class RolandDPX3300(Machine):
         CUSTOM_48_36 = (480 * X_FACTOR, 360 * Y_FACTOR)
         CUSTOM_36_48 = (360 * X_FACTOR, 480 * Y_FACTOR)
         DIN_A1_LANDSCAPE = (841 * X_FACTOR, 594 * Y_FACTOR)
+        CUSTOM_30_30 = (300 * X_FACTOR, 300 * Y_FACTOR)
 
         @staticmethod
         def custom_36_48_portrait():
@@ -35,6 +36,10 @@ class RolandDPX3300(Machine):
         @staticmethod
         def a1_landscape():
             return RolandDPX3300.Paper.DIN_A1_LANDSCAPE
+
+        @staticmethod
+        def custom_30_30():
+            return RolandDPX3300.Paper.CUSTOM_30_30
 
 
 class AxiDraw(Machine):

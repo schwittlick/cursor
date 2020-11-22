@@ -478,9 +478,11 @@ class PathCollection:
         """
         removes all paths with only one point
         """
-        self.__paths = [path for path in self.__paths if len(path) > 1]
         for p in self.__paths:
             p.clean()
+
+        self.__paths = [path for path in self.__paths if len(path) > 1]
+
 
     def hash(self):
         return hashlib.md5(str(self.__paths).encode("utf-8")).hexdigest()
