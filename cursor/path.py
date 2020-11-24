@@ -630,7 +630,6 @@ class PathCollection:
 
     def fit(
         self,
-
         size=tuple[int, int],
         xy_factor: tuple[float, float] = (2.85714, 2.90572),
         padding_mm: int = None,
