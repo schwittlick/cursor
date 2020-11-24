@@ -203,8 +203,8 @@ class Exporter:
 
     def fit(self) -> None:
         out_dim = tuple(
-            l * r
-            for l, r in zip(
+            _ * r
+            for _, r in zip(
                 Paper.sizes[self.cfg.dimension], XYFactors.fac[self.cfg.type]
             )
         )
