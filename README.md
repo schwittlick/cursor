@@ -7,8 +7,8 @@
 
 setup
 
-    pyenv install 3.6.8
-    pyenv virtualenv 3.6.8 cursor
+    pyenv install 3.9.0
+    pyenv virtualenv 3.9.0 cursor
     pyenv activate cursor
     pip install -r requirements.txt
 
@@ -17,7 +17,7 @@ test
     
     # linux/osx
     py.test --cov cursor -v
-    flake8 --max-line-length=88
+    flake8 --max-line-length=100
 
     # windows
     python -m pytest --cov=cursor . -v

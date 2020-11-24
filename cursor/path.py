@@ -437,8 +437,10 @@ class Path:
         self.vertices = [prev := v for v in self.vertices if prev != v]
 
     def __repr__(self):
-        rep = f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} " \
-              f"shannchan: {self.shannon_direction_changes} layer: {self.layer}"
+        rep = (
+            f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} "
+            f"shannchan: {self.shannon_direction_changes} layer: {self.layer}"
+        )
         return rep
 
     def __len__(self):

@@ -1,5 +1,4 @@
 from cursor import loader
-from cursor import renderer
 from cursor import data
 from cursor import device
 from cursor import filter

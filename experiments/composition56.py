@@ -1,5 +1,4 @@
 from cursor import loader
-from cursor import renderer
 from cursor import path
 from cursor import filter
 from cursor import data

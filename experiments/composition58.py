@@ -38,7 +38,7 @@ def main():
             if down:
                 try:
                     client.send_message("/keyboard_keys_ascii", ord(k))
-                except:
+                except TypeError:
                     client.send_message("/keyboard_keys_ascii_special", k)
 
             current_key_index += 1

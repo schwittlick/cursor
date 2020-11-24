@@ -8,8 +8,6 @@ from cursor import device
 
 def composition37(p0, p1, offset):
     coll = path.PathCollection()
-    folder = data.DataDirHandler().jpg("composition37")
-    jpeg_renderer = renderer.JpegRenderer(folder)
     start = (100, 100)
     end = (100, 700)
 
