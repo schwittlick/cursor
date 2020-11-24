@@ -437,7 +437,8 @@ class Path:
         self.vertices = [prev := v for v in self.vertices if prev != v]
 
     def __repr__(self):
-        rep = f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} shannchan: {self.shannon_direction_changes} layer: {self.layer}"
+        rep = f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} " \
+              f"shannchan: {self.shannon_direction_changes} layer: {self.layer}"
         return rep
 
     def __len__(self):
@@ -655,7 +656,7 @@ class PathCollection:
             padding_y = padding_mm * xy_factor[1]
 
             # multiply both tuples
-            _size = tuple(l * r for l, r in zip(size, xy_factor))
+            _size = tuple(_ * r for _, r in zip(size, xy_factor))
             width = _size[0]
             height = _size[1]
 

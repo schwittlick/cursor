@@ -67,7 +67,7 @@ class JsonCompressor:
         try:
             assert j[self.ZIPJSON_KEY]
             assert set(j.keys()) == {self.ZIPJSON_KEY}
-        except:
+        except AssertionError:
             if insist:
                 raise RuntimeError(
                     "JSON not in the expected format {"
@@ -79,12 +79,12 @@ class JsonCompressor:
 
         try:
             j = zlib.decompress(base64.b64decode(j[self.ZIPJSON_KEY]))
-        except:
+        except zlib.error:
             raise RuntimeError("Could not decode/unzip the contents")
 
         try:
             j = json.loads(j, cls=MyJsonDecoder)
-        except:
+        except TypeError and json.JSONDecodeError:
             raise RuntimeError("Could interpret the unzipped contents")
 
         return j
