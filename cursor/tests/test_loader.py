@@ -2,7 +2,6 @@ from cursor.loader import Loader
 from cursor.data import DataDirHandler
 
 import pytest
-import pathlib
 
 
 def test_loader_simple():

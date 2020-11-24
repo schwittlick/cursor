@@ -23,7 +23,7 @@ jobs:
         uses: wearerequired/lint-action@v1
         with:
           github_token: ${{ secrets.github_token }}
-          
+
           # Enable linters
           black: true
           flake8: true

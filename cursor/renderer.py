@@ -218,29 +218,29 @@ class HPGLRenderer:
 
             with open(fname.as_posix(), "w") as file:
                 # file.write(f"PA0,0;\n")
-                file.write(f"SP1;\n")
+                file.write("SP1;\n")
 
                 self.__append_to_file(file, 0.0, 0.0)
 
                 first = True
                 for p in self.paths:
                     if first:
-                        file.write(f"PU;\n")
+                        file.write("PU;\n")
                         first = False
                     x = p.start_pos().x
                     y = p.start_pos().y
                     self.__append_to_file(file, x, y)
-                    file.write(f"PD;\n")
+                    file.write("PD;\n")
                     for line in p.vertices:
                         x = line.x
                         y = line.y
                         # file.write(f"{int(x)},{int(y)},")
                         self.__append_to_file(file, x, y)
                     # file.write(";\n")
-                    file.write(f"PU;\n")
+                    file.write("PU;\n")
 
                 self.__append_to_file(file, 0.0, 0.0)
-                file.write(f"SP0;\n")
+                file.write("SP0;\n")
             log.good(f"Finished saving {fname}")
         except DrawingOutOfBoundsException as e:
             log.fail(f"Couldn't generate HPGL- Out of Bounds with position {e}")
