@@ -7,7 +7,6 @@ from cursor import device
 
 def composition37(p0, p1, offset):
     coll = path.PathCollection()
-
     start = (100, 100)
     end = (100, 700)
 
@@ -33,7 +32,7 @@ def composition37(p0, p1, offset):
 
     device.SimpleExportWrapper().ex(
         coll,
-        device.PlotterType.DIY_PLOTTER,
+        device.PlotterType.ROLAND_DPX3300,
         device.PaperSize.LANDSCAPE_A1,
         90,
         "composition37",
@@ -55,7 +54,7 @@ if __name__ == "__main__":
     maxcount_filter = filter.MaxPointCountFilter(100)
     all_paths.filter(maxcount_filter)
 
-    for i in range(1):
+    for i in range(10):
         import random
 
         r = random.randint(0, len(all_paths) - 1)

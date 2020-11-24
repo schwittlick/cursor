@@ -6,13 +6,13 @@ import pyautogui
 import datetime
 import pytz
 
-from cursor.path import Path
-from cursor.path import PathCollection
-from cursor.path import TimedPosition
-
 
 class MyJsonEncoder(json.JSONEncoder):
     def default(self, o):
+        from cursor.path import Path
+        from cursor.path import PathCollection
+        from cursor.path import TimedPosition
+
         if isinstance(o, PathCollection):
             return {
                 "paths": o.get_all(),
@@ -31,6 +31,10 @@ class MyJsonDecoder(json.JSONDecoder):
         json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
 
     def object_hook(self, dct):
+        from cursor.path import Path
+        from cursor.path import PathCollection
+        from cursor.path import TimedPosition
+
         if "x" in dct and "y" in dct and "ts" in dct:
             p = TimedPosition(dct["x"], dct["y"], dct["ts"])
             return p
@@ -63,7 +67,7 @@ class JsonCompressor:
         try:
             assert j[self.ZIPJSON_KEY]
             assert set(j.keys()) == {self.ZIPJSON_KEY}
-        except:
+        except AssertionError:
             if insist:
                 raise RuntimeError(
                     "JSON not in the expected format {"
@@ -75,12 +79,12 @@ class JsonCompressor:
 
         try:
             j = zlib.decompress(base64.b64decode(j[self.ZIPJSON_KEY]))
-        except:
+        except zlib.error:
             raise RuntimeError("Could not decode/unzip the contents")
 
         try:
             j = json.loads(j, cls=MyJsonDecoder)
-        except:
+        except TypeError and json.JSONDecodeError:
             raise RuntimeError("Could interpret the unzipped contents")
 
         return j
@@ -116,6 +120,11 @@ class DataDirHandler:
     def svg(self, subfolder):
         return self.data_dir.joinpath("experiments").joinpath(subfolder).joinpath("svg")
 
+    def hpgl(self, subfolder):
+        return (
+            self.data_dir.joinpath("experiments").joinpath(subfolder).joinpath("hpgl")
+        )
+
     def images(self):
         return self.data_dir.joinpath("jpgs")
 
@@ -124,6 +133,9 @@ class DataDirHandler:
 
     def svgs(self):
         return self.data_dir.joinpath("svg")
+
+    def hpgls(self):
+        return self.data_dir.joinpath("hpgl")
 
     def recordings(self):
         return self.data_dir.joinpath("recordings")
@@ -136,6 +148,9 @@ class DataDirHandler:
 
     def test_svgs(self):
         return self.test_data_dir.joinpath("svg")
+
+    def test_hpgls(self):
+        return self.test_data_dir.joinpath("hpgl")
 
     def test_recordings(self):
         return self.test_data_dir.joinpath("test_recordings")

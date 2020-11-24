@@ -74,9 +74,7 @@ class Sorter:
                     paths, key=lambda x: x.hash, reverse=self.__reverse
                 )
             else:
-                raise Exception(
-                    f"Did not understand parameter {self.__param} for {__class__.__name__}"
-                )
+                raise Exception(f"Wrong param {self.__param} for {__class__.__name__}")
             elapsed = time.time() - t0
             log.good(f"Sorted via {__class__.__name__} took {round(elapsed * 1000)}ms.")
             return sorted_list
@@ -101,9 +99,7 @@ class EntropyMinFilter(Filter):
         t0 = time.time()
         len_before = len(paths)
         paths[:] = [
-            p
-            for p in paths
-            if p.shannon_x() > self.min_x and p.shannon_y() > self.min_y
+            p for p in paths if p.shannon_x > self.min_x and p.shannon_y > self.min_y
         ]
         len_after = len(paths)
 
@@ -129,9 +125,7 @@ class EntropyMaxFilter(Filter):
         len_before = len(paths)
 
         paths[:] = [
-            p
-            for p in paths
-            if p.shannon_x() < self.max_x and p.shannon_y() < self.max_y
+            p for p in paths if p.shannon_x < self.max_x and p.shannon_y < self.max_y
         ]
 
         len_after = len(paths)
@@ -197,6 +191,6 @@ class DistanceFilter(Filter):
 
     def filter(self, paths):
         len_before = len(paths)
-        paths[:] = [p for p in paths if p.distance() <= self.max_distance]
+        paths[:] = [p for p in paths if p.distance <= self.max_distance]
         len_after = len(paths)
         log.good(f"DistanceFilter: reduced path count from {len_before} to {len_after}")

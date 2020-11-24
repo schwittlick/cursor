@@ -41,10 +41,10 @@ class Loader:
 
         elapsed = time.time() - start_benchmark
         log.good(
-            f"Loaded {absolut_path_count} paths from {len(self._recordings)} recordings."
+            f"Loaded {absolut_path_count} paths from {len(self._recordings)} recordings"
         )
         log.good(
-            f"Loaded {len(self._keyboard_recordings)} keys from {len(all_json_files)} recordings."
+            f"Loaded {len(self._keyboard_recordings)} keys from {len(all_json_files)} recordings"
         )
         log.good(f"This took {round(elapsed * 1000)}ms.")
 

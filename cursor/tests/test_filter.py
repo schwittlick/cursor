@@ -8,6 +8,7 @@ from cursor.filter import BoundingBoxFilter
 from cursor.filter import MinPointCountFilter
 from cursor.filter import MaxPointCountFilter
 from cursor.filter import Sorter
+from cursor.filter import DistanceFilter
 
 import pytest
 import random
@@ -144,3 +145,27 @@ def test_entropy_sort2():
         print(pcol[i].hash)
 
     print(1)
+
+
+def test_distance_filter():
+    pcol = PathCollection()
+
+    p1 = Path()
+
+    p1.add(0, 0)
+    p1.add(10, 0, 0)
+
+    p2 = Path()
+
+    p2.add(0, 0)
+    p2.add(20, 0, 0)
+
+    pcol.add(p1)
+    pcol.add(p2)
+
+    assert len(pcol) == 2
+
+    filter = DistanceFilter(15)
+    pcol.filter(filter)
+
+    assert len(pcol) == 1

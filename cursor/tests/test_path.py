@@ -344,10 +344,10 @@ def test_path_distance():
 
 def test_path_layer():
     p = Path()
-    assert p.layer is "default"
+    assert p.layer == "default"
 
     p.layer = "custom"
-    assert p.layer is "custom"
+    assert p.layer == "custom"
 
 
 def test_path_intersection1():

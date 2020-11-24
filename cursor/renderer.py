@@ -1,6 +1,6 @@
 from cursor.path import PathCollection
+from cursor.path import Path
 from cursor.path import BoundingBox
-from cursor.device import DrawingMachine
 
 import svgwrite
 import pathlib
@@ -49,24 +49,47 @@ class PathIterator:
 
 
 class SvgRenderer:
-    def __init__(self, folder, filename):
+    def __init__(self, folder):
         assert isinstance(folder, pathlib.Path), "Only path objects allowed"
         self.save_path = folder
-        self.filename = filename
         self.dwg = None
+        self.paths = PathCollection()
+        self.bbs = []
 
     def render(self, paths):
         if not isinstance(paths, PathCollection):
             raise Exception("Only PathCollection and list of PathCollections allowed")
 
-        bb = paths.bb()
+        log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
+        # for path in paths:
+        #    log.good(f"with {len(path)} verts")
+        self.paths += paths
 
-        fname = self.save_path.joinpath(self.filename + ".svg")
+    def render_bb(self, bb):
+        assert isinstance(bb, BoundingBox), "Only BoundingBox objects allowed"
+
+        self.bbs.append(bb)
+
+        p1 = Path()
+        p1.add(bb.x, bb.y)
+        p1.add(bb.w, bb.y)
+        p1.add(bb.w, bb.h)
+        p1.add(bb.x, bb.h)
+        p1.add(bb.x, bb.y)
+
+        self.paths.add(p1)
+
+    def save(self, filename):
+        bb = self.paths.bb()
+
+        pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
+
+        fname = self.save_path.joinpath(filename + ".svg")
         self.dwg = svgwrite.Drawing(
             fname.as_posix(), profile="tiny", size=(bb.w + bb.x, bb.h + bb.y)
         )
 
-        it = PathIterator(paths)
+        it = PathIterator(self.paths)
         for conn in it.connections():
             start = conn[0]
             end = conn[1]
@@ -82,7 +105,8 @@ class SvgRenderer:
 
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
-    def save(self):
+        log.good(f"Finished saving {fname}")
+
         self.dwg.save()
 
 
@@ -166,9 +190,71 @@ class GCodeRenderer:
             log.fail(f"Couldn't generate GCode- Out of Bounds with position {e}")
 
     def __append_to_file(self, file, x, y):
-        if y < DrawingMachine.Plotter.MAX_Y:
-            raise DrawingOutOfBoundsException(y)
+        # if y < DrawingMachine.Plotter.MAX_Y:
+        #    raise DrawingOutOfBoundsException(y)
+        # if x > DrawingMachine.Plotter.MAX_X:
+        #    raise DrawingOutOfBoundsException(x)
         file.write(f"G01 X{x:.2f} Y{y:.2f} F{self.feedrate_xy}\n")
+
+
+class HPGLRenderer:
+    def __init__(self, folder):
+        assert isinstance(folder, pathlib.Path), "Only path objects allowed"
+
+        self.save_path = folder
+        self.paths = PathCollection()
+
+    def render(self, paths):
+        if not isinstance(paths, PathCollection):
+            raise Exception("Only PathCollection and list of PathCollections allowed")
+
+        log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
+        self.paths += paths
+
+    def save(self, filename):
+        try:
+            pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
+            fname = self.save_path.joinpath(filename + ".hpgl")
+
+            with open(fname.as_posix(), "w") as file:
+                # file.write(f"PA0,0;\n")
+                file.write("SP1;\n")
+
+                self.__append_to_file(file, 0.0, 0.0)
+
+                first = True
+                for p in self.paths:
+                    if first:
+                        file.write("PU;\n")
+                        first = False
+                    x = p.start_pos().x
+                    y = p.start_pos().y
+                    self.__append_to_file(file, x, y)
+                    file.write("PD;\n")
+                    for line in p.vertices:
+                        x = line.x
+                        y = line.y
+                        # file.write(f"{int(x)},{int(y)},")
+                        self.__append_to_file(file, x, y)
+                    # file.write(";\n")
+                    file.write("PU;\n")
+
+                self.__append_to_file(file, 0.0, 0.0)
+                file.write("SP0;\n")
+            log.good(f"Finished saving {fname}")
+        except DrawingOutOfBoundsException as e:
+            log.fail(f"Couldn't generate HPGL- Out of Bounds with position {e}")
+
+    def __append_to_file(self, file, x, y):
+        # if y < RolandDPX3300.Plotter.MIN_Y:
+        #    raise DrawingOutOfBoundsException(y)
+        # if y > RolandDPX3300.Plotter.MAX_Y:
+        #    raise DrawingOutOfBoundsException(y)
+        # if x < RolandDPX3300.Plotter.MIN_X:
+        #    raise DrawingOutOfBoundsException(x)
+        # if x > RolandDPX3300.Plotter.MAX_X:
+        #    raise DrawingOutOfBoundsException(x)
+        file.write(f"PA{int(x)},{int(y)}\n")
 
 
 class JpegRenderer:
@@ -203,7 +289,7 @@ class JpegRenderer:
         log.good(f"Creating image with size=({image_width}, {image_height})")
         assert image_width < 20000 and image_height < 20000, "keep resolution lower"
 
-        self.img = Image.new("RGB", (image_width, image_height,), "white",)
+        self.img = Image.new("RGB", (image_width, image_height), "white")
         self.img_draw = ImageDraw.ImageDraw(self.img)
 
         it = PathIterator(paths)
