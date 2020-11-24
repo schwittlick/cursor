@@ -225,10 +225,11 @@ class Path:
             print(w)
 
         # acos can't properly calculate angle more than 180°.
-        # solution taken from here: http://www.gamedev.net/topic/556500-angle-between-vectors/
+        # solution taken from here:
+        # http://www.gamedev.net/topic/556500-angle-between-vectors/
         if (
-                current_start_to_end[0] * new_start_to_end[1]
-                < current_start_to_end[1] * new_start_to_end[0]
+            current_start_to_end[0] * new_start_to_end[1]
+            < current_start_to_end[1] * new_start_to_end[0]
         ):
             angle = 2 * math.pi - angle
 
@@ -256,16 +257,16 @@ class Path:
                 compareA = diffLAx * line1Start.y - diffLAy * line1Start.x
                 compareB = diffLBx * line2Start.y - diffLBy * line2Start.x
                 if ((diffLAx * line2Start.y - diffLAy * line2Start.x) < compareA) ^ (
-                        (diffLAx * line2End.y - diffLAy * line2End.x) < compareA
+                    (diffLAx * line2End.y - diffLAy * line2End.x) < compareA
                 ) and ((diffLBx * line1Start.y - diffLBy * line1Start.x) < compareB) ^ (
-                        (diffLBx * line1End.y - diffLBy * line1End.x) < compareB
+                    (diffLBx * line1End.y - diffLBy * line1End.x) < compareB
                 ):
                     lDetDivInv = 1 / ((diffLAx * diffLBy) - (diffLAy * diffLBx))
                     intersectionx = (
-                            -((diffLAx * compareB) - (compareA * diffLBx)) * lDetDivInv
+                        -((diffLAx * compareB) - (compareA * diffLBx)) * lDetDivInv
                     )
                     intersectiony = (
-                            -((diffLAy * compareB) - (compareA * diffLBy)) * lDetDivInv
+                        -((diffLAy * compareB) - (compareA * diffLBy)) * lDetDivInv
                     )
 
                     return True, intersectionx, intersectiony
@@ -618,13 +619,13 @@ class PathCollection:
             p.scale(x, y)
 
     def fit(
-            self,
-            size=tuple[int, int],
-            xy_factor: tuple[float, float] = (2.85714, 2.90572),
-            padding_mm: int = None,
-            padding_units: int = None,
-            padding_percent: int = None,
-            center_point: tuple[int, int] = None,
+        self,
+        size=tuple[int, int],
+        xy_factor: tuple[float, float] = (2.85714, 2.90572),
+        padding_mm: int = None,
+        padding_units: int = None,
+        padding_percent: int = None,
+        center_point: tuple[int, int] = None,
     ):
         # move into positive area
         _bb = self.bb()
