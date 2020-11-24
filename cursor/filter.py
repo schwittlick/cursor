@@ -74,9 +74,7 @@ class Sorter:
                     paths, key=lambda x: x.hash, reverse=self.__reverse
                 )
             else:
-                raise Exception(
-                    f"Wrong param {self.__param} for {__class__.__name__}"
-                )
+                raise Exception(f"Wrong param {self.__param} for {__class__.__name__}")
             elapsed = time.time() - t0
             log.good(f"Sorted via {__class__.__name__} took {round(elapsed * 1000)}ms.")
             return sorted_list

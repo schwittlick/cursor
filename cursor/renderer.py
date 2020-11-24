@@ -289,7 +289,7 @@ class JpegRenderer:
         log.good(f"Creating image with size=({image_width}, {image_height})")
         assert image_width < 20000 and image_height < 20000, "keep resolution lower"
 
-        self.img = Image.new("RGB", (image_width, image_height,), "white")
+        self.img = Image.new("RGB", (image_width, image_height), "white")
         self.img_draw = ImageDraw.ImageDraw(self.img)
 
         it = PathIterator(paths)
