@@ -1,5 +1,4 @@
 from cursor import filter
-from cursor import device
 
 import numpy as np
 import math
@@ -20,7 +19,7 @@ class TimedPosition:
         self.y = y
         self.timestamp = timestamp
 
-    def pos(self) -> typing.Tuple[float, float]:
+    def pos(self) -> tuple[float, float]:
         return self.x, self.y
 
     def arr(self) -> np.array:
@@ -132,7 +131,7 @@ class Path:
     def reversed(self) -> "Path":
         c = copy.deepcopy(self.vertices)
         c.reverse()
-        return Path(c)
+        return Path(c, layer=self.layer)
 
     def start_pos(self) -> "TimedPosition":
         if len(self.vertices) == 0:
@@ -169,7 +168,7 @@ class Path:
             current = self.__getitem__(i)
             next = self.__getitem__(i + 1)
 
-            d = calculateDistance(current.x, current.y, next.x, next.y,)
+            d = calculateDistance(current.x, current.y, next.x, next.y)
             dist += d
 
         return dist
@@ -231,7 +230,8 @@ class Path:
             print(w)
 
         # acos can't properly calculate angle more than 180°.
-        # solution taken from here: http://www.gamedev.net/topic/556500-angle-between-vectors/
+        # solution taken from here:
+        # http://www.gamedev.net/topic/556500-angle-between-vectors/
         if (
             current_start_to_end[0] * new_start_to_end[1]
             < current_start_to_end[1] * new_start_to_end[0]
@@ -330,7 +330,8 @@ class Path:
 
     def direction_changes(self) -> typing.List[float]:
         """
-        returns a list of radial direction changes from each point to the next len() = self.__len() - 1
+        returns a list of radial direction changes from each point
+        to the next len() = self.__len() - 1
         :return:
         """
 
@@ -434,21 +435,17 @@ class Path:
         return False
 
     def clean(self) -> None:
-        new_points = []
-        for i in range(1, len(self.vertices)):
-            current = self.__getitem__(i - 1)
-            next = self.__getitem__(i)
-            if current.x == next.x and current.y == next.y:
-                if i == len(self.vertices) - 1:
-                    new_points.append(current)
-                continue
+        """
+        removes consecutive duplicates
+        """
+        prev = TimedPosition()
+        self.vertices = [prev := v for v in self.vertices if prev != v]
 
-            new_points.append(current)
-
-        self.vertices = new_points
-
-    def __repr__(self) -> str:
-        rep = f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} shannchan: {self.shannon_direction_changes} layer: {self.layer}"
+    def __repr__(self):
+        rep = (
+            f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} "
+            f"shannchan: {self.shannon_direction_changes} layer: {self.layer}"
+        )
         return rep
 
     def __len__(self) -> int:
@@ -485,9 +482,10 @@ class PathCollection:
         """
         removes all paths with only one point
         """
-        self.__paths = [path for path in self.__paths if len(path) > 1]
         for p in self.__paths:
             p.clean()
+
+        self.__paths = [path for path in self.__paths if len(path) > 1]
 
     def hash(self) -> str:
         return hashlib.md5(str(self.__paths).encode("utf-8")).hexdigest()
@@ -632,9 +630,13 @@ class PathCollection:
 
     def fit(
         self,
-        size: typing.Tuple[float, float],
-        padding_mm: float = None,
-        padding_units: float = None,
+
+        size=tuple[int, int],
+        xy_factor: tuple[float, float] = (2.85714, 2.90572),
+        padding_mm: int = None,
+        padding_units: int = None,
+        padding_percent: int = None,
+        center_point: tuple[int, int] = None,
     ) -> None:
         # move into positive area
         _bb = self.bb()
@@ -656,14 +658,29 @@ class PathCollection:
             )
             self.translate(0.0, -abs(_bb.y))
         _bb = self.bb()
+
         width = size[0]
         height = size[1]
-        if padding_mm is not None:
-            padding_x = padding_mm * device.DrawingMachine.Paper.X_FACTOR
-            padding_y = padding_mm * device.DrawingMachine.Paper.Y_FACTOR
-        else:
+
+        padding_x = 0
+        padding_y = 0
+
+        if padding_mm is not None and padding_units is None and padding_percent is None:
+            padding_x = padding_mm * xy_factor[0]
+            padding_y = padding_mm * xy_factor[1]
+
+            # multiply both tuples
+            _size = tuple(_ * r for _, r in zip(size, xy_factor))
+            width = _size[0]
+            height = _size[1]
+
+        if padding_mm is None and padding_units is not None and padding_percent is None:
             padding_x = padding_units
             padding_y = padding_units
+
+        if padding_mm is None and padding_units is None and padding_percent is not None:
+            padding_x = abs(width * padding_percent)
+            padding_y = abs(height * padding_percent)
 
         # scaling
         _bb = self.bb()
@@ -681,10 +698,15 @@ class PathCollection:
         self.scale(xfac, yfac)
 
         print(self.bb())
+
         # centering
+
         _bb = self.bb()
         center = _bb.center()
-        center_dims = width / 2.0, height / 2.0
+        if center_point is None:
+            center_dims = width / 2.0, height / 2.0
+        else:
+            center_dims = center_point
         diff = center_dims[0] - center[0], center_dims[1] - center[1]
 
         log.good(f"{self.__class__.__name__}: fit: translated by {diff[0]} {diff[1]}")
