@@ -75,7 +75,7 @@ class Sorter:
                 )
             else:
                 raise Exception(
-                    f"Did not understand parameter {self.__param} for {__class__.__name__}"
+                    f"Wrong param {self.__param} for {__class__.__name__}"
                 )
             elapsed = time.time() - t0
             log.good(f"Sorted via {__class__.__name__} took {round(elapsed * 1000)}ms.")
