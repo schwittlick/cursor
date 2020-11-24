@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/cursor
     docker:
-      - image: cimg/python:3.9.0
+      - image: python:3.9-jessie
     steps:
       - checkout
       - run:
