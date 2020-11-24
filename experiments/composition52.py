@@ -8,12 +8,6 @@ from cursor import device
 
 def composition52(idx, pa):
     print(f"Creating Composition #52.{idx}")
-
-    gcode_folder = data.DataDirHandler().gcode("composition52")
-    jpeg_folder = data.DataDirHandler().jpg("composition52")
-    gcode_renderer = renderer.GCodeRenderer(gcode_folder, z_down=3.5)
-    jpeg_renderer = renderer.JpegRenderer(jpeg_folder)
-
     coll = path.PathCollection()
 
     xoffset = 135.38
@@ -30,14 +24,14 @@ def composition52(idx, pa):
         morphed = pa.morph((xfrom, yfrom), (xto, yto))
         coll.add(morphed)
 
-    coll.fit(device.DrawingMachine.Paper.custom_70_100_landscape(), 80)
-
-    name = f"composition52_double_final_sp2.5_3.0_{idx}"
-    gcode_renderer.render(coll)
-    gcode_renderer.save(name)
-
-    jpeg_renderer.render(coll)
-    jpeg_renderer.save(name)
+    device.SimpleExportWrapper().ex(
+        coll,
+        device.PlotterType.DIY_PLOTTER,
+        device.PaperSize.LANDSCAPE_A1,
+        90,
+        "composition52",
+        str(idx),
+    )
 
 
 if __name__ == "__main__":

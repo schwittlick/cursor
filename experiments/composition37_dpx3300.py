@@ -33,26 +33,14 @@ def composition37(p0, p1, offset):
         newpath = p1.morph(en.pos(), st.pos())
         coll.add(newpath)
 
-    print(coll.bb())
-
-    coll.fit(
-        device.RolandDPX3300.Paper.custom_30_30(),
-        machine=device.RolandDPX3300(),
-        padding_mm=50,
-        center_point=(-880, 600),
+    device.SimpleExportWrapper().ex(
+        coll,
+        device.PlotterType.ROLAND_DPX3300,
+        device.PaperSize.LANDSCAPE_A1,
+        90,
+        "composition37",
+        str(offset),
     )
-    fname = f"composition37_dpx3300_{offset}"
-
-    hpgl_folder = data.DataDirHandler().hpgl("composition37")
-    hpgl_renderer = renderer.HPGLRenderer(hpgl_folder)
-
-    jpeg_renderer.render(coll)
-    jpeg_renderer.save(fname)
-
-    separate_layers = coll.get_layers()
-    for layer, pc in separate_layers.items():
-        hpgl_renderer.render(pc)
-        hpgl_renderer.save(f"{fname}_{layer}")
 
 
 if __name__ == "__main__":

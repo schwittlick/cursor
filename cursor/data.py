@@ -6,13 +6,14 @@ import pyautogui
 import datetime
 import pytz
 
-from cursor.path import Path
-from cursor.path import PathCollection
-from cursor.path import TimedPosition
-
 
 class MyJsonEncoder(json.JSONEncoder):
+
     def default(self, o):
+        from cursor.path import Path
+        from cursor.path import PathCollection
+        from cursor.path import TimedPosition
+
         if isinstance(o, PathCollection):
             return {
                 "paths": o.get_all(),
@@ -31,6 +32,10 @@ class MyJsonDecoder(json.JSONDecoder):
         json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
 
     def object_hook(self, dct):
+        from cursor.path import Path
+        from cursor.path import PathCollection
+        from cursor.path import TimedPosition
+
         if "x" in dct and "y" in dct and "ts" in dct:
             p = TimedPosition(dct["x"], dct["y"], dct["ts"])
             return p

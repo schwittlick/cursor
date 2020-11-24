@@ -1,6 +1,4 @@
-from cursor import renderer
-from cursor import path
-from cursor import data
+from cursor.path import Path, PathCollection
 from cursor import device
 
 import math
@@ -92,11 +90,10 @@ def fat_spiral(pp):
     return "fat_spiral"
 
 
-
 if __name__ == "__main__":
-    coll = path.PathCollection()
+    coll = PathCollection()
 
-    pp = path.Path(layer="round1")
+    pp = Path(layer="round1")
 
     # num = plain_spiral(pp)
     # num = circleball_spiral(pp)
@@ -111,50 +108,27 @@ if __name__ == "__main__":
     coll.add(pp)
     coll.add(reversed_path)
 
-    axidraw = False
-    dpx3300 = True
-    if axidraw:
-        coll.fit(
-            size=device.AxiDraw.Paper.custom_36_48_landscape(),
-            machine=device.AxiDraw(),
-            padding_mm=64,
-        )
-        fname = f"composition59_axidraw_{num}_a1"
-    elif dpx3300:
-        coll.fit(
-            device.RolandDPX3300.Paper.a1_landscape(),
-            machine=device.RolandDPX3300(),
-            padding_mm=90,
-            center_point=(-880, 600),
-        )
-        fname = f"composition59_dpx3300_{num}_a1_rounder"
-
-        hpgl_folder = data.DataDirHandler().hpgl("composition59")
-        hpgl_renderer = renderer.HPGLRenderer(hpgl_folder)
-        separate_layers = coll.get_layers()
-        for layer, pc in separate_layers.items():
-            hpgl_renderer.render(pc)
-            hpgl_renderer.save(f"{fname}_{layer}")
-
-        exit(0)
-    else:
-        coll.fit(device.DrawingMachine.Paper.a1_landscape(), padding_mm=90)
-        fname = f"composition59_{num}_a1_rounder"
-
-    separate_layers = coll.get_layers()
-    for layer, pc in separate_layers.items():
-        gcode_folder = data.DataDirHandler().gcode("composition59")
-        folder = data.DataDirHandler().jpg("composition59")
-        svg_dir = data.DataDirHandler().svg("composition59")
-        gcode_renderer = renderer.GCodeRenderer(gcode_folder, z_down=4.5)
-        jpeg_renderer = renderer.JpegRenderer(folder)
-        svg_renderer = renderer.SvgRenderer(svg_dir)
-
-        # pc.fit(device.DrawingMachine.Paper.a1_landscape(), 90)
-
-        jpeg_renderer.render(pc)
-        jpeg_renderer.save(f"{fname}_{layer}")
-        gcode_renderer.render(pc)
-        gcode_renderer.save(f"{fname}_{layer}")
-        svg_renderer.render(pc)
-        svg_renderer.save(f"{fname}_{layer}")
+    device.SimpleExportWrapper().ex(
+        coll,
+        device.PlotterType.DIY_PLOTTER,
+        device.PaperSize.LANDSCAPE_A1,
+        90,
+        "composition59",
+        num,
+    )
+    device.SimpleExportWrapper().ex(
+        coll,
+        device.PlotterType.ROLAND_DPX3300,
+        device.PaperSize.LANDSCAPE_A1,
+        90,
+        "composition59",
+        num,
+    )
+    device.SimpleExportWrapper().ex(
+        coll,
+        device.PlotterType.AXIDRAW,
+        device.PaperSize.LANDSCAPE_48_36,
+        64,
+        "composition59",
+        num,
+    )

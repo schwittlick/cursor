@@ -1,262 +1,285 @@
-import serial
-import time
 import wasabi
+from enum import Enum
 
 log = wasabi.Printer()
 
 
-class Machine:
-    pass
+class MinMax:
+    def __init__(self, minx: int, maxx: int, miny: int, maxy: int):
+        self.minx = minx
+        self.maxx = maxx
+        self.miny = miny
+        self.maxy = maxy
 
 
-class RolandDPX3300(Machine):
-    class Plotter:
-        MAX_Y = 12400
-        MAX_X = 16000
-        MIN_X = -17600
-        MIN_Y = -11360
-
-    class Paper:
-        X_FACTOR = 40
-        Y_FACTOR = 40
-
-        CUSTOM_48_36 = (480 * X_FACTOR, 360 * Y_FACTOR)
-        CUSTOM_36_48 = (360 * X_FACTOR, 480 * Y_FACTOR)
-        DIN_A1_LANDSCAPE = (841 * X_FACTOR, 594 * Y_FACTOR)
-        CUSTOM_30_30 = (300 * X_FACTOR, 300 * Y_FACTOR)
-
-        @staticmethod
-        def custom_36_48_portrait():
-            return RolandDPX3300.Paper.CUSTOM_36_48
-
-        @staticmethod
-        def custom_36_48_landscape():
-            return RolandDPX3300.Paper.CUSTOM_48_36
-
-        @staticmethod
-        def a1_landscape():
-            return RolandDPX3300.Paper.DIN_A1_LANDSCAPE
-
-        @staticmethod
-        def custom_30_30():
-            return RolandDPX3300.Paper.CUSTOM_30_30
+class PlotterType(Enum):
+    ROLAND_DPX3300 = 0
+    DIY_PLOTTER = 1
+    AXIDRAW = 2
+    HP_7475A = 3
+    ROLAND_DXY1200 = 3
 
 
-class AxiDraw(Machine):
-    class Plotter:
-        pass
-
-    class Paper:
-        X_FACTOR = 3.704
-        Y_FACTOR = 3.704
-
-        CUSTOM_48_36 = (480 * X_FACTOR, 360 * Y_FACTOR)
-        CUSTOM_36_48 = (360 * X_FACTOR, 480 * Y_FACTOR)
-
-        @staticmethod
-        def custom_36_48_portrait():
-            return AxiDraw.Paper.CUSTOM_36_48
-
-        @staticmethod
-        def custom_36_48_landscape():
-            return AxiDraw.Paper.CUSTOM_48_36
+class ExportFormat(Enum):
+    JPG = 0
+    SVG = 1
+    GCODE = 2
+    HPGL = 3
 
 
-class DrawingMachine(Machine):
+class ExportFormatMappings:
+    maps = {
+        PlotterType.ROLAND_DPX3300: ExportFormat.HPGL,
+        PlotterType.DIY_PLOTTER: ExportFormat.GCODE,
+        PlotterType.AXIDRAW: ExportFormat.SVG,
+        PlotterType.HP_7475A: ExportFormat.HPGL,
+        PlotterType.ROLAND_DXY1200: ExportFormat.HPGL,
+    }
+
+
+class MinmaxMapping:
+    maps = {
+        PlotterType.ROLAND_DPX3300: MinMax(-17600, 16000, -11360, 12400),
+        PlotterType.DIY_PLOTTER: MinMax(0, 3350, 0, -1715),
+        PlotterType.AXIDRAW: MinMax(0, 0, 0, -0),  # todo: missing real bounds
+        PlotterType.HP_7475A: MinMax(0, 0, 0, 0),  # todo: missing real bounds
+        PlotterType.ROLAND_DXY1200: MinMax(0, 0, 0, 0),  # todo: missing real bounds
+    }
+
+
+class MinMaxMappingBB:
+    from cursor import path
+    maps = {
+        PlotterType.ROLAND_DPX3300: path.BoundingBox(-17600, 33600, -11360, 23760),
+        PlotterType.DIY_PLOTTER: path.BoundingBox(0, 3350, 0, -1715),
+        PlotterType.AXIDRAW: MinMax(0, 0, 0, -0),  # todo: missing real bounds
+        PlotterType.HP_7475A: MinMax(0, 0, 0, 0),  # todo: missing real bounds
+        PlotterType.ROLAND_DXY1200: MinMax(0, 0, 0, 0),  # todo: missing real bounds
+    }
+
+
+class PaperSize(Enum):
+    PORTRAIT_36_48 = 0
+    LANDSCAPE_48_36 = 1
+    PORTRAIT_42_56 = 2
+    LANDSCAPE_56_42 = 3
+    PORTRAIT_50_70 = 4
+    LANDSCAPE_70_50 = 5
+    SQUARE_70_70 = 6
+    PORTRAIT_70_100 = 7
+    LANDSCAPE_100_70 = 8
+    LANDSCAPE_A4 = 9
+    PORTRAIT_A4 = 10
+    LANDSCAPE_A1 = 11
+    LANDSCAPE_A0 = 12
+
+
+class PlotterName:
+    names = {
+        PlotterType.ROLAND_DPX3300: "dpx3300",
+        PlotterType.AXIDRAW: "axidraw",
+        PlotterType.DIY_PLOTTER: "custom",
+        PlotterType.HP_7475A: "hp7475a",
+        PlotterType.ROLAND_DXY1200: "dxy1200",
+    }
+
+
+class PaperSizeName:
+    names = {
+        PaperSize.PORTRAIT_36_48: "portrait_36_48",
+        PaperSize.LANDSCAPE_48_36: "landscape_48_36",
+        PaperSize.PORTRAIT_42_56: "portrait_42_56",
+        PaperSize.LANDSCAPE_56_42: "landscape_56_42",
+        PaperSize.PORTRAIT_50_70: "portrait_50_70",
+        PaperSize.LANDSCAPE_70_50: "landscape_70_50",
+        PaperSize.SQUARE_70_70: "square_70_70",
+        PaperSize.PORTRAIT_70_100: "portrait_70_100",
+        PaperSize.LANDSCAPE_100_70: "landscape_100_70",
+        PaperSize.LANDSCAPE_A4: "landscape_a4",
+        PaperSize.PORTRAIT_A4: "portrait_a4",
+        PaperSize.LANDSCAPE_A1: "landscape_a1",
+        PaperSize.LANDSCAPE_A0: "landscape_a0",
+    }
+
+
+class Paper:
+    sizes = {
+        PaperSize.PORTRAIT_36_48: (360, 480),
+        PaperSize.LANDSCAPE_48_36: (480, 360),
+        PaperSize.PORTRAIT_42_56: (420, 560),
+        PaperSize.LANDSCAPE_56_42: (560, 420),
+        PaperSize.PORTRAIT_50_70: (500, 700),
+        PaperSize.LANDSCAPE_70_50: (700, 500),
+        PaperSize.SQUARE_70_70: (700, 700),
+        PaperSize.PORTRAIT_70_100: (700, 1000),
+        PaperSize.LANDSCAPE_100_70: (1000, 700),
+        PaperSize.LANDSCAPE_A4: (297, 210),
+        PaperSize.PORTRAIT_A4: (210, 297),
+        PaperSize.LANDSCAPE_A1: (841, 594),
+        PaperSize.LANDSCAPE_A0: (1189, 841),
+    }
+
+
+class XYFactors:
+    fac = {
+        PlotterType.ROLAND_DPX3300: (40, 40),
+        PlotterType.DIY_PLOTTER: (2.85714, 2.90572),
+        PlotterType.AXIDRAW: (3.704, 3.704),
+    }
+
+
+class Cfg:
     def __init__(self):
-        self.__serial = None
-        self.__error = False
-        self.__ready = False
+        self.__type = None
+        self.__dimensions = None
+        self.__margin = None
 
-    def ready(self):
-        if self.__ready and not self.__error:
-            return True
-        log.warn(f"Not ready. ready={self.__ready}, error={self.__error}")
-        return False
+    @property
+    def type(self) -> PlotterType:
+        return self.__type
 
-    def connect(self, port, baud):
-        if self.__serial:
-            log.warn("Can't connect when already connected")
-            return
-        try:
-            self.__serial = serial.Serial(port, baud, timeout=5)
-            log.good(f"Connected to {port}:{baud}.")
-            return True
-        except serial.SerialException as se:
-            self.__serial = None
-            log.fail(se)
-            return False
+    @type.setter
+    def type(self, t: PlotterType) -> None:
+        self.__type = t
 
-    def disconnect(self):
-        if self.__serial is None:
-            log.warn(f"Can't disconnect when not connected")
-            return
+    @property
+    def dimension(self) -> PaperSize:
+        return self.__dimensions
 
-        if not self.__serial.is_open:
-            log.warn(f"Can't disconnect when not connected")
-            return
+    @dimension.setter
+    def dimension(self, t: PaperSize):
+        self.__dimensions = t
 
-        self.__serial.reset_input_buffer()
-        self.__serial.reset_output_buffer()
-        self.__serial.close()
-        self.__serial = None
+    @property
+    def margin(self) -> int:
+        return self.__margin
 
-    def connected(self):
-        if self.__serial is not None:
-            return self.__serial.is_open
+    @margin.setter
+    def margin(self, t: int):
+        self.__margin = t
 
-        return False
 
-    def calib(self):
-        self.__send_and_print_reply("\r\n\r", 2)
-        self.__serial.reset_input_buffer()
+class Exporter:
+    from cursor import path
 
-        self.kill_alarm()
-        self.home()
-        self.null_coords()
+    def __init__(self):
+        self.__paths = None
+        self.__cfg = None
+        self.__name = None
+        self.__suffix = None
 
-        self.__ready = True
+    @property
+    def paths(self) -> path.PathCollection:
+        return self.__paths
 
-    def __send_and_print_reply(self, msg, delay=0):
-        if self.__error:
-            log.warn(f"Not sending {msg} because an error occurred.")
-            return
+    @paths.setter
+    def paths(self, t: path.PathCollection) -> None:
+        self.__paths = t
 
-        if self.__serial is None:
-            log.warn(f"Can't send when not connected")
-            return
+    @property
+    def cfg(self) -> Cfg:
+        return self.__cfg
 
-        _msg = msg + "\n"
-        log.good(f"Sending {_msg}")
-        self.__serial.write(_msg.encode("utf-8"))
-        time.sleep(delay)
-        grbl_out = self.__serial.readline()
-        try:
-            result = grbl_out.strip().decode("utf-8")
-            if "ok" in result:
-                log.good(result)
-                return True, result
-            elif "error" in result:
-                log.fail(result)
-                return False, result
-            else:
-                log.fail(result)
-                return False, result
-        except Exception as e:
-            log.fail(f"Failed to receive anything for input: {_msg}. {e}")
-            self.__error = True
-            return False, f"ERROR: {e}"
+    @cfg.setter
+    def cfg(self, t: Cfg) -> None:
+        self.__cfg = t
 
-    def feed_hold(self):
-        self.__send_and_print_reply("!")
+    @property
+    def name(self) -> str:
+        return self.__name
 
-    def resume(self):
-        self.__send_and_print_reply("~")
+    @name.setter
+    def name(self, t: str) -> None:
+        self.__name = t
 
-    def info(self):
-        return self.__send_and_print_reply("?")
+    @property
+    def suffix(self) -> str:
+        return self.__suffix
 
-    def kill_alarm(self):
-        self.__send_and_print_reply("$X")
+    @suffix.setter
+    def suffix(self, t: str) -> None:
+        self.__suffix = t
 
-    def home(self):
-        self.__send_and_print_reply("$H")
+    def fit(self) -> None:
+        out_dim = tuple(
+            l * r
+            for l, r in zip(
+                Paper.sizes[self.cfg.dimension], XYFactors.fac[self.cfg.type]
+            )
+        )
 
-    def null_coords(self):
-        self.__send_and_print_reply("G92X0Y0Z0")
+        if self.cfg.type is PlotterType.ROLAND_DPX3300:
+            self.paths.fit(
+                out_dim, xy_factor=XYFactors.fac[self.cfg.type], padding_mm=self.cfg.margin, center_point=(-880, 600)
+            )
+        else:
+            self.paths.fit(
+                out_dim, xy_factor=XYFactors.fac[self.cfg.type], padding_mm=self.cfg.margin
+            )
 
-    def stream(self, filename):
-        if self.__serial is None:
-            log.warn(f"Can't stream when not connected")
+    def run(self, jpg: bool = False) -> None:
+        if self.cfg is None or self.paths is None or self.name is None:
+            log.fail("Config, Name or Paths is None. Not exporting anything")
             return
 
-        if not self.__ready:
-            log.warn(f"Can't stream when not calibrated & homed")
-            return
+        from cursor import data
+        from cursor import renderer
 
-        file = open(filename, "r")
-        lines = file.readlines()
-        file.close()
+        # jpeg fitting roughly
+        self.paths.fit(Paper.sizes[self.cfg.dimension], padding_mm=self.cfg.margin)
 
-        for line in lines:
-            line = line.strip()
-            success = self.__send_and_print_reply(line)
+        if jpg:
+            separate_layers = self.paths.get_layers()
+            for layer, pc in separate_layers.items():
+                sizename = PaperSizeName.names[self.cfg.dimension]
+                machinename = PlotterName.names[self.cfg.type]
+                fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}"
 
-        # here should some kind of waiting happen.. for the machine to be done
-        # checking the info() function and evaluating some stuff there
-        # also the $10 in grbl config might have to be modified
-        # https://github.com/gnea/grbl/wiki/Grbl-v1.1-Configuration#10---status-report-mask
+                jpeg_folder = data.DataDirHandler().jpg(self.name)
+                jpeg_renderer = renderer.JpegRenderer(jpeg_folder)
+                jpeg_renderer.render(pc, scale=4.0)
+                jpeg_renderer.save(f"{fname}_{layer}")
 
-    class Plotter:
-        MAX_Y = -1715
-        MAX_X = 3350
+        self.fit()
+        separate_layers = self.paths.get_layers()
+        for layer, pc in separate_layers.items():
+            sizename = PaperSizeName.names[self.cfg.dimension]
+            machinename = PlotterName.names[self.cfg.type]
+            fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}"
 
-    class Paper:
-        X_FACTOR = 2.85714
-        Y_FACTOR = 2.90572
+            format = ExportFormatMappings.maps[self.cfg.type]
+            if format is ExportFormat.HPGL:
+                hpgl_folder = data.DataDirHandler().hpgl(self.name)
+                hpgl_renderer = renderer.HPGLRenderer(hpgl_folder)
+                hpgl_renderer.render(pc)
+                hpgl_renderer.save(f"{fname}_{layer}")
 
-        CUSTOM_36_48 = (360 * X_FACTOR, 480 * Y_FACTOR)
-        CUSTOM_48_36 = (480 * X_FACTOR, 360 * Y_FACTOR)
-        CUSTOM_42_56 = (420 * X_FACTOR, 560 * Y_FACTOR)
-        CUSTOM_56_42 = (560 * X_FACTOR, 420 * Y_FACTOR)
-        CUSTOM_50_70 = (500 * X_FACTOR, 700 * Y_FACTOR)
-        CUSTOM_70_50 = (700 * X_FACTOR, 500 * Y_FACTOR)
-        CUSTOM_70_70 = (700 * X_FACTOR, 700 * Y_FACTOR)
-        CUSTOM_70_100 = (700 * X_FACTOR, 1000 * Y_FACTOR)
-        CUSTOM_100_70 = (1000 * X_FACTOR, 700 * Y_FACTOR)
-        DIN_A4_LANDSCAPE = (297 * X_FACTOR, 210 * Y_FACTOR)
-        DIN_A4_PORTRAIT = (210 * X_FACTOR, 297 * Y_FACTOR)
-        DIN_A1_LANDSCAPE = (841 * X_FACTOR, 594 * Y_FACTOR)
-        DIN_A0_LANDSCAPE = (1189 * X_FACTOR, 841 * Y_FACTOR)
+            if format is ExportFormat.SVG:
+                svg_dir = data.DataDirHandler().svg(self.name)
+                svg_renderer = renderer.SvgRenderer(svg_dir)
+                svg_renderer.render(pc)
+                svg_renderer.save(f"{fname}_{layer}")
 
-        @staticmethod
-        def custom_36_48_portrait():
-            return DrawingMachine.Paper.CUSTOM_36_48
+            if format is ExportFormat.GCODE:
+                gcode_folder = data.DataDirHandler().gcode(self.name)
+                gcode_renderer = renderer.GCodeRenderer(gcode_folder, z_down=4.5)
+                gcode_renderer.render(pc)
+                gcode_renderer.save(f"{fname}_{layer}")
 
-        @staticmethod
-        def custom_36_48_landscape():
-            return DrawingMachine.Paper.CUSTOM_48_36
 
-        @staticmethod
-        def custom_42_56_portrait():
-            return DrawingMachine.Paper.CUSTOM_42_56
+class SimpleExportWrapper:
+    from cursor import path
 
-        @staticmethod
-        def custom_42_56_landscape():
-            return DrawingMachine.Paper.CUSTOM_56_42
+    def ex(self, paths: path.PathCollection, ptype: PlotterType, psize: PaperSize, margin: int, name: str,
+           suffix: str = ""):
+        cfg = Cfg()
+        cfg.type = ptype
+        cfg.dimension = psize
+        cfg.margin = margin
 
-        @staticmethod
-        def custom_70_50_landscape():
-            return DrawingMachine.Paper.CUSTOM_70_50
-
-        @staticmethod
-        def custom_70_50_portrait():
-            return DrawingMachine.Paper.CUSTOM_50_70
-
-        @staticmethod
-        def custom_70_70():
-            return DrawingMachine.Paper.CUSTOM_70_70
-
-        @staticmethod
-        def custom_70_100_landscape():
-            return DrawingMachine.Paper.CUSTOM_100_70
-
-        @staticmethod
-        def custom_70_100_portrait():
-            return DrawingMachine.Paper.CUSTOM_70_100
-
-        @staticmethod
-        def a4_landscape():
-            return DrawingMachine.Paper.DIN_A4_LANDSCAPE
-
-        @staticmethod
-        def a4_portrait():
-            return DrawingMachine.Paper.DIN_A4_PORTRAIT
-
-        @staticmethod
-        def a1_landscape():
-            return DrawingMachine.Paper.DIN_A1_LANDSCAPE
-
-        @staticmethod
-        def a0_landscape():
-            return DrawingMachine.Paper.DIN_A0_LANDSCAPE
+        exp = Exporter()
+        exp.cfg = cfg
+        exp.paths = paths
+        exp.name = name
+        exp.suffix = str(suffix)
+        exp.run(True)

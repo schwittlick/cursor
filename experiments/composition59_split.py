@@ -7,15 +7,11 @@ import math
 
 
 def save_wrapper(pc, projname, fname):
-    gcode_folder = data.DataDirHandler().gcode(projname)
     folder = data.DataDirHandler().jpg(projname)
-    gcode_renderer = renderer.GCodeRenderer(gcode_folder, z_down=4.5)
     jpeg_renderer = renderer.JpegRenderer(folder)
 
-    jpeg_renderer.render(pc)
+    jpeg_renderer.render(pc, scale=4.0)
     jpeg_renderer.save(fname)
-    gcode_renderer.render(pc)
-    gcode_renderer.save(fname)
 
 
 def two_split_spiral():
@@ -311,9 +307,6 @@ def get_random_chunksizes(chunknum, maxchunk):
 
 
 if __name__ == "__main__":
-    # get_random_chunksizes(10, 801)
-    # exit(1)
-
     coll = path.PathCollection()
 
     # num, pc = two_split_spiral()
@@ -324,8 +317,8 @@ if __name__ == "__main__":
     # num, pc = many_split_left_right()
     num, pc = triple_fat_spiral()
 
-    pc.fit(device.DrawingMachine.Paper.a1_landscape(), padding_mm=90)
-    save_wrapper(pc, "composition59_split", f"c59_{num}_together")
+    pc.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=90)
+    save_wrapper(pc, "composition59_split", f"composition59_split_{num}_together")
 
     for p in pc:
         p_rev = p.reversed()
@@ -334,35 +327,19 @@ if __name__ == "__main__":
         coll.add(p)
         coll.add(p_rev)
 
-    coll.fit(device.DrawingMachine.Paper.a1_landscape(), padding_mm=90)
-
-    fname = f"c59_{num}_a1"
-
-    separate_layers = coll.get_layers()
-    for layer, pc in separate_layers.items():
-        gcode_folder = data.DataDirHandler().gcode("composition59_split")
-        folder = data.DataDirHandler().jpg("composition59_split")
-        gcode_renderer = renderer.GCodeRenderer(gcode_folder, z_down=4.5)
-        jpeg_renderer = renderer.JpegRenderer(folder)
-
-        # pc.fit(device.DrawingMachine.Paper.a1_landscape(), 90)
-
-        jpeg_renderer.render(pc)
-        jpeg_renderer.save(f"{fname}_{layer}")
-        gcode_renderer.render(pc)
-        gcode_renderer.save(f"{fname}_{layer}")
-
-    coll.fit(
-        device.RolandDPX3300.Paper.custom_30_30(),
-        machine=device.RolandDPX3300(),
-        padding_mm=50,
-        center_point=(-880, 600),
+    device.SimpleExportWrapper().ex(
+        coll,
+        device.PlotterType.DIY_PLOTTER,
+        device.PaperSize.LANDSCAPE_A1,
+        90,
+        "composition59_split",
+        num,
     )
-
-
-    separate_layers = coll.get_layers()
-    for layer, pc in separate_layers.items():
-        hpgl_folder = data.DataDirHandler().hpgl("composition59_split")
-        hpgl_renderer = renderer.HPGLRenderer(hpgl_folder)
-        hpgl_renderer.render(pc)
-        hpgl_renderer.save(f"{fname}_{layer}")
+    device.SimpleExportWrapper().ex(
+        coll,
+        device.PlotterType.ROLAND_DPX3300,
+        device.PaperSize.LANDSCAPE_A1,
+        90,
+        "composition59_split",
+        num,
+    )

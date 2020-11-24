@@ -1,5 +1,4 @@
 from cursor import filter
-from cursor import device
 
 import numpy as np
 import math
@@ -428,19 +427,12 @@ class Path:
             return True
         return False
 
-    def clean(self):
-        new_points = []
-        for i in range(1, len(self.vertices)):
-            current = self.__getitem__(i - 1)
-            next = self.__getitem__(i)
-            if current.x == next.x and current.y == next.y:
-                if i == len(self.vertices) - 1:
-                    new_points.append(current)
-                continue
-
-            new_points.append(current)
-
-        self.vertices = new_points
+    def clean(self) -> None:
+        """
+        removes consecutive duplicates
+        """
+        prev = TimedPosition()
+        self.vertices = [prev := v for v in self.vertices if prev != v]
 
     def __repr__(self):
         rep = f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} shannchan: {self.shannon_direction_changes} layer: {self.layer}"
@@ -482,7 +474,6 @@ class PathCollection:
             p.clean()
 
         self.__paths = [path for path in self.__paths if len(path) > 1]
-
 
     def hash(self):
         return hashlib.md5(str(self.__paths).encode("utf-8")).hexdigest()
@@ -627,12 +618,12 @@ class PathCollection:
 
     def fit(
         self,
-        size,
-        machine=device.DrawingMachine(),
-        padding_mm=None,
-        padding_units=None,
-        padding_percent=None,
-        center_point=None,
+        size=tuple[int, int],
+        xy_factor: tuple[float, float] = (2.85714, 2.90572),
+        padding_mm: int = None,
+        padding_units: int = None,
+        padding_percent: int = None,
+        center_point: tuple[int, int] = None,
     ):
         # move into positive area
         _bb = self.bb()
@@ -650,6 +641,7 @@ class PathCollection:
             log.good(f"{__class__.__name__}: fit: translate by {0.0} {-abs(_bb.y)}")
             self.translate(0.0, -abs(_bb.y))
         _bb = self.bb()
+
         width = size[0]
         height = size[1]
 
@@ -657,8 +649,14 @@ class PathCollection:
         padding_y = 0
 
         if padding_mm is not None and padding_units is None and padding_percent is None:
-            padding_x = padding_mm * machine.Paper.X_FACTOR
-            padding_y = padding_mm * machine.Paper.Y_FACTOR
+            padding_x = padding_mm * xy_factor[0]
+            padding_y = padding_mm * xy_factor[1]
+
+            # multiply both tuples
+            _size = tuple(l * r for l, r in zip(size, xy_factor))
+            width = _size[0]
+            height = _size[1]
+
 
         if padding_mm is None and padding_units is not None and padding_percent is None:
             padding_x = padding_units
