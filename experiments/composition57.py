@@ -49,11 +49,7 @@ def apply_filter(all_paths, _min, _max):
 
 def composition57(pc):
     folder = data.DataDirHandler().jpg("composition57")
-    gcode_folder = data.DataDirHandler().gcode("composition57")
     jpeg_renderer = renderer.JpegRenderer(folder)
-    gcode_renderer = renderer.GCodeRenderer(gcode_folder)
-    svg_folder = data.DataDirHandler().svg("composition57")
-    svg_renderer = renderer.SvgRenderer(svg_folder)
 
     xspacing = 1
     coll = path.PathCollection()
