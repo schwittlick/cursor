@@ -23,7 +23,8 @@ jobs:
         uses: wearerequired/lint-action@v1
         with:
           github_token: ${{ secrets.github_token }}
-          max-line-length: 100
+          
           # Enable linters
           black: true
           flake8: true
+          flake8_args: --max-line-length 100
