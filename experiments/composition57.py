@@ -79,7 +79,7 @@ def composition57(pc):
 
         counter += 1
 
-    coll.fit(device.DrawingMachine.Paper.a1_landscape(), 100)
+    coll.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=100)
 
     filename = f"composition57_{pc.hash()}"
 
@@ -95,12 +95,25 @@ def composition57(pc):
     )
 
     if st.sidebar.button("save"):
+        device.SimpleExportWrapper().ex(
+            coll,
+            device.PlotterType.DIY_PLOTTER,
+            device.PaperSize.LANDSCAPE_A1,
+            90,
+            "composition57",
+            pc.hash(),
+        )
+
+        device.SimpleExportWrapper().ex(
+            coll,
+            device.PlotterType.ROLAND_DPX3300,
+            device.PaperSize.LANDSCAPE_A1,
+            90,
+            "composition57",
+            pc.hash(),
+        )
+
         st.write(f"Saving {filename}")
-        gcode_renderer.render(coll)
-        gcode_renderer.save(filename)
-        jpeg_renderer.save(filename)
-        svg_renderer.render(coll)
-        svg_renderer.save(filename)
 
 
 def main():

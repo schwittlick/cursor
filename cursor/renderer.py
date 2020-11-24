@@ -1,8 +1,6 @@
 from cursor.path import PathCollection
 from cursor.path import Path
 from cursor.path import BoundingBox
-from cursor.device import DrawingMachine
-from cursor.device import RolandDPX3300
 
 import svgwrite
 import pathlib
@@ -192,10 +190,10 @@ class GCodeRenderer:
             log.fail(f"Couldn't generate GCode- Out of Bounds with position {e}")
 
     def __append_to_file(self, file, x, y):
-        if y < DrawingMachine.Plotter.MAX_Y:
-            raise DrawingOutOfBoundsException(y)
-        if x > DrawingMachine.Plotter.MAX_X:
-            raise DrawingOutOfBoundsException(x)
+        #if y < DrawingMachine.Plotter.MAX_Y:
+        #    raise DrawingOutOfBoundsException(y)
+        #if x > DrawingMachine.Plotter.MAX_X:
+        #    raise DrawingOutOfBoundsException(x)
         file.write(f"G01 X{x:.2f} Y{y:.2f} F{self.feedrate_xy}\n")
 
 
@@ -248,14 +246,14 @@ class HPGLRenderer:
             log.fail(f"Couldn't generate HPGL- Out of Bounds with position {e}")
 
     def __append_to_file(self, file, x, y):
-        if y < RolandDPX3300.Plotter.MIN_Y:
-            raise DrawingOutOfBoundsException(y)
-        if y > RolandDPX3300.Plotter.MAX_Y:
-            raise DrawingOutOfBoundsException(y)
-        if x < RolandDPX3300.Plotter.MIN_X:
-            raise DrawingOutOfBoundsException(x)
-        if x > RolandDPX3300.Plotter.MAX_X:
-            raise DrawingOutOfBoundsException(x)
+        #if y < RolandDPX3300.Plotter.MIN_Y:
+        #    raise DrawingOutOfBoundsException(y)
+        #if y > RolandDPX3300.Plotter.MAX_Y:
+        #    raise DrawingOutOfBoundsException(y)
+        #if x < RolandDPX3300.Plotter.MIN_X:
+        #    raise DrawingOutOfBoundsException(x)
+        #if x > RolandDPX3300.Plotter.MAX_X:
+        #    raise DrawingOutOfBoundsException(x)
         file.write(f"PA{int(x)},{int(y)}\n")
 
 
