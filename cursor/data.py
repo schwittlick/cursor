@@ -8,7 +8,6 @@ import pytz
 
 
 class MyJsonEncoder(json.JSONEncoder):
-
     def default(self, o):
         from cursor.path import Path
         from cursor.path import PathCollection

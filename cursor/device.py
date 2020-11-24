@@ -49,6 +49,7 @@ class MinmaxMapping:
 
 class MinMaxMappingBB:
     from cursor import path
+
     maps = {
         PlotterType.ROLAND_DPX3300: path.BoundingBox(-17600, 33600, -11360, 23760),
         PlotterType.DIY_PLOTTER: path.BoundingBox(0, 3350, 0, -1715),
@@ -210,11 +211,16 @@ class Exporter:
 
         if self.cfg.type is PlotterType.ROLAND_DPX3300:
             self.paths.fit(
-                out_dim, xy_factor=XYFactors.fac[self.cfg.type], padding_mm=self.cfg.margin, center_point=(-880, 600)
+                out_dim,
+                xy_factor=XYFactors.fac[self.cfg.type],
+                padding_mm=self.cfg.margin,
+                center_point=(-880, 600),
             )
         else:
             self.paths.fit(
-                out_dim, xy_factor=XYFactors.fac[self.cfg.type], padding_mm=self.cfg.margin
+                out_dim,
+                xy_factor=XYFactors.fac[self.cfg.type],
+                padding_mm=self.cfg.margin,
             )
 
     def run(self, jpg: bool = False) -> None:
@@ -270,8 +276,15 @@ class Exporter:
 class SimpleExportWrapper:
     from cursor import path
 
-    def ex(self, paths: path.PathCollection, ptype: PlotterType, psize: PaperSize, margin: int, name: str,
-           suffix: str = ""):
+    def ex(
+        self,
+        paths: path.PathCollection,
+        ptype: PlotterType,
+        psize: PaperSize,
+        margin: int,
+        name: str,
+        suffix: str = "",
+    ):
         cfg = Cfg()
         cfg.type = ptype
         cfg.dimension = psize

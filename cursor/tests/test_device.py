@@ -22,4 +22,3 @@ def test_simple_export():
     exp.name = "composition59"
     exp.suffix = "test_full_spiral_test"
     exp.run(True)
-
