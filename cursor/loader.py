@@ -1,4 +1,5 @@
 from cursor import data
+from cursor import path
 
 import json
 import time
@@ -10,15 +11,14 @@ log = wasabi.Printer()
 
 
 class Loader:
-    def __init__(self, directory=None, limit_files=None):
+    def __init__(self, directory: pathlib.Path = None, limit_files: int = None):
         self._recordings = []
         self._keyboard_recordings = []
 
         if directory is not None:
             self.load_all(directory=directory, limit_files=limit_files)
 
-    def load_all(self, directory, limit_files=None):
-        assert isinstance(directory, pathlib.Path), "Only path objects allowed"
+    def load_all(self, directory: pathlib.Path, limit_files: int = None) -> None:
         start_benchmark = time.time()
 
         all_json_files = [
@@ -76,13 +76,16 @@ class Loader:
             return True
         return False
 
-    def all_collections(self):
+    def all_collections(self) -> list[path.PathCollection]:
         """
         :return: a copy of all recordings
         """
         return list(self._recordings)
 
-    def all_paths(self):
+    def all_paths(self) -> path.PathCollection:
+        """
+        :return: all paths combined into one path.PathCollection
+        """
         return reduce(lambda pcol1, pcol2: pcol1 + pcol2, self._recordings)
 
     def single(self, index):
