@@ -227,7 +227,7 @@ class Path:
                 )
             )
         except RuntimeWarning as w:
-            print(w)
+            log.fail(w)
 
         # acos can't properly calculate angle more than 180°.
         # solution taken from here:
@@ -426,7 +426,7 @@ class Path:
     def shannon_direction_changes(self) -> float:
         entropy = self.__entropy2(self.direction_changes())
         if entropy is np.nan:
-            print("lol")
+            log.fail("LOL")
         return entropy
 
     def empty(self) -> bool:
@@ -605,7 +605,7 @@ class PathCollection:
         ma = self.max()
         bb = BoundingBox(mi[0], mi[1], ma[0], ma[1])
         if bb.x is np.nan or bb.y is np.nan or bb.w is np.nan or bb.h is np.nan:
-            print("f8co")
+            log.fail("SHIT")
         return bb
 
     def min(self) -> typing.Tuple[float, float]:
@@ -640,20 +640,20 @@ class PathCollection:
         # move into positive area
         _bb = self.bb()
         if _bb.x < 0:
-            log.good(f"{self.__class__.__name__}: fit: translate by {_bb.x} {0.0}")
+            log.good(f"{self.__class__.__name__}: fit: translate by {_bb.x:.2f} {0.0}")
             self.translate(abs(_bb.x), 0.0)
         else:
             log.good(
-                f"{self.__class__.__name__}: fit: translate by {-abs(_bb.x)} {0.0}"
+                f"{self.__class__.__name__}: fit: translate by {-abs(_bb.x):.2f} {0.0}"
             )
             self.translate(-abs(_bb.x), 0.0)
 
         if _bb.y < 0:
-            log.good(f"{self.__class__.__name__}: fit: translate by {0.0} {abs(_bb.y)}")
+            log.good(f"{self.__class__.__name__}: fit: translate by {0.0} {abs(_bb.y):.2f}")
             self.translate(0.0, abs(_bb.y))
         else:
             log.good(
-                f"{self.__class__.__name__}: fit: translate by {0.0} {-abs(_bb.y)}"
+                f"{self.__class__.__name__}: fit: translate by {0.0} {-abs(_bb.y):.2f}"
             )
             self.translate(0.0, -abs(_bb.y))
         _bb = self.bb()
@@ -692,11 +692,9 @@ class PathCollection:
         xfac = x1 / x2
         yfac = y1 / y2
 
-        log.good(f"{self.__class__.__name__}: fit: scaled by {xfac} {yfac}")
+        log.good(f"{self.__class__.__name__}: fit: scaled by {xfac:.2f} {yfac:.2f}")
 
         self.scale(xfac, yfac)
-
-        print(self.bb())
 
         # centering
 
@@ -708,8 +706,6 @@ class PathCollection:
             center_dims = center_point
         diff = center_dims[0] - center[0], center_dims[1] - center[1]
 
-        log.good(f"{self.__class__.__name__}: fit: translated by {diff[0]} {diff[1]}")
+        log.good(f"{self.__class__.__name__}: fit: translated by {diff[0]:.2f} {diff[1]:.2f}")
 
         self.translate(diff[0], diff[1])
-
-        print(self.bb())
