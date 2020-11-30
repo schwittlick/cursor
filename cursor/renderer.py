@@ -79,12 +79,12 @@ class SvgRenderer:
 
         self.paths.add(p1)
 
-    def save(self, filename):
+    def save(self, filename: str):
         bb = self.paths.bb()
 
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
-        fname = self.save_path / filename + ".svg"
+        fname = self.save_path / (filename + ".svg")
         self.dwg = svgwrite.Drawing(
             fname.as_posix(), profile="tiny", size=(bb.w + bb.x, bb.h + bb.y)
         )
@@ -144,10 +144,10 @@ class GCodeRenderer:
         assert isinstance(bb, BoundingBox), "Only BoundingBox objects allowed"
         self.bbs.append(bb)
 
-    def save(self, filename):
+    def save(self, filename: str):
         try:
             pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
-            fname = self.save_path / filename + ".nc"
+            fname = self.save_path / (filename + ".nc")
             with open(fname.as_posix(), "w") as file:
                 file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
                 self.__append_to_file(file, 0.0, 0.0)
@@ -211,10 +211,10 @@ class HPGLRenderer:
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
         self.paths += paths
 
-    def save(self, filename):
+    def save(self, filename: str):
         try:
             pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
-            fname = self.save_path / filename + ".hpgl"
+            fname = self.save_path / (filename + ".hpgl")
 
             with open(fname.as_posix(), "w") as file:
                 # file.write(f"PA0,0;\n")
@@ -258,8 +258,7 @@ class HPGLRenderer:
 
 
 class JpegRenderer:
-    def __init__(self, folder):
-        assert isinstance(folder, pathlib.Path), "Only path objects allowed"
+    def __init__(self, folder: pathlib.Path):
         self.save_path = folder
         self.img = None
         self.img_draw = None
@@ -316,8 +315,8 @@ class JpegRenderer:
         if frame:
             self.render_frame()
 
-    def save(self, filename):
-        fname = self.save_path / filename + ".jpg"
+    def save(self, filename: str):
+        fname = self.save_path / (filename + ".jpg")
         self.img.save(fname, "JPEG")
         log.good(f"Finished saving {fname}")
 
