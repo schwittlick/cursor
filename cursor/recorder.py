@@ -88,9 +88,7 @@ class Recorder:
 
         recs = {"mouse": self._mouse_recordings, "keys": self._keyboard_recodings}
 
-        fname_compressed = save_path.joinpath(
-            str(self._start_time_stamp) + "_compressed.json"
-        )
+        fname_compressed = save_path / str(self._start_time_stamp) + "_compressed.json"
 
         log.good(f"Saving mouse recordings: {len(self._mouse_recordings)}")
         log.good(f"Saving keyboard recordings: {len(self._keyboard_recodings)}")
@@ -183,7 +181,7 @@ def main(args=None):
     # loops forever until quit forcefully or via gui
 
     icon_path = (
-        pathlib.Path(__file__).resolve().parent.parent.joinpath("mouse-icon.gif")
+        pathlib.Path(__file__).resolve().parent.parent / "mouse-icon.gif"
     )
     image = Image.open(icon_path.as_posix())
     global icon

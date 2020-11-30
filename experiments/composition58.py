@@ -14,7 +14,7 @@ def main():
     # this port needs to be taken from SC via NetAddr.langPort;
 
     p = data.DataDirHandler().recordings()
-    p = p.joinpath("1594553245.575756_compressed.json")
+    p = p / "1594553245.575756_compressed.json"
     ll = loader.Loader()
     ll.load_file(p)
     keys = ll.keys()

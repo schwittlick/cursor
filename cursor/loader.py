@@ -40,7 +40,7 @@ class Loader:
             all_json_files = fin
 
         for file in all_json_files:
-            full_path = directory.joinpath(file)
+            full_path = directory / file
             self.load_file(full_path)
 
         absolut_path_count = sum(len(pc) for pc in self._recordings)

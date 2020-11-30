@@ -106,51 +106,49 @@ class DateHandler:
 class DataDirHandler:
     def __init__(self):
         self.BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
-        self.data_dir = self.BASE_DIR.joinpath("data")
-        self.test_data_dir = (
-            self.BASE_DIR.joinpath("cursor").joinpath("tests").joinpath("data")
-        )
+        self.data_dir = self.BASE_DIR / "data"
+        self.test_data_dir = (self.BASE_DIR / "cursor" / "tests" / "data")
 
     def gcode(self, folder):
-        return self.data_dir.joinpath("experiments").joinpath(folder).joinpath("gcode")
+        return self.data_dir / "experiments" / folder / "gcode"
 
     def jpg(self, subfolder):
-        return self.data_dir.joinpath("experiments").joinpath(subfolder).joinpath("jpg")
+        return self.data_dir / "experiments" / subfolder / "jpg"
 
     def svg(self, subfolder):
-        return self.data_dir.joinpath("experiments").joinpath(subfolder).joinpath("svg")
+        return self.data_dir / "experiments" / subfolder / "svg"
 
     def hpgl(self, subfolder):
         return (
-            self.data_dir.joinpath("experiments").joinpath(subfolder).joinpath("hpgl")
+            self.data_dir / "experiments" / subfolder / "hpgl"
         )
 
     def images(self):
-        return self.data_dir.joinpath("jpgs")
+        return self.data_dir / "jpgs"
 
     def gcodes(self):
-        return self.data_dir.joinpath("gcode")
+        return self.data_dir / "gcode"
 
     def svgs(self):
-        return self.data_dir.joinpath("svg")
+        return self.data_dir / "svg"
 
     def hpgls(self):
-        return self.data_dir.joinpath("hpgl")
+        return self.data_dir / "hpgl"
 
     def recordings(self):
-        return self.data_dir.joinpath("recordings")
+        return self.data_dir / "recordings"
 
     def test_images(self):
-        return self.test_data_dir.joinpath("jpgs")
+        return self.test_data_dir / "jpgs"
 
     def test_gcodes(self):
-        return self.test_data_dir.joinpath("gcode")
+        return self.test_data_dir / "gcode"
 
     def test_svgs(self):
-        return self.test_data_dir.joinpath("svg")
+        return self.test_data_dir / "svg"
 
     def test_hpgls(self):
-        return self.test_data_dir.joinpath("hpgl")
+        return self.test_data_dir / "hpgl"
 
     def test_recordings(self):
-        return self.test_data_dir.joinpath("test_recordings")
+        return self.test_data_dir / "test_recordings"

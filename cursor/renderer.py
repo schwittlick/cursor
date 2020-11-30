@@ -84,7 +84,7 @@ class SvgRenderer:
 
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
-        fname = self.save_path.joinpath(filename + ".svg")
+        fname = self.save_path / filename + ".svg"
         self.dwg = svgwrite.Drawing(
             fname.as_posix(), profile="tiny", size=(bb.w + bb.x, bb.h + bb.y)
         )
@@ -147,7 +147,7 @@ class GCodeRenderer:
     def save(self, filename):
         try:
             pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
-            fname = self.save_path.joinpath(filename + ".nc")
+            fname = self.save_path / filename + ".nc"
             with open(fname.as_posix(), "w") as file:
                 file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
                 self.__append_to_file(file, 0.0, 0.0)
@@ -214,7 +214,7 @@ class HPGLRenderer:
     def save(self, filename):
         try:
             pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
-            fname = self.save_path.joinpath(filename + ".hpgl")
+            fname = self.save_path / filename + ".hpgl"
 
             with open(fname.as_posix(), "w") as file:
                 # file.write(f"PA0,0;\n")
@@ -317,7 +317,7 @@ class JpegRenderer:
             self.render_frame()
 
     def save(self, filename):
-        fname = self.save_path.joinpath(filename + ".jpg")
+        fname = self.save_path / filename + ".jpg"
         self.img.save(fname, "JPEG")
         log.good(f"Finished saving {fname}")
 
