@@ -202,23 +202,23 @@ class Exporter:
         self.__suffix = t
 
     def fit(self) -> None:
-        out_dim = tuple(
-            _ * r
-            for _, r in zip(
-                Paper.sizes[self.cfg.dimension], XYFactors.fac[self.cfg.type]
-            )
-        )
+        #out_dim = tuple(
+        #    _ * r
+        #    for _, r in zip(
+        #        Paper.sizes[self.cfg.dimension], XYFactors.fac[self.cfg.type]
+        #    )
+        #)
 
         if self.cfg.type is PlotterType.ROLAND_DPX3300:
             self.paths.fit(
-                out_dim,
+                Paper.sizes[self.cfg.dimension],
                 xy_factor=XYFactors.fac[self.cfg.type],
                 padding_mm=self.cfg.margin,
                 center_point=(-880, 600),
             )
         else:
             self.paths.fit(
-                out_dim,
+                Paper.sizes[self.cfg.dimension],
                 xy_factor=XYFactors.fac[self.cfg.type],
                 padding_mm=self.cfg.margin,
             )

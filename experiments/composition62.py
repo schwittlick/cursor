@@ -15,7 +15,8 @@ def save_wrapper(pc, projname, fname):
 
 if __name__ == "__main__":
     p = data.DataDirHandler().recordings()
-    ll = loader.Loader(directory=p, limit_files=None)
+    files = ['1606384281.710116_compressed', '1606479425.800735_compressed', '1606567860.241626_compressed']
+    ll = loader.Loader(directory=p, limit_files=files)
     colls = ll.all_collections()
 
     c = path.PathCollection()
@@ -27,14 +28,14 @@ if __name__ == "__main__":
             c.add(p)
         layer += 1
 
-    c.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=90)
+    c.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=70)
     save_wrapper(c, "composition62", "composition62_together")
 
     device.SimpleExportWrapper().ex(
         c,
         device.PlotterType.ROLAND_DPX3300,
         device.PaperSize.LANDSCAPE_A1,
-        90,
+        70,
         "composition62",
         c.hash(),
     )

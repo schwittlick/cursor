@@ -4,6 +4,7 @@ from cursor import path
 import json
 import time
 import wasabi
+import typing
 import pathlib
 from functools import reduce
 
@@ -11,24 +12,32 @@ log = wasabi.Printer()
 
 
 class Loader:
-    def __init__(self, directory: pathlib.Path = None, limit_files: int = None):
+    def __init__(self, directory: pathlib.Path = None, limit_files: typing.Union[int, list[str]] = None):
         self._recordings = []
         self._keyboard_recordings = []
 
         if directory is not None:
             self.load_all(directory=directory, limit_files=limit_files)
 
-    def load_all(self, directory: pathlib.Path, limit_files: int = None) -> None:
+    def load_all(self, directory: pathlib.Path, limit_files: typing.Union[int, list[str]] = None) -> None:
         start_benchmark = time.time()
 
         all_json_files = [
             f
             for f in directory.iterdir()
-            if self.is_file_and_json(directory.joinpath(f))
+            if self.is_file_and_json(directory / f)
         ]
 
-        if limit_files:
+        fin = []
+        if limit_files and type(limit_files) is int:
             all_json_files = all_json_files[:limit_files]
+        if limit_files and type(limit_files) is list:
+            for f in all_json_files:
+                st = f.stem
+                if st in limit_files:
+                    fin.append(f)
+            #all_json_files = [k for k in all_json_files if k.stem in limit_files]
+            all_json_files = fin
 
         for file in all_json_files:
             full_path = directory.joinpath(file)
