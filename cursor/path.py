@@ -649,7 +649,9 @@ class PathCollection:
             self.translate(-abs(_bb.x), 0.0)
 
         if _bb.y < 0:
-            log.good(f"{self.__class__.__name__}: fit: translate by {0.0} {abs(_bb.y):.2f}")
+            log.good(
+                f"{self.__class__.__name__}: fit: translate by {0.0} {abs(_bb.y):.2f}"
+            )
             self.translate(0.0, abs(_bb.y))
         else:
             log.good(
@@ -706,6 +708,8 @@ class PathCollection:
             center_dims = center_point
         diff = center_dims[0] - center[0], center_dims[1] - center[1]
 
-        log.good(f"{self.__class__.__name__}: fit: translated by {diff[0]:.2f} {diff[1]:.2f}")
+        log.good(
+            f"{self.__class__.__name__}: fit: translated by {diff[0]:.2f} {diff[1]:.2f}"
+        )
 
         self.translate(diff[0], diff[1])
