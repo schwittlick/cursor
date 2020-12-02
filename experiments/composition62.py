@@ -28,7 +28,7 @@ if __name__ == "__main__":
         layer += 1
 
     c.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=90)
-    save_wrapper(c, "composition62", f"composition62_together")
+    save_wrapper(c, "composition62", "composition62_together")
 
     device.SimpleExportWrapper().ex(
         c,
