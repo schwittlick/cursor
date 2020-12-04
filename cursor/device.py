@@ -16,8 +16,9 @@ class PlotterType(Enum):
     ROLAND_DPX3300 = 0
     DIY_PLOTTER = 1
     AXIDRAW = 2
-    HP_7475A = 3
-    ROLAND_DXY1200 = 3
+    HP_7475A_A4 = 3
+    HP_7475A_A3 = 4
+    ROLAND_DXY1200 = 5
 
 
 class ExportFormat(Enum):
@@ -32,7 +33,8 @@ class ExportFormatMappings:
         PlotterType.ROLAND_DPX3300: ExportFormat.HPGL,
         PlotterType.DIY_PLOTTER: ExportFormat.GCODE,
         PlotterType.AXIDRAW: ExportFormat.SVG,
-        PlotterType.HP_7475A: ExportFormat.HPGL,
+        PlotterType.HP_7475A_A3: ExportFormat.HPGL,
+        PlotterType.HP_7475A_A4: ExportFormat.HPGL,
         PlotterType.ROLAND_DXY1200: ExportFormat.HPGL,
     }
 
@@ -42,7 +44,8 @@ class MinmaxMapping:
         PlotterType.ROLAND_DPX3300: MinMax(-17600, 16000, -11360, 12400),
         PlotterType.DIY_PLOTTER: MinMax(0, 3350, 0, -1715),
         PlotterType.AXIDRAW: MinMax(0, 0, 0, -0),  # todo: missing real bounds
-        PlotterType.HP_7475A: MinMax(0, 0, 0, 0),  # todo: missing real bounds
+        PlotterType.HP_7475A_A4: MinMax(0, 0, 11040, 7721),
+        PlotterType.HP_7475A_A3: MinMax(0, 0, 16158, 11040),
         PlotterType.ROLAND_DXY1200: MinMax(0, 0, 0, 0),  # todo: missing real bounds
     }
 
@@ -54,7 +57,8 @@ class MinMaxMappingBB:
         PlotterType.ROLAND_DPX3300: path.BoundingBox(-17600, 33600, -11360, 23760),
         PlotterType.DIY_PLOTTER: path.BoundingBox(0, 3350, 0, -1715),
         PlotterType.AXIDRAW: MinMax(0, 0, 0, -0),  # todo: missing real bounds
-        PlotterType.HP_7475A: MinMax(0, 0, 0, 0),  # todo: missing real bounds
+        PlotterType.HP_7475A_A4: MinMax(0, 0, 0, 0),  # todo: missing real bounds
+        PlotterType.HP_7475A_A3: MinMax(0, 0, 0, 0),  # todo: missing real bounds
         PlotterType.ROLAND_DXY1200: MinMax(0, 0, 0, 0),  # todo: missing real bounds
     }
 
@@ -80,7 +84,8 @@ class PlotterName:
         PlotterType.ROLAND_DPX3300: "dpx3300",
         PlotterType.AXIDRAW: "axidraw",
         PlotterType.DIY_PLOTTER: "custom",
-        PlotterType.HP_7475A: "hp7475a",
+        PlotterType.HP_7475A_A3: "hp7475a_a3",
+        PlotterType.HP_7475A_A4: "hp7475a_a4",
         PlotterType.ROLAND_DXY1200: "dxy1200",
     }
 
@@ -126,6 +131,9 @@ class XYFactors:
         PlotterType.ROLAND_DPX3300: (40, 40),
         PlotterType.DIY_PLOTTER: (2.85714, 2.90572),
         PlotterType.AXIDRAW: (3.704, 3.704),
+        PlotterType.HP_7475A_A3: (40, 40),
+        PlotterType.HP_7475A_A4: (40, 40),
+        PlotterType.ROLAND_DXY1200: (40, 40),
     }
 
 

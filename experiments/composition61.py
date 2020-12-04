@@ -8,7 +8,7 @@ from cursor.path import PathCollection
 
 if __name__ == "__main__":
     p = data.DataDirHandler().recordings()
-    ll = loader.Loader(directory=p, limit_files=10)
+    ll = loader.Loader(directory=p, limit_files=1)
     pcol = ll.all_paths()
     # pcol.clean()
 
@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     coll = PathCollection()
 
-    for i in range(len(pcol)):
+    for i in range(10):
         p = pcol[i]
 
         pnew = p.morph((i, 0), (i, 100))
@@ -34,9 +34,9 @@ if __name__ == "__main__":
 
     device.SimpleExportWrapper().ex(
         coll,
-        device.PlotterType.DIY_PLOTTER,
-        device.PaperSize.LANDSCAPE_56_42,
-        40,
+        device.PlotterType.HP_7475A,
+        device.PaperSize.PORTRAIT_A4,
+        20,
         "composition61",
-        coll.hash(),
+        coll.hash()
     )
