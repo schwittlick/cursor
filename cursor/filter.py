@@ -166,6 +166,11 @@ class MinPointCountFilter(Filter):
             f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
         )
 
+    def filtered(self, paths):
+        copied_paths = copy.deepcopy(paths)
+        self.filter(copied_paths)
+        return copied_paths
+
 
 class MaxPointCountFilter(Filter):
     def __init__(self, point_count):
