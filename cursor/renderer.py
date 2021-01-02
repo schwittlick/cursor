@@ -264,7 +264,7 @@ class JpegRenderer:
         self.img = None
         self.img_draw = None
 
-    def render(self, paths, scale=1.0, frame=False):
+    def render(self, paths, scale=1.0, frame=False, thickness=1):
         if not isinstance(paths, PathCollection):
             raise Exception("Only PathCollection allowed")
 
@@ -310,7 +310,7 @@ class JpegRenderer:
             self.img_draw.line(
                 xy=(start.x * scale, start.y * scale, end.x * scale, end.y * scale),
                 fill="black",
-                width=1,
+                width=thickness,
             )
 
         if frame:
