@@ -19,6 +19,7 @@ class PlotterType(Enum):
     HP_7475A_A4 = 3
     HP_7475A_A3 = 4
     ROLAND_DXY1200 = 5
+    ROLAND_DXY980 = 6
 
 
 class ExportFormat(Enum):
@@ -36,6 +37,7 @@ class ExportFormatMappings:
         PlotterType.HP_7475A_A3: ExportFormat.HPGL,
         PlotterType.HP_7475A_A4: ExportFormat.HPGL,
         PlotterType.ROLAND_DXY1200: ExportFormat.HPGL,
+        PlotterType.ROLAND_DXY980: ExportFormat.HPGL
     }
 
 
@@ -47,6 +49,7 @@ class MinmaxMapping:
         PlotterType.HP_7475A_A4: MinMax(0, 0, 11040, 7721),
         PlotterType.HP_7475A_A3: MinMax(0, 0, 16158, 11040),
         PlotterType.ROLAND_DXY1200: MinMax(0, 0, 0, 0),  # todo: missing real bounds
+        PlotterType.ROLAND_DXY980: MinMax(0, 0, 100, 100)
     }
 
 
@@ -60,6 +63,7 @@ class MinMaxMappingBB:
         PlotterType.HP_7475A_A4: MinMax(0, 0, 0, 0),  # todo: missing real bounds
         PlotterType.HP_7475A_A3: MinMax(0, 0, 0, 0),  # todo: missing real bounds
         PlotterType.ROLAND_DXY1200: MinMax(0, 0, 0, 0),  # todo: missing real bounds
+        PlotterType.ROLAND_DXY980: MinMax(0, 0, 0, 0),  # todo: missing real bounds
     }
 
 
@@ -77,6 +81,8 @@ class PaperSize(Enum):
     PORTRAIT_A4 = 10
     LANDSCAPE_A1 = 11
     LANDSCAPE_A0 = 12
+    PORTRAIT_A3 = 13
+    LANDSCAPE_A3 = 14
 
 
 class PlotterName:
@@ -87,6 +93,7 @@ class PlotterName:
         PlotterType.HP_7475A_A3: "hp7475a_a3",
         PlotterType.HP_7475A_A4: "hp7475a_a4",
         PlotterType.ROLAND_DXY1200: "dxy1200",
+        PlotterType.ROLAND_DXY980: "dxy980",
     }
 
 
@@ -105,6 +112,8 @@ class PaperSizeName:
         PaperSize.PORTRAIT_A4: "portrait_a4",
         PaperSize.LANDSCAPE_A1: "landscape_a1",
         PaperSize.LANDSCAPE_A0: "landscape_a0",
+        PaperSize.PORTRAIT_A3: "portrait_a3",
+        PaperSize.LANDSCAPE_A3: "landscape_a3",
     }
 
 
@@ -123,6 +132,8 @@ class Paper:
         PaperSize.PORTRAIT_A4: (210, 297),
         PaperSize.LANDSCAPE_A1: (841, 594),
         PaperSize.LANDSCAPE_A0: (1189, 841),
+        PaperSize.PORTRAIT_A3: (297, 420),
+        PaperSize.LANDSCAPE_A3: (420, 297),
     }
 
 
@@ -134,6 +145,7 @@ class XYFactors:
         PlotterType.HP_7475A_A3: (40, 40),
         PlotterType.HP_7475A_A4: (40, 40),
         PlotterType.ROLAND_DXY1200: (40, 40),
+        PlotterType.ROLAND_DXY980: (40, 40),
     }
 
 
