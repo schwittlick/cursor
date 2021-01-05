@@ -568,9 +568,16 @@ class PathCollection:
         for p in self.__paths:
             yield p
 
-    def __getitem__(self, item: int) -> Path:
+    def __getitem__(self, item: typing.Union[int, slice]) -> typing.Union["PathCollection", Path]:
+        if isinstance(item, slice):
+            start, stop, step = item.indices(len(self))
+            _pc = PathCollection()
+            _pc.__paths = [self[i] for i in range(start, stop, step)]
+            return _pc
+
         if len(self.__paths) < item + 1:
             raise IndexError(f"Index too high. Maximum is {len(self.__paths)}")
+
         return self.__paths[item]
 
     def timestamp(self) -> float:
