@@ -141,6 +141,32 @@ class EntropyMaxFilter(Filter):
         return copied_paths
 
 
+class DirectionChangeEntropyFilter(Filter):
+    def __init__(self, min_entropy, max_entropy):
+        self.min = min_entropy
+        self.max = max_entropy
+
+    def filter(self, paths):
+        t0 = time.time()
+        len_before = len(paths)
+
+        paths[:] = [
+            p for p in paths if self.max > p.shannon_direction_changes > self.min
+        ]
+
+        len_after = len(paths)
+        elapsed = time.time() - t0
+        log.good(f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
+        log.good(
+            f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
+        )
+
+    def filtered(self, paths):
+        copied_paths = copy.deepcopy(paths)
+        self.filter(copied_paths)
+        return copied_paths
+
+
 class BoundingBoxFilter(Filter):
     def __init__(self, bb):
         self.bb = bb
