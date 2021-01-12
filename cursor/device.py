@@ -47,9 +47,9 @@ class MinmaxMapping:
         PlotterType.DIY_PLOTTER: MinMax(0, 3350, 0, -1715),
         PlotterType.AXIDRAW: MinMax(0, 0, 0, -0),  # todo: missing real bounds
         PlotterType.HP_7475A_A4: MinMax(0, 0, 11040, 7721),
-        PlotterType.HP_7475A_A3: MinMax(0, 0, 16158, 11040),
+        PlotterType.HP_7475A_A3: MinMax(0, 16158, 0, 11040),
         PlotterType.ROLAND_DXY1200: MinMax(0, 0, 0, 0),  # todo: missing real bounds
-        PlotterType.ROLAND_DXY980: MinMax(0, 0, 100, 100)
+        PlotterType.ROLAND_DXY980: MinMax(0, 0, 380, 270)
     }
 
 
@@ -309,6 +309,8 @@ class SimpleExportWrapper:
         cfg.type = ptype
         cfg.dimension = psize
         cfg.margin = margin
+
+        paths.clean()
 
         exp = Exporter()
         exp.cfg = cfg
