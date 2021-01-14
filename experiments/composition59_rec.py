@@ -14,13 +14,10 @@ def full_spiral(pp, rounds=200, _yextra=0.01, _theta=0.003):
     theta2 = 0
     while theta < rounds:
         x2 = r2 * math.sin(theta2)
-        y2 = r2 * math.cos(theta2)
+        y2 = r2 * math.cos(theta2) * 0.5
 
         x = r * math.sin(theta) + x2 + yextra
-        y = r * math.cos(theta) + y2# * 2
-
-
-
+        y = r * math.cos(theta) + y2
 
         pp.add(x, y, 0)
 
@@ -46,9 +43,9 @@ if __name__ == "__main__":
 
     device.SimpleExportWrapper().ex(
         coll,
-        device.PlotterType.DIY_PLOTTER,
-        device.PaperSize.LANDSCAPE_A1,
-        90,
+        device.PlotterType.ROLAND_DXY980,
+        device.PaperSize.LANDSCAPE_A3,
+        30,
         "composition59_rec",
         num,
     )
