@@ -328,49 +328,72 @@ class Path:
 
         return ent
 
-    def direction_changes(self) -> typing.List[float]:
+    def direction_changes_pos_neg(self) -> typing.List[float]:
         """
         returns a list of radial direction changes from each point
         to the next len() = self.__len() - 1
         :return:
         """
 
-        def length(v):
-            return np.sqrt(v[0] ** 2 + v[1] ** 2)
+        angles = []
+        idx = 0
+        prev = 0
+        for _ in self.vertices:
+            if idx > 0:
+                f = self.vertices[idx - 1]
+                s = self.vertices[idx]
 
-        def dot_product(v, w):
-            return v[0] * w[0] + v[1] * w[1]
+                ang = math.atan2(s.y-f.y, s.x-f.x)
+                ang = math.degrees(ang)
 
-        def determinant(v, w):
-            return v[0] * w[1] - v[1] * w[0]
+                angles.append(ang - prev)
+                prev = ang
+            idx += 1
 
-        def inner_angle(v, w):
-            dp = dot_product(v, w)
-            ll = length(v) * length(w)
-            if ll == 0.0:
-                return 0.0
+        return angles
 
-            cosx = dp / ll
-            rad = np.arccos(cosx)  # in radians
-            return rad * 180 / np.pi  # returns degrees
+    def length(self, v):
+        return np.sqrt(v[0] ** 2 + v[1] ** 2)
 
-        def angle_clockwise(A, B):
-            inner = inner_angle(A, B)
-            det = determinant(A, B)
-            if (
+    def dot_product(self, v, w):
+        return v[0] * w[0] + v[1] * w[1]
+
+    def determinant(self, v, w):
+        return v[0] * w[1] - v[1] * w[0]
+
+    def inner_angle(self, v, w):
+        dp = self.dot_product(v, w)
+        ll = self.length(v) * self.length(w)
+        if ll == 0.0:
+            return 0.0
+
+        cosx = dp / ll
+        rad = np.arccos(cosx)  # in radians
+        return rad * 180 / np.pi  # returns degrees
+
+    def angle_clockwise(self, A, B):
+        inner = self.inner_angle(A, B)
+        det = self.determinant(A, B)
+        if (
                 det < 0
-            ):  # this is a property of the det. If the det < 0 then B is clockwise of A
-                return inner
-            else:  # if the det > 0 then A is immediately clockwise of B
-                return 360 - inner
+        ):  # this is a property of the det. If the det < 0 then B is clockwise of A
+            return inner
+        else:  # if the det > 0 then A is immediately clockwise of B
+            return 360 - inner
 
+    def direction_changes(self) -> typing.List[float]:
+        """
+        returns a list of radial direction changes from each point
+        to the next len() = self.__len() - 1
+        :return:
+        """
         angles = []
         idx = 0
         for _ in self.vertices:
             if idx > 0:
                 f = self.vertices[idx - 1]
                 s = self.vertices[idx]
-                angle = angle_clockwise(f.pos(), s.pos())
+                angle = self.angle_clockwise(f.pos(), s.pos())
                 # angle = angle_clockwise((1, 1), (1, -1))
 
                 if angle > 180:
@@ -439,7 +462,7 @@ class Path:
         removes consecutive duplicates
         """
         prev = TimedPosition()
-        self.vertices = [prev := v for v in self.vertices if prev != v]
+        self.vertices = [prev := v for v in self.vertices if prev != v and v.x < 1.0 and v.y < 1.0]
 
     def __repr__(self):
         rep = (
@@ -485,7 +508,7 @@ class PathCollection:
         for p in self.__paths:
             p.clean()
 
-        self.__paths = [path for path in self.__paths if len(path) > 1]
+        self.__paths = [path for path in self.__paths if len(path) > 2]
 
     def hash(self) -> str:
         return hashlib.md5(str(self.__paths).encode("utf-8")).hexdigest()
@@ -694,9 +717,13 @@ class PathCollection:
         _bb = self.bb()
         x1 = width - padding_x * 2.0
         x2 = _bb.w - _bb.x
+        if x2 == 0.0:
+            x2 = 1
 
         y1 = height - padding_y * 2.0
         y2 = _bb.h - _bb.y
+        if y2 == 0.0:
+            y2 = 1
 
         xfac = x1 / x2
         yfac = y1 / y2
