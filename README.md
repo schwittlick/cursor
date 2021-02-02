@@ -40,3 +40,26 @@ axidraw?
     cd Dropbox\CODE\cursor\venc\Scripts\activate.bat
     cd h:\AxiDraw_API_v253r3
     axicli ..\Dropbox\CODE\cursor\data\svg\pen_sample_book\pen_sample_test_45.svg
+
+###Plotter handling
+
+##### HP7595A
+- serial cable with usb adapter
+- ohne nullmodem
+- sendhpgl port file
+
+##### HP7475A
+- serial cable with usb adapter
+- mit nullmodem
+- sendhpgl port file
+
+##### HP7475A buffer overflow
+- serial cable with usb adapter
+- mit null modem
+- cat file to port
+
+##### Roland DPX3300
+usb to parallel port adapter
+
+    chmod 777 /dev/usb/lp0
+    cat file.hpgl /dev/usb/lp0
