@@ -20,6 +20,7 @@ class PlotterType(Enum):
     HP_7475A_A3 = 4
     ROLAND_DXY1200 = 5
     ROLAND_DXY980 = 6
+    HP_7595A = 7
 
 
 class ExportFormat(Enum):
@@ -37,7 +38,8 @@ class ExportFormatMappings:
         PlotterType.HP_7475A_A3: ExportFormat.HPGL,
         PlotterType.HP_7475A_A4: ExportFormat.HPGL,
         PlotterType.ROLAND_DXY1200: ExportFormat.HPGL,
-        PlotterType.ROLAND_DXY980: ExportFormat.HPGL
+        PlotterType.ROLAND_DXY980: ExportFormat.HPGL,
+        PlotterType.HP_7595A: ExportFormat.HPGL
     }
 
 
@@ -46,10 +48,11 @@ class MinmaxMapping:
         PlotterType.ROLAND_DPX3300: MinMax(-17600, 16000, -11360, 12400),
         PlotterType.DIY_PLOTTER: MinMax(0, 3350, 0, -1715),
         PlotterType.AXIDRAW: MinMax(0, 0, 0, -0),  # todo: missing real bounds
-        PlotterType.HP_7475A_A4: MinMax(0, 0, 11040, 7721),
+        PlotterType.HP_7475A_A4: MinMax(0, 11040, 0, 7721),
         PlotterType.HP_7475A_A3: MinMax(0, 16158, 0, 11040),
         PlotterType.ROLAND_DXY1200: MinMax(0, 0, 0, 0),  # todo: missing real bounds
-        PlotterType.ROLAND_DXY980: MinMax(0, 0, 380, 270)
+        PlotterType.ROLAND_DXY980: MinMax(0, 16158, 0, 11040),
+        PlotterType.HP_7595A: MinMax(-23160, 23160, -17602, 17602),
     }
 
 
@@ -94,6 +97,7 @@ class PlotterName:
         PlotterType.HP_7475A_A4: "hp7475a_a4",
         PlotterType.ROLAND_DXY1200: "dxy1200",
         PlotterType.ROLAND_DXY980: "dxy980",
+        PlotterType.HP_7595A: "hp_draftmaster_sx"
     }
 
 
@@ -146,6 +150,7 @@ class XYFactors:
         PlotterType.HP_7475A_A4: (40, 40),
         PlotterType.ROLAND_DXY1200: (40, 40),
         PlotterType.ROLAND_DXY980: (40, 40),
+        PlotterType.HP_7595A: (40, 40),
     }
 
 
@@ -236,6 +241,13 @@ class Exporter:
                 padding_mm=self.cfg.margin,
                 center_point=(-880, 600),
             )
+        elif self.cfg.type is PlotterType.HP_7595A:
+            self.paths.fit(
+                Paper.sizes[self.cfg.dimension],
+                xy_factor=XYFactors.fac[self.cfg.type],
+                padding_mm=self.cfg.margin,
+                center_point=(0, 0),
+            )
         else:
             self.paths.fit(
                 Paper.sizes[self.cfg.dimension],
@@ -263,7 +275,7 @@ class Exporter:
 
                 jpeg_folder = data.DataDirHandler().jpg(self.name)
                 jpeg_renderer = renderer.JpegRenderer(jpeg_folder)
-                jpeg_renderer.render(pc, scale=4.0)
+                jpeg_renderer.render(pc, scale=3.0)
                 jpeg_renderer.save(f"{fname}_{layer}")
 
         self.fit()
@@ -310,7 +322,7 @@ class SimpleExportWrapper:
         cfg.dimension = psize
         cfg.margin = margin
 
-        paths.clean()
+        #paths.clean()
 
         exp = Exporter()
         exp.cfg = cfg
