@@ -27,7 +27,7 @@ if __name__ == "__main__":
         ips.append("101.32.116.55")
         mm = device.MinmaxMapping.maps[device.PlotterType.HP_7475A_A3]
         f2 = open("all_blocked.txt", "r")
-        f.write("DT~;\n")
+        f.write("DT~,1;\n")
         counter = 0
         for ip in f2:
             mx = mm.minx

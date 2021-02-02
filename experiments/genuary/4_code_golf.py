@@ -24,7 +24,7 @@ if __name__ == "__main__":
     pc = path.PathCollection()
 
     counter = 0
-    for p in all_paths[60:70]:
+    for p in all_paths[90:100]:
         p.layer = counter
         pc.add(p)
 
