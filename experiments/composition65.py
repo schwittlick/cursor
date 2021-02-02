@@ -15,7 +15,7 @@ def save_wrapper(pc, projname, fname):
 
 if __name__ == "__main__":
     recs = data.DataDirHandler().recordings()
-    loader = loader.Loader(directory=recs, limit_files=10)
+    loader = loader.Loader(directory=recs, limit_files=5)
     all_paths = loader.all_paths()
 
     sorter1 = filter.DistanceFilter(0.05)
@@ -35,9 +35,9 @@ if __name__ == "__main__":
 
     device.SimpleExportWrapper().ex(
         pc,
-        device.PlotterType.DIY_PLOTTER,
+        device.PlotterType.ROLAND_DPX3300,
         device.PaperSize.LANDSCAPE_A1,
-        60,
+        50,
         "composition65",
         f"c65{pc.hash()}",
     )
