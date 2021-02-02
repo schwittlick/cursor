@@ -95,10 +95,10 @@ if __name__ == "__main__":
 
     pp = Path(layer="round1")
 
-    # num = plain_spiral(pp)
+    num = plain_spiral(pp)
     # num = circleball_spiral(pp)
     # num = upward_spiral(pp)
-    num = full_spiral(pp, 20000, 0.002, 0.2)
+    # num = full_spiral(pp, 20000, 0.002, 0.2)
     # num = heart_spiral(pp)
     # num = fat_spiral(pp)
 
@@ -111,11 +111,21 @@ if __name__ == "__main__":
     device.SimpleExportWrapper().ex(
         coll,
         device.PlotterType.DIY_PLOTTER,
+        device.PaperSize.LANDSCAPE_A3,
+        40,
+        "composition59",
+        num,
+    )
+
+    device.SimpleExportWrapper().ex(
+        coll,
+        device.PlotterType.DIY_PLOTTER,
         device.PaperSize.LANDSCAPE_A1,
         90,
         "composition59",
         num,
     )
+
     device.SimpleExportWrapper().ex(
         coll,
         device.PlotterType.ROLAND_DPX3300,
@@ -124,11 +134,11 @@ if __name__ == "__main__":
         "composition59",
         num,
     )
-    device.SimpleExportWrapper().ex(
-        coll,
-        device.PlotterType.AXIDRAW,
-        device.PaperSize.LANDSCAPE_48_36,
-        64,
-        "composition59",
-        num,
-    )
+    #device.SimpleExportWrapper().ex(
+    #    coll,
+    #    device.PlotterType.AXIDRAW,
+    #    device.PaperSize.LANDSCAPE_48_36,
+    #    64,
+    #    "composition59",
+    #    num,
+    #)

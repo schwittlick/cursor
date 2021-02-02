@@ -22,7 +22,7 @@ def full_spiral(pp, rounds=200, _yextra=0.01, _theta=0.003):
         pp.add(x, y, 0)
 
         theta += _theta
-        theta2 += 1
+        theta2 += 1.3
         yextra += _yextra
 
     return "full_plain"
@@ -43,9 +43,9 @@ if __name__ == "__main__":
 
     device.SimpleExportWrapper().ex(
         coll,
-        device.PlotterType.ROLAND_DXY980,
-        device.PaperSize.LANDSCAPE_A3,
-        30,
+        device.PlotterType.ROLAND_DPX3300,
+        device.PaperSize.LANDSCAPE_A1,
+        70,
         "composition59_rec",
         num,
     )
