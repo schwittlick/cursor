@@ -146,6 +146,7 @@ def test_pathcollection_clean():
 
     p1.add(5, 5111)
     p1.add(40, 41)
+    p1.add(30, 41)
 
     pcol.add(p0)
     pcol.add(p1)

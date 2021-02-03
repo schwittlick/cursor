@@ -462,7 +462,13 @@ class Path:
         removes consecutive duplicates
         """
         prev = TimedPosition()
-        self.vertices = [prev := v for v in self.vertices if prev != v and v.x < 1.0 and v.y < 1.0]
+        self.vertices = [prev := v for v in self.vertices if prev != v]
+
+    def limit(self) -> None:
+        """
+        removes points larger than 1.0
+        """
+        self.vertices = [prev := v for v in self.vertices if v.x < 1.0 and v.y < 1.0]
 
     def __repr__(self):
         rep = (
@@ -509,6 +515,10 @@ class PathCollection:
             p.clean()
 
         self.__paths = [path for path in self.__paths if len(path) > 2]
+
+    def limit(self) -> None:
+        for p in self.__paths:
+            p.limit()
 
     def hash(self) -> str:
         return hashlib.md5(str(self.__paths).encode("utf-8")).hexdigest()
