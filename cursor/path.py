@@ -83,7 +83,7 @@ class BoundingBox:
         return f"BB(x={self.x}, y={self.y}, w={self.w}, h={self.h})"
 
     def __inside(self, point: "TimedPosition") -> bool:
-        return self.x < point.x < self.x + self.w and self.y < point.y < self.y + self.h
+        return self.x <= point.x <= self.x + self.w and self.y <= point.y <= self.y + self.h
 
     def inside(self, data: typing.Union["Path", "PathCollection"]) -> bool:
         if isinstance(data, Path):
@@ -676,6 +676,7 @@ class PathCollection:
         padding_units: int = None,
         padding_percent: int = None,
         center_point: tuple[int, int] = None,
+        cutoff_mm=None
     ) -> None:
         # move into positive area
         _bb = self.bb()
@@ -757,3 +758,20 @@ class PathCollection:
         )
 
         self.translate(diff[0], diff[1])
+
+        if cutoff_mm is not None:
+            cuttoff_margin_diff = padding_mm - cutoff_mm
+
+            if cuttoff_margin_diff > 0:
+                return
+
+            cuttoff_margin_diff_x = cuttoff_margin_diff * xy_factor[0]
+            cuttoff_margin_diff_y = cuttoff_margin_diff * xy_factor[1]
+
+            cutoff_bb = self.bb()
+            cutoff_bb.x -= cuttoff_margin_diff_x
+            cutoff_bb.w += cuttoff_margin_diff_x
+            cutoff_bb.y -= cuttoff_margin_diff_y
+            cutoff_bb.h += cuttoff_margin_diff_y
+
+            self.__paths = [x for x in self.__paths if cutoff_bb.inside(x)]
