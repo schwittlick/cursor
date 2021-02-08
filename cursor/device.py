@@ -39,7 +39,7 @@ class ExportFormatMappings:
         PlotterType.HP_7475A_A4: ExportFormat.HPGL,
         PlotterType.ROLAND_DXY1200: ExportFormat.HPGL,
         PlotterType.ROLAND_DXY980: ExportFormat.HPGL,
-        PlotterType.HP_7595A: ExportFormat.HPGL
+        PlotterType.HP_7595A: ExportFormat.HPGL,
     }
 
 
@@ -97,7 +97,7 @@ class PlotterName:
         PlotterType.HP_7475A_A4: "hp7475a_a4",
         PlotterType.ROLAND_DXY1200: "dxy1200",
         PlotterType.ROLAND_DXY980: "dxy980",
-        PlotterType.HP_7595A: "hp_draftmaster_sx"
+        PlotterType.HP_7595A: "hp_draftmaster_sx",
     }
 
 
@@ -159,6 +159,7 @@ class Cfg:
         self.__type = None
         self.__dimensions = None
         self.__margin = None
+        self.__cutoff = None
 
     @property
     def type(self) -> PlotterType:
@@ -183,6 +184,14 @@ class Cfg:
     @margin.setter
     def margin(self, t: int):
         self.__margin = t
+
+    @property
+    def cutoff(self) -> int:
+        return self.__cutoff
+
+    @cutoff.setter
+    def cutoff(self, t: int):
+        self.__cutoff = t
 
 
 class Exporter:
@@ -227,19 +236,19 @@ class Exporter:
         self.__suffix = t
 
     def fit(self) -> None:
-        #out_dim = tuple(
+        # out_dim = tuple(
         #    _ * r
         #    for _, r in zip(
         #        Paper.sizes[self.cfg.dimension], XYFactors.fac[self.cfg.type]
         #    )
-        #)
-
+        # )
         if self.cfg.type is PlotterType.ROLAND_DPX3300:
             self.paths.fit(
                 Paper.sizes[self.cfg.dimension],
                 xy_factor=XYFactors.fac[self.cfg.type],
                 padding_mm=self.cfg.margin,
                 center_point=(-880, 600),
+                cutoff_mm=self.cfg.cutoff,
             )
         elif self.cfg.type is PlotterType.HP_7595A:
             self.paths.fit(
@@ -247,12 +256,14 @@ class Exporter:
                 xy_factor=XYFactors.fac[self.cfg.type],
                 padding_mm=self.cfg.margin,
                 center_point=(0, 0),
+                cutoff_mm=self.cfg.cutoff,
             )
         else:
             self.paths.fit(
                 Paper.sizes[self.cfg.dimension],
                 xy_factor=XYFactors.fac[self.cfg.type],
                 padding_mm=self.cfg.margin,
+                cutoff_mm=self.cfg.cutoff,
             )
 
     def run(self, jpg: bool = False) -> None:
@@ -264,7 +275,11 @@ class Exporter:
         from cursor import renderer
 
         # jpeg fitting roughly
-        self.paths.fit(Paper.sizes[self.cfg.dimension], padding_mm=self.cfg.margin)
+        self.paths.fit(
+            Paper.sizes[self.cfg.dimension],
+            padding_mm=self.cfg.margin,
+            cutoff_mm=self.cfg.cutoff,
+        )
 
         if jpg:
             separate_layers = self.paths.get_layers()
@@ -314,15 +329,17 @@ class SimpleExportWrapper:
         ptype: PlotterType,
         psize: PaperSize,
         margin: int,
-        name: str,
+        name: str = "output_name",
         suffix: str = "",
+        cutoff: int = None,
     ):
         cfg = Cfg()
         cfg.type = ptype
         cfg.dimension = psize
         cfg.margin = margin
+        cfg.cutoff = cutoff
 
-        #paths.clean()
+        # paths.clean()
 
         exp = Exporter()
         exp.cfg = cfg

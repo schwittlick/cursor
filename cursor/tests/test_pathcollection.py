@@ -286,6 +286,24 @@ def test_pathcollection_fit4():
     assert pcol.bb().w == 40
 
 
+def test_pathcollection_fit5():
+    pcol = PathCollection()
+
+    p0 = Path()
+    p0.add(10, 10)
+    p0.add(90, 90)
+    pcol.add(p0)
+
+    p1 = Path()
+    p1.add(0, 0)
+    p1.add(100, 100)
+    pcol.add(p1)
+
+    pcol.fit((100, 100), xy_factor=(1, 1), padding_mm=0, cutoff_mm=10)
+
+    assert len(pcol) == 1
+
+
 def test_pathcollection_layer():
     pcol = PathCollection()
     p0 = Path(layer="custom")
