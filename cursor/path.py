@@ -775,3 +775,33 @@ class PathCollection:
             cutoff_bb.h += cuttoff_margin_diff_y
 
             self.__paths = [x for x in self.__paths if cutoff_bb.inside(x)]
+
+    def optimize_order(self) -> None:
+        import mlrose_hiive as mlrose
+        import numpy as np
+        dist_list = []
+
+        for i in range(len(self)):
+            for j in range(len(self)):
+                if j is not i:
+                    a = self[i].bb().center()
+                    a = np.array(a, dtype=float)
+                    b = self[j].bb().center()
+                    b = np.array(b, dtype=float)
+                    dist = np.linalg.norm(a - b)
+                    if dist == 0.0:
+                        dist = 0.01
+                    dist_list.append((i, j, dist))
+
+        fitness_dists = mlrose.TravellingSales(distances=dist_list)
+        problem_fit = mlrose.TSPOpt(length=len(self), fitness_fn=fitness_dists, maximize=False)
+
+        print(problem_fit)
+
+        best_state, best_fitness, fitness_curve = mlrose.genetic_alg(problem_fit, random_state=2)
+
+        print('The best state found is: ', best_state)
+
+        print('The fitness at the best state is: ', best_fitness)
+
+        self.__paths[:] = [self.__paths[i] for i in best_state]
