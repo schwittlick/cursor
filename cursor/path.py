@@ -85,9 +85,14 @@ class BoundingBox:
         return f"BB(x={self.x}, y={self.y}, w={self.w}, h={self.h})"
 
     def __inside(self, point: "TimedPosition") -> bool:
-        return self.x <= point.x <= self.x + self.w and self.y <= point.y <= self.y + self.h
+        return (
+            self.x <= point.x <= self.x + self.w
+            and self.y <= point.y <= self.y + self.h
+        )
 
-    def inside(self, data: typing.Union["TimedPosition", "Path", "PathCollection"]) -> bool:
+    def inside(
+        self, data: typing.Union["TimedPosition", "Path", "PathCollection"]
+    ) -> bool:
         if isinstance(data, TimedPosition):
             return self.__inside(data)
         if isinstance(data, Path):
@@ -358,7 +363,7 @@ class Path:
                 f = self.vertices[idx - 1]
                 s = self.vertices[idx]
 
-                ang = math.atan2(s.y-f.y, s.x-f.x)
+                ang = math.atan2(s.y - f.y, s.x - f.x)
                 ang = math.degrees(ang)
 
                 angles.append(ang - prev)
@@ -390,7 +395,7 @@ class Path:
         inner = self.inner_angle(A, B)
         det = self.determinant(A, B)
         if (
-                det < 0
+            det < 0
         ):  # this is a property of the det. If the det < 0 then B is clockwise of A
             return inner
         else:  # if the det > 0 then A is immediately clockwise of B
@@ -616,7 +621,9 @@ class PathCollection:
         for p in self.__paths:
             yield p
 
-    def __getitem__(self, item: typing.Union[int, slice]) -> typing.Union["PathCollection", Path]:
+    def __getitem__(
+        self, item: typing.Union[int, slice]
+    ) -> typing.Union["PathCollection", Path]:
         if isinstance(item, slice):
             start, stop, step = item.indices(len(self))
             _pc = PathCollection()
@@ -691,7 +698,7 @@ class PathCollection:
         padding_units: int = None,
         padding_percent: int = None,
         center_point: tuple[int, int] = None,
-        cutoff_mm=None
+        cutoff_mm=None,
     ) -> None:
         # move into positive area
         _bb = self.bb()
@@ -816,8 +823,12 @@ class PathCollection:
                     dist_list.append((i, j, dist))
 
         fitness_dists = mlrose.TravellingSales(distances=dist_list)
-        problem_fit = mlrose.TSPOpt(length=len(self), fitness_fn=fitness_dists, maximize=False)
-        best_state, best_fitness, fitness_curve = mlrose.genetic_alg(problem_fit, random_state=2)
+        problem_fit = mlrose.TSPOpt(
+            length=len(self), fitness_fn=fitness_dists, maximize=False
+        )
+        best_state, best_fitness, fitness_curve = mlrose.genetic_alg(
+            problem_fit, random_state=2
+        )
         self.__paths[:] = [self.__paths[i] for i in best_state]
 
     def reorder_quadrants(self, xq: int, yq: int) -> None:
@@ -837,13 +848,19 @@ class PathCollection:
 
             return new_bb
 
-        def _filter(_bb: BoundingBox) -> PathCollection:
-            _pc = PathCollection()
-            for p in self:
-                if _bb.mostly_inside(p):
-                    _pc.add(p)
-
-            return _pc
+        bbs = {}
+        bbcounter = 0
+        for y in range(yq):
+            if y % 2 == 0:
+                for x in range(xq):
+                    bb = calc_bb(x, y)
+                    bbs[bbcounter] = bb
+                    bbcounter += 1
+            else:
+                for x in reversed(range(xq)):
+                    bb = calc_bb(x, y)
+                    bbs[bbcounter] = bb
+                    bbcounter += 1
 
         def _count_inside(_bb: BoundingBox, _pa: Path) -> int:
             c = 0
@@ -852,27 +869,23 @@ class PathCollection:
                     c += 1
             return c
 
-        def _center_inside(_bb: BoundingBox, _pa: Path) -> bool:
-            cen = _pa.bb().center()
-            t = TimedPosition(cen[0], cen[1])
-            return _bb.inside(t)
-
         start_benchmark = time.time()
 
         best = {}
+
         for p in self:
             bbcounter = 0
             mapping = {}
             for y in range(yq):
                 if y % 2 == 0:
                     for x in range(xq):
-                        bb = calc_bb(x, y)
+                        bb = bbs[bbcounter]
                         inside = _count_inside(bb, p)
                         mapping[bbcounter] = inside
                         bbcounter += 1
                 else:
                     for x in reversed(range(xq)):
-                        bb = calc_bb(x, y)
+                        bb = bbs[bbcounter]
                         inside = _count_inside(bb, p)
                         mapping[bbcounter] = inside
                         bbcounter += 1
@@ -882,6 +895,8 @@ class PathCollection:
         ss = dict(sorted(best.items(), key=lambda item: item[1]))
 
         elapsed = time.time() - start_benchmark
-        log.good(f"reorder_quadrants with x={xq} y={yq} took {round(elapsed * 1000)}ms.")
+        log.good(
+            f"reorder_quadrants with x={xq} y={yq} took {round(elapsed * 1000)}ms."
+        )
 
         self.__paths = list(ss.keys())
