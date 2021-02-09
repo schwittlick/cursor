@@ -98,6 +98,17 @@ class BoundingBox:
                         return False
             return True
 
+    def mostly_inside(self, data: "Path") -> bool:
+        points_inside = 0
+        points_outside = 0
+        if isinstance(data, Path):
+            for p in data:
+                if not self.__inside(p):
+                    points_outside += 1
+                else:
+                    points_inside += 1
+            return points_inside > points_outside
+
     def center(self) -> typing.Tuple[float, float]:
         center_x = ((self.w - self.x) / 2.0) + self.x
         center_y = ((self.h - self.y) / 2.0) + self.y
@@ -776,9 +787,16 @@ class PathCollection:
 
             self.__paths = [x for x in self.__paths if cutoff_bb.inside(x)]
 
-    def optimize_order(self) -> None:
+    def reorder_tsp(self) -> None:
+        """
+        use this with caution, it works for 20 paths, but will run
+        out of memory for hundreds of points.. this implementation is
+        kind of useless here, but i'll leave it here for the moment..
+        you never know.
+        """
         import mlrose_hiive as mlrose
         import numpy as np
+
         dist_list = []
 
         for i in range(len(self)):
@@ -795,13 +813,47 @@ class PathCollection:
 
         fitness_dists = mlrose.TravellingSales(distances=dist_list)
         problem_fit = mlrose.TSPOpt(length=len(self), fitness_fn=fitness_dists, maximize=False)
-
-        print(problem_fit)
-
         best_state, best_fitness, fitness_curve = mlrose.genetic_alg(problem_fit, random_state=2)
-
-        print('The best state found is: ', best_state)
-
-        print('The fitness at the best state is: ', best_fitness)
-
         self.__paths[:] = [self.__paths[i] for i in best_state]
+
+    def reorder_quadrants(self, xq: int, yq: int) -> None:
+        if xq < 2 and yq < 2:
+            return
+
+        def calc_bb(x: int, y: int) -> BoundingBox:
+            big_bb = self.bb()
+
+            new_width = big_bb.w / xq
+            new_height = big_bb.h / yq
+
+            _x = x * new_width
+            _y = y * new_height
+
+            new_bb = BoundingBox(_x, _y, new_width, new_height)
+
+            return new_bb
+
+        def _filter(_bb: BoundingBox) -> PathCollection:
+            _pc = PathCollection()
+            for p in self:
+                if _bb.mostly_inside(p):
+                    _pc.add(p)
+
+            return _pc
+
+        pths = []
+        for y in range(yq):
+            if y % 2 == 0:
+                for x in range(xq):
+                    bb = calc_bb(x, y)
+                    pc = _filter(bb)
+                    for pa in pc:
+                        pths.append(pa)
+            else:
+                for x in reversed(range(xq)):
+                    bb = calc_bb(x, y)
+                    pc = _filter(bb)
+                    for pa in pc:
+                        pths.append(pa)
+
+        self.__paths = pths

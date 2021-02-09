@@ -184,7 +184,59 @@ def test_tsp():
     pc.add(p3)
     pc.add(p4)
 
-    pc.optimize_order()
+    pc.reorder_tsp()
+
+    assert pc[0] == p4
+    assert pc[1] == p0
+    assert pc[2] == p1
+    assert pc[3] == p3
+    assert pc[4] == p2
+
+def test_reorder_custom():
+    p0 = Path()
+    p0.add(0, 0)
+    p0.add(1, 0)
+    p0.add(2, 0)
+    p0.add(3, 0)
+    p0.add(4, 0)
+
+    p1 = Path()
+    p1.add(2, 2)
+    p1.add(2, 3)
+    p1.add(2, 4)
+    p1.add(2, 5)
+    p1.add(2, 6)
+
+    p2 = Path()
+    p2.add(20, 20)
+    p2.add(25, 20)
+    p2.add(27, 20)
+    p2.add(30, 20)
+    p2.add(40, 20)
+
+    p3 = Path()
+    p3.add(50, 50)
+    p3.add(50, 60)
+    p3.add(50, 70)
+    p3.add(50, 80)
+    p3.add(50, 90)
+    p3.add(100, 100)
+
+    p4 = Path()
+    p4.add(1, 0)
+    p4.add(3, 3)
+    p4.add(4, 4)
+    p4.add(5, 5)
+    p4.add(1, 0)
+
+    pc = PathCollection()
+    pc.add(p0)
+    pc.add(p1)
+    pc.add(p2)
+    pc.add(p3)
+    pc.add(p4)
+
+    pc.reorder_quadrants(3, 3)
 
     assert pc[0] == p4
     assert pc[1] == p0
