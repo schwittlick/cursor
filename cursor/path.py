@@ -9,6 +9,8 @@ import hashlib
 import wasabi
 import copy
 import typing
+import operator
+import time
 
 log = wasabi.Printer()
 
@@ -85,7 +87,9 @@ class BoundingBox:
     def __inside(self, point: "TimedPosition") -> bool:
         return self.x <= point.x <= self.x + self.w and self.y <= point.y <= self.y + self.h
 
-    def inside(self, data: typing.Union["Path", "PathCollection"]) -> bool:
+    def inside(self, data: typing.Union["TimedPosition", "Path", "PathCollection"]) -> bool:
+        if isinstance(data, TimedPosition):
+            return self.__inside(data)
         if isinstance(data, Path):
             for p in data:
                 if not self.__inside(p):
@@ -841,19 +845,43 @@ class PathCollection:
 
             return _pc
 
-        pths = []
-        for y in range(yq):
-            if y % 2 == 0:
-                for x in range(xq):
-                    bb = calc_bb(x, y)
-                    pc = _filter(bb)
-                    for pa in pc:
-                        pths.append(pa)
-            else:
-                for x in reversed(range(xq)):
-                    bb = calc_bb(x, y)
-                    pc = _filter(bb)
-                    for pa in pc:
-                        pths.append(pa)
+        def _count_inside(_bb: BoundingBox, _pa: Path) -> int:
+            c = 0
+            for _p in _pa:
+                if _bb.inside(_p):
+                    c += 1
+            return c
 
-        self.__paths = pths
+        def _center_inside(_bb: BoundingBox, _pa: Path) -> bool:
+            cen = _pa.bb().center()
+            t = TimedPosition(cen[0], cen[1])
+            return _bb.inside(t)
+
+        start_benchmark = time.time()
+
+        best = {}
+        for p in self:
+            bbcounter = 0
+            mapping = {}
+            for y in range(yq):
+                if y % 2 == 0:
+                    for x in range(xq):
+                        bb = calc_bb(x, y)
+                        inside = _count_inside(bb, p)
+                        mapping[bbcounter] = inside
+                        bbcounter += 1
+                else:
+                    for x in reversed(range(xq)):
+                        bb = calc_bb(x, y)
+                        inside = _count_inside(bb, p)
+                        mapping[bbcounter] = inside
+                        bbcounter += 1
+            best_bb = max(mapping.items(), key=operator.itemgetter(1))[0]
+            best[p] = best_bb
+
+        ss = dict(sorted(best.items(), key=lambda item: item[1]))
+
+        elapsed = time.time() - start_benchmark
+        log.good(f"reorder_quadrants with x={xq} y={yq} took {round(elapsed * 1000)}ms.")
+
+        self.__paths = list(ss.keys())
