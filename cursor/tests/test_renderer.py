@@ -245,15 +245,3 @@ def test_reorder_custom():
     assert pc[3] == p4
     assert pc[4] == p3
 
-
-def test_reorder_custom2():
-    import random
-    pc = PathCollection()
-    for i in range(100):
-        p = Path()
-        for j in range(20):
-            p.add(random.randint(0, 1000), random.randint(0, 1000))
-
-        pc.add(p)
-
-    pc.reorder_quadrants(10, 10)
