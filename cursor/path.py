@@ -11,6 +11,7 @@ import copy
 import typing
 import operator
 import time
+from scipy import spatial
 
 log = wasabi.Printer()
 
@@ -497,8 +498,16 @@ class Path:
         self.vertices = [prev := v for v in self.vertices if v.x < 1.0 and v.y < 1.0]
 
     def similarity(self, _path: "Path") -> float:
-        from scipy import spatial
+        """
+        this does not really work..
 
+        most similarities are > 0.7, even for severely un-similar
+        paths. what might help is to normalize them (and their BB)
+        into the space around the (0, 0) origin. but i'm not really
+        sure. similarity between a list of coordinates doesn't seem
+        to be a trivial thing. especially when you want some meaningful
+        results. to be continued. :)
+        """
         if len(self) < len(_path):
             diff = len(_path) - len(self)
             _t = self.vertices.copy()
