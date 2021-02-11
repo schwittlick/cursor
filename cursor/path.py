@@ -73,6 +73,12 @@ class TimedPosition:
     def __repr__(self):
         return f"({self.x:.3f}, {self.y:.3f}, {self.timestamp:.3f})"
 
+    def __hash__(self):
+        return hash(repr(self))
+
+    def __mul__(self, other: "TimedPosition"):
+        return self.arr() * other.arr()
+
 
 class BoundingBox:
     def __init__(self, x: float, y: float, w: float, h: float):
@@ -489,6 +495,28 @@ class Path:
         removes points larger than 1.0
         """
         self.vertices = [prev := v for v in self.vertices if v.x < 1.0 and v.y < 1.0]
+
+    def similarity(self, _path: "Path") -> float:
+        from scipy import spatial
+
+        if len(self) < len(_path):
+            diff = len(_path) - len(self)
+            _t = self.vertices.copy()
+            for i in range(diff):
+                _t.append(self.end_pos())
+            result = 1 - spatial.distance.cosine(_t, _path.vertices)
+            return result[1]
+
+        if len(_path) < len(self):
+            diff = len(self) - len(_path)
+            _t = _path.vertices.copy()
+            for i in range(diff):
+                _t.append(_path.end_pos())
+            result = 1 - spatial.distance.cosine(self.vertices, _t)
+            return result[1]
+
+        result = 1 - spatial.distance.cosine(self.vertices, _path.vertices)
+        return result[1]
 
     def __repr__(self):
         rep = (
