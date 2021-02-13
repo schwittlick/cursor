@@ -11,6 +11,7 @@ import copy
 import typing
 import operator
 import time
+from scipy import spatial
 
 log = wasabi.Printer()
 
@@ -72,6 +73,12 @@ class TimedPosition:
 
     def __repr__(self):
         return f"({self.x:.3f}, {self.y:.3f}, {self.timestamp:.3f})"
+
+    def __hash__(self):
+        return hash(repr(self))
+
+    def __mul__(self, other: "TimedPosition"):
+        return self.arr() * other.arr()
 
 
 class BoundingBox:
@@ -489,6 +496,36 @@ class Path:
         removes points larger than 1.0
         """
         self.vertices = [prev := v for v in self.vertices if v.x < 1.0 and v.y < 1.0]
+
+    def similarity(self, _path: "Path") -> float:
+        """
+        this does not really work..
+
+        most similarities are > 0.7, even for severely un-similar
+        paths. what might help is to normalize them (and their BB)
+        into the space around the (0, 0) origin. but i'm not really
+        sure. similarity between a list of coordinates doesn't seem
+        to be a trivial thing. especially when you want some meaningful
+        results. to be continued. :)
+        """
+        if len(self) < len(_path):
+            diff = len(_path) - len(self)
+            _t = self.vertices.copy()
+            for i in range(diff):
+                _t.append(self.end_pos())
+            result = 1 - spatial.distance.cosine(_t, _path.vertices)
+            return result[1]
+
+        if len(_path) < len(self):
+            diff = len(self) - len(_path)
+            _t = _path.vertices.copy()
+            for i in range(diff):
+                _t.append(_path.end_pos())
+            result = 1 - spatial.distance.cosine(self.vertices, _t)
+            return result[1]
+
+        result = 1 - spatial.distance.cosine(self.vertices, _path.vertices)
+        return result[1]
 
     def __repr__(self):
         rep = (
