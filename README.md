@@ -43,6 +43,29 @@ axidraw?
 
 ###Plotter handling
 
+hard limits of the plotting area as measured by the machine, in plotter steps
+
+    OH;
+    >> -15819, -9298, 15819, 9298
+    >> 1mm = 40 steps
+    >> your width is 15819 + 15819 / 40 = 790mm
+    >> do the same with the height
+    
+    the plotter drawing are will have +25mm offset at the bottom
+    
+inkscape
+
+    create document with  that dimensions
+    bottom (right) side has 25mm offset
+    in order to have everwhere the same offset (30mm) add 25mm offset left, right and top in inkscape
+    
+    you can use the inkscape plot function.
+    serial flow: Hardware RTS/CTS
+    center zero point (on big hp plotter)
+    change pen speed, default is full speed
+    plot featuer: everything off (overcut: 0mm; offset correction: 0mm; precut and autoalign off)
+
+
 ##### HP7595A
 - serial cable with usb adapter
 - ohne nullmodem
