@@ -80,7 +80,7 @@ def fat_spiral(pp):
     theta = 0
     yextra = 0
     r = 50
-    while theta < 600:
+    while theta < 6000:
         x = r * math.cos(theta) * 2
         y = r * math.sin(theta) + yextra
         pp.add(x, y, 0)
@@ -95,12 +95,12 @@ if __name__ == "__main__":
 
     pp = Path(layer="round1")
 
-    num = plain_spiral(pp)
+    #num = plain_spiral(pp)
     # num = circleball_spiral(pp)
     # num = upward_spiral(pp)
     # num = full_spiral(pp, 20000, 0.002, 0.2)
     # num = heart_spiral(pp)
-    # num = fat_spiral(pp)
+    num = fat_spiral(pp)
 
     reversed_path = pp.reversed()
     reversed_path.layer = "round2"
@@ -108,29 +108,29 @@ if __name__ == "__main__":
     coll.add(pp)
     coll.add(reversed_path)
 
-    device.SimpleExportWrapper().ex(
-        coll,
-        device.PlotterType.DIY_PLOTTER,
-        device.PaperSize.LANDSCAPE_A3,
-        40,
-        "composition59",
-        num,
-    )
+    #device.SimpleExportWrapper().ex(
+    #    coll,
+    #    device.PlotterType.DIY_PLOTTER,
+    #    device.PaperSize.LANDSCAPE_A3,
+    #    40,
+    #    "composition59",
+    #    num,
+    #)
 
-    device.SimpleExportWrapper().ex(
-        coll,
-        device.PlotterType.DIY_PLOTTER,
-        device.PaperSize.LANDSCAPE_A1,
-        90,
-        "composition59",
-        num,
-    )
+    #device.SimpleExportWrapper().ex(
+    #    coll,
+    #    device.PlotterType.DIY_PLOTTER,
+    #    device.PaperSize.LANDSCAPE_A1,
+    #    90,
+    #    "composition59",
+    #    num,
+    #)
 
     device.SimpleExportWrapper().ex(
         coll,
         device.PlotterType.ROLAND_DPX3300,
         device.PaperSize.LANDSCAPE_A1,
-        90,
+        5,
         "composition59",
         num,
     )
