@@ -86,6 +86,7 @@ class PaperSize(Enum):
     LANDSCAPE_A0 = 12
     PORTRAIT_A3 = 13
     LANDSCAPE_A3 = 14
+    LANDSCAPE_80_50 = 15
 
 
 class PlotterName:
@@ -118,6 +119,7 @@ class PaperSizeName:
         PaperSize.LANDSCAPE_A0: "landscape_a0",
         PaperSize.PORTRAIT_A3: "portrait_a3",
         PaperSize.LANDSCAPE_A3: "landscape_a3",
+        PaperSize.LANDSCAPE_80_50: "landscape_80x50"
     }
 
 
@@ -138,6 +140,7 @@ class Paper:
         PaperSize.LANDSCAPE_A0: (1189, 841),
         PaperSize.PORTRAIT_A3: (297, 420),
         PaperSize.LANDSCAPE_A3: (420, 297),
+        PaperSize.LANDSCAPE_80_50: (800, 500)
     }
 
 
@@ -202,6 +205,8 @@ class Exporter:
         self.__cfg = None
         self.__name = None
         self.__suffix = None
+        self.__hpgl_speed = None
+        self.__gcode_speed = None
 
     @property
     def paths(self) -> path.PathCollection:
@@ -234,6 +239,22 @@ class Exporter:
     @suffix.setter
     def suffix(self, t: str) -> None:
         self.__suffix = t
+
+    @property
+    def hpgl_speed(self) -> int:
+        return self.__hpgl_speed
+
+    @hpgl_speed.setter
+    def hpgl_speed(self, t: int) -> None:
+        self.__hpgl_speed = t
+
+    @property
+    def gcode_speed(self) -> int:
+        return self.__gcode_speed
+
+    @gcode_speed.setter
+    def gcode_speed(self, t: int) -> None:
+        self.__gcode_speed = t
 
     def fit(self) -> None:
         # out_dim = tuple(
@@ -302,8 +323,12 @@ class Exporter:
 
             format = ExportFormatMappings.maps[self.cfg.type]
             if format is ExportFormat.HPGL:
+
                 hpgl_folder = data.DataDirHandler().hpgl(self.name)
-                hpgl_renderer = renderer.HPGLRenderer(hpgl_folder)
+                if self.hpgl_speed:
+                    hpgl_renderer = renderer.HPGLRenderer(hpgl_folder, speed=self.hpgl_speed)
+                else:
+                    hpgl_renderer = renderer.HPGLRenderer(hpgl_folder)
                 hpgl_renderer.render(pc)
                 hpgl_renderer.save(f"{fname}_{layer}")
 
@@ -315,7 +340,10 @@ class Exporter:
 
             if format is ExportFormat.GCODE:
                 gcode_folder = data.DataDirHandler().gcode(self.name)
-                gcode_renderer = renderer.GCodeRenderer(gcode_folder, z_down=4.5)
+                if self.gcode_speed:
+                    gcode_renderer = renderer.GCodeRenderer(gcode_folder, z_down=4.5)
+                else:
+                    gcode_renderer = renderer.GCodeRenderer(gcode_folder, feedrate_xy=self.gcode_speed, z_down=4.5)
                 gcode_renderer.render(pc)
                 gcode_renderer.save(f"{fname}_{layer}")
 
@@ -332,6 +360,8 @@ class SimpleExportWrapper:
         name: str = "output_name",
         suffix: str = "",
         cutoff: int = None,
+        hpgl_speed: int = None,
+        gcode_speed: int = None
     ):
         cfg = Cfg()
         cfg.type = ptype
@@ -346,4 +376,6 @@ class SimpleExportWrapper:
         exp.paths = paths
         exp.name = name
         exp.suffix = str(suffix)
+        exp.hpgl_speed = hpgl_speed
+        exp.gcode_speed = gcode_speed
         exp.run(True)

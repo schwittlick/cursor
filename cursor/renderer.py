@@ -197,10 +197,44 @@ class GCodeRenderer:
         file.write(f"G01 X{x:.2f} Y{y:.2f} F{self.feedrate_xy}\n")
 
 
+class RealtimeRenderer:
+    def __init__(self):
+        pass
+
+    def render_pc(self, app, _pc):
+        it = PathIterator(_pc)
+
+        for conn in it.connections():
+            start = conn[0]
+            end = conn[1]
+
+            app.line(start.x, start.y, end.x, end.y)
+
+    def render(self, paths):
+        from processing_py import App
+        app = App(1920, 1080)  # create window: width, height
+
+        t = 0
+        while (t < 500):
+            print(f"frame {t}")
+            t += 1
+            app.background(0, 0, 0)  # set background:  red, green, blue
+            app.fill(255, 255, 0)  # set color for objects: red, green, blue
+            app.ellipse(app.mouseX, app.mouseY, 50, 50)  # draw a circle: center_x, center_y, size_x, size_y
+            app.fill(255, 255, 255)
+            # app.textFont("JetBrains Mono", 100)
+            # app.text(str(t), 100, 100)
+            app.stroke(255, 255, 255)
+            self.render_pc(app, paths)
+            app.redraw()  # refresh the window
+        app.exit()
+
+
 class HPGLRenderer:
-    def __init__(self, folder):
+    def __init__(self, folder, speed=30):
         assert isinstance(folder, pathlib.Path), "Only path objects allowed"
 
+        self.speed = speed
         self.save_path = folder
         self.paths = PathCollection()
 
@@ -219,6 +253,7 @@ class HPGLRenderer:
             with open(fname.as_posix(), "w") as file:
                 # file.write(f"PA0,0;\n")
                 file.write("SP1;\n")
+                file.write(f"VS{self.speed};\n")
 
                 self.__append_to_file(file, 0.0, 0.0)
 
