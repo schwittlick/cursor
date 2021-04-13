@@ -98,7 +98,7 @@ if __name__ == "__main__":
     num = plain_spiral(pp)
     # num = circleball_spiral(pp)
     # num = upward_spiral(pp)
-    # num = full_spiral(pp, 20000, 0.002, 0.2)
+    # num = full_spiral(pp, 20000, 0.0005, 0.1)
     # num = heart_spiral(pp)
     # num = fat_spiral(pp)
 
