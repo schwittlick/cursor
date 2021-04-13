@@ -32,7 +32,7 @@ if __name__ == "__main__":
     device.SimpleExportWrapper().ex(
         pc,
         device.PlotterType.HP_7595A,
-        device.PaperSize.LANDSCAPE_A1,
+        device.PaperSize.LANDSCAPE_80_50,
         50,
         "simple_rect",
         f"simple_rect",

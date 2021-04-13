@@ -14,6 +14,14 @@ def save_wrapper(pc, projname, fname):
     jpeg_renderer.render(pc, scale=4.0, thickness=6)
     jpeg_renderer.save(fname)
 
+def svg_save_wrapper(pc, projname, fname):
+    folder = data.DataDirHandler().svg(projname)
+    svg_renderer = renderer.SvgRenderer(folder)
+
+    svg_renderer.render(pc)
+    svg_renderer.save(fname)
+
+
 if __name__ == "__main__":
     pc = path.PathCollection()
 
@@ -32,8 +40,8 @@ if __name__ == "__main__":
             p.add(x, y+1)
         pc.add(p)
 
-    #pc.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=10)
-    #save_wrapper(pc, "millimeter", f"millimeter_papier")
+    pc.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=10)
+    svg_save_wrapper(pc, "millimeter", f"millimeter_papier")
 
     device.SimpleExportWrapper().ex(
         pc,
