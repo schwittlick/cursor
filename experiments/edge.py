@@ -64,21 +64,51 @@ def save_contours(con):
         pc.add(p)
     return pc
 
+def test():
+    image = cv2.imread('20210324_small.jpg', 0)
 
-if __name__ == "__main__":
-    image = cv2.imread('boken_glass.jpg', 0)
+    cv2.namedWindow('image')  # make a window with name 'image'
+    cv2.createTrackbar('L', 'image', 0, 255, callback)  # lower threshold trackbar for window 'image
+    # cv2.createTrackbar('U', 'image', 0, 255, callback)  # upper threshold trackbar for window 'image
 
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    _, binary = cv2.threshold(gray,26, 255, cv2.THRESH_BINARY_INV)
+    while (1):
+        # numpy_horizontal_concat = np.concatenate((image, canny), axis=1)  # to display image side by side
+        l = cv2.getTrackbarPos('L', 'image')
+        # u = cv2.getTrackbarPos('U', 'image')
+
+        image2 = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        gray = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
+        _, binary = cv2.threshold(gray, l, 255, cv2.THRESH_BINARY_INV)
+        contours, hierarchy = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+        # draw all contours
+        image_c = cv2.drawContours(binary, contours, -1, (0, 255, 0), 2)
+        cv2.imshow('image', binary)
+
+        k = cv2.waitKey(1) & 0xFF
+        if k == 27:  # escape key
+            break
+        if k == 115:
+            print("saving")
+            pc = save_contours(contours)
+
+            pc.reorder_quadrants(10, 10)
+
+            device.SimpleExportWrapper().ex(
+                pc,
+                device.PlotterType.ROLAND_DPX3300,
+                device.PaperSize.LANDSCAPE_A1,
+                15,
+                "edge",
+                f"edge{pc.hash()}",
+            )
+
+def save():
+    image = cv2.imread('20210324.jpg', 0)
+    image2 = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    gray = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
+    _, binary = cv2.threshold(gray, 126, 255, cv2.THRESH_BINARY_INV)
     contours, hierarchy = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-    # draw all contours
-    image = cv2.drawContours(image, contours, -1, (0, 255, 0), 2)
-    # show it
-    plt.imshow(image)
-    plt.show()
-
     pc = save_contours(contours)
 
     pc.reorder_quadrants(10, 10)
@@ -91,4 +121,13 @@ if __name__ == "__main__":
         "edge",
         f"edge{pc.hash()}",
     )
+
+if __name__ == "__main__":
+    save()
+
+    # show it
+    #plt.imshow(image)
+    #plt.show()
+
+
 
