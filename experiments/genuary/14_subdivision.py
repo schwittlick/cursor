@@ -24,7 +24,7 @@ if __name__ == "__main__":
     main = all_paths.random()
     main = main.morph((0, 0), (100, 0))
 
-    ff = filter.DirectionChangeEntropyFilter(0.0, 2.7) # 2.0
+    ff = filter.DirectionChangeEntropyFilter(0.0, 2.7)  # 2.0
     all_paths.filter(ff)
 
     for i in range(10):
@@ -43,8 +43,8 @@ if __name__ == "__main__":
 
             counter += 1
 
-        #pc.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=40)
-        #save_wrapper(pc, "genuary", f"14_subdivision_3_{i}")
+        # pc.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=40)
+        # save_wrapper(pc, "genuary", f"14_subdivision_3_{i}")
 
         device.SimpleExportWrapper().ex(
             pc,

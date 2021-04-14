@@ -19,21 +19,21 @@ if __name__ == "__main__":
     loader = loader.Loader(directory=recs, limit_files=1)
     all_paths = loader.all_paths()
 
-    #filter1 = filter.DirectionChangeEntropyFilter(2.0, 3.0)
-    #all_paths.filter(filter1)
+    # filter1 = filter.DirectionChangeEntropyFilter(2.0, 3.0)
+    # all_paths.filter(filter1)
 
     pc = path.PathCollection()
 
     sc = 1
     for x in range(4):
         p1 = all_paths.random()
-        p1.morph((x*sc, 0), (x*sc, sc))
+        p1.morph((x * sc, 0), (x * sc, sc))
 
         p2 = all_paths.random()
-        p2.morph((x*sc, 0), ((x+1)*sc, sc))
+        p2.morph((x * sc, 0), ((x + 1) * sc, sc))
 
         p3 = all_paths.random()
-        p3.morph((x*sc, sc), ((x+1)*sc, sc))
+        p3.morph((x * sc, sc), ((x + 1) * sc, sc))
 
         pc.add(p1)
         pc.add(p2)

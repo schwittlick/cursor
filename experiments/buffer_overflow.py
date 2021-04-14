@@ -8,6 +8,7 @@ from cursor import filter
 import random
 import math
 
+
 def save_wrapper(pc, projname, fname):
     folder = data.DataDirHandler().jpg(projname)
     jpeg_renderer = renderer.JpegRenderer(folder)
@@ -44,6 +45,7 @@ def circles():
         "buffer_overflow",
         f"circles{10}",
     )
+
 
 def patches():
     p = data.DataDirHandler().recordings()

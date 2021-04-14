@@ -38,5 +38,5 @@ if __name__ == "__main__":
         device.PaperSize.PORTRAIT_A4,
         20,
         "composition61",
-        coll.hash()
+        coll.hash(),
     )

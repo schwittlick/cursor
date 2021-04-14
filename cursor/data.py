@@ -107,7 +107,7 @@ class DataDirHandler:
     def __init__(self):
         self.BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
         self.data_dir = self.BASE_DIR / "data"
-        self.test_data_dir = (self.BASE_DIR / "cursor" / "tests" / "data")
+        self.test_data_dir = self.BASE_DIR / "cursor" / "tests" / "data"
 
     def gcode(self, folder):
         return self.data_dir / "experiments" / folder / "gcode"
@@ -119,9 +119,7 @@ class DataDirHandler:
         return self.data_dir / "experiments" / subfolder / "svg"
 
     def hpgl(self, subfolder):
-        return (
-            self.data_dir / "experiments" / subfolder / "hpgl"
-        )
+        return self.data_dir / "experiments" / subfolder / "hpgl"
 
     def images(self):
         return self.data_dir / "jpgs"

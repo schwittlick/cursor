@@ -38,26 +38,32 @@ if __name__ == "__main__":
     for _ in range(leny):
         values[0].append(0)
 
-    rules = {(1, 1, 1): 0,
-             (1, 1, 0): 0,
-             (1, 0, 1): 0,
-             (1, 0, 0): 1,
-             (0, 1, 1): 1,
-             (0, 1, 0): 1,
-             (0, 0, 1): 1,
-             (0, 0, 0): 0}
+    rules = {
+        (1, 1, 1): 0,
+        (1, 1, 0): 0,
+        (1, 0, 1): 0,
+        (1, 0, 0): 1,
+        (0, 1, 1): 1,
+        (0, 1, 0): 1,
+        (0, 0, 1): 1,
+        (0, 0, 0): 0,
+    }
 
     for y in range(leny):
         newvalues = []
-        tupleft = (values[y][len(values[y])-1], values[y][0], values[y][1])
+        tupleft = (values[y][len(values[y]) - 1], values[y][0], values[y][1])
         newleft = rules[tupleft]
         newvalues.append(newleft)
 
         for i in range(1, len(values[y]) - 1):
-            tup = (values[y][i-1], values[y][i], values[y][i+1])
+            tup = (values[y][i - 1], values[y][i], values[y][i + 1])
             newvalues.append(rules[tup])
 
-        tupright = (values[y][len(values[y])-2], values[y][len(values[y])-1], values[y][0])
+        tupright = (
+            values[y][len(values[y]) - 2],
+            values[y][len(values[y]) - 1],
+            values[y][0],
+        )
         newright = rules[tupright]
         newvalues.append(newright)
         values.append(newvalues)
@@ -78,22 +84,22 @@ if __name__ == "__main__":
                 # current is on, lets check from where its coming
                 pr = colls.random()
                 try:
-                    if values[y-1][x-1]:
-                        mor = pr.morph((x-1, y-1), (x, y))
-                        #p = path.Path()
-                        #p.add(x-1, y-1)
-                        #p.add(x,y)
-                        #c.add(p)
+                    if values[y - 1][x - 1]:
+                        mor = pr.morph((x - 1, y - 1), (x, y))
+                        # p = path.Path()
+                        # p.add(x-1, y-1)
+                        # p.add(x,y)
+                        # c.add(p)
                         c.add(mor)
                 except IndexError:
                     pass
                 if values[y - 1][x]:
-                    mor = pr.morph((x, y-1), (x, y))
+                    mor = pr.morph((x, y - 1), (x, y))
 
                     c.add(mor)
                 try:
                     if values[y - 1][x + 1]:
-                        mor = pr.morph((x+1, y-1), (x, y))
+                        mor = pr.morph((x + 1, y - 1), (x, y))
                         c.add(mor)
                 except IndexError:
                     pass
@@ -104,8 +110,8 @@ if __name__ == "__main__":
         for x in y:
             if x:
                 pass
-                #if values[yv-1][xv]
-                #c.add(makepath(xv * 1, yv * 1))
+                # if values[yv-1][xv]
+                # c.add(makepath(xv * 1, yv * 1))
             xv += 1
 
         yv += 1
