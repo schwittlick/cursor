@@ -119,7 +119,7 @@ class PaperSizeName:
         PaperSize.LANDSCAPE_A0: "landscape_a0",
         PaperSize.PORTRAIT_A3: "portrait_a3",
         PaperSize.LANDSCAPE_A3: "landscape_a3",
-        PaperSize.LANDSCAPE_80_50: "landscape_80x50"
+        PaperSize.LANDSCAPE_80_50: "landscape_80x50",
     }
 
 
@@ -140,7 +140,7 @@ class Paper:
         PaperSize.LANDSCAPE_A0: (1189, 841),
         PaperSize.PORTRAIT_A3: (297, 420),
         PaperSize.LANDSCAPE_A3: (420, 297),
-        PaperSize.LANDSCAPE_80_50: (800, 500)
+        PaperSize.LANDSCAPE_80_50: (800, 500),
     }
 
 
@@ -326,7 +326,9 @@ class Exporter:
 
                 hpgl_folder = data.DataDirHandler().hpgl(self.name)
                 if self.hpgl_speed:
-                    hpgl_renderer = renderer.HPGLRenderer(hpgl_folder, speed=self.hpgl_speed)
+                    hpgl_renderer = renderer.HPGLRenderer(
+                        hpgl_folder, speed=self.hpgl_speed
+                    )
                 else:
                     hpgl_renderer = renderer.HPGLRenderer(hpgl_folder)
                 hpgl_renderer.render(pc)
@@ -343,7 +345,9 @@ class Exporter:
                 if self.gcode_speed:
                     gcode_renderer = renderer.GCodeRenderer(gcode_folder, z_down=4.5)
                 else:
-                    gcode_renderer = renderer.GCodeRenderer(gcode_folder, feedrate_xy=self.gcode_speed, z_down=4.5)
+                    gcode_renderer = renderer.GCodeRenderer(
+                        gcode_folder, feedrate_xy=self.gcode_speed, z_down=4.5
+                    )
                 gcode_renderer.render(pc)
                 gcode_renderer.save(f"{fname}_{layer}")
 
@@ -361,7 +365,7 @@ class SimpleExportWrapper:
         suffix: str = "",
         cutoff: int = None,
         hpgl_speed: int = None,
-        gcode_speed: int = None
+        gcode_speed: int = None,
     ):
         cfg = Cfg()
         cfg.type = ptype
