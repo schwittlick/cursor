@@ -8,6 +8,7 @@ from cursor import renderer
 import sys
 import random
 
+
 def save_wrapper(pc, projname, fname):
     folder = data.DataDirHandler().jpg(projname)
     jpeg_renderer = renderer.JpegRenderer(folder)
@@ -36,7 +37,7 @@ if __name__ == "__main__":
             y = random.randint(-200, mm.maxy)
 
             f.write(f"PU{x},{y};\n")
-            #f.write("PD;\n")
+            # f.write("PD;\n")
             f.write(f"LB{ip.rstrip()}~;\n")
 
             counter += 1

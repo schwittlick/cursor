@@ -7,12 +7,14 @@ from cursor import filter
 
 import sys
 
+
 def save_wrapper(pc, projname, fname):
     folder = data.DataDirHandler().jpg(projname)
     jpeg_renderer = renderer.JpegRenderer(folder)
 
     jpeg_renderer.render(pc, scale=2.0, thickness=3)
     jpeg_renderer.save(fname)
+
 
 if __name__ == "__main__":
     commands = []
@@ -23,28 +25,27 @@ if __name__ == "__main__":
                 if c:
                     commands.append(c)
 
-
     pc = path.PathCollection()
 
     counter = 0
 
-    prev = ''
+    prev = ""
 
     for c in commands:
-        if c.startswith('PU'):
-            p = c[2:].split(',')
+        if c.startswith("PU"):
+            p = c[2:].split(",")
             prev = c
 
-        elif c.startswith('PD'):
-            counter +=1
-            p = c[2:].split(',')
+        elif c.startswith("PD"):
+            counter += 1
+            p = c[2:].split(",")
             _path = path.Path()
-            #if len(p) == 2:
-            psplit = prev[2:].split(',')
+            # if len(p) == 2:
+            psplit = prev[2:].split(",")
             _path.add(float(psplit[0]), float(psplit[1]))
             for step in range(0, len(p), 2):
-                _path.add(float(p[step]), float(p[step+1]))
-                #print(step)
+                _path.add(float(p[step]), float(p[step + 1]))
+                # print(step)
             pc.add(_path)
         else:
             print(c)
@@ -59,5 +60,5 @@ if __name__ == "__main__":
         device.PaperSize.LANDSCAPE_A1,
         20,
         "calendar",
-        pc.hash()
+        pc.hash(),
     )

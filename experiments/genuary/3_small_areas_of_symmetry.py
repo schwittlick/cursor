@@ -7,6 +7,7 @@ from cursor import filter
 
 import numpy
 
+
 def save_wrapper(pc, projname, fname):
     folder = data.DataDirHandler().jpg(projname)
     jpeg_renderer = renderer.JpegRenderer(folder)
@@ -14,12 +15,13 @@ def save_wrapper(pc, projname, fname):
     jpeg_renderer.render(pc, scale=4.0, thickness=3)
     jpeg_renderer.save(fname)
 
+
 def gen3(id):
     p = data.DataDirHandler().recordings()
     ll = loader.Loader(directory=p, limit_files=1)
     colls = ll.all_paths()
-    #fil = filter.EntropyMaxFilter(2.0, 2.0)
-    #colls.filter(fil)
+    # fil = filter.EntropyMaxFilter(2.0, 2.0)
+    # colls.filter(fil)
 
     p1 = colls.random()
     p2 = colls.random()
@@ -40,8 +42,9 @@ def gen3(id):
         device.PaperSize.LANDSCAPE_A3,
         30,
         "genuary",
-        "3_small_areas" + pc.hash()
+        "3_small_areas" + pc.hash(),
     )
+
 
 if __name__ == "__main__":
     for i in range(10):

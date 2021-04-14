@@ -58,14 +58,18 @@ def save_contours(con):
     pc = path.PathCollection()
     for contour in con:
         p = path.Path()
+        first = contour[0][0]
+        last = contour[-1][0]
+        p.add(first[0], first[1])
         for point in contour:
             p.add(point[0][0], point[0][1])
         #print(contours)
+        p.add(last[0], last[1])
         pc.add(p)
     return pc
 
 def test():
-    image = cv2.imread('20210324_small.jpg', 0)
+    image = cv2.imread('1304_small.jpg', 0)
 
     cv2.namedWindow('image')  # make a window with name 'image'
     cv2.createTrackbar('L', 'image', 0, 255, callback)  # lower threshold trackbar for window 'image
@@ -104,10 +108,10 @@ def test():
             )
 
 def save():
-    image = cv2.imread('20210324.jpg', 0)
+    image = cv2.imread('13042_small.jpg', 0)
     image2 = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     gray = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
-    _, binary = cv2.threshold(gray, 126, 255, cv2.THRESH_BINARY_INV)
+    _, binary = cv2.threshold(gray, 134, 255, cv2.THRESH_BINARY_INV)
     contours, hierarchy = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     pc = save_contours(contours)
 
@@ -124,7 +128,7 @@ def save():
 
 if __name__ == "__main__":
     save()
-
+    #test()
     # show it
     #plt.imshow(image)
     #plt.show()

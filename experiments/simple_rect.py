@@ -7,12 +7,14 @@ from cursor import filter
 
 import random
 
+
 def save_wrapper(pc, projname, fname):
     folder = data.DataDirHandler().jpg(projname)
     jpeg_renderer = renderer.JpegRenderer(folder)
 
     jpeg_renderer.render(pc, scale=4.0, thickness=6)
     jpeg_renderer.save(fname)
+
 
 if __name__ == "__main__":
     pc = path.PathCollection()
@@ -24,8 +26,8 @@ if __name__ == "__main__":
     p.add(0, 1)
     p.add(0, 0)
 
-    #pc.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=10)
-    #save_wrapper(pc, "millimeter", f"millimeter_papier")
+    # pc.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=10)
+    # save_wrapper(pc, "millimeter", f"millimeter_papier")
 
     pc.add(p)
 

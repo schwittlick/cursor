@@ -244,4 +244,3 @@ def test_reorder_custom():
     assert pc[2] == p2
     assert pc[3] == p4
     assert pc[4] == p3
-

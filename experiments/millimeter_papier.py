@@ -7,12 +7,14 @@ from cursor import filter
 
 import random
 
+
 def save_wrapper(pc, projname, fname):
     folder = data.DataDirHandler().jpg(projname)
     jpeg_renderer = renderer.JpegRenderer(folder)
 
     jpeg_renderer.render(pc, scale=4.0, thickness=6)
     jpeg_renderer.save(fname)
+
 
 def svg_save_wrapper(pc, projname, fname):
     folder = data.DataDirHandler().svg(projname)
@@ -30,14 +32,14 @@ if __name__ == "__main__":
         for x in range(42):
 
             p.add(x, y)
-            p.add(x+1, y)
+            p.add(x + 1, y)
         pc.add(p)
 
     for x in range(42):
         p = path.Path()
         for y in range(30):
             p.add(x, y)
-            p.add(x, y+1)
+            p.add(x, y + 1)
         pc.add(p)
 
     pc.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=10)

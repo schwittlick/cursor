@@ -5,6 +5,7 @@ from cursor import path
 from cursor import filter
 from cursor import renderer
 
+
 def save_wrapper(pc, projname, fname):
     folder = data.DataDirHandler().jpg(projname)
     jpeg_renderer = renderer.JpegRenderer(folder)

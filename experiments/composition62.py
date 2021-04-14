@@ -15,7 +15,7 @@ def save_wrapper(pc, projname, fname):
 
 if __name__ == "__main__":
     p = data.DataDirHandler().recordings()
-    files = ['1611136777.66754_compressed']
+    files = ["1611136777.66754_compressed"]
     ll = loader.Loader(directory=p, limit_files=files)
     colls = ll.all_collections()
 

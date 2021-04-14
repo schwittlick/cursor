@@ -27,7 +27,7 @@ if __name__ == "__main__":
     pc = path.PathCollection()
 
     p1 = all_paths.random()
-    #pc.add(p1)
+    # pc.add(p1)
 
     p2 = path.Path()
     p2.add(0, 0)
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     p2.add(400, 100)
 
     pc.add(p2)
-    #pc.add(p1)
+    # pc.add(p1)
 
     c = p2.direction_changes_pos_neg()
     c2 = p1.direction_changes_pos_neg()
@@ -53,10 +53,8 @@ if __name__ == "__main__":
         elif change < 0:
             counterNeg += change
 
-
-
-    #ff = filter.Sorter(reverse=False, param=filter.Sorter.SHANNON_DIRECTION_CHANGES)
-    #all_paths.sort(ff)
+    # ff = filter.Sorter(reverse=False, param=filter.Sorter.SHANNON_DIRECTION_CHANGES)
+    # all_paths.sort(ff)
 
     pc.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=40)
     save_wrapper(pc, "genuary", f"16_circles_only_1")
@@ -66,7 +64,7 @@ if __name__ == "__main__":
         counterPos = 0
         counterNeg = 0
         for change in direction_changes:
-            #print(change)
+            # print(change)
             if change > 0:
                 counterPos += change
             elif change < 0:
@@ -75,7 +73,7 @@ if __name__ == "__main__":
         relPos = counterPos / len(pa)
         relNeg = counterNeg / len(pa)
 
-        #if abs(relNeg) > 90 or relPos > 90:
+        # if abs(relNeg) > 90 or relPos > 90:
         #    print(pa.hash)
         #    print(f"neg: {relNeg}")
         #    print(f"pos: {relPos}")
@@ -84,7 +82,7 @@ if __name__ == "__main__":
         #    pc.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=40)
         #    save_wrapper(pc, "genuary", f"16_circles_only_1{pa.hash}")
 
-        if abs(counterNeg) > counterPos*10:
+        if abs(counterNeg) > counterPos * 10:
             print(pa.hash)
             print(f"neg: {counterNeg}")
             print(f"pos: {counterPos}")
@@ -93,7 +91,7 @@ if __name__ == "__main__":
             pc.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=40)
             save_wrapper(pc, "genuary", f"16_circles_only_1{pa.hash}")
 
-        if counterPos > abs(counterNeg)*10:
+        if counterPos > abs(counterNeg) * 10:
             print(pa.hash)
             print(f"neg: {counterNeg}")
             print(f"pos: {counterPos}")
