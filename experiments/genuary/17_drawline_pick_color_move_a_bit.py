@@ -21,10 +21,8 @@ if __name__ == "__main__":
     loader = loader.Loader(directory=recs, limit_files=1)
     all_paths = loader.all_paths()
 
-    ff = filter.DirectionChangeEntropyFilter(4.0, 4.5) # 2.0
+    ff = filter.DirectionChangeEntropyFilter(4.0, 4.5)  # 2.0
     all_paths.filter(ff)
-
-
 
     for times in range(10):
         pc = path.PathCollection()
@@ -34,10 +32,8 @@ if __name__ == "__main__":
             for lines in range(40):
                 pm = p.morph((x, 0), (x, 100))
                 pm.layer = i
-                x+= 5
+                x += 5
                 pc.add(pm)
-
-
 
         device.SimpleExportWrapper().ex(
             pc,
