@@ -18,6 +18,9 @@ test
     # linux/osx
     py.test --cov cursor -v
     flake8 --max-line-length=100
+    
+    # single test
+    pytest tests/test_renderer.py::test_ascii_renderer
 
     # windows
     python -m pytest --cov=cursor . -v
