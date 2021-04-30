@@ -133,6 +133,9 @@ class DataDirHandler:
     def hpgls(self):
         return self.data_dir / "hpgl"
 
+    def ascii(self):
+        return self.data_dir / "ascii"
+
     def recordings(self):
         return self.data_dir / "recordings"
 
@@ -147,6 +150,9 @@ class DataDirHandler:
 
     def test_hpgls(self):
         return self.test_data_dir / "hpgl"
+
+    def test_ascii(self):
+        return self.test_data_dir / "ascii"
 
     def test_recordings(self):
         return self.test_data_dir / "test_recordings"
