@@ -70,6 +70,7 @@ inkscape
 - serial cable with usb adapter
 - ohne nullmodem
 - sendhpgl port file
+- inkscape hpgl export check "centerd"
 
 ##### HP7475A
 - serial cable with usb adapter
@@ -80,6 +81,12 @@ inkscape
 - serial cable with usb adapter
 - mit null modem
 - cat file to port
+
+#### HP7475A inkscape
+- document layout: A3 in landscape 
+- export hpgl not centered
+
+
 
 ##### Roland DPX3300
 usb to parallel port adapter
