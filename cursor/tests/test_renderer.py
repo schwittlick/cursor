@@ -1,8 +1,10 @@
 from cursor.loader import Loader
+from cursor.device import *
 from cursor.renderer import SvgRenderer
 from cursor.renderer import GCodeRenderer
 from cursor.renderer import JpegRenderer
 from cursor.renderer import HPGLRenderer
+from cursor.renderer import AsciiRenderer
 from cursor.renderer import PathIterator
 from cursor.data import DataDirHandler
 from cursor.path import PathCollection
@@ -85,6 +87,12 @@ def test_jpegrenderer():
     loader = Loader(directory=path)
 
     rec = loader.all_paths()
+
+    rec.fit(
+        Paper.sizes[PaperSize.LANDSCAPE_A1],
+        padding_mm=0,
+        cutoff_mm=0,
+    )
 
     r = JpegRenderer(DataDirHandler().test_images())
     r.render(rec)
@@ -244,3 +252,21 @@ def test_reorder_custom():
     assert pc[2] == p2
     assert pc[3] == p4
     assert pc[4] == p3
+
+
+def test_ascii_renderer():
+    path = DataDirHandler().test_recordings()
+    loader = Loader(directory=path)
+
+    rec = loader.all_paths()
+
+    rec.fit(
+        Paper.sizes[PaperSize.PORTRAIT_A3],
+        padding_mm=0,
+        cutoff_mm=0,
+    )
+
+    r = JpegRenderer(DataDirHandler().test_images())
+    a = AsciiRenderer(DataDirHandler().test_ascii(), r)
+    a.render(rec, scale=1, thickness=30)
+    a.save("test1")
