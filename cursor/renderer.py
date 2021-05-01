@@ -383,7 +383,7 @@ class AsciiRenderer:
         self.output = ""
 
     def get_raw_char(self, r: int, g: int, b: int, a: int):
-        value = r#self.intensity(r, g, b, a)
+        value = r  # self.intensity(r, g, b, a)
         precision = 255 / (len(self.pixels) - 1)
         rawChar = self.pixels[int(round(value / precision))]
 

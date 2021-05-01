@@ -89,9 +89,7 @@ def test_jpegrenderer():
     rec = loader.all_paths()
 
     rec.fit(
-        Paper.sizes[PaperSize.LANDSCAPE_A1],
-        padding_mm=0,
-        cutoff_mm=0,
+        Paper.sizes[PaperSize.LANDSCAPE_A1], padding_mm=0, cutoff_mm=0,
     )
 
     r = JpegRenderer(DataDirHandler().test_images())
@@ -261,9 +259,7 @@ def test_ascii_renderer():
     rec = loader.all_paths()
 
     rec.fit(
-        Paper.sizes[PaperSize.PORTRAIT_A3],
-        padding_mm=0,
-        cutoff_mm=0,
+        Paper.sizes[PaperSize.PORTRAIT_A3], padding_mm=0, cutoff_mm=0,
     )
 
     r = JpegRenderer(DataDirHandler().test_images())
