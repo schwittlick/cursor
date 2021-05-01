@@ -412,6 +412,7 @@ class AsciiRenderer:
             self.output = self.output + "\n"
 
     def save(self, filename: str):
+        pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
         fname = self.save_path / (filename + ".txt")
         with open(fname.as_posix(), "w") as file:
             file.write(self.output)
