@@ -39,3 +39,4 @@ zope.interface==5.2.0
 streamlit==0.57.3
 python-osc==1.7.4
 mlrose-hiive==2.1.3
+fpdf2==2.3.4

@@ -417,3 +417,5 @@ class AsciiRenderer:
         with open(fname.as_posix(), "w") as file:
             file.write(self.output)
         log.good(f"Finished saving {fname}")
+
+
