@@ -266,3 +266,34 @@ def test_ascii_renderer():
     a = AsciiRenderer(DataDirHandler().test_ascii(), r)
     a.render(rec, scale=1, thickness=30)
     a.save("test1")
+
+
+def test_pdf_renderer():
+    path = DataDirHandler().test_recordings()
+    loader = Loader(directory=path)
+
+    rec = loader.all_paths()
+
+    rec.fit(
+        Paper.sizes[PaperSize.PORTRAIT_A4], padding_mm=0, cutoff_mm=0,
+    )
+
+    r = JpegRenderer(DataDirHandler().test_images())
+    a = AsciiRenderer(DataDirHandler().test_ascii(), r)
+    a.render(rec, scale=1, thickness=30)
+
+    text = a.output.splitlines()
+
+    from fpdf import FPDF
+    pdf = FPDF(orientation='L', unit='mm', format='A4')
+    print(pdf.core_fonts)
+    pdf.add_font("JetbrainsMono", "", "Z:\\dev\\cursor\\cursor\\tests\\JetBrainsMono-Regular.ttf", uni=True)
+    pdf.add_page()
+    pdf.set_margins(0, 0)
+    pdf.set_font("JetbrainsMono", size=14)
+    linecounter = 0
+    for line in text:
+        #pdf.cell(0, 3, txt=line, ln=1, align="L")
+        pdf.text(0, linecounter*6+5, line)
+        linecounter += 1
+    pdf.output("simple_demo.pdf")
