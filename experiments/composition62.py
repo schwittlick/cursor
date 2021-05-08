@@ -3,7 +3,7 @@ from cursor import data
 from cursor import device
 from cursor import path
 from cursor import renderer
-
+from cursor import filter
 
 def save_wrapper(pc, projname, fname):
     folder = data.DataDirHandler().jpg(projname)
@@ -15,7 +15,7 @@ def save_wrapper(pc, projname, fname):
 
 if __name__ == "__main__":
     p = data.DataDirHandler().recordings()
-    files = ["1611136777.66754_compressed"]
+    files = ["1620493187.451028_compressed"]
     ll = loader.Loader(directory=p, limit_files=files)
     colls = ll.all_collections()
 
@@ -29,13 +29,18 @@ if __name__ == "__main__":
         layer += 1
 
     c.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=40)
+
+    bb = path.BoundingBox(500, 400, 1400, 900)
+    f = filter.BoundingBoxFilter(bb)
+    c.filter(f)
+
     save_wrapper(c, "composition62", "composition62_together")
 
     device.SimpleExportWrapper().ex(
         c,
         device.PlotterType.ROLAND_DPX3300,
         device.PaperSize.LANDSCAPE_A1,
-        70,
+        20,
         "composition62",
         c.hash(),
     )
