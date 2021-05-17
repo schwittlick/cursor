@@ -285,15 +285,20 @@ def test_pdf_renderer():
     text = a.output.splitlines()
 
     from fpdf import FPDF
-    pdf = FPDF(orientation='L', unit='mm', format='A4')
-    print(pdf.core_fonts)
-    pdf.add_font("JetbrainsMono", "", "JetBrainsMono-Regular.ttf", uni=True)
+
+    pdf = FPDF(orientation="L", unit="mm", format="A4")
+    pdf.add_font(
+        "JetbrainsMono",
+        "",
+        DataDirHandler().test_file("JetBrainsMono-Regular.ttf"),
+        uni=True,
+    )
     pdf.add_page()
     pdf.set_margins(0, 0)
-    pdf.set_font("JetbrainsMono", size=14)
+    pdf.set_font("jetbrainsmono", size=14)
     linecounter = 0
     for line in text:
-        #pdf.cell(0, 3, txt=line, ln=1, align="L")
-        pdf.text(0, linecounter*6+5, line)
+        # pdf.cell(0, 3, txt=line, ln=1, align="L")
+        pdf.text(0, linecounter * 6 + 5, line)
         linecounter += 1
     pdf.output("simple_demo.pdf")
