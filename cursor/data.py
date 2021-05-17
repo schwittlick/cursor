@@ -156,3 +156,9 @@ class DataDirHandler:
 
     def test_recordings(self):
         return self.test_data_dir / "test_recordings"
+
+    def test_file(self, fname: str):
+        return self.test_data_dir / fname
+
+    def file(self, fname: str):
+        return self.data_dir / fname
