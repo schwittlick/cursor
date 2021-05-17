@@ -290,7 +290,7 @@ def test_pdf_renderer():
     pdf.add_font(
         "JetbrainsMono",
         "",
-        DataDirHandler().test_file("JetBrainsMono-Regular.ttf"),
+        DataDirHandler().test_file("JetBrainsMono-Regular.ttf").absolute().as_posix(),
         uni=True,
     )
     pdf.add_page()
