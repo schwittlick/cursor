@@ -5,19 +5,19 @@ from cursor import device
 import math
 
 
-def plain_spiral(thetamax, yoffset, yadd, xextra):
+def plain_spiral():
     pp = Path(layer="round1")
+    length = 1500
     theta = 0
     ypos = 0
-    xpos = 0
-    r = 30
-    while theta < thetamax: #* 20:
-        y = r * math.cos(theta) + xpos
+    r = 100
+    x = 0
+    while x < length:  # * 20:
+        y = r * math.cos(theta)
         x = r * math.sin(theta) + ypos
-        pp.add(x, y + yoffset, 0)
-        theta += 0.08
-        ypos += yadd
-        xpos += xextra
+        pp.add(x, y, 0)
+        theta += 0.3
+        ypos += 0.25
 
     return pp
 
@@ -25,27 +25,27 @@ def plain_spiral(thetamax, yoffset, yadd, xextra):
 if __name__ == "__main__":
     coll = PathCollection()
 
-    xplus = 0.25
-    yplus = 0.25
+    p1 = plain_spiral()
+    p2 = p1.copy().morph((0, 0), (1, 0))
+    p3 = p1.copy().morph((0, 0.5), (1, 0.5))
+    p4 = p1.copy().morph((0, 0), (0, 0.25))
+    p5 = p1.copy()
+    p5.rotate(2.0)
 
-    p1 = plain_spiral(255, 0, xplus, 0)
-    p2 = plain_spiral(255, 400, xplus, 0)
-    p3 = plain_spiral(155, 0, 0, yplus)
-    p4 = plain_spiral(155, 0, xplus, yplus)
-
-    num = 'ad_strauss'
+    num = "ad_strauss"
 
     # reversed_path = pp.reversed()
     # reversed_path.layer = "round2"
 
-    coll.add(p1)
+    # coll.add(p1)
     coll.add(p2)
     coll.add(p3)
     coll.add(p4)
+    #coll.add(p5)
     # coll.add(reversed_path)
 
-    #r = RealtimeRenderer()
-    #r.render(coll)
+    # r = RealtimeRenderer()
+    # r.render(coll)
 
     device.SimpleExportWrapper().ex(
         coll,
