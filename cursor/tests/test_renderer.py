@@ -284,21 +284,22 @@ def test_pdf_renderer():
 
     text = a.output.splitlines()
 
-    from fpdf import FPDF
+    import fpdf
 
-    pdf = FPDF(orientation="L", unit="mm", format="A4")
+    pdf = fpdf.FPDF(orientation="L", unit="mm", format="A4")
+
+    fontpath = DataDirHandler().test_data_file("JetBrainsMono-Regular.ttf")
     pdf.add_font(
-        "JetbrainsMono",
-        "",
-        DataDirHandler().test_file("JetBrainsMono-Regular.ttf").absolute().as_posix(),
-        uni=True,
+        "JetbrainsMono", "", fontpath, uni=True,
     )
     pdf.add_page()
     pdf.set_margins(0, 0)
-    pdf.set_font("jetbrainsmono", size=14)
+    pdf.set_font("JetbrainsMono", size=14)
     linecounter = 0
     for line in text:
         # pdf.cell(0, 3, txt=line, ln=1, align="L")
         pdf.text(0, linecounter * 6 + 5, line)
         linecounter += 1
-    pdf.output("simple_demo.pdf")
+
+    out = DataDirHandler().test_data_dir / "simple_demo.pdf"
+    pdf.output(out)
