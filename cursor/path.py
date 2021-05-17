@@ -13,6 +13,25 @@ import operator
 import time
 from scipy import spatial
 
+import scipy
+import pylab
+
+# just for fun making further development easier and with joy
+pi = scipy.pi
+dot = scipy.dot
+sin = scipy.sin
+cos = scipy.cos
+ar = scipy.array
+rand = scipy.rand
+arange = scipy.arange
+plot = pylab.plot
+show = pylab.show
+axis = pylab.axis
+grid = pylab.grid
+title = pylab.title
+rad = lambda ang: ang * pi / 180
+
+
 log = wasabi.Printer()
 
 
@@ -32,7 +51,7 @@ class TimedPosition:
         return self.timestamp
 
     def copy(self) -> "TimedPosition":
-        return type(self)(self.x, self.y, self.timestamp)
+        return type(self)(copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(self.timestamp))
 
     def rot(self, delta: float) -> None:
         co = np.cos(delta)
@@ -273,6 +292,18 @@ class Path:
             p.translate(translation[0], translation[1])
 
         return path
+
+
+    def Rotate2D(self, pts, cnt, ang=pi / 4):
+        '''pts = {} Rotates points(nx2) about center cnt(2) by angle ang(1) in radian'''
+        return dot(pts - cnt, ar([[cos(ang), sin(ang)], [-sin(ang), cos(ang)]])) + cnt
+
+    def rotate(self, angle: float) -> None:
+        pcs = []
+        for point in self.vertices:
+            nparr = point.arr()
+            pcs.append(nparr)
+        v = self.Rotate2D(ar(pcs), ar([0, 0]), angle)
 
     def intersect(self, newpath: "Path") -> typing.Tuple[bool, float, float]:
         for p1 in range(len(newpath) - 1):
