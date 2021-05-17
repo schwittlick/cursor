@@ -70,24 +70,32 @@ inkscape
 
 
 ##### HP7595A
-- serial cable with usb adapter
-- ohne nullmodem
-- sendhpgl port file
-- inkscape hpgl export check "centerd"
+    - serial cable with usb adapter
+    - ohne nullmodem
+    - sendhpgl port file
+    - inkscape hpgl export check "centerd"
 
 ##### HP7475A
-- serial cable with usb adapter
-- mit nullmodem
-- sendhpgl port file
+    - serial cable with usb adapter
+    - mit nullmodem
+    - sendhpgl port file
+    - https://github.com/b4ckspace/hpgl-plot
 
 ##### HP7475A buffer overflow
-- serial cable with usb adapter
-- mit null modem
-- cat file to port
+    - serial cable with usb adapter
+    - mit null modem
+    - cat file to port
 
 #### HP7475A inkscape
-- document layout: A3 in landscape 
-- export hpgl not centered
+    - document layout: A3 in landscape 
+    - export hpgl not centered
+
+#### HP7475a GPIB HPIB
+    https://pearl-hifi.com/06_Lit_Archive/15_Mfrs_Publications/20_HP_Agilent/HP_7475A_Plotter/HP_7475A_Op_Interconnect.pdf
+    - Prologix GPIB Configurator
+    - Auf ID 5
+    - Arduino Serial Monitor, "help++"
+    http://prologix.biz/downloads/PrologixGpibUsbManual-6.0.pdf
 
 
 
