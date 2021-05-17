@@ -287,7 +287,7 @@ def test_pdf_renderer():
     from fpdf import FPDF
     pdf = FPDF(orientation='L', unit='mm', format='A4')
     print(pdf.core_fonts)
-    pdf.add_font("JetbrainsMono", "", "Z:\\dev\\cursor\\cursor\\tests\\JetBrainsMono-Regular.ttf", uni=True)
+    pdf.add_font("JetbrainsMono", "", "JetBrainsMono-Regular.ttf", uni=True)
     pdf.add_page()
     pdf.set_margins(0, 0)
     pdf.set_font("JetbrainsMono", size=14)
