@@ -109,56 +109,56 @@ class DataDirHandler:
         self.data_dir = self.BASE_DIR / "data"
         self.test_data_dir = self.BASE_DIR / "cursor" / "tests" / "data"
 
-    def gcode(self, folder):
+    def gcode(self, folder) -> pathlib.Path:
         return self.data_dir / "experiments" / folder / "gcode"
 
-    def jpg(self, subfolder):
+    def jpg(self, subfolder) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "jpg"
 
-    def svg(self, subfolder):
+    def svg(self, subfolder) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "svg"
 
-    def hpgl(self, subfolder):
+    def hpgl(self, subfolder) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "hpgl"
 
-    def images(self):
+    def images(self) -> pathlib.Path:
         return self.data_dir / "jpgs"
 
-    def gcodes(self):
+    def gcodes(self) -> pathlib.Path:
         return self.data_dir / "gcode"
 
-    def svgs(self):
+    def svgs(self) -> pathlib.Path:
         return self.data_dir / "svg"
 
-    def hpgls(self):
+    def hpgls(self) -> pathlib.Path:
         return self.data_dir / "hpgl"
 
-    def ascii(self):
+    def ascii(self) -> pathlib.Path:
         return self.data_dir / "ascii"
 
-    def recordings(self):
+    def recordings(self) -> pathlib.Path:
         return self.data_dir / "recordings"
 
-    def test_images(self):
+    def test_images(self) -> pathlib.Path:
         return self.test_data_dir / "jpgs"
 
-    def test_gcodes(self):
+    def test_gcodes(self) -> pathlib.Path:
         return self.test_data_dir / "gcode"
 
-    def test_svgs(self):
+    def test_svgs(self) -> pathlib.Path:
         return self.test_data_dir / "svg"
 
-    def test_hpgls(self):
+    def test_hpgls(self) -> pathlib.Path:
         return self.test_data_dir / "hpgl"
 
-    def test_ascii(self):
+    def test_ascii(self) -> pathlib.Path:
         return self.test_data_dir / "ascii"
 
-    def test_recordings(self):
+    def test_recordings(self) -> pathlib.Path:
         return self.test_data_dir / "test_recordings"
 
-    def test_file(self, fname: str):
+    def test_data_file(self, fname: str) -> pathlib.Path:
         return self.test_data_dir / fname
 
-    def file(self, fname: str):
+    def file(self, fname: str) -> pathlib.Path:
         return self.data_dir / fname
