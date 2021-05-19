@@ -51,7 +51,9 @@ class TimedPosition:
         return self.timestamp
 
     def copy(self) -> "TimedPosition":
-        return type(self)(copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(self.timestamp))
+        return type(self)(
+            copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(self.timestamp)
+        )
 
     def rot(self, delta: float) -> None:
         co = np.cos(delta)
@@ -293,12 +295,12 @@ class Path:
 
         return path
 
-
     def Rotate2D(self, pts, cnt, ang=pi / 4):
-        '''pts = {} Rotates points(nx2) about center cnt(2) by angle ang(1) in radian'''
+        """pts = {} Rotates points(nx2) about center cnt(2) by angle ang(1) in radian"""
         return dot(pts - cnt, ar([[cos(ang), sin(ang)], [-sin(ang), cos(ang)]])) + cnt
 
     def rotate(self, angle: float) -> None:
+        """ works very wonkily """
         pcs = []
         for point in self.vertices:
             nparr = point.arr()
