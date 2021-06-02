@@ -1,11 +1,6 @@
-from cursor.data import DataDirHandler
-from cursor.device import Paper
 from cursor.path import Path, PathCollection
-from cursor.renderer import RealtimeRenderer
 from cursor import device
-from cursor import renderer
 import matplotlib
-import numpy as np
 
 matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
@@ -15,10 +10,8 @@ plt.style.use("ggplot")
 import math
 from scipy.spatial import distance
 import sys
-from datetime import datetime
 from matplotlib import pyplot
 from matplotlib.animation import FuncAnimation
-from random import randrange
 
 
 def map(value, inputMin, inputMax, outputMin, outputMax, clamp):
@@ -46,15 +39,12 @@ class SpiralFactory:
         self.yy = 0.25
 
     def plain_spiral(self, th, x_add, y_add, target, layer):
-        rounds = 100
         pp = Path(layer=layer)
         theta = math.pi * 2
         xoffset = 0
         yoffset = 0
         r = 35
         center = [0, 0]
-        # target =
-        # while theta <= math.pi * 2 * (rounds+1):  # * 20:
         while distance.euclidean(center, target) > 0.01:
             x = r * math.sin(theta) + xoffset
             y = r * math.cos(theta) + yoffset

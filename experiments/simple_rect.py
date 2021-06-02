@@ -12,7 +12,7 @@ def save_wrapper(pc, projname, fname):
     jpeg_renderer.save(fname)
 
 
-if __name__ == "__main__":
+def with_layers() -> "path.PathCollection":
     pc = path.PathCollection()
 
     p1 = path.Path(layer="1")
@@ -38,6 +38,26 @@ if __name__ == "__main__":
     pc.add(p2)
     pc.add(p3)
     pc.add(p4)
+
+    return pc
+
+
+def regular() -> "path.PathCollection":
+    pc = path.PathCollection()
+
+    p = path.Path()
+    p.add(0, 0)
+    p.add(1, 0)
+    p.add(1, 1)
+    p.add(0, 1)
+    p.add(0, 0)
+    pc.add(p)
+    return pc
+
+
+if __name__ == "__main__":
+    pc = regular()
+    # pc = with_layers()
 
     layer_pen_mapping = {}
     layer_pen_mapping["1"] = 1

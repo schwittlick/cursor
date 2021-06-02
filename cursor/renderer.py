@@ -234,7 +234,9 @@ class RealtimeRenderer:
 
 
 class HPGLRenderer:
-    def __init__(self, folder: pathlib.Path, speed: int = 30, layer_pen_mapping: dict = None) -> None:
+    def __init__(
+        self, folder: pathlib.Path, speed: int = 30, layer_pen_mapping: dict = None
+    ) -> None:
         self.speed = speed
         self.save_path = folder
         self.paths = PathCollection()
@@ -409,5 +411,3 @@ class AsciiRenderer:
         with open(fname.as_posix(), "w") as file:
             file.write(self.output)
         log.good(f"Finished saving {fname}")
-
-
