@@ -1,11 +1,6 @@
-from cursor.data import DataDirHandler
-from cursor.device import Paper
 from cursor.path import Path, PathCollection
-from cursor.renderer import RealtimeRenderer
 from cursor import device
-from cursor import renderer
 import matplotlib
-import numpy as np
 
 matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
@@ -15,10 +10,8 @@ plt.style.use("ggplot")
 import math
 from scipy.spatial import distance
 import sys
-from datetime import datetime
 from matplotlib import pyplot
 from matplotlib.animation import FuncAnimation
-from random import randrange
 
 
 def map(value, inputMin, inputMax, outputMin, outputMax, clamp):
@@ -46,15 +39,12 @@ class SpiralFactory:
         self.yy = 0.25
 
     def plain_spiral(self, th, x_add, y_add, target, layer):
-        rounds = 100
         pp = Path(layer=layer)
         theta = math.pi * 2
         xoffset = 0
         yoffset = 0
         r = 35
         center = [0, 0]
-        # target =
-        # while theta <= math.pi * 2 * (rounds+1):  # * 20:
         while distance.euclidean(center, target) > 0.01:
             x = r * math.sin(theta) + xoffset
             y = r * math.cos(theta) + yoffset
@@ -105,15 +95,15 @@ if __name__ == "__main__":
         tstep = 0.1
         xstep = 0.005
         ystep = 0.005
-        p2 = sf.plain_spiral(tstep, xstep, 0.0, [100, 0], "red")  # horizon
-        p3 = sf.plain_spiral(tstep, 0.0, ystep, [0, 100], "blue")  # vertical
-        p4 = sf.plain_spiral(tstep, 0.0, ystep, [0, 200], "blue")  # vertical
-        p5 = sf.plain_spiral(tstep, xstep, -ystep, [100, -100], "red")  # diagonal
-        p6 = sf.plain_spiral(tstep, xstep, 0, [200, 0], "red")  # horizontal
-        p7 = sf.plain_spiral(tstep, xstep, 0.0, [100, 0], "red")  # horizon
-        p8 = sf.plain_spiral(tstep, 0.0, ystep, [0, 100], "blue")  # vertical
-        p9 = sf.plain_spiral(tstep, 0.0, ystep, [0, 200], "blue")  # vertical
-        p10 = sf.plain_spiral(tstep, xstep, 0.0, [100, 0], "red")  # horizon
+        p2 = sf.plain_spiral(tstep, xstep, 0.0, [100, 0], "1")  # horizon
+        p3 = sf.plain_spiral(tstep, 0.0, ystep, [0, 100], "2")  # vertical
+        p4 = sf.plain_spiral(tstep, 0.0, ystep, [0, 200], "3")  # vertical
+        p5 = sf.plain_spiral(tstep, xstep, -ystep, [100, -100], "4")  # diagonal
+        p6 = sf.plain_spiral(tstep, xstep, 0, [200, 0], "5")  # horizontal
+        p7 = sf.plain_spiral(tstep, xstep, 0.0, [100, 0], "6")  # horizon
+        p8 = sf.plain_spiral(tstep, 0.0, ystep, [0, 100], "7")  # vertical
+        p9 = sf.plain_spiral(tstep, 0.0, ystep, [0, 200], "8")  # vertical
+        p10 = sf.plain_spiral(tstep, xstep, 0.0, [100, 0], "9")  # horizon
 
         p3.translate(0, 100)
         p4.translate(100, 0)
