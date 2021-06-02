@@ -45,7 +45,7 @@ class ExportFormatMappings:
 
 class MinmaxMapping:
     maps = {
-        PlotterType.ROLAND_DPX3300: MinMax(-17600, 16000, -11360, 12400),
+        PlotterType.ROLAND_DPX3300: MinMax(-17750, 16790, -11180, 11180),
         PlotterType.DIY_PLOTTER: MinMax(0, 3350, 0, -1715),
         PlotterType.AXIDRAW: MinMax(0, 0, 0, -0),  # todo: missing real bounds
         PlotterType.HP_7475A_A4: MinMax(0, 11040, 0, 7721),
@@ -207,6 +207,7 @@ class Exporter:
         self.__suffix = None
         self.__hpgl_speed = None
         self.__gcode_speed = None
+        self.__layer_pen_mapping = None
 
     @property
     def paths(self) -> path.PathCollection:
@@ -255,6 +256,14 @@ class Exporter:
     @gcode_speed.setter
     def gcode_speed(self, t: int) -> None:
         self.__gcode_speed = t
+
+    @property
+    def layer_pen_mapping(self) -> dict:
+        return self.__layer_pen_mapping
+
+    @layer_pen_mapping.setter
+    def layer_pen_mapping(self, m: dict) -> None:
+        self.__layer_pen_mapping = m
 
     def fit(self) -> None:
         # out_dim = tuple(
@@ -315,41 +324,60 @@ class Exporter:
                 jpeg_renderer.save(f"{fname}_{layer}")
 
         self.fit()
-        separate_layers = self.paths.get_layers()
-        for layer, pc in separate_layers.items():
-            sizename = PaperSizeName.names[self.cfg.dimension]
-            machinename = PlotterName.names[self.cfg.type]
-            fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}"
 
-            format = ExportFormatMappings.maps[self.cfg.type]
+        sizename = PaperSizeName.names[self.cfg.dimension]
+        machinename = PlotterName.names[self.cfg.type]
+        fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}"
+        format = ExportFormatMappings.maps[self.cfg.type]
+
+        if self.layer_pen_mapping is not None:
             if format is ExportFormat.HPGL:
-
                 hpgl_folder = data.DataDirHandler().hpgl(self.name)
                 if self.hpgl_speed:
                     hpgl_renderer = renderer.HPGLRenderer(
-                        hpgl_folder, speed=self.hpgl_speed
+                        hpgl_folder,
+                        speed=self.hpgl_speed,
+                        layer_pen_mapping=self.layer_pen_mapping,
                     )
                 else:
-                    hpgl_renderer = renderer.HPGLRenderer(hpgl_folder)
-                hpgl_renderer.render(pc)
-                hpgl_renderer.save(f"{fname}_{layer}")
-
-            if format is ExportFormat.SVG:
-                svg_dir = data.DataDirHandler().svg(self.name)
-                svg_renderer = renderer.SvgRenderer(svg_dir)
-                svg_renderer.render(pc)
-                svg_renderer.save(f"{fname}_{layer}")
-
-            if format is ExportFormat.GCODE:
-                gcode_folder = data.DataDirHandler().gcode(self.name)
-                if self.gcode_speed:
-                    gcode_renderer = renderer.GCodeRenderer(gcode_folder, z_down=4.5)
-                else:
-                    gcode_renderer = renderer.GCodeRenderer(
-                        gcode_folder, feedrate_xy=self.gcode_speed, z_down=4.5
+                    hpgl_renderer = renderer.HPGLRenderer(
+                        hpgl_folder, layer_pen_mapping=self.layer_pen_mapping
                     )
-                gcode_renderer.render(pc)
-                gcode_renderer.save(f"{fname}_{layer}")
+                hpgl_renderer.render(self.paths)
+                hpgl_renderer.save(f"{fname}_all")
+        else:
+
+            separate_layers = self.paths.get_layers()
+            for layer, pc in separate_layers.items():
+                if format is ExportFormat.HPGL:
+                    hpgl_folder = data.DataDirHandler().hpgl(self.name)
+                    if self.hpgl_speed:
+                        hpgl_renderer = renderer.HPGLRenderer(
+                            hpgl_folder, speed=self.hpgl_speed
+                        )
+                    else:
+                        hpgl_renderer = renderer.HPGLRenderer(hpgl_folder)
+                    hpgl_renderer.render(pc)
+                    hpgl_renderer.save(f"{fname}_{layer}")
+
+                if format is ExportFormat.SVG:
+                    svg_dir = data.DataDirHandler().svg(self.name)
+                    svg_renderer = renderer.SvgRenderer(svg_dir)
+                    svg_renderer.render(pc)
+                    svg_renderer.save(f"{fname}_{layer}")
+
+                if format is ExportFormat.GCODE:
+                    gcode_folder = data.DataDirHandler().gcode(self.name)
+                    if self.gcode_speed:
+                        gcode_renderer = renderer.GCodeRenderer(
+                            gcode_folder, z_down=4.5
+                        )
+                    else:
+                        gcode_renderer = renderer.GCodeRenderer(
+                            gcode_folder, feedrate_xy=self.gcode_speed, z_down=4.5
+                        )
+                    gcode_renderer.render(pc)
+                    gcode_renderer.save(f"{fname}_{layer}")
 
 
 class SimpleExportWrapper:
@@ -366,6 +394,7 @@ class SimpleExportWrapper:
         cutoff: int = None,
         hpgl_speed: int = None,
         gcode_speed: int = None,
+        gcode_layer_pen_mapping=None,
     ):
         cfg = Cfg()
         cfg.type = ptype
@@ -382,4 +411,5 @@ class SimpleExportWrapper:
         exp.suffix = str(suffix)
         exp.hpgl_speed = hpgl_speed
         exp.gcode_speed = gcode_speed
+        exp.layer_pen_mapping = gcode_layer_pen_mapping
         exp.run(True)
