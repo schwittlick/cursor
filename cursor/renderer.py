@@ -234,65 +234,57 @@ class RealtimeRenderer:
 
 
 class HPGLRenderer:
-    def __init__(self, folder, speed=30):
-        assert isinstance(folder, pathlib.Path), "Only path objects allowed"
-
+    def __init__(self, folder: pathlib.Path, speed: int = 30, layer_pen_mapping: dict = None) -> None:
         self.speed = speed
         self.save_path = folder
         self.paths = PathCollection()
+        self.layer_pen_mapping = layer_pen_mapping
 
-    def render(self, paths):
-        if not isinstance(paths, PathCollection):
-            raise Exception("Only PathCollection and list of PathCollections allowed")
-
-        log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
+    def render(self, paths: "PathCollection") -> None:
         self.paths += paths
+        log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
 
-    def save(self, filename: str):
-        try:
-            pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
-            fname = self.save_path / (filename + ".hpgl")
+    def save(self, filename: str) -> None:
+        pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
+        fname = self.save_path / (filename + ".hpgl")
 
-            with open(fname.as_posix(), "w") as file:
-                # file.write(f"PA0,0;\n")
-                file.write("SP1;\n")
-                file.write(f"VS{self.speed};\n")
+        with open(fname.as_posix(), "w") as file:
+            # file.write(f"PA0,0;\n")
+            file.write(f"SP1;\n")
+            file.write(f"VS{self.speed};\n")
 
-                self.__append_to_file(file, 0.0, 0.0)
+            self.__append_to_file(file, 0.0, 0.0)
 
-                first = True
-                for p in self.paths:
-                    if first:
-                        file.write("PU;\n")
-                        first = False
-                    x = p.start_pos().x
-                    y = p.start_pos().y
-                    self.__append_to_file(file, x, y)
-                    file.write("PD;\n")
-                    for line in p.vertices:
-                        x = line.x
-                        y = line.y
-                        # file.write(f"{int(x)},{int(y)},")
-                        self.__append_to_file(file, x, y)
-                    # file.write(";\n")
+            first = True
+            for p in self.paths:
+
+                if first:
                     file.write("PU;\n")
+                    first = False
+                x = p.start_pos().x
+                y = p.start_pos().y
+                self.__append_to_file(file, x, y)
+                file.write(f"SP{self.__pen_from_layer(p.layer)};\n")
+                file.write("PD;\n")
+                for line in p.vertices:
+                    x = line.x
+                    y = line.y
+                    self.__append_to_file(file, x, y)
+                file.write("PU;\n")
 
-                self.__append_to_file(file, 0.0, 0.0)
-                file.write("SP0;\n")
-            log.good(f"Finished saving {fname}")
-        except DrawingOutOfBoundsException as e:
-            log.fail(f"Couldn't generate HPGL- Out of Bounds with position {e}")
+            self.__append_to_file(file, 0.0, 0.0)
+            file.write("SP0;\n")
+        log.good(f"Finished saving {fname}")
 
-    def __append_to_file(self, file, x, y):
-        # if y < RolandDPX3300.Plotter.MIN_Y:
-        #    raise DrawingOutOfBoundsException(y)
-        # if y > RolandDPX3300.Plotter.MAX_Y:
-        #    raise DrawingOutOfBoundsException(y)
-        # if x < RolandDPX3300.Plotter.MIN_X:
-        #    raise DrawingOutOfBoundsException(x)
-        # if x > RolandDPX3300.Plotter.MAX_X:
-        #    raise DrawingOutOfBoundsException(x)
+    @staticmethod
+    def __append_to_file(file, x: float, y: float):
         file.write(f"PA{int(x)},{int(y)}\n")
+
+    def __pen_from_layer(self, layer: str) -> int:
+        if layer not in self.layer_pen_mapping.keys():
+            return 1
+
+        return self.layer_pen_mapping[layer]
 
 
 class JpegRenderer:
