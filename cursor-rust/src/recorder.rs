@@ -5,6 +5,8 @@ use chrono::{DateTime, Utc}; // 0.4.15
 use std::time::{Duration, SystemTime};
 use rdev::display_size;
 use rdev::{listen, Event};
+use std::fs::File;
+use std::io::prelude::*;
 
 fn get_mouse_pos() -> (i32, i32) {
     let mut point = POINT { x: 0, y: 0 };
@@ -15,7 +17,7 @@ fn get_mouse_pos() -> (i32, i32) {
 fn get_resolution() -> (i32, i32)
 {
     let mut _r = unsafe {
-        let dpi_aware = ::winapi::um::winuser::SetProcessDPIAware();
+        let _dpi_aware = ::winapi::um::winuser::SetProcessDPIAware();
         let x = ::winapi::um::winuser::GetSystemMetrics(::winapi::um::winuser::SM_CXVIRTUALSCREEN);
         let y = ::winapi::um::winuser::GetSystemMetrics(::winapi::um::winuser::SM_CYVIRTUALSCREEN);
         (x, y)
@@ -27,12 +29,25 @@ struct TimedPoint
 {
     x: f64,
     y: f64,
-    //time: String
     time: DateTime<Utc>
 }
 
+
+fn main()
+{
+    ctrlc::set_handler(move || {
+        println!("cleaning up.");
+        std::process::exit(0);
+    })
+    .expect("Error setting Ctrl-C handler");
+
+    record();
+}
+
+
 impl fmt::Display for TimedPoint {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+       // let string = format!("({x.*}, {}, {})", 3, x=self.x, y=self.y, time=self.time.to_rfc3339());
         write!(f, "({}, {}, {})", self.x, self.y, self.time.to_rfc3339())
     }
 }
@@ -41,11 +56,29 @@ fn callback(event: Event) {
     println!("My callback {:?}", event);
 }
 
+fn write_points(point: &Vec<TimedPoint>) -> std::io::Result<()> {
+    let mut f = File::create("foo.txt")?;
+
+    for p in point.iter()
+    {
+        let str = p.to_string() + "\n";
+        f.write_all(str.as_bytes()).expect("couldnt write :(");
+    }
+
+    f.sync_all()?;
+    Ok(())
+}
+
 fn record()
 {
-    if let Err(error) = listen(callback) {
-        println!("Error: {:?}", error)
-    }
+    thread::spawn(|| {
+        if let Err(error) = listen(callback) {
+            println!("Error: {:?}", error)
+        }
+    });
+
+    let mut counter = 0;
+    let mut vec = Vec::new();
 
     loop {
         let pos = get_mouse_pos();
@@ -59,42 +92,22 @@ fn record()
         let now = SystemTime::now();
         let now: DateTime<Utc> = now.into();
         //let now = now.to_rfc3339();
-        let timed_pos = TimedPoint{x: pos.0 as f64/ resolution.0 as f64, y: pos.1 as f64 / resolution.1 as f64, time: now};
+        let timed_pos = TimedPoint{x: pos.0 as f64 / resolution.0 as f64, y: pos.1 as f64 / resolution.1 as f64, time: now};
         println!("{}", &timed_pos);
+        vec.push(timed_pos);
         thread::sleep(Duration::from_millis(100));
+
+        counter = counter + 1;
+        if counter >= 4
+        {
+            println!("{}", vec.len());
+            match write_points(&vec)
+            {
+                Ok(v) => println!("ok: {:?}", v),
+                Err(e) => println!("err: {}", e)
+            }
+
+            std::process::exit(0);
+        }
     }
-}
-
-
-
-fn borrowing()
-{
-    let s1 = "hello dolly".to_string();
-    let mut rs1 = &s1;
-    {
-        let tmp = "hello world".to_string();
-        rs1 = &tmp;
-        rs1 = &s1;
-    }
-    println!("ref {}", s1);
-}
-
-fn struct_test()
-{
-    //let mut point = TimedPoint{x: 0.0, y: 0.0, time: "jetzt".to_string()};
-    //println!("{:?}", &point.time);
-}
-
-fn main()
-{
-    ctrlc::set_handler(move || {
-        println!("cleaning up.");
-        std::process::exit(0);
-    })
-    .expect("Error setting Ctrl-C handler");
-
-    record();
-
-    //borrowing();
-    struct_test();
 }
