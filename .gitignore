@@ -7,3 +7,4 @@ __pycache__
 *.pyc
 .cache/
 cursor.egg-info/
+.vscode
