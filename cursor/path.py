@@ -14,7 +14,6 @@ import time
 from scipy import spatial
 
 import scipy
-import pylab
 
 # just for fun making further development easier and with joy
 pi = scipy.pi
@@ -24,13 +23,6 @@ cos = scipy.cos
 ar = scipy.array
 rand = scipy.rand
 arange = scipy.arange
-plot = pylab.plot
-show = pylab.show
-axis = pylab.axis
-grid = pylab.grid
-title = pylab.title
-rad = lambda ang: ang * pi / 180
-
 
 log = wasabi.Printer()
 
