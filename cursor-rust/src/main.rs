@@ -1,50 +1,68 @@
-use std::fs;
-use std::fs::File;
-use std::io::prelude::*;
-use std::path::Path;
+mod helpers;
+mod path;
 
-use winapi::shared::windef::POINT;
+use crate::helpers::help;
+use crate::path::cursor;
 
-fn get_mouse_pos() -> (i32, i32) {
-    let mut point = POINT { x: 0, y: 0 };
-    unsafe { ::winapi::um::winuser::GetCursorPos(&mut point as *mut POINT) };
-    (point.x, point.y)
-}
+use chrono::{DateTime, Utc};
 
-fn set_mouse_pos(x: i32 , y: i32) {
-    unsafe { ::winapi::um::winuser::SetCursorPos(x, y) };
-}
+use rdev::display_size;
+use rdev::{listen, Event};
+use std::thread;
+use std::time::{Duration, SystemTime};
 
 fn main() {
-    // store mouse postion
-    let (x, y) = get_mouse_pos();
-
-    // print mouse coords
-    print!("coords = {},{}", x, y);
-
-    // mouse mouse
-    set_mouse_pos(250, 250);
-
+    help::add_ctrlc_handler();
+    record();
+    help::test_tray();
 }
 
-fn main2() {
-    let paths = fs::read_dir("../data/recordings/").unwrap();
-    for p in paths {
-        let path_string = p.unwrap().path();
-        let path = Path::new(path_string.as_os_str());
-        let display = path.display();
-        // Open the path in read-only mode, returns `io::Result<File>`
-        let mut file = match File::open(&path) {
-            Err(why) => panic!("couldn't open {}: {}", display, why),
-            Ok(file) => file,
-        };
+fn callback(event: Event) {
+    println!("My callback {:?}", event);
+}
 
-        // Read the file contents into a string, returns `io::Result<usize>`
-        let mut s = String::new();
-        match file.read_to_string(&mut s) {
-            Err(why) => panic!("couldn't read {}: {}", display, why),
-            Ok(_) => print!("{} contains:\n{}\n", display, &s[..30]),
+fn record() {
+    thread::spawn(|| {
+        if let Err(error) = listen(callback) {
+            println!("Error: {:?}", error)
         }
+    });
 
+    thread::spawn(|| {
+        let mut counter = 0;
+        let mut vec = Vec::new();
+        let resolution = help::get_resolution();
+        println!("{:?}", resolution);
+
+        loop {
+            let pos = help::get_mouse_pos();
+            println!("{:?}", pos);
+            let (w, h) = display_size().unwrap();
+
+            println!("Your screen is {:?}x{:?}", w, h);
+
+            let now = SystemTime::now();
+            let now: DateTime<Utc> = now.into();
+            //let now = now.to_rfc3339();
+            let timed_pos = cursor::TimedPoint {
+                x: pos.0 as f64 / resolution.0 as f64,
+                y: pos.1 as f64 / resolution.1 as f64,
+                time: now,
+            };
+            println!("{}", &timed_pos);
+            vec.push(timed_pos);
+            thread::sleep(Duration::from_millis(1000));
+
+            counter = counter + 1;
+            if counter >= 4 {
+                println!("{}", vec.len());
+                match help::write_points(&vec) {
+                    Ok(v) => println!("ok: {:?}", v),
+                    Err(e) => println!("err: {}", e),
+                }
+
+                std::process::exit(0);
+            }
         }
+    });
 }

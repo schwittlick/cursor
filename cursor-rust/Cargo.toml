@@ -9,15 +9,14 @@ authors = ["Marcel Schwittlick <info@schwittlick.net>"]
 [dependencies]
 #nannou = "0.17"
 #winit = "0.25.0"
-#simple_logger = "1.11.0"
 chrono = "0.4.19"
 winapi = { version = "0.3.9", features = ["wingdi", "winuser", "libloaderapi", "combaseapi", "objbase", "shobjidl", "winerror"] }
 rdev = "0.5.1"
 ctrlc = "3.1.9"
+base64 = "0.13.0"
+tao = "0.4.0"
+simple_logger = "1.11.0"
 
 [[example]]
 name = "recorder"
 path = "src/recorder.rs"
-[[example]]
-name = "monitor"
-path = "src/monitor.rs"
