@@ -54,7 +54,6 @@ class JsonCompressor:
     ZIPJSON_KEY = "base64(zip(o))"
 
     def json_zip(self, j):
-
         j = {
             self.ZIPJSON_KEY: base64.b64encode(
                 zlib.compress(json.dumps(j, cls=MyJsonEncoder).encode("utf-8"))
@@ -78,16 +77,17 @@ class JsonCompressor:
                 return j
 
         try:
-            j = zlib.decompress(base64.b64decode(j[self.ZIPJSON_KEY]))
+            decoded = base64.b64decode(j[self.ZIPJSON_KEY])
+            decompressed = zlib.decompress(decoded)
         except zlib.error:
             raise RuntimeError("Could not decode/unzip the contents")
 
         try:
-            j = json.loads(j, cls=MyJsonDecoder)
+            decompressed = json.loads(decompressed, cls=MyJsonDecoder)
         except TypeError and json.JSONDecodeError:
             raise RuntimeError("Could interpret the unzipped contents")
 
-        return j
+        return decompressed
 
 
 class DateHandler:
