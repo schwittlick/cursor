@@ -283,6 +283,9 @@ class HPGLRenderer:
         file.write(f"PA{int(x)},{int(y)}\n")
 
     def __pen_from_layer(self, layer: str) -> int:
+        if self.layer_pen_mapping is None:
+            return 1
+
         if layer not in self.layer_pen_mapping.keys():
             return 1
 
