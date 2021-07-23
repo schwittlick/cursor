@@ -46,3 +46,5 @@ encoded=
 # rust secrets
 
     $env:RUST_BACKTRACE=1; cargo run
+    cargo test
+    cargo build
