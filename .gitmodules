@@ -1,0 +1,3 @@
+[submodule "data/recordings"]
+	path = data/recordings
+	url = git@github.com:schwittlick/cursor-recordings.git

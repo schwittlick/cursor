@@ -126,7 +126,7 @@ def test_entropy_sort():
 
 def test_entropy_sort2():
     pcol = PathCollection()
-    dir = DataDirHandler().recordings()
+    dir = DataDirHandler().test_recordings()
     ll = Loader(directory=dir, limit_files=2)
     pcol = ll.all_paths()
     sorter = Sorter(param=Sorter.SHANNON_X, reverse=True)
