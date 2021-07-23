@@ -8,7 +8,7 @@ mod tests {
     #[test]
     fn it_adds_two() {
         let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-        let result = e.write_all(b"{\"mouse\": {\"paths\": [[{\"x\": 0.8638, \"y\": 0.8694, \"ts\": 1626996998.83}], [{\"x\": 0.8589, \"y\": 0.9444, \"ts\": 1626996999.33}], [{\"x\": 0.8482, \"y\": 0.937, \"ts\": 1626996999.97}]], \"timestamp\": 1626996990.504024}, \"keys\": []}");
+        let result = e.write_all(b"{\"mouse\": {\"paths\": [[{\"x\": 0.000, \"y\": 0.000, \"ts\": 1626037613.00}]], \"keys\": []}");
         match result {
             Ok(_) => {}
             Err(result) => println!("couldnt write stuff; {:?}", result),
