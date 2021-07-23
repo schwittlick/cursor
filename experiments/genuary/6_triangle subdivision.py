@@ -3,7 +3,6 @@ from cursor import data
 from cursor import device
 from cursor import path
 from cursor import renderer
-from cursor import filter
 
 
 def save_wrapper(pc, projname, fname):
@@ -40,4 +39,4 @@ if __name__ == "__main__":
         pc.add(p3)
 
     pc.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=40)
-    save_wrapper(pc, "genuary", f"6_triangle_subdivision")
+    save_wrapper(pc, "genuary", "6_triangle_subdivision")

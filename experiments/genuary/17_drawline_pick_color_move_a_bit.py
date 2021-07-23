@@ -5,8 +5,6 @@ from cursor import path
 from cursor import renderer
 from cursor import filter
 
-import random
-
 
 def save_wrapper(pc, projname, fname):
     folder = data.DataDirHandler().jpg(projname)

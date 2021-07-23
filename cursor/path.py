@@ -297,7 +297,7 @@ class Path:
         for point in self.vertices:
             nparr = point.arr()
             pcs.append(nparr)
-        v = self.Rotate2D(ar(pcs), ar([0, 0]), angle)
+        # v = self.Rotate2D(ar(pcs), ar([0, 0]), angle)
 
     def intersect(self, newpath: "Path") -> typing.Tuple[bool, float, float]:
         for p1 in range(len(newpath) - 1):

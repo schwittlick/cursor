@@ -70,7 +70,7 @@ def pen_sample(pa, id):
     print(coll.bb())
     bb = path.BoundingBox(0, 0, res.width, res.height)
     if bb.inside(coll):
-        fname = f"pen_sample_test_{id}"
+        # fname = f"pen_sample_test_{id}"
         # coll2 = path.PathCollection(res)
         # add_bb(coll.bb(), coll2, res)
 

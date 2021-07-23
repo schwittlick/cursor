@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
     print(counter)
     pc.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=20)
-    save_wrapper(pc, "calendar", f"calendar1")
+    save_wrapper(pc, "calendar", "calendar1")
 
     device.SimpleExportWrapper().ex(
         pc,

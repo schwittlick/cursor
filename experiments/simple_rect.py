@@ -71,6 +71,6 @@ if __name__ == "__main__":
         device.PaperSize.LANDSCAPE_A1,
         100,
         "simple_rect",
-        f"simple_rect",
+        "simple_rect",
         gcode_layer_pen_mapping=layer_pen_mapping,
     )

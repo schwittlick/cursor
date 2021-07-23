@@ -39,7 +39,7 @@ if __name__ == "__main__":
         pc.add(p)
 
     pc.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=10)
-    svg_save_wrapper(pc, "millimeter", f"millimeter_papier")
+    svg_save_wrapper(pc, "millimeter", "millimeter_papier")
 
     device.SimpleExportWrapper().ex(
         pc,

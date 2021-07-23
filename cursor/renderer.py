@@ -252,7 +252,7 @@ class HPGLRenderer:
 
         with open(fname.as_posix(), "w") as file:
             # file.write(f"PA0,0;\n")
-            file.write(f"SP1;\n")
+            file.write("SP1;\n")
             file.write(f"VS{self.speed};\n")
 
             self.__append_to_file(file, 0.0, 0.0)

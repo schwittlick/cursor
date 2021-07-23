@@ -29,8 +29,6 @@ def canny():
     canny = cv2.Canny(image, 85, 255)
 
     cv2.namedWindow("image")  # make a window with name 'image'
-    # cv2.createTrackbar('L', 'image', 0, 255, callback)  # lower threshold trackbar for window 'image
-    # cv2.createTrackbar('U', 'image', 0, 255, callback)  # upper threshold trackbar for window 'image
 
     while 1:
         numpy_horizontal_concat = np.concatenate(
@@ -40,10 +38,10 @@ def canny():
         k = cv2.waitKey(1) & 0xFF
         if k == 27:  # escape key
             break
-        l = 18  # cv2.getTrackbarPos('L', 'image')
+        lImage = 18  # cv2.getTrackbarPos('L', 'image')
         u = 3  # cv2.getTrackbarPos('U', 'image')
 
-        canny = cv2.Canny(image, l, u)
+        canny = cv2.Canny(image, lImage, u)
 
     cv2.destroyAllWindows()
 
@@ -79,22 +77,20 @@ def test():
     cv2.createTrackbar(
         "L", "image", 0, 255, callback
     )  # lower threshold trackbar for window 'image
-    # cv2.createTrackbar('U', 'image', 0, 255, callback)  # upper threshold trackbar for window 'image
 
     while 1:
-        # numpy_horizontal_concat = np.concatenate((image, canny), axis=1)  # to display image side by side
-        l = cv2.getTrackbarPos("L", "image")
+        lImage = cv2.getTrackbarPos("L", "image")
         # u = cv2.getTrackbarPos('U', 'image')
 
         image2 = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         gray = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
-        _, binary = cv2.threshold(gray, l, 255, cv2.THRESH_BINARY_INV)
+        _, binary = cv2.threshold(gray, lImage, 255, cv2.THRESH_BINARY_INV)
         contours, hierarchy = cv2.findContours(
             binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
         )
 
         # draw all contours
-        image_c = cv2.drawContours(binary, contours, -1, (0, 255, 0), 2)
+        cv2.drawContours(binary, contours, -1, (0, 255, 0), 2)
         cv2.imshow("image", binary)
 
         k = cv2.waitKey(1) & 0xFF

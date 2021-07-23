@@ -3,7 +3,6 @@ from cursor import data
 from cursor import device
 from cursor import path
 from cursor import renderer
-from cursor import filter
 
 import random
 
@@ -57,7 +56,7 @@ if __name__ == "__main__":
     # all_paths.sort(ff)
 
     pc.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=40)
-    save_wrapper(pc, "genuary", f"16_circles_only_1")
+    save_wrapper(pc, "genuary", "16_circles_only_1")
 
     for pa in all_paths:
         direction_changes = pa.direction_changes_pos_neg()

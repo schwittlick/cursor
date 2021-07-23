@@ -7,7 +7,6 @@ import math
 def full_spiral(pp, rounds=200, _yextra=0.01, _theta=0.003):
     theta = 0
     yextra = 0
-    xextra = 0
     r = 50
     r2 = 10
     # wenn mehr oder weniger spacing, r2 does the job

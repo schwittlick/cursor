@@ -3,9 +3,6 @@ from cursor import data
 from cursor import device
 from cursor import path
 from cursor import renderer
-from cursor import filter
-
-import random
 
 
 def save_wrapper(pc, projname, fname):
@@ -59,4 +56,4 @@ if __name__ == "__main__":
         print(_sim)
 
     pc.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=10)
-    save_wrapper(pc, "similarity", f"similarity_test")
+    save_wrapper(pc, "similarity", "similarity_test")
