@@ -125,7 +125,9 @@ if __name__ == "__main__":
         coll.add(p10)
 
         coll.fit(
-            (800, 600), padding_mm=50, cutoff_mm=0,
+            (800, 600),
+            padding_mm=50,
+            cutoff_mm=0,
         )
 
         # r = renderer.SvgRenderer(DataDirHandler().svg("c66_single"))

@@ -292,7 +292,7 @@ class Path:
         return dot(pts - cnt, ar([[cos(ang), sin(ang)], [-sin(ang), cos(ang)]])) + cnt
 
     def rotate(self, angle: float) -> None:
-        """ works very wonkily """
+        """works very wonkily"""
         pcs = []
         for point in self.vertices:
             nparr = point.arr()
