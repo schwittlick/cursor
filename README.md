@@ -11,6 +11,7 @@ setup
     pyenv virtualenv 3.9.0 cursor
     pyenv activate cursor
     pip install -r requirements.txt
+    git submodule update --init
 
 
 test
