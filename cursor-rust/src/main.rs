@@ -58,11 +58,10 @@ fn record() {
 
             let now = SystemTime::now();
             let now: DateTime<Utc> = now.into();
-            //let now = now.to_rfc3339();
             let timed_pos = cursor::TimedPoint {
                 x: pos.0 as f64 / resolution.0 as f64,
                 y: pos.1 as f64 / resolution.1 as f64,
-                time: now,
+                ts: now.timestamp(),
             };
             println!("{}", &timed_pos);
             vec.push(timed_pos);

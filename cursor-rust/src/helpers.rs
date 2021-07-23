@@ -3,7 +3,6 @@ pub mod help {
     use std::fs;
     use std::io::prelude::*;
     use winapi::shared::windef::POINT;
-
     pub fn get_mouse_pos() -> (i32, i32) {
         let mut point = POINT { x: 0, y: 0 };
         unsafe { ::winapi::um::winuser::GetCursorPos(&mut point as *mut POINT) };

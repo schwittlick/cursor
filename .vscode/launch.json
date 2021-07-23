@@ -20,7 +20,7 @@
             "name": "cursor-rust-tests (windows)",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/cursor-rust/target/debug/deps/cursor_rust-27b02eede75f3487.exe",
+            "program": "${workspaceFolder}/cursor-rust/target/debug/deps/cursor_rust-8963a424a514f028.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
