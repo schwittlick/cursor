@@ -17,7 +17,7 @@ test
     
     # linux/osx
     py.test --cov cursor -v
-    flake8 --max-line-length=100
+    flake8 --max-line-length=100 --ignore=E402,W503
     
     # single test
     pytest tests/test_renderer.py::test_ascii_renderer
