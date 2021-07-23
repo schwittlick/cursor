@@ -6,9 +6,8 @@ use crate::helpers::help;
 use crate::path::cursor;
 
 use chrono::{DateTime, Utc};
-
+use rdev;
 use rdev::display_size;
-use rdev::{listen, Event};
 use std::thread;
 use std::time::{Duration, SystemTime};
 
@@ -18,13 +17,28 @@ fn main() {
     help::test_tray();
 }
 
-fn callback(event: Event) {
-    println!("My callback {:?}", event);
+fn match_events(event: rdev::Event) {
+    match event.event_type {
+        rdev::EventType::KeyRelease(key) => {
+            match key {
+                rdev::Key::KeyG => println!("g pressed"),
+                rdev::Key::Escape => std::process::exit(0),
+                _ => {}
+            }
+            println!("{:?}", event.name);
+        }
+        _ => {}
+    }
+}
+
+fn callback(event: rdev::Event) {
+    let _event_type = event.event_type;
+    let _res = match_events(event);
 }
 
 fn record() {
     thread::spawn(|| {
-        if let Err(error) = listen(callback) {
+        if let Err(error) = rdev::listen(callback) {
             println!("Error: {:?}", error)
         }
     });
