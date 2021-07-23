@@ -1,5 +1,6 @@
 mod helpers;
 mod path;
+mod test;
 
 use crate::helpers::help;
 use crate::path::cursor;
@@ -65,4 +66,13 @@ fn record() {
             }
         }
     });
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn internal() {
+        let encoded = "";
+        assert_eq!(encoded, "");
+    }
 }

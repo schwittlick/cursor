@@ -163,6 +163,8 @@ icon = None
 
 
 def save_exit(icon, item):
+    global rr
+    rr.save()
     icon.stop()
 
 
