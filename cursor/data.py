@@ -54,13 +54,12 @@ class JsonCompressor:
     ZIPJSON_KEY = "base64(zip(o))"
 
     def json_zip(self, j):
-        j = {
-            self.ZIPJSON_KEY: base64.b64encode(
-                zlib.compress(json.dumps(j, cls=MyJsonEncoder).encode("utf-8"))
-            ).decode("ascii")
-        }
+        dumped = json.dumps(j, cls=MyJsonEncoder)
+        dumped_encoded = dumped.encode("utf-8")
+        compressed = zlib.compress(dumped_encoded)
+        encoded = {self.ZIPJSON_KEY: base64.b64encode(compressed).decode("ascii")}
 
-        return j
+        return encoded
 
     def json_unzip(self, j, insist=True):
         try:

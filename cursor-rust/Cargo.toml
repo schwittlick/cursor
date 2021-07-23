@@ -16,7 +16,4 @@ ctrlc = "3.1.9"
 base64 = "0.13.0"
 tao = "0.4.0"
 simple_logger = "1.11.0"
-
-[[example]]
-name = "recorder"
-path = "src/recorder.rs"
+flate2 = "1.0.20"
