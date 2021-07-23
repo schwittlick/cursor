@@ -22,4 +22,15 @@ mod tests {
         //assert_eq!(_encoded, "lol");
         assert_eq!("lol", "lol");
     }
+
+    use chrono::DateTime;
+    use chrono::Utc;
+    use std::time::SystemTime;
+
+    #[test]
+    fn unix_timestamp() {
+        let utc_time: DateTime<Utc> = SystemTime::now().into();
+        let _utc = utc_time.timestamp();
+        assert!(_utc > 0);
+    }
 }
