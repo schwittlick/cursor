@@ -413,7 +413,7 @@ def test_angles():
     assert changes[3] == 0.0
 
 
-def test_similarity():
+def disabled_test_similarity():
     p1 = Path()
     p1.add(0, 0)
     p1.add(0, 1)

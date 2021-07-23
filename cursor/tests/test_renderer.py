@@ -268,7 +268,7 @@ def test_ascii_renderer():
     a.save("test1")
 
 
-def test_pdf_renderer():
+def disabled_test_pdf_renderer():
     path = DataDirHandler().test_recordings()
     loader = Loader(directory=path)
 
