@@ -1,5 +1,6 @@
 from cursor.loader import Loader
-from cursor.device import *
+from cursor.device import Paper
+from cursor.device import PaperSize
 from cursor.renderer import SvgRenderer
 from cursor.renderer import GCodeRenderer
 from cursor.renderer import JpegRenderer

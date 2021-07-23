@@ -1,9 +1,7 @@
-from cursor import loader
 from cursor import data
 from cursor import device
 from cursor import path
 from cursor import renderer
-from cursor import filter
 
 import random
 import sys
@@ -26,9 +24,6 @@ if __name__ == "__main__":
         "traceroute to jakarta.go.id (103.209.7.21), 60 hops max, 52 byte packets"
     )
     lines.append("1 o2.box (192.168.1.1)  3.058ms  3.572ms  3.475ms")
-    lines.append(
-        "2 loopback1.0002.acln.02.ber.de.net.telefonica.de (62.52.200.176) 40.494ms 14.325ms  10.908ms"
-    )
     lines.append(
         "3  ae13-0.0001.dbrx.02.ber.de.net.telefonica.de (62.53.11.216)  14.309ms"
     )
@@ -59,9 +54,6 @@ if __name__ == "__main__":
     )
     lines.append(
         "11  100ge14-2.core1.sin1.he.net (184.105.65.13)  173.614ms  177.161ms  192.652ms"
-    )
-    lines.append(
-        "12  moratel-international-pte-ltd.10gigabitethernet3-13.core1.sin1.he.net (65.49.108.46)  194.013ms  197.305ms  198.490ms"
     )
     lines.append(
         "13  ip-103-83-6-17.moratelindo.net.id (103.83.6.17)  193.801ms  194.040ms  319.188ms"
@@ -171,5 +163,5 @@ if __name__ == "__main__":
         device.PaperSize.LANDSCAPE_A3,
         50,
         "genuary",
-        f"15_let_somebody",
+        "15_let_somebody",
     )

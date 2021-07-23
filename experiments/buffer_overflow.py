@@ -23,7 +23,6 @@ def circles():
 
     for i in range(10):
         theta = 0
-        yextra = 0
         r += 20
         pp = path.Path()
         while theta < 255:

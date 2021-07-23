@@ -117,4 +117,4 @@ if __name__ == "__main__":
         yv += 1
 
     c.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=40)
-    save_wrapper(c, "genuary", f"2_rule30")
+    save_wrapper(c, "genuary", "2_rule30")

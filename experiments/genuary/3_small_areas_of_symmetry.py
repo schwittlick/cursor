@@ -3,7 +3,6 @@ from cursor import data
 from cursor import device
 from cursor import path
 from cursor import renderer
-from cursor import filter
 
 import numpy
 
