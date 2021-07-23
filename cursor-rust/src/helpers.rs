@@ -1,9 +1,7 @@
 pub mod help {
     use crate::path::cursor;
-    
     use std::fs;
     use std::io::prelude::*;
-    use std::path::Path;
     use winapi::shared::windef::POINT;
 
     pub fn get_mouse_pos() -> (i32, i32) {
@@ -43,8 +41,8 @@ pub mod help {
         })
         .expect("Error setting Ctrl-C handler");
     }
-
-    fn writesomestuff() {
+    /*
+    fn write_some_stuff() {
         let paths = fs::read_dir("../data/recordings/").unwrap();
         for p in paths {
             let path_string = p.unwrap().path();
@@ -64,6 +62,7 @@ pub mod help {
             }
         }
     }
+    */
     pub fn test_tray() {
         use simple_logger::SimpleLogger;
         use std::collections::HashMap;
