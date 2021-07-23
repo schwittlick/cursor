@@ -10,7 +10,7 @@ pub mod help {
     }
 
     pub fn get_resolution() -> (i32, i32) {
-        let mut _r = unsafe {
+        let _r = unsafe {
             let _dpi_aware = ::winapi::um::winuser::SetProcessDPIAware();
             let x =
                 ::winapi::um::winuser::GetSystemMetrics(::winapi::um::winuser::SM_CXVIRTUALSCREEN);
@@ -18,7 +18,7 @@ pub mod help {
                 ::winapi::um::winuser::GetSystemMetrics(::winapi::um::winuser::SM_CYVIRTUALSCREEN);
             (x, y)
         };
-        return (_r.0, _r.1);
+        (_r.0, _r.1)
     }
 
     pub fn write_points(point: &Vec<cursor::TimedPoint>) -> std::io::Result<()> {

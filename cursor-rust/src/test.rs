@@ -1,12 +1,18 @@
 #[cfg(test)]
 mod tests {
+    use crate::path::cursor;
     use base64;
+    use chrono::DateTime;
+    use chrono::Utc;
     use flate2::write::ZlibDecoder;
     use flate2::write::ZlibEncoder;
     use flate2::Compression;
+    use serde_json;
     use std::fs;
     use std::io;
     use std::io::prelude::*;
+    use std::time::SystemTime;
+
     #[test]
     fn encoding() {
         let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
@@ -33,12 +39,12 @@ mod tests {
         assert_eq!("lol", "lol");
     }
 
-    fn decode_reader(bytes: &std::vec::Vec<u8>) -> io::Result<String> {
+    fn decode_reader(bytes: &[u8]) -> io::Result<String> {
         let mut writer = Vec::new();
         let mut z = ZlibDecoder::new(writer);
         let res = z.write_all(&bytes[..]);
         match res {
-            Err(what) => {}
+            Err(_what) => {}
             Ok(_) => {}
         }
         writer = z.finish()?;
@@ -48,8 +54,7 @@ mod tests {
     #[test]
     fn decoding() {
         let s: String = String::from("eJylmEtOnDEQhK+CZo1Gdtttt3MVxIIFUqIIBQkiJULcPYZNuuzybwZWvOrDj6q22/Nyevj1++n+9O3q5fR49/z9qX93c/Ny+tO/hrOZ2PXV6e/7Dy0k6T88v0likdJaVSnnKq/XV/+BKB6oDEgABHVALgzIHqitOkDjHrDiADqAoj7v9OVArwyoCMQtYADU5oHGgIZAckBlwDCAn5Elpo8AFJ+Lxmw2QcDNKAYWJEsIOH1kLhi6rG5Gkf5/dFn9hFJmANqsXk+3FF3OrhK66gOA19MtRdOSB4wVgmEqkp9RY0tGvbhKk2BMH9eAsCWPgFuCJOZykzWQ2Zobxii60hFltdYwR7F4gPncdA3Q4mwYpOjXUFmxHQLUB0xS8FNq1Ac7AKgPGI3gqieRQ7Keg9eX5qozzbZNcvXy2bWujwikLSAIeP1sWtdDjorpFshrQD4CyBbQNZDmHHWgILDVQ4yKP5E+AcxB7YAhIFsAclfAtzwfkvUcMRilbgFZAzrXTgcwGSVeCKhfg7LaiWi0lksBP6XCyi1iMrIfgW4SGp3jTo8+Jx+9ysozos9JdwC6lnz9sxyh3Le1yVityQD4+ZCrswNossiFQPS5a3QJeF5EN6UcWHUeAaRF6gCmwvfynwBYLgRzFFwpZGFBHQF3wmR6kUg7AFiQ0IYgX9AzmxMESVv7ip4CGQG/YKWAHgAseKmugcKCNwJxC9gaqCx4A2BtB+QDPQtqjgiULZAuBIquAdLN1+FRqP4V+QmAXSP4itRqOwBfhVrLMWBDR6L1Qn2x4zXb0JFo0UsBOfbNho5EYQ0fAvwIZa43O+OmZj8AqZ5JvylPGzoe9Q9VdgBMQCpbAIvBv1Rznq/bGfBRJaeeDR2PyuaYtKGDUUlbwA4Aope1nFxUNtz/CAirBbzOB4COgMETv6nkdrZzimsgUAAXHW0L5AOAZXUE0hbQJcDaqhk47gxtvNwCtJIsGMNdhQDR57WcdMJdL2ugsCBle729ffv9j4f7p+e7h0f/59w3JNv7p7qnn/d/3z8Qvn39B82p1X4=");
-        let b = s.into_bytes();
-        let r = decode_reader(&b);
+        let r = decode_reader(&s.as_bytes());
         match r {
             Ok(result) => {
                 println!("{}", result);
@@ -60,12 +65,6 @@ mod tests {
             }
         }
     }
-
-    use crate::path::cursor;
-    use chrono::DateTime;
-    use chrono::Utc;
-    use serde_json;
-    use std::time::SystemTime;
 
     #[test]
     fn test_serialize_deserialize() {
