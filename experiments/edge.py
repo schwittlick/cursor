@@ -1,11 +1,7 @@
-from cursor import loader
 from cursor import data
 from cursor import device
 from cursor import path
 from cursor import renderer
-from cursor import filter
-
-import random
 
 import cv2
 import numpy as np
@@ -17,7 +13,7 @@ def callback(x):
 
 
 def detect_edge(image):
-    """ Detecting Edges """
+    """Detecting Edges"""
     image_with_edges = cv2.Canny(image, 30, 200)
     images = [image, image_with_edges]
     location = [121, 122]
@@ -76,6 +72,7 @@ def save_contours(con):
 
 
 def test():
+    global image
     image = cv2.imread("1304_small.jpg", 0)
 
     cv2.namedWindow("image")  # make a window with name 'image'
