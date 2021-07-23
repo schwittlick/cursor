@@ -1,5 +1,8 @@
 cursor/tests/data
-data/
+data/experiments
+data/*.hpgl
+data/*.svg
+data/*.ttf
 venv/
 .idea
 .coverage

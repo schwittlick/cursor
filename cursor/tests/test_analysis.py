@@ -15,7 +15,7 @@ def test_simple_histogram():
 
     # h.get(p.direction_changes())
 
-    dir = DataDirHandler().recordings()
+    dir = DataDirHandler().test_recordings()
     # single_file = dir / "1565088885.39372_compressed.json"
     ll = Loader(directory=dir, limit_files=2)
     # ll.load_file(single_file)
