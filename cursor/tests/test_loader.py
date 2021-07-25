@@ -61,5 +61,4 @@ def test_recording_from_rust():
     single_file = dir / "1565089006.12945_compressed.json"
     ll = Loader()
     ll.load_file(single_file)
-    # that specific file has 18 paths
     assert len(ll.all_paths()) == 1
