@@ -3,8 +3,11 @@
     "tasks": [
         {
             "label": "cargo build",
-            "type": "cargo",
-            "subcommand": "build",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/cursor-rust"
+            },
+            "command": "cargo build",
             "problemMatcher": [
                 "$rustc"
             ]
