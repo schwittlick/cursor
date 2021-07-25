@@ -8,59 +8,75 @@ use crate::path::cursor;
 use chrono::{DateTime, Utc};
 use rdev;
 use rdev::display_size;
+use std::io;
 use std::thread;
 use std::time::{Duration, SystemTime};
 
 fn main() {
     help::add_ctrlc_handler();
-    record();
+    help::add_event_listener(callback);
+    record().unwrap();
     help::test_tray();
 }
 
-fn match_events(event: rdev::Event) {
+fn callback(event: rdev::Event) {
     match event.event_type {
-        rdev::EventType::KeyRelease(key) => {
-            match key {
-                rdev::Key::KeyG => println!("g pressed"),
-                rdev::Key::Escape => std::process::exit(0),
-                _ => {}
-            }
+        rdev::EventType::KeyRelease(key) => match key {
+            rdev::Key::KeyG => println!("g pressed"),
+            rdev::Key::Escape => std::process::exit(0),
+            _ => {}
+        },
+        rdev::EventType::MouseMove { x, y } => {
+            let mut _x = x.clamp(0.0, 2180.0);
+            let mut _y = y;
+            if _x < 0.0 {
+                _x = 0.0
+            };
+            if _y < 0.0 {
+                _y = 0.0
+            };
+            println!("{}x{}", _x, _y);
+        }
+        _ => {
             println!("{:?}", event.name);
         }
-        _ => {}
     }
 }
 
-fn callback(event: rdev::Event) {
-    let _event_type = event.event_type;
-    let _res = match_events(event);
-}
-
-fn record() {
-    thread::spawn(|| {
-        if let Err(error) = rdev::listen(callback) {
-            println!("Error: {:?}", error)
-        }
-    });
-
+fn record() -> Result<i32, io::Error> {
     thread::spawn(|| {
         let mut counter = 0;
         let mut vec = Vec::new();
-        let resolution = help::get_resolution();
-        println!("{:?}", resolution);
+        let (width, height) = match help::get_resolution() {
+            Ok(res) => res,
+            Err(err) => {
+                println!("Couldnt get resolution: {:?}", err);
+                return err;
+                //return Err(err);
+            }
+        };
+        println!("{:?}x{:?}", width, height);
+
+        let (w, h) = match display_size() {
+            Ok(wh) => wh,
+            Err(err) => {
+                println!("Couldn't get display size: {:?}", err);
+                std::process::exit(0);
+                //return Err();
+            }
+        };
+
+        println!("Your screen is {:?}x{:?}", w, h);
 
         loop {
-            let pos = help::get_mouse_pos();
-            println!("{:?}", pos);
-            let (w, h) = display_size().unwrap();
-
-            println!("Your screen is {:?}x{:?}", w, h);
+            let (x, y) = help::get_mouse_pos();
+            println!("{:?}x{:?}", x, y);
 
             let now = SystemTime::now();
             let now: DateTime<Utc> = now.into();
             let timed_pos = cursor::TimedPoint {
-                x: pos.0 as f64 / resolution.0 as f64,
-                y: pos.1 as f64 / resolution.1 as f64,
+                x: x as f64 / width as f64,
+                y: y as f64 / height as f64,
                 ts: now.timestamp(),
             };
             println!("{}", &timed_pos);
@@ -79,6 +95,8 @@ fn record() {
             }
         }
     });
+
+    return Ok(0);
 }
 
 #[cfg(test)]

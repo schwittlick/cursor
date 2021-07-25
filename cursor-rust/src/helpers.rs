@@ -1,7 +1,9 @@
 pub mod help {
     use crate::path::cursor;
     use std::fs;
+    use std::io;
     use std::io::prelude::*;
+    use std::thread;
     use winapi::shared::windef::POINT;
     pub fn get_mouse_pos() -> (i32, i32) {
         let mut point = POINT { x: 0, y: 0 };
@@ -9,7 +11,7 @@ pub mod help {
         (point.x, point.y)
     }
 
-    pub fn get_resolution() -> (i32, i32) {
+    pub fn get_resolution() -> Result<(u64, u64), io::Error> {
         let _r = unsafe {
             let _dpi_aware = ::winapi::um::winuser::SetProcessDPIAware();
             let x =
@@ -18,7 +20,7 @@ pub mod help {
                 ::winapi::um::winuser::GetSystemMetrics(::winapi::um::winuser::SM_CYVIRTUALSCREEN);
             (x, y)
         };
-        (_r.0, _r.1)
+        Ok((_r.0 as u64, _r.1 as u64))
     }
 
     pub fn write_points(point: &Vec<cursor::TimedPoint>) -> std::io::Result<()> {
@@ -39,6 +41,15 @@ pub mod help {
             std::process::exit(0);
         })
         .expect("Error setting Ctrl-C handler");
+    }
+
+    pub fn add_event_listener(f: fn(rdev::Event)) {
+        thread::spawn(move || {
+            match rdev::listen(f) {
+                Err(err) => println!("Failed to start event callback listener. {:?}", err),
+                Ok(ok) => println!("Successfully started event callback listener: {:?}", ok),
+            };
+        });
     }
     /*
     fn write_some_stuff() {
