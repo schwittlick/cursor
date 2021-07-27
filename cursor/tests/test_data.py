@@ -67,7 +67,12 @@ def test_json_encoder():
 
 
 def test_json_decoder():
-    enc = "{'base64(zip(o))': 'eJyrVsrNLy1OVbJSqFYqSCzJKAayoqOrlSqAtIGOglIllC4BSRiaGZkZGJubGRrXxsaCBDNzU4tLEnMLIHLmBiYWpuYGeoYGphYWRrVABdmplWADY2sB4yQcFQ=='}"
+    hash = (
+        "eJyrVsrNLy1OVbJSqFYqSCzJKAayoqOrlSqAtIGOglIllC4BSRiaGZkZGJubGR" \
+        + "rXxsaCBDNzU4tLEnMLIHLmBiYWpuYGeoYGphYWRrVABdmplWADY2sB4yQcFQ=="
+    )
+    d = type(hash)
+    enc = "{'base64(zip(o))': '" + str(hash) + "'}"
     compressor = JsonCompressor()
     res = compressor.json_unzip(eval(enc))
     assert len(res["mouse"]) == 1
