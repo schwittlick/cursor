@@ -9,7 +9,7 @@ def test_loader_simple():
     ll = Loader(directory=dir)
 
     rec = ll.all_collections()
-    assert len(rec) == 2
+    assert len(rec) == 3
 
 
 def test_loader_keys():

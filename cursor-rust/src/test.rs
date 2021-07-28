@@ -4,25 +4,25 @@ mod tests {
     use base64;
     use chrono::DateTime;
     use chrono::Utc;
-    use flate2::write::ZlibDecoder;
+    //use flate2::write::ZlibDecoder;
     use flate2::write::ZlibEncoder;
     use flate2::Compression;
     use serde_json;
     use std::fs;
-    use std::io;
+    //use std::io;
     use std::io::prelude::*;
     use std::time::SystemTime;
 
     #[test]
     fn encoding() {
         let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-        let result = e.write_all(b"{\"keys\":[],\"mouse\":{\"paths\":[{\"ts\":1626037613,\"x\":0.1,\"y\":0.1}]},\"timestamp\":1627049293}");
+        let result = e.write_all(b"{\"resolution\": {\"w\": 3840, \"h\": 2160},\"mouse\":{\"paths\":[[{\"ts\":1626037613,\"x\":0.1,\"y\":0.1}]],\"timestamp\":1627049293}, \"keys\":[]}");
         match result {
             Ok(_) => {}
             Err(result) => println!("couldnt write stuff; {:?}", result),
         }
         let compressed_bytes = e.finish();
-        //let encoded = match compressed_bytes{
+        //let encoded = match compressed_bytes{W
         //    Ok(compressed_bytes) => compressed_bytes,
         //};
 
