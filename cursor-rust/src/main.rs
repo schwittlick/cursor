@@ -7,12 +7,13 @@ use crate::path::cursor;
 
 use chrono::{DateTime, Utc};
 use rdev;
-use rdev::display_size;
 use std::io;
 use std::thread;
 use std::time::{Duration, SystemTime};
 
 fn main() {
+    // let mut vec: Vec<cursor::TimedPoint> = Vec::new();
+
     help::add_ctrlc_handler();
     help::add_event_listener(callback);
     record().unwrap();
@@ -46,27 +47,16 @@ fn callback(event: rdev::Event) {
 fn record() -> Result<i32, io::Error> {
     thread::spawn(|| {
         let mut counter = 0;
-        let mut vec = Vec::new();
+        let mut vec: Vec<cursor::TimedPoint> = Vec::new();
+
         let (width, height) = match help::get_resolution() {
             Ok(res) => res,
             Err(err) => {
                 println!("Couldnt get resolution: {:?}", err);
-                return err;
-                //return Err(err);
+                std::process::exit(0);
             }
         };
         println!("{:?}x{:?}", width, height);
-
-        let (w, h) = match display_size() {
-            Ok(wh) => wh,
-            Err(err) => {
-                println!("Couldn't get display size: {:?}", err);
-                std::process::exit(0);
-                //return Err();
-            }
-        };
-
-        println!("Your screen is {:?}x{:?}", w, h);
 
         loop {
             let (x, y) = help::get_mouse_pos();
@@ -74,17 +64,28 @@ fn record() -> Result<i32, io::Error> {
 
             let now = SystemTime::now();
             let now: DateTime<Utc> = now.into();
-            let timed_pos = cursor::TimedPoint {
-                x: x as f64 / width as f64,
-                y: y as f64 / height as f64,
-                ts: now.timestamp(),
-            };
+            let timed_pos = cursor::TimedPoint::new(
+                x as f64 / width as f64,
+                y as f64 / height as f64,
+                now.timestamp(),
+            );
+
             println!("{}", &timed_pos);
-            vec.push(timed_pos);
-            thread::sleep(Duration::from_millis(1000));
+            if vec.len() > 0 {
+                let ll = vec.last().unwrap();
+                if !ll.same_pos(&timed_pos) {
+                    println!("added");
+                    vec.push(timed_pos);
+                } else {
+                    println!("not added. hura");
+                }
+            } else {
+                vec.push(timed_pos);
+            }
+            thread::sleep(Duration::from_millis(100));
 
             counter = counter + 1;
-            if counter >= 4 {
+            if counter >= 3 {
                 println!("{}", vec.len());
                 match help::write_points(&vec) {
                     Ok(v) => println!("ok: {:?}", v),

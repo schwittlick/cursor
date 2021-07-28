@@ -8,6 +8,16 @@ pub mod cursor {
         pub ts: i64,
     }
 
+    impl TimedPoint {
+        pub fn new(x: f64, y: f64, ts: i64) -> TimedPoint {
+            TimedPoint { x: x, y: y, ts: ts }
+        }
+
+        pub fn same_pos(&self, other: &TimedPoint) -> bool {
+            self.x == other.x && self.y == other.y
+        }
+    }
+
     impl fmt::Display for TimedPoint {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
             write!(f, "({}, {}, {})", self.x, self.y, self.ts)
@@ -19,7 +29,6 @@ pub mod cursor {
             self.x == other.x && self.y == other.y && self.ts == other.ts
         }
     }
-
     #[derive(Serialize, Deserialize, Debug)]
     pub struct PathCollection {
         pub paths: Vec<TimedPoint>,
