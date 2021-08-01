@@ -78,6 +78,18 @@ pub mod cursor {
         pub fn new() -> PathCollection {
             PathCollection { paths: Vec::new() }
         }
+        pub fn callback(&mut self, event: rdev::Event) {
+            let timed_pos = cursor::TimedPoint::now();
+
+            match self.last() {
+                Some(x) => {
+                    if !x.same_pos(&timed_pos) {
+                        self.add(timed_pos);
+                    }
+                }
+                None => self.add(timed_pos),
+            };
+        }
         pub fn size(&self) -> usize {
             self.paths.len()
         }

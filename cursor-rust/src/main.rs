@@ -13,10 +13,14 @@ use std::time::Duration;
 
 fn main() {
     //let (rx, tx) = channel();
-
+    let l: lol = lol { p: 1 };
+    let mut pc = cursor::PathCollection::new();
     help::add_ctrlc_handler();
-    help::add_event_listener(callback);
-    let data = record();
+    help::add_event_listener(l.callback);
+    // here i would pass a lambda to do a bit more
+    // but i need to research this
+    // just remove the l. from l.callback and it will work again
+    let data = record(&pc);
     match data {
         Ok(pc) => {
             match help::write_points(&pc) {
@@ -28,6 +32,13 @@ fn main() {
     };
     std::process::exit(0);
     help::test_tray();
+}
+
+struct lol {
+    pub p: u8,
+}
+impl lol {
+    pub fn callback(&self, event: rdev::Event) {}
 }
 
 fn callback(event: rdev::Event) {
@@ -48,10 +59,9 @@ fn callback(event: rdev::Event) {
     }
 }
 
-fn record() -> Result<cursor::PathCollection, u8> {
+fn record(mut pc: &cursor::PathCollection) -> Result<cursor::PathCollection, u8> {
     let handler = thread::spawn(|| {
         let mut counter = 0;
-        let mut pc = cursor::PathCollection::new();
 
         loop {
             let timed_pos = cursor::TimedPoint::now();
@@ -65,7 +75,7 @@ fn record() -> Result<cursor::PathCollection, u8> {
                 None => pc.add(timed_pos),
             };
 
-            thread::sleep(Duration::from_millis(1));
+            thread::sleep(Duration::from_millis(100));
 
             counter += 1;
             if counter >= 30 {
