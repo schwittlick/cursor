@@ -14,8 +14,22 @@ pub mod cursor {
         pub ts: i64,
     }
 
+    static mut RESOLUTION: (u16, u16) = (0, 0); //help::get_resolution().unwrap();
+                                                // how to init this from a non-static function?
+                                                // how to make a static function?
     impl TimedPoint {
         pub fn new(x: f64, y: f64, ts: i64) -> TimedPoint {
+            unsafe {
+                if RESOLUTION.0 == 0 || RESOLUTION.1 == 0 {
+                    RESOLUTION = match help::get_resolution() {
+                        Ok(res) => res,
+                        Err(err) => {
+                            println!("Couldnt get resolution: {:?}", err);
+                            std::process::exit(0);
+                        }
+                    };
+                }
+            }
             TimedPoint { x: x, y: y, ts: ts }
         }
 
@@ -23,21 +37,15 @@ pub mod cursor {
             let (x, y) = help::get_mouse_pos();
             //println!("{:?}x{:?}", x, y);
 
-            let (width, height) = match help::get_resolution() {
-                Ok(res) => res,
-                Err(err) => {
-                    println!("Couldnt get resolution: {:?}", err);
-                    std::process::exit(0);
-                }
-            };
-
             let now = SystemTime::now();
             let now: DateTime<Utc> = now.into();
-            cursor::TimedPoint::new(
-                x as f64 / width as f64,
-                y as f64 / height as f64,
-                now.timestamp(),
-            )
+            unsafe {
+                cursor::TimedPoint::new(
+                    x as f64 / RESOLUTION.0 as f64,
+                    y as f64 / RESOLUTION.1 as f64,
+                    now.timestamp(),
+                )
+            }
         }
 
         pub fn same_pos(&self, other: &TimedPoint) -> bool {

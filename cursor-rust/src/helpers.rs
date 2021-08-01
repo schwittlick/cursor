@@ -11,7 +11,7 @@ pub mod help {
         (point.x, point.y)
     }
 
-    pub fn get_resolution() -> Result<(u64, u64), io::Error> {
+    pub fn get_resolution() -> Result<(u16, u16), io::Error> {
         let _r = unsafe {
             let _dpi_aware = ::winapi::um::winuser::SetProcessDPIAware();
             let x =
@@ -20,7 +20,7 @@ pub mod help {
                 ::winapi::um::winuser::GetSystemMetrics(::winapi::um::winuser::SM_CYVIRTUALSCREEN);
             (x, y)
         };
-        Ok((_r.0 as u64, _r.1 as u64))
+        Ok((_r.0 as u16, _r.1 as u16))
     }
 
     pub fn write_points(points: &cursor::PathCollection) -> std::io::Result<()> {
