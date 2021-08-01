@@ -1,12 +1,11 @@
 pub mod cursor {
-    use serde::{Deserialize, Serialize};
-    use std::fmt;
-
     use crate::helpers::help;
     use crate::path::cursor;
-
     use chrono::{DateTime, Utc};
+    use serde::{Deserialize, Serialize};
+    use std::fmt;
     use std::time::SystemTime;
+
     #[derive(Serialize, Deserialize, Debug)]
     pub struct TimedPoint {
         pub x: f64,
@@ -15,8 +14,7 @@ pub mod cursor {
     }
 
     static mut RESOLUTION: (u16, u16) = (0, 0); //help::get_resolution().unwrap();
-                                                // how to init this from a non-static function?
-                                                // how to make a static function?
+
     impl TimedPoint {
         pub fn new(x: f64, y: f64, ts: i64) -> TimedPoint {
             unsafe {
@@ -37,15 +35,22 @@ pub mod cursor {
             let (x, y) = help::get_mouse_pos();
             //println!("{:?}x{:?}", x, y);
 
+            let (width, height) = match help::get_resolution() {
+                Ok(res) => res,
+                Err(err) => {
+                    println!("Couldnt get resolution: {:?}", err);
+                    std::process::exit(0);
+                }
+            };
+            println!("{}, {}", width, height);
+
             let now = SystemTime::now();
             let now: DateTime<Utc> = now.into();
-            unsafe {
-                cursor::TimedPoint::new(
-                    x as f64 / RESOLUTION.0 as f64,
-                    y as f64 / RESOLUTION.1 as f64,
-                    now.timestamp(),
-                )
-            }
+            cursor::TimedPoint::new(
+                x as f64 / width as f64,
+                y as f64 / height as f64,
+                now.timestamp(),
+            )
         }
 
         pub fn same_pos(&self, other: &TimedPoint) -> bool {

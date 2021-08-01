@@ -23,18 +23,20 @@ pub mod help {
         Ok((_r.0 as u16, _r.1 as u16))
     }
 
-    pub fn write_points(points: &cursor::PathCollection) -> std::io::Result<()> {
+    pub fn write_points(points: &cursor::PathCollection) -> Result<usize, io::Error> {
         let file_name = "paths.txt";
         let mut f = fs::File::create(&file_name)?;
 
+        let mut content: String = String::new();
         for p in points.iter() {
             let str = p.to_string() + "\n";
-            println!("saved {} to {}", str, file_name);
-            f.write_all(str.as_bytes()).expect("couldnt write :(");
+            content += &str;
         }
 
+        println!("saved {} to {}", &content, file_name);
+        f.write_all(content.as_bytes()).expect("couldnt write :(");
         f.sync_all()?;
-        Ok(())
+        Ok(points.size())
     }
 
     pub fn add_ctrlc_handler() {

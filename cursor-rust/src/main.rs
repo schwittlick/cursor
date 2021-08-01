@@ -5,15 +5,28 @@ mod test;
 use crate::helpers::help;
 use crate::path::cursor;
 
+//use mpsc;
 use rdev;
-use std::io;
+use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Duration;
 
 fn main() {
+    //let (rx, tx) = channel();
+
     help::add_ctrlc_handler();
     help::add_event_listener(callback);
-    record().unwrap();
+    let data = record();
+    match data {
+        Ok(pc) => {
+            match help::write_points(&pc) {
+                Ok(num_points) => println!("saved {} points lol", num_points),
+                Err(_) => println!("failed to save points"),
+            };
+        }
+        Err(_) => println!("failed to record"),
+    };
+    std::process::exit(0);
     help::test_tray();
 }
 
@@ -25,14 +38,8 @@ fn callback(event: rdev::Event) {
             _ => {}
         },
         rdev::EventType::MouseMove { x, y } => {
-            let mut _x = x.clamp(0.0, 2180.0);
-            let mut _y = y;
-            if _x < 0.0 {
-                _x = 0.0
-            };
-            if _y < 0.0 {
-                _y = 0.0
-            };
+            let _x_clamped = x.clamp(0.0, 3840.0);
+            let _y_clamped = y.clamp(0.0, 2160.0);
             //println!("{}x{}", _x, _y);
         }
         _ => {
@@ -41,8 +48,8 @@ fn callback(event: rdev::Event) {
     }
 }
 
-fn record() -> Result<i32, io::Error> {
-    thread::spawn(|| {
+fn record() -> Result<cursor::PathCollection, u8> {
+    let handler = thread::spawn(|| {
         let mut counter = 0;
         let mut pc = cursor::PathCollection::new();
 
@@ -58,22 +65,20 @@ fn record() -> Result<i32, io::Error> {
                 None => pc.add(timed_pos),
             };
 
-            thread::sleep(Duration::from_millis(100));
+            thread::sleep(Duration::from_millis(1));
 
             counter += 1;
-            if counter >= 3 {
+            if counter >= 30 {
                 println!("collected {} points", pc.size());
-                match help::write_points(&pc) {
-                    Ok(v) => println!("ok: {:?}", v),
-                    Err(e) => println!("err: {}", e),
-                }
-
-                std::process::exit(0);
+                return pc;
             }
         }
     });
 
-    return Ok(0);
+    return match handler.join() {
+        Ok(pc) => Ok(pc),
+        Err(_) => Err(1),
+    };
 }
 
 #[cfg(test)]
