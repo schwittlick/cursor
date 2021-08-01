@@ -12,8 +12,6 @@ use std::thread;
 use std::time::{Duration, SystemTime};
 
 fn main() {
-    // let mut vec: Vec<cursor::TimedPoint> = Vec::new();
-
     help::add_ctrlc_handler();
     help::add_event_listener(callback);
     record().unwrap();
@@ -47,7 +45,7 @@ fn callback(event: rdev::Event) {
 fn record() -> Result<i32, io::Error> {
     thread::spawn(|| {
         let mut counter = 0;
-        let mut vec: Vec<cursor::TimedPoint> = Vec::new();
+        let mut pc: cursor::PathCollection = cursor::PathCollection::new();
 
         let (width, height) = match help::get_resolution() {
             Ok(res) => res,
@@ -71,23 +69,23 @@ fn record() -> Result<i32, io::Error> {
             );
 
             println!("{}", &timed_pos);
-            if vec.len() > 0 {
-                let ll = vec.last().unwrap();
+            if pc.size() > 0 {
+                let ll = pc.last().unwrap();
                 if !ll.same_pos(&timed_pos) {
                     println!("added");
-                    vec.push(timed_pos);
+                    pc.add(timed_pos);
                 } else {
                     println!("not added. hura");
                 }
             } else {
-                vec.push(timed_pos);
+                pc.add(timed_pos);
             }
             thread::sleep(Duration::from_millis(100));
 
             counter = counter + 1;
             if counter >= 3 {
-                println!("{}", vec.len());
-                match help::write_points(&vec) {
+                println!("collected {} points", pc.size());
+                match help::write_points(&pc) {
                     Ok(v) => println!("ok: {:?}", v),
                     Err(e) => println!("err: {}", e),
                 }

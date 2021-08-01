@@ -23,10 +23,10 @@ pub mod help {
         Ok((_r.0 as u64, _r.1 as u64))
     }
 
-    pub fn write_points(point: &Vec<cursor::TimedPoint>) -> std::io::Result<()> {
+    pub fn write_points(points: &cursor::PathCollection) -> std::io::Result<()> {
         let mut f = fs::File::create("foo.txt")?;
 
-        for p in point.iter() {
+        for p in points.iter() {
             let str = p.to_string() + "\n";
             f.write_all(str.as_bytes()).expect("couldnt write :(");
         }

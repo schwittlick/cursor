@@ -33,4 +33,26 @@ pub mod cursor {
     pub struct PathCollection {
         pub paths: Vec<TimedPoint>,
     }
+
+    trait Add {
+        fn add(&mut self, p: TimedPoint);
+    }
+
+    impl PathCollection {
+        pub fn new() -> PathCollection {
+            PathCollection { paths: Vec::new() }
+        }
+        pub fn size(&self) -> usize {
+            self.paths.len()
+        }
+        pub fn last(&self) -> std::option::Option<&TimedPoint> {
+            self.paths.last()
+        }
+        pub fn add(&mut self, p: TimedPoint) {
+            self.paths.push(p);
+        }
+        pub fn iter(&self) -> std::slice::Iter<TimedPoint> {
+            self.paths.iter()
+        }
+    }
 }
