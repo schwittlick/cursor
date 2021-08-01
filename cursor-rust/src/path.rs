@@ -1,6 +1,12 @@
 pub mod cursor {
     use serde::{Deserialize, Serialize};
     use std::fmt;
+
+    use crate::helpers::help;
+    use crate::path::cursor;
+
+    use chrono::{DateTime, Utc};
+    use std::time::SystemTime;
     #[derive(Serialize, Deserialize, Debug)]
     pub struct TimedPoint {
         pub x: f64,
@@ -11,6 +17,27 @@ pub mod cursor {
     impl TimedPoint {
         pub fn new(x: f64, y: f64, ts: i64) -> TimedPoint {
             TimedPoint { x: x, y: y, ts: ts }
+        }
+
+        pub fn now() -> TimedPoint {
+            let (x, y) = help::get_mouse_pos();
+            //println!("{:?}x{:?}", x, y);
+
+            let (width, height) = match help::get_resolution() {
+                Ok(res) => res,
+                Err(err) => {
+                    println!("Couldnt get resolution: {:?}", err);
+                    std::process::exit(0);
+                }
+            };
+
+            let now = SystemTime::now();
+            let now: DateTime<Utc> = now.into();
+            cursor::TimedPoint::new(
+                x as f64 / width as f64,
+                y as f64 / height as f64,
+                now.timestamp(),
+            )
         }
 
         pub fn same_pos(&self, other: &TimedPoint) -> bool {
@@ -32,10 +59,6 @@ pub mod cursor {
     #[derive(Serialize, Deserialize, Debug)]
     pub struct PathCollection {
         pub paths: Vec<TimedPoint>,
-    }
-
-    trait Add {
-        fn add(&mut self, p: TimedPoint);
     }
 
     impl PathCollection {

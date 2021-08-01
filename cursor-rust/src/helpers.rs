@@ -24,10 +24,12 @@ pub mod help {
     }
 
     pub fn write_points(points: &cursor::PathCollection) -> std::io::Result<()> {
-        let mut f = fs::File::create("foo.txt")?;
+        let file_name = "paths.txt";
+        let mut f = fs::File::create(&file_name)?;
 
         for p in points.iter() {
             let str = p.to_string() + "\n";
+            println!("saved {} to {}", str, file_name);
             f.write_all(str.as_bytes()).expect("couldnt write :(");
         }
 
