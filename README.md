@@ -31,6 +31,12 @@ recorder
     # check scripts folder
     pip install -e .
     cursor_recorder
+
+experiment
+
+    pip install -e .
+    cd experiments
+    python file.py
     
 data handling
 

@@ -752,6 +752,9 @@ class PathCollection:
         for p in self.__paths:
             p.scale(x, y)
 
+    def log(self, str) -> None:
+        log.good(f"{self.__class__.__name__}: {str}")
+
     def fit(
         self,
         size=tuple[int, int],
@@ -765,23 +768,17 @@ class PathCollection:
         # move into positive area
         _bb = self.bb()
         if _bb.x < 0:
-            log.good(f"{self.__class__.__name__}: fit: translate by {_bb.x:.2f} {0.0}")
+            self.log("fit: translate by {_bb.x:.2f} {0.0}")
             self.translate(abs(_bb.x), 0.0)
         else:
-            log.good(
-                f"{self.__class__.__name__}: fit: translate by {-abs(_bb.x):.2f} {0.0}"
-            )
+            self.log("fit: translate by {-abs(_bb.x):.2f} {0.0}")
             self.translate(-abs(_bb.x), 0.0)
 
         if _bb.y < 0:
-            log.good(
-                f"{self.__class__.__name__}: fit: translate by {0.0} {abs(_bb.y):.2f}"
-            )
+            self.log("fit: translate by {0.0} {abs(_bb.y):.2f}")
             self.translate(0.0, abs(_bb.y))
         else:
-            log.good(
-                f"{self.__class__.__name__}: fit: translate by {0.0} {-abs(_bb.y):.2f}"
-            )
+            self.log("fit: translate by {0.0} {-abs(_bb.y):.2f}")
             self.translate(0.0, -abs(_bb.y))
         _bb = self.bb()
 
