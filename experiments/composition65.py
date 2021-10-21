@@ -34,5 +34,5 @@ if __name__ == "__main__":
         35,
         "composition65",
         # f"c65_{pc.hash()}",
-        f"c65_test",
+        "c65_test",
     )

@@ -385,7 +385,7 @@ class Exporter:
 
 class SimpleExportWrapper:
     from cursor import path
-    
+
     def ex(
         self,
         paths: path.PathCollection,

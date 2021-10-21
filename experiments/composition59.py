@@ -43,7 +43,6 @@ def double_full_spiral1(pp, rounds=800, _yextra=0.01, _theta=0.02):
         theta += _theta
         yextra += _yextra
 
-
     return "double_full_spiral1"
 
 
@@ -135,8 +134,8 @@ if __name__ == "__main__":
     name = double_full_spiral1(pp, 20000, 0.0005, 0.1)
     name2 = double_full_spiral2(pp2, 20000, 0.0005, 0.1)
 
-    #reversed_path = pp.reversed()
-    #reversed_path.layer = "round2"
+    # reversed_path = pp.reversed()
+    # reversed_path.layer = "round2"
 
     coll.add(pp)
     coll.add(pp2)
