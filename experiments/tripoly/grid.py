@@ -1,35 +1,13 @@
-from cursor import loader
-from cursor import data
-from cursor import device
 from cursor import path
-from cursor import renderer
-from cursor import filter
-import random
+from cursor import misc
 import math
-
-pi = math.pi
-pihalf = pi / 2.0
-
-
-def save_wrapper(pc, projname, fname):
-    folder = data.DataDirHandler().jpg(projname)
-    jpeg_renderer = renderer.JpegRenderer(folder)
-
-    jpeg_renderer.render(pc, scale=1.0)
-    jpeg_renderer.save(fname)
-
-    svg_folder = data.DataDirHandler().svg(projname)
-    svg_renderer = renderer.SvgRenderer(svg_folder)
-
-    svg_renderer.render(pc)
-    svg_renderer.save(fname)
 
 
 def PointsInCircum(r, n=100):
     return [
         (
-            math.cos(2 * (pi - pihalf) / n * x) * r,
-            math.sin(2 * (pi - pihalf) / n * x) * r,
+            math.cos(2 * (math.pi - math.pi / 2) / n * x) * r,
+            math.sin(2 * (math.pi - math.pi / 2) / n * x) * r,
         )
         for x in range(0, n + 1)
     ]
@@ -43,11 +21,11 @@ class Triangle:
         self.points.append(path.TimedPosition(x3, y3))
 
         for point in self.points:
-            point.rot(pihalf)
+            point.rot(math.pi / 2)
 
         if rot:
             for point in self.points:
-                point.rot(pi)
+                point.rot(math.pi)
 
     def translate(self, x, y):
         for point in self.points:
@@ -64,10 +42,6 @@ class Triangle:
 
 
 def triangleGrid():
-    p = data.DataDirHandler().recordings()
-    # 100, 0
-    # -50, 86.6
-    # -50, -86.6
     fff = 172
     c = path.PathCollection()
     for i in range(8):
@@ -118,14 +92,7 @@ def triangleGrid():
         pa.translate(i * fff + 86 * 7, -150 * 7)
         c.add(pa.copy())
 
-    # _path = path.Path()
-    # circ = PointsInCircum(100, 3)
-    # for point in circ:
-    #    _path.add(point[0], point[1])
-
-    # c.add(_path)
-    # c.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=90)
-    save_wrapper(c, "tripoly", "grid_one2")
+    misc.save_wrapper(c, "tripoly", "grid_one2")
 
 
 if __name__ == "__main__":

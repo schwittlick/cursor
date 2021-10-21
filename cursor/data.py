@@ -1,3 +1,7 @@
+from cursor.path import Path
+from cursor.path import PathCollection
+from cursor.path import TimedPosition
+
 import pathlib
 import json
 import base64
@@ -9,10 +13,6 @@ import pytz
 
 class MyJsonEncoder(json.JSONEncoder):
     def default(self, o):
-        from cursor.path import Path
-        from cursor.path import PathCollection
-        from cursor.path import TimedPosition
-
         if isinstance(o, PathCollection):
             return {
                 "paths": o.get_all(),
@@ -91,13 +91,13 @@ class JsonCompressor:
 
 class DateHandler:
     @staticmethod
-    def utc_timestamp():
+    def utc_timestamp() -> float:
         now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
         utc_timestamp = datetime.datetime.timestamp(now)
         return utc_timestamp
 
     @staticmethod
-    def get_timestamp_from_utc(ts):
+    def get_timestamp_from_utc(ts: float) -> str:
         dt = datetime.datetime.fromtimestamp(ts)
         return dt.strftime("%d/%m/%y %H:%M:%S.%f")
 

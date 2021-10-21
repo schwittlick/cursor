@@ -1,6 +1,7 @@
 import wasabi
 import time
 import copy
+import typing
 
 log = wasabi.Printer()
 
@@ -24,62 +25,54 @@ class Sorter:
     def param(self, v):
         self.__param = v
 
-    def sort(self, paths):
-        if isinstance(paths, list):
-            t0 = time.time()
-            if self.__param is self.SHANNON_X:
-                paths.sort(key=lambda x: x.shannon_x, reverse=self.__reverse)
-            elif self.__param is self.SHANNON_Y:
-                paths.sort(key=lambda x: x.shannon_y, reverse=self.__reverse)
-            elif self.__param is self.SHANNON_DIRECTION_CHANGES:
-                paths.sort(
-                    key=lambda x: x.shannon_direction_changes, reverse=self.__reverse
-                )
-            elif self.__param is self.DISTANCE:
-                paths.sort(key=lambda x: x.distance, reverse=self.__reverse)
-            elif self.__param is self.HASH:
-                paths.sort(key=lambda x: x.hash, reverse=self.__reverse)
-            else:
-                raise Exception(
-                    f"Unknown parameter {self.__param} for {__class__.__name__}"
-                )
-            elapsed = time.time() - t0
-            log.good(f"Sorted via {__class__.__name__} took {round(elapsed * 1000)}ms.")
+    def sort(self, paths: typing.List):
+        t0 = time.time()
+        if self.__param is self.SHANNON_X:
+            paths.sort(key=lambda x: x.shannon_x, reverse=self.__reverse)
+        elif self.__param is self.SHANNON_Y:
+            paths.sort(key=lambda x: x.shannon_y, reverse=self.__reverse)
+        elif self.__param is self.SHANNON_DIRECTION_CHANGES:
+            paths.sort(
+                key=lambda x: x.shannon_direction_changes, reverse=self.__reverse
+            )
+        elif self.__param is self.DISTANCE:
+            paths.sort(key=lambda x: x.distance, reverse=self.__reverse)
+        elif self.__param is self.HASH:
+            paths.sort(key=lambda x: x.hash, reverse=self.__reverse)
         else:
-            raise Exception(f"Only pass list objects to this {__class__.__name__}")
+            raise Exception(
+                f"Unknown parameter {self.__param} for {__class__.__name__}"
+            )
+        elapsed = time.time() - t0
+        log.good(f"Sorted via {__class__.__name__} took {round(elapsed * 1000)}ms.")
 
-    def sorted(self, paths):
-        if isinstance(paths, list):
-            t0 = time.time()
-            if self.__param is self.SHANNON_X:
-                sorted_list = sorted(
-                    paths, key=lambda x: x.shannon_x, reverse=self.__reverse
-                )
-            elif self.__param is self.SHANNON_Y:
-                sorted_list = sorted(
-                    paths, key=lambda x: x.shannon_y, reverse=self.__reverse
-                )
-            elif self.__param is self.SHANNON_DIRECTION_CHANGES:
-                sorted_list = sorted(
-                    paths,
-                    key=lambda x: x.shannon_direction_changes,
-                    reverse=self.__reverse,
-                )
-            elif self.__param is self.DISTANCE:
-                sorted_list = sorted(
-                    paths, key=lambda x: x.distance, reverse=self.__reverse
-                )
-            elif self.__param is self.HASH:
-                sorted_list = sorted(
-                    paths, key=lambda x: x.hash, reverse=self.__reverse
-                )
-            else:
-                raise Exception(f"Wrong param {self.__param} for {__class__.__name__}")
-            elapsed = time.time() - t0
-            log.good(f"Sorted via {__class__.__name__} took {round(elapsed * 1000)}ms.")
-            return sorted_list
+    def sorted(self, paths: typing.List):
+        t0 = time.time()
+        if self.__param is self.SHANNON_X:
+            sorted_list = sorted(
+                paths, key=lambda x: x.shannon_x, reverse=self.__reverse
+            )
+        elif self.__param is self.SHANNON_Y:
+            sorted_list = sorted(
+                paths, key=lambda x: x.shannon_y, reverse=self.__reverse
+            )
+        elif self.__param is self.SHANNON_DIRECTION_CHANGES:
+            sorted_list = sorted(
+                paths,
+                key=lambda x: x.shannon_direction_changes,
+                reverse=self.__reverse,
+            )
+        elif self.__param is self.DISTANCE:
+            sorted_list = sorted(
+                paths, key=lambda x: x.distance, reverse=self.__reverse
+            )
+        elif self.__param is self.HASH:
+            sorted_list = sorted(paths, key=lambda x: x.hash, reverse=self.__reverse)
         else:
-            raise Exception(f"Only pass list objects to this {__class__.__name__}")
+            raise Exception(f"Wrong param {self.__param} for {__class__.__name__}")
+        elapsed = time.time() - t0
+        log.good(f"Sorted via {__class__.__name__} took {round(elapsed * 1000)}ms.")
+        return sorted_list
 
 
 class Filter:

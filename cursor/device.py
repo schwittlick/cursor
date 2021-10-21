@@ -277,7 +277,9 @@ class Exporter:
         # )
         if self.cfg.type is PlotterType.ROLAND_DPX3300:
             if self.cfg.margin < 35:
-                log.warn(f"Margin for dpx3300 to low: {self.cfg.margin}. Should be > 35mm.")
+                log.warn(
+                    f"Margin for dpx3300 to low: {self.cfg.margin}. Should be > 35mm."
+                )
             self.paths.fit(
                 Paper.sizes[self.cfg.dimension],
                 xy_factor=XYFactors.fac[self.cfg.type],
@@ -348,7 +350,6 @@ class Exporter:
                 hpgl_renderer.render(self.paths)
                 hpgl_renderer.save(f"{fname}_all")
         else:
-
             separate_layers = self.paths.get_layers()
             for layer, pc in separate_layers.items():
                 if format is ExportFormat.HPGL:
@@ -384,7 +385,7 @@ class Exporter:
 
 class SimpleExportWrapper:
     from cursor import path
-
+    
     def ex(
         self,
         paths: path.PathCollection,
