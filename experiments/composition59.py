@@ -132,8 +132,8 @@ if __name__ == "__main__":
     # num = full_spiral(pp, 20000, 0.0005, 0.1)
     # num = heart_spiral(pp)
     # num = fat_spiral(pp)
-    num = double_full_spiral1(pp, 20000, 0.0005, 0.1)
-    num2 = double_full_spiral2(pp2, 20000, 0.0005, 0.1)
+    name = double_full_spiral1(pp, 20000, 0.0005, 0.1)
+    name2 = double_full_spiral2(pp2, 20000, 0.0005, 0.1)
 
     #reversed_path = pp.reversed()
     #reversed_path.layer = "round2"
@@ -165,7 +165,7 @@ if __name__ == "__main__":
         device.PaperSize.LANDSCAPE_A1,
         35,
         "composition59",
-        num,
+        name,
     )
     # device.SimpleExportWrapper().ex(
     #    coll,

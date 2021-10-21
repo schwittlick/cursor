@@ -130,9 +130,6 @@ if __name__ == "__main__":
             cutoff_mm=0,
         )
 
-        # r = renderer.SvgRenderer(DataDirHandler().svg("c66_single"))
-        # r.render(coll)
-        # r.save("c66_single")
         device.SimpleExportWrapper().ex(
             coll,
             device.PlotterType.ROLAND_DPX3300,

@@ -2,17 +2,8 @@ from cursor import loader
 from cursor import data
 from cursor import device
 from cursor import path
-from cursor import renderer
 from cursor import filter
-
-
-def save_wrapper(pc, projname, fname):
-    folder = data.DataDirHandler().jpg(projname)
-    jpeg_renderer = renderer.JpegRenderer(folder)
-
-    jpeg_renderer.render(pc, scale=4.0)
-    jpeg_renderer.save(fname)
-
+from cursor import misc
 
 if __name__ == "__main__":
     p = data.DataDirHandler().recordings()
@@ -35,7 +26,7 @@ if __name__ == "__main__":
     f = filter.BoundingBoxFilter(bb)
     c.filter(f)
 
-    save_wrapper(c, "composition62", "composition62_together")
+    misc.save_wrapper_jpeg(c, "composition62", "composition62_together", 4.0, 1.0)
 
     device.SimpleExportWrapper().ex(
         c,

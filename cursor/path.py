@@ -420,15 +420,20 @@ class Path:
             return 0.0
 
         cosx = dp / ll
+
+        if cosx < -1.0:
+            cosx = -1.0
+        if cosx > 1.0:
+            cosx = 1.0
+
         rad = np.arccos(cosx)  # in radians
         return rad * 180 / np.pi  # returns degrees
 
     def angle_clockwise(self, A, B):
         inner = self.inner_angle(A, B)
         det = self.determinant(A, B)
-        if (
-            det < 0
-        ):  # this is a property of the det. If the det < 0 then B is clockwise of A
+        if det < 0:
+            # this is a property of the det. If the det < 0 then B is clockwise of A
             return inner
         else:  # if the det > 0 then A is immediately clockwise of B
             return 360 - inner
@@ -768,18 +773,19 @@ class PathCollection:
         # move into positive area
         _bb = self.bb()
         if _bb.x < 0:
-            self.log("fit: translate by {_bb.x:.2f} {0.0}")
+            log.info("fit: translate by {_bb.x:.2f} {0.0}")
             self.translate(abs(_bb.x), 0.0)
         else:
-            self.log("fit: translate by {-abs(_bb.x):.2f} {0.0}")
+            log.info("fit: translate by {-abs(_bb.x):.2f} {0.0}")
             self.translate(-abs(_bb.x), 0.0)
 
         if _bb.y < 0:
-            self.log("fit: translate by {0.0} {abs(_bb.y):.2f}")
+            log.info("fit: translate by {0.0} {abs(_bb.y):.2f}")
             self.translate(0.0, abs(_bb.y))
         else:
-            self.log("fit: translate by {0.0} {-abs(_bb.y):.2f}")
+            log.info("fit: translate by {0.0} {-abs(_bb.y):.2f}")
             self.translate(0.0, -abs(_bb.y))
+
         _bb = self.bb()
 
         width = size[0]
@@ -820,7 +826,7 @@ class PathCollection:
         xfac = x1 / x2
         yfac = y1 / y2
 
-        log.good(f"{self.__class__.__name__}: fit: scaled by {xfac:.2f} {yfac:.2f}")
+        log.info(f"{self.__class__.__name__}: fit: scaled by {xfac:.2f} {yfac:.2f}")
 
         self.scale(xfac, yfac)
 
@@ -834,7 +840,7 @@ class PathCollection:
             center_dims = center_point
         diff = center_dims[0] - center[0], center_dims[1] - center[1]
 
-        log.good(
+        log.info(
             f"{self.__class__.__name__}: fit: translated by {diff[0]:.2f} {diff[1]:.2f}"
         )
 
@@ -954,7 +960,7 @@ class PathCollection:
         ss = dict(sorted(best.items(), key=lambda item: item[1]))
 
         elapsed = time.time() - start_benchmark
-        log.good(
+        log.info(
             f"reorder_quadrants with x={xq} y={yq} took {round(elapsed * 1000)}ms."
         )
 

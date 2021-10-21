@@ -44,13 +44,6 @@ data handling
     cd data/recordings
     find . -name "*.json" -type 'f' -size -3k -delete
 
-axidraw?
-
-    h:
-    cd Dropbox\CODE\cursor\venc\Scripts\activate.bat
-    cd h:\AxiDraw_API_v253r3
-    axicli ..\Dropbox\CODE\cursor\data\svg\pen_sample_book\pen_sample_test_45.svg
-
 ###Plotter handling
 
 hard limits of the plotting area as measured by the machine, in plotter steps
@@ -103,8 +96,6 @@ inkscape
     - Auf ID 5
     - Arduino Serial Monitor, "help++"
     http://prologix.biz/downloads/PrologixGpibUsbManual-6.0.pdf
-
-
 
 ##### Roland DPX3300
 usb to parallel port adapter
