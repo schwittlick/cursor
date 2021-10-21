@@ -1,5 +1,8 @@
-import wasabi
+from cursor import data
+from cursor import renderer
+
 from enum import Enum
+import wasabi
 
 log = wasabi.Printer()
 
@@ -273,6 +276,8 @@ class Exporter:
         #    )
         # )
         if self.cfg.type is PlotterType.ROLAND_DPX3300:
+            if self.cfg.margin < 35:
+                log.warn(f"Margin for dpx3300 to low: {self.cfg.margin}. Should be > 35mm.")
             self.paths.fit(
                 Paper.sizes[self.cfg.dimension],
                 xy_factor=XYFactors.fac[self.cfg.type],
@@ -300,9 +305,6 @@ class Exporter:
         if self.cfg is None or self.paths is None or self.name is None:
             log.fail("Config, Name or Paths is None. Not exporting anything")
             return
-
-        from cursor import data
-        from cursor import renderer
 
         # jpeg fitting roughly
         self.paths.fit(
