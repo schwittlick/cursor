@@ -145,8 +145,9 @@ class BoundingBox:
 
 
 class Path:
-    def __init__(self, vertices: typing.Optional[list] = None, layer: str = "default"):
+    def __init__(self, vertices: typing.Optional[list] = None, layer: str = "default", ptype: int = ""):
         self.layer = layer
+        self.type = ptype
         if vertices:
             self.vertices = list(vertices)
         else:
@@ -171,7 +172,7 @@ class Path:
     def reversed(self) -> "Path":
         c = copy.deepcopy(self.vertices)
         c.reverse()
-        return Path(c, layer=self.layer)
+        return Path(c, layer=self.layer, ptype=self.type)
 
     def start_pos(self) -> "TimedPosition":
         if len(self.vertices) == 0:
@@ -560,7 +561,7 @@ class Path:
     def __repr__(self):
         rep = (
             f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} "
-            f"shannchan: {self.shannon_direction_changes} layer: {self.layer}"
+            f"shannchan: {self.shannon_direction_changes} layer: {self.layer} type: {self.type}"
         )
         return rep
 
@@ -704,6 +705,30 @@ class PathCollection:
 
     def timestamp(self) -> float:
         return self._timestamp
+
+    def type_names(self) -> typing.List[str]:
+        types = []
+        for p in self.__paths:
+            if p.type not in types:
+                types.append(p.type)
+
+        return types
+
+    def get_types(self):
+        types = {}
+        for type in self.type_names():
+            types[type] = []
+
+        for p in self.__paths:
+            types[p.type].append(p)
+
+        typed_pathcollections = {}
+        for key in types:
+            pc = PathCollection()
+            pc.__paths.extend(types[key])
+            typed_pathcollections[key] = pc
+
+        return typed_pathcollections
 
     def layer_names(self) -> typing.List[str]:
         layers = []

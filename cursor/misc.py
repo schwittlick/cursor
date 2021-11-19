@@ -2,6 +2,25 @@ from cursor import data
 from cursor import renderer
 
 
+def map(value, inputMin, inputMax, outputMin, outputMax, clamp):
+    outVal = (value - inputMin) / (inputMax - inputMin) * (
+            outputMax - outputMin
+    ) + outputMin
+
+    if clamp:
+        if outputMax < outputMin:
+            if outVal < outputMax:
+                outVal = outputMax
+            elif outVal > outputMin:
+                outVal = outputMin
+    else:
+        if outVal > outputMax:
+            outVal = outputMax
+        elif outVal < outputMin:
+            outVal = outputMin
+    return outVal
+
+
 def save_wrapper(pc, projname, fname):
     jpeg_folder = data.DataDirHandler().jpg(projname)
     jpeg_renderer = renderer.JpegRenderer(jpeg_folder)

@@ -220,6 +220,7 @@ class Exporter:
         self.__hpgl_speed = None
         self.__gcode_speed = None
         self.__layer_pen_mapping = None
+        self.__linetype_mapping = None
 
     @property
     def paths(self) -> path.PathCollection:
@@ -276,6 +277,14 @@ class Exporter:
     @layer_pen_mapping.setter
     def layer_pen_mapping(self, m: dict) -> None:
         self.__layer_pen_mapping = m
+
+    @property
+    def linetype_mapping(self) -> dict:
+        return self.__linetype_mapping
+
+    @linetype_mapping.setter
+    def linetype_mapping(self, m: dict) -> None:
+        self.__linetype_mapping = m
 
     def fit(self) -> None:
         # out_dim = tuple(
@@ -342,7 +351,20 @@ class Exporter:
         machinename = PlotterName.names[self.cfg.type]
         fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}"
         format = ExportFormatMappings.maps[self.cfg.type]
-
+        if self.linetype_mapping and format is ExportFormat.HPGL:
+            hpgl_folder = data.DataDirHandler().hpgl(self.name)
+            if self.hpgl_speed:
+                hpgl_renderer = renderer.HPGLRenderer(
+                    hpgl_folder,
+                    speed=self.hpgl_speed,
+                    linetype_mapping=self.linetype_mapping,
+                )
+            else:
+                hpgl_renderer = renderer.HPGLRenderer(
+                    hpgl_folder, linetype_mapping=self.linetype_mapping
+                )
+            hpgl_renderer.render(self.paths)
+            hpgl_renderer.save(f"{fname}_all")
         if self.layer_pen_mapping is not None:
             if format is ExportFormat.HPGL:
                 hpgl_folder = data.DataDirHandler().hpgl(self.name)
@@ -406,7 +428,8 @@ class SimpleExportWrapper:
         cutoff: int = None,
         hpgl_speed: int = None,
         gcode_speed: int = None,
-        gcode_layer_pen_mapping=None,
+        hpgl_pen_layer_mapping=None,
+        hpgl_linetype_mapping=None,
     ):
         cfg = Cfg()
         cfg.type = ptype
@@ -423,5 +446,6 @@ class SimpleExportWrapper:
         exp.suffix = str(suffix)
         exp.hpgl_speed = hpgl_speed
         exp.gcode_speed = gcode_speed
-        exp.layer_pen_mapping = gcode_layer_pen_mapping
+        exp.layer_pen_mapping = hpgl_pen_layer_mapping
+        exp.linetype_mapping = hpgl_linetype_mapping
         exp.run(True)
