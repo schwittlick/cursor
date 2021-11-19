@@ -69,6 +69,20 @@ inkscape
     plot featuer: everything off (overcut: 0mm; offset correction: 0mm; precut and autoalign off)
 
 
+plotters
+
+HP Draftmaster SX/HP7595A,
+HP7475A,
+Roland DG DXY-980,
+Roland DG DXY-990,
+Roland DG DXY-885,
+Roland DG DXY-1200,
+Tektronix 4662,
+Aritma 512,
+Roland DG DPX3300,
+Roland DG CAMM-1 PNC-1000,
+A0 DIY
+
 ##### HP7595A
     - serial cable with usb adapter
     - ohne nullmodem
@@ -89,6 +103,11 @@ inkscape
 #### HP7475A inkscape
     - document layout: A3 in landscape 
     - export hpgl not centered
+
+#### Roland CAMM-1
+    - usb to parallel port adapter
+    - chmod 777 /dev/usb/lp0
+    - cat file.hpgl /dev/usb/lp0
 
 #### HP7475a GPIB HPIB
     https://pearl-hifi.com/06_Lit_Archive/15_Mfrs_Publications/20_HP_Agilent/HP_7475A_Plotter/HP_7475A_Op_Interconnect.pdf

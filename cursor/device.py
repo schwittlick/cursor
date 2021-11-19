@@ -24,6 +24,7 @@ class PlotterType(Enum):
     ROLAND_DXY1200 = 5
     ROLAND_DXY980 = 6
     HP_7595A = 7
+    ROLAND_PNC1000 = 8
 
 
 class ExportFormat(Enum):
@@ -43,6 +44,7 @@ class ExportFormatMappings:
         PlotterType.ROLAND_DXY1200: ExportFormat.HPGL,
         PlotterType.ROLAND_DXY980: ExportFormat.HPGL,
         PlotterType.HP_7595A: ExportFormat.HPGL,
+        PlotterType.ROLAND_PNC1000: ExportFormat.HPGL,
     }
 
 
@@ -56,6 +58,7 @@ class MinmaxMapping:
         PlotterType.ROLAND_DXY1200: MinMax(0, 0, 0, 0),  # todo: missing real bounds
         PlotterType.ROLAND_DXY980: MinMax(0, 16158, 0, 11040),
         PlotterType.HP_7595A: MinMax(-23160, 23160, -17602, 17602),
+        PlotterType.ROLAND_PNC1000: MinMax(0, 0, 17200, 40000), # actually unlimited y
     }
 
 
@@ -70,6 +73,7 @@ class MinMaxMappingBB:
         PlotterType.HP_7475A_A3: MinMax(0, 0, 0, 0),  # todo: missing real bounds
         PlotterType.ROLAND_DXY1200: MinMax(0, 0, 0, 0),  # todo: missing real bounds
         PlotterType.ROLAND_DXY980: MinMax(0, 0, 0, 0),  # todo: missing real bounds
+        PlotterType.ROLAND_PNC1000: MinMax(0, 0, 17200, 40000),  # todo: missing real bounds
     }
 
 
@@ -90,6 +94,7 @@ class PaperSize(Enum):
     PORTRAIT_A3 = 13
     LANDSCAPE_A3 = 14
     LANDSCAPE_80_50 = 15
+    PORTRAIT_50_80 = 16
 
 
 class PlotterName:
@@ -102,6 +107,7 @@ class PlotterName:
         PlotterType.ROLAND_DXY1200: "dxy1200",
         PlotterType.ROLAND_DXY980: "dxy980",
         PlotterType.HP_7595A: "hp_draftmaster_sx",
+        PlotterType.ROLAND_PNC1000: "roland_camm1",
     }
 
 
@@ -123,6 +129,7 @@ class PaperSizeName:
         PaperSize.PORTRAIT_A3: "portrait_a3",
         PaperSize.LANDSCAPE_A3: "landscape_a3",
         PaperSize.LANDSCAPE_80_50: "landscape_80x50",
+        PaperSize.PORTRAIT_50_80: "portrait_50_80",
     }
 
 
@@ -144,6 +151,7 @@ class Paper:
         PaperSize.PORTRAIT_A3: (297, 420),
         PaperSize.LANDSCAPE_A3: (420, 297),
         PaperSize.LANDSCAPE_80_50: (800, 500),
+        PaperSize.PORTRAIT_50_80: (500, 800),
     }
 
 
@@ -157,6 +165,7 @@ class XYFactors:
         PlotterType.ROLAND_DXY1200: (40, 40),
         PlotterType.ROLAND_DXY980: (40, 40),
         PlotterType.HP_7595A: (40, 40),
+        PlotterType.ROLAND_PNC1000: (40, 40),
     }
 
 
