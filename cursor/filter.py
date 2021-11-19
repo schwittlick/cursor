@@ -218,3 +218,13 @@ class DistanceFilter(Filter):
         paths[:] = [p for p in paths if p.distance <= self.max_distance]
         len_after = len(paths)
         log.good(f"DistanceFilter: reduced path count from {len_before} to {len_after}")
+
+class MinDistanceFilter(Filter):
+    def __init__(self, min_distance):
+        self.min_distance = min_distance
+
+    def filter(self, paths):
+        len_before = len(paths)
+        paths[:] = [p for p in paths if p.distance > self.min_distance]
+        len_after = len(paths)
+        log.good(f"MinDistanceFilter: reduced path count from {len_before} to {len_after}")

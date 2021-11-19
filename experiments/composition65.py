@@ -25,14 +25,14 @@ if __name__ == "__main__":
         counter += 1
         counter = counter % 6
 
-    pc.reorder_quadrants(10, 10)
+    #pc.reorder_quadrants(10, 10)
 
     device.SimpleExportWrapper().ex(
         pc,
-        device.PlotterType.ROLAND_DPX3300,
-        device.PaperSize.LANDSCAPE_A1,
-        35,
+        device.PlotterType.ROLAND_DXY1200,
+        device.PaperSize.LANDSCAPE_A3,
+        15,
         "composition65",
         # f"c65_{pc.hash()}",
-        "c65_test",
+        "c65_001distance_unordered",
     )
