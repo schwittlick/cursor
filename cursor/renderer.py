@@ -235,12 +235,13 @@ class RealtimeRenderer:
 
 class HPGLRenderer:
     def __init__(
-        self, folder: pathlib.Path, speed: int = 30, layer_pen_mapping: dict = None
+        self, folder: pathlib.Path, speed: int = 30, layer_pen_mapping: dict = None, linetype_mapping: dict = None
     ) -> None:
         self.speed = speed
         self.save_path = folder
         self.paths = PathCollection()
         self.layer_pen_mapping = layer_pen_mapping
+        self.linetype_mapping = linetype_mapping
 
     def render(self, paths: "PathCollection") -> None:
         self.paths += paths
@@ -267,6 +268,7 @@ class HPGLRenderer:
                 y = p.start_pos().y
                 self.__append_to_file(file, x, y)
                 file.write(f"SP{self.__pen_from_layer(p.layer)};\n")
+                file.write(f"LT{self.__linetype_from_layer(p.type)};\n")
                 file.write("PD;\n")
                 for line in p.vertices:
                     x = line.x
@@ -290,6 +292,16 @@ class HPGLRenderer:
             return 1
 
         return self.layer_pen_mapping[layer]
+
+    def __linetype_from_layer(self, linetype: int) -> str:
+        _default_linetype = ""
+        if self.linetype_mapping is None:
+            return _default_linetype
+
+        if linetype not in self.linetype_mapping.keys():
+            return _default_linetype
+
+        return self.linetype_mapping[linetype]
 
 
 class JpegRenderer:
