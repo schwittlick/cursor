@@ -72,5 +72,5 @@ if __name__ == "__main__":
         100,
         "simple_rect",
         "simple_rect",
-        gcode_layer_pen_mapping=layer_pen_mapping,
+        hpgl_pen_layer_mapping=layer_pen_mapping,
     )
