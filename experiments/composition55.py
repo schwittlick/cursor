@@ -1,18 +1,12 @@
 from cursor import loader
-from cursor import renderer
 from cursor import path
 from cursor import filter
 from cursor import data
+from cursor import device
 
 
 def composition55(p0, p1, offset):
-    gd = data.DataDirHandler().gcode("composition55")
-    gcode_renderer = renderer.GCodeRenderer(gd, z_down=3.0)
-
-    jd = data.DataDirHandler().jpg("composition55")
-    jpeg_renderer = renderer.JpegRenderer(jd)
-
-    coll = path.PathCollection(rec.resolution)
+    coll = path.PathCollection()
 
     xoffset = 142.5
     yoffset = 147
@@ -41,22 +35,23 @@ def composition55(p0, p1, offset):
         curr_start = (currstartx, currstarty)
         curr_end = (currendx, currendy)
         morphed = interped.morph(curr_start, curr_end)
-        coll.add(morphed, rec.resolution)
+        coll.add(morphed)
 
     print(coll.bb())
 
-    gcode_renderer.render(coll, f"composition55_special_{offset}")
-    try:
-        jpeg_renderer.render(coll, f"composition55_special_{offset}_high2", 5.0)
-    except MemoryError as me:
-        print("Memory error ignored.. " + me)
-        return
+    device.SimpleExportWrapper().ex(
+        coll,
+        device.PlotterType.DIY_PLOTTER,
+        device.PaperSize.LANDSCAPE_A1,
+        90,
+        "composition55",
+        str(offset),
+    )
 
 
 if __name__ == "__main__":
     p = data.DataDirHandler().recordings()
     ll = loader.Loader(directory=p, limit_files=5)
-    rec = ll.single(0)
     all_paths = ll.all_paths()
 
     entropy_filter = filter.EntropyMinFilter(1.5, 1.5)

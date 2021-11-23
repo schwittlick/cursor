@@ -81,10 +81,17 @@ if __name__ == "__main__":
                         newpath.layer = "filled"
                         coll.add(newpath)
 
-        coll.fit(device.DrawingMachine.Paper.custom_42_56_landscape(), 40)
+        coll.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_56_42], padding_mm=40)
+        folder = data.DataDirHandler().jpg("composition60")
+        jpeg_renderer = renderer.JpegRenderer(folder)
+        jpeg_renderer.render(coll, scale=4.0)
+        jpeg_renderer.save(f"composition60_{i}_together")
 
-        for layer, pc in coll.get_layers().items():
-            jpeg_renderer.render(pc)
-            jpeg_renderer.save(f"composition60_{i}_{layer}")
-            gcode_renderer.render(pc)
-            gcode_renderer.save(f"composition60_{i}_{layer}")
+        device.SimpleExportWrapper().ex(
+            coll,
+            device.PlotterType.DIY_PLOTTER,
+            device.PaperSize.LANDSCAPE_56_42,
+            40,
+            "composition60",
+            str(i),
+        )

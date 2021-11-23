@@ -88,7 +88,7 @@ class Recorder:
 
         recs = {"mouse": self._mouse_recordings, "keys": self._keyboard_recodings}
 
-        fname_compressed = save_path.joinpath(
+        fname_compressed = save_path / (
             str(self._start_time_stamp) + "_compressed.json"
         )
 
@@ -163,6 +163,8 @@ icon = None
 
 
 def save_exit(icon, item):
+    global rr
+    rr.save()
     icon.stop()
 
 
@@ -182,9 +184,7 @@ def main(args=None):
     # 2. starts the recorder
     # loops forever until quit forcefully or via gui
 
-    icon_path = (
-        pathlib.Path(__file__).resolve().parent.parent.joinpath("mouse-icon.gif")
-    )
+    icon_path = pathlib.Path(__file__).resolve().parent.parent / "mouse-icon.gif"
     image = Image.open(icon_path.as_posix())
     global icon
     icon = pystray.Icon(

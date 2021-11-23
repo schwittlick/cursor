@@ -1,5 +1,4 @@
 from cursor import loader
-from cursor import renderer
 from cursor import filter
 from cursor import path
 from cursor import data
@@ -7,11 +6,6 @@ from cursor import device
 
 
 def composition37(p0, p1, offset):
-    gcode_folder = data.DataDirHandler().gcode("composition37")
-    folder = data.DataDirHandler().jpg("composition37")
-    gcode_renderer = renderer.GCodeRenderer(gcode_folder, z_down=3.0)
-    jpeg_renderer = renderer.JpegRenderer(folder)
-
     coll = path.PathCollection()
 
     start = (100, 100)
@@ -37,17 +31,14 @@ def composition37(p0, p1, offset):
         newpath = p1.morph(en.pos(), st.pos())
         coll.add(newpath)
 
-    print(coll.bb())
-
-    coll.fit(device.DrawingMachine.Paper.a1_landscape(), 100)
-
-    print(coll.bb())
-
-    fname = f"composition37_broken_{offset}"
-    gcode_renderer.render(coll)
-    gcode_renderer.save(fname)
-    jpeg_renderer.render(coll)
-    jpeg_renderer.save(fname)
+    device.SimpleExportWrapper().ex(
+        coll,
+        device.PlotterType.DIY_PLOTTER,
+        device.PaperSize.LANDSCAPE_A1,
+        90,
+        "composition37",
+        str(offset),
+    )
 
 
 if __name__ == "__main__":
@@ -64,7 +55,7 @@ if __name__ == "__main__":
     maxcount_filter = filter.MaxPointCountFilter(100)
     all_paths.filter(maxcount_filter)
 
-    for i in range(100):
+    for i in range(1):
         import random
 
         r = random.randint(0, len(all_paths) - 1)

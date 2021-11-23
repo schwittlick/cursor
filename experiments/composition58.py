@@ -1,9 +1,5 @@
 from cursor import loader
-from cursor import renderer
-from cursor import path
-from cursor import filter
 from cursor import data
-from cursor import device
 
 import time
 from pythonosc import udp_client
@@ -18,14 +14,14 @@ def main():
     # this port needs to be taken from SC via NetAddr.langPort;
 
     p = data.DataDirHandler().recordings()
-    p = p.joinpath("1594553245.575756_compressed.json")
+    p = p / "1594553245.575756_compressed.json"
     ll = loader.Loader()
     ll.load_file(p)
     keys = ll.keys()
     print(len(keys))
 
-    start_time = data.DateHandler.get_timestamp_from_utc(keys[0][1])
-    end_time = data.DateHandler.get_timestamp_from_utc(keys[-1][1])
+    # start_time = data.DateHandler.get_timestamp_from_utc(keys[0][1])
+    # end_time = data.DateHandler.get_timestamp_from_utc(keys[-1][1])
 
     diff = data.DateHandler.utc_timestamp() - keys[0][1]
 
@@ -42,7 +38,7 @@ def main():
             if down:
                 try:
                     client.send_message("/keyboard_keys_ascii", ord(k))
-                except:
+                except TypeError:
                     client.send_message("/keyboard_keys_ascii_special", k)
 
             current_key_index += 1
