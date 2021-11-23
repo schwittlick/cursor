@@ -344,10 +344,10 @@ def test_path_distance():
 
 def test_path_layer():
     p = Path()
-    assert p.layer is "default"
+    assert p.layer == "default"
 
     p.layer = "custom"
-    assert p.layer is "custom"
+    assert p.layer == "custom"
 
 
 def test_path_intersection1():
@@ -411,3 +411,32 @@ def test_angles():
     assert changes[1] == 45.00000000000001  # wat
     assert changes[2] == 45.00000000000001
     assert changes[3] == 0.0
+
+
+def disabled_test_similarity():
+    p1 = Path()
+    p1.add(0, 0)
+    p1.add(0, 1)
+    p1.add(0, 2)
+    p1.add(0, 3)
+    p1.add(0, 4)
+
+    p2 = Path()
+    p2.add(0, 0)
+    p2.add(0, 1)
+    p2.add(0, 2)
+    p2.add(0, 3)
+    p2.add(0, 4)
+
+    sim = p1.similarity(p2)
+    assert sim == 1.0
+
+    p3 = Path()
+    p3.add(0, 0)
+    p3.add(0, 1)
+    p3.add(0, 2)
+    p3.add(0, 3.1)
+    p3.add(0, 4.1)
+
+    sim2 = p1.similarity(p3)
+    assert sim2 >= 0.9

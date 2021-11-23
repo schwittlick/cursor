@@ -1,3 +1,7 @@
+from cursor.path import Path
+from cursor.path import PathCollection
+from cursor.path import TimedPosition
+
 import pathlib
 import json
 import base64
@@ -5,10 +9,6 @@ import zlib
 import pyautogui
 import datetime
 import pytz
-
-from cursor.path import Path
-from cursor.path import PathCollection
-from cursor.path import TimedPosition
 
 
 class MyJsonEncoder(json.JSONEncoder):
@@ -31,6 +31,10 @@ class MyJsonDecoder(json.JSONDecoder):
         json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
 
     def object_hook(self, dct):
+        from cursor.path import Path
+        from cursor.path import PathCollection
+        from cursor.path import TimedPosition
+
         if "x" in dct and "y" in dct and "ts" in dct:
             p = TimedPosition(dct["x"], dct["y"], dct["ts"])
             return p
@@ -50,20 +54,18 @@ class JsonCompressor:
     ZIPJSON_KEY = "base64(zip(o))"
 
     def json_zip(self, j):
+        dumped = json.dumps(j, cls=MyJsonEncoder)
+        dumped_encoded = dumped.encode("utf-8")
+        compressed = zlib.compress(dumped_encoded)
+        encoded = {self.ZIPJSON_KEY: base64.b64encode(compressed).decode("ascii")}
 
-        j = {
-            self.ZIPJSON_KEY: base64.b64encode(
-                zlib.compress(json.dumps(j, cls=MyJsonEncoder).encode("utf-8"))
-            ).decode("ascii")
-        }
-
-        return j
+        return encoded
 
     def json_unzip(self, j, insist=True):
         try:
             assert j[self.ZIPJSON_KEY]
             assert set(j.keys()) == {self.ZIPJSON_KEY}
-        except:
+        except AssertionError:
             if insist:
                 raise RuntimeError(
                     "JSON not in the expected format {"
@@ -74,27 +76,28 @@ class JsonCompressor:
                 return j
 
         try:
-            j = zlib.decompress(base64.b64decode(j[self.ZIPJSON_KEY]))
-        except:
+            decoded = base64.b64decode(j[self.ZIPJSON_KEY])
+            decompressed = zlib.decompress(decoded)
+        except zlib.error:
             raise RuntimeError("Could not decode/unzip the contents")
 
         try:
-            j = json.loads(j, cls=MyJsonDecoder)
-        except:
+            decompressed = json.loads(decompressed, cls=MyJsonDecoder)
+        except TypeError and json.JSONDecodeError:
             raise RuntimeError("Could interpret the unzipped contents")
 
-        return j
+        return decompressed
 
 
 class DateHandler:
     @staticmethod
-    def utc_timestamp():
+    def utc_timestamp() -> float:
         now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
         utc_timestamp = datetime.datetime.timestamp(now)
         return utc_timestamp
 
     @staticmethod
-    def get_timestamp_from_utc(ts):
+    def get_timestamp_from_utc(ts: float) -> str:
         dt = datetime.datetime.fromtimestamp(ts)
         return dt.strftime("%d/%m/%y %H:%M:%S.%f")
 
@@ -102,40 +105,59 @@ class DateHandler:
 class DataDirHandler:
     def __init__(self):
         self.BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
-        self.data_dir = self.BASE_DIR.joinpath("data")
-        self.test_data_dir = (
-            self.BASE_DIR.joinpath("cursor").joinpath("tests").joinpath("data")
-        )
+        self.data_dir = self.BASE_DIR / "data"
+        self.test_data_dir = self.BASE_DIR / "cursor" / "tests" / "data"
 
-    def gcode(self, folder):
-        return self.data_dir.joinpath("experiments").joinpath(folder).joinpath("gcode")
+    def gcode(self, folder) -> pathlib.Path:
+        return self.data_dir / "experiments" / folder / "gcode"
 
-    def jpg(self, subfolder):
-        return self.data_dir.joinpath("experiments").joinpath(subfolder).joinpath("jpg")
+    def jpg(self, subfolder) -> pathlib.Path:
+        return self.data_dir / "experiments" / subfolder / "jpg"
 
-    def svg(self, subfolder):
-        return self.data_dir.joinpath("experiments").joinpath(subfolder).joinpath("svg")
+    def svg(self, subfolder) -> pathlib.Path:
+        return self.data_dir / "experiments" / subfolder / "svg"
 
-    def images(self):
-        return self.data_dir.joinpath("jpgs")
+    def hpgl(self, subfolder) -> pathlib.Path:
+        return self.data_dir / "experiments" / subfolder / "hpgl"
 
-    def gcodes(self):
-        return self.data_dir.joinpath("gcode")
+    def images(self) -> pathlib.Path:
+        return self.data_dir / "jpgs"
 
-    def svgs(self):
-        return self.data_dir.joinpath("svg")
+    def gcodes(self) -> pathlib.Path:
+        return self.data_dir / "gcode"
 
-    def recordings(self):
-        return self.data_dir.joinpath("recordings")
+    def svgs(self) -> pathlib.Path:
+        return self.data_dir / "svg"
 
-    def test_images(self):
-        return self.test_data_dir.joinpath("jpgs")
+    def hpgls(self) -> pathlib.Path:
+        return self.data_dir / "hpgl"
 
-    def test_gcodes(self):
-        return self.test_data_dir.joinpath("gcode")
+    def ascii(self) -> pathlib.Path:
+        return self.data_dir / "ascii"
 
-    def test_svgs(self):
-        return self.test_data_dir.joinpath("svg")
+    def recordings(self) -> pathlib.Path:
+        return self.data_dir / "recordings"
 
-    def test_recordings(self):
-        return self.test_data_dir.joinpath("test_recordings")
+    def test_images(self) -> pathlib.Path:
+        return self.test_data_dir / "jpgs"
+
+    def test_gcodes(self) -> pathlib.Path:
+        return self.test_data_dir / "gcode"
+
+    def test_svgs(self) -> pathlib.Path:
+        return self.test_data_dir / "svg"
+
+    def test_hpgls(self) -> pathlib.Path:
+        return self.test_data_dir / "hpgl"
+
+    def test_ascii(self) -> pathlib.Path:
+        return self.test_data_dir / "ascii"
+
+    def test_recordings(self) -> pathlib.Path:
+        return self.test_data_dir / "test_recordings"
+
+    def test_data_file(self, fname: str) -> pathlib.Path:
+        return self.test_data_dir / fname
+
+    def file(self, fname: str) -> pathlib.Path:
+        return self.data_dir / fname

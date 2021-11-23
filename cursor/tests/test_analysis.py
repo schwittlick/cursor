@@ -1,10 +1,6 @@
 from cursor.analysis import Histogram
 from cursor.data import DataDirHandler
 from cursor.loader import Loader
-from cursor.path import PathCollection
-from cursor.path import Path
-
-import random
 
 
 def test_simple_histogram():
@@ -19,8 +15,8 @@ def test_simple_histogram():
 
     # h.get(p.direction_changes())
 
-    dir = DataDirHandler().recordings()
-    single_file = dir.joinpath("1565088885.39372_compressed.json")
+    dir = DataDirHandler().test_recordings()
+    # single_file = dir / "1565088885.39372_compressed.json"
     ll = Loader(directory=dir, limit_files=2)
     # ll.load_file(single_file)
 

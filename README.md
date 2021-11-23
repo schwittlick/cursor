@@ -7,17 +7,21 @@
 
 setup
 
-    pyenv install 3.6.8
-    pyenv virtualenv 3.6.8 cursor
+    pyenv install 3.9.0
+    pyenv virtualenv 3.9.0 cursor
     pyenv activate cursor
     pip install -r requirements.txt
+    git submodule update --init
 
 
 test
     
     # linux/osx
     py.test --cov cursor -v
-    flake8 --max-line-length=88
+    flake8 --max-line-length=100 --ignore=E402,W503
+    
+    # single test
+    pytest tests/test_renderer.py::test_ascii_renderer
 
     # windows
     python -m pytest --cov=cursor . -v
@@ -27,6 +31,12 @@ recorder
     # check scripts folder
     pip install -e .
     cursor_recorder
+
+experiment
+
+    pip install -e .
+    cd experiments
+    python file.py
     
 data handling
 
@@ -34,9 +44,80 @@ data handling
     cd data/recordings
     find . -name "*.json" -type 'f' -size -3k -delete
 
-axidraw?
+###Plotter handling
 
-    h:
-    cd Dropbox\CODE\cursor\venc\Scripts\activate.bat
-    cd h:\AxiDraw_API_v253r3
-    axicli ..\Dropbox\CODE\cursor\data\svg\pen_sample_book\pen_sample_test_45.svg
+hard limits of the plotting area as measured by the machine, in plotter steps
+
+    OH;
+    >> -15819, -9298, 15819, 9298
+    >> 1mm = 40 steps
+    >> your width is 15819 + 15819 / 40 = 790mm
+    >> do the same with the height
+    
+    the plotter drawing are will have +25mm offset at the bottom
+    
+inkscape
+
+    create document with  that dimensions
+    bottom (right) side has 25mm offset
+    in order to have everwhere the same offset (30mm) add 25mm offset left, right and top in inkscape
+    
+    you can use the inkscape plot function.
+    serial flow: Hardware RTS/CTS
+    center zero point (on big hp plotter)
+    change pen speed, default is full speed
+    plot featuer: everything off (overcut: 0mm; offset correction: 0mm; precut and autoalign off)
+
+
+plotters
+
+HP Draftmaster SX/HP7595A,
+HP7475A,
+Roland DG DXY-980,
+Roland DG DXY-990,
+Roland DG DXY-885,
+Roland DG DXY-1200,
+Tektronix 4662,
+Aritma 512,
+Roland DG DPX3300,
+Roland DG CAMM-1 PNC-1000,
+A0 DIY
+
+##### HP7595A
+    - serial cable with usb adapter
+    - ohne nullmodem
+    - sendhpgl port file
+    - inkscape hpgl export check "centerd"
+
+##### HP7475A
+    - serial cable with usb adapter
+    - mit nullmodem
+    - sendhpgl port file
+    - https://github.com/b4ckspace/hpgl-plot
+
+##### HP7475A buffer overflow
+    - serial cable with usb adapter
+    - mit null modem
+    - cat file to port
+
+#### HP7475A inkscape
+    - document layout: A3 in landscape 
+    - export hpgl not centered
+
+#### Roland CAMM-1
+    - usb to parallel port adapter
+    - chmod 777 /dev/usb/lp0
+    - cat file.hpgl /dev/usb/lp0
+
+#### HP7475a GPIB HPIB
+    https://pearl-hifi.com/06_Lit_Archive/15_Mfrs_Publications/20_HP_Agilent/HP_7475A_Plotter/HP_7475A_Op_Interconnect.pdf
+    - Prologix GPIB Configurator
+    - Auf ID 5
+    - Arduino Serial Monitor, "help++"
+    http://prologix.biz/downloads/PrologixGpibUsbManual-6.0.pdf
+
+##### Roland DPX3300
+usb to parallel port adapter
+
+    chmod 777 /dev/usb/lp0
+    cat file.hpgl /dev/usb/lp0
