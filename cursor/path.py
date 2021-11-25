@@ -595,6 +595,11 @@ class PathCollection:
 
         self.__paths.append(path)
 
+    def extend(self, pc: "PathCollection") -> None:
+        new_paths = self.__paths + pc.get_all()
+        p = PathCollection()
+        p.__paths.extend(new_paths)
+
     def clean(self) -> None:
         """
         removes all paths with only one point
