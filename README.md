@@ -83,6 +83,22 @@ Roland DG DPX3300,
 Roland DG CAMM-1 PNC-1000,
 A0 DIY
 
+HPGL Basics
+
+    IN; Init
+    PA;PD;PU;
+    SP: Select Pen
+
+    FS[1-16]: Pen Force (20-125g) (DPX3300)
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13, 14, 15, 16
+    20,20,35,35,50,50,65,65,80,80,95,59,110,110,125,125
+    
+    LB,LO: Label, LabenOrigin
+    VS: Velocity/Speed
+    LT: LineType
+    RR/RA: RectRelative/RectAbsolute
+    FT: The FT command specifies the pattern of filling or hatching. It is used together with the RA, RR and WG commands.
+
 https://github.com/beardicus/awesome-plotters#manuals-and-ephemera
 
 ##### HP7595A
