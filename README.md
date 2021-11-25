@@ -83,6 +83,8 @@ Roland DG DPX3300,
 Roland DG CAMM-1 PNC-1000,
 A0 DIY
 
+https://github.com/beardicus/awesome-plotters#manuals-and-ephemera
+
 ##### HP7595A
     - serial cable with usb adapter
     - ohne nullmodem
