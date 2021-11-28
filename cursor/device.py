@@ -58,7 +58,7 @@ class MinmaxMapping:
         PlotterType.ROLAND_DXY1200: MinMax(0, 0, 0, 0),  # todo: missing real bounds
         PlotterType.ROLAND_DXY980: MinMax(0, 16158, 0, 11040),
         PlotterType.HP_7595A: MinMax(-23160, 23160, -17602, 17602),
-        PlotterType.ROLAND_PNC1000: MinMax(0, 0, 17200, 40000), # actually unlimited y
+        PlotterType.ROLAND_PNC1000: MinMax(0, 0, 17200, 40000),  # actually unlimited y
     }
 
 
@@ -217,7 +217,6 @@ class Exporter:
         self.__cfg = None
         self.__name = None
         self.__suffix = None
-        self.__hpgl_speed = None
         self.__gcode_speed = None
         self.__layer_pen_mapping = None
         self.__linetype_mapping = None
@@ -253,14 +252,6 @@ class Exporter:
     @suffix.setter
     def suffix(self, t: str) -> None:
         self.__suffix = t
-
-    @property
-    def hpgl_speed(self) -> int:
-        return self.__hpgl_speed
-
-    @hpgl_speed.setter
-    def hpgl_speed(self, t: int) -> None:
-        self.__hpgl_speed = t
 
     @property
     def gcode_speed(self) -> int:
@@ -353,31 +344,18 @@ class Exporter:
         format = ExportFormatMappings.maps[self.cfg.type]
         if self.linetype_mapping and format is ExportFormat.HPGL:
             hpgl_folder = data.DataDirHandler().hpgl(self.name)
-            if self.hpgl_speed:
-                hpgl_renderer = renderer.HPGLRenderer(
-                    hpgl_folder,
-                    speed=self.hpgl_speed,
-                    linetype_mapping=self.linetype_mapping,
-                )
-            else:
-                hpgl_renderer = renderer.HPGLRenderer(
-                    hpgl_folder, linetype_mapping=self.linetype_mapping
-                )
+            hpgl_renderer = renderer.HPGLRenderer(
+                hpgl_folder, linetype_mapping=self.linetype_mapping
+            )
             hpgl_renderer.render(self.paths)
             hpgl_renderer.save(f"{fname}_all")
         if self.layer_pen_mapping is not None:
             if format is ExportFormat.HPGL:
                 hpgl_folder = data.DataDirHandler().hpgl(self.name)
-                if self.hpgl_speed:
-                    hpgl_renderer = renderer.HPGLRenderer(
-                        hpgl_folder,
-                        speed=self.hpgl_speed,
-                        layer_pen_mapping=self.layer_pen_mapping,
-                    )
-                else:
-                    hpgl_renderer = renderer.HPGLRenderer(
-                        hpgl_folder, layer_pen_mapping=self.layer_pen_mapping
-                    )
+
+                hpgl_renderer = renderer.HPGLRenderer(
+                    hpgl_folder, layer_pen_mapping=self.layer_pen_mapping
+                )
                 hpgl_renderer.render(self.paths)
                 hpgl_renderer.save(f"{fname}_all")
         else:
@@ -385,12 +363,7 @@ class Exporter:
             for layer, pc in separate_layers.items():
                 if format is ExportFormat.HPGL:
                     hpgl_folder = data.DataDirHandler().hpgl(self.name)
-                    if self.hpgl_speed:
-                        hpgl_renderer = renderer.HPGLRenderer(
-                            hpgl_folder, speed=self.hpgl_speed
-                        )
-                    else:
-                        hpgl_renderer = renderer.HPGLRenderer(hpgl_folder)
+                    hpgl_renderer = renderer.HPGLRenderer(hpgl_folder)
                     hpgl_renderer.render(pc)
                     hpgl_renderer.save(f"{fname}_{layer}")
 
@@ -418,18 +391,17 @@ class SimpleExportWrapper:
     from cursor import path
 
     def ex(
-        self,
-        paths: path.PathCollection,
-        ptype: PlotterType,
-        psize: PaperSize,
-        margin: int,
-        name: str = "output_name",
-        suffix: str = "",
-        cutoff: int = None,
-        hpgl_speed: int = None,
-        gcode_speed: int = None,
-        hpgl_pen_layer_mapping=None,
-        hpgl_linetype_mapping=None,
+            self,
+            paths: path.PathCollection,
+            ptype: PlotterType,
+            psize: PaperSize,
+            margin: int,
+            name: str = "output_name",
+            suffix: str = "",
+            cutoff: int = None,
+            gcode_speed: int = None,
+            hpgl_pen_layer_mapping=None,
+            hpgl_linetype_mapping=None,
     ):
         cfg = Cfg()
         cfg.type = ptype
@@ -444,7 +416,6 @@ class SimpleExportWrapper:
         exp.paths = paths
         exp.name = name
         exp.suffix = str(suffix)
-        exp.hpgl_speed = hpgl_speed
         exp.gcode_speed = gcode_speed
         exp.layer_pen_mapping = hpgl_pen_layer_mapping
         exp.linetype_mapping = hpgl_linetype_mapping

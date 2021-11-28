@@ -241,7 +241,6 @@ class HPGLRenderer:
         layer_pen_mapping: dict = None,
         linetype_mapping: dict = None,
     ) -> None:
-        self.speed = speed
         self.save_path = folder
         self.paths = PathCollection()
         self.layer_pen_mapping = layer_pen_mapping
@@ -258,7 +257,6 @@ class HPGLRenderer:
         with open(fname.as_posix(), "w") as file:
             # file.write(f"PA0,0;\n")
             file.write("SP1;\n")
-            file.write(f"VS{self.speed};\n")
 
             self.__append_to_file(file, 0.0, 0.0)
 
@@ -270,9 +268,12 @@ class HPGLRenderer:
                     first = False
                 x = p.start_pos().x
                 y = p.start_pos().y
-                self.__append_to_file(file, x, y)
+
                 file.write(f"SP{self.__pen_from_layer(p.layer)};\n")
                 file.write(f"LT{self.__linetype_from_layer(p.line_type)};\n")
+                file.write(f"VS{self.__get_velocity(p.velocity)};\n")
+
+                self.__append_to_file(file, x, y)
                 file.write("PD;\n")
                 for line in p.vertices:
                     x = line.x
@@ -306,6 +307,13 @@ class HPGLRenderer:
             return _default_linetype
 
         return self.linetype_mapping[linetype]
+
+    @staticmethod
+    def __get_velocity(velocity: int) -> int:
+        if velocity is None:
+            return 45
+
+        return velocity
 
 
 class JpegRenderer:
