@@ -235,7 +235,11 @@ class RealtimeRenderer:
 
 class HPGLRenderer:
     def __init__(
-        self, folder: pathlib.Path, speed: int = 30, layer_pen_mapping: dict = None, linetype_mapping: dict = None
+        self,
+        folder: pathlib.Path,
+        speed: int = 30,
+        layer_pen_mapping: dict = None,
+        linetype_mapping: dict = None,
     ) -> None:
         self.speed = speed
         self.save_path = folder
@@ -268,7 +272,7 @@ class HPGLRenderer:
                 y = p.start_pos().y
                 self.__append_to_file(file, x, y)
                 file.write(f"SP{self.__pen_from_layer(p.layer)};\n")
-                file.write(f"LT{self.__linetype_from_layer(p.type)};\n")
+                file.write(f"LT{self.__linetype_from_layer(p.line_type)};\n")
                 file.write("PD;\n")
                 for line in p.vertices:
                     x = line.x
