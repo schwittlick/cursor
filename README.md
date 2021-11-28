@@ -94,10 +94,21 @@ HPGL Basics
     20,20,35,35,50,50,65,65,80,80,95,59,110,110,125,125
     
     LB,LO: Label, LabenOrigin
-    VS: Velocity/Speed
+
+    VS: Velocity/Speed (2-45 cm/s)
+    When the automatic pen control mode is OFF ("AUTO" LED is OFF), pen speed is
+    set to the command value. But when the automatic pen control is ON ("AUTO" LED
+    lights ON), you cannot change pen speed by the VS command.
+
     LT: LineType
     RR/RA: RectRelative/RectAbsolute
     FT: The FT command specifies the pattern of filling or hatching. It is used together with the RA, RR and WG commands.
+
+Ink Tips
+
+    1. 1x 2.0mm
+    2. 2x 1.4mm 
+
 
 https://github.com/beardicus/awesome-plotters#manuals-and-ephemera
 
