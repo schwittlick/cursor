@@ -1,4 +1,4 @@
-from cursor import filter
+from cursor import filter as cursor_filter
 
 import numpy as np
 import math
@@ -145,9 +145,16 @@ class BoundingBox:
 
 
 class Path:
-    def __init__(self, vertices: typing.Optional[list] = None, layer: str = "default", ptype: int = ""):
-        self.layer = layer
-        self.type = ptype
+    def __init__(
+        self,
+        vertices: typing.Optional[list] = None,
+        layer: typing.Optional[str] = None,
+        line_type: typing.Optional[int] = None,
+        velocity: typing.Optional[int] = None,
+    ):
+        self._layer = layer
+        self._line_type = line_type
+        self._velocity = velocity
         if vertices:
             self.vertices = list(vertices)
         else:
@@ -156,6 +163,24 @@ class Path:
     @property
     def hash(self) -> str:
         return hashlib.md5(str(self.vertices).encode("utf-8")).hexdigest()
+
+    @property
+    def line_type(self):
+        """
+        only linetype of 1 and above allowed
+        all other linetypes don't render well
+        """
+        if self._line_type is None:
+            return 1
+        return max(self._line_type, 1)
+
+    @property
+    def layer(self):
+        return self._layer
+
+    @property
+    def velocity(self):
+        return self._velocity
 
     def add(self, x: float, y: float, timestamp: int = 0) -> None:
         self.vertices.append(TimedPosition(x, y, timestamp))
@@ -172,7 +197,9 @@ class Path:
     def reversed(self) -> "Path":
         c = copy.deepcopy(self.vertices)
         c.reverse()
-        return Path(c, layer=self.layer, ptype=self.type)
+        return Path(
+            c, layer=self.layer, line_type=self.line_type, velocity=self.velocity
+        )
 
     def start_pos(self) -> "TimedPosition":
         if len(self.vertices) == 0:
@@ -561,7 +588,7 @@ class Path:
     def __repr__(self):
         rep = (
             f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} "
-            f"shannchan: {self.shannon_direction_changes} layer: {self.layer} type: {self.type}"
+            f"shannchan: {self.shannon_direction_changes} layer: {self.layer} type: {self.line_type} velocity: {self.velocity}"
         )
         return rep
 
@@ -592,7 +619,6 @@ class PathCollection:
     def add(self, path: Path) -> None:
         if path.empty():
             return
-
         self.__paths.append(path)
 
     def extend(self, pc: "PathCollection") -> None:
@@ -627,26 +653,26 @@ class PathCollection:
     def random(self) -> Path:
         return self.__getitem__(random.randint(0, self.__len__() - 1))
 
-    def sort(self, pathsorter: "filter.Sorter") -> None:
-        if isinstance(pathsorter, filter.Sorter):
+    def sort(self, pathsorter: "cursor_filter.Sorter") -> None:
+        if isinstance(pathsorter, cursor_filter.Sorter):
             pathsorter.sort(self.__paths)
         else:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
-    def sorted(self, pathsorter: "filter.Sorter") -> typing.List[Path]:
-        if isinstance(pathsorter, filter.Sorter):
+    def sorted(self, pathsorter: "cursor_filter.Sorter") -> typing.List[Path]:
+        if isinstance(pathsorter, cursor_filter.Sorter):
             return pathsorter.sorted(self.__paths)
         else:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
-    def filter(self, pathfilter: "filter.Filter") -> None:
-        if isinstance(pathfilter, filter.Filter):
+    def filter(self, pathfilter: "cursor_filter.Filter") -> None:
+        if isinstance(pathfilter, cursor_filter.Filter):
             pathfilter.filter(self.__paths)
         else:
             raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
 
-    def filtered(self, pathfilter: "filter.Filter") -> "PathCollection":
-        if isinstance(pathfilter, filter.Filter):
+    def filtered(self, pathfilter: "cursor_filter.Filter") -> "PathCollection":
+        if isinstance(pathfilter, cursor_filter.Filter):
 
             pc = PathCollection()
             pc.__paths = pathfilter.filtered(self.__paths)
@@ -711,21 +737,21 @@ class PathCollection:
     def timestamp(self) -> float:
         return self._timestamp
 
-    def type_names(self) -> typing.List[str]:
+    def get_all_line_types(self) -> typing.List[int]:
         types = []
-        for p in self.__paths:
-            if p.type not in types:
-                types.append(p.type)
+        for p in self:
+            if p.line_type not in types:
+                types.append(p.line_type)
 
         return types
 
-    def get_types(self):
+    def get_line_types(self):
         types = {}
-        for type in self.type_names():
+        for type in self.get_all_line_types():
             types[type] = []
 
-        for p in self.__paths:
-            types[p.type].append(p)
+        for p in self:
+            types[p.line_type].append(p)
 
         typed_pathcollections = {}
         for key in types:
@@ -737,7 +763,7 @@ class PathCollection:
 
     def layer_names(self) -> typing.List[str]:
         layers = []
-        for p in self.__paths:
+        for p in self:
             if p.layer not in layers:
                 layers.append(p.layer)
 
@@ -748,7 +774,7 @@ class PathCollection:
         for layer in self.layer_names():
             layers[layer] = []
 
-        for p in self.__paths:
+        for p in self:
             layers[p.layer].append(p)
 
         layered_pcs = {}
