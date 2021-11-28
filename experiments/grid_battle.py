@@ -61,5 +61,4 @@ if __name__ == "__main__":
         10,
         "grid_battle",
         f"1_insides",
-        hpgl_speed=1
     )

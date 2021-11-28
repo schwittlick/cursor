@@ -43,5 +43,4 @@ if __name__ == "__main__":
         20,
         "composition67",
         f"c65_{pc.hash()}",
-        hpgl_speed=10
     )
