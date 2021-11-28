@@ -8,7 +8,7 @@ def one_card(lt):
 
     count = 160
     for v in range(count):
-        pa = path.Path(ptype=lt)
+        pa = path.Path(line_type=lt)
         pa.add(0, v)
         pa.add(10, v)
         pc.add(pa)

@@ -11,7 +11,7 @@ if __name__ == "__main__":
     for v in range(count):
         mapping[v] = f"2,{int(misc.map(v, 0, count, 1, max_phase, False))}"
 
-        pa = path.Path(ptype=v)
+        pa = path.Path(line_type=v)
         pa.add(0, count * 10 - (v * 10))
         pa.add(100, count*10 - (v * 10))
         pc.add(pa)

@@ -174,9 +174,19 @@ class Path:
             return 1
         return max(self._line_type, 1)
 
+    @line_type.setter
+    def line_type(self, line_type):
+        if line_type <= 0:
+            self._line_type = 1
+        self._line_type = line_type
+
     @property
     def layer(self):
         return self._layer
+
+    @layer.setter
+    def layer(self, layer):
+        self._layer = layer
 
     @property
     def velocity(self):
