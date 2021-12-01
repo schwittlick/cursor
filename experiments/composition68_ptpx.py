@@ -1,6 +1,5 @@
 from cursor import device
 from cursor import path
-from cursor import misc
 
 
 def one_card(lt):

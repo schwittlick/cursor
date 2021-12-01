@@ -598,7 +598,8 @@ class Path:
     def __repr__(self):
         rep = (
             f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} "
-            f"shannchan: {self.shannon_direction_changes} layer: {self.layer} type: {self.line_type} velocity: {self.velocity}"
+            f"shannchan: {self.shannon_direction_changes} layer: {self.layer} "
+            f"type: {self.line_type} velocity: {self.velocity}"
         )
         return rep
 

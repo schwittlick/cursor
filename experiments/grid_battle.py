@@ -60,5 +60,5 @@ if __name__ == "__main__":
         device.PaperSize.LANDSCAPE_A3,
         10,
         "grid_battle",
-        f"1_insides",
+        "1_insides",
     )
