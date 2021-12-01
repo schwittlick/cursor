@@ -139,8 +139,8 @@ class BoundingBox:
             return points_inside > points_outside
 
     def center(self) -> typing.Tuple[float, float]:
-        center_x = ((self.w - self.x) / 2.0) + self.x
-        center_y = ((self.h - self.y) / 2.0) + self.y
+        center_x = (self.w / 2.0) + self.x
+        center_y = (self.h / 2.0) + self.y
         return center_x, center_y
 
 
@@ -798,7 +798,7 @@ class PathCollection:
     def bb(self) -> BoundingBox:
         mi = self.min()
         ma = self.max()
-        bb = BoundingBox(mi[0], mi[1], ma[0], ma[1])
+        bb = BoundingBox(mi[0], mi[1], ma[0] - mi[0], ma[1] - mi[1])
         if bb.x is np.nan or bb.y is np.nan or bb.w is np.nan or bb.h is np.nan:
             log.fail("SHIT")
         return bb
@@ -833,7 +833,7 @@ class PathCollection:
         padding_mm: int = None,
         padding_units: int = None,
         padding_percent: int = None,
-        center_point: tuple[int, int] = None,
+        output_bounds: tuple[float, float, float, float] = None,
         cutoff_mm=None,
     ) -> None:
         # move into positive area
@@ -897,14 +897,21 @@ class PathCollection:
         self.scale(xfac, yfac)
 
         # centering
-
         _bb = self.bb()
-        center = _bb.center()
-        if center_point is None:
-            center_dims = width / 2.0, height / 2.0
+        paths_center = _bb.center()
+        if not output_bounds:
+            output_bounds_center = width / 2.0, height / 2.0
         else:
-            center_dims = center_point
-        diff = center_dims[0] - center[0], center_dims[1] - center[1]
+            output_bounds_center = BoundingBox(
+                output_bounds[0],
+                output_bounds[2],
+                output_bounds[1] - output_bounds[0],
+                output_bounds[3] - output_bounds[2],
+            ).center()
+        diff = (
+            output_bounds_center[0] - paths_center[0],
+            output_bounds_center[1] - paths_center[1],
+        )
 
         log.info(
             f"{self.__class__.__name__}: fit: translated by {diff[0]:.2f} {diff[1]:.2f}"

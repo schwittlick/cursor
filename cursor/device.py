@@ -14,6 +14,12 @@ class MinMax:
         self.miny = miny
         self.maxy = maxy
 
+    def center(self):
+        return (self.minx + self.maxx) / 2, (self.miny + self.maxy) / 2
+
+    def tuple(self):
+        return self.minx, self.maxx, self.miny, self.maxy
+
 
 class PlotterType(Enum):
     ROLAND_DPX3300 = 0
@@ -50,7 +56,7 @@ class ExportFormatMappings:
 
 class MinmaxMapping:
     maps = {
-        PlotterType.ROLAND_DPX3300: MinMax(-17750, 16790, -11180, 11180),
+        PlotterType.ROLAND_DPX3300: MinMax(-17300, 16340, -11180, 11180),
         PlotterType.DIY_PLOTTER: MinMax(0, 3350, 0, -1715),
         PlotterType.AXIDRAW: MinMax(0, 0, 0, -0),  # todo: missing real bounds
         PlotterType.HP_7475A_A4: MinMax(0, 11040, 0, 7721),
@@ -59,21 +65,6 @@ class MinmaxMapping:
         PlotterType.ROLAND_DXY980: MinMax(0, 16158, 0, 11040),
         PlotterType.HP_7595A: MinMax(-23160, 23160, -17602, 17602),
         PlotterType.ROLAND_PNC1000: MinMax(0, 0, 17200, 40000),  # actually unlimited y
-    }
-
-
-class MinMaxMappingBB:
-    from cursor import path
-
-    maps = {
-        PlotterType.ROLAND_DPX3300: path.BoundingBox(-17600, 33600, -11360, 23760),
-        PlotterType.DIY_PLOTTER: path.BoundingBox(0, 3350, 0, -1715),
-        PlotterType.AXIDRAW: MinMax(0, 0, 0, -0),  # todo: missing real bounds
-        PlotterType.HP_7475A_A4: MinMax(0, 0, 0, 0),  # todo: missing real bounds
-        PlotterType.HP_7475A_A3: MinMax(0, 0, 0, 0),  # todo: missing real bounds
-        PlotterType.ROLAND_DXY1200: MinMax(0, 0, 0, 0),  # todo: missing real bounds
-        PlotterType.ROLAND_DXY980: MinMax(0, 0, 0, 0),  # todo: missing real bounds
-        PlotterType.ROLAND_PNC1000: MinMax(0, 0, 17200, 40000),  # todo: missing real bounds
     }
 
 
@@ -278,39 +269,19 @@ class Exporter:
         self.__linetype_mapping = m
 
     def fit(self) -> None:
-        # out_dim = tuple(
-        #    _ * r
-        #    for _, r in zip(
-        #        Paper.sizes[self.cfg.dimension], XYFactors.fac[self.cfg.type]
-        #    )
-        # )
         if self.cfg.type is PlotterType.ROLAND_DPX3300:
             if self.cfg.margin < 35:
                 log.warn(
                     f"Margin for dpx3300 to low: {self.cfg.margin}. Should be > 35mm."
                 )
-            self.paths.fit(
-                Paper.sizes[self.cfg.dimension],
-                xy_factor=XYFactors.fac[self.cfg.type],
-                padding_mm=self.cfg.margin,
-                center_point=(-880, 600),
-                cutoff_mm=self.cfg.cutoff,
-            )
-        elif self.cfg.type is PlotterType.HP_7595A:
-            self.paths.fit(
-                Paper.sizes[self.cfg.dimension],
-                xy_factor=XYFactors.fac[self.cfg.type],
-                padding_mm=self.cfg.margin,
-                center_point=(0, 0),
-                cutoff_mm=self.cfg.cutoff,
-            )
-        else:
-            self.paths.fit(
-                Paper.sizes[self.cfg.dimension],
-                xy_factor=XYFactors.fac[self.cfg.type],
-                padding_mm=self.cfg.margin,
-                cutoff_mm=self.cfg.cutoff,
-            )
+
+        self.paths.fit(
+            Paper.sizes[self.cfg.dimension],
+            xy_factor=XYFactors.fac[self.cfg.type],
+            padding_mm=self.cfg.margin,
+            output_bounds=MinmaxMapping.maps[self.cfg.type].tuple(),
+            cutoff_mm=self.cfg.cutoff,
+        )
 
     def run(self, jpg: bool = False) -> None:
         if self.cfg is None or self.paths is None or self.name is None:

@@ -247,12 +247,12 @@ def test_entropy():
 def test_bb_center():
     bb = BoundingBox(100, 200, 300, 400)
     cx, cy = bb.center()
-    assert cx == 200
-    assert cy == 300
+    assert cx == 250
+    assert cy == 400
 
 
 def test_bb_center2():
-    bb = BoundingBox(-100, -100, 100, 100)
+    bb = BoundingBox(-100, -100, 200, 200)
     cx, cy = bb.center()
     assert cx == 0
     assert cy == 0
