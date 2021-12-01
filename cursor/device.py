@@ -362,17 +362,17 @@ class SimpleExportWrapper:
     from cursor import path
 
     def ex(
-            self,
-            paths: path.PathCollection,
-            ptype: PlotterType,
-            psize: PaperSize,
-            margin: int,
-            name: str = "output_name",
-            suffix: str = "",
-            cutoff: int = None,
-            gcode_speed: int = None,
-            hpgl_pen_layer_mapping=None,
-            hpgl_linetype_mapping=None,
+        self,
+        paths: path.PathCollection,
+        ptype: PlotterType,
+        psize: PaperSize,
+        margin: int,
+        name: str = "output_name",
+        suffix: str = "",
+        cutoff: int = None,
+        gcode_speed: int = None,
+        hpgl_pen_layer_mapping=None,
+        hpgl_linetype_mapping=None,
     ):
         cfg = Cfg()
         cfg.type = ptype

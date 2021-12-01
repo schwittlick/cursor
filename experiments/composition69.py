@@ -1,14 +1,8 @@
 from cursor import device
 from cursor import path
-from cursor import loader
-from cursor import data
 from cursor import misc
 
 if __name__ == "__main__":
-    #p = data.DataDirHandler().recordings()
-    #_loader = loader.Loader(directory=p, limit_files=3)
-    #all_paths = _loader.all_paths()
-
     pc = path.PathCollection()
     count = 360
     for v in range(count):

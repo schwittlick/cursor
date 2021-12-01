@@ -40,5 +40,5 @@ if __name__ == "__main__":
         20,
         "composition68_pptx",
         f"c68_{pc.hash()}",
-        #hpgl_linetype_mapping=make_mapping(pc)
+        # hpgl_linetype_mapping=make_mapping(pc)
     )

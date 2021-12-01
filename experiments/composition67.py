@@ -18,7 +18,7 @@ if __name__ == "__main__":
     min_distance_filter = filter.MinDistanceFilter(1.5)
     max_distance_filter = filter.DistanceFilter(2)
     all_paths.filter(min_distance_filter)
-    #all_paths.filter(max_distance_filter)
+    # all_paths.filter(max_distance_filter)
 
     all_paths.limit()
 
@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
         counter += 1
 
-    #pc.reorder_quadrants(10, 10)
+    # pc.reorder_quadrants(10, 10)
 
     device.SimpleExportWrapper().ex(
         pc,

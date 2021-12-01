@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
         pa = path.Path(line_type=v)
         pa.add(0, count * 10 - (v * 10))
-        pa.add(100, count*10 - (v * 10))
+        pa.add(100, count * 10 - (v * 10))
         pc.add(pa)
 
     device.SimpleExportWrapper().ex(
@@ -23,5 +23,5 @@ if __name__ == "__main__":
         50,
         "composition68",
         f"c68_{pc.hash()}",
-        #hpgl_linetype_mapping=mapping
+        # hpgl_linetype_mapping=mapping
     )

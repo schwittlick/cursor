@@ -19,6 +19,7 @@ def svg_save_wrapper(pc, projname, fname):
     svg_renderer.render(pc)
     svg_renderer.save(fname)
 
+
 def rect(x, y):
     p = path.Path()
     p.add(0.2, 0.2)
@@ -49,10 +50,9 @@ if __name__ == "__main__":
             p.add(x, y)
             p.add(x, y + 1)
         pc.add(p)
-    
 
-    #pc.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A3], padding_mm=10)
-    #svg_save_wrapper(pc, "grid_battle", "millimeter_papier")
+    # pc.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A3], padding_mm=10)
+    # svg_save_wrapper(pc, "grid_battle", "millimeter_papier")
 
     device.SimpleExportWrapper().ex(
         pc,
