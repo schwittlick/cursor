@@ -151,10 +151,12 @@ class Path:
         layer: typing.Optional[str] = None,
         line_type: typing.Optional[int] = None,
         velocity: typing.Optional[int] = None,
+        pen_force: typing.Optional[int] = None
     ):
         self._layer = layer
         self._line_type = line_type
         self._velocity = velocity
+        self._pen_force = pen_force
         if vertices:
             self.vertices = list(vertices)
         else:
@@ -187,6 +189,14 @@ class Path:
     @layer.setter
     def layer(self, layer):
         self._layer = layer
+
+    @property
+    def pen_force(self):
+        return self._pen_force
+
+    @pen_force.setter
+    def pen_force(self, pen_force):
+        self._pen_force = pen_force
 
     @property
     def velocity(self):
