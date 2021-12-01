@@ -239,22 +239,21 @@ class HPGLRenderer:
     def __init__(
         self,
         folder: pathlib.Path,
-        speed: int = 30,
         layer_pen_mapping: dict = None,
-        linetype_mapping: dict = None,
+        line_type_mapping: dict = None,
     ) -> None:
-        self.save_path = folder
-        self.paths = PathCollection()
-        self.layer_pen_mapping = layer_pen_mapping
-        self.linetype_mapping = linetype_mapping
+        self.__save_path = folder
+        self.__paths = PathCollection()
+        self.__layer_pen_mapping = layer_pen_mapping
+        self.__line_type_mapping = line_type_mapping
 
     def render(self, paths: "PathCollection") -> None:
-        self.paths += paths
+        self.__paths += paths
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
 
     def save(self, filename: str) -> None:
-        pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
-        fname = self.save_path / (filename + ".hpgl")
+        pathlib.Path(self.__save_path).mkdir(parents=True, exist_ok=True)
+        fname = self.__save_path / (filename + ".hpgl")
 
         _hpgl_string = ""
 
@@ -262,7 +261,7 @@ class HPGLRenderer:
         _hpgl_string += "PA0,0\n"
 
         first = True
-        for p in self.paths:
+        for p in self.__paths:
             if first:
                 _hpgl_string += "PU;\n"
                 first = False
@@ -295,23 +294,23 @@ class HPGLRenderer:
         return _hpgl_string
 
     def __pen_from_layer(self, layer: typing.Optional[str] = None) -> int:
-        if self.layer_pen_mapping is None:
+        if self.__layer_pen_mapping is None:
             return 1
 
-        if layer not in self.layer_pen_mapping.keys():
+        if layer not in self.__layer_pen_mapping.keys():
             return 1
 
-        return self.layer_pen_mapping[layer]
+        return self.__layer_pen_mapping[layer]
 
     def __linetype_from_layer(self, linetype: typing.Optional[int] = None) -> str:
         _default_linetype = ""
-        if self.linetype_mapping is None:
+        if self.__line_type_mapping is None:
             return _default_linetype
 
-        if linetype not in self.linetype_mapping.keys():
+        if linetype not in self.__line_type_mapping.keys():
             return _default_linetype
 
-        return self.linetype_mapping[linetype]
+        return self.__line_type_mapping[linetype]
 
     @staticmethod
     def __get_velocity(velocity: typing.Optional[int] = None) -> int:

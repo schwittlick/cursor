@@ -13,16 +13,6 @@ import operator
 import time
 from scipy import spatial
 
-import scipy
-
-# just for fun making further development easier and with joy
-pi = scipy.pi
-dot = scipy.dot
-sin = scipy.sin
-cos = scipy.cos
-ar = scipy.array
-rand = scipy.rand
-arange = scipy.arange
 
 log = wasabi.Printer()
 
@@ -150,12 +140,12 @@ class Path:
         vertices: typing.Optional[list] = None,
         layer: typing.Optional[str] = None,
         line_type: typing.Optional[int] = None,
-        velocity: typing.Optional[int] = None,
+        pen_velocity: typing.Optional[int] = None,
         pen_force: typing.Optional[int] = None,
     ):
         self._layer = layer
         self._line_type = line_type
-        self._velocity = velocity
+        self._pen_velocity = pen_velocity
         self._pen_force = pen_force
         if vertices:
             self.vertices = list(vertices)
@@ -200,7 +190,7 @@ class Path:
 
     @property
     def velocity(self):
-        return self._velocity
+        return self._pen_velocity
 
     def add(self, x: float, y: float, timestamp: int = 0) -> None:
         self.vertices.append(TimedPosition(x, y, timestamp))
@@ -218,7 +208,7 @@ class Path:
         c = copy.deepcopy(self.vertices)
         c.reverse()
         return Path(
-            c, layer=self.layer, line_type=self.line_type, velocity=self.velocity
+            c, layer=self.layer, line_type=self.line_type, pen_velocity=self.velocity
         )
 
     def start_pos(self) -> "TimedPosition":
@@ -335,18 +325,6 @@ class Path:
 
         return path
 
-    def Rotate2D(self, pts, cnt, ang=pi / 4):
-        """pts = {} Rotates points(nx2) about center cnt(2) by angle ang(1) in radian"""
-        return dot(pts - cnt, ar([[cos(ang), sin(ang)], [-sin(ang), cos(ang)]])) + cnt
-
-    def rotate(self, angle: float) -> None:
-        """works very wonkily"""
-        pcs = []
-        for point in self.vertices:
-            nparr = point.arr()
-            pcs.append(nparr)
-        # v = self.Rotate2D(ar(pcs), ar([0, 0]), angle)
-
     def intersect(self, newpath: "Path") -> typing.Tuple[bool, float, float]:
         for p1 in range(len(newpath) - 1):
             for p2 in range(len(self) - 1):
@@ -393,7 +371,7 @@ class Path:
             y_interp = self.mix(pthis.y, pnew.y, perc)
             time_interp = self.mix(pthis.timestamp, pnew.timestamp, perc)
 
-            path.add(x_interp, y_interp, time_interp)
+            path.add(x_interp, y_interp, int(time_interp))
 
         return path
 
@@ -452,13 +430,16 @@ class Path:
 
         return angles
 
-    def length(self, v):
+    @staticmethod
+    def length(v):
         return np.sqrt(v[0] ** 2 + v[1] ** 2)
 
-    def dot_product(self, v, w):
+    @staticmethod
+    def dot_product(v, w):
         return v[0] * w[0] + v[1] * w[1]
 
-    def determinant(self, v, w):
+    @staticmethod
+    def determinant(v, w):
         return v[0] * w[1] - v[1] * w[0]
 
     def inner_angle(self, v, w):

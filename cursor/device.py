@@ -307,7 +307,7 @@ class Exporter:
         if self.linetype_mapping and format is ExportFormat.HPGL:
             hpgl_folder = data.DataDirHandler().hpgl(self.name)
             hpgl_renderer = renderer.HPGLRenderer(
-                hpgl_folder, linetype_mapping=self.linetype_mapping
+                hpgl_folder, line_type_mapping=self.linetype_mapping
             )
             hpgl_renderer.render(self.paths)
             hpgl_renderer.save(f"{fname}_all")
