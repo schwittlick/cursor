@@ -72,5 +72,5 @@ if __name__ == "__main__":
         100,
         "simple_rect_10mm_margin",
         "simple_rect",
-        #hpgl_pen_layer_mapping=layer_pen_mapping,
+        # hpgl_pen_layer_mapping=layer_pen_mapping,
     )
