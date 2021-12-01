@@ -38,8 +38,8 @@ def test_pathcollection_minmax():
 
     assert min[0] == bb.x
     assert min[1] == bb.y
-    assert max[0] == bb.w
-    assert max[1] == bb.h
+    assert max[0] == bb.w + bb.x
+    assert max[1] == bb.h + bb.y
 
     assert min[0] == 5
     assert min[1] == 11
@@ -219,8 +219,8 @@ def test_pathcollection_fit1():
 
     assert pcol.bb().x == 10
     assert pcol.bb().y == 10
-    assert pcol.bb().w == 40
-    assert pcol.bb().w == 40
+    assert pcol.bb().w == 30
+    assert pcol.bb().w == 30
 
 
 def test_pathcollection_fit2():
@@ -238,8 +238,8 @@ def test_pathcollection_fit2():
 
     assert pcol.bb().x == 10
     assert pcol.bb().y == 10
-    assert pcol.bb().w == 40
-    assert pcol.bb().w == 40
+    assert pcol.bb().w == 30
+    assert pcol.bb().w == 30
 
 
 def test_pathcollection_fit3():
@@ -257,8 +257,8 @@ def test_pathcollection_fit3():
 
     assert pcol.bb().x == 10
     assert pcol.bb().y == 10
-    assert pcol.bb().w == 40
-    assert pcol.bb().w == 40
+    assert pcol.bb().w == 30
+    assert pcol.bb().w == 30
 
 
 def test_pathcollection_fit4():
@@ -282,8 +282,8 @@ def test_pathcollection_fit4():
 
     assert pcol.bb().x == 10
     assert pcol.bb().y == 10
-    assert pcol.bb().w == 40
-    assert pcol.bb().w == 40
+    assert pcol.bb().w == 30
+    assert pcol.bb().w == 30
 
 
 def test_pathcollection_fit5():
