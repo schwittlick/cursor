@@ -151,7 +151,7 @@ class Path:
         layer: typing.Optional[str] = None,
         line_type: typing.Optional[int] = None,
         velocity: typing.Optional[int] = None,
-        pen_force: typing.Optional[int] = None
+        pen_force: typing.Optional[int] = None,
     ):
         self._layer = layer
         self._line_type = line_type

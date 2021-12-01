@@ -284,7 +284,7 @@ class HPGLRenderer:
 
             _hpgl_string += "PU;\n"
 
-        _hpgl_string += f"PA0,0\n"
+        _hpgl_string += "PA0,0\n"
         _hpgl_string += "SP0;\n"
 
         with open(fname.as_posix(), "w") as file:
