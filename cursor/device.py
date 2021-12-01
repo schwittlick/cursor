@@ -268,21 +268,6 @@ class Exporter:
     def linetype_mapping(self, m: dict) -> None:
         self.__linetype_mapping = m
 
-    def fit(self) -> None:
-        if self.cfg.type is PlotterType.ROLAND_DPX3300:
-            if self.cfg.margin < 35:
-                log.warn(
-                    f"Margin for dpx3300 to low: {self.cfg.margin}. Should be > 35mm."
-                )
-
-        self.paths.fit(
-            Paper.sizes[self.cfg.dimension],
-            xy_factor=XYFactors.fac[self.cfg.type],
-            padding_mm=self.cfg.margin,
-            output_bounds=MinmaxMapping.maps[self.cfg.type].tuple(),
-            cutoff_mm=self.cfg.cutoff,
-        )
-
     def run(self, jpg: bool = False) -> None:
         if self.cfg is None or self.paths is None or self.name is None:
             log.fail("Config, Name or Paths is None. Not exporting anything")
@@ -307,7 +292,13 @@ class Exporter:
                 jpeg_renderer.render(pc, scale=3.0)
                 jpeg_renderer.save(f"{fname}_{layer}")
 
-        self.fit()
+        self.paths.fit(
+            Paper.sizes[self.cfg.dimension],
+            xy_factor=XYFactors.fac[self.cfg.type],
+            padding_mm=self.cfg.margin,
+            output_bounds=MinmaxMapping.maps[self.cfg.type].tuple(),
+            cutoff_mm=self.cfg.cutoff,
+        )
 
         sizename = PaperSizeName.names[self.cfg.dimension]
         machinename = PlotterName.names[self.cfg.type]

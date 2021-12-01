@@ -90,9 +90,7 @@ def test_jpegrenderer():
     rec = loader.all_paths()
 
     rec.fit(
-        Paper.sizes[PaperSize.LANDSCAPE_A1],
-        padding_mm=0,
-        cutoff_mm=0,
+        Paper.sizes[PaperSize.LANDSCAPE_A1], padding_mm=0, cutoff_mm=0,
     )
 
     r = JpegRenderer(DataDirHandler().test_images())
@@ -149,6 +147,7 @@ def test_jpegrenderer_fail():
         svg_r.save("test1")
 
 
+@pytest.mark.skip(reason="This takes too long to run.")
 def test_tsp():
     p0 = Path()
     p0.add(0, 0)
@@ -262,9 +261,7 @@ def test_ascii_renderer():
     rec = loader.all_paths()
 
     rec.fit(
-        Paper.sizes[PaperSize.PORTRAIT_A3],
-        padding_mm=0,
-        cutoff_mm=0,
+        Paper.sizes[PaperSize.PORTRAIT_A3], padding_mm=0, cutoff_mm=0,
     )
 
     r = JpegRenderer(DataDirHandler().test_images())
@@ -280,9 +277,7 @@ def disabled_test_pdf_renderer():
     rec = loader.all_paths()
 
     rec.fit(
-        Paper.sizes[PaperSize.PORTRAIT_A4],
-        padding_mm=0,
-        cutoff_mm=0,
+        Paper.sizes[PaperSize.PORTRAIT_A4], padding_mm=0, cutoff_mm=0,
     )
 
     r = JpegRenderer(DataDirHandler().test_images())
@@ -297,10 +292,7 @@ def disabled_test_pdf_renderer():
 
     fontpath = DataDirHandler().test_data_file("JetBrainsMono-Regular.ttf")
     pdf.add_font(
-        "JetbrainsMono",
-        "",
-        fontpath,
-        uni=True,
+        "JetbrainsMono", "", fontpath, uni=True,
     )
     pdf.add_page()
     pdf.set_margins(0, 0)
