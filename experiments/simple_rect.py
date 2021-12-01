@@ -70,7 +70,7 @@ if __name__ == "__main__":
         device.PlotterType.ROLAND_DPX3300,
         device.PaperSize.LANDSCAPE_A1,
         100,
+        "simple_rect_10mm_margin",
         "simple_rect",
-        "simple_rect",
-        hpgl_pen_layer_mapping=layer_pen_mapping,
+        #hpgl_pen_layer_mapping=layer_pen_mapping,
     )

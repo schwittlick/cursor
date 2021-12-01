@@ -4,7 +4,7 @@ from cursor import renderer
 
 def map(value, inputMin, inputMax, outputMin, outputMax, clamp):
     outVal = (value - inputMin) / (inputMax - inputMin) * (
-            outputMax - outputMin
+        outputMax - outputMin
     ) + outputMin
 
     if clamp:

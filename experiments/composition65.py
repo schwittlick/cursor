@@ -25,7 +25,7 @@ if __name__ == "__main__":
         counter += 1
         counter = counter % 6
 
-    #pc.reorder_quadrants(10, 10)
+    # pc.reorder_quadrants(10, 10)
 
     device.SimpleExportWrapper().ex(
         pc,
