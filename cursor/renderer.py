@@ -1,3 +1,5 @@
+import typing
+
 from cursor.path import PathCollection
 from cursor.path import Path
 from cursor.path import BoundingBox
@@ -254,42 +256,45 @@ class HPGLRenderer:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
         fname = self.save_path / (filename + ".hpgl")
 
+        _hpgl_string = ""
+
+        _hpgl_string += "SP1;\n"
+        _hpgl_string += "PA0,0\n"
+
+        first = True
+        for p in self.paths:
+            if first:
+                _hpgl_string += "PU;\n"
+                first = False
+            x = p.start_pos().x
+            y = p.start_pos().y
+
+            _hpgl_string += f"SP{self.__pen_from_layer(p.layer)};\n"
+            _hpgl_string += f"LT{self.__linetype_from_layer(p.line_type)};\n"
+            _hpgl_string += f"VS{self.__get_velocity(p.velocity)};\n"
+            _hpgl_string += f"FS{self.__get_pen_force(p.pen_force)};\n"
+
+            _hpgl_string += f"PA{int(x)},{int(y)};\n"
+            _hpgl_string += "PD;\n"
+
+            for line in p.vertices:
+                x = line.x
+                y = line.y
+                _hpgl_string += f"PA{int(x)},{int(y)};\n"
+
+            _hpgl_string += "PU;\n"
+
+        _hpgl_string += f"PA0,0\n"
+        _hpgl_string += "SP0;\n"
+
         with open(fname.as_posix(), "w") as file:
-            # file.write(f"PA0,0;\n")
-            file.write("SP1;\n")
+            file.write(_hpgl_string)
 
-            self.__append_to_file(file, 0.0, 0.0)
-
-            first = True
-            for p in self.paths:
-
-                if first:
-                    file.write("PU;\n")
-                    first = False
-                x = p.start_pos().x
-                y = p.start_pos().y
-
-                file.write(f"SP{self.__pen_from_layer(p.layer)};\n")
-                file.write(f"LT{self.__linetype_from_layer(p.line_type)};\n")
-                file.write(f"VS{self.__get_velocity(p.velocity)};\n")
-
-                self.__append_to_file(file, x, y)
-                file.write("PD;\n")
-                for line in p.vertices:
-                    x = line.x
-                    y = line.y
-                    self.__append_to_file(file, x, y)
-                file.write("PU;\n")
-
-            self.__append_to_file(file, 0.0, 0.0)
-            file.write("SP0;\n")
         log.good(f"Finished saving {fname}")
 
-    @staticmethod
-    def __append_to_file(file, x: float, y: float):
-        file.write(f"PA{int(x)},{int(y)}\n")
+        return _hpgl_string
 
-    def __pen_from_layer(self, layer: str) -> int:
+    def __pen_from_layer(self, layer: typing.Optional[str] = None) -> int:
         if self.layer_pen_mapping is None:
             return 1
 
@@ -298,7 +303,7 @@ class HPGLRenderer:
 
         return self.layer_pen_mapping[layer]
 
-    def __linetype_from_layer(self, linetype: int) -> str:
+    def __linetype_from_layer(self, linetype: typing.Optional[int] = None) -> str:
         _default_linetype = ""
         if self.linetype_mapping is None:
             return _default_linetype
@@ -309,11 +314,18 @@ class HPGLRenderer:
         return self.linetype_mapping[linetype]
 
     @staticmethod
-    def __get_velocity(velocity: int) -> int:
+    def __get_velocity(velocity: typing.Optional[int] = None) -> int:
         if velocity is None:
             return 45
 
         return velocity
+
+    @staticmethod
+    def __get_pen_force(pen_force: typing.Optional[int] = None) -> int:
+        if pen_force is None:
+            return 16
+
+        return pen_force
 
 
 class JpegRenderer:
