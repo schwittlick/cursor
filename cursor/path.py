@@ -891,18 +891,19 @@ class PathCollection:
         # centering
         _bb = self.bb()
         paths_center = _bb.center()
-        if not output_bounds:
-            output_bounds_center = width / 2.0, height / 2.0
-        else:
+
+        output_bounds_center = width / 2.0, height / 2.0
+
+        if output_bounds:
+            w = np.linalg.norm(output_bounds[1] - output_bounds[0])
+            h = np.linalg.norm(output_bounds[3] - output_bounds[2])
             output_bounds_center = BoundingBox(
-                output_bounds[0],
-                output_bounds[2],
-                output_bounds[1] - output_bounds[0],
-                output_bounds[3] - output_bounds[2],
+                output_bounds[0], output_bounds[2], w, h,
             ).center()
+
         diff = (
-            output_bounds_center[0] - paths_center[0],
-            output_bounds_center[1] - paths_center[1],
+            np.linalg.norm(output_bounds_center[0] - paths_center[0]),
+            np.linalg.norm(output_bounds_center[1] - paths_center[1]),
         )
 
         log.info(

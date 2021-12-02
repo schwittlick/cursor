@@ -251,7 +251,7 @@ class HPGLRenderer:
         self.__paths += paths
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
 
-    def save(self, filename: str) -> None:
+    def save(self, filename: str) -> str:
         pathlib.Path(self.__save_path).mkdir(parents=True, exist_ok=True)
         fname = self.__save_path / (filename + ".hpgl")
 
