@@ -31,6 +31,8 @@ class PlotterType(Enum):
     ROLAND_DXY980 = 6
     HP_7595A = 7
     ROLAND_PNC1000 = 8
+    ROLAND_DPX3300_A2 = 9
+    ROLAND_DPX3300_A3 = 10
 
 
 class ExportFormat(Enum):
@@ -43,6 +45,8 @@ class ExportFormat(Enum):
 class ExportFormatMappings:
     maps = {
         PlotterType.ROLAND_DPX3300: ExportFormat.HPGL,
+        PlotterType.ROLAND_DPX3300_A2: ExportFormat.HPGL,
+        PlotterType.ROLAND_DPX3300_A3: ExportFormat.HPGL,
         PlotterType.DIY_PLOTTER: ExportFormat.GCODE,
         PlotterType.AXIDRAW: ExportFormat.SVG,
         PlotterType.HP_7475A_A3: ExportFormat.HPGL,
@@ -56,7 +60,9 @@ class ExportFormatMappings:
 
 class MinmaxMapping:
     maps = {
-        PlotterType.ROLAND_DPX3300: MinMax(-17300, 16340, -11180, 11180),
+        PlotterType.ROLAND_DPX3300: MinMax(-16920, 16340, -11180, 11180),
+        PlotterType.ROLAND_DPX3300_A2: MinMax(-16920, 5440, -11180, 4629),
+        PlotterType.ROLAND_DPX3300_A3: MinMax(-16920, -1112, -11180, -3276),
         PlotterType.DIY_PLOTTER: MinMax(0, 3350, 0, -1715),
         PlotterType.AXIDRAW: MinMax(0, 0, 0, -0),  # todo: missing real bounds
         PlotterType.HP_7475A_A4: MinMax(0, 11040, 0, 7721),
@@ -86,11 +92,14 @@ class PaperSize(Enum):
     LANDSCAPE_A3 = 14
     LANDSCAPE_80_50 = 15
     PORTRAIT_50_80 = 16
+    LANDSCAPE_A2 = 17
 
 
 class PlotterName:
     names = {
         PlotterType.ROLAND_DPX3300: "dpx3300",
+        PlotterType.ROLAND_DPX3300_A2: "dpx3300_a2",
+        PlotterType.ROLAND_DPX3300_A3: "dpx3300_a3",
         PlotterType.AXIDRAW: "axidraw",
         PlotterType.DIY_PLOTTER: "custom",
         PlotterType.HP_7475A_A3: "hp7475a_a3",
@@ -121,6 +130,7 @@ class PaperSizeName:
         PaperSize.LANDSCAPE_A3: "landscape_a3",
         PaperSize.LANDSCAPE_80_50: "landscape_80x50",
         PaperSize.PORTRAIT_50_80: "portrait_50_80",
+        PaperSize.LANDSCAPE_A2: "landscape_a2",
     }
 
 
@@ -143,12 +153,15 @@ class Paper:
         PaperSize.LANDSCAPE_A3: (420, 297),
         PaperSize.LANDSCAPE_80_50: (800, 500),
         PaperSize.PORTRAIT_50_80: (500, 800),
+        PaperSize.LANDSCAPE_A2: (594, 420),
     }
 
 
 class XYFactors:
     fac = {
         PlotterType.ROLAND_DPX3300: (40, 40),
+        PlotterType.ROLAND_DPX3300_A2: (40, 40),
+        PlotterType.ROLAND_DPX3300_A3: (40, 40),
         PlotterType.DIY_PLOTTER: (2.85714, 2.90572),
         PlotterType.AXIDRAW: (3.704, 3.704),
         PlotterType.HP_7475A_A3: (40, 40),
