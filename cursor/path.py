@@ -129,8 +129,8 @@ class BoundingBox:
             return points_inside > points_outside
 
     def center(self) -> typing.Tuple[float, float]:
-        center_x = (self.w / 2.0) + self.x
-        center_y = (self.h / 2.0) + self.y
+        center_x = ((self.w) / 2.0) + self.x
+        center_y = ((self.h) / 2.0) + self.y
         return center_x, center_y
 
 
@@ -902,8 +902,8 @@ class PathCollection:
             ).center()
 
         diff = (
-            np.linalg.norm(output_bounds_center[0] - paths_center[0]),
-            np.linalg.norm(output_bounds_center[1] - paths_center[1]),
+            np.linalg.norm(paths_center[0] - output_bounds_center[0]),
+            np.linalg.norm(paths_center[1] - output_bounds_center[1]),
         )
 
         log.info(
