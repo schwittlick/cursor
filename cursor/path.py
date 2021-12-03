@@ -902,8 +902,8 @@ class PathCollection:
             ).center()
 
         diff = (
-            np.linalg.norm(paths_center[0] - output_bounds_center[0]),
-            np.linalg.norm(paths_center[1] - output_bounds_center[1]),
+            output_bounds_center[0] - paths_center[0],
+            output_bounds_center[1] - paths_center[1],
         )
 
         log.info(
