@@ -1,3 +1,4 @@
+import os
 import typing
 
 from cursor.path import PathCollection
@@ -215,23 +216,19 @@ class RealtimeRenderer:
     def render(self, paths):
         from processing_py import App
 
-        app = App(1920, 1080)  # create window: width, height
+        app = App(800, 600)  # create window: width, height
 
         t = 0
         while t < 500:
             print(f"frame {t}")
             t += 1
-            app.background(0, 0, 0)  # set background:  red, green, blue
-            app.fill(255, 255, 0)  # set color for objects: red, green, blue
-            app.ellipse(
-                app.mouseX, app.mouseY, 50, 50
-            )  # draw a circle: center_x, center_y, size_x, size_y
+            app.background(0, 0, 0)
+            app.fill(255, 255, 0)
+            app.ellipse(app.mouseX, app.mouseY, 50, 50)
             app.fill(255, 255, 255)
-            # app.textFont("JetBrains Mono", 100)
-            # app.text(str(t), 100, 100)
             app.stroke(255, 255, 255)
             self.render_pc(app, paths)
-            app.redraw()  # refresh the window
+            app.redraw()
         app.exit()
 
 
@@ -405,6 +402,34 @@ class JpegRenderer:
         self.img_draw.line(xy=(0, 0, 0, h), fill="black", width=2)
         self.img_draw.line(xy=(w - 2, 0, w - 2, h), fill="black", width=2)
         self.img_draw.line(xy=(0, h - 2, w, h - 2), fill="black", width=2)
+
+
+class VideoRenderer:
+    def __init__(self, folder: pathlib.Path):
+        self.save_path = folder
+        self.images = []
+
+    def add_frame(self, img):
+        self.images.append(img)
+
+    def render_video(self, fname):
+        pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
+
+        text_file = (self.save_path / "list.txt").as_posix()
+
+        p = pathlib.Path(self.save_path.absolute()).glob("**/*.jpg")
+        files = [x for x in p if x.is_file()]
+        with open(text_file, "w", encoding="utf8") as file:
+            for f in files:
+                file.write("file '")
+                file.write(f.as_posix().replace("/", "\\"))
+                file.write("'")
+                file.write("\n")
+
+        out_file = self.save_path / fname
+        call = f'ffmpeg -y -r 25 -f concat -safe 0 -i "{text_file}" -c:v libx264 -vf "fps=25,format=yuv420p,scale=trunc(iw/2)*2:trunc(ih/2)*2" {out_file}'
+
+        os.system(call)
 
 
 class AsciiRenderer:
