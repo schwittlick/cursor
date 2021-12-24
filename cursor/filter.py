@@ -220,6 +220,27 @@ class DistanceFilter(Filter):
         log.good(f"DistanceFilter: reduced path count from {len_before} to {len_after}")
 
 
+class DistanceBetweenPointsFilter(Filter):
+    def __init__(self, max_distance):
+        self.max_distance = max_distance
+
+    def filter(self, paths):
+        len_before = len(paths)
+
+        for pa in paths:
+            #newp = []
+            verts = []
+            for pi in range(len(pa) - 1):
+                p1 = pa[pi]
+                p2 = pa[pi+1]
+                d = p1.distance(p2)
+                if d >= self.max_distance:
+                    verts.append(p2)
+            pa.vertices = verts
+        #paths[:] = [p for p in paths if p.distance(next(p)) <= self.max_distance]
+        len_after = len(paths)
+        log.good(f"DistanceBetweenPointsFilter: reduced path count from {len_before} to {len_after}")
+
 class MinDistanceFilter(Filter):
     def __init__(self, min_distance):
         self.min_distance = min_distance

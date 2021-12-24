@@ -4,9 +4,9 @@ from cursor import misc
 
 if __name__ == "__main__":
     pc = path.PathCollection()
-    count = 360
+    count = 390
     for v in range(count):
-        pa = path.Path(velocity=int(misc.map(v, 0, count, 45, 1, True)))
+        pa = path.Path(pen_velocity=int(misc.map(v, 0, count, 45, 1, True)))
         pa.add(v, 0)
         pa.add(v, 10)
         pc.add(pa)
@@ -15,7 +15,7 @@ if __name__ == "__main__":
         pc,
         device.PlotterType.ROLAND_DPX3300,
         device.PaperSize.LANDSCAPE_A1,
-        60,
+        30,
         "composition69",
         f"c69_{pc.hash()}",
     )
