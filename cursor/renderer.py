@@ -265,7 +265,7 @@ class HPGLRenderer:
             x = p.start_pos().x
             y = p.start_pos().y
 
-            _hpgl_string += f"SP{self.__pen_from_layer(p.layer)};\n"
+            _hpgl_string += f"SP{self.__get_pen_select(p.pen_select)};\n"
             _hpgl_string += f"LT{self.__linetype_from_layer(p.line_type)};\n"
             _hpgl_string += f"VS{self.__get_velocity(p.velocity)};\n"
             _hpgl_string += f"FS{self.__get_pen_force(p.pen_force)};\n"
@@ -290,6 +290,13 @@ class HPGLRenderer:
 
         return _hpgl_string
 
+    @staticmethod
+    def __get_pen_select(pen_select: typing.Optional[int] = None) -> int:
+        if pen_select is None:
+            return 1
+
+        return pen_select
+
     def __pen_from_layer(self, layer: typing.Optional[str] = None) -> int:
         if self.__layer_pen_mapping is None:
             return 1
@@ -312,7 +319,7 @@ class HPGLRenderer:
     @staticmethod
     def __get_velocity(velocity: typing.Optional[int] = None) -> int:
         if velocity is None:
-            return 45
+            return 110
 
         return velocity
 

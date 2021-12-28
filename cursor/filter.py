@@ -12,6 +12,8 @@ class Sorter:
     SHANNON_DIRECTION_CHANGES = 3
     DISTANCE = 4
     HASH = 5
+    LAYER = 6
+    PEN_SELECT = 7
 
     def __init__(self, reverse=False, param=SHANNON_X):
         self.__reverse = reverse
@@ -39,6 +41,10 @@ class Sorter:
             paths.sort(key=lambda x: x.distance, reverse=self.__reverse)
         elif self.__param is self.HASH:
             paths.sort(key=lambda x: x.hash, reverse=self.__reverse)
+        elif self.__param is self.LAYER:
+            paths.sort(key=lambda x: x.layer, reverse=self.__reverse)
+        elif self.__param is self.PEN_SELECT:
+            paths.sort(key=lambda x: x.pen_select, reverse=self.__reverse)
         else:
             raise Exception(
                 f"Unknown parameter {self.__param} for {__class__.__name__}"
@@ -68,6 +74,10 @@ class Sorter:
             )
         elif self.__param is self.HASH:
             sorted_list = sorted(paths, key=lambda x: x.hash, reverse=self.__reverse)
+        elif self.__param is self.LAYER:
+            sorted_list = sorted(paths, key=lambda x: x.layer, reverse=self.__reverse)
+        elif self.__param is self.PEN_SELECT:
+            sorted_list = sorted(paths, key=lambda x: x.pen_select, reverse=self.__reverse)
         else:
             raise Exception(f"Wrong param {self.__param} for {__class__.__name__}")
         elapsed = time.time() - t0

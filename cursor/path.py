@@ -183,11 +183,13 @@ class Path:
         line_type: typing.Optional[int] = None,
         pen_velocity: typing.Optional[int] = None,
         pen_force: typing.Optional[int] = None,
+        pen_select: typing.Optional[int] = None,
     ):
         self._layer = layer
         self._line_type = line_type
         self._pen_velocity = pen_velocity
         self._pen_force = pen_force
+        self._pen_select = pen_select
         if vertices:
             self.vertices = list(vertices)
         else:
@@ -228,6 +230,14 @@ class Path:
     @pen_force.setter
     def pen_force(self, pen_force):
         self._pen_force = pen_force
+
+    @property
+    def pen_select(self):
+        return self._pen_select
+
+    @pen_select.setter
+    def pen_select(self, pen_select):
+        self._pen_select = pen_select
 
     @property
     def velocity(self):
@@ -580,9 +590,7 @@ class Path:
         return entropy
 
     def empty(self) -> bool:
-        if len(self.vertices) == 0:
-            return True
-        return False
+        return len(self.vertices) == 0
 
     def clean(self) -> None:
         """

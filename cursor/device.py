@@ -33,6 +33,7 @@ class PlotterType(Enum):
     ROLAND_PNC1000 = 8
     ROLAND_DPX3300_A2 = 9
     ROLAND_DPX3300_A3 = 10
+    HP_7595A_A3 = 11
 
 
 class ExportFormat(Enum):
@@ -55,6 +56,7 @@ class ExportFormatMappings:
         PlotterType.ROLAND_DXY980: ExportFormat.HPGL,
         PlotterType.HP_7595A: ExportFormat.HPGL,
         PlotterType.ROLAND_PNC1000: ExportFormat.HPGL,
+        PlotterType.HP_7595A_A3: ExportFormat.HPGL,
     }
 
 
@@ -71,6 +73,7 @@ class MinmaxMapping:
         PlotterType.ROLAND_DXY980: MinMax(0, 16158, 0, 11040),
         PlotterType.HP_7595A: MinMax(-23160, 23160, -17602, 17602),
         PlotterType.ROLAND_PNC1000: MinMax(0, 0, 17200, 40000),  # actually unlimited y
+        PlotterType.HP_7595A_A3: MinMax(-7728, 7728+960, -5752, 5752),
     }
 
 
@@ -106,8 +109,9 @@ class PlotterName:
         PlotterType.HP_7475A_A4: "hp7475a_a4",
         PlotterType.ROLAND_DXY1200: "dxy1200",
         PlotterType.ROLAND_DXY980: "dxy980",
-        PlotterType.HP_7595A: "hp_draftmaster_sx",
+        PlotterType.HP_7595A: "hp7595a_draftmaster_sx",
         PlotterType.ROLAND_PNC1000: "roland_camm1",
+        PlotterType.HP_7595A_A3: "hp7595a_draftmaster_sx_a3",
     }
 
 
@@ -170,6 +174,7 @@ class XYFactors:
         PlotterType.ROLAND_DXY980: (40, 40),
         PlotterType.HP_7595A: (40, 40),
         PlotterType.ROLAND_PNC1000: (40, 40),
+        PlotterType.HP_7595A_A3: (37, 37),
     }
 
 
