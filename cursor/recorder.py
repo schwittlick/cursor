@@ -7,6 +7,8 @@ import wasabi
 import pathlib
 import pystray
 import pynput
+import threading
+
 from PIL import Image
 
 log = wasabi.Printer()
@@ -36,7 +38,16 @@ class Recorder:
         )
         self.key_listener.start()
 
+        save_event = threading.Event()
+        self.__save_async(save_event)
+
         log.good("Started cursor recorder")
+
+    def __save_async(self, f_stop):
+        self.save()
+        if not f_stop.is_set():
+            # every 10s
+            threading.Timer(10, self.__save_async, [f_stop]).start()
 
     def on_move(self, x, y):
         _x = x / self._resolution[0]
