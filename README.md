@@ -100,9 +100,21 @@ HPGL Basics
     set to the command value. But when the automatic pen control is ON ("AUTO" LED
     lights ON), you cannot change pen speed by the VS command.
 
+    PT: Pen Thickness (0.1 - 5.0)
+    When you select a filling pattern by the FT command (FT1, FT2), the setting by this command is effective. 
+    The PT command is effective only to the currently used pen. 
+
     LT: LineType
     RR/RA: RectRelative/RectAbsolute
     FT: The FT command specifies the pattern of filling or hatching. It is used together with the RA, RR and WG commands.
+
+
+![HPGL RA](hpgl_ra.png)
+![HPGL_RR](hpgl_rr.png)
+![img.png](hpgl_uf.png)
+![img.png](hpgl_wg.png)
+![img.png](hpgl_fp.png)
+![img.png](hpgl_ft.png)
 
 Ink Tips
 
