@@ -307,7 +307,7 @@ class Exporter:
 
                 jpeg_folder = data.DataDirHandler().jpg(self.name)
                 jpeg_renderer = renderer.JpegRenderer(jpeg_folder)
-                jpeg_renderer.render(pc, scale=3.0)
+                jpeg_renderer.render(pc, scale=2.0)
                 jpeg_renderer.save(f"{fname}_{layer}")
 
         self.paths.fit(

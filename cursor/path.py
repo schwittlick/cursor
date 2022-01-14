@@ -243,6 +243,10 @@ class Path:
     def velocity(self):
         return self._pen_velocity
 
+    @velocity.setter
+    def velocity(self, pen_velocity):
+        self._pen_velocity = pen_velocity
+
     def add(self, x: float, y: float, timestamp: int = 0) -> None:
         self.vertices.append(TimedPosition(x, y, timestamp))
 
@@ -395,7 +399,10 @@ class Path:
                 ) and ((diffLBx * line1Start.y - diffLBy * line1Start.x) < compareB) ^ (
                     (diffLBx * line1End.y - diffLBy * line1End.x) < compareB
                 ):
-                    lDetDivInv = 1 / ((diffLAx * diffLBy) - (diffLAy * diffLBx))
+                    ok = ((diffLAx * diffLBy) - (diffLAy * diffLBx))
+                    if ok == 0:
+                        ok = 0.01
+                    lDetDivInv = 1 / ok
                     intersectionx = (
                         -((diffLAx * compareB) - (compareA * diffLBx)) * lDetDivInv
                     )
@@ -674,8 +681,7 @@ class PathCollection:
 
     def extend(self, pc: "PathCollection") -> None:
         new_paths = self.__paths + pc.get_all()
-        p = PathCollection()
-        p.__paths.extend(new_paths)
+        self.__paths = new_paths
 
     def clean(self) -> None:
         """
@@ -697,6 +703,11 @@ class PathCollection:
         if len(self.__paths) == 0:
             return True
         return False
+
+    def copy(self) -> "PathCollection":
+        p = PathCollection()
+        p.__paths.extend(copy.deepcopy(self.__paths))
+        return p
 
     def get_all(self) -> typing.List[Path]:
         return self.__paths
