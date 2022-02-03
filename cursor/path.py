@@ -184,12 +184,14 @@ class Path:
         pen_velocity: typing.Optional[int] = None,
         pen_force: typing.Optional[int] = None,
         pen_select: typing.Optional[int] = None,
+        is_polygon: typing.Optional[bool] = None
     ):
         self._layer = layer
         self._line_type = line_type
         self._pen_velocity = pen_velocity
         self._pen_force = pen_force
         self._pen_select = pen_select
+        self._is_polygon = is_polygon
         if vertices:
             self.vertices = list(vertices)
         else:
@@ -247,8 +249,26 @@ class Path:
     def velocity(self, pen_velocity):
         self._pen_velocity = pen_velocity
 
+    @property
+    def is_polygon(self):
+        return self._is_polygon
+
+    @is_polygon.setter
+    def is_polygon(self, is_polygon):
+        self._is_polygon = is_polygon
+
     def add(self, x: float, y: float, timestamp: int = 0) -> None:
         self.vertices.append(TimedPosition(x, y, timestamp))
+
+    def arr(self):
+        data = np.random.randint(0, 1000, size=(len(self), 2))
+
+        idx = 0
+        for p in self.vertices:
+            data[idx] = p.arr()
+            idx += 1
+
+        return data
 
     def clear(self) -> None:
         self.vertices.clear()
@@ -642,6 +662,13 @@ class Path:
         result = 1 - spatial.distance.cosine(self.vertices, _path.vertices)
         return result[1]
 
+    def centeroid(self):
+        arr = self.arr()
+        length = arr.shape[0]
+        sum_x = np.sum(arr[:, 0])
+        sum_y = np.sum(arr[:, 1])
+        return sum_x / length, sum_y / length
+
     def __repr__(self):
         rep = (
             f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} "
@@ -658,7 +685,7 @@ class Path:
             yield v
 
     def __getitem__(self, item):
-        return self.vertices[item]
+        return self.vertices[item].copy()
 
 
 class PathCollection:
