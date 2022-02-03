@@ -14,6 +14,7 @@ class Sorter:
     HASH = 5
     LAYER = 6
     PEN_SELECT = 7
+    POINT_COUNT = 8
 
     def __init__(self, reverse=False, param=SHANNON_X):
         self.__reverse = reverse
@@ -45,6 +46,8 @@ class Sorter:
             paths.sort(key=lambda x: x.layer, reverse=self.__reverse)
         elif self.__param is self.PEN_SELECT:
             paths.sort(key=lambda x: x.pen_select, reverse=self.__reverse)
+        elif self.__param is self.POINT_COUNT:
+            paths.sort(key=lambda x: len(x), reverse=self.__reverse)
         else:
             raise Exception(
                 f"Unknown parameter {self.__param} for {__class__.__name__}"
@@ -78,6 +81,8 @@ class Sorter:
             sorted_list = sorted(paths, key=lambda x: x.layer, reverse=self.__reverse)
         elif self.__param is self.PEN_SELECT:
             sorted_list = sorted(paths, key=lambda x: x.pen_select, reverse=self.__reverse)
+        elif self.__param is self.POINT_COUNT:
+            sorted_list = sorted(paths, key=lambda x: len(x), reverse=self.__reverse)
         else:
             raise Exception(f"Wrong param {self.__param} for {__class__.__name__}")
         elapsed = time.time() - t0
