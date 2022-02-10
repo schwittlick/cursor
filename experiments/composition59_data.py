@@ -18,8 +18,6 @@ path = (
     "Z:\\Dropbox\\0_MARCELSCHWITTLICK\\2020_DRAWING_PHOTOS\\spirals\\raw\\edit\\144\\"
 )
 
-out_path = "Z:\\144\\"
-
 data_map = {}
 data_map[yellow] = {}
 data_map[blue] = {}
@@ -73,7 +71,7 @@ data_map[yellow][black] = {
 
 data_map[yellow][white] = {
     "created": "22.12.2021",
-    "objktid": 1111,
+    "objktid": 667434,
     "file": f"{path}{yellow}\\{white}\\20211225_3.jpg",
 }
 
@@ -111,7 +109,7 @@ data_map[yellow][neon_orange] = {
 data_map[blue][yellow] = {
     "created": "02.03.2021",
     "objktid": 1111,
-    "file": f"{path}{blue}\\{yellow}\\20210303_8.jpg",
+    "file": f"{path}{blue}\\{yellow}\\20220206.jpg",
 }
 
 data_map[blue][blue] = {
@@ -123,12 +121,12 @@ data_map[blue][blue] = {
 data_map[blue][green] = {
     "created": "17.03.2021",
     "objktid": 1111,
-    "file": f"{path}{blue}\\{green}\\20211012.jpg",
+    "file": f"{path}{blue}\\{green}\\20220206.jpg",
 }
 
 data_map[blue][red] = {
     "created": "30.09.2021",
-    "objktid": 1111,
+    "objktid": 667435,
     "file": f"{path}{blue}\\{red}\\20211017_br.jpg",
 }
 
@@ -177,14 +175,14 @@ data_map[blue][neon_yellow] = {
 data_map[blue][neon_orange] = {
     "created": "16.06.2021",
     "objktid": 1111,
-    "file": f"{path}{blue}\\{neon_orange}\\20210622.jpg",
+    "file": f"{path}{blue}\\{neon_orange}\\20220206.jpg",
 }
 
 # green
 data_map[green][yellow] = {
     "created": "29.02.2021",
     "objktid": 530222,
-    "file": f"{path}{green}\\{yellow}\\20211111_1_gy.jpg",
+    "file": f"{path}{green}\\{yellow}\\20220206.jpg",
 }
 
 data_map[green][blue] = {
@@ -231,7 +229,7 @@ data_map[green][violet] = {
 
 data_map[green][magenta] = {
     "created": "18.01.2022",
-    "objktid": 1111,
+    "objktid": 667436,
     "file": f"{path}{green}\\{magenta}\\20220201.jpg",
 }
 
@@ -250,20 +248,20 @@ data_map[green][neon_yellow] = {
 data_map[green][neon_orange] = {
     "created": "19.03.2021",
     "objktid": 1111,
-    "file": f"{path}{green}\\{neon_orange}\\20210320.jpg",
+    "file": f"{path}{green}\\{neon_orange}\\20220206.jpg",
 }
 
 # red
 data_map[red][yellow] = {
-    "created": "1111",
-    "objktid": 1111,
-    "file": f"{path}{red}\\{yellow}\\1111.jpg",
+    "created": "03.08.2020",
+    "objktid": 667437,
+    "file": f"{path}{red}\\{yellow}\\20220206.jpg",
 }
 
 data_map[red][blue] = {
     "created": "20.06.2021",
     "objktid": 1111,
-    "file": f"{path}{red}\\{blue}\\20210622_rb.jpg",
+    "file": f"{path}{red}\\{blue}\\20220206.jpg",
 }
 
 data_map[red][green] = {
@@ -321,9 +319,9 @@ data_map[red][neon_yellow] = {
 }
 
 data_map[red][neon_orange] = {
-    "created": "1111",
+    "created": "03.02.2022",
     "objktid": 1111,
-    "file": f"{path}{red}\\{neon_orange}\\1111.jpg",
+    "file": f"{path}{red}\\{neon_orange}\\20220206_1.jpg",
 }
 
 # orange
@@ -336,7 +334,7 @@ data_map[orange][yellow] = {
 data_map[orange][blue] = {
     "created": "10.03.2021",
     "objktid": 1111,
-    "file": f"{path}{orange}\\{blue}\\20210320_17.jpg",
+    "file": f"{path}{orange}\\{blue}\\20220206.jpg",
 }
 
 data_map[orange][green] = {
@@ -370,9 +368,9 @@ data_map[orange][white] = {
 }
 
 data_map[orange][violet] = {
-    "created": "1111",
+    "created": "04.02.2022",
     "objktid": 1111,
-    "file": f"{path}{orange}\\{violet}\\1111.jpg",
+    "file": f"{path}{orange}\\{violet}\\20220206.jpg",
 }
 
 data_map[orange][magenta] = {
@@ -395,7 +393,7 @@ data_map[orange][neon_yellow] = {
 
 data_map[orange][neon_orange] = {
     "created": "26.11.2021",
-    "objktid": 1111,
+    "objktid": 667438,
     "file": f"{path}{orange}\\{neon_orange}\\20211202_ono.jpg",
 }
 
@@ -403,7 +401,7 @@ data_map[orange][neon_orange] = {
 data_map[black][yellow] = {
     "created": "17.06.2021",
     "objktid": 1111,
-    "file": f"{path}{black}\\{yellow}\\20210622_by.jpg",
+    "file": f"{path}{black}\\{yellow}\\20220206.jpg",
 }
 
 data_map[black][blue] = {
@@ -432,8 +430,8 @@ data_map[black][orange] = {
 
 data_map[black][black] = {
     "created": "09.08.2020",
-    "objktid": 1111,
-    "file": f"{path}{black}\\{black}\\20200908_23.jpg",
+    "objktid": 667439,
+    "file": f"{path}{black}\\{black}\\20220206.jpg",
 }
 
 data_map[black][white] = {
@@ -445,7 +443,7 @@ data_map[black][white] = {
 data_map[black][violet] = {
     "created": "27.03.2021",
     "objktid": 1111,
-    "file": f"{path}{black}\\{violet}\\20210327_3.jpg",
+    "file": f"{path}{black}\\{violet}\\20220206.jpg",
 }
 
 data_map[black][magenta] = {
@@ -518,7 +516,7 @@ data_map[white][white] = {
 
 data_map[white][violet] = {
     "created": "30.01.2022",
-    "objktid": 1111,
+    "objktid": 667440,
     "file": f"{path}{white}\\{violet}\\20220201.jpg",
 }
 
@@ -550,7 +548,7 @@ data_map[violet][yellow] = {
 
 data_map[violet][blue] = {
     "created": "21.12.2021",
-    "objktid": 1111,
+    "objktid": 667441,
     "file": f"{path}{violet}\\{blue}\\20211225_3.jpg",
 }
 
@@ -619,7 +617,7 @@ data_map[violet][neon_orange] = {
 data_map[magenta][yellow] = {
     "created": "06.02.2021",
     "objktid": 1075,
-    "file": f"{path}{magenta}\\{yellow}\\20210213.jpg",
+    "file": f"{path}{magenta}\\{yellow}\\20220206.jpg",
 }
 
 data_map[magenta][blue] = {
@@ -672,8 +670,8 @@ data_map[magenta][magenta] = {
 
 data_map[magenta][neon_green] = {
     "created": "08.03.2021",
-    "objktid": 1111,
-    "file": f"{path}{magenta}\\{neon_green}\\20210320_10.jpg",
+    "objktid": 667442,
+    "file": f"{path}{magenta}\\{neon_green}\\20220206.jpg",
 }
 
 data_map[magenta][neon_yellow] = {
@@ -716,7 +714,7 @@ data_map[neon_green][red] = {
 
 data_map[neon_green][orange] = {
     "created": "07.01.2022",
-    "objktid": 1111,
+    "objktid": 667443,
     "file": f"{path}{neon_green}\\{orange}\\20220111.jpg",
 }
 
@@ -760,8 +758,8 @@ data_map[neon_green][neon_orange] = {
 
 data_map[neon_yellow][yellow] = {
     "created": "09.02.2021",
-    "objktid": 1111,
-    "file": f"{path}{neon_yellow}\\{yellow}\\20210213_9.jpg",
+    "objktid": 667444,
+    "file": f"{path}{neon_yellow}\\{yellow}\\20220206.jpg",
 }
 
 data_map[neon_yellow][blue] = {
@@ -815,7 +813,7 @@ data_map[neon_yellow][magenta] = {
 data_map[neon_yellow][neon_green] = {
     "created": "02.02.2022",
     "objktid": 1111,
-    "file": f"{path}{neon_yellow}\\{neon_green}\\1111.jpg",
+    "file": f"{path}{neon_yellow}\\{neon_green}\\20220206.jpg",
 }
 
 data_map[neon_yellow][neon_yellow] = {
@@ -834,7 +832,7 @@ data_map[neon_yellow][neon_orange] = {
 
 data_map[neon_orange][yellow] = {
     "created": "01.02.2022",
-    "objktid": 1111,
+    "objktid": 667445,
     "file": f"{path}{neon_orange}\\{yellow}\\20220202.jpg",
 }
 
@@ -864,7 +862,7 @@ data_map[neon_orange][orange] = {
 
 data_map[neon_orange][black] = {
     "created": "10.11.2021",
-    "objktid": 1111,
+    "objktid": 659566,
     "file": f"{path}{neon_orange}\\{black}\\20211125_nob.jpg",
 }
 
@@ -906,6 +904,7 @@ data_map[neon_orange][neon_orange] = {
 
 if __name__ == "__main__":
 
+    out_path = "Z:\\144\\"
     # copying all files into one folder and rename
     for k1, v1 in data_map.items():
         for k2, v2 in v1.items():
@@ -916,5 +915,6 @@ if __name__ == "__main__":
                 shutil.copyfile(v2["file"], out)
                 v2["file"] = out
 
+    #run this to export
     with open("z:\\144\\upward_spiral.json", "w") as file:
         file.write(json.dumps(data_map))
