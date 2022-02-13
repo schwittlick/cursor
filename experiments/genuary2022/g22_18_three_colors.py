@@ -1,13 +1,8 @@
 from cursor import device
 from cursor import path
-from cursor import data
-from cursor import loader
-from cursor import misc
 from cursor import filter
 
-import math
 import json
-import numpy as np
 import random
 from alive_progress import alive_bar
 

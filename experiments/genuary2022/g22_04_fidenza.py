@@ -53,7 +53,7 @@ def stash():
     for p in pc:
         p.vertices = trying(p.vertices)
 
-        changes_posneg = p.direction_changes_pos_neg()
+        # changes_posneg = p.direction_changes_pos_neg()
         # changes = p.direction_changes()
         # ratio = get_ratio(changes_posneg)
         pc_final.add(p)
@@ -69,7 +69,7 @@ def stash():
         device.PaperSize.LANDSCAPE_A3,
         25,
         "genuary22_04_fidenza",
-        f"fff",
+        "fff",
     )
 
 
@@ -127,7 +127,7 @@ def damn():
         device.PaperSize.LANDSCAPE_A3,
         25,
         "genuary22_04_fidenza",
-        f"fff_TEST_noise_pens",
+        "fff_TEST_noise_pens",
     )
     plt.quiver(x, y, u, v)
     plt.show()

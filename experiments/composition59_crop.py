@@ -3,7 +3,6 @@ import composition59_data
 data = composition59_data.data_map
 
 import cv2
-import pathlib
 
 oriImage = None
 cropping = False
