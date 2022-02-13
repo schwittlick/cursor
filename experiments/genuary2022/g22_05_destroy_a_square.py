@@ -1,9 +1,5 @@
 from cursor import device
 from cursor import path
-from cursor import data
-from cursor import loader
-from cursor import misc
-from cursor import filter
 
 import numpy as np
 
@@ -84,7 +80,7 @@ def new_constellation():
 
 
 def make_pen(pc):
-    p = path.Path()
+    # p = path.Path()
     index = 0
     for pa in pc:
         pa.pen_select = (i % 2) + 1
