@@ -1,12 +1,13 @@
 from cursor import device
 from cursor import path
-from cursor import data
-from cursor import loader
-from cursor import misc
-from cursor import filter
 
-import math
-import numpy as np
+# from cursor import data
+# from cursor import loader
+# from cursor import misc
+# from cursor import filter
+
+# import math
+# import numpy as np
 
 if __name__ == "__main__":
     # recordings = data.DataDirHandler().recordings()
@@ -21,5 +22,5 @@ if __name__ == "__main__":
         device.PaperSize.LANDSCAPE_A3,
         25,
         "folder",
-        f"suffix_name",
+        "suffix_name",
     )

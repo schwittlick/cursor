@@ -440,7 +440,10 @@ class VideoRenderer:
                 file.write("\n")
 
         out_file = self.save_path / fname
-        call = f'ffmpeg -y -r 25 -f concat -safe 0 -i "{text_file}" -c:v libx264 -vf "fps=25,format=yuv420p,scale=trunc(iw/2)*2:trunc(ih/2)*2" {out_file}'
+        call = (
+            f'ffmpeg -y -r 25 -f concat -safe 0 -i "{text_file}" -c:v libx264 -vf '
+            f'"fps=25,format=yuv420p,scale=trunc(iw/2)*2:trunc(ih/2)*2" {out_file}'
+        )
 
         os.system(call)
 

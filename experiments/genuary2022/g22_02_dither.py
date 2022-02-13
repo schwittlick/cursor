@@ -34,7 +34,7 @@ class ditherModule(object):
                     out[i][j + 1] = out[i][j + 1] + (0.5 * err)
                     out[i + 1][j] = out[i + 1][j] + (0.5 * err)
 
-            return out[1 : rows - 1, 1 : cols - 1]
+            return out[1: rows - 1, 1: cols - 1]
 
         elif method == "floyd-steinberg":
             img = cv2.copyMakeBorder(img, 1, 1, 1, 1, cv2.BORDER_REPLICATE)
@@ -56,7 +56,7 @@ class ditherModule(object):
                     out[i + 1][j] = out[i + 1][j] + ((5 / 16) * err)
                     out[i + 1][j + 1] = out[i + 1][j + 1] + ((1 / 16) * err)
 
-            return out[1 : rows - 1, 1 : cols - 1]
+            return out[1: rows - 1, 1: cols - 1]
 
         elif method == "jarvis-judice-ninke":
             img = cv2.copyMakeBorder(img, 2, 2, 2, 2, cv2.BORDER_REPLICATE)
@@ -88,7 +88,7 @@ class ditherModule(object):
                     out[i + 2][j + 1] = out[i + 2][j + 1] + ((3 / 48) * err)
                     out[i + 2][j + 2] = out[i + 2][j + 2] + ((1 / 48) * err)
 
-            return out[2 : rows - 2, 2 : cols - 2]
+            return out[2: rows - 2, 2: cols - 2]
 
         else:
             raise TypeError(
