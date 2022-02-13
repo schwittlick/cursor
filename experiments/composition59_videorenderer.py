@@ -1,12 +1,8 @@
-from cursor.device import Paper, PaperSize
 from cursor.path import Path, Spiral, PathCollection
 from cursor import device
 from cursor import renderer
 from cursor import data
 from cursor import filter
-
-import math
-import random
 
 
 if __name__ == "__main__":

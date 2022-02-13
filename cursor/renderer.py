@@ -257,11 +257,6 @@ class HPGLRenderer:
         _hpgl_string += "SP1;\n"
         _hpgl_string += "PA0,0\n"
 
-        only_polygons = True
-        for p in self.__paths:
-            if not p.is_polygon:
-                only_polygons = False
-
         first = True
         for p in self.__paths:
             if first:
@@ -277,7 +272,7 @@ class HPGLRenderer:
 
             _hpgl_string += f"PA{int(x)},{int(y)};\n"
             if p.is_polygon:
-                _hpgl_string += f"PM0;"
+                _hpgl_string += "PM0;"
 
             _hpgl_string += "PD;\n"
 
@@ -288,17 +283,8 @@ class HPGLRenderer:
 
             _hpgl_string += "PU;\n"
 
-            _hpgl_string += f"PM2;"  # switch to PM2; to close and safe
-            _hpgl_string += f"FP;"
-            # if p.is_polygon:
-            #    if only_polygons:
-            #        _hpgl_string += f'PM1;' # switch to PM2; to close and safe
-            #    else:
-            #        _hpgl_string += f'PM2;' # switch to PM2; to close and safe
-            #        _hpgl_string += f'FP;'
-
-        # if only_polygons:
-        #    _hpgl_string += f'FP;'
+            _hpgl_string += "PM2;"  # switch to PM2; to close and safe
+            _hpgl_string += "FP;"
 
         _hpgl_string += "PA0,0\n"
         _hpgl_string += "SP0;\n"
