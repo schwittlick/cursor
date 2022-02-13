@@ -14,5 +14,5 @@ if __name__ == "__main__":
         device.PaperSize.LANDSCAPE_A3,
         25,
         "folder",
-        f"suffix_name",
+        "suffix_name",
     )

@@ -35,8 +35,7 @@ def mouse_crop(event, x, y, flags, param):
             a, b, c, d = x_start * 3, y_start * 3, x_end * 3, y_end * 3
             roi = oriImage[b:d, a:c]
             cv2.imshow("Cropped", roi)
-            roi = oriImage[b - offset : d + offset, a - offset : c + offset]
-            p = pathlib.Path(filename)
+            roi = oriImage[b - offset: d + offset, a - offset: c + offset]
             t = f"Z:\\144\\cropped\\{id}.jpg"
             cv2.imwrite(t, roi)
 

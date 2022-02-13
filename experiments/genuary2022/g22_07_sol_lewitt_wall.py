@@ -1,6 +1,6 @@
 from cursor import path
 
-from shapely.geometry import MultiLineString, box, Point
+from shapely.geometry import MultiLineString
 from shapely.affinity import rotate
 from shapely import speedups
 from math import sqrt
@@ -173,17 +173,17 @@ if __name__ == "__main__":
 
     pc_final = path.PathCollection()
 
-    for l in range(30):
+    for line in range(30):
         p = path.Path()
         p.add(0, 0)
-        p.add(l, 30)
+        p.add(line, 30)
 
-    for l in range(30):
+    for line in range(30):
         p = path.Path()
         p.add(30, 0)
-        p.add(30, l)
+        p.add(30, line)
 
-    for l in range(30):
+    for line in range(30):
         p = path.Path()
         p.add(0, 0)
-        p.add(l, 30)
+        p.add(line, 30)

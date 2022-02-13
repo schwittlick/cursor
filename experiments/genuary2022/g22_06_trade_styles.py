@@ -9,4 +9,4 @@ if __name__ == "__main__":
                 pen = random.randint(1, 4)
                 outfile.write(f"SP{pen};\n")
                 outfile.write(f"LB{line.strip()}{chr(3)}\n")
-                outfile.write(f"CP;\n")
+                outfile.write("CP;\n")
