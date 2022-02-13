@@ -4,12 +4,9 @@ from cursor import device
 from cursor import path
 from cursor import data
 from cursor import loader
-from cursor import misc
 from cursor import filter
 
-import math
 import time
-import numpy as np
 from alive_progress import alive_bar
 
 
