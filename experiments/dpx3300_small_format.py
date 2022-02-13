@@ -1,7 +1,6 @@
-from cursor import data
 from cursor import device
 from cursor import path
-from cursor import renderer
+
 
 def regular() -> "path.PathCollection":
     pc = path.PathCollection()

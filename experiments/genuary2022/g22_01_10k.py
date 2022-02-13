@@ -1,7 +1,5 @@
 from cursor import device
 from cursor import path
-from cursor import renderer
-from cursor import data
 from numpy import random
 
 import matplotlib.pyplot as plt
@@ -13,6 +11,7 @@ def debug():
     sns.distplot(random.normal(loc=0, scale=10, size=(10000, 2)))
 
     plt.show()
+
 
 def normal():
     v = random.normal(loc=0, scale=100, size=(10000, 2))
@@ -33,7 +32,7 @@ def make_one():
 
     # x = random.normal(loc=1, scale=2, size=(10000, 2))
 
-    #x1 = noncentral_chisquare()
+    # x1 = noncentral_chisquare()
     x1 = normal()
     c = 0
     for pos in x1:

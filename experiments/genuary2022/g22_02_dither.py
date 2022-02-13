@@ -152,7 +152,6 @@ def fft2(img, outname):
     return cv2.normalize(img_back.astype("float"), None, 0.0, 255.0, cv2.NORM_MINMAX)
 
 
-
 def img_to_path(img, lines: int = 660):
     """
     This works only for A3 on HP7579a
@@ -215,12 +214,13 @@ def dither_fin():
         "different_colors",
     )
 
+
 if __name__ == "__main__":
     # to_dither = cv2.imread('Z:\\dev\\cursor\\data\\experiments\\genuary22\\jpg\\dithered5 (Small).jpg', 0)
     # g22_dither(to_dither, "dithered5 (Small)_done")
-    img = cv2.imread('space1.jpg', 0)
+    img = cv2.imread("space1.jpg", 0)
     out = fft2(img, "dithered5")
 
-    #cv2.imwrite(
+    # cv2.imwrite(
     #    f"Z:\\dev\\cursor\\data\\experiments\\genuary22\\jpg\\dithered5.jpg", out
-    #)
+    # )

@@ -80,7 +80,9 @@ class Sorter:
         elif self.__param is self.LAYER:
             sorted_list = sorted(paths, key=lambda x: x.layer, reverse=self.__reverse)
         elif self.__param is self.PEN_SELECT:
-            sorted_list = sorted(paths, key=lambda x: x.pen_select, reverse=self.__reverse)
+            sorted_list = sorted(
+                paths, key=lambda x: x.pen_select, reverse=self.__reverse
+            )
         elif self.__param is self.POINT_COUNT:
             sorted_list = sorted(paths, key=lambda x: len(x), reverse=self.__reverse)
         else:
@@ -243,18 +245,21 @@ class DistanceBetweenPointsFilter(Filter):
         len_before = len(paths)
 
         for pa in paths:
-            #newp = []
+            # newp = []
             verts = []
             for pi in range(len(pa) - 1):
                 p1 = pa[pi]
-                p2 = pa[pi+1]
+                p2 = pa[pi + 1]
                 d = p1.distance(p2)
                 if d >= self.max_distance:
                     verts.append(p2)
             pa.vertices = verts
-        #paths[:] = [p for p in paths if p.distance(next(p)) <= self.max_distance]
+        # paths[:] = [p for p in paths if p.distance(next(p)) <= self.max_distance]
         len_after = len(paths)
-        log.good(f"DistanceBetweenPointsFilter: reduced path count from {len_before} to {len_after}")
+        log.good(
+            f"DistanceBetweenPointsFilter: reduced path count from {len_before} to {len_after}"
+        )
+
 
 class MinDistanceFilter(Filter):
     def __init__(self, min_distance):

@@ -7,9 +7,9 @@ from cursor import filter
 
 import numpy as np
 
+
 def create_square(pieces: int = 100):
     pc_temp = path.PathCollection()
-
 
     for i in range(pieces):
         x1 = i
@@ -82,12 +82,14 @@ def new_constellation():
         idx += 1
     return pc
 
+
 def make_pen(pc):
     p = path.Path()
     index = 0
     for pa in pc:
         pa.pen_select = (i % 2) + 1
         index += 1
+
 
 if __name__ == "__main__":
     # recordings = data.DataDirHandler().recordings()
@@ -100,7 +102,7 @@ if __name__ == "__main__":
 
     for i in range(20):
         pc2 = new_constellation()
-        pc2.translate(i*1, i*2)
+        pc2.translate(i * 1, i * 2)
         make_pen(pc2)
         pc_final.extend(pc2)
 

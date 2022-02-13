@@ -184,7 +184,7 @@ class Path:
         pen_velocity: typing.Optional[int] = None,
         pen_force: typing.Optional[int] = None,
         pen_select: typing.Optional[int] = None,
-        is_polygon: typing.Optional[bool] = None
+        is_polygon: typing.Optional[bool] = None,
     ):
         self._layer = layer
         self._line_type = line_type
@@ -419,7 +419,7 @@ class Path:
                 ) and ((diffLBx * line1Start.y - diffLBy * line1Start.x) < compareB) ^ (
                     (diffLBx * line1End.y - diffLBy * line1End.x) < compareB
                 ):
-                    ok = ((diffLAx * diffLBy) - (diffLAy * diffLBx))
+                    ok = (diffLAx * diffLBy) - (diffLAy * diffLBx)
                     if ok == 0:
                         ok = 0.01
                     lDetDivInv = 1 / ok

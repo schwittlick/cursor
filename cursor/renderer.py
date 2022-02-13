@@ -277,7 +277,7 @@ class HPGLRenderer:
 
             _hpgl_string += f"PA{int(x)},{int(y)};\n"
             if p.is_polygon:
-                _hpgl_string += f'PM0;'
+                _hpgl_string += f"PM0;"
 
             _hpgl_string += "PD;\n"
 
@@ -288,16 +288,16 @@ class HPGLRenderer:
 
             _hpgl_string += "PU;\n"
 
-            _hpgl_string += f'PM2;'  # switch to PM2; to close and safe
-            _hpgl_string += f'FP;'
-            #if p.is_polygon:
+            _hpgl_string += f"PM2;"  # switch to PM2; to close and safe
+            _hpgl_string += f"FP;"
+            # if p.is_polygon:
             #    if only_polygons:
             #        _hpgl_string += f'PM1;' # switch to PM2; to close and safe
             #    else:
             #        _hpgl_string += f'PM2;' # switch to PM2; to close and safe
             #        _hpgl_string += f'FP;'
 
-        #if only_polygons:
+        # if only_polygons:
         #    _hpgl_string += f'FP;'
 
         _hpgl_string += "PA0,0\n"

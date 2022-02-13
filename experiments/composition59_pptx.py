@@ -10,7 +10,7 @@ if __name__ == "__main__":
         x = i % 4
         y = (i - x) / 4
         pp = Path(layer=f"{i:02d}")
-       # pp = Path(layer="1")
+        # pp = Path(layer="1")
         spiral = Spiral()
         spiral.max_theta = 255
         spiral.xoffset_incr = 0.1 + random.random() * 1.0  # random.random() * 1.0

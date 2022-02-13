@@ -73,7 +73,7 @@ class MinmaxMapping:
         PlotterType.ROLAND_DXY980: MinMax(0, 16158, 0, 11040),
         PlotterType.HP_7595A: MinMax(-23160, 23160, -17602, 17602),
         PlotterType.ROLAND_PNC1000: MinMax(0, 0, 17200, 40000),  # actually unlimited y
-        PlotterType.HP_7595A_A3: MinMax(-7728, 7728+960, -5752, 5752),
+        PlotterType.HP_7595A_A3: MinMax(-7728, 7728 + 960, -5752, 5752),
     }
 
 
