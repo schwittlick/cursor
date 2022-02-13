@@ -538,7 +538,7 @@ data_map[white][neon_yellow] = {
     "file": f"{path}{white}\\{neon_yellow}\\20220106.jpg",
 }
 
-#violet
+# violet
 
 data_map[violet][yellow] = {
     "created": "26.05.2021",
@@ -612,7 +612,7 @@ data_map[violet][neon_orange] = {
     "file": f"{path}{violet}\\{neon_orange}\\20220202.jpg",
 }
 
-#magenta
+# magenta
 
 data_map[magenta][yellow] = {
     "created": "06.02.2021",
@@ -686,7 +686,7 @@ data_map[magenta][neon_orange] = {
     "file": f"{path}{magenta}\\{neon_orange}\\20220201.jpg",
 }
 
-#neon green
+# neon green
 
 data_map[neon_green][yellow] = {
     "created": "07.02.2021",
@@ -828,7 +828,7 @@ data_map[neon_yellow][neon_orange] = {
     "file": f"{path}{neon_yellow}\\{neon_orange}\\20220201.jpg",
 }
 
-#neon orange
+# neon orange
 
 data_map[neon_orange][yellow] = {
     "created": "01.02.2022",
@@ -908,13 +908,13 @@ if __name__ == "__main__":
     # copying all files into one folder and rename
     for k1, v1 in data_map.items():
         for k2, v2 in v1.items():
-            print(k1 + " " +k2)
+            print(k1 + " " + k2)
             out = f"{out_path}{k1}_{k2}.jpg"
             print(out)
             if "1111" not in v2["file"]:
                 shutil.copyfile(v2["file"], out)
                 v2["file"] = out
 
-    #run this to export
+    # run this to export
     with open("z:\\144\\upward_spiral.json", "w") as file:
         file.write(json.dumps(data_map))

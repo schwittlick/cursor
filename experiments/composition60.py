@@ -88,12 +88,11 @@ if __name__ == "__main__":
                         newpath.pen_select = coi
                         coll.add(newpath)
 
-
         device.SimpleExportWrapper().ex(
             coll,
             device.PlotterType.HP_7595A_A3,
             device.PaperSize.LANDSCAPE_A3,
             25,
             f"composition60",
-            str(i) + f"_{coll.hash()}"
+            str(i) + f"_{coll.hash()}",
         )

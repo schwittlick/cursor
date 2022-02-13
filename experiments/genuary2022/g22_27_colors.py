@@ -43,20 +43,20 @@ if __name__ == "__main__":
             out.add(p1)
 
             p2 = path.Path()
-            p2.add(i, (r1 + r2)*wid)
-            p2.add(i, 1* wid)
+            p2.add(i, (r1 + r2) * wid)
+            p2.add(i, 1 * wid)
             p2.pen_select = 1
             out.add(p2)
 
             pr = pc.random()
-            prm = pr.morph((i, r1 * wid),(i, (r1+r2)*wid))
+            prm = pr.morph((i, r1 * wid), (i, (r1 + r2) * wid))
             bb = prm.bb()
             bb2 = path.BoundingBox(-3, -3, 410, 410)
             while not bb2.inside(prm):
                 print("try")
                 pr = pc.random()
-                prm = pr.morph((i, r1 * wid),(i, (r1+r2)*wid))
-            #out.add(pr.morph((0, 0),(1, 1)))
+                prm = pr.morph((i, r1 * wid), (i, (r1 + r2) * wid))
+            # out.add(pr.morph((0, 0),(1, 1)))
             prm.pen_select = 2
             out.add(prm)
         else:

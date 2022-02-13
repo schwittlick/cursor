@@ -20,6 +20,7 @@ def intersects_any(pc, pa):
             return True
     return False
 
+
 if __name__ == "__main__":
     recordings = data.DataDirHandler().recordings()
     _loader = loader.Loader(directory=recordings, limit_files=2)
@@ -37,14 +38,13 @@ if __name__ == "__main__":
             bar()
             time.sleep(0.0001)
             print(f"{c}/{size} - {len(pc_final)}")
-            #bar()
+            # bar()
             pa.translate(random.random(), random.random())
             if not intersects_any(pc_final, pa):
                 pa.pen_select = 1
                 pa.velocity = 10
                 pc_final.add(pa)
-            c+=1
-
+            c += 1
 
     sorter = filter.Sorter(reverse=True, param=filter.Sorter.DISTANCE)
     pc_final.sort(sorter)

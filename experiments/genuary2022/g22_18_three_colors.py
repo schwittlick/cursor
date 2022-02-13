@@ -89,7 +89,7 @@ if __name__ == "__main__":
     entropy_filter = filter.EntropyMinFilter(1.5, 1.5)
     point_filter1 = filter.MinPointCountFilter(100)
     point_filter2 = filter.MaxPointCountFilter(30)
-    #pc_all.filter(point_filter1)
+    # pc_all.filter(point_filter1)
     # pc_all.filter(point_filter2)
     pc_all.clean()
     # pc_all.filter(entropy_filter)

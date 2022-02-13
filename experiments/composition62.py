@@ -22,11 +22,11 @@ if __name__ == "__main__":
 
     c.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=20)
 
-    #bb = path.BoundingBox(500, 400, 1400, 900)
-    #f = filter.BoundingBoxFilter(bb)
-    #c.filter(f)
+    # bb = path.BoundingBox(500, 400, 1400, 900)
+    # f = filter.BoundingBoxFilter(bb)
+    # c.filter(f)
 
-    #misc.save_wrapper_jpeg(c, "composition62", "composition62_together", 4.0, 1.0)
+    # misc.save_wrapper_jpeg(c, "composition62", "composition62_together", 4.0, 1.0)
 
     device.SimpleExportWrapper().ex(
         c,

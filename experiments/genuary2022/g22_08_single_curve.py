@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     times = 45
     for i in range(times):
-        morphed = pa.interp(chosen, (1/times) * i)
+        morphed = pa.interp(chosen, (1 / times) * i)
         morphed.velocity = 80
         pc_final.add(morphed)
 
