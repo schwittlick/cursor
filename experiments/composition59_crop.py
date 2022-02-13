@@ -1,11 +1,7 @@
-from cursor.path import Path, Spiral, PathCollection
-from cursor import device
-
 import composition59_data
 
 data = composition59_data.data_map
 
-import random
 import cv2
 import pathlib
 
@@ -27,7 +23,7 @@ def mouse_crop(event, x, y, flags, param):
         cropping = True
     # Mouse is Moving
     elif event == cv2.EVENT_MOUSEMOVE:
-        if cropping == True:
+        if cropping:
             x_end, y_end = x, y
     # if the left mouse button was released
     elif event == cv2.EVENT_LBUTTONUP:

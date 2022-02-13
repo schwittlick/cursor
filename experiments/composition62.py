@@ -2,8 +2,6 @@ from cursor import loader
 from cursor import data
 from cursor import device
 from cursor import path
-from cursor import filter
-from cursor import misc
 
 if __name__ == "__main__":
     p = data.DataDirHandler().recordings()

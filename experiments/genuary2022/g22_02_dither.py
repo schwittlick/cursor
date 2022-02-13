@@ -1,12 +1,9 @@
 from cursor import device
 from cursor import path
-from cursor import renderer
 from cursor import filter
 from cursor import misc
-from numpy import random
 
 import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
 
 import cv2
@@ -95,7 +92,8 @@ class ditherModule(object):
 
         else:
             raise TypeError(
-                'specified method does not exist. available methods = "simple2D", "floyd-steinberg(default)", "jarvis-judice-ninke"'
+                'specified method does not exist. available methods = "simple2D", \
+                "floyd-steinberg(default)", "jarvis-judice-ninke"'
             )
 
 
