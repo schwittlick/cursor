@@ -40,13 +40,14 @@ class TimedPosition:
     def distance(self, t: "TimedPosition"):
         return np.linalg.norm(self.arr() - t.arr())
 
-    def rot(self, delta: float) -> None:
-        co = np.cos(delta)
-        si = np.sin(delta)
-        xx = co * self.x - si * self.y
-        yy = si * self.x + co * self.y
-        self.x = xx
-        self.y = yy
+    def rot(self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)) -> None:
+        ox, oy = origin
+
+        qx = ox + math.cos(angle) * (self.x - ox) - math.sin(angle) * (self.y - oy)
+        qy = oy + math.sin(angle) * (self.x - ox) + math.cos(angle) * (self.y - oy)
+
+        self.x = qx
+        self.y = qy
 
     def translate(self, x: float, y: float) -> None:
         self.x += x
@@ -91,16 +92,18 @@ class BoundingBox:
     def __init__(self, x: float, y: float, w: float, h: float):
         self.x = x
         self.y = y
-        self.w = w
-        self.h = h
+        self.x2 = w
+        self.y2 = h
+        self.w = math.dist([self.x], [self.x2])
+        self.h = math.dist([self.y], [self.y2])
 
     def __repr__(self) -> str:
-        return f"BB(x={self.x}, y={self.y}, w={self.w}, h={self.h})"
+        return f"BB(x={self.x}, y={self.y}, x2={self.x2}, y2={self.y2}, w={self.w}, h={self.h})"
 
     def __inside(self, point: "TimedPosition") -> bool:
         return (
-            self.x <= point.x <= self.x + self.w
-            and self.y <= point.y <= self.y + self.h
+            self.x <= point.x <= self.x + self.x2
+            and self.y <= point.y <= self.y + self.y2
         )
 
     def inside(
@@ -132,10 +135,20 @@ class BoundingBox:
             return points_inside > points_outside
 
     def center(self) -> typing.Tuple[float, float]:
-        center_x = ((self.w) / 2.0) + self.x
-        center_y = ((self.h) / 2.0) + self.y
+        center_x = ((self.x2) / 2.0) + self.x
+        center_y = ((self.y2) / 2.0) + self.y
         return center_x, center_y
 
+    def subdiv(self, xpieces, ypieces) -> typing.List["BoundingBox"]:
+        bbs = []
+        for _x in range(xpieces):
+            for _y in range(ypieces):
+                xoff = (_x * self.x2 / xpieces) + self.x
+                yoff = (_y * self.y2 / ypieces) + self.y
+                bb = BoundingBox(xoff, yoff, self.x2 / xpieces, self.y2 / ypieces)
+                bbs.append(bb)
+
+        return bbs
 
 class Spiral:
     def __init__(self):
@@ -184,7 +197,7 @@ class Path:
         pen_velocity: typing.Optional[int] = None,
         pen_force: typing.Optional[int] = None,
         pen_select: typing.Optional[int] = None,
-        is_polygon: typing.Optional[bool] = None,
+        is_polygon: typing.Optional[bool] = False,
     ):
         self._layer = layer
         self._line_type = line_type
@@ -305,6 +318,13 @@ class Path:
         b = BoundingBox(minx, miny, maxx, maxy)
         return b
 
+    def aspect_ratio(self):
+        _bb = self.bb()
+        w = _bb.w
+        if _bb.w == 0.0:
+            w = 0.001
+        return _bb.h / w
+
     @property
     def distance(self) -> float:
         """
@@ -333,6 +353,30 @@ class Path:
     def scale(self, x: float, y: float) -> None:
         for p in self.vertices:
             p.scale(x, y)
+
+    def rotate(self, delta: float) -> None:
+        for p in self.vertices:
+            p.rot(delta)
+
+    def move_to_origin(self):
+        """
+        moves path to zero origin
+        after calling this the bb of the path has its x,y at 0,0
+        """
+
+        _bb = self.bb()
+        if _bb.x < 0:
+            self.translate(abs(_bb.x), 0.0)
+        else:
+            self.translate(-abs(_bb.x), 0.0)
+
+        if _bb.y < 0:
+            self.translate(0.0, abs(_bb.y))
+        else:
+            self.translate(0.0, -abs(_bb.y))
+
+    def fit(self, bb: BoundingBox) -> None:
+        pass
 
     def morph(
         self,
@@ -680,7 +724,7 @@ class Path:
     def __len__(self) -> int:
         return len(self.vertices)
 
-    def __iter__(self):
+    def __iter__(self) -> typing.Iterator['Path']:
         for v in self.vertices:
             yield v
 
@@ -701,10 +745,19 @@ class PathCollection:
             utc_timestamp = datetime.datetime.timestamp(now)
             self._timestamp = utc_timestamp
 
-    def add(self, path: Path) -> None:
-        if path.empty():
-            return
-        self.__paths.append(path)
+    def add(self,  path: typing.Union[BoundingBox, Path]) -> None:
+        if isinstance(path, Path):
+            if path.empty():
+                return
+            self.__paths.append(path)
+        if isinstance(path, BoundingBox):
+            p = Path()
+            p.add(path.x, path.y)
+            p.add(path.x, path.y2)
+            p.add(path.x2, path.y2)
+            p.add(path.x2, path.y)
+            p.add(path.x, path.y)
+            self.__paths.append(p)
 
     def extend(self, pc: "PathCollection") -> None:
         new_paths = self.__paths + pc.get_all()
@@ -717,7 +770,12 @@ class PathCollection:
         for p in self.__paths:
             p.clean()
 
+        len_before = len(self)
         self.__paths = [path for path in self.__paths if len(path) > 2]
+
+        log.good(
+            f"PathCollection::clean: reduced path count from {len_before} to {len(self)}"
+        )
 
     def limit(self) -> None:
         for p in self.__paths:
@@ -878,7 +936,7 @@ class PathCollection:
         mi = self.min()
         ma = self.max()
         bb = BoundingBox(mi[0], mi[1], ma[0] - mi[0], ma[1] - mi[1])
-        if bb.x is np.nan or bb.y is np.nan or bb.w is np.nan or bb.h is np.nan:
+        if bb.x is np.nan or bb.y is np.nan or bb.x2 is np.nan or bb.y2 is np.nan:
             log.fail("SHIT")
         return bb
 
@@ -902,8 +960,29 @@ class PathCollection:
         for p in self.__paths:
             p.scale(x, y)
 
+    def rot(self, delta: float) -> None:
+        for p in self.__paths:
+            p.rotate(delta)
+
     def log(self, str) -> None:
         log.good(f"{self.__class__.__name__}: {str}")
+
+    def move_to_origin(self):
+        """
+        moves pathcollection to zero origin
+        after calling this the bb of the pathcollection has its x,y at 0,0
+        """
+
+        _bb = self.bb()
+        if _bb.x < 0:
+            self.translate(abs(_bb.x), 0.0)
+        else:
+            self.translate(-abs(_bb.x), 0.0)
+
+        if _bb.y < 0:
+            self.translate(0.0, abs(_bb.y))
+        else:
+            self.translate(0.0, -abs(_bb.y))
 
     def fit(
         self,
@@ -916,20 +995,7 @@ class PathCollection:
         cutoff_mm=None,
     ) -> None:
         # move into positive area
-        _bb = self.bb()
-        if _bb.x < 0:
-            log.info("fit: translate by {_bb.x:.2f} {0.0}")
-            self.translate(abs(_bb.x), 0.0)
-        else:
-            log.info("fit: translate by {-abs(_bb.x):.2f} {0.0}")
-            self.translate(-abs(_bb.x), 0.0)
-
-        if _bb.y < 0:
-            log.info("fit: translate by {0.0} {abs(_bb.y):.2f}")
-            self.translate(0.0, abs(_bb.y))
-        else:
-            log.info("fit: translate by {0.0} {-abs(_bb.y):.2f}")
-            self.translate(0.0, -abs(_bb.y))
+        self.move_to_origin()
 
         _bb = self.bb()
 
@@ -959,12 +1025,12 @@ class PathCollection:
         # scaling
         _bb = self.bb()
         x1 = width - padding_x * 2.0
-        x2 = _bb.w - _bb.x
+        x2 = _bb.x2 - _bb.x
         if x2 == 0.0:
             x2 = 1
 
         y1 = height - padding_y * 2.0
-        y2 = _bb.h - _bb.y
+        y2 = _bb.y2 - _bb.y
         if y2 == 0.0:
             y2 = 1
 
@@ -1010,9 +1076,9 @@ class PathCollection:
 
             cutoff_bb = self.bb()
             cutoff_bb.x -= cuttoff_margin_diff_x
-            cutoff_bb.w += cuttoff_margin_diff_x
+            cutoff_bb.x2 += cuttoff_margin_diff_x
             cutoff_bb.y -= cuttoff_margin_diff_y
-            cutoff_bb.h += cuttoff_margin_diff_y
+            cutoff_bb.y2 += cuttoff_margin_diff_y
 
             self.__paths = [x for x in self.__paths if cutoff_bb.inside(x)]
 
@@ -1056,8 +1122,8 @@ class PathCollection:
         def calc_bb(x: int, y: int) -> BoundingBox:
             big_bb = self.bb()
 
-            new_width = big_bb.w / xq
-            new_height = big_bb.h / yq
+            new_width = big_bb.x2 / xq
+            new_height = big_bb.y2 / yq
 
             _x = x * new_width
             _y = y * new_height

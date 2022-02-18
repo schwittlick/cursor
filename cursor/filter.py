@@ -237,8 +237,21 @@ class DistanceFilter(Filter):
         log.good(f"DistanceFilter: reduced path count from {len_before} to {len_after}")
 
 
+class AspectRatioFilter(Filter):
+    def __init__(self, min_as, max_as):
+        self.min_as = min_as
+        self.max_as = max_as
+
+    def filter(self, paths):
+        len_before = len(paths)
+        paths[:] = [p for p in paths if self.min_as < p.aspect_ratio() < self.max_as]
+        len_after = len(paths)
+        log.good(f"AspectRatioFilter: reduced path count from {len_before} to {len_after}")
+
+
 class DistanceBetweenPointsFilter(Filter):
-    def __init__(self, max_distance):
+    def __init__(self, min_distance, max_distance):
+        self.min_distance = min_distance
         self.max_distance = max_distance
 
     def filter(self, paths):
@@ -246,14 +259,18 @@ class DistanceBetweenPointsFilter(Filter):
 
         for pa in paths:
             # newp = []
+            #log.good(f"vertices before: {len(pa)}")
             verts = []
             for pi in range(len(pa) - 1):
                 p1 = pa[pi]
                 p2 = pa[pi + 1]
                 d = p1.distance(p2)
-                if d >= self.max_distance:
+                if self.min_distance <= d <= self.max_distance:
                     verts.append(p2)
             pa.vertices = verts
+            pa.clean()
+            #log.good(f"vertices after: {len(pa)}")
+
         # paths[:] = [p for p in paths if p.distance(next(p)) <= self.max_distance]
         len_after = len(paths)
         log.good(
@@ -261,7 +278,7 @@ class DistanceBetweenPointsFilter(Filter):
         )
 
 
-class MinDistanceFilter(Filter):
+class MinTravelDistanceFilter(Filter):
     def __init__(self, min_distance):
         self.min_distance = min_distance
 
