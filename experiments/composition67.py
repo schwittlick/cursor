@@ -15,7 +15,7 @@ if __name__ == "__main__":
     _loader = loader.Loader(directory=p, limit_files=3)
     all_paths = _loader.all_paths()
 
-    min_distance_filter = filter.MinDistanceFilter(1.5)
+    min_distance_filter = filter.MinTravelDistanceFilter(1.5)
     max_distance_filter = filter.DistanceFilter(2)
     all_paths.filter(min_distance_filter)
     # all_paths.filter(max_distance_filter)
