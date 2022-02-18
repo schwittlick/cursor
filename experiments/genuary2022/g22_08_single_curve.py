@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     pa = path.Path()
     pa.add(bb.x, bb.y)
-    pa.add(bb.w, bb.h)
+    pa.add(bb.x2, bb.y2)
 
     times = 45
     for i in range(times):
