@@ -116,6 +116,14 @@ HPGL Basics
 ![img.png](hpgl_fp.png)
 ![img.png](hpgl_ft.png)
 
+## 4662 Tektronix
+![img.png](tek_4662_graph_mode.png)
+![img.png](tek_4662_graph_mode2.png)
+![img.png](tek_4662_plotter_on.png)
+![img.png](tek_4662_transmission.png)
+![img.png](tek_4662_bounds.png)
+![img.png](tek_4662_switches.png)
+
 Ink Tips
 
     1. 1x 2.0mm
