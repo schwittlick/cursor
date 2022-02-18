@@ -96,6 +96,7 @@ class PaperSize(Enum):
     LANDSCAPE_80_50 = 15
     PORTRAIT_50_80 = 16
     LANDSCAPE_A2 = 17
+    SQUARE_59_59 = 18
 
 
 class PlotterName:
@@ -135,6 +136,7 @@ class PaperSizeName:
         PaperSize.LANDSCAPE_80_50: "landscape_80x50",
         PaperSize.PORTRAIT_50_80: "portrait_50_80",
         PaperSize.LANDSCAPE_A2: "landscape_a2",
+        PaperSize.SQUARE_59_59: "square_59_59",
     }
 
 
@@ -158,6 +160,7 @@ class Paper:
         PaperSize.LANDSCAPE_80_50: (800, 500),
         PaperSize.PORTRAIT_50_80: (500, 800),
         PaperSize.LANDSCAPE_A2: (594, 420),
+        PaperSize.SQUARE_59_59: (590, 590),
     }
 
 
@@ -307,7 +310,7 @@ class Exporter:
 
                 jpeg_folder = data.DataDirHandler().jpg(self.name)
                 jpeg_renderer = renderer.JpegRenderer(jpeg_folder)
-                jpeg_renderer.render(pc, scale=2.0)
+                jpeg_renderer.render(pc, scale=4.0)
                 jpeg_renderer.save(f"{fname}_{layer}")
 
         self.paths.fit(

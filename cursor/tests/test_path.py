@@ -106,8 +106,8 @@ def test_path_bb():
     bb = p.bb()
     assert bb.x == 0
     assert bb.y == 0
-    assert bb.w == 141
-    assert bb.h == 4511
+    assert bb.x2 == 141
+    assert bb.y2 == 4511
 
 
 def test_path_bb2():
@@ -120,8 +120,8 @@ def test_path_bb2():
     bb = p.bb()
     assert bb.x == 100
     assert bb.y == 100
-    assert bb.w == 200
-    assert bb.h == 200
+    assert bb.x2 == 200
+    assert bb.y2 == 200
 
 
 def test_path_morph():

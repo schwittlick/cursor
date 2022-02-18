@@ -75,9 +75,9 @@ class SvgRenderer:
 
         p1 = Path()
         p1.add(bb.x, bb.y)
-        p1.add(bb.w, bb.y)
-        p1.add(bb.w, bb.h)
-        p1.add(bb.x, bb.h)
+        p1.add(bb.x2, bb.y)
+        p1.add(bb.x2, bb.y2)
+        p1.add(bb.x, bb.y2)
         p1.add(bb.x, bb.y)
 
         self.paths.add(p1)
@@ -89,7 +89,7 @@ class SvgRenderer:
 
         fname = self.save_path / (filename + ".svg")
         self.dwg = svgwrite.Drawing(
-            fname.as_posix(), profile="tiny", size=(bb.w + bb.x, bb.h + bb.y)
+            fname.as_posix(), profile="tiny", size=(bb.x2 + bb.x, bb.y2 + bb.y)
         )
 
         it = PathIterator(self.paths)
@@ -174,8 +174,8 @@ class GCodeRenderer:
                     _y = bb.y
                     if self.invert_y:
                         _y = -_y
-                    _w = bb.w
-                    _h = bb.h
+                    _w = bb.x2
+                    _h = bb.y2
                     if self.invert_y:
                         _h = -_h
                     file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
@@ -283,8 +283,9 @@ class HPGLRenderer:
 
             _hpgl_string += "PU;\n"
 
-            _hpgl_string += "PM2;"  # switch to PM2; to close and safe
-            _hpgl_string += "FP;"
+            if p.is_polygon:
+                _hpgl_string += "PM2;"  # switch to PM2; to close and safe
+                _hpgl_string += "FP;"
 
         _hpgl_string += "PA0,0\n"
         _hpgl_string += "SP0;\n"
@@ -358,12 +359,12 @@ class JpegRenderer:
         abs_scaled_bb = (
             abs(bb.x * scale),
             abs(bb.y * scale),
-            abs(bb.w * scale),
-            abs(bb.h * scale),
+            abs(bb.x2 * scale),
+            abs(bb.y2 * scale),
         )
 
-        image_width = int(abs_scaled_bb[0] + abs_scaled_bb[2])
-        image_height = int(abs_scaled_bb[1] + abs_scaled_bb[3])
+        image_width = int(abs_scaled_bb[0] + abs_scaled_bb[2]) + int(bb.x * scale)
+        image_height = int(abs_scaled_bb[1] + abs_scaled_bb[3]) + int(bb.y * scale)
 
         log.good(f"Creating image with size=({image_width}, {image_height})")
         assert image_width < 21000 and image_height < 21000, "keep resolution lower"
@@ -403,10 +404,10 @@ class JpegRenderer:
     def render_bb(self, bb):
         assert isinstance(bb, BoundingBox), "Only BoundingBox objects allowed"
 
-        self.img_draw.line(xy=(bb.x, bb.y, bb.w, bb.y), fill="black", width=2)
-        self.img_draw.line(xy=(bb.x, bb.y, bb.x, bb.h), fill="black", width=2)
-        self.img_draw.line(xy=(bb.w, bb.y, bb.w, bb.h), fill="black", width=2)
-        self.img_draw.line(xy=(bb.x, bb.h, bb.w, bb.h), fill="black", width=2)
+        self.img_draw.line(xy=(bb.x, bb.y, bb.x2, bb.y), fill="black", width=2)
+        self.img_draw.line(xy=(bb.x, bb.y, bb.x, bb.y2), fill="black", width=2)
+        self.img_draw.line(xy=(bb.x2, bb.y, bb.x2, bb.y2), fill="black", width=2)
+        self.img_draw.line(xy=(bb.x, bb.y2, bb.x2, bb.y2), fill="black", width=2)
 
     def render_frame(self):
         w = self.img.size[0]
