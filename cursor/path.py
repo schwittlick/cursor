@@ -354,9 +354,9 @@ class Path:
         for p in self.vertices:
             p.scale(x, y)
 
-    def rotate(self, delta: float) -> None:
+    def rot(self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)) -> None:
         for p in self.vertices:
-            p.rot(delta)
+            p.rot(angle, origin)
 
     def move_to_origin(self):
         """
@@ -962,7 +962,7 @@ class PathCollection:
 
     def rot(self, delta: float) -> None:
         for p in self.__paths:
-            p.rotate(delta)
+            p.rot(delta)
 
     def log(self, str) -> None:
         log.good(f"{self.__class__.__name__}: {str}")
