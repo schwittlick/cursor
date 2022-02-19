@@ -35,3 +35,5 @@ def test_recorder1():
     # the size doesnt change even though a key is pressed
     recorder.on_press(pynput.keyboard.Key.pause)
     assert len(recorder._keyboard_recodings) == 3
+
+    recorder.stop()

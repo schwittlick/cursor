@@ -1,7 +1,10 @@
 from cursor import device
 from cursor import path
 
+import pytest
 
+
+@pytest.mark.skip(reason="This is not really a test at the moment.")
 def test_simple_export():
     p = path.Path()
     p.add(3, 5)

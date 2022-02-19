@@ -53,18 +53,18 @@ class Loader:
             pc.clean()
 
         elapsed = time.time() - start_benchmark
-        log.good(
+        log.info(
             f"Loaded {absolut_path_count} paths from {len(self._recordings)} recordings"
         )
-        log.good(
+        log.info(
             f"Loaded {len(self._keyboard_recordings)} keys from {len(all_json_files)} recordings"
         )
-        log.good(f"This took {round(elapsed * 1000)}ms.")
+        log.info(f"This took {round(elapsed * 1000)}ms.")
 
-    def load_file(self, path):
+    def load_file(self, path: str) -> None:
         _fn = path.stem.replace("_compressed", "")
         ts = data.DateHandler.get_timestamp_from_utc(float(_fn))
-        log.good(f"Loading {path.stem}.json > {ts}")
+        log.info(f"Loading {path.stem}.json > {ts}")
 
         new_keys = []
         with open(path.as_posix()) as json_file:
@@ -108,8 +108,8 @@ class Loader:
         single_recording = self._recordings[index]
         return single_recording
 
-    def keys(self):
+    def keys(self) -> list[tuple]:
         return self._keyboard_recordings
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._recordings)

@@ -38,8 +38,8 @@ def test_pathcollection_minmax():
 
     assert min[0] == bb.x
     assert min[1] == bb.y
-    assert max[0] == bb.w
-    assert max[1] == bb.h
+    assert max[0] == bb.x2 + bb.x
+    assert max[1] == bb.y2 + bb.y
 
     assert min[0] == 5
     assert min[1] == 11
@@ -219,8 +219,8 @@ def test_pathcollection_fit1():
 
     assert pcol.bb().x == 10
     assert pcol.bb().y == 10
-    assert pcol.bb().w == 40
-    assert pcol.bb().w == 40
+    assert pcol.bb().x2 == 30
+    assert pcol.bb().x2 == 30
 
 
 def test_pathcollection_fit2():
@@ -238,8 +238,8 @@ def test_pathcollection_fit2():
 
     assert pcol.bb().x == 10
     assert pcol.bb().y == 10
-    assert pcol.bb().w == 40
-    assert pcol.bb().w == 40
+    assert pcol.bb().x2 == 30
+    assert pcol.bb().x2 == 30
 
 
 def test_pathcollection_fit3():
@@ -257,8 +257,8 @@ def test_pathcollection_fit3():
 
     assert pcol.bb().x == 10
     assert pcol.bb().y == 10
-    assert pcol.bb().w == 40
-    assert pcol.bb().w == 40
+    assert pcol.bb().x2 == 30
+    assert pcol.bb().x2 == 30
 
 
 def test_pathcollection_fit4():
@@ -282,8 +282,8 @@ def test_pathcollection_fit4():
 
     assert pcol.bb().x == 10
     assert pcol.bb().y == 10
-    assert pcol.bb().w == 40
-    assert pcol.bb().w == 40
+    assert pcol.bb().x2 == 30
+    assert pcol.bb().x2 == 30
 
 
 def test_pathcollection_fit5():
@@ -323,5 +323,32 @@ def test_pathcollection_layer():
 
     v = pcol.get_layers()
 
-    assert len(v["default"]) == 2
+    assert len(v[None]) == 2
     assert len(v["custom"]) == 1
+
+
+def test_pathcollection_line_types():
+    p1 = Path(line_type=1)
+    p1.add(0, 0)
+
+    p2 = Path(line_type=2)
+    p2.add(0, 0)
+
+    p3 = Path(line_type=3)
+    p3.add(0, 0)
+
+    p4 = Path(line_type=4)
+    p4.add(0, 0)
+
+    p5 = Path(line_type=4)
+    p5.add(0, 0)
+
+    pc = PathCollection()
+    pc.add(p1)
+    pc.add(p2)
+    pc.add(p3)
+    pc.add(p4)
+    pc.add(p5)
+
+    line_types = pc.get_all_line_types()
+    assert line_types == [1, 2, 3, 4]

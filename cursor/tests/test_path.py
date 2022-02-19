@@ -106,8 +106,8 @@ def test_path_bb():
     bb = p.bb()
     assert bb.x == 0
     assert bb.y == 0
-    assert bb.w == 141
-    assert bb.h == 4511
+    assert bb.x2 == 141
+    assert bb.y2 == 4511
 
 
 def test_path_bb2():
@@ -120,8 +120,8 @@ def test_path_bb2():
     bb = p.bb()
     assert bb.x == 100
     assert bb.y == 100
-    assert bb.w == 200
-    assert bb.h == 200
+    assert bb.x2 == 200
+    assert bb.y2 == 200
 
 
 def test_path_morph():
@@ -247,12 +247,12 @@ def test_entropy():
 def test_bb_center():
     bb = BoundingBox(100, 200, 300, 400)
     cx, cy = bb.center()
-    assert cx == 200
-    assert cy == 300
+    assert cx == 250
+    assert cy == 400
 
 
 def test_bb_center2():
-    bb = BoundingBox(-100, -100, 100, 100)
+    bb = BoundingBox(-100, -100, 200, 200)
     cx, cy = bb.center()
     assert cx == 0
     assert cy == 0
@@ -344,7 +344,7 @@ def test_path_distance():
 
 def test_path_layer():
     p = Path()
-    assert p.layer == "default"
+    assert p.layer is None
 
     p.layer = "custom"
     assert p.layer == "custom"

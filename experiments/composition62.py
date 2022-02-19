@@ -2,21 +2,10 @@ from cursor import loader
 from cursor import data
 from cursor import device
 from cursor import path
-from cursor import renderer
-from cursor import filter
-
-
-def save_wrapper(pc, projname, fname):
-    folder = data.DataDirHandler().jpg(projname)
-    jpeg_renderer = renderer.JpegRenderer(folder)
-
-    jpeg_renderer.render(pc, scale=4.0)
-    jpeg_renderer.save(fname)
-
 
 if __name__ == "__main__":
     p = data.DataDirHandler().recordings()
-    files = ["1620493187.451028_compressed"]
+    files = ["1640346795.269127_compressed"]
     ll = loader.Loader(directory=p, limit_files=files)
     colls = ll.all_collections()
 
@@ -29,13 +18,13 @@ if __name__ == "__main__":
             c.add(p)
         layer += 1
 
-    c.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=40)
+    c.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=20)
 
-    bb = path.BoundingBox(500, 400, 1400, 900)
-    f = filter.BoundingBoxFilter(bb)
-    c.filter(f)
+    # bb = path.BoundingBox(500, 400, 1400, 900)
+    # f = filter.BoundingBoxFilter(bb)
+    # c.filter(f)
 
-    save_wrapper(c, "composition62", "composition62_together")
+    # misc.save_wrapper_jpeg(c, "composition62", "composition62_together", 4.0, 1.0)
 
     device.SimpleExportWrapper().ex(
         c,
