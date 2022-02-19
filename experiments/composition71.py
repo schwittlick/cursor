@@ -14,8 +14,8 @@ if __name__ == "__main__":
     _loader = loader.Loader(directory=recordings, limit_files=None)
     all_paths = _loader.all_paths()
 
-    w = 6 * 3
-    h = 8 * 3
+    w = 6 * 10
+    h = 8 * 10
 
     fitting = []
 
@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
     #all_paths.clean()
 
-    sorter = filter.Sorter(param=filter.Sorter.POINT_COUNT, reverse=True)
+    sorter = filter.Sorter(param=filter.Sorter.SHANNON_DIRECTION_CHANGES, reverse=True)
     all_paths.sort(sorter)
 
     print(len(all_paths))
@@ -38,7 +38,10 @@ if __name__ == "__main__":
         for y in range(h):
             index = x + w * y
             b = path.BoundingBox(x, y, x + 1, y + 1)
-            p = all_paths[index]
+            if x > w / 2:
+                p = all_paths[len(all_paths) - index]
+            else:
+                p = all_paths[index]
             p.clean()
             p.velocity = 15
             p.move_to_origin()
