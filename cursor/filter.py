@@ -1,6 +1,7 @@
 import wasabi
 import time
 import copy
+import typing
 
 log = wasabi.Printer()
 
@@ -11,6 +12,9 @@ class Sorter:
     SHANNON_DIRECTION_CHANGES = 3
     DISTANCE = 4
     HASH = 5
+    LAYER = 6
+    PEN_SELECT = 7
+    POINT_COUNT = 8
 
     def __init__(self, reverse=False, param=SHANNON_X):
         self.__reverse = reverse
@@ -24,62 +28,68 @@ class Sorter:
     def param(self, v):
         self.__param = v
 
-    def sort(self, paths):
-        if isinstance(paths, list):
-            t0 = time.time()
-            if self.__param is self.SHANNON_X:
-                paths.sort(key=lambda x: x.shannon_x, reverse=self.__reverse)
-            elif self.__param is self.SHANNON_Y:
-                paths.sort(key=lambda x: x.shannon_y, reverse=self.__reverse)
-            elif self.__param is self.SHANNON_DIRECTION_CHANGES:
-                paths.sort(
-                    key=lambda x: x.shannon_direction_changes, reverse=self.__reverse
-                )
-            elif self.__param is self.DISTANCE:
-                paths.sort(key=lambda x: x.distance, reverse=self.__reverse)
-            elif self.__param is self.HASH:
-                paths.sort(key=lambda x: x.hash, reverse=self.__reverse)
-            else:
-                raise Exception(
-                    f"Unknown parameter {self.__param} for {__class__.__name__}"
-                )
-            elapsed = time.time() - t0
-            log.good(f"Sorted via {__class__.__name__} took {round(elapsed * 1000)}ms.")
+    def sort(self, paths: typing.List):
+        t0 = time.time()
+        if self.__param is self.SHANNON_X:
+            paths.sort(key=lambda x: x.shannon_x, reverse=self.__reverse)
+        elif self.__param is self.SHANNON_Y:
+            paths.sort(key=lambda x: x.shannon_y, reverse=self.__reverse)
+        elif self.__param is self.SHANNON_DIRECTION_CHANGES:
+            paths.sort(
+                key=lambda x: x.shannon_direction_changes, reverse=self.__reverse
+            )
+        elif self.__param is self.DISTANCE:
+            paths.sort(key=lambda x: x.distance, reverse=self.__reverse)
+        elif self.__param is self.HASH:
+            paths.sort(key=lambda x: x.hash, reverse=self.__reverse)
+        elif self.__param is self.LAYER:
+            paths.sort(key=lambda x: x.layer, reverse=self.__reverse)
+        elif self.__param is self.PEN_SELECT:
+            paths.sort(key=lambda x: x.pen_select, reverse=self.__reverse)
+        elif self.__param is self.POINT_COUNT:
+            paths.sort(key=lambda x: len(x), reverse=self.__reverse)
         else:
-            raise Exception(f"Only pass list objects to this {__class__.__name__}")
+            raise Exception(
+                f"Unknown parameter {self.__param} for {__class__.__name__}"
+            )
+        elapsed = time.time() - t0
+        log.good(f"Sorted via {__class__.__name__} took {round(elapsed * 1000)}ms.")
 
-    def sorted(self, paths):
-        if isinstance(paths, list):
-            t0 = time.time()
-            if self.__param is self.SHANNON_X:
-                sorted_list = sorted(
-                    paths, key=lambda x: x.shannon_x, reverse=self.__reverse
-                )
-            elif self.__param is self.SHANNON_Y:
-                sorted_list = sorted(
-                    paths, key=lambda x: x.shannon_y, reverse=self.__reverse
-                )
-            elif self.__param is self.SHANNON_DIRECTION_CHANGES:
-                sorted_list = sorted(
-                    paths,
-                    key=lambda x: x.shannon_direction_changes,
-                    reverse=self.__reverse,
-                )
-            elif self.__param is self.DISTANCE:
-                sorted_list = sorted(
-                    paths, key=lambda x: x.distance, reverse=self.__reverse
-                )
-            elif self.__param is self.HASH:
-                sorted_list = sorted(
-                    paths, key=lambda x: x.hash, reverse=self.__reverse
-                )
-            else:
-                raise Exception(f"Wrong param {self.__param} for {__class__.__name__}")
-            elapsed = time.time() - t0
-            log.good(f"Sorted via {__class__.__name__} took {round(elapsed * 1000)}ms.")
-            return sorted_list
+    def sorted(self, paths: typing.List):
+        t0 = time.time()
+        if self.__param is self.SHANNON_X:
+            sorted_list = sorted(
+                paths, key=lambda x: x.shannon_x, reverse=self.__reverse
+            )
+        elif self.__param is self.SHANNON_Y:
+            sorted_list = sorted(
+                paths, key=lambda x: x.shannon_y, reverse=self.__reverse
+            )
+        elif self.__param is self.SHANNON_DIRECTION_CHANGES:
+            sorted_list = sorted(
+                paths,
+                key=lambda x: x.shannon_direction_changes,
+                reverse=self.__reverse,
+            )
+        elif self.__param is self.DISTANCE:
+            sorted_list = sorted(
+                paths, key=lambda x: x.distance, reverse=self.__reverse
+            )
+        elif self.__param is self.HASH:
+            sorted_list = sorted(paths, key=lambda x: x.hash, reverse=self.__reverse)
+        elif self.__param is self.LAYER:
+            sorted_list = sorted(paths, key=lambda x: x.layer, reverse=self.__reverse)
+        elif self.__param is self.PEN_SELECT:
+            sorted_list = sorted(
+                paths, key=lambda x: x.pen_select, reverse=self.__reverse
+            )
+        elif self.__param is self.POINT_COUNT:
+            sorted_list = sorted(paths, key=lambda x: len(x), reverse=self.__reverse)
         else:
-            raise Exception(f"Only pass list objects to this {__class__.__name__}")
+            raise Exception(f"Wrong param {self.__param} for {__class__.__name__}")
+        elapsed = time.time() - t0
+        log.good(f"Sorted via {__class__.__name__} took {round(elapsed * 1000)}ms.")
+        return sorted_list
 
 
 class Filter:
@@ -225,3 +235,55 @@ class DistanceFilter(Filter):
         paths[:] = [p for p in paths if p.distance <= self.max_distance]
         len_after = len(paths)
         log.good(f"DistanceFilter: reduced path count from {len_before} to {len_after}")
+
+
+class AspectRatioFilter(Filter):
+    def __init__(self, min_as, max_as):
+        self.min_as = min_as
+        self.max_as = max_as
+
+    def filter(self, paths):
+        len_before = len(paths)
+        paths[:] = [p for p in paths if self.min_as < p.aspect_ratio() < self.max_as]
+        len_after = len(paths)
+        log.good(
+            f"AspectRatioFilter: reduced path count from {len_before} to {len_after}"
+        )
+
+
+class DistanceBetweenPointsFilter(Filter):
+    def __init__(self, min_distance, max_distance):
+        self.min_distance = min_distance
+        self.max_distance = max_distance
+
+    def filter(self, paths):
+        len_before = len(paths)
+
+        for pa in paths:
+            verts = []
+            for pi in range(len(pa) - 1):
+                p1 = pa[pi]
+                p2 = pa[pi + 1]
+                d = p1.distance(p2)
+                if self.min_distance <= d <= self.max_distance:
+                    verts.append(p2)
+            pa.vertices = verts
+            pa.clean()
+
+        len_after = len(paths)
+        log.good(
+            f"DistanceBetweenPointsFilter: reduced path count from {len_before} to {len_after}"
+        )
+
+
+class MinTravelDistanceFilter(Filter):
+    def __init__(self, min_distance):
+        self.min_distance = min_distance
+
+    def filter(self, paths):
+        len_before = len(paths)
+        paths[:] = [p for p in paths if p.distance > self.min_distance]
+        len_after = len(paths)
+        log.good(
+            f"MinDistanceFilter: reduced path count from {len_before} to {len_after}"
+        )

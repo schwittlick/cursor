@@ -103,28 +103,46 @@ def test_jpegrenderer():
 def test_hpglrenderer():
     pc = PathCollection()
     p1 = Path()
-    p1.add(-10000, -10000)
-    p1.add(10000, -10000)
+    p1.add(-10, -10)
+    p1.add(10, -10)
+
     p2 = Path()
-    p2.add(10000, -10000)
-    p2.add(10000, 10000)
-
-    p3 = Path()
-    p3.add(10000, 10000)
-    p3.add(-10000, 10000)
-
-    p4 = Path()
-    p4.add(-10000, 10000)
-    p4.add(-10000, -10000)
+    p2.add(10, -10)
+    p2.add(10, 10)
 
     pc.add(p1)
     pc.add(p2)
-    pc.add(p3)
-    pc.add(p4)
 
     r = HPGLRenderer(DataDirHandler().test_hpgls())
     r.render(pc)
-    r.save("test1")
+    hpgl_data = r.save("test1")
+
+    expected_result = (
+        "SP1;\n"
+        "PA0,0\n"
+        "PU;\n"
+        "SP1;\n"
+        "LT;\n"
+        "VS110;\n"
+        "FS16;\n"
+        "PA-10,-10;\n"
+        "PD;\n"
+        "PA-10,-10;\n"
+        "PA10,-10;\n"
+        "PU;\n"
+        "SP1;\n"
+        "LT;\n"
+        "VS110;\n"
+        "FS16;\n"
+        "PA10,-10;\n"
+        "PD;\n"
+        "PA10,-10;\n"
+        "PA10,10;\n"
+        "PU;\n"
+        "PA0,0\n"
+        "SP0;\n"
+    )
+    assert hpgl_data == expected_result
 
 
 def test_jpegrenderer_fail():
@@ -149,6 +167,7 @@ def test_jpegrenderer_fail():
         svg_r.save("test1")
 
 
+@pytest.mark.skip(reason="This takes too long to run.")
 def test_tsp():
     p0 = Path()
     p0.add(0, 0)

@@ -52,6 +52,7 @@ def regular() -> "path.PathCollection":
     p.add(0, 1)
     p.add(0, 0)
     pc.add(p)
+
     return pc
 
 
@@ -65,12 +66,23 @@ if __name__ == "__main__":
     layer_pen_mapping["3"] = 3
     layer_pen_mapping["4"] = 4
 
+    # testing dpx3300 a2 format
     device.SimpleExportWrapper().ex(
         pc,
-        device.PlotterType.ROLAND_DPX3300,
-        device.PaperSize.LANDSCAPE_A1,
-        100,
+        device.PlotterType.ROLAND_DPX3300_A2,
+        device.PaperSize.LANDSCAPE_A2,
+        0,
+        "simple_rect_10mm_margin_a2",
         "simple_rect",
-        "simple_rect",
-        gcode_layer_pen_mapping=layer_pen_mapping,
+    )
+    # hpgl_pen_layer_mapping=layer_pen_mapping,
+
+    # testing hp7595a a3 export
+    device.SimpleExportWrapper().ex(
+        pc,
+        device.PlotterType.HP_7595A_A3,
+        device.PaperSize.LANDSCAPE_A3,
+        30,
+        "sr_20mm",
+        "test__fix",
     )

@@ -1,3 +1,6 @@
+import os
+import typing
+
 from cursor.path import PathCollection
 from cursor.path import Path
 from cursor.path import BoundingBox
@@ -72,9 +75,9 @@ class SvgRenderer:
 
         p1 = Path()
         p1.add(bb.x, bb.y)
-        p1.add(bb.w, bb.y)
-        p1.add(bb.w, bb.h)
-        p1.add(bb.x, bb.h)
+        p1.add(bb.x2, bb.y)
+        p1.add(bb.x2, bb.y2)
+        p1.add(bb.x, bb.y2)
         p1.add(bb.x, bb.y)
 
         self.paths.add(p1)
@@ -86,7 +89,7 @@ class SvgRenderer:
 
         fname = self.save_path / (filename + ".svg")
         self.dwg = svgwrite.Drawing(
-            fname.as_posix(), profile="tiny", size=(bb.w + bb.x, bb.h + bb.y)
+            fname.as_posix(), profile="tiny", size=(bb.x2 + bb.x, bb.y2 + bb.y)
         )
 
         it = PathIterator(self.paths)
@@ -171,8 +174,8 @@ class GCodeRenderer:
                     _y = bb.y
                     if self.invert_y:
                         _y = -_y
-                    _w = bb.w
-                    _h = bb.h
+                    _w = bb.x2
+                    _h = bb.y2
                     if self.invert_y:
                         _h = -_h
                     file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
@@ -213,83 +216,126 @@ class RealtimeRenderer:
     def render(self, paths):
         from processing_py import App
 
-        app = App(1920, 1080)  # create window: width, height
+        app = App(800, 600)  # create window: width, height
 
         t = 0
         while t < 500:
             print(f"frame {t}")
             t += 1
-            app.background(0, 0, 0)  # set background:  red, green, blue
-            app.fill(255, 255, 0)  # set color for objects: red, green, blue
-            app.ellipse(
-                app.mouseX, app.mouseY, 50, 50
-            )  # draw a circle: center_x, center_y, size_x, size_y
+            app.background(0, 0, 0)
+            app.fill(255, 255, 0)
+            app.ellipse(app.mouseX, app.mouseY, 50, 50)
             app.fill(255, 255, 255)
-            # app.textFont("JetBrains Mono", 100)
-            # app.text(str(t), 100, 100)
             app.stroke(255, 255, 255)
             self.render_pc(app, paths)
-            app.redraw()  # refresh the window
+            app.redraw()
         app.exit()
 
 
 class HPGLRenderer:
     def __init__(
-        self, folder: pathlib.Path, speed: int = 30, layer_pen_mapping: dict = None
+        self,
+        folder: pathlib.Path,
+        layer_pen_mapping: dict = None,
+        line_type_mapping: dict = None,
     ) -> None:
-        self.speed = speed
-        self.save_path = folder
-        self.paths = PathCollection()
-        self.layer_pen_mapping = layer_pen_mapping
+        self.__save_path = folder
+        self.__paths = PathCollection()
+        self.__layer_pen_mapping = layer_pen_mapping
+        self.__line_type_mapping = line_type_mapping
 
     def render(self, paths: "PathCollection") -> None:
-        self.paths += paths
+        self.__paths += paths
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
 
-    def save(self, filename: str) -> None:
-        pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
-        fname = self.save_path / (filename + ".hpgl")
+    def save(self, filename: str) -> str:
+        pathlib.Path(self.__save_path).mkdir(parents=True, exist_ok=True)
+        fname = self.__save_path / (filename + ".hpgl")
+
+        _hpgl_string = ""
+
+        _hpgl_string += "SP1;\n"
+        _hpgl_string += "PA0,0\n"
+
+        first = True
+        for p in self.__paths:
+            if first:
+                _hpgl_string += "PU;\n"
+                first = False
+            x = p.start_pos().x
+            y = p.start_pos().y
+
+            _hpgl_string += f"SP{self.__get_pen_select(p.pen_select)};\n"
+            _hpgl_string += f"LT{self.__linetype_from_layer(p.line_type)};\n"
+            _hpgl_string += f"VS{self.__get_velocity(p.velocity)};\n"
+            _hpgl_string += f"FS{self.__get_pen_force(p.pen_force)};\n"
+
+            _hpgl_string += f"PA{int(x)},{int(y)};\n"
+            if p.is_polygon:
+                _hpgl_string += "PM0;"
+
+            _hpgl_string += "PD;\n"
+
+            for line in p.vertices:
+                x = line.x
+                y = line.y
+                _hpgl_string += f"PA{int(x)},{int(y)};\n"
+
+            _hpgl_string += "PU;\n"
+
+            if p.is_polygon:
+                _hpgl_string += "PM2;"  # switch to PM2; to close and safe
+                _hpgl_string += "FP;"
+
+        _hpgl_string += "PA0,0\n"
+        _hpgl_string += "SP0;\n"
 
         with open(fname.as_posix(), "w") as file:
-            # file.write(f"PA0,0;\n")
-            file.write("SP1;\n")
-            file.write(f"VS{self.speed};\n")
+            file.write(_hpgl_string)
 
-            self.__append_to_file(file, 0.0, 0.0)
-
-            first = True
-            for p in self.paths:
-
-                if first:
-                    file.write("PU;\n")
-                    first = False
-                x = p.start_pos().x
-                y = p.start_pos().y
-                self.__append_to_file(file, x, y)
-                file.write(f"SP{self.__pen_from_layer(p.layer)};\n")
-                file.write("PD;\n")
-                for line in p.vertices:
-                    x = line.x
-                    y = line.y
-                    self.__append_to_file(file, x, y)
-                file.write("PU;\n")
-
-            self.__append_to_file(file, 0.0, 0.0)
-            file.write("SP0;\n")
         log.good(f"Finished saving {fname}")
 
+        return _hpgl_string
+
     @staticmethod
-    def __append_to_file(file, x: float, y: float):
-        file.write(f"PA{int(x)},{int(y)}\n")
-
-    def __pen_from_layer(self, layer: str) -> int:
-        if self.layer_pen_mapping is None:
+    def __get_pen_select(pen_select: typing.Optional[int] = None) -> int:
+        if pen_select is None:
             return 1
 
-        if layer not in self.layer_pen_mapping.keys():
+        return pen_select
+
+    def __pen_from_layer(self, layer: typing.Optional[str] = None) -> int:
+        if self.__layer_pen_mapping is None:
             return 1
 
-        return self.layer_pen_mapping[layer]
+        if layer not in self.__layer_pen_mapping.keys():
+            return 1
+
+        return self.__layer_pen_mapping[layer]
+
+    def __linetype_from_layer(self, linetype: typing.Optional[int] = None) -> str:
+        _default_linetype = ""
+        if self.__line_type_mapping is None:
+            return _default_linetype
+
+        if linetype not in self.__line_type_mapping.keys():
+            return _default_linetype
+
+        return self.__line_type_mapping[linetype]
+
+    @staticmethod
+    def __get_velocity(velocity: typing.Optional[int] = None) -> int:
+        if velocity is None:
+            return 110
+
+        return velocity
+
+    @staticmethod
+    def __get_pen_force(pen_force: typing.Optional[int] = None) -> int:
+        if pen_force is None:
+            return 16
+
+        return pen_force
 
 
 class JpegRenderer:
@@ -313,15 +359,15 @@ class JpegRenderer:
         abs_scaled_bb = (
             abs(bb.x * scale),
             abs(bb.y * scale),
-            abs(bb.w * scale),
-            abs(bb.h * scale),
+            abs(bb.x2 * scale),
+            abs(bb.y2 * scale),
         )
 
-        image_width = int(abs_scaled_bb[0] + abs_scaled_bb[2])
-        image_height = int(abs_scaled_bb[1] + abs_scaled_bb[3])
+        image_width = int(abs_scaled_bb[0] + abs_scaled_bb[2]) + int(bb.x * scale)
+        image_height = int(abs_scaled_bb[1] + abs_scaled_bb[3]) + int(bb.y * scale)
 
         log.good(f"Creating image with size=({image_width}, {image_height})")
-        assert image_width < 20000 and image_height < 20000, "keep resolution lower"
+        assert image_width < 21000 and image_height < 21000, "keep resolution lower"
 
         self.img = Image.new("RGB", (image_width, image_height), "white")
         self.img_draw = ImageDraw.ImageDraw(self.img)
@@ -358,10 +404,10 @@ class JpegRenderer:
     def render_bb(self, bb):
         assert isinstance(bb, BoundingBox), "Only BoundingBox objects allowed"
 
-        self.img_draw.line(xy=(bb.x, bb.y, bb.w, bb.y), fill="black", width=2)
-        self.img_draw.line(xy=(bb.x, bb.y, bb.x, bb.h), fill="black", width=2)
-        self.img_draw.line(xy=(bb.w, bb.y, bb.w, bb.h), fill="black", width=2)
-        self.img_draw.line(xy=(bb.x, bb.h, bb.w, bb.h), fill="black", width=2)
+        self.img_draw.line(xy=(bb.x, bb.y, bb.x2, bb.y), fill="black", width=2)
+        self.img_draw.line(xy=(bb.x, bb.y, bb.x, bb.y2), fill="black", width=2)
+        self.img_draw.line(xy=(bb.x2, bb.y, bb.x2, bb.y2), fill="black", width=2)
+        self.img_draw.line(xy=(bb.x, bb.y2, bb.x2, bb.y2), fill="black", width=2)
 
     def render_frame(self):
         w = self.img.size[0]
@@ -370,6 +416,37 @@ class JpegRenderer:
         self.img_draw.line(xy=(0, 0, 0, h), fill="black", width=2)
         self.img_draw.line(xy=(w - 2, 0, w - 2, h), fill="black", width=2)
         self.img_draw.line(xy=(0, h - 2, w, h - 2), fill="black", width=2)
+
+
+class VideoRenderer:
+    def __init__(self, folder: pathlib.Path):
+        self.save_path = folder
+        self.images = []
+
+    def add_frame(self, img):
+        self.images.append(img)
+
+    def render_video(self, fname):
+        pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
+
+        text_file = (self.save_path / "list.txt").as_posix()
+
+        p = pathlib.Path(self.save_path.absolute()).glob("**/*.jpg")
+        files = [x for x in p if x.is_file()]
+        with open(text_file, "w", encoding="utf8") as file:
+            for f in files:
+                file.write("file '")
+                file.write(f.as_posix().replace("/", "\\"))
+                file.write("'")
+                file.write("\n")
+
+        out_file = self.save_path / fname
+        call = (
+            f'ffmpeg -y -r 25 -f concat -safe 0 -i "{text_file}" -c:v libx264 -vf '
+            f'"fps=25,format=yuv420p,scale=trunc(iw/2)*2:trunc(ih/2)*2" {out_file}'
+        )
+
+        os.system(call)
 
 
 class AsciiRenderer:

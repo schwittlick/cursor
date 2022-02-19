@@ -1,5 +1,8 @@
-import wasabi
+from cursor import data
+from cursor import renderer
+
 from enum import Enum
+import wasabi
 
 log = wasabi.Printer()
 
@@ -11,6 +14,12 @@ class MinMax:
         self.miny = miny
         self.maxy = maxy
 
+    def center(self):
+        return (self.minx + self.maxx) / 2, (self.miny + self.maxy) / 2
+
+    def tuple(self):
+        return self.minx, self.maxx, self.miny, self.maxy
+
 
 class PlotterType(Enum):
     ROLAND_DPX3300 = 0
@@ -21,6 +30,10 @@ class PlotterType(Enum):
     ROLAND_DXY1200 = 5
     ROLAND_DXY980 = 6
     HP_7595A = 7
+    ROLAND_PNC1000 = 8
+    ROLAND_DPX3300_A2 = 9
+    ROLAND_DPX3300_A3 = 10
+    HP_7595A_A3 = 11
 
 
 class ExportFormat(Enum):
@@ -33,6 +46,8 @@ class ExportFormat(Enum):
 class ExportFormatMappings:
     maps = {
         PlotterType.ROLAND_DPX3300: ExportFormat.HPGL,
+        PlotterType.ROLAND_DPX3300_A2: ExportFormat.HPGL,
+        PlotterType.ROLAND_DPX3300_A3: ExportFormat.HPGL,
         PlotterType.DIY_PLOTTER: ExportFormat.GCODE,
         PlotterType.AXIDRAW: ExportFormat.SVG,
         PlotterType.HP_7475A_A3: ExportFormat.HPGL,
@@ -40,12 +55,16 @@ class ExportFormatMappings:
         PlotterType.ROLAND_DXY1200: ExportFormat.HPGL,
         PlotterType.ROLAND_DXY980: ExportFormat.HPGL,
         PlotterType.HP_7595A: ExportFormat.HPGL,
+        PlotterType.ROLAND_PNC1000: ExportFormat.HPGL,
+        PlotterType.HP_7595A_A3: ExportFormat.HPGL,
     }
 
 
 class MinmaxMapping:
     maps = {
-        PlotterType.ROLAND_DPX3300: MinMax(-17750, 16790, -11180, 11180),
+        PlotterType.ROLAND_DPX3300: MinMax(-16920, 16340, -11180, 11180),
+        PlotterType.ROLAND_DPX3300_A2: MinMax(-16920, 5440, -11180, 4629),
+        PlotterType.ROLAND_DPX3300_A3: MinMax(-16920, -1112, -11180, -3276),
         PlotterType.DIY_PLOTTER: MinMax(0, 3350, 0, -1715),
         PlotterType.AXIDRAW: MinMax(0, 0, 0, -0),  # todo: missing real bounds
         PlotterType.HP_7475A_A4: MinMax(0, 11040, 0, 7721),
@@ -53,20 +72,8 @@ class MinmaxMapping:
         PlotterType.ROLAND_DXY1200: MinMax(0, 0, 0, 0),  # todo: missing real bounds
         PlotterType.ROLAND_DXY980: MinMax(0, 16158, 0, 11040),
         PlotterType.HP_7595A: MinMax(-23160, 23160, -17602, 17602),
-    }
-
-
-class MinMaxMappingBB:
-    from cursor import path
-
-    maps = {
-        PlotterType.ROLAND_DPX3300: path.BoundingBox(-17600, 33600, -11360, 23760),
-        PlotterType.DIY_PLOTTER: path.BoundingBox(0, 3350, 0, -1715),
-        PlotterType.AXIDRAW: MinMax(0, 0, 0, -0),  # todo: missing real bounds
-        PlotterType.HP_7475A_A4: MinMax(0, 0, 0, 0),  # todo: missing real bounds
-        PlotterType.HP_7475A_A3: MinMax(0, 0, 0, 0),  # todo: missing real bounds
-        PlotterType.ROLAND_DXY1200: MinMax(0, 0, 0, 0),  # todo: missing real bounds
-        PlotterType.ROLAND_DXY980: MinMax(0, 0, 0, 0),  # todo: missing real bounds
+        PlotterType.ROLAND_PNC1000: MinMax(0, 0, 17200, 40000),  # actually unlimited y
+        PlotterType.HP_7595A_A3: MinMax(-7728, 7728 + 960, -5752, 5752),
     }
 
 
@@ -87,18 +94,25 @@ class PaperSize(Enum):
     PORTRAIT_A3 = 13
     LANDSCAPE_A3 = 14
     LANDSCAPE_80_50 = 15
+    PORTRAIT_50_80 = 16
+    LANDSCAPE_A2 = 17
+    SQUARE_59_59 = 18
 
 
 class PlotterName:
     names = {
         PlotterType.ROLAND_DPX3300: "dpx3300",
+        PlotterType.ROLAND_DPX3300_A2: "dpx3300_a2",
+        PlotterType.ROLAND_DPX3300_A3: "dpx3300_a3",
         PlotterType.AXIDRAW: "axidraw",
         PlotterType.DIY_PLOTTER: "custom",
         PlotterType.HP_7475A_A3: "hp7475a_a3",
         PlotterType.HP_7475A_A4: "hp7475a_a4",
         PlotterType.ROLAND_DXY1200: "dxy1200",
         PlotterType.ROLAND_DXY980: "dxy980",
-        PlotterType.HP_7595A: "hp_draftmaster_sx",
+        PlotterType.HP_7595A: "hp7595a_draftmaster_sx",
+        PlotterType.ROLAND_PNC1000: "roland_camm1",
+        PlotterType.HP_7595A_A3: "hp7595a_draftmaster_sx_a3",
     }
 
 
@@ -120,6 +134,9 @@ class PaperSizeName:
         PaperSize.PORTRAIT_A3: "portrait_a3",
         PaperSize.LANDSCAPE_A3: "landscape_a3",
         PaperSize.LANDSCAPE_80_50: "landscape_80x50",
+        PaperSize.PORTRAIT_50_80: "portrait_50_80",
+        PaperSize.LANDSCAPE_A2: "landscape_a2",
+        PaperSize.SQUARE_59_59: "square_59_59",
     }
 
 
@@ -141,12 +158,17 @@ class Paper:
         PaperSize.PORTRAIT_A3: (297, 420),
         PaperSize.LANDSCAPE_A3: (420, 297),
         PaperSize.LANDSCAPE_80_50: (800, 500),
+        PaperSize.PORTRAIT_50_80: (500, 800),
+        PaperSize.LANDSCAPE_A2: (594, 420),
+        PaperSize.SQUARE_59_59: (590, 590),
     }
 
 
 class XYFactors:
     fac = {
         PlotterType.ROLAND_DPX3300: (40, 40),
+        PlotterType.ROLAND_DPX3300_A2: (40, 40),
+        PlotterType.ROLAND_DPX3300_A3: (40, 40),
         PlotterType.DIY_PLOTTER: (2.85714, 2.90572),
         PlotterType.AXIDRAW: (3.704, 3.704),
         PlotterType.HP_7475A_A3: (40, 40),
@@ -154,6 +176,8 @@ class XYFactors:
         PlotterType.ROLAND_DXY1200: (40, 40),
         PlotterType.ROLAND_DXY980: (40, 40),
         PlotterType.HP_7595A: (40, 40),
+        PlotterType.ROLAND_PNC1000: (40, 40),
+        PlotterType.HP_7595A_A3: (37, 37),
     }
 
 
@@ -205,9 +229,9 @@ class Exporter:
         self.__cfg = None
         self.__name = None
         self.__suffix = None
-        self.__hpgl_speed = None
         self.__gcode_speed = None
         self.__layer_pen_mapping = None
+        self.__linetype_mapping = None
 
     @property
     def paths(self) -> path.PathCollection:
@@ -242,14 +266,6 @@ class Exporter:
         self.__suffix = t
 
     @property
-    def hpgl_speed(self) -> int:
-        return self.__hpgl_speed
-
-    @hpgl_speed.setter
-    def hpgl_speed(self, t: int) -> None:
-        self.__hpgl_speed = t
-
-    @property
     def gcode_speed(self) -> int:
         return self.__gcode_speed
 
@@ -265,44 +281,18 @@ class Exporter:
     def layer_pen_mapping(self, m: dict) -> None:
         self.__layer_pen_mapping = m
 
-    def fit(self) -> None:
-        # out_dim = tuple(
-        #    _ * r
-        #    for _, r in zip(
-        #        Paper.sizes[self.cfg.dimension], XYFactors.fac[self.cfg.type]
-        #    )
-        # )
-        if self.cfg.type is PlotterType.ROLAND_DPX3300:
-            self.paths.fit(
-                Paper.sizes[self.cfg.dimension],
-                xy_factor=XYFactors.fac[self.cfg.type],
-                padding_mm=self.cfg.margin,
-                center_point=(-880, 600),
-                cutoff_mm=self.cfg.cutoff,
-            )
-        elif self.cfg.type is PlotterType.HP_7595A:
-            self.paths.fit(
-                Paper.sizes[self.cfg.dimension],
-                xy_factor=XYFactors.fac[self.cfg.type],
-                padding_mm=self.cfg.margin,
-                center_point=(0, 0),
-                cutoff_mm=self.cfg.cutoff,
-            )
-        else:
-            self.paths.fit(
-                Paper.sizes[self.cfg.dimension],
-                xy_factor=XYFactors.fac[self.cfg.type],
-                padding_mm=self.cfg.margin,
-                cutoff_mm=self.cfg.cutoff,
-            )
+    @property
+    def linetype_mapping(self) -> dict:
+        return self.__linetype_mapping
+
+    @linetype_mapping.setter
+    def linetype_mapping(self, m: dict) -> None:
+        self.__linetype_mapping = m
 
     def run(self, jpg: bool = False) -> None:
         if self.cfg is None or self.paths is None or self.name is None:
             log.fail("Config, Name or Paths is None. Not exporting anything")
             return
-
-        from cursor import data
-        from cursor import renderer
 
         # jpeg fitting roughly
         self.paths.fit(
@@ -320,43 +310,43 @@ class Exporter:
 
                 jpeg_folder = data.DataDirHandler().jpg(self.name)
                 jpeg_renderer = renderer.JpegRenderer(jpeg_folder)
-                jpeg_renderer.render(pc, scale=3.0)
+                jpeg_renderer.render(pc, scale=4.0)
                 jpeg_renderer.save(f"{fname}_{layer}")
 
-        self.fit()
+        self.paths.fit(
+            Paper.sizes[self.cfg.dimension],
+            xy_factor=XYFactors.fac[self.cfg.type],
+            padding_mm=self.cfg.margin,
+            output_bounds=MinmaxMapping.maps[self.cfg.type].tuple(),
+            cutoff_mm=self.cfg.cutoff,
+        )
 
         sizename = PaperSizeName.names[self.cfg.dimension]
         machinename = PlotterName.names[self.cfg.type]
         fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}"
         format = ExportFormatMappings.maps[self.cfg.type]
-
+        if self.linetype_mapping and format is ExportFormat.HPGL:
+            hpgl_folder = data.DataDirHandler().hpgl(self.name)
+            hpgl_renderer = renderer.HPGLRenderer(
+                hpgl_folder, line_type_mapping=self.linetype_mapping
+            )
+            hpgl_renderer.render(self.paths)
+            hpgl_renderer.save(f"{fname}_all")
         if self.layer_pen_mapping is not None:
             if format is ExportFormat.HPGL:
                 hpgl_folder = data.DataDirHandler().hpgl(self.name)
-                if self.hpgl_speed:
-                    hpgl_renderer = renderer.HPGLRenderer(
-                        hpgl_folder,
-                        speed=self.hpgl_speed,
-                        layer_pen_mapping=self.layer_pen_mapping,
-                    )
-                else:
-                    hpgl_renderer = renderer.HPGLRenderer(
-                        hpgl_folder, layer_pen_mapping=self.layer_pen_mapping
-                    )
+
+                hpgl_renderer = renderer.HPGLRenderer(
+                    hpgl_folder, layer_pen_mapping=self.layer_pen_mapping
+                )
                 hpgl_renderer.render(self.paths)
                 hpgl_renderer.save(f"{fname}_all")
         else:
-
             separate_layers = self.paths.get_layers()
             for layer, pc in separate_layers.items():
                 if format is ExportFormat.HPGL:
                     hpgl_folder = data.DataDirHandler().hpgl(self.name)
-                    if self.hpgl_speed:
-                        hpgl_renderer = renderer.HPGLRenderer(
-                            hpgl_folder, speed=self.hpgl_speed
-                        )
-                    else:
-                        hpgl_renderer = renderer.HPGLRenderer(hpgl_folder)
+                    hpgl_renderer = renderer.HPGLRenderer(hpgl_folder)
                     hpgl_renderer.render(pc)
                     hpgl_renderer.save(f"{fname}_{layer}")
 
@@ -392,9 +382,9 @@ class SimpleExportWrapper:
         name: str = "output_name",
         suffix: str = "",
         cutoff: int = None,
-        hpgl_speed: int = None,
         gcode_speed: int = None,
-        gcode_layer_pen_mapping=None,
+        hpgl_pen_layer_mapping=None,
+        hpgl_linetype_mapping=None,
     ):
         cfg = Cfg()
         cfg.type = ptype
@@ -409,7 +399,7 @@ class SimpleExportWrapper:
         exp.paths = paths
         exp.name = name
         exp.suffix = str(suffix)
-        exp.hpgl_speed = hpgl_speed
         exp.gcode_speed = gcode_speed
-        exp.layer_pen_mapping = gcode_layer_pen_mapping
+        exp.layer_pen_mapping = hpgl_pen_layer_mapping
+        exp.linetype_mapping = hpgl_linetype_mapping
         exp.run(True)

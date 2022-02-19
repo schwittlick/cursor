@@ -32,6 +32,35 @@ def full_spiral(pp, rounds=800, _yextra=0.01, _theta=0.02):
     return "full_plain"
 
 
+def double_full_spiral1(pp, rounds=800, _yextra=0.01, _theta=0.02):
+    theta = 0
+    yextra = 0
+    r = 50
+    while theta < rounds:
+        y = r * math.cos(theta) * 2
+        x = r * math.sin(theta) + yextra
+        pp.add(x, y, 0)
+        theta += _theta
+        yextra += _yextra
+
+    return "double_full_spiral1"
+
+
+def double_full_spiral2(pp, rounds=800, _yextra=0.01, _theta=0.02):
+    theta = 0
+    yextra = 0
+    r = 50
+
+    while theta < rounds:
+        y = r * math.cos(theta) * 2
+        x = r * math.sin(theta) + yextra
+        pp.add(x + 100, y, 0)
+        theta += _theta
+        yextra += _yextra
+
+    return "double_full_spiral2"
+
+
 def circleball_spiral(pp):
     theta = 0
     yextra = 0
@@ -93,20 +122,23 @@ def fat_spiral(pp):
 if __name__ == "__main__":
     coll = PathCollection()
 
-    pp = Path(layer="round1")
+    pp = Path(layer="top")
+    pp2 = Path(layer="bottom")
 
     # num = plain_spiral(pp)
     # num = circleball_spiral(pp)
     # num = upward_spiral(pp)
     # num = full_spiral(pp, 20000, 0.0005, 0.1)
     # num = heart_spiral(pp)
-    num = fat_spiral(pp)
+    # num = fat_spiral(pp)
+    name = double_full_spiral1(pp, 20000, 0.0005, 0.1)
+    name2 = double_full_spiral2(pp2, 20000, 0.0005, 0.1)
 
-    reversed_path = pp.reversed()
-    reversed_path.layer = "round2"
+    # reversed_path = pp.reversed()
+    # reversed_path.layer = "round2"
 
     coll.add(pp)
-    coll.add(reversed_path)
+    coll.add(pp2)
 
     # device.SimpleExportWrapper().ex(
     #    coll,
@@ -130,9 +162,9 @@ if __name__ == "__main__":
         coll,
         device.PlotterType.ROLAND_DPX3300,
         device.PaperSize.LANDSCAPE_A1,
-        5,
+        35,
         "composition59",
-        num,
+        name,
     )
     # device.SimpleExportWrapper().ex(
     #    coll,

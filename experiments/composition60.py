@@ -17,19 +17,19 @@ if __name__ == "__main__":
     5. this means 3 diff gcode files
     """
     p = data.DataDirHandler().recordings()
-    ll = loader.Loader(directory=p, limit_files=1)
+    ll = loader.Loader(directory=p, limit_files=10)
     all_paths = ll.all_paths()
 
     entropy_filter_min = filter.EntropyMinFilter(0.1, 0.1)
     all_paths.filter(entropy_filter_min)
 
-    entropy_filter_max = filter.EntropyMaxFilter(1.5, 1.5)
+    entropy_filter_max = filter.EntropyMaxFilter(1.7, 1.7)
     all_paths.filter(entropy_filter_max)
 
-    point_filter = filter.MaxPointCountFilter(100)
+    point_filter = filter.MaxPointCountFilter(150)
     all_paths.filter(point_filter)
 
-    point_filter2 = filter.MinPointCountFilter(6)
+    point_filter2 = filter.MinPointCountFilter(30)
     all_paths.filter(point_filter2)
 
     for i in range(1):
@@ -66,32 +66,33 @@ if __name__ == "__main__":
                     (posx + xsize, posy), (posx + xsize, posy + ysize)
                 )  # right
 
+                _p1.pen_select = 1
+                _p2.pen_select = 1
+                _p3.pen_select = 1
+                _p4.pen_select = 1
+
                 coll.add(_p1)
                 coll.add(_p2)
                 coll.add(_p3)
                 coll.add(_p4)
 
-                if random.randint(0, 10) < 2:
+                if random.randint(0, 10) < 6:
                     counter = 0
+                    pens = [2, 3, 4, 5]
+                    coi = random.choice(pens)
                     for p in _p1:
                         bottom_connection = _p2[counter]
                         counter += 1
 
                         newpath = _p3.morph(p, bottom_connection)
-                        newpath.layer = "filled"
+                        newpath.pen_select = coi
                         coll.add(newpath)
-
-        coll.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_56_42], padding_mm=40)
-        folder = data.DataDirHandler().jpg("composition60")
-        jpeg_renderer = renderer.JpegRenderer(folder)
-        jpeg_renderer.render(coll, scale=4.0)
-        jpeg_renderer.save(f"composition60_{i}_together")
 
         device.SimpleExportWrapper().ex(
             coll,
-            device.PlotterType.DIY_PLOTTER,
-            device.PaperSize.LANDSCAPE_56_42,
-            40,
+            device.PlotterType.HP_7595A_A3,
+            device.PaperSize.LANDSCAPE_A3,
+            25,
             "composition60",
-            str(i),
+            str(i) + f"_{coll.hash()}",
         )

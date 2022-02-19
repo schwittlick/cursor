@@ -1,4 +1,4 @@
-from cursor import filter
+from cursor import filter as cursor_filter
 
 import numpy as np
 import math
@@ -13,16 +13,6 @@ import operator
 import time
 from scipy import spatial
 
-import scipy
-
-# just for fun making further development easier and with joy
-pi = scipy.pi
-dot = scipy.dot
-sin = scipy.sin
-cos = scipy.cos
-ar = scipy.array
-rand = scipy.rand
-arange = scipy.arange
 
 log = wasabi.Printer()
 
@@ -47,13 +37,19 @@ class TimedPosition:
             copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(self.timestamp)
         )
 
-    def rot(self, delta: float) -> None:
-        co = np.cos(delta)
-        si = np.sin(delta)
-        xx = co * self.x - si * self.y
-        yy = si * self.x + co * self.y
-        self.x = xx
-        self.y = yy
+    def distance(self, t: "TimedPosition"):
+        return np.linalg.norm(self.arr() - t.arr())
+
+    def rot(
+        self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)
+    ) -> None:
+        ox, oy = origin
+
+        qx = ox + math.cos(angle) * (self.x - ox) - math.sin(angle) * (self.y - oy)
+        qy = oy + math.sin(angle) * (self.x - ox) + math.cos(angle) * (self.y - oy)
+
+        self.x = qx
+        self.y = qy
 
     def translate(self, x: float, y: float) -> None:
         self.x += x
@@ -98,16 +94,18 @@ class BoundingBox:
     def __init__(self, x: float, y: float, w: float, h: float):
         self.x = x
         self.y = y
-        self.w = w
-        self.h = h
+        self.x2 = w
+        self.y2 = h
+        self.w = math.dist([self.x], [self.x2])
+        self.h = math.dist([self.y], [self.y2])
 
     def __repr__(self) -> str:
-        return f"BB(x={self.x}, y={self.y}, w={self.w}, h={self.h})"
+        return f"BB(x={self.x}, y={self.y}, x2={self.x2}, y2={self.y2}, w={self.w}, h={self.h})"
 
     def __inside(self, point: "TimedPosition") -> bool:
         return (
-            self.x <= point.x <= self.x + self.w
-            and self.y <= point.y <= self.y + self.h
+            self.x <= point.x <= self.x + self.x2
+            and self.y <= point.y <= self.y + self.y2
         )
 
     def inside(
@@ -139,14 +137,77 @@ class BoundingBox:
             return points_inside > points_outside
 
     def center(self) -> typing.Tuple[float, float]:
-        center_x = ((self.w - self.x) / 2.0) + self.x
-        center_y = ((self.h - self.y) / 2.0) + self.y
+        center_x = ((self.x2) / 2.0) + self.x
+        center_y = ((self.y2) / 2.0) + self.y
         return center_x, center_y
+
+    def subdiv(self, xpieces, ypieces) -> typing.List["BoundingBox"]:
+        bbs = []
+        for _x in range(xpieces):
+            for _y in range(ypieces):
+                xoff = (_x * self.x2 / xpieces) + self.x
+                yoff = (_y * self.y2 / ypieces) + self.y
+                bb = BoundingBox(xoff, yoff, self.x2 / xpieces, self.y2 / ypieces)
+                bbs.append(bb)
+
+        return bbs
+
+
+class Spiral:
+    def __init__(self):
+        self.theta = 0
+        self.theta_incr = 0.02
+        self.max_theta = 255
+        self.r = 50
+        self.xoffset = 0
+        self.xoffset_incr = 0.55
+        self.maxx = 1888
+
+    def reset(self):
+        self.theta = 0
+        self.xoffset = 0
+
+    def custom(self, pp):
+        while self.theta < self.max_theta:
+            y = self.r * math.cos(self.theta) * 2
+            x = self.r * math.sin(self.theta) + self.xoffset
+            pp.add(x, y, 0)
+            self.theta += self.theta_incr
+            self.xoffset += self.xoffset_incr
+            if x >= self.maxx:
+                break
+
+        return pp
+
+    def get_plain(self, pp):
+        self.theta = 0
+        self.theta_incr = 0.02
+        self.max_theta = 255
+        self.r = 50
+        self.xoffset = 0
+        self.xoffset_incr = 0.15
+        self.maxx = 1888
+
+        return self.custom(pp)
 
 
 class Path:
-    def __init__(self, vertices: typing.Optional[list] = None, layer: str = "default"):
-        self.layer = layer
+    def __init__(
+        self,
+        vertices: typing.Optional[list] = None,
+        layer: typing.Optional[str] = None,
+        line_type: typing.Optional[int] = None,
+        pen_velocity: typing.Optional[int] = None,
+        pen_force: typing.Optional[int] = None,
+        pen_select: typing.Optional[int] = None,
+        is_polygon: typing.Optional[bool] = False,
+    ):
+        self._layer = layer
+        self._line_type = line_type
+        self._pen_velocity = pen_velocity
+        self._pen_force = pen_force
+        self._pen_select = pen_select
+        self._is_polygon = is_polygon
         if vertices:
             self.vertices = list(vertices)
         else:
@@ -156,8 +217,74 @@ class Path:
     def hash(self) -> str:
         return hashlib.md5(str(self.vertices).encode("utf-8")).hexdigest()
 
+    @property
+    def line_type(self):
+        """
+        only linetype of 1 and above allowed
+        all other linetypes don't render well
+        """
+        if self._line_type is None:
+            return 1
+        return max(self._line_type, 1)
+
+    @line_type.setter
+    def line_type(self, line_type):
+        if line_type <= 0:
+            self._line_type = 1
+        self._line_type = line_type
+
+    @property
+    def layer(self):
+        return self._layer
+
+    @layer.setter
+    def layer(self, layer):
+        self._layer = layer
+
+    @property
+    def pen_force(self):
+        return self._pen_force
+
+    @pen_force.setter
+    def pen_force(self, pen_force):
+        self._pen_force = pen_force
+
+    @property
+    def pen_select(self):
+        return self._pen_select
+
+    @pen_select.setter
+    def pen_select(self, pen_select):
+        self._pen_select = pen_select
+
+    @property
+    def velocity(self):
+        return self._pen_velocity
+
+    @velocity.setter
+    def velocity(self, pen_velocity):
+        self._pen_velocity = pen_velocity
+
+    @property
+    def is_polygon(self):
+        return self._is_polygon
+
+    @is_polygon.setter
+    def is_polygon(self, is_polygon):
+        self._is_polygon = is_polygon
+
     def add(self, x: float, y: float, timestamp: int = 0) -> None:
         self.vertices.append(TimedPosition(x, y, timestamp))
+
+    def arr(self):
+        data = np.random.randint(0, 1000, size=(len(self), 2))
+
+        idx = 0
+        for p in self.vertices:
+            data[idx] = p.arr()
+            idx += 1
+
+        return data
 
     def clear(self) -> None:
         self.vertices.clear()
@@ -171,7 +298,9 @@ class Path:
     def reversed(self) -> "Path":
         c = copy.deepcopy(self.vertices)
         c.reverse()
-        return Path(c, layer=self.layer)
+        return Path(
+            c, layer=self.layer, line_type=self.line_type, pen_velocity=self.velocity
+        )
 
     def start_pos(self) -> "TimedPosition":
         if len(self.vertices) == 0:
@@ -191,6 +320,13 @@ class Path:
         maxy = max(self.vertices, key=lambda pos: pos.y).y
         b = BoundingBox(minx, miny, maxx, maxy)
         return b
+
+    def aspect_ratio(self):
+        _bb = self.bb()
+        w = _bb.w
+        if _bb.w == 0.0:
+            w = 0.001
+        return _bb.h / w
 
     @property
     def distance(self) -> float:
@@ -220,6 +356,32 @@ class Path:
     def scale(self, x: float, y: float) -> None:
         for p in self.vertices:
             p.scale(x, y)
+
+    def rot(
+        self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)
+    ) -> None:
+        for p in self.vertices:
+            p.rot(angle, origin)
+
+    def move_to_origin(self):
+        """
+        moves path to zero origin
+        after calling this the bb of the path has its x,y at 0,0
+        """
+
+        _bb = self.bb()
+        if _bb.x < 0:
+            self.translate(abs(_bb.x), 0.0)
+        else:
+            self.translate(-abs(_bb.x), 0.0)
+
+        if _bb.y < 0:
+            self.translate(0.0, abs(_bb.y))
+        else:
+            self.translate(0.0, -abs(_bb.y))
+
+    def fit(self, bb: BoundingBox) -> None:
+        pass
 
     def morph(
         self,
@@ -287,18 +449,6 @@ class Path:
 
         return path
 
-    def Rotate2D(self, pts, cnt, ang=pi / 4):
-        """pts = {} Rotates points(nx2) about center cnt(2) by angle ang(1) in radian"""
-        return dot(pts - cnt, ar([[cos(ang), sin(ang)], [-sin(ang), cos(ang)]])) + cnt
-
-    def rotate(self, angle: float) -> None:
-        """works very wonkily"""
-        pcs = []
-        for point in self.vertices:
-            nparr = point.arr()
-            pcs.append(nparr)
-        # v = self.Rotate2D(ar(pcs), ar([0, 0]), angle)
-
     def intersect(self, newpath: "Path") -> typing.Tuple[bool, float, float]:
         for p1 in range(len(newpath) - 1):
             for p2 in range(len(self) - 1):
@@ -318,7 +468,10 @@ class Path:
                 ) and ((diffLBx * line1Start.y - diffLBy * line1Start.x) < compareB) ^ (
                     (diffLBx * line1End.y - diffLBy * line1End.x) < compareB
                 ):
-                    lDetDivInv = 1 / ((diffLAx * diffLBy) - (diffLAy * diffLBx))
+                    ok = (diffLAx * diffLBy) - (diffLAy * diffLBx)
+                    if ok == 0:
+                        ok = 0.01
+                    lDetDivInv = 1 / ok
                     intersectionx = (
                         -((diffLAx * compareB) - (compareA * diffLBx)) * lDetDivInv
                     )
@@ -345,7 +498,7 @@ class Path:
             y_interp = self.mix(pthis.y, pnew.y, perc)
             time_interp = self.mix(pthis.timestamp, pnew.timestamp, perc)
 
-            path.add(x_interp, y_interp, time_interp)
+            path.add(x_interp, y_interp, int(time_interp))
 
         return path
 
@@ -404,13 +557,16 @@ class Path:
 
         return angles
 
-    def length(self, v):
+    @staticmethod
+    def length(v):
         return np.sqrt(v[0] ** 2 + v[1] ** 2)
 
-    def dot_product(self, v, w):
+    @staticmethod
+    def dot_product(v, w):
         return v[0] * w[0] + v[1] * w[1]
 
-    def determinant(self, v, w):
+    @staticmethod
+    def determinant(v, w):
         return v[0] * w[1] - v[1] * w[0]
 
     def inner_angle(self, v, w):
@@ -420,15 +576,20 @@ class Path:
             return 0.0
 
         cosx = dp / ll
+
+        if cosx < -1.0:
+            cosx = -1.0
+        if cosx > 1.0:
+            cosx = 1.0
+
         rad = np.arccos(cosx)  # in radians
         return rad * 180 / np.pi  # returns degrees
 
     def angle_clockwise(self, A, B):
         inner = self.inner_angle(A, B)
         det = self.determinant(A, B)
-        if (
-            det < 0
-        ):  # this is a property of the det. If the det < 0 then B is clockwise of A
+        if det < 0:
+            # this is a property of the det. If the det < 0 then B is clockwise of A
             return inner
         else:  # if the det > 0 then A is immediately clockwise of B
             return 360 - inner
@@ -505,9 +666,7 @@ class Path:
         return entropy
 
     def empty(self) -> bool:
-        if len(self.vertices) == 0:
-            return True
-        return False
+        return len(self.vertices) == 0
 
     def clean(self) -> None:
         """
@@ -552,22 +711,30 @@ class Path:
         result = 1 - spatial.distance.cosine(self.vertices, _path.vertices)
         return result[1]
 
+    def centeroid(self):
+        arr = self.arr()
+        length = arr.shape[0]
+        sum_x = np.sum(arr[:, 0])
+        sum_y = np.sum(arr[:, 1])
+        return sum_x / length, sum_y / length
+
     def __repr__(self):
         rep = (
             f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} "
-            f"shannchan: {self.shannon_direction_changes} layer: {self.layer}"
+            f"shannchan: {self.shannon_direction_changes} layer: {self.layer} "
+            f"type: {self.line_type} velocity: {self.velocity}"
         )
         return rep
 
     def __len__(self) -> int:
         return len(self.vertices)
 
-    def __iter__(self):
+    def __iter__(self) -> typing.Iterator["Path"]:
         for v in self.vertices:
             yield v
 
     def __getitem__(self, item):
-        return self.vertices[item]
+        return self.vertices[item].copy()
 
 
 class PathCollection:
@@ -583,11 +750,23 @@ class PathCollection:
             utc_timestamp = datetime.datetime.timestamp(now)
             self._timestamp = utc_timestamp
 
-    def add(self, path: Path) -> None:
-        if path.empty():
-            return
+    def add(self, path: typing.Union[BoundingBox, Path]) -> None:
+        if isinstance(path, Path):
+            if path.empty():
+                return
+            self.__paths.append(path)
+        if isinstance(path, BoundingBox):
+            p = Path()
+            p.add(path.x, path.y)
+            p.add(path.x, path.y2)
+            p.add(path.x2, path.y2)
+            p.add(path.x2, path.y)
+            p.add(path.x, path.y)
+            self.__paths.append(p)
 
-        self.__paths.append(path)
+    def extend(self, pc: "PathCollection") -> None:
+        new_paths = self.__paths + pc.get_all()
+        self.__paths = new_paths
 
     def clean(self) -> None:
         """
@@ -596,7 +775,12 @@ class PathCollection:
         for p in self.__paths:
             p.clean()
 
+        len_before = len(self)
         self.__paths = [path for path in self.__paths if len(path) > 2]
+
+        log.good(
+            f"PathCollection::clean: reduced path count from {len_before} to {len(self)}"
+        )
 
     def limit(self) -> None:
         for p in self.__paths:
@@ -610,32 +794,37 @@ class PathCollection:
             return True
         return False
 
+    def copy(self) -> "PathCollection":
+        p = PathCollection()
+        p.__paths.extend(copy.deepcopy(self.__paths))
+        return p
+
     def get_all(self) -> typing.List[Path]:
         return self.__paths
 
     def random(self) -> Path:
         return self.__getitem__(random.randint(0, self.__len__() - 1))
 
-    def sort(self, pathsorter: "filter.Sorter") -> None:
-        if isinstance(pathsorter, filter.Sorter):
+    def sort(self, pathsorter: "cursor_filter.Sorter") -> None:
+        if isinstance(pathsorter, cursor_filter.Sorter):
             pathsorter.sort(self.__paths)
         else:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
-    def sorted(self, pathsorter: "filter.Sorter") -> typing.List[Path]:
-        if isinstance(pathsorter, filter.Sorter):
+    def sorted(self, pathsorter: "cursor_filter.Sorter") -> typing.List[Path]:
+        if isinstance(pathsorter, cursor_filter.Sorter):
             return pathsorter.sorted(self.__paths)
         else:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
-    def filter(self, pathfilter: "filter.Filter") -> None:
-        if isinstance(pathfilter, filter.Filter):
+    def filter(self, pathfilter: "cursor_filter.Filter") -> None:
+        if isinstance(pathfilter, cursor_filter.Filter):
             pathfilter.filter(self.__paths)
         else:
             raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
 
-    def filtered(self, pathfilter: "filter.Filter") -> "PathCollection":
-        if isinstance(pathfilter, filter.Filter):
+    def filtered(self, pathfilter: "cursor_filter.Filter") -> "PathCollection":
+        if isinstance(pathfilter, cursor_filter.Filter):
 
             pc = PathCollection()
             pc.__paths = pathfilter.filtered(self.__paths)
@@ -700,9 +889,33 @@ class PathCollection:
     def timestamp(self) -> float:
         return self._timestamp
 
+    def get_all_line_types(self) -> typing.List[int]:
+        types = []
+        for p in self:
+            if p.line_type not in types:
+                types.append(p.line_type)
+
+        return types
+
+    def get_line_types(self):
+        types = {}
+        for type in self.get_all_line_types():
+            types[type] = []
+
+        for p in self:
+            types[p.line_type].append(p)
+
+        typed_pathcollections = {}
+        for key in types:
+            pc = PathCollection()
+            pc.__paths.extend(types[key])
+            typed_pathcollections[key] = pc
+
+        return typed_pathcollections
+
     def layer_names(self) -> typing.List[str]:
         layers = []
-        for p in self.__paths:
+        for p in self:
             if p.layer not in layers:
                 layers.append(p.layer)
 
@@ -713,7 +926,7 @@ class PathCollection:
         for layer in self.layer_names():
             layers[layer] = []
 
-        for p in self.__paths:
+        for p in self:
             layers[p.layer].append(p)
 
         layered_pcs = {}
@@ -727,8 +940,8 @@ class PathCollection:
     def bb(self) -> BoundingBox:
         mi = self.min()
         ma = self.max()
-        bb = BoundingBox(mi[0], mi[1], ma[0], ma[1])
-        if bb.x is np.nan or bb.y is np.nan or bb.w is np.nan or bb.h is np.nan:
+        bb = BoundingBox(mi[0], mi[1], ma[0] - mi[0], ma[1] - mi[1])
+        if bb.x is np.nan or bb.y is np.nan or bb.x2 is np.nan or bb.y2 is np.nan:
             log.fail("SHIT")
         return bb
 
@@ -752,6 +965,30 @@ class PathCollection:
         for p in self.__paths:
             p.scale(x, y)
 
+    def rot(self, delta: float) -> None:
+        for p in self.__paths:
+            p.rot(delta)
+
+    def log(self, str) -> None:
+        log.good(f"{self.__class__.__name__}: {str}")
+
+    def move_to_origin(self):
+        """
+        moves pathcollection to zero origin
+        after calling this the bb of the pathcollection has its x,y at 0,0
+        """
+
+        _bb = self.bb()
+        if _bb.x < 0:
+            self.translate(abs(_bb.x), 0.0)
+        else:
+            self.translate(-abs(_bb.x), 0.0)
+
+        if _bb.y < 0:
+            self.translate(0.0, abs(_bb.y))
+        else:
+            self.translate(0.0, -abs(_bb.y))
+
     def fit(
         self,
         size=tuple[int, int],
@@ -759,30 +996,12 @@ class PathCollection:
         padding_mm: int = None,
         padding_units: int = None,
         padding_percent: int = None,
-        center_point: tuple[int, int] = None,
+        output_bounds: tuple[float, float, float, float] = None,
         cutoff_mm=None,
     ) -> None:
         # move into positive area
-        _bb = self.bb()
-        if _bb.x < 0:
-            log.good(f"{self.__class__.__name__}: fit: translate by {_bb.x:.2f} {0.0}")
-            self.translate(abs(_bb.x), 0.0)
-        else:
-            log.good(
-                f"{self.__class__.__name__}: fit: translate by {-abs(_bb.x):.2f} {0.0}"
-            )
-            self.translate(-abs(_bb.x), 0.0)
+        self.move_to_origin()
 
-        if _bb.y < 0:
-            log.good(
-                f"{self.__class__.__name__}: fit: translate by {0.0} {abs(_bb.y):.2f}"
-            )
-            self.translate(0.0, abs(_bb.y))
-        else:
-            log.good(
-                f"{self.__class__.__name__}: fit: translate by {0.0} {-abs(_bb.y):.2f}"
-            )
-            self.translate(0.0, -abs(_bb.y))
         _bb = self.bb()
 
         width = size[0]
@@ -811,33 +1030,41 @@ class PathCollection:
         # scaling
         _bb = self.bb()
         x1 = width - padding_x * 2.0
-        x2 = _bb.w - _bb.x
+        x2 = _bb.x2 - _bb.x
         if x2 == 0.0:
             x2 = 1
 
         y1 = height - padding_y * 2.0
-        y2 = _bb.h - _bb.y
+        y2 = _bb.y2 - _bb.y
         if y2 == 0.0:
             y2 = 1
 
         xfac = x1 / x2
         yfac = y1 / y2
 
-        log.good(f"{self.__class__.__name__}: fit: scaled by {xfac:.2f} {yfac:.2f}")
+        log.info(f"{self.__class__.__name__}: fit: scaled by {xfac:.2f} {yfac:.2f}")
 
         self.scale(xfac, yfac)
 
         # centering
-
         _bb = self.bb()
-        center = _bb.center()
-        if center_point is None:
-            center_dims = width / 2.0, height / 2.0
-        else:
-            center_dims = center_point
-        diff = center_dims[0] - center[0], center_dims[1] - center[1]
+        paths_center = _bb.center()
 
-        log.good(
+        output_bounds_center = width / 2.0, height / 2.0
+
+        if output_bounds:
+            w = np.linalg.norm(output_bounds[1] - output_bounds[0])
+            h = np.linalg.norm(output_bounds[3] - output_bounds[2])
+            output_bounds_center = BoundingBox(
+                output_bounds[0], output_bounds[2], w, h,
+            ).center()
+
+        diff = (
+            output_bounds_center[0] - paths_center[0],
+            output_bounds_center[1] - paths_center[1],
+        )
+
+        log.info(
             f"{self.__class__.__name__}: fit: translated by {diff[0]:.2f} {diff[1]:.2f}"
         )
 
@@ -854,9 +1081,9 @@ class PathCollection:
 
             cutoff_bb = self.bb()
             cutoff_bb.x -= cuttoff_margin_diff_x
-            cutoff_bb.w += cuttoff_margin_diff_x
+            cutoff_bb.x2 += cuttoff_margin_diff_x
             cutoff_bb.y -= cuttoff_margin_diff_y
-            cutoff_bb.h += cuttoff_margin_diff_y
+            cutoff_bb.y2 += cuttoff_margin_diff_y
 
             self.__paths = [x for x in self.__paths if cutoff_bb.inside(x)]
 
@@ -900,8 +1127,8 @@ class PathCollection:
         def calc_bb(x: int, y: int) -> BoundingBox:
             big_bb = self.bb()
 
-            new_width = big_bb.w / xq
-            new_height = big_bb.h / yq
+            new_width = big_bb.x2 / xq
+            new_height = big_bb.y2 / yq
 
             _x = x * new_width
             _y = y * new_height
@@ -957,7 +1184,7 @@ class PathCollection:
         ss = dict(sorted(best.items(), key=lambda item: item[1]))
 
         elapsed = time.time() - start_benchmark
-        log.good(
+        log.info(
             f"reorder_quadrants with x={xq} y={yq} took {round(elapsed * 1000)}ms."
         )
 

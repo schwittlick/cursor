@@ -1,3 +1,7 @@
+from cursor.path import Path
+from cursor.path import PathCollection
+from cursor.path import TimedPosition
+
 import pathlib
 import json
 import base64
@@ -9,10 +13,6 @@ import pytz
 
 class MyJsonEncoder(json.JSONEncoder):
     def default(self, o):
-        from cursor.path import Path
-        from cursor.path import PathCollection
-        from cursor.path import TimedPosition
-
         if isinstance(o, PathCollection):
             return {
                 "paths": o.get_all(),
@@ -91,13 +91,13 @@ class JsonCompressor:
 
 class DateHandler:
     @staticmethod
-    def utc_timestamp():
+    def utc_timestamp() -> float:
         now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
         utc_timestamp = datetime.datetime.timestamp(now)
         return utc_timestamp
 
     @staticmethod
-    def get_timestamp_from_utc(ts):
+    def get_timestamp_from_utc(ts: float) -> str:
         dt = datetime.datetime.fromtimestamp(ts)
         return dt.strftime("%d/%m/%y %H:%M:%S.%f")
 
@@ -114,6 +114,9 @@ class DataDirHandler:
     def jpg(self, subfolder) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "jpg"
 
+    def video(self, subfolder) -> pathlib.Path:
+        return self.data_dir / "experiments" / subfolder / "video"
+
     def svg(self, subfolder) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "svg"
 
@@ -121,7 +124,10 @@ class DataDirHandler:
         return self.data_dir / "experiments" / subfolder / "hpgl"
 
     def images(self) -> pathlib.Path:
-        return self.data_dir / "jpgs"
+        return self.data_dir / "jpg"
+
+    def videos(self) -> pathlib.Path:
+        return self.data_dir / "video"
 
     def gcodes(self) -> pathlib.Path:
         return self.data_dir / "gcode"
@@ -139,7 +145,10 @@ class DataDirHandler:
         return self.data_dir / "recordings"
 
     def test_images(self) -> pathlib.Path:
-        return self.test_data_dir / "jpgs"
+        return self.test_data_dir / "jpg"
+
+    def test_videos(self) -> pathlib.Path:
+        return self.test_data_dir / "video"
 
     def test_gcodes(self) -> pathlib.Path:
         return self.test_data_dir / "gcode"
