@@ -1,6 +1,5 @@
 from cursor import device
 from cursor import path
-from cursor import misc
 
 import composition59
 
@@ -47,7 +46,7 @@ if __name__ == "__main__":
         raender.vertices.append(p)
 
     pc_final = path.PathCollection()
-    #pc_final.add(raender)
+    # pc_final.add(raender)
 
     for _bb in bbs:
         pc_final.add(_bb)
