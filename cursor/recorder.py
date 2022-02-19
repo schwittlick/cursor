@@ -15,6 +15,7 @@ log = wasabi.Printer()
 
 
 class Recorder:
+    _timer = True
     _mouse_recordings = path.PathCollection()
     _keyboard_recodings = []
     _current_line = path.Path()
@@ -43,11 +44,15 @@ class Recorder:
 
         log.good("Started cursor recorder")
 
+    def stop(self):
+        self._timer.cancel()
+
     def __save_async(self, f_stop):
         self.save()
         if not f_stop.is_set():
             # every 10s
-            threading.Timer(10, self.__save_async, [f_stop]).start()
+            self._timer = threading.Timer(10, self.__save_async, [f_stop])
+            self._timer.start()
 
     def on_move(self, x, y):
         _x = x / self._resolution[0]

@@ -15,7 +15,7 @@ def test_experiments_path():
 
 def test_images_path():
     test_recordings_dir = DataDirHandler().images()
-    assert test_recordings_dir.as_posix().endswith("cursor/data/jpgs")
+    assert test_recordings_dir.as_posix().endswith("cursor/data/jpg")
 
 
 def test_gcode_path():
@@ -35,7 +35,7 @@ def test_recordings_path():
 
 def test_test_images_path():
     test_recordings_dir = DataDirHandler().test_images()
-    assert test_recordings_dir.as_posix().endswith("cursor/tests/data/jpgs")
+    assert test_recordings_dir.as_posix().endswith("cursor/tests/data/jpg")
 
 
 def test_test_gcode_path():
