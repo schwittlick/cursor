@@ -40,7 +40,9 @@ class TimedPosition:
     def distance(self, t: "TimedPosition"):
         return np.linalg.norm(self.arr() - t.arr())
 
-    def rot(self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)) -> None:
+    def rot(
+        self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)
+    ) -> None:
         ox, oy = origin
 
         qx = ox + math.cos(angle) * (self.x - ox) - math.sin(angle) * (self.y - oy)
@@ -149,6 +151,7 @@ class BoundingBox:
                 bbs.append(bb)
 
         return bbs
+
 
 class Spiral:
     def __init__(self):
@@ -354,7 +357,9 @@ class Path:
         for p in self.vertices:
             p.scale(x, y)
 
-    def rot(self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)) -> None:
+    def rot(
+        self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)
+    ) -> None:
         for p in self.vertices:
             p.rot(angle, origin)
 
@@ -724,7 +729,7 @@ class Path:
     def __len__(self) -> int:
         return len(self.vertices)
 
-    def __iter__(self) -> typing.Iterator['Path']:
+    def __iter__(self) -> typing.Iterator["Path"]:
         for v in self.vertices:
             yield v
 
