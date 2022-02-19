@@ -745,7 +745,7 @@ class PathCollection:
             utc_timestamp = datetime.datetime.timestamp(now)
             self._timestamp = utc_timestamp
 
-    def add(self,  path: typing.Union[BoundingBox, Path]) -> None:
+    def add(self, path: typing.Union[BoundingBox, Path]) -> None:
         if isinstance(path, Path):
             if path.empty():
                 return

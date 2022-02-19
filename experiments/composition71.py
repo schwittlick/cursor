@@ -22,8 +22,7 @@ if __name__ == "__main__":
     as_filter = filter.AspectRatioFilter(0.60, 1.40)
     all_paths.filter(as_filter)
 
-
-    #all_paths.clean()
+    # all_paths.clean()
 
     sorter = filter.Sorter(param=filter.Sorter.SHANNON_DIRECTION_CHANGES, reverse=True)
     all_paths.sort(sorter)

@@ -926,7 +926,10 @@ if __name__ == "__main__":
                 shutil.copyfile(v2["file"], out)
                 v2["file"] = f"{k1}_{k2}.jpg"
             else:
-                shutil.copyfile("C:\\Users\\Marcel Schwittlick\\Desktop\\ROHDE-SCHWARZ-XY-Schreiber-Recorder-ZSK-2.jpg", out)
+                shutil.copyfile(
+                    "C:\\Users\\Marcel Schwittlick\\Desktop\\ROHDE-SCHWARZ-XY-Schreiber-Recorder-ZSK-2.jpg",
+                    out,
+                )
                 v2["file"] = f"{k1}_{k2}.jpg"
 
     with open("z:\\144\\upward_spiral.json", "w") as file:
