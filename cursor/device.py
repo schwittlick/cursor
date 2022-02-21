@@ -313,7 +313,10 @@ class Exporter:
             for layer, pc in separate_layers.items():
                 sizename = PaperSizeName.names[self.cfg.dimension]
                 machinename = PlotterName.names[self.cfg.type]
-                fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}_{layer}_{hashlib.sha256(ms.encode('utf-8')).hexdigest()}"
+                fname = (
+                    f"{self.name}_{self.suffix}_{sizename}_{machinename}_{layer}_"
+                    f"{hashlib.sha256(ms.encode('utf-8')).hexdigest()}"
+                )
 
                 jpeg_folder = data.DataDirHandler().jpg(self.name)
                 jpeg_renderer = renderer.JpegRenderer(jpeg_folder)
@@ -324,7 +327,10 @@ class Exporter:
             source_folder = data.DataDirHandler().source(self.name)
             sizename = PaperSizeName.names[self.cfg.dimension]
             machinename = PlotterName.names[self.cfg.type]
-            fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}_{hashlib.sha256(ms.encode('utf-8')).hexdigest()}.py"
+            fname = (
+                f"{self.name}_{self.suffix}_{sizename}_{machinename}_"
+                f"{hashlib.sha256(ms.encode('utf-8')).hexdigest()}.py"
+            )
             import pathlib
 
             pathlib.Path(source_folder).mkdir(parents=True, exist_ok=True)
