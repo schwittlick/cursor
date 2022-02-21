@@ -3,6 +3,8 @@ from cursor import renderer
 
 from enum import Enum
 import wasabi
+import inspect
+import hashlib
 
 log = wasabi.Printer()
 
@@ -289,7 +291,7 @@ class Exporter:
     def linetype_mapping(self, m: dict) -> None:
         self.__linetype_mapping = m
 
-    def run(self, jpg: bool = False) -> None:
+    def run(self, jpg: bool = False, source: bool = False) -> None:
         if self.cfg is None or self.paths is None or self.name is None:
             log.fail("Config, Name or Paths is None. Not exporting anything")
             return
@@ -301,17 +303,33 @@ class Exporter:
             cutoff_mm=self.cfg.cutoff,
         )
 
+        stack = inspect.stack()
+        frame = stack[2]
+        module = inspect.getmodule(frame[0])
+        ms = inspect.getsource(module)
+
         if jpg:
             separate_layers = self.paths.get_layers()
             for layer, pc in separate_layers.items():
                 sizename = PaperSizeName.names[self.cfg.dimension]
                 machinename = PlotterName.names[self.cfg.type]
-                fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}"
+                fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}_{layer}_{hashlib.sha256(ms.encode('utf-8')).hexdigest()}"
 
                 jpeg_folder = data.DataDirHandler().jpg(self.name)
                 jpeg_renderer = renderer.JpegRenderer(jpeg_folder)
                 jpeg_renderer.render(pc, scale=4.0)
-                jpeg_renderer.save(f"{fname}_{layer}")
+                jpeg_renderer.save(f"{fname}")
+
+        if source:
+            source_folder = data.DataDirHandler().source(self.name)
+            sizename = PaperSizeName.names[self.cfg.dimension]
+            machinename = PlotterName.names[self.cfg.type]
+            fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}_{hashlib.sha256(ms.encode('utf-8')).hexdigest()}.py"
+            import pathlib
+            pathlib.Path(source_folder).mkdir(parents=True, exist_ok=True)
+            log.good(f"Saved source to {source_folder / fname}")
+            with open(source_folder / fname, "w") as file:
+                file.write(ms)
 
         self.paths.fit(
             Paper.sizes[self.cfg.dimension],
@@ -323,7 +341,7 @@ class Exporter:
 
         sizename = PaperSizeName.names[self.cfg.dimension]
         machinename = PlotterName.names[self.cfg.type]
-        fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}"
+        fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}_{hashlib.sha256(ms.encode('utf-8')).hexdigest()}"
         format = ExportFormatMappings.maps[self.cfg.type]
         if self.linetype_mapping and format is ExportFormat.HPGL:
             hpgl_folder = data.DataDirHandler().hpgl(self.name)
@@ -331,7 +349,7 @@ class Exporter:
                 hpgl_folder, line_type_mapping=self.linetype_mapping
             )
             hpgl_renderer.render(self.paths)
-            hpgl_renderer.save(f"{fname}_all")
+            hpgl_renderer.save(f"{fname}")
         if self.layer_pen_mapping is not None:
             if format is ExportFormat.HPGL:
                 hpgl_folder = data.DataDirHandler().hpgl(self.name)
@@ -340,7 +358,7 @@ class Exporter:
                     hpgl_folder, layer_pen_mapping=self.layer_pen_mapping
                 )
                 hpgl_renderer.render(self.paths)
-                hpgl_renderer.save(f"{fname}_all")
+                hpgl_renderer.save(f"{fname}")
         else:
             separate_layers = self.paths.get_layers()
             for layer, pc in separate_layers.items():
@@ -367,7 +385,7 @@ class Exporter:
                             gcode_folder, feedrate_xy=self.gcode_speed, z_down=4.5
                         )
                     gcode_renderer.render(pc)
-                    gcode_renderer.save(f"{fname}_{layer}")
+                    gcode_renderer.save(f"{layer}_{fname}")
 
 
 class SimpleExportWrapper:
@@ -402,4 +420,4 @@ class SimpleExportWrapper:
         exp.gcode_speed = gcode_speed
         exp.layer_pen_mapping = hpgl_pen_layer_mapping
         exp.linetype_mapping = hpgl_linetype_mapping
-        exp.run(True)
+        exp.run(True, True)

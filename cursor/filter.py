@@ -1,3 +1,5 @@
+import sys
+
 import wasabi
 import time
 import copy
@@ -238,7 +240,7 @@ class DistanceFilter(Filter):
 
 
 class AspectRatioFilter(Filter):
-    def __init__(self, min_as, max_as):
+    def __init__(self, min_as, max_as=sys.maxsize):
         self.min_as = min_as
         self.max_as = max_as
 
