@@ -326,6 +326,7 @@ class Exporter:
             machinename = PlotterName.names[self.cfg.type]
             fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}_{hashlib.sha256(ms.encode('utf-8')).hexdigest()}.py"
             import pathlib
+
             pathlib.Path(source_folder).mkdir(parents=True, exist_ok=True)
             log.good(f"Saved source to {source_folder / fname}")
             with open(source_folder / fname, "w") as file:
