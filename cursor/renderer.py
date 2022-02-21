@@ -359,8 +359,8 @@ class JpegRenderer:
         abs_scaled_bb = (
             abs(bb.x * scale),
             abs(bb.y * scale),
-            abs(bb.x2 * scale),
-            abs(bb.y2 * scale),
+            abs(bb.w * scale),
+            abs(bb.h * scale),
         )
 
         image_width = int(abs_scaled_bb[0] + abs_scaled_bb[2]) + int(bb.x * scale)
