@@ -4,6 +4,7 @@ from cursor import renderer
 
 import time
 import numpy as np
+import inspect
 
 
 class Timer:
@@ -114,3 +115,7 @@ def save_wrapper_jpeg(pc, projname, fname, scale=4.0, thickness=3):
 
     jpeg_renderer.render(pc, scale=scale, thickness=thickness)
     jpeg_renderer.save(fname)
+
+
+def current_source(frame):
+    return inspect.getsource(inspect.getmodule(frame))

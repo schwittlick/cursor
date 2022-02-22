@@ -123,6 +123,9 @@ class DataDirHandler:
     def hpgl(self, subfolder) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "hpgl"
 
+    def source(self, subfolder) -> pathlib.Path:
+        return self.data_dir / "experiments" / subfolder / "source"
+
     def images(self) -> pathlib.Path:
         return self.data_dir / "jpg"
 

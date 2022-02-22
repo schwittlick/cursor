@@ -104,8 +104,8 @@ class BoundingBox:
 
     def __inside(self, point: "TimedPosition") -> bool:
         return (
-            self.x <= point.x <= self.x + self.x2
-            and self.y <= point.y <= self.y + self.y2
+            self.x <= point.x <= self.x + self.w
+            and self.y <= point.y <= self.y + self.w
         )
 
     def inside(
@@ -137,8 +137,8 @@ class BoundingBox:
             return points_inside > points_outside
 
     def center(self) -> typing.Tuple[float, float]:
-        center_x = ((self.x2) / 2.0) + self.x
-        center_y = ((self.y2) / 2.0) + self.y
+        center_x = ((self.w) / 2.0) + self.x
+        center_y = ((self.h) / 2.0) + self.y
         return center_x, center_y
 
     def subdiv(self, xpieces, ypieces) -> typing.List["BoundingBox"]:
@@ -558,18 +558,18 @@ class Path:
         return angles
 
     @staticmethod
-    def length(v):
+    def length(v: tuple[float, float]):
         return np.sqrt(v[0] ** 2 + v[1] ** 2)
 
     @staticmethod
-    def dot_product(v, w):
+    def dot_product(v: tuple[float, float], w: tuple[float, float]):
         return v[0] * w[0] + v[1] * w[1]
 
     @staticmethod
-    def determinant(v, w):
+    def determinant(v: tuple[float, float], w: tuple[float, float]):
         return v[0] * w[1] - v[1] * w[0]
 
-    def inner_angle(self, v, w):
+    def inner_angle(self, v: tuple[float, float], w: tuple[float, float]):
         dp = self.dot_product(v, w)
         ll = self.length(v) * self.length(w)
         if ll == 0.0:
@@ -583,7 +583,8 @@ class Path:
             cosx = 1.0
 
         rad = np.arccos(cosx)  # in radians
-        return rad * 180 / np.pi  # returns degrees
+        deg1 = math.degrees(rad)
+        return deg1  # returns degrees
 
     def angle_clockwise(self, A, B):
         inner = self.inner_angle(A, B)
@@ -722,7 +723,8 @@ class Path:
         rep = (
             f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} "
             f"shannchan: {self.shannon_direction_changes} layer: {self.layer} "
-            f"type: {self.line_type} velocity: {self.velocity}"
+            f"type: {self.line_type} velocity: {self.velocity} "
+            f"bb: {self.bb()}"
         )
         return rep
 
@@ -882,7 +884,7 @@ class PathCollection:
             return _pc
 
         if len(self.__paths) < item + 1:
-            raise IndexError(f"Index too high. Maximum is {len(self.__paths)}")
+            raise IndexError(f"Index {item} too high. Maximum is {len(self.__paths)}")
 
         return self.__paths[item]
 
@@ -940,7 +942,7 @@ class PathCollection:
     def bb(self) -> BoundingBox:
         mi = self.min()
         ma = self.max()
-        bb = BoundingBox(mi[0], mi[1], ma[0] - mi[0], ma[1] - mi[1])
+        bb = BoundingBox(mi[0], mi[1], ma[0], ma[1])
         if bb.x is np.nan or bb.y is np.nan or bb.x2 is np.nan or bb.y2 is np.nan:
             log.fail("SHIT")
         return bb
@@ -999,8 +1001,11 @@ class PathCollection:
         output_bounds: tuple[float, float, float, float] = None,
         cutoff_mm=None,
     ) -> None:
+        _bb = self.bb()
+
         # move into positive area
-        self.move_to_origin()
+        if _bb.x != 0.0 and _bb.y != 0.0:
+            self.move_to_origin()
 
         _bb = self.bb()
 
@@ -1029,22 +1034,18 @@ class PathCollection:
 
         # scaling
         _bb = self.bb()
-        x1 = width - padding_x * 2.0
-        x2 = _bb.x2 - _bb.x
-        if x2 == 0.0:
-            x2 = 1
 
-        y1 = height - padding_y * 2.0
-        y2 = _bb.y2 - _bb.y
-        if y2 == 0.0:
-            y2 = 1
+        _w = _bb.w
+        if _w == 0.0:
+            _w = 0.001
+        _h = _bb.h
+        if _h == 0.0:
+            _h = 0.001
+        xscale = (width - padding_x * 2.0) / _w
+        yscale = (height - padding_y * 2.0) / _h
 
-        xfac = x1 / x2
-        yfac = y1 / y2
-
-        log.info(f"{self.__class__.__name__}: fit: scaled by {xfac:.2f} {yfac:.2f}")
-
-        self.scale(xfac, yfac)
+        log.info(f"{self.__class__.__name__}: fit: scaled by {xscale:.2f} {yscale:.2f}")
+        self.scale(xscale, yscale)
 
         # centering
         _bb = self.bb()
@@ -1053,10 +1054,8 @@ class PathCollection:
         output_bounds_center = width / 2.0, height / 2.0
 
         if output_bounds:
-            w = np.linalg.norm(output_bounds[1] - output_bounds[0])
-            h = np.linalg.norm(output_bounds[3] - output_bounds[2])
             output_bounds_center = BoundingBox(
-                output_bounds[0], output_bounds[2], w, h,
+                output_bounds[0], output_bounds[2], output_bounds[1], output_bounds[3],
             ).center()
 
         diff = (
