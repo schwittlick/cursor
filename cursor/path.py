@@ -558,18 +558,18 @@ class Path:
         return angles
 
     @staticmethod
-    def length(v):
+    def length(v: tuple[float, float]):
         return np.sqrt(v[0] ** 2 + v[1] ** 2)
 
     @staticmethod
-    def dot_product(v, w):
+    def dot_product(v: tuple[float, float], w: tuple[float, float]):
         return v[0] * w[0] + v[1] * w[1]
 
     @staticmethod
-    def determinant(v, w):
+    def determinant(v: tuple[float, float], w: tuple[float, float]):
         return v[0] * w[1] - v[1] * w[0]
 
-    def inner_angle(self, v, w):
+    def inner_angle(self, v: tuple[float, float], w: tuple[float, float]):
         dp = self.dot_product(v, w)
         ll = self.length(v) * self.length(w)
         if ll == 0.0:
@@ -583,7 +583,8 @@ class Path:
             cosx = 1.0
 
         rad = np.arccos(cosx)  # in radians
-        return rad * 180 / np.pi  # returns degrees
+        deg1 = math.degrees(rad)
+        return deg1  # returns degrees
 
     def angle_clockwise(self, A, B):
         inner = self.inner_angle(A, B)
