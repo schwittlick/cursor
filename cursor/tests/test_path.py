@@ -440,3 +440,17 @@ def disabled_test_similarity():
 
     sim2 = p1.similarity(p3)
     assert sim2 >= 0.9
+
+
+def test_offset():
+    p1 = Path()
+    p1.add(0, 0)
+    p1.add(1, 0)
+    p1.add(0.5, 1)
+    p1.add(3.5, 1)
+    p1.add(3, 0)
+    p1.add(4, 0)
+
+    offset = p1.offset(0.2)
+
+    assert offset[0].y == -0.2
