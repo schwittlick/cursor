@@ -14,13 +14,14 @@ if __name__ == "__main__":
     _loader = loader.Loader(directory=recordings, limit_files=None)
     all_paths = _loader.all_paths()
 
-    w = 6 * 10
-    h = 8 * 10
+    w = 6 * 3
+    h = 8 * 3
 
     fitting = []
 
-    as_filter = filter.AspectRatioFilter(0.60, 1.40)
-    all_paths.filter(as_filter)
+    #windows_size = 0.4
+    #as_filter = filter.AspectRatioFilter(1 - windows_size, 1 + windows_size)
+    #all_paths.filter(as_filter)
 
     # all_paths.clean()
 
@@ -29,7 +30,7 @@ if __name__ == "__main__":
 
     print(len(all_paths))
 
-    if len(all_paths) < w * h:
+    if len(all_paths) < w * h * 2:
         print("exit")
         sys.exit(1)
 
@@ -37,10 +38,10 @@ if __name__ == "__main__":
         for y in range(h):
             index = x + w * y
             b = path.BoundingBox(x, y, x + 1, y + 1)
-            if x > w / 2:
-                p = all_paths[len(all_paths) - index]
-            else:
-                p = all_paths[index]
+            #if index % 2 == 0:
+            #    p = all_paths[len(all_paths) - 1 - index]
+            #else:
+            p = all_paths[index]
             p.clean()
             p.velocity = 15
             p.move_to_origin()
@@ -58,16 +59,18 @@ if __name__ == "__main__":
             p.translate(x * 1, y * 1)
             pc.add(p)
 
+    # remove lots of unnecessary close-by points from a path
     simplify_filter = filter.DistanceBetweenPointsFilter(0.005, 1.0)
     pc.filter(simplify_filter)
 
     pc.clean()
     pc.rot(-math.pi / 2)
+
     device.SimpleExportWrapper().ex(
         pc,
         device.PlotterType.ROLAND_DPX3300,
         device.PaperSize.LANDSCAPE_A1,
         30,
         "composition71",
-        f"c71_{pc.hash()}",
+        f"remake_centered",
     )
