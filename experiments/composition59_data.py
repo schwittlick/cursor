@@ -194,7 +194,7 @@ data_map[green][blue] = {
 data_map[green][green] = {
     "created": "22.02.2022",
     "objktid": 1111,
-    "file": f"{path}{green}\\{green}\\20200908_5.jpg",
+    "file": f"{path}{green}\\{green}\\20220223.jpg",
 }
 
 data_map[green][red] = {
@@ -737,9 +737,9 @@ data_map[neon_green][white] = {
 }
 
 data_map[neon_green][violet] = {
-    "created": "1111",
+    "created": "19.02.2022",
     "objktid": 1111,
-    "file": f"{path}{neon_green}\\{violet}\\1111.jpg",
+    "file": f"{path}{neon_green}\\{violet}\\20220223.jpg",
 }
 
 data_map[neon_green][magenta] = {
@@ -805,9 +805,9 @@ data_map[neon_yellow][black] = {
 }
 
 data_map[neon_yellow][white] = {
-    "created": "1111",
+    "created": "21.02.2022",
     "objktid": 1111,
-    "file": f"{path}{neon_yellow}\\{white}\\1111.jpg",
+    "file": f"{path}{neon_yellow}\\{white}\\20220223.jpg",
 }
 
 data_map[neon_yellow][violet] = {
@@ -897,15 +897,15 @@ data_map[neon_orange][magenta] = {
 }
 
 data_map[neon_orange][neon_green] = {
-    "created": "1111",
+    "created": "23.02.2022",
     "objktid": 1111,
-    "file": f"{path}{neon_orange}\\{neon_green}\\1111.jpg",
+    "file": f"{path}{neon_orange}\\{neon_green}\\20220223.jpg",
 }
 
 data_map[neon_orange][neon_yellow] = {
     "created": "10.10.2021",
     "objktid": 1111,
-    "file": f"{path}{neon_orange}\\{neon_yellow}\\20211027_nony.jpg",
+    "file": f"{path}{neon_orange}\\{neon_yellow}\\20220223.jpg",
 }
 
 data_map[neon_orange][neon_orange] = {
