@@ -48,14 +48,14 @@ if __name__ == "__main__":
             _h = p.bb().h
             if _h == 0.0:
                 _h = 0.001
-            xscale = (1 / _w) * 0.8
+            xscale = (1 / _w) * 1.0
             yscale = (1 / _h) * 1.0
             p.scale(xscale, yscale)
             p.translate(x * 1, y * 1)
             pc.add(p)
 
     # remove lots of unnecessary close-by points from a path
-    simplify_filter = filter.DistanceBetweenPointsFilter(0.005, 1.0)
+    simplify_filter = filter.DistanceBetweenPointsFilter(0.008, 1.0)
     pc.filter(simplify_filter)
 
     pc.clean()
@@ -65,7 +65,7 @@ if __name__ == "__main__":
         pc,
         device.PlotterType.ROLAND_DPX3300,
         device.PaperSize.LANDSCAPE_A1,
-        30,
+        20,
         "composition77",
         "top_bottom",
     )
