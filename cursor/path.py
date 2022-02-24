@@ -38,7 +38,8 @@ class TimedPosition:
         )
 
     def distance(self, t: "TimedPosition"):
-        return np.linalg.norm(self.arr() - t.arr())
+        return math.sqrt(math.pow(t.x - self.x, 2) + math.pow(t.y - self.y, 2))
+        #return np.linalg.norm(self.arr() - t.arr())
 
     def rot(
         self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)
@@ -674,7 +675,7 @@ class Path:
         removes consecutive duplicates
         """
         prev = TimedPosition()
-        self.vertices = [prev := v for v in self.vertices if prev != v]
+        self.vertices = [prev := v for v in self.vertices if prev.x != v.x or prev.y != v.y]
 
     def limit(self) -> None:
         """
@@ -719,6 +720,92 @@ class Path:
         sum_y = np.sum(arr[:, 1])
         return sum_x / length, sum_y / length
 
+    def _parallel(self, p1: "TimedPosition", p2: "TimedPosition", offset_amount: float):
+        delta_y = p2.y - p1.y
+        delta_x = p2.x - p1.x
+        theta = math.atan2(delta_y, delta_x)
+
+        line_a = Path()
+        line_a.add(p1.x, p1.y)
+        line_a.add(p1.x + offset_amount * math.cos(theta + math.pi/2),
+                   p1.y + offset_amount * math.sin(theta + math.pi/2))
+
+        line_b = Path()
+        line_b.add(p2.x, p2.y)
+        line_b.add(p2.x + offset_amount * math.cos(theta + math.pi/2),
+                   p2.y + offset_amount * math.sin(theta + math.pi/2))
+
+        out_path = Path()
+        out_path.add(line_a[1].x, line_a[1].y)
+        out_path.add(line_b[1].x, line_b[1].y)
+        return out_path
+
+    def _cross_product(self, a, b):
+        return [
+            a[1] * 0 - 0 * b[1],
+            0 * b[0] - a[0] * 0,
+            a[0] * b[1] - a[1] * b[0]
+        ]
+
+    def _extended_line(self, a, b, delta_a, delta_b):
+        theta = math.atan2(b.y - a.y, b.x - a.x)
+        new_a = [a.x - (delta_a * math.cos(theta)),
+                 a.y - (delta_a * math.sin(theta))]
+        new_b = [b.x + (delta_b * math.cos(theta)),
+                 b.y + (delta_b * math.sin(theta))]
+
+        return [new_a, new_b]
+
+    def _offset_angle(self, p1: "TimedPosition", p2: "TimedPosition", p3: "TimedPosition", offset: float) -> "Path":
+        a = p2.distance(p3)
+        b = p1.distance(p2)
+        c = p3.distance(p1)
+
+        acos_arg = (math.pow(a, 2) + math.pow(b, 2) - math.pow(c, 2)) / (2 * a * b)
+        if abs(acos_arg) > 1:
+            acos_arg = 0
+        gamma = math.acos(acos_arg)
+        corner_offset = offset * math.tan(math.pi/2 - (0.5 * gamma))
+        ac_offset = self._parallel(p1, p2, offset)
+        vector_a = TimedPosition(p1.x - p2.x, p1.y - p2.y)
+        vector_b = TimedPosition(p3.x - p2.x, p3.y - p2.y)
+        cp = self._cross_product(vector_a.arr(), vector_b.arr())# np.cross(vector_a.arr(), vector_b.arr())
+        if cp[2] < 0:
+            corner_offset = corner_offset * -1
+
+        ac_offset = self._extended_line(ac_offset.vertices[0], ac_offset.vertices[1], 0, corner_offset)
+        cb_offset = self._parallel(p2, p3, offset)
+
+        out_path = Path()
+        out_path.add(ac_offset[0][0], ac_offset[0][1])
+        out_path.add(ac_offset[1][0], ac_offset[1][1])
+        out_path.add(cb_offset[1].x, cb_offset[1].y)
+
+        return out_path
+
+    def offset(self, offset: float = 1.0):
+        if len(self) < 3:
+            return None
+
+        c = self.copy()
+        offset_path = Path()
+
+        for i in range(0, len(c) - 2, 1):
+            j = i + 1
+            k = i + 2
+            offset_angle = self._offset_angle(c.vertices[i], c.vertices[j], c.vertices[k], -offset)
+            if i == 0:
+                offset_path.add(offset_angle[0].x, offset_angle[0].y)
+                offset_path.add(offset_angle[1].x, offset_angle[1].y)
+            elif i == len(c) - 3:
+                offset_path.add(offset_angle[1].x, offset_angle[1].y)
+                offset_path.add(offset_angle[2].x, offset_angle[2].y)
+            else:
+                offset_path.add(offset_angle[1].x, offset_angle[1].y)
+
+        return offset_path
+
+
     def __repr__(self):
         rep = (
             f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} "
@@ -735,7 +822,7 @@ class Path:
         for v in self.vertices:
             yield v
 
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> "TimedPosition":
         return self.vertices[item].copy()
 
 
