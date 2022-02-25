@@ -174,7 +174,7 @@ data_map[blue][neon_yellow] = {
 
 data_map[blue][neon_orange] = {
     "created": "16.06.2021",
-    "objktid": 1111,
+    "objktid": 683514,
     "file": f"{path}{blue}\\{neon_orange}\\20220206.jpg",
 }
 
@@ -193,7 +193,7 @@ data_map[green][blue] = {
 
 data_map[green][green] = {
     "created": "22.02.2022",
-    "objktid": 1111,
+    "objktid": 683516,
     "file": f"{path}{green}\\{green}\\20220223.jpg",
 }
 
@@ -345,7 +345,7 @@ data_map[orange][green] = {
 
 data_map[orange][red] = {
     "created": "15.02.2022",
-    "objktid": 1111,
+    "objktid": 683517,
     "file": f"{path}{orange}\\{red}\\20220219.jpg",
 }
 
@@ -375,7 +375,7 @@ data_map[orange][violet] = {
 
 data_map[orange][magenta] = {
     "created": "07.10.2021",
-    "objktid": 1111,
+    "objktid": 683518,
     "file": f"{path}{orange}\\{magenta}\\20211012_5.jpg",
 }
 
@@ -387,7 +387,7 @@ data_map[orange][neon_green] = {
 
 data_map[orange][neon_yellow] = {
     "created": "13.09.2021",
-    "objktid": 1111,
+    "objktid": 683519,
     "file": f"{path}{orange}\\{neon_yellow}\\20211017_1_ony.jpg",
 }
 
@@ -474,8 +474,8 @@ data_map[black][neon_orange] = {
 
 data_map[white][yellow] = {
     "created": "16.01.2022",
-    "objktid": 1111,
-    "file": f"{path}{white}\\{yellow}\\20220201.jpg",
+    "objktid": 683515,
+    "file": f"{path}{white}\\{yellow}\\20220225.jpg",
 }
 
 data_map[white][blue] = {
@@ -486,7 +486,7 @@ data_map[white][blue] = {
 
 data_map[white][green] = {
     "created": "15.11.2021",
-    "objktid": 1111,
+    "objktid": 683520,
     "file": f"{path}{white}\\{green}\\20220106.jpg",
 }
 
@@ -540,7 +540,7 @@ data_map[white][neon_yellow] = {
 
 data_map[white][neon_orange] = {
     "created": "16.02.2022",
-    "objktid": 1111,
+    "objktid": 683521,
     "file": f"{path}{white}\\{neon_yellow}\\20220219.jpg",
 }
 
@@ -738,7 +738,7 @@ data_map[neon_green][white] = {
 
 data_map[neon_green][violet] = {
     "created": "19.02.2022",
-    "objktid": 1111,
+    "objktid": 683522,
     "file": f"{path}{neon_green}\\{violet}\\20220223.jpg",
 }
 
@@ -806,7 +806,7 @@ data_map[neon_yellow][black] = {
 
 data_map[neon_yellow][white] = {
     "created": "21.02.2022",
-    "objktid": 1111,
+    "objktid": 683523,
     "file": f"{path}{neon_yellow}\\{white}\\20220223.jpg",
 }
 
@@ -898,13 +898,13 @@ data_map[neon_orange][magenta] = {
 
 data_map[neon_orange][neon_green] = {
     "created": "23.02.2022",
-    "objktid": 1111,
+    "objktid": 683524,
     "file": f"{path}{neon_orange}\\{neon_green}\\20220223.jpg",
 }
 
 data_map[neon_orange][neon_yellow] = {
     "created": "10.10.2021",
-    "objktid": 1111,
+    "objktid": 683525,
     "file": f"{path}{neon_orange}\\{neon_yellow}\\20220223.jpg",
 }
 
