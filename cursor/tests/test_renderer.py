@@ -7,6 +7,7 @@ from cursor.renderer import JpegRenderer
 from cursor.renderer import HPGLRenderer
 from cursor.renderer import AsciiRenderer
 from cursor.renderer import PathIterator
+from cursor.renderer import TektronixRenderer
 from cursor.data import DataDirHandler
 from cursor.path import PathCollection
 from cursor.path import Path
@@ -90,9 +91,7 @@ def test_jpegrenderer():
     rec = loader.all_paths()
 
     rec.fit(
-        Paper.sizes[PaperSize.LANDSCAPE_A1],
-        padding_mm=0,
-        cutoff_mm=0,
+        Paper.sizes[PaperSize.LANDSCAPE_A1], padding_mm=0, cutoff_mm=0,
     )
 
     r = JpegRenderer(DataDirHandler().test_images())
@@ -281,15 +280,39 @@ def test_ascii_renderer():
     rec = loader.all_paths()
 
     rec.fit(
-        Paper.sizes[PaperSize.PORTRAIT_A3],
-        padding_mm=0,
-        cutoff_mm=0,
+        Paper.sizes[PaperSize.PORTRAIT_A3], padding_mm=0, cutoff_mm=0,
     )
 
     r = JpegRenderer(DataDirHandler().test_images())
     a = AsciiRenderer(DataDirHandler().test_ascii(), r)
     a.render(rec, scale=1, thickness=30)
     a.save("test1")
+
+
+def test_tektronix_renderer():
+    p0 = Path()
+    p0.add(0, 0)
+    p0.add(1, 0)
+    p0.add(2, 0)
+    p0.add(3, 0)
+    p0.add(4, 0)
+
+    p1 = Path()
+    p1.add(2, 2)
+    p1.add(2, 3)
+    p1.add(2, 4)
+    p1.add(2, 5)
+    p1.add(2, 6)
+
+    pc = PathCollection()
+    pc.add(p0)
+    pc.add(p1)
+
+    renderer = TektronixRenderer(DataDirHandler().test_hpgls())
+    renderer.render(pc)
+    out = renderer.save("tektronix_test01")
+
+    assert out == "00102030402223242526"
 
 
 def disabled_test_pdf_renderer():
@@ -299,9 +322,7 @@ def disabled_test_pdf_renderer():
     rec = loader.all_paths()
 
     rec.fit(
-        Paper.sizes[PaperSize.PORTRAIT_A4],
-        padding_mm=0,
-        cutoff_mm=0,
+        Paper.sizes[PaperSize.PORTRAIT_A4], padding_mm=0, cutoff_mm=0,
     )
 
     r = JpegRenderer(DataDirHandler().test_images())
@@ -316,10 +337,7 @@ def disabled_test_pdf_renderer():
 
     fontpath = DataDirHandler().test_data_file("JetBrainsMono-Regular.ttf")
     pdf.add_font(
-        "JetbrainsMono",
-        "",
-        fontpath,
-        uni=True,
+        "JetbrainsMono", "", fontpath, uni=True,
     )
     pdf.add_page()
     pdf.set_margins(0, 0)

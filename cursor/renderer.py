@@ -338,6 +338,39 @@ class HPGLRenderer:
         return pen_force
 
 
+class TektronixRenderer:
+    def __init__(
+        self, folder: pathlib.Path,
+    ):
+        self.__save_path = folder
+        self.__paths = PathCollection()
+
+    def render(self, paths: "PathCollection") -> None:
+        self.__paths += paths
+        log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
+
+    def save(self, filename: str) -> str:
+        pathlib.Path(self.__save_path).mkdir(parents=True, exist_ok=True)
+        fname = self.__save_path / (filename + ".tek")
+
+        _output_string = ""
+
+        for p in self.__paths:
+            x = p.start_pos().x
+            y = p.start_pos().y
+            for line in p.vertices:
+                x = line.x
+                y = line.y
+                _output_string += f"{x}{y}"  # conversion to funky 12-bit byte coords
+
+        with open(fname.as_posix(), "w") as file:
+            file.write(_output_string)
+
+        log.good(f"Finished saving {fname}")
+
+        return _output_string
+
+
 class JpegRenderer:
     def __init__(self, folder: pathlib.Path):
         self.save_path = folder
