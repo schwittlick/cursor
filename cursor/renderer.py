@@ -345,6 +345,33 @@ class TektronixRenderer:
         self.__save_path = folder
         self.__paths = PathCollection()
 
+    def _coords_to_bytes(self, xcoord, ycoord, low_res=False):
+        """
+        Converts integer coordinates to the funky 12-bit byte coordinate
+        codes expected by the Tek plotter in graph mode.
+        returns a byte string:
+        <HIGH Y><Remainders (low 2 bits added)><LOW Y><HIGH X><LOW X>
+    
+        all characters are offset so they are in the typable ascii range
+        since they were designed for manual input on a 1970s tty/terminal keyboard
+        """
+        if low_res:
+            eb = ''
+        else:
+            remx = xcoord % 4
+            remy = ycoord % 4
+            eb = chr(96 + remx + (4 * remy)) # see Operators manual Appendix B-1
+    
+        # the 'low' bits are actually the highest 5 of the lowest 7 bits
+        # there is also a lower precision mode that ignores the remainder 
+        low_y = chr(96 + ((ycoord // 4) & 0b11111))
+        low_x = chr(64 + ((xcoord // 4) & 0b11111))
+    
+        hi_y = chr(32 + (ycoord // 128))
+        hi_x = chr(32 + (xcoord // 128))
+    
+        return hi_y + eb + low_y + hi_x + low_x
+
     def render(self, paths: "PathCollection") -> None:
         self.__paths += paths
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
@@ -353,22 +380,31 @@ class TektronixRenderer:
         pathlib.Path(self.__save_path).mkdir(parents=True, exist_ok=True)
         fname = self.__save_path / (filename + ".tek")
 
-        _output_string = ""
+        GS = chr(29)
+        BEL = chr(7)
+
+        # NOTE: this does not initialize the plotter or set the mode
+        # NOTE: this is only for the tek 4662 - the 4663 has way more features
+        # TODO: add some bounds checking for bogus inputs 
+        output_string = ""
 
         for p in self.__paths:
             x = p.start_pos().x
             y = p.start_pos().y
+            output_string += GS + self._coords_to_bytes(x, y)  # move, pen-up
             for line in p.vertices:
                 x = line.x
                 y = line.y
-                _output_string += f"{x}{y}"  # conversion to funky 12-bit byte coords
+                output_string += self._coords_to_bytes(x, y)
+
+        output_string += GS + self._coords_to_bytes(0, 0)  # pen up, move 0,0 
 
         with open(fname.as_posix(), "w") as file:
-            file.write(_output_string)
+            file.write(output_string)
 
         log.good(f"Finished saving {fname}")
 
-        return _output_string
+        return output_string
 
 
 class JpegRenderer:
