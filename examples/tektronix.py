@@ -13,10 +13,10 @@ if __name__ == "__main__":
     pc.add(p)
 
     device.SimpleExportWrapper().ex(
-        pc,
-        device.PlotterType.ROLAND_DPX3300_A3,
-        device.PaperSize.LANDSCAPE_A3,
-        10,
-        "simple_rect_example",
-        "simple_rect",
+        paths=pc,
+        ptype=device.PlotterType.TEKTRONIX_4662,
+        psize=device.PaperSize.LANDSCAPE_A3,
+        margin=10,
+        name="simple_rect_example",
+        suffix="helloworld"
     )

@@ -923,13 +923,13 @@ if __name__ == "__main__":
             out = f"{out_path}{k1}_{k2}.jpg"
             print(out)
             if "1111" not in v2["file"]:
-                #shutil.copyfile(v2["file"], out)
+                # shutil.copyfile(v2["file"], out)
                 v2["file"] = f"{k1}-{k2}.jpg"
             else:
-                #shutil.copyfile(
+                # shutil.copyfile(
                 #    "C:\\Users\\Marcel Schwittlick\\Desktop\\ROHDE-SCHWARZ-XY-Schreiber-Recorder-ZSK-2.jpg",
                 #    out,
-                #)
+                # )
                 v2["file"] = f"{k1}_{k2}.jpg"
 
     with open("z:\\144\\cropped\\upward_spiral.json", "w") as file:

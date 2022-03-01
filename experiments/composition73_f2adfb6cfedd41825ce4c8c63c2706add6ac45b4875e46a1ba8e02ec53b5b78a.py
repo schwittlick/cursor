@@ -29,7 +29,7 @@ if __name__ == "__main__":
         for i in range(500):  # für a1 400
             pc.add(pc[0].offset(-0.001 * i))
         for i in range(10):
-            pc.add(pc[0].offset(-0.0005 * (1000-i)))
+            pc.add(pc[0].offset(-0.0005 * (1000 - i)))
 
         device.SimpleExportWrapper().ex(
             pc,
