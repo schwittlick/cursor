@@ -312,7 +312,7 @@ def test_tektronix_renderer():
     renderer.render(pc)
     out = renderer.save("tektronix_test01")
 
-    assert out == "00102030402223242526"
+    assert out == " `` @ `` @ a` @ b` @ c` @ `` A j` @ j` @ n` @ ba @ fa @ ja @ `` @"
 
 
 def disabled_test_pdf_renderer():
