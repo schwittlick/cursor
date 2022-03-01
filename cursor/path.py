@@ -52,6 +52,9 @@ class TimedPosition:
         self.x = qx
         self.y = qy
 
+    def tuple(self) -> tuple[float, float]:
+        return self.x, self.y
+
     def translate(self, x: float, y: float) -> None:
         self.x += x
         self.y += y
@@ -794,6 +797,9 @@ class Path:
         return out_path
 
     def offset(self, offset: float = 1.0):
+        """
+        taken from https://github.com/markroland/path-helper/blob/main/src/PathHelper.js <3
+        """
         if len(self) < 3:
             return None
 
@@ -816,6 +822,67 @@ class Path:
                 offset_path.add(offset_angle[1].x, offset_angle[1].y)
 
         return offset_path
+
+    @staticmethod
+    def clamp(n, smallest, largest):
+        return max(smallest, min(n, largest))
+
+    @staticmethod
+    def map(value, inputMin, inputMax, outputMin, outputMax, clamp):
+        outVal = (value - inputMin) / (inputMax - inputMin) * (
+            outputMax - outputMin
+        ) + outputMin
+
+        if clamp:
+            if outputMax < outputMin:
+                if outVal < outputMax:
+                    outVal = outputMax
+                elif outVal > outputMin:
+                    outVal = outputMin
+        else:
+            if outVal > outputMax:
+                outVal = outputMax
+            elif outVal < outputMin:
+                outVal = outputMin
+        return outVal
+
+    def smooth(self, size, shape):
+        n = len(self)
+        size = Path.clamp(size, 0, n)
+        shape = Path.clamp(shape, 0, 1)
+
+        weights = [0] * size
+        for i in range(size):
+            cur_weight = Path.map(i, 0, size, 1, shape, True)
+            weights[i] = cur_weight
+
+        result = self.copy()
+
+        closed = False
+
+        for i in range(n):
+            sum = 1
+            for j in range(1, size, 1):
+                cur = TimedPosition()
+                left_position = i - j
+                right_position = i + j
+                if left_position < 0 and closed:
+                    left_position += n
+                if left_position >= 0:
+                    # holy shit, unpacking a tuple into parameters via pointer
+                    cur.translate(*self.vertices[left_position].tuple())
+                    sum += weights[j]
+                if right_position >= n and closed:
+                    right_position -= n
+                if right_position < n:
+                    # again
+                    cur.translate(*self.vertices[right_position].tuple())
+                    sum += weights[j]
+                result.vertices[i].translate(cur.x * weights[j], cur.y * weights[j])
+            result.vertices[i].x = result.vertices[i].x / sum
+            result.vertices[i].y = result.vertices[i].y / sum
+
+        self.vertices = result.vertices
 
     def __repr__(self):
         rep = (
