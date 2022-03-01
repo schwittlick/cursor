@@ -388,7 +388,7 @@ class TektronixRenderer:
         self.__save_path = folder
         self.__paths = PathCollection()
 
-    def _coords_to_bytes(self, xcoord, ycoord, low_res=False):
+    def _coords_to_bytes(self, xcoord: int, ycoord: int, low_res: bool = False):
         """
         Converts integer coordinates to the funky 12-bit byte coordinate
         codes expected by the Tek plotter in graph mode.
@@ -432,18 +432,18 @@ class TektronixRenderer:
         output_string = ""
 
         for p in self.__paths:
-            x = p.start_pos().x
-            y = p.start_pos().y
+            x = int(p.start_pos().x)
+            y = int(p.start_pos().y)
             output_string += GS + self._coords_to_bytes(x, y)  # move, pen-up
             for line in p.vertices:
-                x = line.x
-                y = line.y
+                x = int(line.x)
+                y = int(line.y)
                 output_string += self._coords_to_bytes(x, y)
 
         output_string += GS + self._coords_to_bytes(0, 0)  # pen up, move 0,0
 
-        with open(fname.as_posix(), "w") as file:
-            file.write(output_string)
+        with open(fname.as_posix(), "wb") as file:
+            file.write(output_string.encode("ascii"))
 
         log.good(f"Finished saving {fname}")
 
