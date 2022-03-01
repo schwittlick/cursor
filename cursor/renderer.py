@@ -394,25 +394,25 @@ class TektronixRenderer:
         codes expected by the Tek plotter in graph mode.
         returns a byte string:
         <HIGH Y><Remainders (low 2 bits added)><LOW Y><HIGH X><LOW X>
-    
+
         all characters are offset so they are in the typable ascii range
         since they were designed for manual input on a 1970s tty/terminal keyboard
         """
         if low_res:
-            eb = ''
+            eb = ""
         else:
             remx = xcoord % 4
             remy = ycoord % 4
-            eb = chr(96 + remx + (4 * remy)) # see Operators manual Appendix B-1
-    
+            eb = chr(96 + remx + (4 * remy))  # see Operators manual Appendix B-1
+
         # the 'low' bits are actually the highest 5 of the lowest 7 bits
-        # there is also a lower precision mode that ignores the remainder 
+        # there is also a lower precision mode that ignores the remainder
         low_y = chr(96 + ((ycoord // 4) & 0b11111))
         low_x = chr(64 + ((xcoord // 4) & 0b11111))
-    
+
         hi_y = chr(32 + (ycoord // 128))
         hi_x = chr(32 + (xcoord // 128))
-    
+
         return hi_y + eb + low_y + hi_x + low_x
 
     def render(self, paths: "PathCollection") -> None:
@@ -424,11 +424,11 @@ class TektronixRenderer:
         fname = self.__save_path / (filename + ".tek")
 
         GS = chr(29)
-        BEL = chr(7)
+        # BEL = chr(7)
 
         # NOTE: this does not initialize the plotter or set the mode
         # NOTE: this is only for the tek 4662 - the 4663 has way more features
-        # TODO: add some bounds checking for bogus inputs 
+        # TODO: add some bounds checking for bogus inputs
         output_string = ""
 
         for p in self.__paths:
@@ -440,7 +440,7 @@ class TektronixRenderer:
                 y = line.y
                 output_string += self._coords_to_bytes(x, y)
 
-        output_string += GS + self._coords_to_bytes(0, 0)  # pen up, move 0,0 
+        output_string += GS + self._coords_to_bytes(0, 0)  # pen up, move 0,0
 
         with open(fname.as_posix(), "w") as file:
             file.write(output_string)
