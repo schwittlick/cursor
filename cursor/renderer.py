@@ -206,10 +206,14 @@ class GCodeRenderer:
 class RealtimeRenderer:
     def __init__(self, w: int, h: int):
         self.running = False
+        self.cb = None
         self.w = w
         self.h = h
         self.pcs = []
         self.selected = 0
+
+    def set_cb(self, cb):
+        self.cb = cb
 
     def _pygameinit(self):
         pygame.init()
@@ -224,6 +228,9 @@ class RealtimeRenderer:
 
     def add(self, pc):
         self.pcs.append(pc)
+
+    def set(self, pcs):
+        self.pcs = pcs
 
     def render(self):
         if len(self.pcs) == 0:
@@ -247,8 +254,9 @@ class RealtimeRenderer:
                 if event.type == pygame.MOUSEBUTTONUP:
                     pygame.display.update()
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_c:
-                        pygame.display.update()
+                    if event.key == pygame.K_s:
+                        if self.cb:
+                            self.cb(self.selected, self.pcs[self.selected])
                     if event.key == pygame.K_ESCAPE:
                         self.running = False
                         pygame.quit()
