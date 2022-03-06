@@ -1,5 +1,18 @@
 from cursor import path
 from cursor import renderer
+from cursor import device
+
+
+def save_callback(id: int, pc: "path.PathCollection"):
+    print(f"saving {id}")
+    device.SimpleExportWrapper().ex(
+        pc,
+        device.PlotterType.ROLAND_DPX3300,
+        device.PaperSize.LANDSCAPE_A1,
+        20,
+        "realtime_example",
+        f"switch_pathcollections_{id}",
+    )
 
 
 if __name__ == "__main__":
@@ -25,8 +38,17 @@ if __name__ == "__main__":
     p2.translate(200, 200)
     pc2.add(p2)
 
-    rr = renderer.RealtimeRenderer(850, 600)
-    rr.add(pc1)
-    rr.add(pc2)
+    res = device.Paper.sizes[device.PaperSize.LANDSCAPE_A1]
+
+    pc1.fit(res, padding_mm=10)
+    pc2.fit(res, padding_mm=20, keep_aspect=True)
+
+    pcs = []
+    pcs.append(pc1)
+    pcs.append(pc2)
+
+    rr = renderer.RealtimeRenderer(*res)
+    rr.set_cb(save_callback)
+    rr.set(pcs)
 
     rr.render()
