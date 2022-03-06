@@ -19,9 +19,9 @@ if __name__ == "__main__":
 
     fitting = []
 
-    #windows_size = 0.4
-    #as_filter = filter.AspectRatioFilter(1 - windows_size, 1 + windows_size)
-    #all_paths.filter(as_filter)
+    # windows_size = 0.4
+    # as_filter = filter.AspectRatioFilter(1 - windows_size, 1 + windows_size)
+    # all_paths.filter(as_filter)
 
     # all_paths.clean()
 
@@ -38,9 +38,9 @@ if __name__ == "__main__":
         for y in range(h):
             index = x + w * y
             b = path.BoundingBox(x, y, x + 1, y + 1)
-            #if index % 2 == 0:
+            # if index % 2 == 0:
             #    p = all_paths[len(all_paths) - 1 - index]
-            #else:
+            # else:
             p = all_paths[index]
             p.clean()
             p.velocity = 15
