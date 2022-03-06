@@ -72,5 +72,5 @@ if __name__ == "__main__":
         device.PaperSize.LANDSCAPE_A1,
         30,
         "composition71",
-        f"remake_centered",
+        "remake_centered",
     )
