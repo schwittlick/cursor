@@ -1,14 +1,17 @@
 import os
 import typing
+import sys
 
 from cursor.path import PathCollection
 from cursor.path import Path
+from cursor.path import TimedPosition
 from cursor.path import BoundingBox
 
 import svgwrite
 import pathlib
 import wasabi
 import copy
+import pygame
 from PIL import Image, ImageDraw
 
 log = wasabi.Printer()
@@ -201,35 +204,75 @@ class GCodeRenderer:
 
 
 class RealtimeRenderer:
-    def __init__(self):
-        pass
+    def __init__(self, w: int, h: int):
+        self.running = False
+        self.cb = None
+        self.w = w
+        self.h = h
+        self.pcs = []
+        self.selected = 0
 
-    def render_pc(self, app, _pc):
-        it = PathIterator(_pc)
+    def set_cb(self, cb):
+        self.cb = cb
 
-        for conn in it.connections():
-            start = conn[0]
-            end = conn[1]
+    def _pygameinit(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode((self.w, self.h))
 
-            app.line(start.x, start.y, end.x, end.y)
+        self.screen.fill((255, 255, 255))
+        pygame.display.update()
+        self.running = True
 
-    def render(self, paths):
-        from processing_py import App
+    def _line(self, screen, p1: TimedPosition, p2: TimedPosition):
+        pygame.draw.line(screen, (0, 0, 0), p1.pos(), p2.pos())
 
-        app = App(800, 600)  # create window: width, height
+    def add(self, pc):
+        self.pcs.append(pc)
 
-        t = 0
-        while t < 500:
-            print(f"frame {t}")
-            t += 1
-            app.background(0, 0, 0)
-            app.fill(255, 255, 0)
-            app.ellipse(app.mouseX, app.mouseY, 50, 50)
-            app.fill(255, 255, 255)
-            app.stroke(255, 255, 255)
-            self.render_pc(app, paths)
-            app.redraw()
-        app.exit()
+    def set(self, pcs):
+        self.pcs = pcs
+
+    def render(self):
+        if len(self.pcs) == 0:
+            log.fail("No paths to render. Quitting")
+            return
+
+        self._pygameinit()
+
+        while self.running:
+            pygame.display.set_caption(f"selected {self.selected}")
+            self.screen.fill((255, 255, 255))
+            it = PathIterator(self.pcs[self.selected])
+            ev = pygame.event.get()
+            for conn in it.connections():
+                start = conn[0]
+                end = conn[1]
+                self._line(self.screen, start, end)
+            pygame.display.update()
+
+            for event in ev:
+                if event.type == pygame.MOUSEBUTTONUP:
+                    pygame.display.update()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_s:
+                        if self.cb:
+                            self.cb(self.selected, self.pcs[self.selected])
+                    if event.key == pygame.K_ESCAPE:
+                        self.running = False
+                        pygame.quit()
+                        sys.exit(0)
+
+                    if event.key == pygame.K_LEFT:
+                        self.selected -= 1
+                        if self.selected < 0:
+                            self.selected = len(self.pcs) - 1
+                    if event.key == pygame.K_RIGHT:
+                        self.selected += 1
+                        if self.selected >= len(self.pcs):
+                            self.selected = 0
+
+                if event.type == pygame.QUIT:
+                    self.running = False
 
 
 class HPGLRenderer:
