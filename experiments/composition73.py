@@ -1,11 +1,8 @@
 from cursor import device
 from cursor import path
-from cursor import filter
 from cursor import data
 from cursor import loader
 
-import sys
-import math
 
 if __name__ == "__main__":
     pc = path.PathCollection()
@@ -26,5 +23,5 @@ if __name__ == "__main__":
         device.PaperSize.LANDSCAPE_A1,
         30,
         "composition73",
-        f"offset",
+        "offset",
     )
