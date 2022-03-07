@@ -1,6 +1,7 @@
 from cursor import device
 from cursor import path
 
+import inspect
 
 if __name__ == "__main__":
     pc = path.PathCollection()
@@ -20,4 +21,5 @@ if __name__ == "__main__":
         10,
         "simple_rect_example",
         "simple_rect",
+
     )

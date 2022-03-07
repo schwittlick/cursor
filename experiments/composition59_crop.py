@@ -8,7 +8,7 @@ oriImage = None
 cropping = False
 x_start, y_start, x_end, y_end = 0, 0, 0, 0
 filename = None
-offset = 100
+offset = 0
 id = 1111
 
 
@@ -93,10 +93,10 @@ def crop(fn):
 
 
 if __name__ == "__main__":
-    selected = composition59_data.data_map[composition59_data.yellow][
-        composition59_data.orange
-    ]
-    crop_interactive(selected["file"], selected["objktid"])
+    #selected = composition59_data.data_map[composition59_data.violet][
+    #    composition59_data.black
+    #]
+    #crop_interactive(selected["file"], "violet-black")
     for k1, v1 in composition59_data.data_map.items():
         for k2, v2 in v1.items():
             print(k1 + " " + k2)

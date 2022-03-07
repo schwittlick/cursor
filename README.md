@@ -170,3 +170,14 @@ usb to parallel port adapter
 
     chmod 777 /dev/usb/lp0
     cat file.hpgl /dev/usb/lp0
+
+
+#### Tektronix 4662
+    baud 1200
+    parity: none
+    1 stop bit
+    device A
+
+Local mode on via button
+Joystick removed
+GS mode ascii key 29

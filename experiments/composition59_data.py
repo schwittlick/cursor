@@ -541,7 +541,7 @@ data_map[white][neon_yellow] = {
 data_map[white][neon_orange] = {
     "created": "16.02.2022",
     "objktid": 683521,
-    "file": f"{path}{white}\\{neon_yellow}\\20220219.jpg",
+    "file": f"{path}{white}\\{neon_orange}\\20220219.jpg",
 }
 
 # violet
@@ -915,7 +915,7 @@ data_map[neon_orange][neon_orange] = {
 }
 
 if __name__ == "__main__":
-    out_path = "Z:\\144\\"
+    out_path = "Z:\\144\\cropped\\"
     # copying all files into one folder and rename
     for k1, v1 in data_map.items():
         for k2, v2 in v1.items():
@@ -923,14 +923,14 @@ if __name__ == "__main__":
             out = f"{out_path}{k1}_{k2}.jpg"
             print(out)
             if "1111" not in v2["file"]:
-                shutil.copyfile(v2["file"], out)
-                v2["file"] = f"{k1}_{k2}.jpg"
+                #shutil.copyfile(v2["file"], out)
+                v2["file"] = f"{k1}-{k2}.jpg"
             else:
-                shutil.copyfile(
-                    "C:\\Users\\Marcel Schwittlick\\Desktop\\ROHDE-SCHWARZ-XY-Schreiber-Recorder-ZSK-2.jpg",
-                    out,
-                )
+                #shutil.copyfile(
+                #    "C:\\Users\\Marcel Schwittlick\\Desktop\\ROHDE-SCHWARZ-XY-Schreiber-Recorder-ZSK-2.jpg",
+                #    out,
+                #)
                 v2["file"] = f"{k1}_{k2}.jpg"
 
-    with open("z:\\144\\upward_spiral.json", "w") as file:
+    with open("z:\\144\\cropped\\upward_spiral.json", "w") as file:
         file.write(json.dumps(data_map))
