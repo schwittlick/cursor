@@ -14,8 +14,8 @@ if __name__ == "__main__":
     _loader = loader.Loader(directory=recordings, limit_files=None)
     all_paths = _loader.all_paths()
 
-    w = 70 * 5
-    h = 2
+    w = 2
+    h = 70*5
 
     fitting = []
 
