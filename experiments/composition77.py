@@ -15,7 +15,7 @@ if __name__ == "__main__":
     all_paths = _loader.all_paths()
 
     w = 2
-    h = 70*5
+    h = 70 * 5
 
     fitting = []
 
