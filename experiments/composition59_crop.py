@@ -34,7 +34,7 @@ def mouse_crop(event, x, y, flags, param):
             a, b, c, d = x_start * 3, y_start * 3, x_end * 3, y_end * 3
             roi = oriImage[b:d, a:c]
             cv2.imshow("Cropped", roi)
-            roi = oriImage[b - offset: d + offset, a - offset: c + offset]
+            roi = oriImage[b - offset : d + offset, a - offset : c + offset]
             t = f"Z:\\144\\cropped\\{id}.jpg"
             cv2.imwrite(t, roi)
 
@@ -93,10 +93,10 @@ def crop(fn):
 
 
 if __name__ == "__main__":
-    #selected = composition59_data.data_map[composition59_data.violet][
+    # selected = composition59_data.data_map[composition59_data.violet][
     #    composition59_data.black
-    #]
-    #crop_interactive(selected["file"], "violet-black")
+    # ]
+    # crop_interactive(selected["file"], "violet-black")
     for k1, v1 in composition59_data.data_map.items():
         for k2, v2 in v1.items():
             print(k1 + " " + k2)
