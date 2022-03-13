@@ -1,7 +1,7 @@
 from cursor.path import Path
 from cursor.path import TimedPosition
 from cursor.path import BoundingBox
-
+from cursor.path import PathCollection
 import pytest
 
 
@@ -277,16 +277,83 @@ def test_entropy():
 
 def test_bb_center():
     bb = BoundingBox(100, 200, 300, 400)
-    cx, cy = bb.center()
-    assert cx == 200
-    assert cy == 300
+    c = bb.center()
+    assert c.x == 200
+    assert c.y == 300
 
 
 def test_bb_center2():
     bb = BoundingBox(-100, -100, 100, 100)
-    cx, cy = bb.center()
-    assert cx == 0
-    assert cy == 0
+    c = bb.center()
+    assert c.x == 0
+    assert c.y == 0
+
+
+def test_bb_center3():
+    bb = BoundingBox(0, 0, 300, 300)
+    c = bb.center()
+    assert c.x == 150
+    assert c.y == 150
+
+
+def test_bb_subdiv():
+    bb = BoundingBox(0, 0, 300, 300)
+    subdived = bb.subdiv(10, 10)
+
+    assert len(subdived) == 100
+
+    for _bb in subdived:
+        assert _bb.w == 30
+        assert _bb.h == 30
+
+
+def test_bb_mostly_inside():
+    bb = BoundingBox(0, 0, 300, 300)
+    pa = Path()
+    pa.add(0, 0)
+    pa.add(0, 1)
+    pa.add(0, 3)
+    pa.add(-1, 3)
+    pa.add(-1, 5)
+
+    assert bb.mostly_inside(pa)
+
+    pa.add(-1, 10)
+
+    assert not bb.mostly_inside(pa)
+
+
+def test_inside_pos():
+    bb = BoundingBox(0, 0, 300, 300)
+
+    assert bb.inside(TimedPosition(10, 10))
+    assert not bb.inside(TimedPosition(10, 301))
+
+    pa = Path()
+    pa.add(0, 300)
+    pa.add(300, 280)
+
+    assert bb.inside(pa)
+
+    pa.add(-10, 10)
+    assert not bb.inside(pa)
+
+    pc = PathCollection()
+    pc.add(pa)
+    assert not bb.inside(pc)
+
+    pc2 = PathCollection()
+    p1 = Path()
+    p1.add(100, 100)
+    p1.add(100, 200)
+
+    p2 = Path()
+    p2.add(0, 0)
+    p2.add(300, 300)
+    pc2.add(p1)
+    pc2.add(p2)
+
+    assert bb.inside(p2)
 
 
 def test_path_clean():

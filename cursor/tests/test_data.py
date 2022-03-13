@@ -63,7 +63,7 @@ def test_json_encoder():
     recs = {"mouse": mouse_recordings, "keys": keyboard_recodings}
     compressor = JsonCompressor()
     enc = compressor.json_zip(j=recs)
-    assert 120 <= len(enc["base64(zip(o))"]) <= 124
+    assert 120 <= len(enc["base64(zip(o))"]) <= 128
 
 
 def test_json_decoder():
