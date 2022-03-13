@@ -1,12 +1,12 @@
 from cursor.path import Path
-from cursor.path import TimedPosition
+from cursor.path import Position
 from cursor.path import BoundingBox
 from cursor.path import PathCollection
 import pytest
 
 
 def test_timedposition_copy():
-    t1 = TimedPosition(0, 0, 0)
+    t1 = Position(0, 0, 0)
 
     t2 = t1.copy()
 
@@ -19,7 +19,7 @@ def test_timedposition_copy():
 
 
 def test_timedposition_translate():
-    t1 = TimedPosition(0, 0)
+    t1 = Position(0, 0)
     t1.translate(1, 2)
 
     assert t1.x == 1
@@ -27,7 +27,7 @@ def test_timedposition_translate():
 
 
 def test_timedposition_scale():
-    t1 = TimedPosition(2, 2)
+    t1 = Position(2, 2)
     t1.scale(2, 2)
 
     assert t1.x == 4
@@ -35,8 +35,8 @@ def test_timedposition_scale():
 
 
 def test_timedpos_comparison():
-    t1 = TimedPosition(0, 0, 0)
-    t2 = TimedPosition(0, 0, 1)
+    t1 = Position(0, 0, 0)
+    t2 = Position(0, 0, 1)
     r = t1 < t2
     assert r is True
 
@@ -52,14 +52,14 @@ def test_timedpos_comparison():
 
 
 def test_timedpos_simple():
-    t = TimedPosition(1, 2, 100)
+    t = Position(1, 2, 100)
     assert t.time() == 100
     assert t.x == 1
     assert t.y == 2
 
 
 def test_timedpos_scale():
-    t = TimedPosition(1, 2, 100)
+    t = Position(1, 2, 100)
     t.scale(5, 10)
     assert t.x == 5.0
     assert t.y == 20.0
@@ -326,8 +326,8 @@ def test_bb_mostly_inside():
 def test_inside_pos():
     bb = BoundingBox(0, 0, 300, 300)
 
-    assert bb.inside(TimedPosition(10, 10))
-    assert not bb.inside(TimedPosition(10, 301))
+    assert bb.inside(Position(10, 10))
+    assert not bb.inside(Position(10, 301))
 
     pa = Path()
     pa.add(0, 300)

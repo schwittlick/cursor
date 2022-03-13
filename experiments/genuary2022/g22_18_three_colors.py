@@ -15,7 +15,7 @@ def file_to_paths(pc, file, pen):
         for d in file:
             c = 0
             p = path.Path()
-            pos = path.TimedPosition()
+            pos = path.Position()
 
             for current_pos in d:
                 if c % 2 == 0:
@@ -23,7 +23,7 @@ def file_to_paths(pc, file, pen):
                 else:
                     pos.y = current_pos
                     p.add(pos.x, pos.y, 0)
-                    pos = path.TimedPosition()
+                    pos = path.Position()
                 c += 1
 
             p.add(d[0], d[1], 0)  # add first one to close shape
