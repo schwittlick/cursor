@@ -4,7 +4,7 @@ import sys
 
 from cursor.path import PathCollection
 from cursor.path import Path
-from cursor.path import TimedPosition
+from cursor.path import Position
 from cursor.path import BoundingBox
 
 import svgwrite
@@ -223,7 +223,7 @@ class RealtimeRenderer:
         pygame.display.update()
         self.running = True
 
-    def _line(self, screen, p1: TimedPosition, p2: TimedPosition):
+    def _line(self, screen, p1: Position, p2: Position):
         pygame.draw.line(screen, (0, 0, 0), p1.pos(), p2.pos())
 
     def add(self, pc):

@@ -17,7 +17,7 @@ from scipy import spatial
 log = wasabi.Printer()
 
 
-class TimedPosition:
+class Position:
     def __init__(self, x: float = 0.0, y: float = 0.0, timestamp: int = 0):
         self._pos = np.array((x, y), dtype=float)
         self.timestamp = timestamp
@@ -47,12 +47,12 @@ class TimedPosition:
     def time(self) -> int:
         return self.timestamp
 
-    def copy(self) -> "TimedPosition":
+    def copy(self) -> "Position":
         return type(self)(
             copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(self.timestamp)
         )
 
-    def distance(self, t: "TimedPosition") -> float:
+    def distance(self, t: "Position") -> float:
         return np.linalg.norm(self.arr() - t.arr())
 
     def rot(
@@ -76,7 +76,7 @@ class TimedPosition:
         """
         compare equality by comparing all fields
         """
-        if not isinstance(o, TimedPosition):
+        if not isinstance(o, Position):
             raise NotImplementedError
 
         return self.x == o.x and self.y == o.y and self.timestamp == o.timestamp
@@ -99,7 +99,7 @@ class TimedPosition:
     def __hash__(self):
         return hash(repr(self))
 
-    def __mul__(self, other: "TimedPosition"):
+    def __mul__(self, other: "Position"):
         return self.arr() * other.arr()
 
 
@@ -112,13 +112,13 @@ class BoundingBox:
         self.w = math.dist([self.x], [self.x2])
         self.h = math.dist([self.y], [self.y2])
 
-    def __inside(self, point: "TimedPosition") -> bool:
+    def __inside(self, point: "Position") -> bool:
         return self.x <= point.x <= self.x2 and self.y <= point.y <= self.y2
 
     def inside(
-        self, data: typing.Union["TimedPosition", "Path", "PathCollection"]
+        self, data: typing.Union["Position", "Path", "PathCollection"]
     ) -> bool:
-        if isinstance(data, TimedPosition):
+        if isinstance(data, Position):
             return self.__inside(data)
         if isinstance(data, Path):
             for p in data:
@@ -143,10 +143,10 @@ class BoundingBox:
                     points_inside += 1
             return points_inside > points_outside
 
-    def center(self) -> "TimedPosition":
+    def center(self) -> "Position":
         center_x = (self.w / 2.0) + self.x
         center_y = (self.h / 2.0) + self.y
-        return TimedPosition(center_x, center_y)
+        return Position(center_x, center_y)
 
     def subdiv(self, xpieces: int, ypieces: int) -> typing.List["BoundingBox"]:
         bbs = []
@@ -286,7 +286,7 @@ class Path:
         self._is_polygon = is_polygon
 
     def add(self, x: float, y: float, timestamp: int = 0) -> None:
-        self.vertices.append(TimedPosition(x, y, timestamp))
+        self.vertices.append(Position(x, y, timestamp))
 
     def arr(self):
         data = np.random.randint(0, 1000, size=(len(self), 2))
@@ -314,12 +314,12 @@ class Path:
             c, layer=self.layer, line_type=self.line_type, pen_velocity=self.velocity
         )
 
-    def start_pos(self) -> "TimedPosition":
+    def start_pos(self) -> "Position":
         if len(self.vertices) == 0:
             raise IndexError
         return self.vertices[0]
 
-    def end_pos(self) -> "TimedPosition":
+    def end_pos(self) -> "Position":
         if len(self.vertices) == 0:
             raise IndexError
 
@@ -397,10 +397,10 @@ class Path:
 
     def morph(
         self,
-        start: typing.Union["TimedPosition", typing.Tuple[float, float]],
-        end: typing.Union["TimedPosition", typing.Tuple[float, float]],
+        start: typing.Union["Position", typing.Tuple[float, float]],
+        end: typing.Union["Position", typing.Tuple[float, float]],
     ) -> "Path":
-        if isinstance(start, TimedPosition) and isinstance(end, TimedPosition):
+        if isinstance(start, Position) and isinstance(end, Position):
             start = (start.x, start.y)
             end = (end.x, end.y)
 
@@ -685,7 +685,7 @@ class Path:
         """
         removes consecutive duplicates
         """
-        prev = TimedPosition()
+        prev = Position()
         self.vertices = [
             prev := v for v in self.vertices if prev.x != v.x or prev.y != v.y
         ]
@@ -733,7 +733,7 @@ class Path:
         sum_y = np.sum(arr[:, 1])
         return sum_x / length, sum_y / length
 
-    def _parallel(self, p1: "TimedPosition", p2: "TimedPosition", offset_amount: float):
+    def _parallel(self, p1: "Position", p2: "Position", offset_amount: float):
         delta_y = p2.y - p1.y
         delta_x = p2.x - p1.x
         theta = math.atan2(delta_y, delta_x)
@@ -769,9 +769,9 @@ class Path:
 
     def _offset_angle(
         self,
-        p1: "TimedPosition",
-        p2: "TimedPosition",
-        p3: "TimedPosition",
+        p1: "Position",
+        p2: "Position",
+        p3: "Position",
         offset: float,
     ) -> "Path":
         a = p2.distance(p3)
@@ -784,8 +784,8 @@ class Path:
         gamma = math.acos(acos_arg)
         corner_offset = offset * math.tan(math.pi / 2 - (0.5 * gamma))
         ac_offset = self._parallel(p1, p2, offset)
-        vector_a = TimedPosition(p1.x - p2.x, p1.y - p2.y)
-        vector_b = TimedPosition(p3.x - p2.x, p3.y - p2.y)
+        vector_a = Position(p1.x - p2.x, p1.y - p2.y)
+        vector_b = Position(p3.x - p2.x, p3.y - p2.y)
         cp = self._cross_product(
             vector_a.arr(), vector_b.arr()
         )  # np.cross(vector_a.arr(), vector_b.arr())
@@ -844,7 +844,7 @@ class Path:
         for v in self.vertices:
             yield v
 
-    def __getitem__(self, item) -> "TimedPosition":
+    def __getitem__(self, item) -> "Position":
         return self.vertices[item].copy()
 
 
@@ -1170,7 +1170,7 @@ class PathCollection:
         _bb = self.bb()
         paths_center = _bb.center()
 
-        output_bounds_center = TimedPosition(width / 2.0, height / 2.0)
+        output_bounds_center = Position(width / 2.0, height / 2.0)
 
         if output_bounds:
             output_bounds_center = BoundingBox(
