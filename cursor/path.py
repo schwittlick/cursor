@@ -19,15 +19,30 @@ log = wasabi.Printer()
 
 class TimedPosition:
     def __init__(self, x: float = 0.0, y: float = 0.0, timestamp: int = 0):
-        self.x = x
-        self.y = y
+        self._pos = np.array((x, y), dtype=float)
         self.timestamp = timestamp
 
-    def pos(self) -> tuple[float, float]:
-        return self.x, self.y
+    @property
+    def x(self) -> float:
+        return self._pos[0]
+
+    @x.setter
+    def x(self, v: float) -> None:
+        self._pos[0] = v
+
+    @property
+    def y(self) -> float:
+        return self._pos[1]
+
+    @y.setter
+    def y(self, v: float) -> None:
+        self._pos[1] = v
+
+    def tuple(self) -> tuple[float, float]:
+        return tuple(self._pos)
 
     def arr(self) -> np.array:
-        return np.array(self.pos(), dtype=float)
+        return self._pos
 
     def time(self) -> int:
         return self.timestamp
@@ -37,9 +52,8 @@ class TimedPosition:
             copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(self.timestamp)
         )
 
-    def distance(self, t: "TimedPosition"):
-        return math.sqrt(math.pow(t.x - self.x, 2) + math.pow(t.y - self.y, 2))
-        # return np.linalg.norm(self.arr() - t.arr())
+    def distance(self, t: "TimedPosition") -> float:
+        return np.linalg.norm(self.arr() - t.arr())
 
     def rot(
         self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)
@@ -53,12 +67,10 @@ class TimedPosition:
         self.y = qy
 
     def translate(self, x: float, y: float) -> None:
-        self.x += x
-        self.y += y
+        self._pos += (x, y)
 
     def scale(self, x: float, y: float) -> None:
-        self.x *= x
-        self.y *= y
+        self._pos *= (x, y)
 
     def __eq__(self, o):
         """
@@ -138,11 +150,11 @@ class BoundingBox:
             return points_inside > points_outside
 
     def center(self) -> typing.Tuple[float, float]:
-        center_x = ((self.w) / 2.0) + self.x
-        center_y = ((self.h) / 2.0) + self.y
+        center_x = (self.w / 2.0) + self.x
+        center_y = (self.h / 2.0) + self.y
         return center_x, center_y
 
-    def subdiv(self, xpieces, ypieces) -> typing.List["BoundingBox"]:
+    def subdiv(self, xpieces: int, ypieces: int) -> typing.List["BoundingBox"]:
         bbs = []
         for _x in range(xpieces):
             for _y in range(ypieces):
@@ -608,7 +620,7 @@ class Path:
             if idx > 0:
                 f = self.vertices[idx - 1]
                 s = self.vertices[idx]
-                angle = self.angle_clockwise(f.pos(), s.pos())
+                angle = self.angle_clockwise(f.tuple(), s.tuple())
                 # angle = angle_clockwise((1, 1), (1, -1))
 
                 if angle > 180:
@@ -793,7 +805,7 @@ class Path:
 
         return out_path
 
-    def offset(self, offset: float = 1.0):
+    def offset(self, offset: float = 1.0) -> "Path":
         if len(self) < 3:
             return None
 

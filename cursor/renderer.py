@@ -102,8 +102,8 @@ class SvgRenderer:
 
             self.dwg.add(
                 self.dwg.line(
-                    start.pos(),
-                    end.pos(),
+                    start.tuple(),
+                    end.tuple(),
                     stroke_width=0.5,
                     stroke=svgwrite.rgb(0, 0, 0, "%"),
                 )
