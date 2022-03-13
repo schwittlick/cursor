@@ -38,7 +38,7 @@ if __name__ == "__main__":
         for _bb in range(len(bbs)):
             if bbs[_bb].inside(p):
                 offset = offsets[_bb]
-                p.rot(offset, bbs[_bb].center())
+                p.rot(offset, bbs[_bb].center().tuple())
                 paths[_bb].vertices.append(p)
                 break
 

@@ -104,22 +104,16 @@ class TimedPosition:
 
 
 class BoundingBox:
-    def __init__(self, x: float, y: float, w: float, h: float):
+    def __init__(self, x: float, y: float, x2: float, y2: float):
         self.x = x
         self.y = y
-        self.x2 = w
-        self.y2 = h
+        self.x2 = x2
+        self.y2 = y2
         self.w = math.dist([self.x], [self.x2])
         self.h = math.dist([self.y], [self.y2])
 
-    def __repr__(self) -> str:
-        return f"BB(x={self.x}, y={self.y}, x2={self.x2}, y2={self.y2}, w={self.w}, h={self.h})"
-
     def __inside(self, point: "TimedPosition") -> bool:
-        return (
-            self.x <= point.x <= self.x + self.w
-            and self.y <= point.y <= self.y + self.w
-        )
+        return self.x <= point.x <= self.x2 and self.y <= point.y <= self.y2
 
     def inside(
         self, data: typing.Union["TimedPosition", "Path", "PathCollection"]
@@ -149,21 +143,26 @@ class BoundingBox:
                     points_inside += 1
             return points_inside > points_outside
 
-    def center(self) -> typing.Tuple[float, float]:
+    def center(self) -> "TimedPosition":
         center_x = (self.w / 2.0) + self.x
         center_y = (self.h / 2.0) + self.y
-        return center_x, center_y
+        return TimedPosition(center_x, center_y)
 
     def subdiv(self, xpieces: int, ypieces: int) -> typing.List["BoundingBox"]:
         bbs = []
-        for _x in range(xpieces):
-            for _y in range(ypieces):
-                xoff = (_x * self.x2 / xpieces) + self.x
-                yoff = (_y * self.y2 / ypieces) + self.y
-                bb = BoundingBox(xoff, yoff, self.x2 / xpieces, self.y2 / ypieces)
+        for x in range(xpieces):
+            for y in range(ypieces):
+                w = self.x2 / xpieces
+                h = self.y2 / ypieces
+                xoff = x * w + self.x
+                yoff = y * h + self.y
+                bb = BoundingBox(xoff, yoff, xoff + w, yoff + h)
                 bbs.append(bb)
 
         return bbs
+
+    def __repr__(self) -> str:
+        return f"BB(x={self.x}, y={self.y}, x2={self.x2}, y2={self.y2}, w={self.w}, h={self.h})"
 
 
 class Spiral:
@@ -1171,7 +1170,7 @@ class PathCollection:
         _bb = self.bb()
         paths_center = _bb.center()
 
-        output_bounds_center = width / 2.0, height / 2.0
+        output_bounds_center = TimedPosition(width / 2.0, height / 2.0)
 
         if output_bounds:
             output_bounds_center = BoundingBox(
@@ -1179,8 +1178,8 @@ class PathCollection:
             ).center()
 
         diff = (
-            output_bounds_center[0] - paths_center[0],
-            output_bounds_center[1] - paths_center[1],
+            output_bounds_center.x - paths_center.x,
+            output_bounds_center.y - paths_center.y,
         )
 
         log.info(
