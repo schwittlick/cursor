@@ -5,6 +5,66 @@ from cursor.path import BoundingBox
 import pytest
 
 
+def test_timedposition_copy():
+    t1 = TimedPosition(0, 0, 0)
+
+    t2 = t1.copy()
+
+    assert t1 is not t2
+    assert t1 == t2
+
+    t2.x = 1
+
+    assert t1 != t2
+
+
+def test_timedposition_translate():
+    t1 = TimedPosition(0, 0)
+    t1.translate(1, 2)
+
+    assert t1.x == 1
+    assert t1.y == 2
+
+
+def test_timedposition_scale():
+    t1 = TimedPosition(2, 2)
+    t1.scale(2, 2)
+
+    assert t1.x == 4
+    assert t1.y == 4
+
+
+def test_timedpos_comparison():
+    t1 = TimedPosition(0, 0, 0)
+    t2 = TimedPosition(0, 0, 1)
+    r = t1 < t2
+    assert r is True
+
+    r2 = t1 > t2
+    assert r2 is False
+
+    eq = t1 == t2
+    assert eq is False
+
+    b = False
+    with pytest.raises(NotImplementedError):
+        r = b == t1
+
+
+def test_timedpos_simple():
+    t = TimedPosition(1, 2, 100)
+    assert t.time() == 100
+    assert t.x == 1
+    assert t.y == 2
+
+
+def test_timedpos_scale():
+    t = TimedPosition(1, 2, 100)
+    t.scale(5, 10)
+    assert t.x == 5.0
+    assert t.y == 20.0
+
+
 def test_path_empty_start():
     p = Path()
 
@@ -173,35 +233,6 @@ def test_path_interp():
     assert int(interped[1].y) == 50
     assert int(interped[0].x) == 0
     assert int(interped[1].x) == 100
-
-
-def test_timedpos_comparison():
-    t1 = TimedPosition(0, 0, 0)
-    t2 = TimedPosition(0, 0, 1)
-    r = t1 < t2
-    assert r is True
-
-    r2 = t1 > t2
-    assert r2 is False
-
-    eq = t1 == t2
-    assert eq is False
-
-    b = False
-    with pytest.raises(NotImplementedError):
-        r = b == t1
-
-
-def test_timedpos_simple():
-    t = TimedPosition(0, 0, 100)
-    assert t.time() == 100
-
-
-def test_timedpos_scale():
-    t = TimedPosition(1, 2, 100)
-    t.scale(5, 10)
-    assert t.x == 5.0
-    assert t.y == 20.0
 
 
 def test_sort_path():
