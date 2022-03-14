@@ -10,15 +10,15 @@ import pyautogui
 def add_bb(bb, coll, res):
     coll.add(
         path.Path(
-            [path.TimedPosition(bb.x, bb.y), path.TimedPosition(bb.x + bb.x2, bb.y)]
+            [path.Position(bb.x, bb.y), path.Position(bb.x + bb.x2, bb.y)]
         ),
         res,
     )
     coll.add(
         path.Path(
             [
-                path.TimedPosition(bb.x + bb.x2, bb.y),
-                path.TimedPosition(bb.x + bb.x2, bb.y + bb.y2),
+                path.Position(bb.x + bb.x2, bb.y),
+                path.Position(bb.x + bb.x2, bb.y + bb.y2),
             ]
         ),
         res,
@@ -26,15 +26,15 @@ def add_bb(bb, coll, res):
     coll.add(
         path.Path(
             [
-                path.TimedPosition(bb.x + bb.x2, bb.y + bb.y2),
-                path.TimedPosition(bb.x, bb.y + bb.y2),
+                path.Position(bb.x + bb.x2, bb.y + bb.y2),
+                path.Position(bb.x, bb.y + bb.y2),
             ]
         ),
         res,
     )
     coll.add(
         path.Path(
-            [path.TimedPosition(bb.x, bb.y + bb.y2), path.TimedPosition(bb.x, bb.y)]
+            [path.Position(bb.x, bb.y + bb.y2), path.Position(bb.x, bb.y)]
         ),
         res,
     )

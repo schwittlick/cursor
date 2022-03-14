@@ -1,6 +1,7 @@
 from cursor import device
 from cursor import path
 
+
 if __name__ == "__main__":
     pc = path.PathCollection()
 

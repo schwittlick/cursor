@@ -4,8 +4,6 @@ from cursor import filter
 from cursor import data
 from cursor import loader
 
-import sys
-import math
 
 if __name__ == "__main__":
     recordings = data.DataDirHandler().recordings()
