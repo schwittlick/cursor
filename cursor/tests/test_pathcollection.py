@@ -47,7 +47,7 @@ def test_pathcollection_minmax():
     assert max[1] == 5111
 
 
-def test_bb():
+def test_bb_inside():
     p1 = Path()
     p1.add(100, 34)
     p1.add(200, 10)

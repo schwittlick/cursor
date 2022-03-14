@@ -1,6 +1,6 @@
 from cursor.path import Path
 from cursor.path import PathCollection
-from cursor.path import TimedPosition
+from cursor.path import Position
 
 import pathlib
 import json
@@ -22,7 +22,7 @@ class MyJsonEncoder(json.JSONEncoder):
         if isinstance(o, Path):
             return o.vertices
 
-        if isinstance(o, TimedPosition):
+        if isinstance(o, Position):
             return {"x": round(o.x, 4), "y": round(o.y, 4), "ts": round(o.timestamp, 2)}
 
 
@@ -33,10 +33,10 @@ class MyJsonDecoder(json.JSONDecoder):
     def object_hook(self, dct):
         from cursor.path import Path
         from cursor.path import PathCollection
-        from cursor.path import TimedPosition
+        from cursor.path import Position
 
         if "x" in dct and "y" in dct and "ts" in dct:
-            p = TimedPosition(dct["x"], dct["y"], dct["ts"])
+            p = Position(dct["x"], dct["y"], dct["ts"])
             return p
         if "w" in dct and "h" in dct:
             s = pyautogui.Size(dct["w"], dct["h"])
