@@ -1,5 +1,4 @@
 import json
-import shutil
 
 yellow = "yellow"
 blue = "blue"

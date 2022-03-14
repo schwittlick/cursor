@@ -16,9 +16,9 @@ def PointsInCircum(r, n=100):
 class Triangle:
     def __init__(self, x1, y1, x2, y2, x3, y3, rot=False) -> None:
         self.points = []
-        self.points.append(path.TimedPosition(x1, y1))
-        self.points.append(path.TimedPosition(x2, y2))
-        self.points.append(path.TimedPosition(x3, y3))
+        self.points.append(path.Position(x1, y1))
+        self.points.append(path.Position(x2, y2))
+        self.points.append(path.Position(x3, y3))
 
         for point in self.points:
             point.rot(math.pi / 2)

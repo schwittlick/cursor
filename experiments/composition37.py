@@ -22,13 +22,13 @@ def composition37(p0, p1, offset):
     coll.add(toppath)
     coll.add(bottompath)
 
-    p1_morphed = p1.morph(toppath[0].pos(), bottompath[0].pos())
+    p1_morphed = p1.morph(toppath[0].tuple(), bottompath[0].tuple())
     coll.add(p1_morphed)
 
     for i in range(len(toppath)):
         st = toppath[i]
         en = bottompath[i]
-        newpath = p1.morph(en.pos(), st.pos())
+        newpath = p1.morph(en.tuple(), st.tuple())
         coll.add(newpath)
 
     device.SimpleExportWrapper().ex(
