@@ -66,9 +66,6 @@ class Position:
         self.x = qx
         self.y = qy
 
-    def astuple(self) -> tuple[float, float]:
-        return self.x, self.y
-
     def translate(self, x: float, y: float) -> None:
         self._pos += (x, y)
 
