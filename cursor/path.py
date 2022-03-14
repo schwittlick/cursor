@@ -38,7 +38,7 @@ class Position:
     def y(self, v: float) -> None:
         self._pos[1] = v
 
-    def tuple(self) -> tuple[float, float]:
+    def astuple(self) -> tuple[float, float]:
         return tuple(self._pos)
 
     def arr(self) -> np.array:
@@ -66,7 +66,7 @@ class Position:
         self.x = qx
         self.y = qy
 
-    def tuple(self) -> tuple[float, float]:
+    def astuple(self) -> tuple[float, float]:
         return self.x, self.y
 
     def translate(self, x: float, y: float) -> None:
@@ -622,7 +622,7 @@ class Path:
             if idx > 0:
                 f = self.vertices[idx - 1]
                 s = self.vertices[idx]
-                angle = self.angle_clockwise(f.tuple(), s.tuple())
+                angle = self.angle_clockwise(f.astuple(), s.astuple())
                 # angle = angle_clockwise((1, 1), (1, -1))
 
                 if angle > 180:
@@ -874,20 +874,20 @@ class Path:
         for i in range(n):
             sum = 1
             for j in range(1, size, 1):
-                cur = TimedPosition()
+                cur = Position()
                 left_position = i - j
                 right_position = i + j
                 if left_position < 0 and closed:
                     left_position += n
                 if left_position >= 0:
                     # holy shit, unpacking a tuple into parameters via pointer
-                    cur.translate(*self.vertices[left_position].tuple())
+                    cur.translate(*self.vertices[left_position].astuple())
                     sum += weights[j]
                 if right_position >= n and closed:
                     right_position -= n
                 if right_position < n:
                     # again
-                    cur.translate(*self.vertices[right_position].tuple())
+                    cur.translate(*self.vertices[right_position].astuple())
                     sum += weights[j]
                 result.vertices[i].translate(cur.x * weights[j], cur.y * weights[j])
             result.vertices[i].x = result.vertices[i].x / sum
