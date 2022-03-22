@@ -2,23 +2,29 @@ from cursor import loader
 from cursor import data
 from cursor import device
 from cursor import path
+from cursor import filter
+
 
 if __name__ == "__main__":
     p = data.DataDirHandler().recordings()
-    files = ["1640346795.269127_compressed"]
+    files = ["1645457267.665355_compressed"]
     ll = loader.Loader(directory=p, limit_files=files)
-    colls = ll.all_collections()
+    colls = ll.all_paths()
 
     c = path.PathCollection()
 
     layer = 0
-    for coll in colls:
-        for p in coll:
-            p.layer = str(layer)
+    for p in colls:
+        add = True
+        for pos in p:
+            if pos.x > 1.1:
+                add = False
+        # p.layer = str(layer)
+        if add:
             c.add(p)
-        layer += 1
+    # layer += 1
 
-    c.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=20)
+    # c.fit(device.Paper.sizes[device.PaperSize.LANDSCAPE_A1], padding_mm=20)
 
     # bb = path.BoundingBox(500, 400, 1400, 900)
     # f = filter.BoundingBoxFilter(bb)
