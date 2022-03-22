@@ -8,10 +8,10 @@ orange = "orange"
 black = "black"
 white = "white"
 violet = "violet"
-magenta = "neon magenta"
-neon_green = "neon green"
-neon_yellow = "neon yellow"
-neon_orange = "neon orange"
+magenta = "neonmagenta"
+neon_green = "neongreen"
+neon_yellow = "neonyellow"
+neon_orange = "neonorange"
 
 path = (
     "Z:\\Dropbox\\0_MARCELSCHWITTLICK\\2020_DRAWING_PHOTOS\\spirals\\raw\\edit\\144\\"
@@ -33,7 +33,7 @@ data_map[neon_orange] = {}
 
 # yellow
 data_map[yellow][yellow] = {
-    "created": "01.08.2020",
+    "created": "15.08.2020",
     "objktid": 256740,
     "file": f"{path}{yellow}\\{yellow}\\20210902_yy.jpg",
 }
@@ -112,7 +112,7 @@ data_map[blue][yellow] = {
 }
 
 data_map[blue][blue] = {
-    "created": "03.08.2020",
+    "created": "02.08.2020",
     "objktid": 131715,
     "file": f"{path}{blue}\\{blue}\\20200908_21.jpg",
 }
@@ -130,7 +130,7 @@ data_map[blue][red] = {
 }
 
 data_map[blue][orange] = {
-    "created": "26.08.2021",
+    "created": "27.08.2021",
     "objktid": 291350,
     "file": f"{path}{blue}\\{orange}\\20210902_bo.jpg",
 }
@@ -276,7 +276,7 @@ data_map[red][red] = {
 }
 
 data_map[red][orange] = {
-    "created": "12.04.2021",
+    "created": "11.04.2021",
     "objktid": 48563,
     "file": f"{path}{red}\\{orange}\\20210420_rno.jpg",
 }
@@ -434,7 +434,7 @@ data_map[black][black] = {
 }
 
 data_map[black][white] = {
-    "created": "01.08.2020",
+    "created": "05.08.2020",
     "objktid": 256730,
     "file": f"{path}{black}\\{white}\\20210902_bw.jpg",
 }
@@ -452,7 +452,7 @@ data_map[black][magenta] = {
 }
 
 data_map[black][neon_green] = {
-    "created": "25.05.2021",
+    "created": "24.05.2021",
     "objktid": 105740,
     "file": f"{path}{black}\\{neon_green}\\20210530.jpg",
 }
@@ -490,7 +490,7 @@ data_map[white][green] = {
 }
 
 data_map[white][red] = {
-    "created": "10.06.2020",
+    "created": "10.06.2021",
     "objktid": 133550,
     "file": f"{path}{white}\\{red}\\20210614_wr.jpg",
 }
@@ -588,7 +588,7 @@ data_map[violet][white] = {
 }
 
 data_map[violet][violet] = {
-    "created": "01.08.2020",
+    "created": "06.08.2020",
     "objktid": 256751,
     "file": f"{path}{violet}\\{violet}\\20210902_v.jpg",
 }
@@ -742,7 +742,7 @@ data_map[neon_green][violet] = {
 }
 
 data_map[neon_green][magenta] = {
-    "created": "05.05.2021",
+    "created": "07.05.2021",
     "objktid": 95777,
     "file": f"{path}{neon_green}\\{magenta}\\20210508.jpg",
 }
@@ -828,7 +828,7 @@ data_map[neon_yellow][neon_green] = {
 }
 
 data_map[neon_yellow][neon_yellow] = {
-    "created": "09.08.2020",
+    "created": "10.08.2020",
     "objktid": 471762,
     "file": f"{path}{neon_yellow}\\{neon_yellow}\\20210902_ny.jpg",
 }
@@ -923,13 +923,13 @@ if __name__ == "__main__":
             print(out)
             if "1111" not in v2["file"]:
                 # shutil.copyfile(v2["file"], out)
-                v2["file"] = f"{k1}-{k2}.jpg"
+                v2["file"] = f"{k1}-{k2}"
             else:
                 # shutil.copyfile(
                 #    "C:\\Users\\Marcel Schwittlick\\Desktop\\ROHDE-SCHWARZ-XY-Schreiber-Recorder-ZSK-2.jpg",
                 #    out,
                 # )
-                v2["file"] = f"{k1}_{k2}.jpg"
+                v2["file"] = f"{k1}-{k2}"
 
-    with open("z:\\144\\cropped\\upward_spiral.json", "w") as file:
-        file.write(json.dumps(data_map))
+    with open("z:\\144\\cropped\\upward_spiral_noext.json", "w") as file:
+        file.write(json.dumps(data_map, indent=2))
