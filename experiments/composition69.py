@@ -4,7 +4,7 @@ from cursor import misc
 
 if __name__ == "__main__":
     pc = path.PathCollection()
-    count = 390
+    count = 390 * 4
     for v in range(count):
         pa = path.Path(pen_velocity=int(misc.map(v, 0, count, 45, 1, True)))
         pa.add(v, 0)
@@ -17,5 +17,5 @@ if __name__ == "__main__":
         device.PaperSize.LANDSCAPE_A1,
         30,
         "composition69",
-        f"c69_{pc.hash()}",
+        f"c69_0.5mm_{pc.hash()}",
     )
