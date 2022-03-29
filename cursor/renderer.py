@@ -429,20 +429,18 @@ class TektronixRenderer:
         # NOTE: this does not initialize the plotter or set the mode
         # NOTE: this is only for the tek 4662 - the 4663 has way more features
         # TODO: add some bounds checking for bogus inputs
-        output_string = chr(27) + 'AE' + GS
+        output_string = chr(27) + "AE" + GS
 
         for p in self.__paths:
             x = int(p.start_pos().x)
             y = int(p.start_pos().y)
-            print(f"{x} {y}")
             output_string += self._coords_to_bytes(x, y)  # move, pen-up
             for line in p.vertices:
                 x = int(line.x)
                 y = int(line.y)
-                print(f"{x} {y}")
-                output_string += self._coords_to_bytes(x, y)
+                output_string += self._coords_to_bytes(x, y)  # draw, pen-down
 
-        output_string += self._coords_to_bytes(0, 0)  # pen up, move 0,0
+        output_string += self._coords_to_bytes(0, 0)
 
         with open(fname.as_posix(), "wb") as file:
             file.write(output_string.encode("utf-8"))
