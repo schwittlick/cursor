@@ -694,7 +694,7 @@ class Path:
         """
         removes points larger than 1.0
         """
-        self.vertices = [prev := v for v in self.vertices if v.x < 1.0 and v.y < 1.0]
+        self.vertices = [prev := v for v in self.vertices if v.x < 1.0 and v.x > 0.0 and v.y < 1.0 and v.y > 0.0]
 
     def similarity(self, _path: "Path") -> float:
         """

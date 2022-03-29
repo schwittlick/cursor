@@ -310,8 +310,12 @@ class HPGLRenderer:
 
             _hpgl_string += f"SP{self.__get_pen_select(p.pen_select)};\n"
             _hpgl_string += f"LT{self.__linetype_from_layer(p.line_type)};\n"
-            _hpgl_string += f"VS{self.__get_velocity(p.velocity)};\n"
-            _hpgl_string += f"FS{self.__get_pen_force(p.pen_force)};\n"
+
+            if p.velocity:
+                _hpgl_string += f"VS{self.__get_velocity(p.velocity)};\n"
+
+            if p.pen_force:
+                _hpgl_string += f"FS{self.__get_pen_force(p.pen_force)};\n"
 
             _hpgl_string += f"PA{int(x)},{int(y)};\n"
             if p.is_polygon:
