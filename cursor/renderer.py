@@ -424,12 +424,13 @@ class TektronixRenderer:
         fname = self.__save_path / (filename + ".tek")
 
         GS = chr(29)
+        ESC = chr(27)
+        FF = chr(12)
+        US = chr(31)
         # BEL = chr(7)
 
-        # NOTE: this does not initialize the plotter or set the mode
-        # NOTE: this is only for the tek 4662 - the 4663 has way more features
-        # TODO: add some bounds checking for bogus inputs
-        output_string = chr(27) + "AE" + GS
+        # Escape + init? + Go-to-graph-mode
+        output_string = ESC + "AE" + GS
 
         for p in self.__paths:
             x = int(p.start_pos().x)
@@ -440,7 +441,8 @@ class TektronixRenderer:
                 y = int(line.y)
                 output_string += self._coords_to_bytes(x, y)  # draw, pen-down
 
-        output_string += self._coords_to_bytes(0, 0)
+        # Escape + Move-to-home + Go-to-alpha-mode
+        output_string += ESC + FF + US
 
         with open(fname.as_posix(), "wb") as file:
             file.write(output_string.encode("utf-8"))
