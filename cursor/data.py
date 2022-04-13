@@ -111,6 +111,9 @@ class DataDirHandler:
     def gcode(self, folder) -> pathlib.Path:
         return self.data_dir / "experiments" / folder / "gcode"
 
+    def tek(self, folder) -> pathlib.Path:
+        return self.data_dir / "experiments" / folder / "tek"
+
     def jpg(self, subfolder) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "jpg"
 
