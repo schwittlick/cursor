@@ -36,6 +36,7 @@ class PlotterType(Enum):
     ROLAND_DPX3300_A2 = 9
     ROLAND_DPX3300_A3 = 10
     HP_7595A_A3 = 11
+    TEKTRONIX_4662 = 12
 
 
 class ExportFormat(Enum):
@@ -43,6 +44,7 @@ class ExportFormat(Enum):
     SVG = 1
     GCODE = 2
     HPGL = 3
+    TEK = 4
 
 
 class ExportFormatMappings:
@@ -59,6 +61,7 @@ class ExportFormatMappings:
         PlotterType.HP_7595A: ExportFormat.HPGL,
         PlotterType.ROLAND_PNC1000: ExportFormat.HPGL,
         PlotterType.HP_7595A_A3: ExportFormat.HPGL,
+        PlotterType.TEKTRONIX_4662: ExportFormat.TEK,
     }
 
 
@@ -76,6 +79,7 @@ class MinmaxMapping:
         PlotterType.HP_7595A: MinMax(-23160, 23160, -17602, 17602),
         PlotterType.ROLAND_PNC1000: MinMax(0, 0, 17200, 40000),  # actually unlimited y
         PlotterType.HP_7595A_A3: MinMax(-7728, 7728 + 960, -5752, 5752),
+        PlotterType.TEKTRONIX_4662: MinMax(0, 4095, 0, 2731),  # 10x15 inches (25.4 x 38.1 cm)
     }
 
 
@@ -115,6 +119,7 @@ class PlotterName:
         PlotterType.HP_7595A: "hp7595a_draftmaster_sx",
         PlotterType.ROLAND_PNC1000: "roland_camm1",
         PlotterType.HP_7595A_A3: "hp7595a_draftmaster_sx_a3",
+        PlotterType.TEKTRONIX_4662: "tektronix4662",
     }
 
 
@@ -180,6 +185,7 @@ class XYFactors:
         PlotterType.HP_7595A: (40, 40),
         PlotterType.ROLAND_PNC1000: (40, 40),
         PlotterType.HP_7595A_A3: (37, 37),
+        PlotterType.TEKTRONIX_4662: (9.75, 9.19525),
     }
 
 
@@ -393,6 +399,12 @@ class Exporter:
                         )
                     gcode_renderer.render(pc)
                     gcode_renderer.save(f"{layer}_{fname}")
+
+                if format is ExportFormat.TEK:
+                    tek_folder = data.DataDirHandler().tek(self.name)
+                    tek_renderer = renderer.TektronixRenderer(tek_folder)
+                    tek_renderer.render(pc)
+                    tek_renderer.save(f"{layer}_{fname}")
 
 
 class SimpleExportWrapper:
