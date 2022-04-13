@@ -79,7 +79,7 @@ class MinmaxMapping:
         PlotterType.HP_7595A: MinMax(-23160, 23160, -17602, 17602),
         PlotterType.ROLAND_PNC1000: MinMax(0, 0, 17200, 40000),  # actually unlimited y
         PlotterType.HP_7595A_A3: MinMax(-7728, 7728 + 960, -5752, 5752),
-        PlotterType.TEKTRONIX_4662: MinMax(0, 0, 4095, 2731),
+        PlotterType.TEKTRONIX_4662: MinMax(0, 4095, 0, 2731),
     }
 
 
@@ -185,7 +185,7 @@ class XYFactors:
         PlotterType.HP_7595A: (40, 40),
         PlotterType.ROLAND_PNC1000: (40, 40),
         PlotterType.HP_7595A_A3: (37, 37),
-        PlotterType.TEKTRONIX_4662: (9.75, 9.75),
+        PlotterType.TEKTRONIX_4662: (9.75, 9.19525),
     }
 
 
