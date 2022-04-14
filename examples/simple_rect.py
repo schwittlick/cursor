@@ -1,4 +1,5 @@
 from cursor import device
+from cursor import export
 from cursor import path
 
 
@@ -13,7 +14,7 @@ if __name__ == "__main__":
     p.add(0, 0)
     pc.add(p)
 
-    device.SimpleExportWrapper().ex(
+    export.SimpleExportWrapper().ex(
         pc,
         device.PlotterType.ROLAND_DPX3300_A3,
         device.PaperSize.LANDSCAPE_A3,

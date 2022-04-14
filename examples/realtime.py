@@ -1,11 +1,12 @@
 from cursor import path
 from cursor import renderer
 from cursor import device
+from cursor import export
 
 
 def save_callback(id: int, pc: "path.PathCollection"):
     print(f"saving {id}")
-    device.SimpleExportWrapper().ex(
+    export.SimpleExportWrapper().ex(
         pc,
         device.PlotterType.ROLAND_DPX3300,
         device.PaperSize.LANDSCAPE_A1,

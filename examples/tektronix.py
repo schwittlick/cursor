@@ -1,4 +1,5 @@
 from cursor import device
+from cursor import export
 from cursor import path
 
 if __name__ == "__main__":
@@ -12,11 +13,11 @@ if __name__ == "__main__":
     p.add(0, 0)
     pc.add(p)
 
-    device.SimpleExportWrapper().ex(
+    export.SimpleExportWrapper().ex(
         paths=pc,
         ptype=device.PlotterType.TEKTRONIX_4662,
         psize=device.PaperSize.LANDSCAPE_A3,
         margin=10,
         name="simple_rect_example",
-        suffix="helloworld"
+        suffix="helloworld",
     )
