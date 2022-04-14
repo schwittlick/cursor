@@ -26,16 +26,15 @@ class DrawingOutOfBoundsException(Exception):
 
 
 class PathIterator:
-    def __init__(self, paths):
-        assert isinstance(paths, PathCollection), "Only PathCollection objects allowed"
+    def __init__(self, paths: PathCollection):
         self.paths = paths
 
-    def points(self):
+    def points(self) -> typing.Iterator[Position]:
         for p in self.paths:
             for point in p.vertices:
                 yield point
 
-    def connections(self):
+    def connections(self) -> typing.Iterator[typing.Tuple[Position, Position]]:
         prev = None
 
         for p in self.paths:
@@ -55,25 +54,17 @@ class PathIterator:
 
 
 class SvgRenderer:
-    def __init__(self, folder):
-        assert isinstance(folder, pathlib.Path), "Only path objects allowed"
+    def __init__(self, folder: pathlib.Path):
         self.save_path = folder
         self.dwg = None
         self.paths = PathCollection()
         self.bbs = []
 
-    def render(self, paths):
-        if not isinstance(paths, PathCollection):
-            raise Exception("Only PathCollection and list of PathCollections allowed")
-
+    def render(self, paths: PathCollection) -> None:
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
-        # for path in paths:
-        #    log.good(f"with {len(path)} verts")
         self.paths += paths
 
-    def render_bb(self, bb):
-        assert isinstance(bb, BoundingBox), "Only BoundingBox objects allowed"
-
+    def render_bb(self, bb: BoundingBox) -> None:
         self.bbs.append(bb)
 
         p1 = Path()
@@ -85,7 +76,7 @@ class SvgRenderer:
 
         self.paths.add(p1)
 
-    def save(self, filename: str):
+    def save(self, filename: str) -> None:
         bb = self.paths.bb()
 
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
@@ -119,15 +110,13 @@ class SvgRenderer:
 class GCodeRenderer:
     def __init__(
         self,
-        folder,
-        feedrate_xy=2000,
-        feedrate_z=1000,
-        z_down=3.5,
-        z_up=0.0,
-        invert_y=True,
+        folder: pathlib.Path,
+        feedrate_xy: int = 2000,
+        feedrate_z: int = 1000,
+        z_down: float = 3.5,
+        z_up: float = 0.0,
+        invert_y: bool = True,
     ):
-        assert isinstance(folder, pathlib.Path), "Only path objects allowed"
-
         self.save_path = folder
         self.z_down = z_down
         self.z_up = z_up
@@ -137,20 +126,14 @@ class GCodeRenderer:
         self.paths = PathCollection()
         self.bbs = []
 
-    def render(self, paths):
-        if not isinstance(paths, PathCollection):
-            raise Exception("Only PathCollection and list of PathCollections allowed")
-
+    def render(self, paths: PathCollection) -> None:
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
-        # for path in paths:
-        #    log.good(f"with {len(path)} verts")
         self.paths += paths
 
-    def render_bb(self, bb):
-        assert isinstance(bb, BoundingBox), "Only BoundingBox objects allowed"
+    def render_bb(self, bb: BoundingBox) -> None:
         self.bbs.append(bb)
 
-    def save(self, filename: str):
+    def save(self, filename: str) -> None:
         try:
             pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
             fname = self.save_path / (filename + ".nc")
@@ -195,11 +178,7 @@ class GCodeRenderer:
         except DrawingOutOfBoundsException as e:
             log.fail(f"Couldn't generate GCode- Out of Bounds with position {e}")
 
-    def __append_to_file(self, file, x, y):
-        # if y < DrawingMachine.Plotter.MAX_Y:
-        #    raise DrawingOutOfBoundsException(y)
-        # if x > DrawingMachine.Plotter.MAX_X:
-        #    raise DrawingOutOfBoundsException(x)
+    def __append_to_file(self, file: typing.TextIO, x: float, y: float) -> None:
         file.write(f"G01 X{x:.2f} Y{y:.2f} F{self.feedrate_xy}\n")
 
 
@@ -212,10 +191,10 @@ class RealtimeRenderer:
         self.pcs = []
         self.selected = 0
 
-    def set_cb(self, cb):
+    def set_cb(self, cb) -> None:
         self.cb = cb
 
-    def _pygameinit(self):
+    def _pygameinit(self) -> None:
         pygame.init()
         self.screen = pygame.display.set_mode((self.w, self.h))
 
@@ -223,16 +202,16 @@ class RealtimeRenderer:
         pygame.display.update()
         self.running = True
 
-    def _line(self, screen, p1: Position, p2: Position):
-        pygame.draw.line(screen, (0, 0, 0), p1.pos(), p2.pos())
+    def _line(self, screen, p1: Position, p2: Position) -> None:
+        pygame.draw.line(screen, (0, 0, 0), p1.astuple(), p2.astuple())
 
-    def add(self, pc):
+    def add(self, pc: PathCollection) -> None:
         self.pcs.append(pc)
 
-    def set(self, pcs):
+    def set(self, pcs: typing.List[PathCollection]) -> None:
         self.pcs = pcs
 
-    def render(self):
+    def render(self) -> None:
         if len(self.pcs) == 0:
             log.fail("No paths to render. Quitting")
             return
@@ -319,7 +298,7 @@ class HPGLRenderer:
 
             _hpgl_string += f"PA{int(x)},{int(y)};\n"
             if p.is_polygon:
-                _hpgl_string += "PM0;"
+                _hpgl_string += "PM0;\n"
 
             _hpgl_string += "PD;\n"
 
@@ -331,10 +310,10 @@ class HPGLRenderer:
             _hpgl_string += "PU;\n"
 
             if p.is_polygon:
-                _hpgl_string += "PM2;"  # switch to PM2; to close and safe
-                _hpgl_string += "FP;"
+                _hpgl_string += "PM2;\n"  # switch to PM2; to close and safe
+                _hpgl_string += "FP;\n"
 
-        _hpgl_string += "PA0,0\n"
+        _hpgl_string += "PA0,0;\n"
         _hpgl_string += "SP0;\n"
 
         with open(fname.as_posix(), "w") as file:
@@ -392,7 +371,7 @@ class TektronixRenderer:
         self.__save_path = folder
         self.__paths = PathCollection()
 
-    def _coords_to_bytes(self, xcoord: int, ycoord: int, low_res: bool = False):
+    def _coords_to_bytes(self, xcoord: int, ycoord: int, low_res: bool = False) -> str:
         """
         Converts integer coordinates to the funky 12-bit byte coordinate
         codes expected by the Tek plotter in graph mode.
@@ -419,7 +398,7 @@ class TektronixRenderer:
 
         return hi_y + eb + low_y + hi_x + low_x
 
-    def render(self, paths: "PathCollection") -> None:
+    def render(self, paths: PathCollection) -> None:
         self.__paths += paths
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
 
@@ -462,10 +441,7 @@ class JpegRenderer:
         self.img = None
         self.img_draw = None
 
-    def render(self, paths, scale=1.0, frame=False, thickness=1):
-        if not isinstance(paths, PathCollection):
-            raise Exception("Only PathCollection allowed")
-
+    def render(self, paths: PathCollection, scale: float = 1.0, frame:bool = False, thickness: int = 1) -> None:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
         if len(paths) == 0:
@@ -514,20 +490,18 @@ class JpegRenderer:
         if frame:
             self.render_frame()
 
-    def save(self, filename: str):
+    def save(self, filename: str) -> None:
         fname = self.save_path / (filename + ".jpg")
         self.img.save(fname, "JPEG")
         log.good(f"Finished saving {fname}")
 
-    def render_bb(self, bb):
-        assert isinstance(bb, BoundingBox), "Only BoundingBox objects allowed"
-
+    def render_bb(self, bb: BoundingBox) -> None:
         self.img_draw.line(xy=(bb.x, bb.y, bb.x2, bb.y), fill="black", width=2)
         self.img_draw.line(xy=(bb.x, bb.y, bb.x, bb.y2), fill="black", width=2)
         self.img_draw.line(xy=(bb.x2, bb.y, bb.x2, bb.y2), fill="black", width=2)
         self.img_draw.line(xy=(bb.x, bb.y2, bb.x2, bb.y2), fill="black", width=2)
 
-    def render_frame(self):
+    def render_frame(self) -> None:
         w = self.img.size[0]
         h = self.img.size[1]
         self.img_draw.line(xy=(0, 0, w, 0), fill="black", width=2)
@@ -541,10 +515,10 @@ class VideoRenderer:
         self.save_path = folder
         self.images = []
 
-    def add_frame(self, img):
+    def add_frame(self, img) -> None:
         self.images.append(img)
 
-    def render_video(self, fname):
+    def render_video(self, fname: str) -> None:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
         text_file = (self.save_path / "list.txt").as_posix()
@@ -574,7 +548,7 @@ class AsciiRenderer:
         self.pixels = " .,:;i1tfLCG08#"
         self.output = ""
 
-    def get_raw_char(self, r: int, g: int, b: int, a: int):
+    def get_raw_char(self, r: int, g: int, b: int, a: int) -> str:
         value = r  # self.intensity(r, g, b, a)
         precision = 255 / (len(self.pixels) - 1)
         rawChar = self.pixels[int(round(value / precision))]
@@ -582,10 +556,10 @@ class AsciiRenderer:
         return rawChar
 
     @staticmethod
-    def intensity(r: int, g: int, b: int, a: int):
+    def intensity(r: int, g: int, b: int, a: int) -> int:
         return (r + g + b) * a
 
-    def render(self, paths, scale=1.0, frame=False, thickness=1):
+    def render(self, paths: PathCollection, scale: float = 1.0, frame: bool = False, thickness: int = 1):
         self.jpeg_renderer.render(paths, scale, frame, thickness)
 
         im = self.jpeg_renderer.img
@@ -603,7 +577,7 @@ class AsciiRenderer:
                 self.output = self.output + _a
             self.output = self.output + "\n"
 
-    def save(self, filename: str):
+    def save(self, filename: str) -> None:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
         fname = self.save_path / (filename + ".txt")
         with open(fname.as_posix(), "w") as file:
