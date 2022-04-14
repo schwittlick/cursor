@@ -115,9 +115,7 @@ class BoundingBox:
     def __inside(self, point: "Position") -> bool:
         return self.x <= point.x <= self.x2 and self.y <= point.y <= self.y2
 
-    def inside(
-        self, data: typing.Union["Position", "Path", "PathCollection"]
-    ) -> bool:
+    def inside(self, data: typing.Union["Position", "Path", "PathCollection"]) -> bool:
         if isinstance(data, Position):
             return self.__inside(data)
         if isinstance(data, Path):
@@ -221,13 +219,21 @@ class Path:
         self._pen_select = pen_select
         self._is_polygon = is_polygon
         if vertices:
-            self.vertices = list(vertices)
+            self._vertices = list(vertices)
         else:
-            self.vertices = []
+            self._vertices = []
 
     @property
     def hash(self) -> str:
         return hashlib.md5(str(self.vertices).encode("utf-8")).hexdigest()
+
+    @property
+    def vertices(self) -> typing.List[Position]:
+        return self._vertices
+
+    @vertices.setter
+    def vertices(self, vertices: typing.List[Position]):
+        self._vertices = vertices
 
     @property
     def line_type(self):
@@ -314,12 +320,12 @@ class Path:
             c, layer=self.layer, line_type=self.line_type, pen_velocity=self.velocity
         )
 
-    def start_pos(self) -> "Position":
+    def start_pos(self) -> Position:
         if len(self.vertices) == 0:
             raise IndexError
         return self.vertices[0]
 
-    def end_pos(self) -> "Position":
+    def end_pos(self) -> Position:
         if len(self.vertices) == 0:
             raise IndexError
 
@@ -333,7 +339,7 @@ class Path:
         b = BoundingBox(minx, miny, maxx, maxy)
         return b
 
-    def aspect_ratio(self):
+    def aspect_ratio(self) -> float:
         _bb = self.bb()
         w = _bb.w
         if _bb.w == 0.0:
@@ -348,7 +354,7 @@ class Path:
         """
         dist = 0
 
-        def calculateDistance(x1, y1, x2, y2):
+        def calculateDistance(x1, y1, x2, y2) -> float:
             dist = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
             return dist
 
@@ -694,7 +700,11 @@ class Path:
         """
         removes points larger than 1.0
         """
-        self.vertices = [prev := v for v in self.vertices if v.x < 1.0 and v.x > 0.0 and v.y < 1.0 and v.y > 0.0]
+        self.vertices = [
+            prev := v
+            for v in self.vertices
+            if v.x < 1.0 and v.x > 0.0 and v.y < 1.0 and v.y > 0.0
+        ]
 
     def similarity(self, _path: "Path") -> float:
         """
@@ -768,11 +778,7 @@ class Path:
         return [new_a, new_b]
 
     def _offset_angle(
-        self,
-        p1: "Position",
-        p2: "Position",
-        p3: "Position",
-        offset: float,
+        self, p1: "Position", p2: "Position", p3: "Position", offset: float,
     ) -> "Path":
         a = p2.distance(p3)
         b = p1.distance(p2)
@@ -854,7 +860,7 @@ class Path:
                 outVal = outputMin
         return outVal
 
-    def smooth(self, size, shape):
+    def smooth(self, size: int, shape: int) -> None:
         n = len(self)
         size = Path.clamp(size, 0, n)
         shape = Path.clamp(shape, 0, 1)
@@ -877,13 +883,12 @@ class Path:
                 if left_position < 0 and closed:
                     left_position += n
                 if left_position >= 0:
-                    # holy shit, unpacking a tuple into parameters via pointer
+                    # holy shit, unpacking a tuple into parameters via *
                     cur.translate(*self.vertices[left_position].astuple())
                     sum += weights[j]
                 if right_position >= n and closed:
                     right_position -= n
                 if right_position < n:
-                    # again
                     cur.translate(*self.vertices[right_position].astuple())
                     sum += weights[j]
                 result.vertices[i].translate(cur.x * weights[j], cur.y * weights[j])
@@ -891,6 +896,12 @@ class Path:
             result.vertices[i].y = result.vertices[i].y / sum
 
         self.vertices = result.vertices
+
+    def downsample(self, dist: float) -> None:
+        prev = Position()
+        self.vertices = [
+            prev := v for v in self.vertices if v.distance(prev) > dist
+        ]
 
     def __repr__(self):
         rep = (

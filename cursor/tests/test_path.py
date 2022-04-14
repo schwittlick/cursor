@@ -552,3 +552,19 @@ def test_offset():
     offset = p1.offset(0.2)
 
     assert offset[0].y == -0.2
+
+
+def test_downsample():
+    p1 = Path()
+    p1.add(0, 0)
+    p1.add(1, 0)
+    p1.add(2, 0)
+    p1.add(3, 0)
+    p1.add(4, 0)
+    p1.add(6, 0)
+    p1.add(7, 0)
+    p1.add(7.2, 0)
+
+    p1.downsample(1.1)
+
+    assert len(p1) == 4
