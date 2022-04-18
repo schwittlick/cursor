@@ -883,7 +883,6 @@ class Path:
                 if left_position < 0 and closed:
                     left_position += n
                 if left_position >= 0:
-                    # holy shit, unpacking a tuple into parameters via *
                     cur.translate(*self.vertices[left_position].astuple())
                     sum += weights[j]
                 if right_position >= n and closed:
@@ -898,6 +897,7 @@ class Path:
         self.vertices = result.vertices
 
     def downsample(self, dist: float) -> None:
+        _bb = self.bb()
         prev = Position()
         self.vertices = [
             prev := v for v in self.vertices if v.distance(prev) > dist
@@ -919,7 +919,7 @@ class Path:
         for v in self.vertices:
             yield v
 
-    def __getitem__(self, item) -> "Position":
+    def __getitem__(self, item) -> Position:
         return self.vertices[item].copy()
 
 
@@ -1182,7 +1182,7 @@ class PathCollection:
         padding_mm: int = None,
         padding_units: int = None,
         padding_percent: int = None,
-        output_bounds: tuple[float, float, float, float] = None,
+        output_bounds: BoundingBox = None,
         cutoff_mm=None,
         keep_aspect=False,
     ) -> None:
@@ -1248,9 +1248,7 @@ class PathCollection:
         output_bounds_center = Position(width / 2.0, height / 2.0)
 
         if output_bounds:
-            output_bounds_center = BoundingBox(
-                output_bounds[0], output_bounds[2], output_bounds[1], output_bounds[3],
-            ).center()
+            output_bounds_center = output_bounds.center()
 
         diff = (
             output_bounds_center.x - paths_center.x,

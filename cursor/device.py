@@ -6,20 +6,6 @@ import wasabi
 log = wasabi.Printer()
 
 
-class MinMax:
-    def __init__(self, minx: int, maxx: int, miny: int, maxy: int):
-        self.minx = minx
-        self.maxx = maxx
-        self.miny = miny
-        self.maxy = maxy
-
-    def center(self):
-        return (self.minx + self.maxx) / 2, (self.miny + self.maxy) / 2
-
-    def tuple(self):
-        return self.minx, self.maxx, self.miny, self.maxy
-
-
 class PlotterType(Enum):
     ROLAND_DPX3300 = 0
     DIY_PLOTTER = 1
@@ -65,19 +51,23 @@ class ExportFormatMappings:
 class MinmaxMapping:
     maps = {
         PlotterType.ROLAND_DPX3300: path.BoundingBox(-16920, -11180, 16340, 11180),
-        PlotterType.ROLAND_DPX3300_A2: MinMax(-16920, 5440, -11180, 4629),
-        PlotterType.ROLAND_DPX3300_A3: MinMax(-16920, -1112, -11180, -3276),
-        PlotterType.DIY_PLOTTER: MinMax(0, 3350, 0, -1715),
-        PlotterType.AXIDRAW: MinMax(0, 0, 0, -0),  # todo: missing real bounds
-        PlotterType.HP_7475A_A4: MinMax(0, 11040, 0, 7721),
-        PlotterType.HP_7475A_A3: MinMax(0, 16158, 0, 11040),
-        PlotterType.ROLAND_DXY1200: MinMax(0, 0, 0, 0),  # todo: missing real bounds
-        PlotterType.ROLAND_DXY980: MinMax(0, 16158, 0, 11040),
-        PlotterType.HP_7595A: MinMax(-23160, 23160, -17602, 17602),
-        PlotterType.ROLAND_PNC1000: MinMax(0, 0, 17200, 40000),  # actually unlimited y
-        PlotterType.HP_7595A_A3: MinMax(-7728, 7728 + 960, -5752, 5752),
-        PlotterType.TEKTRONIX_4662: MinMax(
-            0, 4095, 0, 2731
+        PlotterType.ROLAND_DPX3300_A2: path.BoundingBox(-16920, -11180, 5440, 4629),
+        PlotterType.ROLAND_DPX3300_A3: path.BoundingBox(-16920, -11180, -1112, -3276),
+        PlotterType.DIY_PLOTTER: path.BoundingBox(0, 0, 3350, -1715),
+        PlotterType.AXIDRAW: path.BoundingBox(0, 0, 0, -0),  # todo: missing real bounds
+        PlotterType.HP_7475A_A4: path.BoundingBox(0, 0, 11040, 7721),
+        PlotterType.HP_7475A_A3: path.BoundingBox(0, 0, 16158, 11040),
+        PlotterType.ROLAND_DXY1200: path.BoundingBox(
+            0, 0, 0, 0
+        ),  # todo: missing real bounds
+        PlotterType.ROLAND_DXY980: path.BoundingBox(0, 0, 16158, 11040),
+        PlotterType.HP_7595A: path.BoundingBox(-23160, -17602, 23160, 17602),
+        PlotterType.ROLAND_PNC1000: path.BoundingBox(
+            0, 0, 17200, 40000
+        ),  # actually unlimited y
+        PlotterType.HP_7595A_A3: path.BoundingBox(-7728, -5752, 7728 + 960, 5752),
+        PlotterType.TEKTRONIX_4662: path.BoundingBox(
+            0, 0, 4095, 2731
         ),  # 10x15 inches (25.4 x 38.1 cm)
     }
 

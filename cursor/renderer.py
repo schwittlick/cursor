@@ -15,6 +15,7 @@ import pygame
 from PIL import Image, ImageDraw
 
 log = wasabi.Printer()
+clock = pygame.time.Clock()
 
 
 class DrawingOutOfBoundsException(Exception):
@@ -210,6 +211,7 @@ class RealtimeRenderer:
 
     def set(self, pcs: typing.List[PathCollection]) -> None:
         self.pcs = pcs
+        self.selected = 0
 
     def render(self) -> None:
         if len(self.pcs) == 0:
@@ -218,6 +220,7 @@ class RealtimeRenderer:
 
         self._pygameinit()
 
+        frame_count = 0
         while self.running:
             pygame.display.set_caption(f"selected {self.selected}")
             self.screen.fill((255, 255, 255))
@@ -229,7 +232,16 @@ class RealtimeRenderer:
                 self._line(self.screen, start, end)
             pygame.display.update()
 
+            if frame_count % 60 == 0:
+                pressed = pygame.key.get_pressed()
+                if pressed[pygame.K_LEFT]:
+                    self.selected -= 1
+                    if self.selected < 0:
+                        self.selected = len(self.pcs) - 1
+
+            frame_count += 1
             for event in ev:
+
                 if event.type == pygame.MOUSEBUTTONUP:
                     pygame.display.update()
                 if event.type == pygame.KEYDOWN:
@@ -266,7 +278,7 @@ class HPGLRenderer:
         self.__layer_pen_mapping = layer_pen_mapping
         self.__line_type_mapping = line_type_mapping
 
-    def render(self, paths: "PathCollection") -> None:
+    def render(self, paths: PathCollection) -> None:
         self.__paths += paths
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
 
@@ -441,7 +453,13 @@ class JpegRenderer:
         self.img = None
         self.img_draw = None
 
-    def render(self, paths: PathCollection, scale: float = 1.0, frame:bool = False, thickness: int = 1) -> None:
+    def render(
+        self,
+        paths: PathCollection,
+        scale: float = 1.0,
+        frame: bool = False,
+        thickness: int = 1,
+    ) -> None:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
         if len(paths) == 0:
@@ -559,7 +577,13 @@ class AsciiRenderer:
     def intensity(r: int, g: int, b: int, a: int) -> int:
         return (r + g + b) * a
 
-    def render(self, paths: PathCollection, scale: float = 1.0, frame: bool = False, thickness: int = 1):
+    def render(
+        self,
+        paths: PathCollection,
+        scale: float = 1.0,
+        frame: bool = False,
+        thickness: int = 1,
+    ):
         self.jpeg_renderer.render(paths, scale, frame, thickness)
 
         im = self.jpeg_renderer.img

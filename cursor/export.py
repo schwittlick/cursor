@@ -5,6 +5,7 @@ from cursor import device
 import inspect
 import hashlib
 import wasabi
+import pathlib
 
 log = wasabi.Printer()
 
@@ -129,9 +130,7 @@ class Exporter:
             cutoff_mm=self.cfg.cutoff,
         )
 
-        stack = inspect.stack()
-        frame = stack[2]
-        module = inspect.getmodule(frame[0])
+        module = inspect.getmodule(inspect.stack()[2][0])
         ms = inspect.getsource(module)
 
         if jpg:
@@ -157,7 +156,6 @@ class Exporter:
                 f"{self.name}_{self.suffix}_{sizename}_{machinename}_"
                 f"{hashlib.sha256(ms.encode('utf-8')).hexdigest()}.py"
             )
-            import pathlib
 
             pathlib.Path(source_folder).mkdir(parents=True, exist_ok=True)
             log.good(f"Saved source to {source_folder / fname}")
@@ -168,7 +166,7 @@ class Exporter:
             device.Paper.sizes[self.cfg.dimension],
             xy_factor=device.XYFactors.fac[self.cfg.type],
             padding_mm=self.cfg.margin,
-            output_bounds=device.MinmaxMapping.maps[self.cfg.type].tuple(),
+            output_bounds=device.MinmaxMapping.maps[self.cfg.type],
             cutoff_mm=self.cfg.cutoff,
         )
 

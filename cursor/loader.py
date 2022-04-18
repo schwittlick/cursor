@@ -61,7 +61,7 @@ class Loader:
         )
         log.info(f"This took {round(elapsed * 1000)}ms.")
 
-    def load_file(self, path: str) -> None:
+    def load_file(self, path: pathlib.Path) -> None:
         _fn = path.stem.replace("_compressed", "")
         ts = data.DateHandler.get_timestamp_from_utc(float(_fn))
         log.info(f"Loading {path.stem}.json > {ts}")
@@ -83,8 +83,7 @@ class Loader:
         log.good(f"Loaded {len(new_keys)} keys")
 
     @staticmethod
-    def is_file_and_json(path):
-        assert isinstance(path, pathlib.Path), "Only path objects allowed"
+    def is_file_and_json(path: pathlib.Path) -> bool:
         if path.is_file() and path.as_posix().endswith(".json"):
             return True
         return False
@@ -101,7 +100,7 @@ class Loader:
         """
         return reduce(lambda pcol1, pcol2: pcol1 + pcol2, self._recordings)
 
-    def single(self, index):
+    def single(self, index: int) -> path.Path:
         max_index = len(self._recordings) - 1
         if index > max_index:
             raise IndexError("Specified index too high. (> " + str(max_index) + ")")
