@@ -159,6 +159,15 @@ class BoundingBox:
 
         return bbs
 
+    def paths(self) -> typing.List[typing.Tuple[float, float, float, float]]:
+        # returns a list of lines, x1, y1, x2, y2
+        paths = []
+        paths.append((self.x, self.y, self.x2, self.y))
+        paths.append((self.x2, self.y, self.x2, self.y2))
+        paths.append((self.x2, self.y2, self.x, self.y2))
+        paths.append((self.x, self.y2, self.x, self.y))
+        return paths
+
     def __repr__(self) -> str:
         return f"BB(x={self.x}, y={self.y}, x2={self.x2}, y2={self.y2}, w={self.w}, h={self.h})"
 
@@ -899,9 +908,75 @@ class Path:
     def downsample(self, dist: float) -> None:
         _bb = self.bb()
         prev = Position()
-        self.vertices = [
-            prev := v for v in self.vertices if v.distance(prev) > dist
-        ]
+        self.vertices = [prev := v for v in self.vertices if v.distance(prev) > dist]
+
+    @staticmethod
+    def intersect(p1, p2, p3, p4):
+        x1, y1 = p1
+        x2, y2 = p2
+        x3, y3 = p3
+        x4, y4 = p4
+        denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1)
+        if denom == 0:  # parallel
+            return None
+        ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom
+        if ua < 0 or ua > 1:  # out of range
+            return None
+        ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denom
+        if ub < 0 or ub > 1:  # out of range
+            return None
+        x = x1 + ua * (x2 - x1)
+        y = y1 + ua * (y2 - y1)
+        return (x, y)
+
+    def clip(self, bb: BoundingBox) -> None:
+        any_inside = False
+        for v in self.vertices:
+            if bb.inside(v):
+                any_inside = True
+                break
+
+        if not any_inside:
+            return
+
+        def get_intersection(
+            segment: Path, paths: typing.List[typing.Tuple[float, float, float, float]]
+        ) -> typing.Tuple[float, float]:
+            for p in paths:
+                tup1 = segment[0].astuple()
+                tup2 = segment[1].astuple()
+                intersect = Path.intersect((p[0], p[1]), (p[2], p[3]), tup1, tup2)
+                if intersect is not None:
+                    return intersect[0], intersect[1]
+            raise Exception("no intersection with anything")
+
+        bb_lines = bb.paths()
+        prev_v = None
+        vetices = []
+        for v in self.vertices:
+            if prev_v is not None:
+                prev_inside = bb.inside(prev_v)
+                curr_inside = bb.inside(v)
+                if prev_inside and curr_inside:
+                    vetices.append(v)
+                if prev_inside and not curr_inside:
+                    p = Path()
+                    p.add(prev_v.x, prev_v.y)
+                    p.add(v.x, v.y)
+                    intersection = get_intersection(p, bb_lines)
+                    vetices.append(Position(intersection[0], intersection[1]))
+                if not prev_inside and curr_inside:
+                    p = Path()
+                    p.add(prev_v.x, prev_v.y)
+                    p.add(v.x, v.y)
+                    intersection = get_intersection(p, bb_lines)
+                    vetices.append(Position(intersection[0], intersection[1]))
+            else:
+                if bb.inside(v):
+                    vetices.append(v)
+            prev_v = v
+
+        self.vertices = vetices
 
     def __repr__(self):
         rep = (
@@ -1038,7 +1113,7 @@ class PathCollection:
             )
 
     def __repr__(self) -> str:
-        return f"PathCollection({self.__name}) -> ({self.__paths})"
+        return f"PathCollection({self.__name}) -> ({len(self)})"
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, PathCollection):
@@ -1132,12 +1207,18 @@ class PathCollection:
         return bb
 
     def min(self) -> typing.Tuple[float, float]:
+        if self.empty():
+            return 0, 0
+
         all_chained = [point for path in self.__paths for point in path]
         minx = min(all_chained, key=lambda pos: pos.x).x
         miny = min(all_chained, key=lambda pos: pos.y).y
         return minx, miny
 
     def max(self) -> typing.Tuple[float, float]:
+        if self.empty():
+            return 0, 0
+
         all_chained = [point for path in self.__paths for point in path]
         maxx = max(all_chained, key=lambda pos: pos.x).x
         maxy = max(all_chained, key=lambda pos: pos.y).y
@@ -1154,6 +1235,10 @@ class PathCollection:
     def rot(self, delta: float) -> None:
         for p in self.__paths:
             p.rot(delta)
+
+    def downsample(self, dist: float) -> None:
+        for p in self.__paths:
+            p.downsample(dist)
 
     def log(self, str) -> None:
         log.good(f"{self.__class__.__name__}: {str}")
