@@ -303,6 +303,9 @@ class Path:
     def add(self, x: float, y: float, timestamp: int = 0) -> None:
         self.vertices.append(Position(x, y, timestamp))
 
+    def add_position(self, pos: Position) -> None:
+        self.vertices.append(pos)
+
     def arr(self):
         data = np.random.randint(0, 1000, size=(len(self), 2))
 
@@ -929,7 +932,7 @@ class Path:
         y = y1 + ua * (y2 - y1)
         return (x, y)
 
-    def clip(self, bb: BoundingBox) -> None:
+    def clip(self, bb: BoundingBox) -> typing.List["Path"]:
         any_inside = False
         for v in self.vertices:
             if bb.inside(v):
@@ -952,31 +955,35 @@ class Path:
 
         bb_lines = bb.paths()
         prev_v = None
-        vetices = []
+        new_paths = []
+        current_path = Path()
         for v in self.vertices:
             if prev_v is not None:
                 prev_inside = bb.inside(prev_v)
                 curr_inside = bb.inside(v)
                 if prev_inside and curr_inside:
-                    vetices.append(v)
+                    current_path.add_position(v)
                 if prev_inside and not curr_inside:
                     p = Path()
                     p.add(prev_v.x, prev_v.y)
                     p.add(v.x, v.y)
                     intersection = get_intersection(p, bb_lines)
-                    vetices.append(Position(intersection[0], intersection[1]))
+                    current_path.add_position(Position(intersection[0], intersection[1]))
+                    new_paths.append(current_path.copy())
+                    current_path = Path()
                 if not prev_inside and curr_inside:
                     p = Path()
                     p.add(prev_v.x, prev_v.y)
                     p.add(v.x, v.y)
                     intersection = get_intersection(p, bb_lines)
-                    vetices.append(Position(intersection[0], intersection[1]))
+                    current_path.add_position(Position(intersection[0], intersection[1]))
+                    current_path.add_position(Position(v.x, v.y))
             else:
                 if bb.inside(v):
-                    vetices.append(v)
+                    current_path.add_position(v)
             prev_v = v
-
-        self.vertices = vetices
+        new_paths.append(current_path)
+        return new_paths
 
     def __repr__(self):
         rep = (
