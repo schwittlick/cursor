@@ -586,14 +586,21 @@ def test_clip():
     p1 = Path()
     p1.add(5, 5)
     p1.add(5, 15)
+    p1.add(6, 15)
+    p1.add(6, 5)
 
     bb = BoundingBox(1, 1, 10, 10)
 
-    p1.clip(bb)
+    clipped = p1.clip(bb)
 
-    assert len(p1) == 2
-    assert p1[0].x == 5
-    assert p1[0].y == 5
+    assert len(clipped) == 2
+    assert clipped[0][0] == Position(5, 5)
+    assert clipped[0][1] == Position(5, 10)
 
-    assert p1[1].x == 5
-    assert p1[1].y == 10
+    assert clipped[1][0] == Position(6, 10)
+    assert clipped[1][1] == Position(6, 5)
+
+    assert p1[0] == Position(5, 5)
+    assert p1[1] == Position(5, 15)
+    assert p1[2] == Position(6, 15)
+    assert p1[3] == Position(6, 5)
