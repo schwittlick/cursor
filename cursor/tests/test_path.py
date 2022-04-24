@@ -589,7 +589,7 @@ def test_intersect():
     p3 = [4, 0]
     p4 = [4, 10]
 
-    i = Path.intersect(p1, p2, p3, p4)
+    i = Path.intersect_segment(p1, p2, p3, p4)
     assert i[0] == 4
     assert i[1] == 1
 

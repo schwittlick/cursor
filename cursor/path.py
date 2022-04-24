@@ -922,6 +922,7 @@ class Path:
 
     @staticmethod
     def intersect_segment(p1, p2, p3, p4):
+        # https://gist.github.com/kylemcdonald/6132fc1c29fd3767691442ba4bc84018
         x1, y1 = p1
         x2, y2 = p2
         x3, y3 = p3
