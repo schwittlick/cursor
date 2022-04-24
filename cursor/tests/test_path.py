@@ -296,6 +296,18 @@ def test_bb_center3():
     assert c.y == 150
 
 
+def test_bb_scale():
+    bb = BoundingBox(0, 0, 100, 100)
+    bb.scale(0.5)
+
+    assert bb.x == 25
+    assert bb.y == 25
+    assert bb.x2 == 75
+    assert bb.y2 == 75
+    assert bb.w == 50
+    assert bb.h == 50
+
+
 def test_bb_subdiv():
     bb = BoundingBox(0, 0, 300, 300)
     subdived = bb.subdiv(10, 10)
@@ -588,17 +600,28 @@ def test_clip():
     p1.add(5, 15)
     p1.add(6, 15)
     p1.add(6, 5)
+    p1.add(5, 5)
+    p1.add(11, 5)
+    p1.add(12, 5)
+    p1.add(5, 5)
+    p1.add(7, 5)
 
     bb = BoundingBox(1, 1, 10, 10)
 
     clipped = p1.clip(bb)
 
-    assert len(clipped) == 2
+    assert len(clipped) == 3
     assert clipped[0][0] == Position(5, 5)
     assert clipped[0][1] == Position(5, 10)
 
     assert clipped[1][0] == Position(6, 10)
     assert clipped[1][1] == Position(6, 5)
+    assert clipped[1][2] == Position(5, 5)
+    assert clipped[1][3] == Position(10, 5)
+
+    assert clipped[2][0] == Position(10, 5)
+    assert clipped[2][1] == Position(5, 5)
+    assert clipped[2][2] == Position(7, 5)
 
     assert p1[0] == Position(5, 5)
     assert p1[1] == Position(5, 15)

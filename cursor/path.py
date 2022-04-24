@@ -146,6 +146,14 @@ class BoundingBox:
         center_y = (self.h / 2.0) + self.y
         return Position(center_x, center_y)
 
+    def scale(self, fac: float) -> None:
+        self.w = self.w * fac
+        self.h = self.h * fac
+        self.x = self.x + self.w / 2
+        self.y = self.y + self.h / 2
+        self.x2 = self.x + self.w
+        self.y2 = self.y + self.h
+
     def subdiv(self, xpieces: int, ypieces: int) -> typing.List["BoundingBox"]:
         bbs = []
         for x in range(xpieces):
@@ -932,7 +940,7 @@ class Path:
         y = y1 + ua * (y2 - y1)
         return (x, y)
 
-    def clip(self, bb: BoundingBox) -> typing.List["Path"]:
+    def clip(self, bb: BoundingBox) -> typing.Optional[typing.List["Path"]]:
         any_inside = False
         for v in self.vertices:
             if bb.inside(v):
@@ -968,7 +976,9 @@ class Path:
                     p.add(prev_v.x, prev_v.y)
                     p.add(v.x, v.y)
                     intersection = get_intersection(p, bb_lines)
-                    current_path.add_position(Position(intersection[0], intersection[1]))
+                    current_path.add_position(
+                        Position(intersection[0], intersection[1])
+                    )
                     new_paths.append(current_path.copy())
                     current_path = Path()
                 if not prev_inside and curr_inside:
@@ -976,13 +986,16 @@ class Path:
                     p.add(prev_v.x, prev_v.y)
                     p.add(v.x, v.y)
                     intersection = get_intersection(p, bb_lines)
-                    current_path.add_position(Position(intersection[0], intersection[1]))
+                    current_path.add_position(
+                        Position(intersection[0], intersection[1])
+                    )
                     current_path.add_position(Position(v.x, v.y))
             else:
                 if bb.inside(v):
                     current_path.add_position(v)
             prev_v = v
-        new_paths.append(current_path)
+        if not current_path.empty():
+            new_paths.append(current_path)
         return new_paths
 
     def __repr__(self):
@@ -1266,6 +1279,16 @@ class PathCollection:
             self.translate(0.0, abs(_bb.y))
         else:
             self.translate(0.0, -abs(_bb.y))
+
+    def clip(self, bb: BoundingBox) -> None:
+        pp = []
+        for p in self.__paths:
+            clipped = p.clip(bb)
+            if clipped:
+                for clip in clipped:
+                    pp.append(clip)
+
+        self.__paths = pp
 
     def fit(
         self,
