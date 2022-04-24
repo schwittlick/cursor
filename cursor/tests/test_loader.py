@@ -1,5 +1,3 @@
-import pathlib
-
 from cursor.loader import Loader
 from cursor.data import DataDirHandler
 
