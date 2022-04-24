@@ -917,12 +917,11 @@ class Path:
         self.vertices = result.vertices
 
     def downsample(self, dist: float) -> None:
-        _bb = self.bb()
         prev = Position()
         self.vertices = [prev := v for v in self.vertices if v.distance(prev) > dist]
 
     @staticmethod
-    def intersect(p1, p2, p3, p4):
+    def intersect_segment(p1, p2, p3, p4):
         x1, y1 = p1
         x2, y2 = p2
         x3, y3 = p3
@@ -956,7 +955,9 @@ class Path:
             for p in paths:
                 tup1 = segment[0].astuple()
                 tup2 = segment[1].astuple()
-                intersect = Path.intersect((p[0], p[1]), (p[2], p[3]), tup1, tup2)
+                intersect = Path.intersect_segment(
+                    (p[0], p[1]), (p[2], p[3]), tup1, tup2
+                )
                 if intersect is not None:
                     return intersect[0], intersect[1]
             raise Exception("no intersection with anything")
