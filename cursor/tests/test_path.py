@@ -568,3 +568,32 @@ def test_downsample():
     p1.downsample(1.1)
 
     assert len(p1) == 4
+
+
+def test_intersect():
+    p1 = [1, 1]
+    p2 = [10, 1]
+
+    p3 = [4, 0]
+    p4 = [4, 10]
+
+    i = Path.intersect(p1, p2, p3, p4)
+    assert i[0] == 4
+    assert i[1] == 1
+
+
+def test_clip():
+    p1 = Path()
+    p1.add(5, 5)
+    p1.add(5, 15)
+
+    bb = BoundingBox(1, 1, 10, 10)
+
+    p1.clip(bb)
+
+    assert len(p1) == 2
+    assert p1[0].x == 5
+    assert p1[0].y == 5
+
+    assert p1[1].x == 5
+    assert p1[1].y == 10
