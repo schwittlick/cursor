@@ -1,4 +1,6 @@
-from cursor import filter as cursor_filter
+import cursor.filter as cursor_filter
+import cursor.bb
+import cursor.misc
 
 import numpy as np
 import math
@@ -101,83 +103,6 @@ class Position:
 
     def __mul__(self, other: "Position"):
         return self.arr() * other.arr()
-
-
-class BoundingBox:
-    def __init__(self, x: float, y: float, x2: float, y2: float):
-        self.x = x
-        self.y = y
-        self.x2 = x2
-        self.y2 = y2
-        self.w = math.dist([self.x], [self.x2])
-        self.h = math.dist([self.y], [self.y2])
-
-    def __inside(self, point: "Position") -> bool:
-        return self.x <= point.x <= self.x2 and self.y <= point.y <= self.y2
-
-    def inside(self, data: typing.Union["Position", "Path", "PathCollection"]) -> bool:
-        if isinstance(data, Position):
-            return self.__inside(data)
-        if isinstance(data, Path):
-            for p in data:
-                if not self.__inside(p):
-                    return False
-            return True
-        if isinstance(data, PathCollection):
-            for path in data:
-                for p in path:
-                    if not self.__inside(p):
-                        return False
-            return True
-
-    def mostly_inside(self, data: "Path") -> bool:
-        points_inside = 0
-        points_outside = 0
-        if isinstance(data, Path):
-            for p in data:
-                if not self.__inside(p):
-                    points_outside += 1
-                else:
-                    points_inside += 1
-            return points_inside > points_outside
-
-    def center(self) -> "Position":
-        center_x = (self.w / 2.0) + self.x
-        center_y = (self.h / 2.0) + self.y
-        return Position(center_x, center_y)
-
-    def scale(self, fac: float) -> None:
-        self.w = self.w * fac
-        self.h = self.h * fac
-        self.x = self.x + self.w / 2
-        self.y = self.y + self.h / 2
-        self.x2 = self.x + self.w
-        self.y2 = self.y + self.h
-
-    def subdiv(self, xpieces: int, ypieces: int) -> typing.List["BoundingBox"]:
-        bbs = []
-        for x in range(xpieces):
-            for y in range(ypieces):
-                w = self.x2 / xpieces
-                h = self.y2 / ypieces
-                xoff = x * w + self.x
-                yoff = y * h + self.y
-                bb = BoundingBox(xoff, yoff, xoff + w, yoff + h)
-                bbs.append(bb)
-
-        return bbs
-
-    def paths(self) -> typing.List[typing.Tuple[float, float, float, float]]:
-        # returns a list of lines, x1, y1, x2, y2
-        paths = []
-        paths.append((self.x, self.y, self.x2, self.y))
-        paths.append((self.x2, self.y, self.x2, self.y2))
-        paths.append((self.x2, self.y2, self.x, self.y2))
-        paths.append((self.x, self.y2, self.x, self.y))
-        return paths
-
-    def __repr__(self) -> str:
-        return f"BB(x={self.x}, y={self.y}, x2={self.x2}, y2={self.y2}, w={self.w}, h={self.h})"
 
 
 class Spiral:
@@ -351,12 +276,12 @@ class Path:
 
         return self.vertices[-1]
 
-    def bb(self) -> BoundingBox:
+    def bb(self) -> cursor.bb.BoundingBox:
         minx = min(self.vertices, key=lambda pos: pos.x).x
         miny = min(self.vertices, key=lambda pos: pos.y).y
         maxx = max(self.vertices, key=lambda pos: pos.x).x
         maxy = max(self.vertices, key=lambda pos: pos.y).y
-        b = BoundingBox(minx, miny, maxx, maxy)
+        b = cursor.bb.BoundingBox(minx, miny, maxx, maxy)
         return b
 
     def aspect_ratio(self) -> float:
@@ -418,7 +343,7 @@ class Path:
         else:
             self.translate(0.0, -abs(_bb.y))
 
-    def fit(self, bb: BoundingBox) -> None:
+    def fit(self, bb: cursor.bb.BoundingBox) -> None:
         pass
 
     def morph(
@@ -830,7 +755,7 @@ class Path:
 
         return out_path
 
-    def offset(self, offset: float = 1.0) -> "Path":
+    def offset(self, offset: float = 1.0) -> typing.Optional["Path"]:
         """
         copied from https://github.com/markroland/path-helper/blob/main/src/PathHelper.js <3
         """
@@ -861,25 +786,6 @@ class Path:
     def clamp(n, smallest, largest):
         return max(smallest, min(n, largest))
 
-    @staticmethod
-    def map(value, inputMin, inputMax, outputMin, outputMax, clamp):
-        outVal = (value - inputMin) / (inputMax - inputMin) * (
-            outputMax - outputMin
-        ) + outputMin
-
-        if clamp:
-            if outputMax < outputMin:
-                if outVal < outputMax:
-                    outVal = outputMax
-                elif outVal > outputMin:
-                    outVal = outputMin
-        else:
-            if outVal > outputMax:
-                outVal = outputMax
-            elif outVal < outputMin:
-                outVal = outputMin
-        return outVal
-
     def smooth(self, size: int, shape: int) -> None:
         n = len(self)
         size = Path.clamp(size, 0, n)
@@ -887,7 +793,7 @@ class Path:
 
         weights = [0] * size
         for i in range(size):
-            cur_weight = Path.map(i, 0, size, 1, shape, True)
+            cur_weight = cursor.misc.map(i, 0, size, 1, shape, True)
             weights[i] = cur_weight
 
         result = self.copy()
@@ -940,7 +846,7 @@ class Path:
         y = y1 + ua * (y2 - y1)
         return (x, y)
 
-    def clip(self, bb: BoundingBox) -> typing.Optional[typing.List["Path"]]:
+    def clip(self, bb: cursor.bb.BoundingBox) -> typing.Optional[typing.List["Path"]]:
         any_inside = False
         for v in self.vertices:
             if bb.inside(v):
@@ -1033,12 +939,12 @@ class PathCollection:
             utc_timestamp = datetime.datetime.timestamp(now)
             self._timestamp = utc_timestamp
 
-    def add(self, path: typing.Union[BoundingBox, Path]) -> None:
+    def add(self, path: typing.Union[cursor.bb.BoundingBox, Path]) -> None:
         if isinstance(path, Path):
             if path.empty():
                 return
             self.__paths.append(path)
-        if isinstance(path, BoundingBox):
+        if isinstance(path, cursor.bb.BoundingBox):
             p = Path()
             p.add(path.x, path.y)
             p.add(path.x, path.y2)
@@ -1220,10 +1126,10 @@ class PathCollection:
 
         return layered_pcs
 
-    def bb(self) -> BoundingBox:
+    def bb(self) -> cursor.bb.BoundingBox:
         mi = self.min()
         ma = self.max()
-        bb = BoundingBox(mi[0], mi[1], ma[0], ma[1])
+        bb = cursor.bb.BoundingBox(mi[0], mi[1], ma[0], ma[1])
         if bb.x is np.nan or bb.y is np.nan or bb.x2 is np.nan or bb.y2 is np.nan:
             log.fail("SHIT")
         return bb
@@ -1282,7 +1188,7 @@ class PathCollection:
         else:
             self.translate(0.0, -abs(_bb.y))
 
-    def clip(self, bb: BoundingBox) -> None:
+    def clip(self, bb: cursor.bb.BoundingBox) -> None:
         pp = []
         for p in self.__paths:
             clipped = p.clip(bb)
@@ -1299,7 +1205,7 @@ class PathCollection:
         padding_mm: int = None,
         padding_units: int = None,
         padding_percent: int = None,
-        output_bounds: BoundingBox = None,
+        output_bounds: cursor.bb.BoundingBox = None,
         cutoff_mm=None,
         keep_aspect=False,
     ) -> None:
@@ -1432,7 +1338,7 @@ class PathCollection:
         if xq < 2 and yq < 2:
             return
 
-        def calc_bb(x: int, y: int) -> BoundingBox:
+        def calc_bb(x: int, y: int) -> cursor.bb.BoundingBox:
             big_bb = self.bb()
 
             new_width = big_bb.x2 / xq
@@ -1441,7 +1347,7 @@ class PathCollection:
             _x = x * new_width
             _y = y * new_height
 
-            new_bb = BoundingBox(_x, _y, new_width, new_height)
+            new_bb = cursor.bb.BoundingBox(_x, _y, new_width, new_height)
 
             return new_bb
 
@@ -1459,7 +1365,7 @@ class PathCollection:
                     bbs[bbcounter] = bb
                     bbcounter += 1
 
-        def _count_inside(_bb: BoundingBox, _pa: Path) -> int:
+        def _count_inside(_bb: cursor.bb.BoundingBox, _pa: Path) -> int:
             c = 0
             for _p in _pa:
                 if _bb.inside(_p):

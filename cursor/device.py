@@ -1,4 +1,4 @@
-from cursor import path
+import cursor.bb
 
 from enum import Enum
 import wasabi
@@ -50,23 +50,23 @@ class ExportFormatMappings:
 
 class MinmaxMapping:
     maps = {
-        PlotterType.ROLAND_DPX3300: path.BoundingBox(-16920, -11180, 16340, 11180),
-        PlotterType.ROLAND_DPX3300_A2: path.BoundingBox(-16920, -11180, 5440, 4629),
-        PlotterType.ROLAND_DPX3300_A3: path.BoundingBox(-16920, -11180, -1112, -3276),
-        PlotterType.DIY_PLOTTER: path.BoundingBox(0, 0, 3350, -1715),
-        PlotterType.AXIDRAW: path.BoundingBox(0, 0, 0, -0),  # todo: missing real bounds
-        PlotterType.HP_7475A_A4: path.BoundingBox(0, 0, 11040, 7721),
-        PlotterType.HP_7475A_A3: path.BoundingBox(0, 0, 16158, 11040),
-        PlotterType.ROLAND_DXY1200: path.BoundingBox(
+        PlotterType.ROLAND_DPX3300: cursor.bb.BoundingBox(-16920, -11180, 16340, 11180),
+        PlotterType.ROLAND_DPX3300_A2: cursor.bb.BoundingBox(-16920, -11180, 5440, 4629),
+        PlotterType.ROLAND_DPX3300_A3: cursor.bb.BoundingBox(-16920, -11180, -1112, -3276),
+        PlotterType.DIY_PLOTTER: cursor.bb.BoundingBox(0, 0, 3350, -1715),
+        PlotterType.AXIDRAW: cursor.bb.BoundingBox(0, 0, 0, -0),  # todo: missing real bounds
+        PlotterType.HP_7475A_A4: cursor.bb.BoundingBox(0, 0, 11040, 7721),
+        PlotterType.HP_7475A_A3: cursor.bb.BoundingBox(0, 0, 16158, 11040),
+        PlotterType.ROLAND_DXY1200: cursor.bb.BoundingBox(
             0, 0, 0, 0
         ),  # todo: missing real bounds
-        PlotterType.ROLAND_DXY980: path.BoundingBox(0, 0, 16158, 11040),
-        PlotterType.HP_7595A: path.BoundingBox(-23160, -17602, 23160, 17602),
-        PlotterType.ROLAND_PNC1000: path.BoundingBox(
+        PlotterType.ROLAND_DXY980: cursor.bb.BoundingBox(0, 0, 16158, 11040),
+        PlotterType.HP_7595A: cursor.bb.BoundingBox(-23160, -17602, 23160, 17602),
+        PlotterType.ROLAND_PNC1000: cursor.bb.BoundingBox(
             0, 0, 17200, 40000
         ),  # actually unlimited y
-        PlotterType.HP_7595A_A3: path.BoundingBox(-7728, -5752, 7728 + 960, 5752),
-        PlotterType.TEKTRONIX_4662: path.BoundingBox(
+        PlotterType.HP_7595A_A3: cursor.bb.BoundingBox(-7728, -5752, 7728 + 960, 5752),
+        PlotterType.TEKTRONIX_4662: cursor.bb.BoundingBox(
             0, 0, 4095, 2731
         ),  # 10x15 inches (25.4 x 38.1 cm)
     }

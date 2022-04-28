@@ -1,6 +1,6 @@
 from cursor.path import Path
 from cursor.path import Position
-from cursor.path import BoundingBox
+from cursor.bb import BoundingBox
 from cursor.path import PathCollection
 import pytest
 

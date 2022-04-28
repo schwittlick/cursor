@@ -2,7 +2,7 @@ from cursor.data import DataDirHandler
 from cursor.loader import Loader
 from cursor.path import Path
 from cursor.path import PathCollection
-from cursor.path import BoundingBox
+from cursor.bb import BoundingBox
 from cursor.filter import Filter
 from cursor.filter import BoundingBoxFilter
 from cursor.filter import MinPointCountFilter

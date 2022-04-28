@@ -1,13 +1,10 @@
+import cursor.path
+import cursor.bb
+
+import svgwrite
 import os
 import typing
 import sys
-
-from cursor.path import PathCollection
-from cursor.path import Path
-from cursor.path import Position
-from cursor.path import BoundingBox
-
-import svgwrite
 import pathlib
 import wasabi
 import copy
@@ -27,15 +24,17 @@ class DrawingOutOfBoundsException(Exception):
 
 
 class PathIterator:
-    def __init__(self, paths: PathCollection):
+    def __init__(self, paths: "cursor.path.PathCollection"):
         self.paths = paths
 
-    def points(self) -> typing.Iterator[Position]:
+    def points(self) -> typing.Iterator["cursor.path.Position"]:
         for p in self.paths:
             for point in p.vertices:
                 yield point
 
-    def connections(self) -> typing.Iterator[typing.Tuple[Position, Position]]:
+    def connections(
+        self,
+    ) -> typing.Iterator[typing.Tuple["cursor.path.Position", "cursor.path.Position"]]:
         prev = None
 
         for p in self.paths:
@@ -58,17 +57,17 @@ class SvgRenderer:
     def __init__(self, folder: pathlib.Path):
         self.save_path = folder
         self.dwg = None
-        self.paths = PathCollection()
+        self.paths = cursor.path.PathCollection()
         self.bbs = []
 
-    def render(self, paths: PathCollection) -> None:
+    def render(self, paths: "cursor.path.PathCollection") -> None:
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
         self.paths += paths
 
-    def render_bb(self, bb: BoundingBox) -> None:
+    def render_bb(self, bb: cursor.bb.BoundingBox) -> None:
         self.bbs.append(bb)
 
-        p1 = Path()
+        p1 = cursor.path.Path()
         p1.add(bb.x, bb.y)
         p1.add(bb.x2, bb.y)
         p1.add(bb.x2, bb.y2)
@@ -124,14 +123,14 @@ class GCodeRenderer:
         self.feedrate_xy = feedrate_xy
         self.feedrate_z = feedrate_z
         self.invert_y = invert_y
-        self.paths = PathCollection()
+        self.paths = cursor.path.PathCollection()
         self.bbs = []
 
-    def render(self, paths: PathCollection) -> None:
+    def render(self, paths: "cursor.path.PathCollection") -> None:
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
         self.paths += paths
 
-    def render_bb(self, bb: BoundingBox) -> None:
+    def render_bb(self, bb: cursor.bb.BoundingBox) -> None:
         self.bbs.append(bb)
 
     def save(self, filename: str) -> None:
@@ -203,13 +202,13 @@ class RealtimeRenderer:
         pygame.display.update()
         self.running = True
 
-    def _line(self, screen, p1: Position, p2: Position) -> None:
+    def _line(self, screen, p1: "cursor.path.Position", p2: "cursor.path.Position") -> None:
         pygame.draw.line(screen, (0, 0, 0), p1.astuple(), p2.astuple())
 
-    def add(self, pc: PathCollection) -> None:
+    def add(self, pc: "cursor.path.PathCollection") -> None:
         self.pcs.append(pc)
 
-    def set(self, pcs: typing.List[PathCollection]) -> None:
+    def set(self, pcs: typing.List["cursor.path.PathCollection"]) -> None:
         self.pcs = pcs
         self.selected = 0
 
@@ -258,7 +257,7 @@ class RealtimeRenderer:
                     for cbk in self.__cbs:
                         if cbk[0] == event.key:
                             cbk[1](self.selected, self.pcs[self.selected])
-                    #if event.key == pygame.K_s:
+                    # if event.key == pygame.K_s:
                     #    if self.cb:
                     #        self.cb(self.selected, self.pcs[self.selected])
                     if event.key == pygame.K_ESCAPE:
@@ -287,11 +286,11 @@ class HPGLRenderer:
         line_type_mapping: dict = None,
     ) -> None:
         self.__save_path = folder
-        self.__paths = PathCollection()
+        self.__paths = cursor.path.PathCollection()
         self.__layer_pen_mapping = layer_pen_mapping
         self.__line_type_mapping = line_type_mapping
 
-    def render(self, paths: PathCollection) -> None:
+    def render(self, paths: "cursor.path.PathCollection") -> None:
         self.__paths += paths
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
 
@@ -394,7 +393,7 @@ class TektronixRenderer:
         self, folder: pathlib.Path,
     ):
         self.__save_path = folder
-        self.__paths = PathCollection()
+        self.__paths = cursor.path.PathCollection()
 
     def _coords_to_bytes(self, xcoord: int, ycoord: int, low_res: bool = False) -> str:
         """
@@ -423,7 +422,7 @@ class TektronixRenderer:
 
         return hi_y + eb + low_y + hi_x + low_x
 
-    def render(self, paths: PathCollection) -> None:
+    def render(self, paths: "cursor.path.PathCollection") -> None:
         self.__paths += paths
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
 
@@ -468,7 +467,7 @@ class JpegRenderer:
 
     def render(
         self,
-        paths: PathCollection,
+        paths: "cursor.path.PathCollection",
         scale: float = 1.0,
         frame: bool = False,
         thickness: int = 1,
@@ -526,7 +525,7 @@ class JpegRenderer:
         self.img.save(fname, "JPEG")
         log.good(f"Finished saving {fname}")
 
-    def render_bb(self, bb: BoundingBox) -> None:
+    def render_bb(self, bb: cursor.bb.BoundingBox) -> None:
         self.img_draw.line(xy=(bb.x, bb.y, bb.x2, bb.y), fill="black", width=2)
         self.img_draw.line(xy=(bb.x, bb.y, bb.x, bb.y2), fill="black", width=2)
         self.img_draw.line(xy=(bb.x2, bb.y, bb.x2, bb.y2), fill="black", width=2)
@@ -592,7 +591,7 @@ class AsciiRenderer:
 
     def render(
         self,
-        paths: PathCollection,
+        paths: "cursor.path.PathCollection",
         scale: float = 1.0,
         frame: bool = False,
         thickness: int = 1,

@@ -1,7 +1,5 @@
-from cursor import data
-from cursor import path
-from cursor.renderer import SvgRenderer
-from cursor.renderer import JpegRenderer
+import cursor.data as data
+import cursor.renderer
 
 import time
 import numpy as np
@@ -22,42 +20,13 @@ class Timer:
         print(self.elapsed())
 
 
-def img_to_path(img, lines: int = 660):
-    """
-    This works only for A3 on HP7579a
-    Mit dem neuen zentrierungs-Mechanismus haben wir 33cm in der Höhe
-    Mit Stiftstärke von ~0.5mm -> 660 linien
-    """
-    pc = path.PathCollection()
-
-    rows, cols = img.shape
-    for x in range(rows):
-        pa = path.Path()
-        for i in range(lines):
-            line_index = int(map(i, 0, lines, 0, cols, True))
-            k = img[x, line_index]
-            if k == 0:
-                pa.add(x, line_index)
-                pa.add(x, line_index + 0.1)
-                pass
-            if k == 255:
-                if pa.empty():
-                    continue
-
-                pa.pen_select = int(np.clip(len(pa), 0, 16) / 2)
-                pc.add(pa)
-                pa = path.Path()
-                pass
-    return pc
-
-
 def generate_perlin_noise_2d(shape, res):
     def f(t):
         return 6 * t ** 5 - 15 * t ** 4 + 10 * t ** 3
 
     delta = (res[0] / shape[0], res[1] / shape[1])
     d = (shape[0] // res[0], shape[1] // res[1])
-    grid = np.mgrid[0: res[0]: delta[0], 0: res[1]: delta[1]].transpose(1, 2, 0) % 1
+    grid = np.mgrid[0 : res[0] : delta[0], 0 : res[1] : delta[1]].transpose(1, 2, 0) % 1
     # Gradients
     angles = 2 * np.pi * np.random.rand(res[0] + 1, res[1] + 1)
     gradients = np.dstack((np.cos(angles), np.sin(angles)))
@@ -98,13 +67,13 @@ def map(value, inputMin, inputMax, outputMin, outputMax, clamp):
 
 def save_wrapper(pc, projname, fname):
     jpeg_folder = data.DataDirHandler().jpg(projname)
-    jpeg_renderer = JpegRenderer(jpeg_folder)
+    jpeg_renderer = cursor.renderer.JpegRenderer(jpeg_folder)
 
     jpeg_renderer.render(pc, scale=1.0)
     jpeg_renderer.save(fname)
 
     svg_folder = data.DataDirHandler().svg(projname)
-    svg_renderer = SvgRenderer(svg_folder)
+    svg_renderer = cursor.renderer.SvgRenderer(svg_folder)
 
     svg_renderer.render(pc)
     svg_renderer.save(fname)
@@ -112,7 +81,7 @@ def save_wrapper(pc, projname, fname):
 
 def save_wrapper_jpeg(pc, projname, fname, scale=4.0, thickness=3):
     folder = data.DataDirHandler().jpg(projname)
-    jpeg_renderer = JpegRenderer(folder)
+    jpeg_renderer = cursor.renderer.JpegRenderer(folder)
 
     jpeg_renderer.render(pc, scale=scale, thickness=thickness)
     jpeg_renderer.save(fname)
