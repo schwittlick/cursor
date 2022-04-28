@@ -1,6 +1,6 @@
 from cursor.path import Path
 from cursor.path import PathCollection
-from cursor.path import BoundingBox
+from cursor.bb import BoundingBox
 
 import pytest
 import random
