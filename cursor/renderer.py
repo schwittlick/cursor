@@ -186,14 +186,14 @@ class GCodeRenderer:
 class RealtimeRenderer:
     def __init__(self, w: int, h: int):
         self.running = False
-        self.cb = None
+        self.__cbs = []
         self.w = w
         self.h = h
         self.pcs = []
         self.selected = 0
 
-    def set_cb(self, cb) -> None:
-        self.cb = cb
+    def set_cb(self, key: str, cb: typing.Callable, reset: bool = False) -> None:
+        self.__cbs.append((ord(key), cb, reset))
 
     def _pygameinit(self) -> None:
         pygame.init()
@@ -234,20 +234,33 @@ class RealtimeRenderer:
 
             if frame_count % 60 == 0:
                 pressed = pygame.key.get_pressed()
-                if pressed[pygame.K_LEFT]:
+                if pressed[pygame.K_LEFT] and pressed[pygame.K_LCTRL]:
                     self.selected -= 1
                     if self.selected < 0:
                         self.selected = len(self.pcs) - 1
 
+                if pressed[pygame.K_RIGHT] and pressed[pygame.K_LCTRL]:
+                    self.selected += 1
+                    if self.selected >= len(self.pcs):
+                        self.selected = 0
+
+                for cbk in self.__cbs:
+                    if pressed[cbk[0]] and pressed[pygame.K_LCTRL]:
+                        cbk[1](self.selected, self.pcs[self.selected])
+                        if cbk[2]:
+                            self.selected = 0
+
             frame_count += 1
             for event in ev:
-
                 if event.type == pygame.MOUSEBUTTONUP:
                     pygame.display.update()
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_s:
-                        if self.cb:
-                            self.cb(self.selected, self.pcs[self.selected])
+                    for cbk in self.__cbs:
+                        if cbk[0] == event.key:
+                            cbk[1](self.selected, self.pcs[self.selected])
+                    #if event.key == pygame.K_s:
+                    #    if self.cb:
+                    #        self.cb(self.selected, self.pcs[self.selected])
                     if event.key == pygame.K_ESCAPE:
                         self.running = False
                         pygame.quit()
