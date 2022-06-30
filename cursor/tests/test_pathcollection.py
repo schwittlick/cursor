@@ -304,6 +304,28 @@ def test_pathcollection_fit5():
     assert len(pcol) == 1
 
 
+def test_pathcollection_reverse():
+    pcol = PathCollection()
+
+    p0 = Path()
+    p0.add(10, 10)
+    p0.add(90, 90)
+    pcol.add(p0)
+
+    p1 = Path()
+    p1.add(0, 0)
+    p1.add(100, 100)
+    pcol.add(p1)
+
+    assert pcol[0] == p0
+    assert pcol[1] == p1
+
+    pcol.reverse()
+
+    assert pcol[0] == p1
+    assert pcol[1] == p0
+
+
 def test_pathcollection_layer():
     pcol = PathCollection()
     p0 = Path(layer="custom")
