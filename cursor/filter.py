@@ -5,7 +5,6 @@ import wasabi
 import time
 import copy
 import typing
-from operator import methodcaller
 from operator import itemgetter
 
 log = wasabi.Printer()

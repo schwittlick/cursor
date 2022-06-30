@@ -37,7 +37,7 @@ def img_to_path(img, layers: int = 8):
         img = img.transpose(Image.ROTATE_90)
 
     img = img.resize((w, h))
-    img = img.convert('1')
+    img = img.convert("1")
 
     lens = []
     for x in range(w):
@@ -45,8 +45,8 @@ def img_to_path(img, layers: int = 8):
         start = img.getpixel((0, 0))
         curr = start
         for y in range(h):
-            #xpos = int(map(x, 0, w, 0, img_w, False))
-            #ypos = int(map(y, 0, h, 0, img_h, False))
+            # xpos = int(map(x, 0, w, 0, img_w, False))
+            # ypos = int(map(y, 0, h, 0, img_h, False))
             v = img.getpixel((x, y))
             _y = float(y)
             _x = float(x)
@@ -73,9 +73,11 @@ def img_to_path(img, layers: int = 8):
         new_pa = Path()
         new_pa.add(pa.start_pos().x, pa.start_pos().y)
         new_pa.add(pa.end_pos().x, pa.end_pos().y)
-        new_pa.pen_select = int(map(np.clip(len(pa), 0, max_len), 0, max_len/15, 1, 8, False))
-        #ps = int(map(len(pa), 0, max_len, 0, layers, False))
-        #new_pa.layer = ps
+        new_pa.pen_select = int(
+            map(np.clip(len(pa), 0, max_len), 0, max_len / 15, 1, 8, False)
+        )
+        # ps = int(map(len(pa), 0, max_len, 0, layers, False))
+        # new_pa.layer = ps
         new_pa.velocity = 10
 
         if len(pa) > 1:
@@ -96,7 +98,10 @@ def img_to_path(img, layers: int = 8):
                     buffered = prev.copy()
                     buffered.pen_select = prev.pen_select
 
-                if prev.end_pos().x == pa.start_pos().x and prev.end_pos().y + 1 == pa.start_pos().y:
+                if (
+                    prev.end_pos().x == pa.start_pos().x
+                    and prev.end_pos().y + 1 == pa.start_pos().y
+                ):
                     buffered.add(pa.start_pos().x, pa.start_pos().y)
                 else:
                     buffered_simple = Path()

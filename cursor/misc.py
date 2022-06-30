@@ -6,7 +6,7 @@ import numpy as np
 import inspect
 import math
 from typing import Callable, Dict
-from numba import jit, types, prange, int32, int64
+from numba import jit, types, int32, int64
 from numba import typed
 from timeit import default_timer as timer
 

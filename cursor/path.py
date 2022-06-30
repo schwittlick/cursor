@@ -14,7 +14,6 @@ import typing
 import operator
 import time
 from scipy import spatial
-from shapely.geometry import LineString
 
 
 log = wasabi.Printer()
@@ -765,6 +764,8 @@ class Path:
         return offset_path
 
     def parallel_offset(self):
+        # from shapely.geometry import LineString
+
         """
         same as above but via shapely lib
         """
