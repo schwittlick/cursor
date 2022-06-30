@@ -14,6 +14,7 @@ import typing
 import operator
 import time
 from scipy import spatial
+from shapely.geometry import LineString
 
 
 log = wasabi.Printer()
@@ -21,7 +22,7 @@ log = wasabi.Printer()
 
 class Position:
     def __init__(self, x: float = 0.0, y: float = 0.0, timestamp: int = 0):
-        self._pos = np.array((x, y), dtype=float)
+        self._pos = np.array([x, y])
         self.timestamp = timestamp
 
     @property
@@ -72,7 +73,7 @@ class Position:
         self._pos += (x, y)
 
     def scale(self, x: float, y: float) -> None:
-        self._pos *= (x, y)
+        self._pos = np.multiply(self._pos, np.array([x, y]))
 
     def __eq__(self, o):
         """
@@ -103,44 +104,6 @@ class Position:
 
     def __mul__(self, other: "Position"):
         return self.arr() * other.arr()
-
-
-class Spiral:
-    def __init__(self):
-        self.theta = 0
-        self.theta_incr = 0.02
-        self.max_theta = 255
-        self.r = 50
-        self.xoffset = 0
-        self.xoffset_incr = 0.55
-        self.maxx = 1888
-
-    def reset(self):
-        self.theta = 0
-        self.xoffset = 0
-
-    def custom(self, pp):
-        while self.theta < self.max_theta:
-            y = self.r * math.cos(self.theta) * 2
-            x = self.r * math.sin(self.theta) + self.xoffset
-            pp.add(x, y, 0)
-            self.theta += self.theta_incr
-            self.xoffset += self.xoffset_incr
-            if x >= self.maxx:
-                break
-
-        return pp
-
-    def get_plain(self, pp):
-        self.theta = 0
-        self.theta_incr = 0.02
-        self.max_theta = 255
-        self.r = 50
-        self.xoffset = 0
-        self.xoffset_incr = 0.15
-        self.maxx = 1888
-
-        return self.custom(pp)
 
 
 class Path:
@@ -239,21 +202,28 @@ class Path:
     def add_position(self, pos: Position) -> None:
         self.vertices.append(pos)
 
-    def arr(self):
-        data = np.random.randint(0, 1000, size=(len(self), 2))
-
+    def arr(self) -> np.array:
+        data = []
         idx = 0
         for p in self.vertices:
-            data[idx] = p.arr()
-            idx += 1
+            data.append(p.arr())
 
-        return data
+            idx += 1
+        arr = np.array(data)
+        return arr
 
     def clear(self) -> None:
         self.vertices.clear()
 
     def copy(self) -> "Path":
-        return type(self)(copy.deepcopy(self.vertices))
+        p = type(self)(copy.deepcopy(self.vertices))
+        p.layer = self.layer
+        p.velocity = self.velocity
+        p.line_type = self.line_type
+        p.pen_select = self.pen_select
+        p.pen_force = self.pen_force
+        p.is_polygon = self.is_polygon
+        return p
 
     def reverse(self) -> None:
         self.vertices.reverse()
@@ -276,7 +246,7 @@ class Path:
 
         return self.vertices[-1]
 
-    def bb(self) -> cursor.bb.BoundingBox:
+    def bb(self) -> "cursor.bb.BoundingBox":
         minx = min(self.vertices, key=lambda pos: pos.x).x
         miny = min(self.vertices, key=lambda pos: pos.y).y
         maxx = max(self.vertices, key=lambda pos: pos.x).x
@@ -343,7 +313,7 @@ class Path:
         else:
             self.translate(0.0, -abs(_bb.y))
 
-    def fit(self, bb: cursor.bb.BoundingBox) -> None:
+    def fit(self, bb: "cursor.bb.BoundingBox") -> None:
         pass
 
     def morph(
@@ -630,7 +600,7 @@ class Path:
         return entropy
 
     def empty(self) -> bool:
-        return len(self.vertices) == 0
+        return len(self.vertices) < 2
 
     def clean(self) -> None:
         """
@@ -681,6 +651,14 @@ class Path:
         result = 1 - spatial.distance.cosine(self.vertices, _path.vertices)
         return result[1]
 
+    def frechet_similarity(self, _path: "Path") -> float:
+        """
+        https://github.com/joaofig/discrete-frechet
+        """
+        distance = cursor.misc.euclidean
+        fdfs = cursor.misc.LinearDiscreteFrechet(distance)
+        return fdfs.distance(self.arr(), _path.arr())
+
     def centeroid(self):
         arr = self.arr()
         length = arr.shape[0]
@@ -723,7 +701,11 @@ class Path:
         return [new_a, new_b]
 
     def _offset_angle(
-        self, p1: "Position", p2: "Position", p3: "Position", offset: float,
+        self,
+        p1: "Position",
+        p2: "Position",
+        p3: "Position",
+        offset: float,
     ) -> "Path":
         a = p2.distance(p3)
         b = p1.distance(p2)
@@ -781,6 +763,12 @@ class Path:
                 offset_path.add(offset_angle[1].x, offset_angle[1].y)
 
         return offset_path
+
+    def parallel_offset(self):
+        """
+        same as above but via shapely lib
+        """
+        pass
 
     @staticmethod
     def clamp(n, smallest, largest):
@@ -846,7 +834,7 @@ class Path:
         y = y1 + ua * (y2 - y1)
         return (x, y)
 
-    def clip(self, bb: cursor.bb.BoundingBox) -> typing.Optional[typing.List["Path"]]:
+    def clip(self, bb: "cursor.bb.BoundingBox") -> typing.Optional[typing.List["Path"]]:
         any_inside = False
         for v in self.vertices:
             if bb.inside(v):
@@ -939,7 +927,7 @@ class PathCollection:
             utc_timestamp = datetime.datetime.timestamp(now)
             self._timestamp = utc_timestamp
 
-    def add(self, path: typing.Union[cursor.bb.BoundingBox, Path]) -> None:
+    def add(self, path: typing.Union["cursor.bb.BoundingBox", Path]) -> None:
         if isinstance(path, Path):
             if path.empty():
                 return
@@ -971,6 +959,18 @@ class PathCollection:
             f"PathCollection::clean: reduced path count from {len_before} to {len(self)}"
         )
 
+    def reverse(self) -> None:
+        self.__paths.reverse()
+
+    def reversed(self) -> "PathCollection":
+        c = copy.deepcopy(self.__paths)
+        c.reverse()
+        pc = PathCollection()
+        for p in c:
+            pc.add(p)
+
+        return pc
+
     def limit(self) -> None:
         for p in self.__paths:
             p.limit()
@@ -994,15 +994,17 @@ class PathCollection:
     def random(self) -> Path:
         return self.__getitem__(random.randint(0, self.__len__() - 1))
 
-    def sort(self, pathsorter: "cursor_filter.Sorter") -> None:
+    def sort(self, pathsorter: "cursor_filter.Sorter", reference_path=None) -> None:
         if isinstance(pathsorter, cursor_filter.Sorter):
-            pathsorter.sort(self.__paths)
+            pathsorter.sort(self.__paths, reference_path)
         else:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
-    def sorted(self, pathsorter: "cursor_filter.Sorter") -> typing.List[Path]:
+    def sorted(
+        self, pathsorter: "cursor_filter.Sorter", reference_path=None
+    ) -> typing.List[Path]:
         if isinstance(pathsorter, cursor_filter.Sorter):
-            return pathsorter.sorted(self.__paths)
+            return pathsorter.sorted(self.__paths, reference_path)
         else:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
@@ -1126,7 +1128,7 @@ class PathCollection:
 
         return layered_pcs
 
-    def bb(self) -> cursor.bb.BoundingBox:
+    def bb(self) -> "cursor.bb.BoundingBox":
         mi = self.min()
         ma = self.max()
         bb = cursor.bb.BoundingBox(mi[0], mi[1], ma[0], ma[1])
@@ -1188,7 +1190,7 @@ class PathCollection:
         else:
             self.translate(0.0, -abs(_bb.y))
 
-    def clip(self, bb: cursor.bb.BoundingBox) -> None:
+    def clip(self, bb: "cursor.bb.BoundingBox") -> None:
         pp = []
         for p in self.__paths:
             clipped = p.clip(bb)
@@ -1205,7 +1207,7 @@ class PathCollection:
         padding_mm: int = None,
         padding_units: int = None,
         padding_percent: int = None,
-        output_bounds: cursor.bb.BoundingBox = None,
+        output_bounds: "cursor.bb.BoundingBox" = None,
         cutoff_mm=None,
         keep_aspect=False,
     ) -> None:
