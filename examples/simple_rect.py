@@ -1,6 +1,6 @@
-from cursor import device
-from cursor import export
-from cursor import path
+import cursor.device as device
+import cursor.export as export
+import cursor.path as path
 
 
 if __name__ == "__main__":
@@ -16,9 +16,9 @@ if __name__ == "__main__":
 
     export.SimpleExportWrapper().ex(
         pc,
-        device.PlotterType.ROLAND_DPX3300_A3,
-        device.PaperSize.LANDSCAPE_A3,
-        10,
+        device.PlotterType.HP_7596B,
+        device.PaperSize.LANDSCAPE_A1,
+        45,
         "simple_rect_example",
         "simple_rect",
     )

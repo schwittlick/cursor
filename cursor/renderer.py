@@ -80,23 +80,17 @@ class SvgRenderer:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
         fname = self.save_path / (filename + ".svg")
-        self.dwg = svgwrite.Drawing(
-            fname.as_posix(), profile="tiny", size=(bb.x2 + bb.x, bb.y2 + bb.y)
-        )
+        self.dwg = svgwrite.Drawing(fname.as_posix(), profile="tiny", size=(bb.w, bb.h))
 
         it = PathIterator(self.paths)
         for conn in it.connections():
-            start = conn[0]
-            end = conn[1]
-
-            self.dwg.add(
-                self.dwg.line(
-                    start.astuple(),
-                    end.astuple(),
-                    stroke_width=0.5,
-                    stroke=svgwrite.rgb(0, 0, 0, "%"),
-                )
+            line = self.dwg.line(
+                conn[0].astuple(),
+                conn[1].astuple(),
+                stroke_width=0.5,
+                stroke='black',
             )
+            self.dwg.add(line)
 
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
@@ -181,7 +175,6 @@ class GCodeRenderer:
 
 
 class RealtimeRenderer:
-
     def __init__(self, w: int, h: int):
         self.running = False
         self.__cbs = []
@@ -203,7 +196,9 @@ class RealtimeRenderer:
         pygame.display.update()
         self.running = True
 
-    def _line(self, screen, p1: "cursor.path.Position", p2: "cursor.path.Position") -> None:
+    def _line(
+        self, screen, p1: "cursor.path.Position", p2: "cursor.path.Position"
+    ) -> None:
         import pygame
 
         pygame.draw.line(screen, (0, 0, 0), p1.astuple(), p2.astuple())
@@ -395,7 +390,8 @@ class HPGLRenderer:
 
 class TektronixRenderer:
     def __init__(
-        self, folder: pathlib.Path,
+        self,
+        folder: pathlib.Path,
     ):
         self.__save_path = folder
         self.__paths = cursor.path.PathCollection()

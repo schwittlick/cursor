@@ -21,7 +21,7 @@ log = wasabi.Printer()
 
 class Position:
     def __init__(self, x: float = 0.0, y: float = 0.0, timestamp: int = 0):
-        self._pos = np.array([x, y])
+        self._pos = np.array([x, y], dtype="float")
         self.timestamp = timestamp
 
     @property
@@ -599,7 +599,7 @@ class Path:
         return entropy
 
     def empty(self) -> bool:
-        return len(self.vertices) < 2
+        return len(self.vertices) < 1
 
     def clean(self) -> None:
         """
