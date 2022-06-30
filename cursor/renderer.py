@@ -8,11 +8,9 @@ import sys
 import pathlib
 import wasabi
 import copy
-import pygame
 from PIL import Image, ImageDraw
 
 log = wasabi.Printer()
-clock = pygame.time.Clock()
 
 
 class DrawingOutOfBoundsException(Exception):
@@ -64,7 +62,7 @@ class SvgRenderer:
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
         self.paths += paths
 
-    def render_bb(self, bb: cursor.bb.BoundingBox) -> None:
+    def render_bb(self, bb: "cursor.bb.BoundingBox") -> None:
         self.bbs.append(bb)
 
         p1 = cursor.path.Path()
@@ -130,7 +128,7 @@ class GCodeRenderer:
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
         self.paths += paths
 
-    def render_bb(self, bb: cursor.bb.BoundingBox) -> None:
+    def render_bb(self, bb: "cursor.bb.BoundingBox") -> None:
         self.bbs.append(bb)
 
     def save(self, filename: str) -> None:
@@ -183,6 +181,7 @@ class GCodeRenderer:
 
 
 class RealtimeRenderer:
+
     def __init__(self, w: int, h: int):
         self.running = False
         self.__cbs = []
@@ -195,6 +194,8 @@ class RealtimeRenderer:
         self.__cbs.append((ord(key), cb, reset))
 
     def _pygameinit(self) -> None:
+        import pygame
+
         pygame.init()
         self.screen = pygame.display.set_mode((self.w, self.h))
 
@@ -203,6 +204,8 @@ class RealtimeRenderer:
         self.running = True
 
     def _line(self, screen, p1: "cursor.path.Position", p2: "cursor.path.Position") -> None:
+        import pygame
+
         pygame.draw.line(screen, (0, 0, 0), p1.astuple(), p2.astuple())
 
     def add(self, pc: "cursor.path.PathCollection") -> None:
@@ -213,6 +216,8 @@ class RealtimeRenderer:
         self.selected = 0
 
     def render(self) -> None:
+        import pygame
+
         if len(self.pcs) == 0:
             log.fail("No paths to render. Quitting")
             return
@@ -525,7 +530,7 @@ class JpegRenderer:
         self.img.save(fname, "JPEG")
         log.good(f"Finished saving {fname}")
 
-    def render_bb(self, bb: cursor.bb.BoundingBox) -> None:
+    def render_bb(self, bb: "cursor.bb.BoundingBox") -> None:
         self.img_draw.line(xy=(bb.x, bb.y, bb.x2, bb.y), fill="black", width=2)
         self.img_draw.line(xy=(bb.x, bb.y, bb.x, bb.y2), fill="black", width=2)
         self.img_draw.line(xy=(bb.x2, bb.y, bb.x2, bb.y2), fill="black", width=2)

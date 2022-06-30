@@ -20,6 +20,9 @@ class PlotterType(Enum):
     ROLAND_DPX3300_A3 = 10
     HP_7595A_A3 = 11
     TEKTRONIX_4662 = 12
+    HP_7596B = 13
+    HP_7596B_25_25 = 14
+    HP_7596B_A3 = 15
 
 
 class ExportFormat(Enum):
@@ -45,23 +48,34 @@ class ExportFormatMappings:
         PlotterType.ROLAND_PNC1000: ExportFormat.HPGL,
         PlotterType.HP_7595A_A3: ExportFormat.HPGL,
         PlotterType.TEKTRONIX_4662: ExportFormat.TEK,
+        PlotterType.HP_7596B: ExportFormat.HPGL,
+        PlotterType.HP_7596B_A3: ExportFormat.HPGL,
+        PlotterType.HP_7596B_25_25: ExportFormat.HPGL,
     }
 
 
 class MinmaxMapping:
     maps = {
         PlotterType.ROLAND_DPX3300: cursor.bb.BoundingBox(-16920, -11180, 16340, 11180),
-        PlotterType.ROLAND_DPX3300_A2: cursor.bb.BoundingBox(-16920, -11180, 5440, 4629),
-        PlotterType.ROLAND_DPX3300_A3: cursor.bb.BoundingBox(-16920, -11180, -1112, -3276),
+        PlotterType.ROLAND_DPX3300_A2: cursor.bb.BoundingBox(
+            -16920, -11180, 5440, 4629
+        ),
+        PlotterType.ROLAND_DPX3300_A3: cursor.bb.BoundingBox(
+            -16920, -11180, -1112, -3276
+        ),
         PlotterType.DIY_PLOTTER: cursor.bb.BoundingBox(0, 0, 3350, -1715),
-        PlotterType.AXIDRAW: cursor.bb.BoundingBox(0, 0, 0, -0),  # todo: missing real bounds
+        PlotterType.AXIDRAW: cursor.bb.BoundingBox(
+            0, 0, 0, -0
+        ),  # todo: missing real bounds
         PlotterType.HP_7475A_A4: cursor.bb.BoundingBox(0, 0, 11040, 7721),
         PlotterType.HP_7475A_A3: cursor.bb.BoundingBox(0, 0, 16158, 11040),
         PlotterType.ROLAND_DXY1200: cursor.bb.BoundingBox(
             0, 0, 0, 0
         ),  # todo: missing real bounds
         PlotterType.ROLAND_DXY980: cursor.bb.BoundingBox(0, 0, 16158, 11040),
-        PlotterType.HP_7595A: cursor.bb.BoundingBox(-23160, -17602, 23160, 17602),
+        PlotterType.HP_7595A: cursor.bb.BoundingBox(
+            -23160, -17602, 23160 + 1160, 17602
+        ),  # minimum 35mm padding
         PlotterType.ROLAND_PNC1000: cursor.bb.BoundingBox(
             0, 0, 17200, 40000
         ),  # actually unlimited y
@@ -69,6 +83,13 @@ class MinmaxMapping:
         PlotterType.TEKTRONIX_4662: cursor.bb.BoundingBox(
             0, 0, 4095, 2731
         ),  # 10x15 inches (25.4 x 38.1 cm)
+        PlotterType.HP_7596B: cursor.bb.BoundingBox(
+            -15500, -11100, 15500 + 22 * 40, 11100
+        ),
+        PlotterType.HP_7596B_A3: cursor.bb.BoundingBox(-6800, -5250, 6800, 5250),
+        PlotterType.HP_7596B_25_25: cursor.bb.BoundingBox(
+            -4310, -3444, 4310 + 800, 3444
+        ),
     }
 
 
@@ -92,6 +113,8 @@ class PaperSize(Enum):
     PORTRAIT_50_80 = 16
     LANDSCAPE_A2 = 17
     SQUARE_59_59 = 18
+    SQUARE_25_25 = 19
+    LANDSCAPE_A1_HP_7596B = 20
 
 
 class PlotterName:
@@ -109,6 +132,9 @@ class PlotterName:
         PlotterType.ROLAND_PNC1000: "roland_camm1",
         PlotterType.HP_7595A_A3: "hp7595a_draftmaster_sx_a3",
         PlotterType.TEKTRONIX_4662: "tektronix4662",
+        PlotterType.HP_7596B: "hp7596b_draftmaster_rxplus",
+        PlotterType.HP_7596B_A3: "hp7596b_draftmaster_rxplus_a3",
+        PlotterType.HP_7596B_25_25: "hp7596b_draftmaster_rxplus_2525",
     }
 
 
@@ -133,6 +159,8 @@ class PaperSizeName:
         PaperSize.PORTRAIT_50_80: "portrait_50_80",
         PaperSize.LANDSCAPE_A2: "landscape_a2",
         PaperSize.SQUARE_59_59: "square_59_59",
+        PaperSize.SQUARE_25_25: "square_25_25",
+        PaperSize.LANDSCAPE_A1_HP_7596B: "landscape_a1",
     }
 
 
@@ -157,6 +185,8 @@ class Paper:
         PaperSize.PORTRAIT_50_80: (500, 800),
         PaperSize.LANDSCAPE_A2: (594, 420),
         PaperSize.SQUARE_59_59: (590, 590),
+        PaperSize.SQUARE_25_25: (215, 170),
+        PaperSize.LANDSCAPE_A1_HP_7596B: (776, 555),
     }
 
 
@@ -175,4 +205,7 @@ class XYFactors:
         PlotterType.ROLAND_PNC1000: (40, 40),
         PlotterType.HP_7595A_A3: (37, 37),
         PlotterType.TEKTRONIX_4662: (9.75, 9.19525),
+        PlotterType.HP_7596B: (39.948, 40),
+        PlotterType.HP_7596B_A3: (39.948, 40),
+        PlotterType.HP_7596B_25_25: (40, 40),
     }
