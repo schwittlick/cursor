@@ -240,6 +240,7 @@ class SimpleExportWrapper:
         gcode_speed: int = None,
         hpgl_pen_layer_mapping=None,
         hpgl_linetype_mapping=None,
+        export_reversed=None
     ):
         cfg = Cfg()
         cfg.type = ptype
@@ -258,3 +259,7 @@ class SimpleExportWrapper:
         exp.layer_pen_mapping = hpgl_pen_layer_mapping
         exp.linetype_mapping = hpgl_linetype_mapping
         exp.run(True, True)
+        if export_reversed:
+            exp.paths.reverse()
+            exp.suffix = exp.suffix + "_reversed_"
+            exp.run(True, True)
