@@ -1,9 +1,12 @@
-import sys
+import cursor.path as path
 
+import sys
 import wasabi
 import time
 import copy
 import typing
+from operator import methodcaller
+from operator import itemgetter
 
 log = wasabi.Printer()
 
@@ -17,6 +20,7 @@ class Sorter:
     LAYER = 6
     PEN_SELECT = 7
     POINT_COUNT = 8
+    FRECHET_DISTANCE = 9
 
     def __init__(self, reverse=False, param=SHANNON_X):
         self.__reverse = reverse
@@ -30,7 +34,7 @@ class Sorter:
     def param(self, v):
         self.__param = v
 
-    def sort(self, paths: typing.List):
+    def sort(self, paths: typing.List, reference_path: "path.Path" = None):
         t0 = time.time()
         if self.__param is self.SHANNON_X:
             paths.sort(key=lambda x: x.shannon_x, reverse=self.__reverse)
@@ -50,6 +54,29 @@ class Sorter:
             paths.sort(key=lambda x: x.pen_select, reverse=self.__reverse)
         elif self.__param is self.POINT_COUNT:
             paths.sort(key=lambda x: len(x), reverse=self.__reverse)
+        elif self.__param is self.FRECHET_DISTANCE and reference_path is not None:
+            distances = []
+            idx = 0
+            for pa in paths:
+                distances.append(
+                    (idx, pa.frechet_similarity(reference_path), pa.copy())
+                )
+                idx += 1
+
+            print(1)
+            sorted_idxes = sorted(distances, key=itemgetter(1), reverse=self.__reverse)
+            print(2)
+            newlist = []
+            for element in sorted_idxes:
+                idx = element[0]
+                newlist.append(element[2])
+                # newlist[idx] = element[2].copy()
+
+            paths = newlist
+            # paths.sort(
+            #    key=lambda n: n.frechet_similarity(reference_path),
+            #    reverse=self.__reverse,
+            # )
         else:
             raise Exception(
                 f"Unknown parameter {self.__param} for {__class__.__name__}"
@@ -57,7 +84,7 @@ class Sorter:
         elapsed = time.time() - t0
         log.good(f"Sorted via {__class__.__name__} took {round(elapsed * 1000)}ms.")
 
-    def sorted(self, paths: typing.List):
+    def sorted(self, paths: typing.List, reference_path=None):
         t0 = time.time()
         if self.__param is self.SHANNON_X:
             sorted_list = sorted(
@@ -87,6 +114,23 @@ class Sorter:
             )
         elif self.__param is self.POINT_COUNT:
             sorted_list = sorted(paths, key=lambda x: len(x), reverse=self.__reverse)
+        elif self.__param is self.FRECHET_DISTANCE and reference_path is not None:
+            distances = []
+            idx = 0
+            for pa in paths:
+                distances.append(
+                    (idx, pa.frechet_similarity(reference_path), pa.copy())
+                )
+                idx += 1
+
+            print(1)
+            sorted_idxes = sorted(distances, key=itemgetter(1), reverse=self.__reverse)
+            print(2)
+            sorted_list = []
+            for element in sorted_idxes:
+                idx = element[0]
+                sorted_list.append(element[2])
+                # newlist[idx] = element[2].copy()
         else:
             raise Exception(f"Wrong param {self.__param} for {__class__.__name__}")
         elapsed = time.time() - t0
