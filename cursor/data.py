@@ -108,6 +108,9 @@ class DataDirHandler:
     def tek(self, folder) -> pathlib.Path:
         return self.data_dir / "experiments" / folder / "tek"
 
+    def digi(self, folder) -> pathlib.Path:
+        return self.data_dir / "experiments" / folder / "digi"
+
     def jpg(self, subfolder) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "jpg"
 
