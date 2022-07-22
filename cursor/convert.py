@@ -74,7 +74,7 @@ def img_to_path(img, layers: int = 8):
         new_pa.add(pa.start_pos().x, pa.start_pos().y)
         new_pa.add(pa.end_pos().x, pa.end_pos().y)
         new_pa.pen_select = int(
-            map(np.clip(len(pa), 0, max_len), 0, max_len / 15, 1, 8, False)
+            map(np.clip(len(pa), 0, max_len), 0, max_len / 1, 1, 8, False)
         )
         # ps = int(map(len(pa), 0, max_len, 0, layers, False))
         # new_pa.layer = ps
@@ -87,6 +87,7 @@ def img_to_path(img, layers: int = 8):
 
     print_statistics(fin_pc)
     return fin_pc
+
     prev = None
     buffered = None
     layers = fin_pc.get_layers()

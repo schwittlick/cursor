@@ -33,6 +33,7 @@ class ExportFormat(Enum):
     GCODE = 2
     HPGL = 3
     TEK = 4
+    DIGI = 5
 
 
 class ExportFormatMappings:

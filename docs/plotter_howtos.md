@@ -53,6 +53,7 @@ usb to parallel port adapter
 
     chmod 777 /dev/usb/lp0
     cat file.hpgl /dev/usb/lp0
+    # turn auto button off (on machine)
 
 
 #### Tektronix 4662
