@@ -4,6 +4,7 @@ from cursor.device import PaperSize
 from cursor.renderer import SvgRenderer
 from cursor.renderer import GCodeRenderer
 from cursor.renderer import JpegRenderer
+from cursor.renderer import DigiplotRenderer
 from cursor.renderer import HPGLRenderer
 from cursor.renderer import AsciiRenderer
 from cursor.renderer import PathIterator
@@ -91,7 +92,9 @@ def test_jpegrenderer():
     rec = loader.all_paths()
 
     rec.fit(
-        Paper.sizes[PaperSize.LANDSCAPE_A1], padding_mm=0, cutoff_mm=0,
+        Paper.sizes[PaperSize.LANDSCAPE_A1],
+        padding_mm=0,
+        cutoff_mm=0,
     )
 
     r = JpegRenderer(DataDirHandler().test_images())
@@ -276,7 +279,9 @@ def test_ascii_renderer():
     rec = loader.all_paths()
 
     rec.fit(
-        Paper.sizes[PaperSize.PORTRAIT_A3], padding_mm=0, cutoff_mm=0,
+        Paper.sizes[PaperSize.PORTRAIT_A3],
+        padding_mm=0,
+        cutoff_mm=0,
     )
 
     r = JpegRenderer(DataDirHandler().test_images())
@@ -308,7 +313,37 @@ def test_tektronix_renderer():
     renderer.render(pc)
     out = renderer.save("tektronix_test01")
 
-    assert out == 'AE `` @ `` @ a` @ b` @ c` @ `` A j` @ j` @ n` @ ba @ fa @ ja @'
+    assert out == "AE `` @ `` @ a` @ b` @ c` @ `` A j` @ j` @ n` @ ba @ fa @ ja @"
+
+
+def test_digiplot_renderer():
+    p0 = Path()
+    p0.add(0, 0)
+    p0.add(1, 0)
+    p0.add(2, 0)
+    p0.add(3, 0)
+    p0.add(4, 0)
+
+    p1 = Path()
+    p1.add(2, 2)
+    p1.add(2, 3)
+    p1.add(2, 4)
+    p1.add(2, 5)
+    p1.add(2, 6)
+
+    pc = PathCollection()
+    pc.add(p0)
+    pc.add(p1)
+
+    renderer = DigiplotRenderer(DataDirHandler().test_hpgls())
+    renderer.render(pc)
+    out = renderer.save("digi_test01")
+
+    assert (
+        out
+        == "X,0;/Y,0;H;K;X,0;/Y,0;I;K;X,1;/Y,0;I;K;X,2;/Y,0;I;K;X,3;/Y,0;I;K;X,4;/Y,0;I;K;X,2;/Y,"
+        "2;H;K;X,2;/Y,2;I;K;X,2;/Y,3;I;K;X,2;/Y,4;I;K;X,2;/Y,5;I;K;X,2;/Y,6;I;K;X,0;/Y,0;H;K;"
+    )
 
 
 def disabled_test_pdf_renderer():
@@ -318,7 +353,9 @@ def disabled_test_pdf_renderer():
     rec = loader.all_paths()
 
     rec.fit(
-        Paper.sizes[PaperSize.PORTRAIT_A4], padding_mm=0, cutoff_mm=0,
+        Paper.sizes[PaperSize.PORTRAIT_A4],
+        padding_mm=0,
+        cutoff_mm=0,
     )
 
     r = JpegRenderer(DataDirHandler().test_images())
@@ -333,7 +370,10 @@ def disabled_test_pdf_renderer():
 
     fontpath = DataDirHandler().test_data_file("JetBrainsMono-Regular.ttf")
     pdf.add_font(
-        "JetbrainsMono", "", fontpath, uni=True,
+        "JetbrainsMono",
+        "",
+        fontpath,
+        uni=True,
     )
     pdf.add_page()
     pdf.set_margins(0, 0)

@@ -224,6 +224,12 @@ class Exporter:
                     tek_renderer.render(pc)
                     tek_renderer.save(f"{layer}_{fname}")
 
+                if format is device.ExportFormat.DIGI:
+                    digi_folder = data.DataDirHandler().digi(self.name)
+                    digi_renderer = renderer.DigiplotRenderer(digi_folder)
+                    digi_renderer.render(pc)
+                    digi_renderer.save(f"{layer}_{fname}")
+
 
 class SimpleExportWrapper:
     from cursor import path
