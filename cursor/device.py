@@ -23,6 +23,8 @@ class PlotterType(Enum):
     HP_7596B = 13
     HP_7596B_25_25 = 14
     HP_7596B_A3 = 15
+    DIGIPLOT_A1 = 16
+    HP_7470A = 17
 
 
 class ExportFormat(Enum):
@@ -51,6 +53,8 @@ class ExportFormatMappings:
         PlotterType.HP_7596B: ExportFormat.HPGL,
         PlotterType.HP_7596B_A3: ExportFormat.HPGL,
         PlotterType.HP_7596B_25_25: ExportFormat.HPGL,
+        PlotterType.DIGIPLOT_A1: ExportFormat.DIGI,
+        PlotterType.HP_7470A: ExportFormat.HPGL,
     }
 
 
@@ -90,6 +94,8 @@ class MinmaxMapping:
         PlotterType.HP_7596B_25_25: cursor.bb.BoundingBox(
             -4310, -3444, 4310 + 800, 3444
         ),
+        PlotterType.DIGIPLOT_A1: cursor.bb.BoundingBox(0, 0, 33600, 23700),
+        PlotterType.HP_7470A: cursor.bb.BoundingBox(0, 0, 10900, 7650)
     }
 
 
@@ -135,6 +141,8 @@ class PlotterName:
         PlotterType.HP_7596B: "hp7596b_draftmaster_rxplus",
         PlotterType.HP_7596B_A3: "hp7596b_draftmaster_rxplus_a3",
         PlotterType.HP_7596B_25_25: "hp7596b_draftmaster_rxplus_2525",
+        PlotterType.DIGIPLOT_A1: "digiplot_a1",
+        PlotterType.HP_7470A: "hp7470a",
     }
 
 
@@ -208,4 +216,6 @@ class XYFactors:
         PlotterType.HP_7596B: (39.948, 40),
         PlotterType.HP_7596B_A3: (39.948, 40),
         PlotterType.HP_7596B_25_25: (40, 40),
+        PlotterType.DIGIPLOT_A1: (40, 40),
+        PlotterType.HP_7470A: (40, 40),
     }

@@ -67,3 +67,36 @@ You have to set the serial port config below every time you connect a serial/usb
     cat /path/to/file.tek > /dev/ttyUSB0
 
 Joystick disconnected on the inside
+
+#### GSI Digiplot A1
+
+    baud 1200
+    
+    I; # pen down
+    H; # pen up
+    X100,Y100;
+    X1000;I;K;H; # set coordinate, pen down, go absolute, pen up
+    X/Y,10000,10000;K;  
+    
+    # calibrated a1 sheet 0,0 (bottom left)
+    X,0;/Y,0;K;  
+    # and top right
+    X,33600;/Y,23700;K;    
+
+    # min/max Y
+    /Y,0;K;
+    /Y,27500;K;
+    
+    # min/max x
+    X/,-8000;K;
+    X,34000;K;
+
+    # both min/max
+    X,-8000;/Y,0;K;
+    X,35000;/Y,27500;K;
+
+#### HP 7470A
+
+    OH; does not work..
+    don't use null modem
+    baud 9600
