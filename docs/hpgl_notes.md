@@ -24,7 +24,8 @@ HPGL Basics
     RR/RA: RectRelative/RectAbsolute
     FT: The FT command specifies the pattern of filling or hatching. It is used together with the RA, RR and WG commands.
 
-
+    OF; Output factor, number of plotter units per millimeter per axis
+    OI; plotter model!
 
 ###Plotter handling
 
