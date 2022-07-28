@@ -96,8 +96,16 @@ Joystick disconnected on the inside
     X,-8000;/Y,0;K;
     X,35000;/Y,27500;K;
 
+    python sendhpgl.py /dev/ttyUSB0 1200 0 ~/../plot/digii/None_simple_rect_example_simple_rect_landscape_a1_digiplot_a1_1dbf7144266374ee479325f40560b78250e73b321b75a7b63d2d1147160e00cc.digi 
+
+
 #### HP 7470A
 
     OH; does not work..
     don't use null modem
     baud 9600
+    draw in portrait mode
+    this model does not fedback anything
+    also limited hpgl capability
+    python tools/serial_sender.py /dev/ttyUSB1 9600 0 data/experiments/simple_rect_example/hpgl/simple_rect_example_simple_rect_landscape_a4_hp7470a_26af20deac7561081a545151d62d83c33204365e42bb30050af6c3cb5a81082d_None.hpgl 
+
