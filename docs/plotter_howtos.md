@@ -15,7 +15,7 @@
 
 
 
-##### HP7595A
+##### HP 7595A & 7596A
     - serial cable with usb adapter
     - ohne nullmodem
     - sendhpgl port file
@@ -108,4 +108,3 @@ Joystick disconnected on the inside
     this model does not fedback anything
     also limited hpgl capability
     python tools/serial_sender.py /dev/ttyUSB1 9600 0 data/experiments/simple_rect_example/hpgl/simple_rect_example_simple_rect_landscape_a4_hp7470a_26af20deac7561081a545151d62d83c33204365e42bb30050af6c3cb5a81082d_None.hpgl 
-
