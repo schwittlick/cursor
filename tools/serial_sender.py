@@ -78,7 +78,8 @@ def main():
     args = parser.parse_args()
 
     sender = Sender(args.port, args.baud)
-    feedback = sender.does_feedback()
+    data, success = sender.does_feedback()
+    print(f"plotter at {args.port} w/ baud {args.baud} returned {data}, success={success}")
 
     print(bool(args.hpgl))
     serial = Serial(port=args.port, baudrate=args.baud, timeout=0)
