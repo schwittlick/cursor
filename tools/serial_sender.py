@@ -42,6 +42,7 @@ class Discovery:
 
 class Sender:
     def __init__(self, port: str, baud: int):
+        self.__feedback = None
         self.__serial = Serial(port=port, baudrate=baud, parity=serial.PARITY_NONE, timeout=2)
 
     @staticmethod
@@ -64,30 +65,62 @@ class Sender:
     def is_open(self):
         return self.__serial.is_open
 
+    def close(self):
+        self.__serial.close()
+
     def model(self) -> str:
-        self.send("OI;\n")
+        self.__serial.write("OI;\n".encode('utf-8'))
         ret = self.read().decode("utf-8")
         return ret.strip()
 
     def does_feedback(self) -> typing.Tuple[int, bool]:
+        if self.__feedback is False:
+            return 0, False
+
         self.__serial.write(b"\x1B.B")
         b = b""
         n = 0
 
         read_some = False
+        attempts = 2
+        current_attempt = 0
         while b != b"\r":
             if len(b) > 0:
                 read_some = True
                 n = n * 10 + b[0] - 48
             b = self.__serial.read()
+            current_attempt += 1
+            if current_attempt > attempts:
+                self.__feedback = False
+                return 0, False
 
+        if current_attempt <= attempts:
+            self.__feedback = True
         return n, read_some
 
     def read(self):
         return self.__serial.readline()
 
     def send(self, data: str):
-        self.__serial.write(data.encode("utf-8"))
+        pos = 0
+        code = data
+        self.show_progress(pos, len(code))
+        while pos < len(code):
+            avail = 512
+            if self.__feedback:
+                avail, _ = self.does_feedback()
+            if avail < 512:
+                sleep(0.01)
+                continue
+
+            end = pos + avail
+            if len(code) - pos < avail:
+                end = len(code)
+
+            self.__serial.write(code[pos:end].encode('utf-8'))
+            pos = end
+
+            self.show_progress(pos, len(code))
 
 
 def read_code(path):
@@ -102,6 +135,9 @@ def main():
     machines = discovery.get_machines()
     for port, machine in machines:
         print(f"plotter at port {port} {machine.model()} exists")
+        machine.close()
+
+    #sys.exit()
 
     parser = ArgumentParser()
     parser.add_argument("--port")
@@ -113,8 +149,6 @@ def main():
     data, feedback_success = sender.does_feedback()
     print(f"plotter at {args.port} ({sender.model()}) w/ baud {args.baud} returned {data}, success={feedback_success}")
 
-    serial = Serial(port=args.port, baudrate=args.baud, timeout=0)
-
     if not args.file:
         cmd = input("enter hpgl\n")
         while cmd != "exit":
@@ -122,27 +156,11 @@ def main():
             fb = sender.read()
             print(fb)
             cmd = input("enter hpgl\n")
+        else:
+            sys.exit(0)
 
     code = read_code(args.file)
-    pos = 0
-
-    Sender.show_progress(pos, len(code))
-    while pos < len(code):
-        avail = 512
-        if feedback_success:
-            avail, _ = sender.does_feedback()
-        if avail < 512:
-            sleep(0.01)
-            continue
-
-        end = pos + avail
-        if len(code) - pos < avail:
-            end = len(code)
-
-        serial.write(code[pos:end].encode("utf-8"))
-        pos = end
-
-        Sender.show_progress(pos, len(code))
+    sender.send(code)
 
 
 if __name__ == "__main__":
