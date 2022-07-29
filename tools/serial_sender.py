@@ -78,19 +78,26 @@ def main():
     args = parser.parse_args()
 
     sender = Sender(args.port, args.baud)
-    data, success = sender.does_feedback()
-    print(f"plotter at {args.port} w/ baud {args.baud} returned {data}, success={success}")
+    data, feedback_success = sender.does_feedback()
+    print(f"plotter at {args.port} w/ baud {args.baud} returned {data}, success={feedback_success}")
 
     print(bool(args.hpgl))
     serial = Serial(port=args.port, baudrate=args.baud, timeout=0)
+
+    if not args.file:
+        cmd = input("enter hpgl")
+        while cmd != "exit":
+            sender.send(cmd)
+            cmd = input("enter hpgl")
+
     code = read_code(args.file)
     pos = 0
 
     Sender.show_progress(pos, len(code))
     while pos < len(code):
         avail = 512
-        if feedback:
-            avail, success = sender.does_feedback()
+        if feedback_success:
+            avail, _ = sender.does_feedback()
         if avail < 512:
             sleep(0.01)
             continue
