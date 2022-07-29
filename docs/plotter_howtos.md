@@ -102,9 +102,33 @@ Joystick disconnected on the inside
 #### HP 7470A
 
     OH; does not work..
+    OI; does work!
     don't use null modem
     baud 9600
     draw in portrait mode
     this model does not fedback anything
     also limited hpgl capability
     python tools/serial_sender.py /dev/ttyUSB1 9600 0 data/experiments/simple_rect_example/hpgl/simple_rect_example_simple_rect_landscape_a4_hp7470a_26af20deac7561081a545151d62d83c33204365e42bb30050af6c3cb5a81082d_None.hpgl 
+
+#### DXY 980
+
+    doesnt work :(
+
+#### DXY 990
+    - baud 9600
+    - serial cable with usb adapter
+    - mit nullmodem
+    - sendhpgl port file
+
+#### DXY 885
+    - baud 9600
+    - serial cable with usb adapter
+    - mit nullmodem
+    - sendhpgl port file
+
+#### DXY1200
+    - baud 9600
+    - serial cable with usb adapter
+    - mit nullmodem
+    - sendhpgl port file
+    
