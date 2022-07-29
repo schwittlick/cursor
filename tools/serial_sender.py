@@ -19,13 +19,30 @@
 #  python serial_sender.py /dev/ttyUSB0 1200 0 path/to/fi.le
 import typing
 from argparse import ArgumentParser
+
+import serial
 from serial import Serial
 from time import sleep
+import sys
+
+
+class Discovery:
+    def get_machines(self):
+        machines = []
+        for i in range(9):
+            port = f"/dev/ttyUSB{i}"
+            try:
+                s = Sender(port=port, baud=9600)
+                if s.is_open():
+                    machines.append((port, s))
+            except serial.SerialException as e:
+                continue
+        return machines
 
 
 class Sender:
     def __init__(self, port: str, baud: int):
-        self.__serial = Serial(port=port, baudrate=baud, timeout=2)
+        self.__serial = Serial(port=port, baudrate=baud, parity=serial.PARITY_NONE, timeout=2)
 
     @staticmethod
     def show_progress(pos, total: int, length: int = 100):
@@ -44,6 +61,14 @@ class Sender:
         if pos == total:
             print()
 
+    def is_open(self):
+        return self.__serial.is_open
+
+    def model(self) -> str:
+        self.send("OI;\n")
+        ret = self.read().decode("utf-8")
+        return ret.strip()
+
     def does_feedback(self) -> typing.Tuple[int, bool]:
         self.__serial.write(b"\x1B.B")
         b = b""
@@ -58,8 +83,11 @@ class Sender:
 
         return n, read_some
 
+    def read(self):
+        return self.__serial.readline()
+
     def send(self, data: str):
-        pass
+        self.__serial.write(data.encode("utf-8"))
 
 
 def read_code(path):
@@ -70,25 +98,30 @@ def read_code(path):
 
 
 def main():
+    discovery = Discovery()
+    machines = discovery.get_machines()
+    for port, machine in machines:
+        print(f"plotter at port {port} {machine.model()} exists")
+
     parser = ArgumentParser()
-    parser.add_argument("port")
-    parser.add_argument("baud", type=int)
-    parser.add_argument("hpgl", type=int)
-    parser.add_argument("file")
+    parser.add_argument("--port")
+    parser.add_argument("--baud", type=int)
+    parser.add_argument("--file", required=False)
     args = parser.parse_args()
 
     sender = Sender(args.port, args.baud)
     data, feedback_success = sender.does_feedback()
-    print(f"plotter at {args.port} w/ baud {args.baud} returned {data}, success={feedback_success}")
+    print(f"plotter at {args.port} ({sender.model()}) w/ baud {args.baud} returned {data}, success={feedback_success}")
 
-    print(bool(args.hpgl))
     serial = Serial(port=args.port, baudrate=args.baud, timeout=0)
 
     if not args.file:
-        cmd = input("enter hpgl")
+        cmd = input("enter hpgl\n")
         while cmd != "exit":
-            sender.send(cmd)
-            cmd = input("enter hpgl")
+            sender.send(cmd + "\n\r")
+            fb = sender.read()
+            print(fb)
+            cmd = input("enter hpgl\n")
 
     code = read_code(args.file)
     pos = 0
