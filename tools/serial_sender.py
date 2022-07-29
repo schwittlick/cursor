@@ -17,6 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #  python serial_sender.py /dev/ttyUSB0 1200 0 path/to/fi.le
+
 import typing
 from argparse import ArgumentParser
 
@@ -42,7 +43,9 @@ class Discovery:
 
 class Sender:
     def __init__(self, port: str, baud: int):
-        self.__serial = Serial(port=port, baudrate=baud, parity=serial.PARITY_NONE, timeout=2)
+        self.__serial = Serial(
+            port=port, baudrate=baud, parity=serial.PARITY_NONE, timeout=2
+        )
 
     @staticmethod
     def show_progress(pos, total: int, length: int = 100):
@@ -111,7 +114,9 @@ def main():
 
     sender = Sender(args.port, args.baud)
     data, feedback_success = sender.does_feedback()
-    print(f"plotter at {args.port} ({sender.model()}) w/ baud {args.baud} returned {data}, success={feedback_success}")
+    print(
+        f"plotter at {args.port} ({sender.model()}) w/ baud {args.baud} returned {data}, success={feedback_success}"
+    )
 
     serial = Serial(port=args.port, baudrate=args.baud, timeout=0)
 
