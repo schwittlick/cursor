@@ -140,13 +140,14 @@ def main():
         print(f"plotter at port {port} {machine.model()} exists")
         machine.close()
 
-    #sys.exit()
-
     parser = ArgumentParser()
     parser.add_argument("--port")
     parser.add_argument("--baud", type=int)
     parser.add_argument("--file", required=False)
     args = parser.parse_args()
+
+    if args.port is None or args.baud is None or args.file is None:
+        sys.exit()
 
     sender = Sender(args.port, args.baud)
     data, feedback_success = sender.does_feedback()
