@@ -44,6 +44,7 @@ class Discovery:
 class Sender:
     def __init__(self, port: str, baud: int):
         self.__feedback = None
+        self.__model = None
         self.__serial = Serial(
             port=port, baudrate=baud, parity=serial.PARITY_NONE, timeout=2
         )
@@ -72,9 +73,12 @@ class Sender:
         self.__serial.close()
 
     def model(self) -> str:
+        if self.__model is not None:
+            return self.__model
         self.__serial.write("OI;\n".encode('utf-8'))
         ret = self.read().decode("utf-8")
-        return ret.strip()
+        self.__model = ret.strip()
+        return self.__model
 
     def does_feedback(self) -> typing.Tuple[int, bool]:
         if self.__feedback is False:
@@ -137,7 +141,7 @@ def main():
     discovery = Discovery()
     machines = discovery.get_machines()
     for port, machine in machines:
-        print(f"plotter at port {port} {machine.model()} exists")
+        print(f"Found device at port {port}. It's {machine.model()}")
         machine.close()
 
     parser = ArgumentParser()
