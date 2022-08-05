@@ -72,12 +72,12 @@ class MinmaxMapping:
         ),
         PlotterType.DIY_PLOTTER: cursor.bb.BoundingBox(0, 0, 3350, -1715),
         PlotterType.AXIDRAW: cursor.bb.BoundingBox(
-            0, 0, 0, -0
+            0, 0, 0, 0
         ),  # todo: missing real bounds
         PlotterType.HP_7475A_A4: cursor.bb.BoundingBox(0, 0, 11040, 7721),
         PlotterType.HP_7475A_A3: cursor.bb.BoundingBox(0, 0, 16158, 11040),
         PlotterType.ROLAND_DXY1200: cursor.bb.BoundingBox(
-            0, 0, 0, 0
+            0, 0, 16158, 11040
         ),  # todo: missing real bounds
         PlotterType.ROLAND_DXY980: cursor.bb.BoundingBox(0, 0, 16158, 11040),
         PlotterType.HP_7595A: cursor.bb.BoundingBox(
