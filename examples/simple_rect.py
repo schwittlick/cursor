@@ -16,9 +16,9 @@ if __name__ == "__main__":
 
     export.SimpleExportWrapper().ex(
         pc,
-        device.PlotterType.HP_7470A,
-        device.PaperSize.LANDSCAPE_A4,
-        15,
+        device.PlotterType.HP_7595A_A2,
+        device.PaperSize.LANDSCAPE_A2,
+        30,
         "simple_rect_example",
         "simple_rect",
     )
