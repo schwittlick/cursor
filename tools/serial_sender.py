@@ -138,17 +138,19 @@ def read_code(path):
 
 
 def main():
-    discovery = Discovery()
-    machines = discovery.get_machines()
-    for port, machine in machines:
-        print(f"Found device at port {port}. It's {machine.model()}")
-        machine.close()
-
     parser = ArgumentParser()
-    parser.add_argument("--port")
-    parser.add_argument("--baud", type=int)
+    parser.add_argument("--port", required=False)
+    parser.add_argument("--baud", required=False, type=int)
     parser.add_argument("--file", required=False)
+    parser.add_argument("--discovery", required=False)
     args = parser.parse_args()
+
+    if args.discovery is not None:
+        discovery = Discovery()
+        machines = discovery.get_machines()
+        for port, machine in machines:
+            print(f"Found device at port {port}. It's {machine.model()}")
+            machine.close()
 
     if args.port is None or args.baud is None or args.file is None:
         sys.exit()
