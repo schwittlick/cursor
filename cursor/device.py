@@ -102,7 +102,7 @@ class MinmaxMapping:
         PlotterType.DIGIPLOT_A1: cursor.bb.BoundingBox(0, 0, 33600, 23700),
         PlotterType.HP_7470A: cursor.bb.BoundingBox(0, 0, 10900, 7650),
         PlotterType.HP_7550A: cursor.bb.BoundingBox(0, 0, 15970, 10870),
-        PlotterType.HP_7595A_A2: cursor.bb.BoundingBox(-11684, -7729, 11684, 7729 + 960)
+        PlotterType.HP_7595A_A2: cursor.bb.BoundingBox(-11684, -7729 - 960, 11684, 7729)
     }
 
 
@@ -228,5 +228,5 @@ class XYFactors:
         PlotterType.DIGIPLOT_A1: (40, 40),
         PlotterType.HP_7470A: (40, 40),
         PlotterType.HP_7550A: (40, 40),
-        PlotterType.HP_7595A_A2: (41, 39.5),
+        PlotterType.HP_7595A_A2: (40, 39.5),
     }
