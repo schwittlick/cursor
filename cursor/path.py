@@ -1344,26 +1344,26 @@ class PathCollection:
         def calc_bb(x: int, y: int) -> cursor.bb.BoundingBox:
             big_bb = self.bb()
 
-            new_width = big_bb.x2 / xq
-            new_height = big_bb.y2 / yq
+            new_width = big_bb.w / xq
+            new_height = big_bb.h / yq
 
             _x = x * new_width
             _y = y * new_height
 
-            new_bb = cursor.bb.BoundingBox(_x, _y, new_width, new_height)
+            new_bb = cursor.bb.BoundingBox(_x, _y, _x + new_width, _y + new_height)
 
             return new_bb
 
         bbs = {}
         bbcounter = 0
-        for y in range(yq):
+        for y in range(yq + 2):
             if y % 2 == 0:
-                for x in range(xq):
+                for x in range(xq + 2):
                     bb = calc_bb(x, y)
                     bbs[bbcounter] = bb
                     bbcounter += 1
             else:
-                for x in reversed(range(xq)):
+                for x in reversed(range(xq + 2)):
                     bb = calc_bb(x, y)
                     bbs[bbcounter] = bb
                     bbcounter += 1
@@ -1382,15 +1382,15 @@ class PathCollection:
         for p in self:
             bbcounter = 0
             mapping = {}
-            for y in range(yq):
+            for y in range(yq + 2):
                 if y % 2 == 0:
-                    for x in range(xq):
+                    for x in range(xq + 2):
                         bb = bbs[bbcounter]
                         inside = _count_inside(bb, p)
                         mapping[bbcounter] = inside
                         bbcounter += 1
                 else:
-                    for x in reversed(range(xq)):
+                    for x in reversed(range(xq + 2)):
                         bb = bbs[bbcounter]
                         inside = _count_inside(bb, p)
                         mapping[bbcounter] = inside
