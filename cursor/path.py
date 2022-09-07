@@ -109,7 +109,7 @@ class Path:
     def __init__(
         self,
         vertices: typing.Optional[list] = None,
-        layer: typing.Optional[str] = None,
+        layer: typing.Optional[str] = "layer1",
         line_type: typing.Optional[int] = None,
         pen_velocity: typing.Optional[int] = None,
         pen_force: typing.Optional[int] = None,
@@ -1356,14 +1356,14 @@ class PathCollection:
 
         bbs = {}
         bbcounter = 0
-        for y in range(yq + 2):
+        for y in range(yq):
             if y % 2 == 0:
-                for x in range(xq + 2):
+                for x in range(xq):
                     bb = calc_bb(x, y)
                     bbs[bbcounter] = bb
                     bbcounter += 1
             else:
-                for x in reversed(range(xq + 2)):
+                for x in reversed(range(xq)):
                     bb = calc_bb(x, y)
                     bbs[bbcounter] = bb
                     bbcounter += 1
@@ -1382,15 +1382,15 @@ class PathCollection:
         for p in self:
             bbcounter = 0
             mapping = {}
-            for y in range(yq + 2):
+            for y in range(yq):
                 if y % 2 == 0:
-                    for x in range(xq + 2):
+                    for x in range(xq):
                         bb = bbs[bbcounter]
                         inside = _count_inside(bb, p)
                         mapping[bbcounter] = inside
                         bbcounter += 1
                 else:
-                    for x in reversed(range(xq + 2)):
+                    for x in reversed(range(xq)):
                         bb = bbs[bbcounter]
                         inside = _count_inside(bb, p)
                         mapping[bbcounter] = inside
