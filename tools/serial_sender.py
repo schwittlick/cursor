@@ -21,10 +21,13 @@
 import typing
 from argparse import ArgumentParser
 
+import wasabi
 import serial
 from serial import Serial
 from time import sleep
 import sys
+
+log = wasabi.Printer()
 
 
 class Discovery:
@@ -36,7 +39,7 @@ class Discovery:
                 s = Sender(port=port, baud=9600)
                 if s.is_open():
                     machines.append((port, s))
-            except serial.SerialException as e:
+            except serial.SerialException:
                 continue
         return machines
 
@@ -75,7 +78,7 @@ class Sender:
     def model(self) -> str:
         if self.__model is not None:
             return self.__model
-        self.__serial.write("OI;\n".encode('utf-8'))
+        self.__serial.write("OI;\n".encode("utf-8"))
         ret = self.read().decode("utf-8")
         self.__model = ret.strip()
         return self.__model
@@ -124,17 +127,29 @@ class Sender:
             if len(code) - pos < avail:
                 end = len(code)
 
-            self.__serial.write(code[pos:end].encode('utf-8'))
+            self.__serial.write(code[pos:end].encode("utf-8"))
             pos = end
 
             self.show_progress(pos, len(code))
 
 
-def read_code(path):
-    code = ""
-    with open(path, "r") as f:
-        code = f.read()
-    return code
+def do_discovery():
+    discovery = Discovery()
+    machines = discovery.get_machines()
+    for port, machine in machines:
+        print(f"Found device at port {port}. It's {machine.model()}")
+        machine.close()
+
+
+def do_terminal_input(sender: Sender):
+    cmd = input("enter hpgl\n")
+    while cmd != "exit":
+        sender.send(cmd + "\n\r")
+        fb = sender.read()
+        print(fb)
+        cmd = input("enter hpgl\n")
+    else:
+        sys.exit(0)
 
 
 def main():
@@ -146,33 +161,24 @@ def main():
     args = parser.parse_args()
 
     if args.discovery is not None:
-        discovery = Discovery()
-        machines = discovery.get_machines()
-        for port, machine in machines:
-            print(f"Found device at port {port}. It's {machine.model()}")
-            machine.close()
+        do_discovery()
 
     if args.port is None or args.baud is None or args.file is None:
         sys.exit()
 
     sender = Sender(args.port, args.baud)
     data, feedback_success = sender.does_feedback()
-    print(
-        f"plotter at {args.port} ({sender.model()}) w/ baud {args.baud} returned {data}, success={feedback_success}"
+    log.good(
+        f"plotter at {args.port} ({sender.model()}) w/ "
+        f"baud {args.baud} returned {data}, success={feedback_success}"
     )
 
     if not args.file:
-        cmd = input("enter hpgl\n")
-        while cmd != "exit":
-            sender.send(cmd + "\n\r")
-            fb = sender.read()
-            print(fb)
-            cmd = input("enter hpgl\n")
-        else:
-            sys.exit(0)
+        do_terminal_input(sender)
 
-    code = read_code(args.file)
-    sender.send(code)
+    with open(args.file, "r") as f:
+        code = f.read()
+        sender.send(code)
 
 
 if __name__ == "__main__":
