@@ -387,6 +387,22 @@ def test_path_clean():
     assert len(p) == 3
 
 
+def test_path_limit():
+    p = Path()
+
+    p.add(0.9, 0.9, 0)
+    p.add(0.9, 1.0, 0)
+    p.add(0.9, 1.1, 0)
+    p.add(0.1, 0.8, 0)
+    p.add(-0.1, 0.8, 0)
+    p.add(0.0, 0.0, 0)
+    p.add(1.0, 1.0, 0)
+
+    p.limit()
+
+    assert len(p) == 5
+
+
 def test_path_reverse():
     p1 = Path()
 

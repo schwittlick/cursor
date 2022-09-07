@@ -605,19 +605,16 @@ class Path:
         """
         removes consecutive duplicates
         """
+
         prev = Position()
-        self.vertices = [
-            prev := v for v in self.vertices if prev.x != v.x or prev.y != v.y
-        ]
+        self.vertices = [prev := v for v in self.vertices if prev != v]
 
     def limit(self) -> None:
         """
         removes points larger than 1.0
         """
         self.vertices = [
-            prev := v
-            for v in self.vertices
-            if v.x < 1.0 and v.x > 0.0 and v.y < 1.0 and v.y > 0.0
+            v for v in self.vertices if 1.0 >= v.x >= 0.0 and 1.0 >= v.y >= 0.0
         ]
 
     def similarity(self, _path: "Path") -> float:
