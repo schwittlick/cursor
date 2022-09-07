@@ -271,6 +271,7 @@ def test_reorder_custom():
     assert pc[3] == p3
     assert pc[4] == p4
 
+
 def test_reorder_quadrants():
     p0 = Path()
     p0.add(1, 1)
@@ -308,6 +309,7 @@ def test_reorder_quadrants():
 def test_reorder_quadrants2():
     pc = PathCollection()
     import random
+
     for i in range(100):
         x = random.randint(0, 100)
         y = random.randint(0, 100)
@@ -319,6 +321,7 @@ def test_reorder_quadrants2():
     pc.reorder_quadrants(10, 10)
 
     assert pc[0] == Path(0, 0)
+
 
 def test_ascii_renderer():
     path = DataDirHandler().test_recordings()

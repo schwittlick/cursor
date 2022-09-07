@@ -1,7 +1,7 @@
 import serial
 import sys
-import codecs 
-import time 
+import codecs
+import time
 
 if __name__ == "__main__":
     bauds = [
@@ -42,20 +42,20 @@ if __name__ == "__main__":
         s.close()
         if response:
             print(f"{response}")
-            #string = response.decode('hex')
+            # string = response.decode('hex')
             string = response[1:]
-            #r1 = string[:1] + string[2:]
+            # r1 = string[:1] + string[2:]
             r2 = string.hex()
             print(string)
             print(r2)
             bytes_object = bytes.fromhex(r2)
             ascii_string = bytes_object.decode("latin-1")
             print(ascii_string)
-            #string.remove(4)
+            # string.remove(4)
             print(string)
-            s = codecs.decode(r2, 'hex')
+            s = codecs.decode(r2, "hex")
             print(s)
-            #string = bytearray.fromhex(string.decode('utf-8')).decode()
-            #print(string)
-            #print(response.hex().decode("hex"))
+            # string = bytearray.fromhex(string.decode('utf-8')).decode()
+            # print(string)
+            # print(response.hex().decode("hex"))
             sys.exit(0)
