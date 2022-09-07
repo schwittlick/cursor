@@ -268,8 +268,8 @@ def test_reorder_custom():
     assert pc[0] == p0
     assert pc[1] == p1
     assert pc[2] == p2
-    assert pc[3] == p3
-    assert pc[4] == p4
+    assert pc[3] == p4
+    assert pc[4] == p3
 
 
 def test_reorder_quadrants():

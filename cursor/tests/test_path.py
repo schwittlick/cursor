@@ -470,7 +470,7 @@ def test_path_distance():
 
 def test_path_layer():
     p = Path()
-    assert p.layer is None
+    assert p.layer is "layer1"
 
     p.layer = "custom"
     assert p.layer == "custom"
