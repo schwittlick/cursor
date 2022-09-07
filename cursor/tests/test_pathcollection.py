@@ -345,7 +345,7 @@ def test_pathcollection_layer():
 
     v = pcol.get_layers()
 
-    assert len(v[None]) == 2
+    assert len(v["layer1"]) == 2
     assert len(v["custom"]) == 1
 
 
