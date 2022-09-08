@@ -1,5 +1,10 @@
 import cursor.bb
 import cursor.misc
+from cursor.misc import dot_product
+from cursor.misc import length
+from cursor.misc import determinant
+from cursor.misc import mix
+from cursor.misc import entropy2
 from cursor.position import Position
 
 import numpy as np
@@ -45,11 +50,11 @@ class Path:
         return self._vertices
 
     @vertices.setter
-    def vertices(self, vertices: typing.List[Position]):
+    def vertices(self, vertices: typing.List[Position]) -> None:
         self._vertices = vertices
 
     @property
-    def line_type(self):
+    def line_type(self) -> int:
         """
         only linetype of 1 and above allowed
         all other linetypes don't render well
@@ -59,49 +64,49 @@ class Path:
         return max(self._line_type, 1)
 
     @line_type.setter
-    def line_type(self, line_type):
+    def line_type(self, line_type) -> None:
         if line_type <= 0:
             self._line_type = 1
         self._line_type = line_type
 
     @property
-    def layer(self):
+    def layer(self) -> int:
         return self._layer
 
     @layer.setter
-    def layer(self, layer):
+    def layer(self, layer) -> None:
         self._layer = layer
 
     @property
-    def pen_force(self):
+    def pen_force(self) -> int:
         return self._pen_force
 
     @pen_force.setter
-    def pen_force(self, pen_force):
+    def pen_force(self, pen_force) -> None:
         self._pen_force = pen_force
 
     @property
-    def pen_select(self):
+    def pen_select(self) -> int:
         return self._pen_select
 
     @pen_select.setter
-    def pen_select(self, pen_select):
+    def pen_select(self, pen_select) -> None:
         self._pen_select = pen_select
 
     @property
-    def velocity(self):
+    def velocity(self) -> int:
         return self._pen_velocity
 
     @velocity.setter
-    def velocity(self, pen_velocity):
+    def velocity(self, pen_velocity) -> None:
         self._pen_velocity = pen_velocity
 
     @property
-    def is_polygon(self):
+    def is_polygon(self) -> bool:
         return self._is_polygon
 
     @is_polygon.setter
-    def is_polygon(self, is_polygon):
+    def is_polygon(self, is_polygon) -> None:
         self._is_polygon = is_polygon
 
     def add(self, x: float, y: float, timestamp: int = 0) -> None:
@@ -207,7 +212,7 @@ class Path:
         for p in self.vertices:
             p.rot(angle, origin)
 
-    def move_to_origin(self):
+    def move_to_origin(self) -> None:
         """
         moves path to zero origin
         after calling this the bb of the path has its x,y at 0,0
@@ -338,44 +343,13 @@ class Path:
 
             pthis = self[idxthis]
             pnew = newpath[idxnew]
-            x_interp = self.mix(pthis.x, pnew.x, perc)
-            y_interp = self.mix(pthis.y, pnew.y, perc)
-            time_interp = self.mix(pthis.timestamp, pnew.timestamp, perc)
+            x_interp = mix(pthis.x, pnew.x, perc)
+            y_interp = mix(pthis.y, pnew.y, perc)
+            time_interp = mix(pthis.timestamp, pnew.timestamp, perc)
 
             path.add(x_interp, y_interp, int(time_interp))
 
         return path
-
-    @staticmethod
-    def mix(begin: float, end: float, perc: float):
-        return ((end - begin) * perc) + begin
-
-    @staticmethod
-    def __entropy2(labels: list, base=None) -> float:
-        from math import log, e
-
-        """ Computes entropy of label distribution. """
-
-        n_labels = len(labels)
-
-        if n_labels <= 1:
-            return 0
-
-        value, counts = np.unique(labels, return_counts=True)
-        probs = counts / n_labels
-        n_classes = np.count_nonzero(probs)
-
-        if n_classes <= 1:
-            return 0
-
-        ent = 0.0
-
-        # Compute entropy
-        base = e if base is None else base
-        for i in probs:
-            ent -= i * log(i, base)
-
-        return ent
 
     def direction_changes_pos_neg(self) -> typing.List[float]:
         """
@@ -401,21 +375,9 @@ class Path:
 
         return angles
 
-    @staticmethod
-    def length(v: tuple[float, float]):
-        return np.sqrt(v[0] ** 2 + v[1] ** 2)
-
-    @staticmethod
-    def dot_product(v: tuple[float, float], w: tuple[float, float]):
-        return v[0] * w[0] + v[1] * w[1]
-
-    @staticmethod
-    def determinant(v: tuple[float, float], w: tuple[float, float]):
-        return v[0] * w[1] - v[1] * w[0]
-
     def inner_angle(self, v: tuple[float, float], w: tuple[float, float]):
-        dp = self.dot_product(v, w)
-        ll = self.length(v) * self.length(w)
+        dp = dot_product(v, w)
+        ll = length(v) * length(w)
         if ll == 0.0:
             return 0.0
 
@@ -432,7 +394,7 @@ class Path:
 
     def angle_clockwise(self, A, B):
         inner = self.inner_angle(A, B)
-        det = self.determinant(A, B)
+        det = determinant(A, B)
         if det < 0:
             # this is a property of the det. If the det < 0 then B is clockwise of A
             return inner
@@ -480,7 +442,7 @@ class Path:
 
             prevx = v.x
 
-        entropy = self.__entropy2(distances)
+        entropy = entropy2(distances)
         return entropy
 
     @property
@@ -500,12 +462,12 @@ class Path:
 
             prevy = v.y
 
-        entropy = self.__entropy2(distances)
+        entropy = entropy2(distances)
         return entropy
 
     @property
     def shannon_direction_changes(self) -> float:
-        entropy = self.__entropy2(self.direction_changes())
+        entropy = entropy2(self.direction_changes())
         if entropy is np.nan:
             log.fail("LOL")
         return entropy
