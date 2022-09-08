@@ -30,7 +30,7 @@ if __name__ == "__main__":
     pc.add(p3)
     pc.add(p4)
 
-    export.SimpleExportWrapper().ex(
+    export.ExportWrapper().ex(
         pc,
         device.PlotterType.ROLAND_DPX3300_A3,
         device.PaperSize.LANDSCAPE_A3,
