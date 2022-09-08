@@ -567,7 +567,7 @@ class Path:
         fdfs = cursor.misc.LinearDiscreteFrechet(distance)
         return fdfs.distance(self.arr(), _path.arr())
 
-    def centeroid(self):
+    def centeroid(self) -> typing.Tuple[float, float]:
         arr = self.arr()
         length = arr.shape[0]
         sum_x = np.sum(arr[:, 0])

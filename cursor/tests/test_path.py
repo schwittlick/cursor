@@ -490,3 +490,25 @@ def test_clip():
     assert p1[1] == Position(5, 15)
     assert p1[2] == Position(6, 15)
     assert p1[3] == Position(6, 5)
+
+
+def test_arr():
+    p = Path()
+    p.add(0, 0)
+    p.add(1, 2)
+    p.add(3, 4)
+
+    arr = p.arr()
+    assert arr.shape[0] == 3
+    assert arr.shape[1] == 2
+
+
+def test_centroid():
+    p = Path()
+    p.add(-1, -1)
+    p.add(1, 1)
+
+    centroidx, centroidy = p.centeroid()
+
+    assert centroidx == 0.0
+    assert centroidy == 0.0
