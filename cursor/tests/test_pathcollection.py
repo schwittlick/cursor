@@ -4,6 +4,7 @@ from cursor.bb import BoundingBox
 
 import pytest
 import random
+import math
 
 
 def test_pathcollection_minmax():
@@ -64,6 +65,31 @@ def test_bb_inside():
 
     assert bb.inside(p1) is False
     assert bb.inside(pc) is False
+
+
+def test_path_aspect_ratio():
+    p = Path()
+    p.add(0, 0)
+    p.add(100, 50)
+
+    aspect_ratio = p.aspect_ratio()
+
+    assert aspect_ratio == 0.5
+
+
+def test_path_aspect_ratio_nan():
+    p = Path()
+    p.add(0, 0)
+
+    aspect_ratio = p.aspect_ratio()
+
+    assert aspect_ratio is math.nan
+
+    p.add(1, 0)
+
+    aspect_ratio = p.aspect_ratio()
+
+    assert aspect_ratio is math.nan
 
 
 def test_pathcollection_add():

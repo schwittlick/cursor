@@ -254,11 +254,14 @@ class Path:
         return b
 
     def aspect_ratio(self) -> float:
+        if len(self) < 2:
+            return math.nan
+
         _bb = self.bb()
-        w = _bb.w
-        if _bb.w == 0.0:
-            w = 0.001
-        return _bb.h / w
+        if _bb.w == 0.0 or _bb.h == 0.0:
+            return math.nan
+
+        return _bb.h / _bb.w
 
     @property
     def distance(self) -> float:
