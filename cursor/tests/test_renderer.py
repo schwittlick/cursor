@@ -302,8 +302,11 @@ def test_reorder_quadrants():
 
     pc.reorder_quadrants(10, 10)
 
-    assert pc[0] == p0
-    assert pc[1] == p4
+    assert pc[0] == p1
+    assert pc[1] == p2
+    assert pc[2] == p0
+    assert pc[3] == p4
+    assert pc[4] == p3
 
 
 def test_reorder_quadrants2():
@@ -320,7 +323,7 @@ def test_reorder_quadrants2():
 
     pc.reorder_quadrants(10, 10)
 
-    assert pc[0] == Path(0, 0)
+    assert len(pc) == 100
 
 
 def test_ascii_renderer():
