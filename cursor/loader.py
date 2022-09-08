@@ -1,5 +1,6 @@
 from cursor import data
 from cursor import path
+from cursor import collection
 
 import json
 import time
@@ -88,15 +89,15 @@ class Loader:
             return True
         return False
 
-    def all_collections(self) -> list[path.PathCollection]:
+    def all_collections(self) -> list[collection.Collection]:
         """
         :return: a copy of all recordings
         """
         return list(self._recordings)
 
-    def all_paths(self) -> path.PathCollection:
+    def all_paths(self) -> collection.Collection:
         """
-        :return: all paths combined into one path.PathCollection
+        :return: all paths combined into one collection.PathCollection
         """
         return reduce(lambda pcol1, pcol2: pcol1 + pcol2, self._recordings)
 

@@ -12,7 +12,7 @@ def test_simple_export():
     p.add(5, 9)
     p.add(-3, -10)
 
-    pc = path.PathCollection()
+    pc = collection.Collection()
     pc.add(p)
 
     cfg = export.Cfg()

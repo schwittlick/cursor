@@ -4,7 +4,7 @@ import cursor.path as path
 
 
 if __name__ == "__main__":
-    pc = path.PathCollection()
+    pc = collection.Collection()
 
     p = path.Path()
     p.add(0, 0)

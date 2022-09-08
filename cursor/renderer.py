@@ -22,7 +22,7 @@ class DrawingOutOfBoundsException(Exception):
 
 
 class PathIterator:
-    def __init__(self, paths: "cursor.path.PathCollection"):
+    def __init__(self, paths: "cursor.collection.Collection"):
         self.paths = paths
 
     def points(self) -> typing.Iterator["cursor.path.Position"]:
@@ -55,10 +55,10 @@ class SvgRenderer:
     def __init__(self, folder: pathlib.Path):
         self.save_path = folder
         self.dwg = None
-        self.paths = cursor.path.PathCollection()
+        self.paths = cursor.collection.Collection()
         self.bbs = []
 
-    def render(self, paths: "cursor.path.PathCollection") -> None:
+    def render(self, paths: "cursor.collection.Collection") -> None:
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
         self.paths += paths
 
@@ -115,10 +115,10 @@ class GCodeRenderer:
         self.feedrate_xy = feedrate_xy
         self.feedrate_z = feedrate_z
         self.invert_y = invert_y
-        self.paths = cursor.path.PathCollection()
+        self.paths = cursor.collection.Collection()
         self.bbs = []
 
-    def render(self, paths: "cursor.path.PathCollection") -> None:
+    def render(self, paths: "cursor.collection.Collection") -> None:
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
         self.paths += paths
 
@@ -203,10 +203,10 @@ class RealtimeRenderer:
 
         pygame.draw.line(screen, (0, 0, 0), p1.astuple(), p2.astuple())
 
-    def add(self, pc: "cursor.path.PathCollection") -> None:
+    def add(self, pc: "cursor.collection.Collection") -> None:
         self.pcs.append(pc)
 
-    def set(self, pcs: typing.List["cursor.path.PathCollection"]) -> None:
+    def set(self, pcs: typing.List["cursor.collection.Collection"]) -> None:
         self.pcs = pcs
         self.selected = 0
 
@@ -286,11 +286,11 @@ class HPGLRenderer:
         line_type_mapping: dict = None,
     ) -> None:
         self.__save_path = folder
-        self.__paths = cursor.path.PathCollection()
+        self.__paths = cursor.collection.Collection()
         self.__layer_pen_mapping = layer_pen_mapping
         self.__line_type_mapping = line_type_mapping
 
-    def render(self, paths: "cursor.path.PathCollection") -> None:
+    def render(self, paths: "cursor.collection.Collection") -> None:
         self.__paths += paths
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
 
@@ -394,7 +394,7 @@ class TektronixRenderer:
         folder: pathlib.Path,
     ):
         self.__save_path = folder
-        self.__paths = cursor.path.PathCollection()
+        self.__paths = cursor.collection.Collection()
 
     def _coords_to_bytes(self, xcoord: int, ycoord: int, low_res: bool = False) -> str:
         """
@@ -423,7 +423,7 @@ class TektronixRenderer:
 
         return hi_y + eb + low_y + hi_x + low_x
 
-    def render(self, paths: "cursor.path.PathCollection") -> None:
+    def render(self, paths: "cursor.collection.Collection") -> None:
         self.__paths += paths
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
 
@@ -466,13 +466,13 @@ class DigiplotRenderer:
         folder: pathlib.Path,
     ):
         self.__save_path = folder
-        self.__paths = cursor.path.PathCollection()
+        self.__paths = cursor.collection.Collection()
 
         self.PEN_DOWN = "I;"
         self.PEN_UP = "H;"
         self.GO_ABSOLUTE = "K;"
 
-    def render(self, paths: "cursor.path.PathCollection") -> None:
+    def render(self, paths: "cursor.collection.Collection") -> None:
         self.__paths += paths
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
 
@@ -519,7 +519,7 @@ class JpegRenderer:
 
     def render(
         self,
-        paths: "cursor.path.PathCollection",
+        paths: "cursor.collection.Collection",
         scale: float = 1.0,
         frame: bool = False,
         thickness: int = 1,
@@ -643,7 +643,7 @@ class AsciiRenderer:
 
     def render(
         self,
-        paths: "cursor.path.PathCollection",
+        paths: "cursor.collection.Collection",
         scale: float = 1.0,
         frame: bool = False,
         thickness: int = 1,

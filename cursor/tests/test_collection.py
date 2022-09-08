@@ -1,5 +1,5 @@
 from cursor.path import Path
-from cursor.path import PathCollection
+from cursor.collection import Collection
 from cursor.bb import BoundingBox
 
 import pytest
@@ -8,7 +8,7 @@ import math
 
 
 def test_pathcollection_minmax():
-    pcol = PathCollection()
+    pcol = Collection()
 
     p1 = Path()
 
@@ -53,7 +53,7 @@ def test_bb_inside():
     p1.add(100, 34)
     p1.add(200, 10)
 
-    pc = PathCollection()
+    pc = Collection()
     pc.add(p1)
 
     bb = BoundingBox(0, 0, 300, 300)
@@ -93,7 +93,7 @@ def test_path_aspect_ratio_nan():
 
 
 def test_pathcollection_add():
-    pcol = PathCollection()
+    pcol = Collection()
 
     assert pcol.empty() is True
 
@@ -105,13 +105,13 @@ def test_pathcollection_add():
 
 
 def test_pathcollection_add2():
-    pcol1 = PathCollection()
+    pcol1 = Collection()
     p1 = Path()
     p1.add(5, 5111)
     p1.add(10, 11)
     pcol1.add(p1)
 
-    pcol2 = PathCollection()
+    pcol2 = Collection()
     p2 = Path()
     p2.add(545, 54)
     p2.add(160, 11)
@@ -130,7 +130,7 @@ def test_pathcollection_add2():
 
 
 def test_pathcollection_get():
-    pcol = PathCollection()
+    pcol = Collection()
 
     p1 = Path()
 
@@ -148,7 +148,7 @@ def test_pathcollection_get():
 
 
 def test_pathcollection_compare():
-    pcol = PathCollection()
+    pcol = Collection()
     p1 = Path()
 
     p1.add(5, 5111)
@@ -156,14 +156,14 @@ def test_pathcollection_compare():
 
     pcol.add(p1)
 
-    pcol2 = PathCollection()
+    pcol2 = Collection()
     r = pcol == pcol2
 
     assert not r
 
 
 def test_pathcollection_clean():
-    pcol = PathCollection()
+    pcol = Collection()
     p0 = Path()
 
     p0.add(5, 5111)
@@ -185,7 +185,7 @@ def test_pathcollection_clean():
 
 
 def test_pathcollection_translate():
-    pcol = PathCollection()
+    pcol = Collection()
     p0 = Path()
 
     p0.add(5, -80)
@@ -209,7 +209,7 @@ def test_pathcollection_translate():
 
 
 def test_pathcollection_scale():
-    pcol = PathCollection()
+    pcol = Collection()
     p0 = Path()
 
     p0.add(5, -80)
@@ -233,7 +233,7 @@ def test_pathcollection_scale():
 
 
 def test_pathcollection_fit1():
-    pcol = PathCollection()
+    pcol = Collection()
     p0 = Path()
 
     p0.add(0, 0)
@@ -250,7 +250,7 @@ def test_pathcollection_fit1():
 
 
 def test_pathcollection_fit2():
-    pcol = PathCollection()
+    pcol = Collection()
     p0 = Path()
 
     p0.add(0, 0)
@@ -269,7 +269,7 @@ def test_pathcollection_fit2():
 
 
 def test_pathcollection_fit3():
-    pcol = PathCollection()
+    pcol = Collection()
     p0 = Path()
 
     p0.add(0, 0)
@@ -288,7 +288,7 @@ def test_pathcollection_fit3():
 
 
 def test_pathcollection_fit4():
-    pcol = PathCollection()
+    pcol = Collection()
     p0 = Path()
 
     p0.add(0, 0)
@@ -313,7 +313,7 @@ def test_pathcollection_fit4():
 
 
 def test_pathcollection_fit5():
-    pcol = PathCollection()
+    pcol = Collection()
 
     p0 = Path()
     p0.add(10, 10)
@@ -331,7 +331,7 @@ def test_pathcollection_fit5():
 
 
 def test_pathcollection_reverse():
-    pcol = PathCollection()
+    pcol = Collection()
 
     p0 = Path()
     p0.add(10, 10)
@@ -353,7 +353,7 @@ def test_pathcollection_reverse():
 
 
 def test_pathcollection_layer():
-    pcol = PathCollection()
+    pcol = Collection()
     p0 = Path(layer="custom")
     p0.add(5, 5111)
     p1 = Path()
@@ -391,7 +391,7 @@ def test_pathcollection_line_types():
     p5 = Path(line_type=4)
     p5.add(0, 0)
 
-    pc = PathCollection()
+    pc = Collection()
     pc.add(p1)
     pc.add(p2)
     pc.add(p3)

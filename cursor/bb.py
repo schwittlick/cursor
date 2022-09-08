@@ -1,5 +1,6 @@
 import cursor.path
 import cursor.bb
+import cursor.position
 
 import math
 import typing
@@ -20,7 +21,7 @@ class BoundingBox:
     def inside(
         self,
         data: typing.Union[
-            "cursor.path.Position", "cursor.path.Path", "cursor.path.PathCollection"
+            "cursor.path.Position", "cursor.path.Path", "cursor.collection.Collection"
         ],
     ) -> bool:
         if isinstance(data, cursor.path.Position):
@@ -30,7 +31,7 @@ class BoundingBox:
                 if not self.__inside(p):
                     return False
             return True
-        if isinstance(data, cursor.path.PathCollection):
+        if isinstance(data, cursor.collection.Collection):
             for path in data:
                 for p in path:
                     if not self.__inside(p):

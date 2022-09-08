@@ -4,7 +4,7 @@ from cursor import device
 from cursor import export
 
 
-def save_callback(id: int, pc: "path.PathCollection"):
+def save_callback(id: int, pc: "collection.Collection"):
     print(f"saving {id}")
     export.SimpleExportWrapper().ex(
         pc,
@@ -17,8 +17,8 @@ def save_callback(id: int, pc: "path.PathCollection"):
 
 
 if __name__ == "__main__":
-    pc1 = path.PathCollection()
-    pc2 = path.PathCollection()
+    pc1 = collection.Collection()
+    pc2 = collection.Collection()
 
     p = path.Path()
     p.add(0, 0)

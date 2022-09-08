@@ -1,6 +1,6 @@
 from cursor.path import Path
-from cursor.path import Position
-from cursor.path import PathCollection
+from cursor.position import Position
+from cursor.collection import Collection
 from cursor.bb import BoundingBox
 
 
@@ -79,11 +79,11 @@ def test_inside_pos():
     pa.add(-10, 10)
     assert not bb.inside(pa)
 
-    pc = PathCollection()
+    pc = Collection()
     pc.add(pa)
     assert not bb.inside(pc)
 
-    pc2 = PathCollection()
+    pc2 = Collection()
     p1 = Path()
     p1.add(100, 100)
     p1.add(100, 200)
