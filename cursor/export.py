@@ -11,7 +11,7 @@ import pathlib
 log = wasabi.Printer()
 
 
-class Cfg:
+class Config:
     def __init__(self):
         self.__type = None
         self.__dimensions = None
@@ -72,11 +72,11 @@ class Exporter:
         self.__paths = t
 
     @property
-    def cfg(self) -> Cfg:
+    def cfg(self) -> Config:
         return self.__cfg
 
     @cfg.setter
-    def cfg(self, t: Cfg) -> None:
+    def cfg(self, t: Config) -> None:
         self.__cfg = t
 
     @property
@@ -232,9 +232,7 @@ class Exporter:
                     digi_renderer.save(f"{layer}_{fname}")
 
 
-class SimpleExportWrapper:
-    from cursor import collection
-
+class ExportWrapper:
     def ex(
         self,
         paths: collection.Collection,
@@ -249,16 +247,16 @@ class SimpleExportWrapper:
         hpgl_linetype_mapping=None,
         export_reversed=None,
     ):
-        cfg = Cfg()
-        cfg.type = ptype
-        cfg.dimension = psize
-        cfg.margin = margin
-        cfg.cutoff = cutoff
+        config = Config()
+        config.type = ptype
+        config.dimension = psize
+        config.margin = margin
+        config.cutoff = cutoff
 
         # paths.clean()
 
         exp = Exporter()
-        exp.cfg = cfg
+        exp.cfg = config
         exp.paths = paths
         exp.name = name
         exp.suffix = str(suffix)

@@ -6,7 +6,7 @@ from cursor import export
 
 def save_callback(id: int, pc: "collection.Collection"):
     print(f"saving {id}")
-    export.SimpleExportWrapper().ex(
+    export.ExportWrapper().ex(
         pc,
         device.PlotterType.ROLAND_DPX3300,
         device.PaperSize.LANDSCAPE_A1,

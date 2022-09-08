@@ -15,7 +15,7 @@ def test_simple_export():
     pc = collection.Collection()
     pc.add(p)
 
-    cfg = export.Cfg()
+    cfg = export.Config()
     cfg.type = device.PlotterType.ROLAND_DPX3300
     cfg.dimension = device.PaperSize.LANDSCAPE_A1
     cfg.margin = 90
