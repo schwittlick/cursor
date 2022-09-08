@@ -1,6 +1,7 @@
 from cursor import renderer
 from cursor import data
 from cursor import device
+from cursor import collection
 
 import inspect
 import hashlib
@@ -63,11 +64,11 @@ class Exporter:
         self.__linetype_mapping = None
 
     @property
-    def paths(self) -> path.PathCollection:
+    def paths(self) -> collection.Collection:
         return self.__paths
 
     @paths.setter
-    def paths(self, t: path.PathCollection) -> None:
+    def paths(self, t: collection.Collection) -> None:
         self.__paths = t
 
     @property
@@ -232,11 +233,11 @@ class Exporter:
 
 
 class SimpleExportWrapper:
-    from cursor import path
+    from cursor import collection
 
     def ex(
         self,
-        paths: path.PathCollection,
+        paths: collection.Collection,
         ptype: device.PlotterType,
         psize: device.PaperSize,
         margin: int,
@@ -246,7 +247,7 @@ class SimpleExportWrapper:
         gcode_speed: int = None,
         hpgl_pen_layer_mapping=None,
         hpgl_linetype_mapping=None,
-        export_reversed=None
+        export_reversed=None,
     ):
         cfg = Cfg()
         cfg.type = ptype

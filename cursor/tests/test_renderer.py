@@ -10,14 +10,14 @@ from cursor.renderer import AsciiRenderer
 from cursor.renderer import PathIterator
 from cursor.renderer import TektronixRenderer
 from cursor.data import DataDirHandler
-from cursor.path import PathCollection
+from cursor.collection import Collection
 from cursor.path import Path
 
 import pytest
 
 
 def test_pathiterator():
-    pc = PathCollection()
+    pc = Collection()
     p1 = Path()
     p1.add(0, 0)
     p1.add(1, 0)
@@ -38,7 +38,7 @@ def test_pathiterator():
 
 
 def test_pathiterator2():
-    pc = PathCollection()
+    pc = Collection()
     p1 = Path()
     p1.add(0, 0)
     p2 = Path()
@@ -58,7 +58,7 @@ def test_pathiterator2():
 
 
 def test_svgrenderer():
-    pc = PathCollection()
+    pc = Collection()
     p1 = Path()
     p1.add(0, 0)
     p1.add(1, 0)
@@ -103,7 +103,7 @@ def test_jpegrenderer():
 
 
 def test_hpglrenderer():
-    pc = PathCollection()
+    pc = Collection()
     p1 = Path()
     p1.add(-10, -10)
     p1.add(10, -10)
@@ -203,7 +203,7 @@ def test_tsp():
     p4.add(5, 5)
     p4.add(1, 0)
 
-    pc = PathCollection()
+    pc = Collection()
     pc.add(p0)
     pc.add(p1)
     pc.add(p2)
@@ -256,7 +256,7 @@ def test_reorder_custom():
     p4.add(5, 5)
     p4.add(1, 0)
 
-    pc = PathCollection()
+    pc = Collection()
     pc.add(p0)
     pc.add(p1)
     pc.add(p2)
@@ -293,7 +293,7 @@ def test_reorder_quadrants():
     p4.add(1, 1.1)
     p4.add(1, 1.1)
 
-    pc = PathCollection()
+    pc = Collection()
     pc.add(p0)
     pc.add(p1)
     pc.add(p2)
@@ -310,7 +310,7 @@ def test_reorder_quadrants():
 
 
 def test_reorder_quadrants2():
-    pc = PathCollection()
+    pc = Collection()
     import random
 
     for i in range(100):
@@ -359,7 +359,7 @@ def test_tektronix_renderer():
     p1.add(2, 5)
     p1.add(2, 6)
 
-    pc = PathCollection()
+    pc = Collection()
     pc.add(p0)
     pc.add(p1)
 
@@ -385,7 +385,7 @@ def test_digiplot_renderer():
     p1.add(2, 5)
     p1.add(2, 6)
 
-    pc = PathCollection()
+    pc = Collection()
     pc.add(p0)
     pc.add(p1)
 

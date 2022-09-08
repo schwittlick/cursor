@@ -1,4 +1,5 @@
 import cursor.path
+import cursor.position
 
 import pathlib
 import json
@@ -11,7 +12,7 @@ import pytz
 
 class MyJsonEncoder(json.JSONEncoder):
     def default(self, o):
-        if isinstance(o, cursor.path.PathCollection):
+        if isinstance(o, cursor.collection.Collection):
             return {
                 "paths": o.get_all(),
                 "timestamp": o.timestamp(),
@@ -30,14 +31,14 @@ class MyJsonDecoder(json.JSONDecoder):
 
     def object_hook(self, dct):
         if "x" in dct and "y" in dct and "ts" in dct:
-            p = cursor.path.Position(dct["x"], dct["y"], dct["ts"])
+            p = cursor.position.Position(dct["x"], dct["y"], dct["ts"])
             return p
         if "w" in dct and "h" in dct:
             s = pyautogui.Size(dct["w"], dct["h"])
             return s
         if "paths" in dct and "timestamp" in dct:
             ts = dct["timestamp"]
-            pc = cursor.path.PathCollection(ts)
+            pc = cursor.collection.Collection(ts)
             for p in dct["paths"]:
                 pc.add(cursor.path.Path(p))
             return pc

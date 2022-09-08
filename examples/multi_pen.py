@@ -3,7 +3,7 @@ import cursor.device as device
 import cursor.export as export
 
 if __name__ == "__main__":
-    pc = path.PathCollection()
+    pc = collection.Collection()
 
     p1 = path.Path()
     p1.add(0, 0)
