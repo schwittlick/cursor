@@ -11,6 +11,49 @@ from numba import typed
 from timeit import default_timer as timer
 
 
+def length(v: tuple[float, float]) -> float:
+    return np.sqrt(v[0] ** 2 + v[1] ** 2)
+
+
+def dot_product(v: tuple[float, float], w: tuple[float, float]) -> float:
+    return v[0] * w[0] + v[1] * w[1]
+
+
+def determinant(v: tuple[float, float], w: tuple[float, float]):
+    return v[0] * w[1] - v[1] * w[0]
+
+
+def mix(begin: float, end: float, perc: float):
+    return ((end - begin) * perc) + begin
+
+
+def entropy2(labels: list, base=None) -> float:
+    from math import log, e
+
+    """ Computes entropy of label distribution. """
+
+    n_labels = len(labels)
+
+    if n_labels <= 1:
+        return 0
+
+    value, counts = np.unique(labels, return_counts=True)
+    probs = counts / n_labels
+    n_classes = np.count_nonzero(probs)
+
+    if n_classes <= 1:
+        return 0
+
+    ent = 0.0
+
+    # Compute entropy
+    base = e if base is None else base
+    for i in probs:
+        ent -= i * log(i, base)
+
+    return ent
+
+
 class Timer:
     def __init__(self):
         self._time = None
