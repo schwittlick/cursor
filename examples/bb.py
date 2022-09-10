@@ -1,4 +1,5 @@
 from cursor import device
+from cursor import collection
 from cursor import export
 from cursor import path
 

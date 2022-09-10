@@ -2,6 +2,7 @@ from cursor import path
 from cursor import renderer
 from cursor import device
 from cursor import export
+from cursor import collection
 
 
 def save_callback(id: int, pc: "collection.Collection"):

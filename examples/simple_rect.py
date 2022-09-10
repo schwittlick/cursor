@@ -1,6 +1,7 @@
-import cursor.device as device
-import cursor.export as export
-import cursor.path as path
+from cursor import collection
+from cursor import export
+from cursor import path
+from cursor import device
 
 
 if __name__ == "__main__":

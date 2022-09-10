@@ -1,6 +1,7 @@
 from cursor import data
 from cursor import path
 from cursor import renderer
+from cursor import collection
 
 
 if __name__ == "__main__":

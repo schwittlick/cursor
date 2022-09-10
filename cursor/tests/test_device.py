@@ -1,6 +1,7 @@
 from cursor import device
 from cursor import export
 from cursor import path
+from cursor import collection
 
 import pytest
 
