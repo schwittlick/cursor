@@ -1,8 +1,8 @@
 from cursor.data import DataDirHandler
 from cursor.loader import Loader
 from cursor.path import Path
-from cursor.path import PathCollection
-from cursor.path import BoundingBox
+from cursor.collection import Collection
+from cursor.bb import BoundingBox
 from cursor.filter import Filter
 from cursor.filter import BoundingBoxFilter
 from cursor.filter import MinPointCountFilter
@@ -15,7 +15,7 @@ import random
 
 
 def test_bb_filter():
-    pcol = PathCollection()
+    pcol = Collection()
 
     p1 = Path()
 
@@ -53,7 +53,7 @@ def test_bb_filter():
 
 
 def test_point_count_filter():
-    pcol = PathCollection()
+    pcol = Collection()
 
     p1 = Path()
 
@@ -88,7 +88,7 @@ def test_point_count_filter():
 
 
 def test_entropy_sort():
-    pcol = PathCollection()
+    pcol = Collection()
 
     for i in range(100):
         p = Path()
@@ -125,7 +125,7 @@ def test_entropy_sort():
 
 
 def test_entropy_sort2():
-    pcol = PathCollection()
+    pcol = Collection()
     dir = DataDirHandler().test_recordings()
     ll = Loader(directory=dir, limit_files=2)
     pcol = ll.all_paths()
@@ -148,7 +148,7 @@ def test_entropy_sort2():
 
 
 def test_distance_filter():
-    pcol = PathCollection()
+    pcol = Collection()
 
     p1 = Path()
 

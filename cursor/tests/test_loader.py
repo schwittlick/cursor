@@ -42,11 +42,6 @@ def test_loader_single_file():
     assert len(ll.all_paths()) == 18
 
 
-def test_loader_isfileandjson():
-    with pytest.raises(AssertionError):
-        Loader.is_file_and_json("hey")
-
-
 def test_loader_limit_files():
     dir = DataDirHandler().test_recordings()
     l1 = Loader(directory=dir)

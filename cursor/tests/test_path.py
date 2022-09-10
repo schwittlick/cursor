@@ -1,6 +1,6 @@
 from cursor.path import Path
-from cursor.path import TimedPosition
-from cursor.path import BoundingBox
+from cursor.position import Position
+from cursor.bb import BoundingBox
 
 import pytest
 
@@ -175,35 +175,6 @@ def test_path_interp():
     assert int(interped[1].x) == 100
 
 
-def test_timedpos_comparison():
-    t1 = TimedPosition(0, 0, 0)
-    t2 = TimedPosition(0, 0, 1)
-    r = t1 < t2
-    assert r is True
-
-    r2 = t1 > t2
-    assert r2 is False
-
-    eq = t1 == t2
-    assert eq is False
-
-    b = False
-    with pytest.raises(NotImplementedError):
-        r = b == t1
-
-
-def test_timedpos_simple():
-    t = TimedPosition(0, 0, 100)
-    assert t.time() == 100
-
-
-def test_timedpos_scale():
-    t = TimedPosition(1, 2, 100)
-    t.scale(5, 10)
-    assert t.x == 5.0
-    assert t.y == 20.0
-
-
 def test_sort_path():
     p = Path()
 
@@ -244,20 +215,6 @@ def test_entropy():
     assert sy1 > sy2
 
 
-def test_bb_center():
-    bb = BoundingBox(100, 200, 300, 400)
-    cx, cy = bb.center()
-    assert cx == 200
-    assert cy == 300
-
-
-def test_bb_center2():
-    bb = BoundingBox(-100, -100, 100, 100)
-    cx, cy = bb.center()
-    assert cx == 0
-    assert cy == 0
-
-
 def test_path_clean():
     p = Path()
 
@@ -275,6 +232,22 @@ def test_path_clean():
     p.clean()
 
     assert len(p) == 3
+
+
+def test_path_limit():
+    p = Path()
+
+    p.add(0.9, 0.9, 0)
+    p.add(0.9, 1.0, 0)
+    p.add(0.9, 1.1, 0)
+    p.add(0.1, 0.8, 0)
+    p.add(-0.1, 0.8, 0)
+    p.add(0.0, 0.0, 0)
+    p.add(1.0, 1.0, 0)
+
+    p.limit()
+
+    assert len(p) == 5
 
 
 def test_path_reverse():
@@ -344,7 +317,7 @@ def test_path_distance():
 
 def test_path_layer():
     p = Path()
-    assert p.layer is None
+    assert p.layer == "layer1"
 
     p.layer = "custom"
     assert p.layer == "custom"
@@ -440,3 +413,102 @@ def disabled_test_similarity():
 
     sim2 = p1.similarity(p3)
     assert sim2 >= 0.9
+
+
+def test_offset():
+    p1 = Path()
+    p1.add(0, 0)
+    p1.add(1, 0)
+    p1.add(0.5, 1)
+    p1.add(3.5, 1)
+    p1.add(3, 0)
+    p1.add(4, 0)
+
+    offset = p1.offset(0.2)
+
+    assert offset[0].y == -0.2
+
+
+def test_downsample():
+    p1 = Path()
+    p1.add(0, 0)
+    p1.add(1, 0)
+    p1.add(2, 0)
+    p1.add(3, 0)
+    p1.add(4, 0)
+    p1.add(6, 0)
+    p1.add(7, 0)
+    p1.add(7.2, 0)
+
+    p1.downsample(1.1)
+
+    assert len(p1) == 4
+
+
+def test_intersect():
+    p1 = [1, 1]
+    p2 = [10, 1]
+
+    p3 = [4, 0]
+    p4 = [4, 10]
+
+    i = Path.intersect_segment(p1, p2, p3, p4)
+    assert i[0] == 4
+    assert i[1] == 1
+
+
+def test_clip():
+    p1 = Path()
+    p1.add(5, 5)
+    p1.add(5, 15)
+    p1.add(6, 15)
+    p1.add(6, 5)
+    p1.add(5, 5)
+    p1.add(11, 5)
+    p1.add(12, 5)
+    p1.add(5, 5)
+    p1.add(7, 5)
+
+    bb = BoundingBox(1, 1, 10, 10)
+
+    clipped = p1.clip(bb)
+
+    assert len(clipped) == 3
+    assert clipped[0][0] == Position(5, 5)
+    assert clipped[0][1] == Position(5, 10)
+
+    assert clipped[1][0] == Position(6, 10)
+    assert clipped[1][1] == Position(6, 5)
+    assert clipped[1][2] == Position(5, 5)
+    assert clipped[1][3] == Position(10, 5)
+
+    assert clipped[2][0] == Position(10, 5)
+    assert clipped[2][1] == Position(5, 5)
+    assert clipped[2][2] == Position(7, 5)
+
+    assert p1[0] == Position(5, 5)
+    assert p1[1] == Position(5, 15)
+    assert p1[2] == Position(6, 15)
+    assert p1[3] == Position(6, 5)
+
+
+def test_arr():
+    p = Path()
+    p.add(0, 0)
+    p.add(1, 2)
+    p.add(3, 4)
+
+    arr = p.arr()
+    assert arr.shape[0] == 3
+    assert arr.shape[1] == 2
+
+
+def test_centroid():
+    p = Path()
+    p.add(-1, -1)
+    p.add(1, 1)
+
+    centroidx, centroidy = p.centeroid()
+
+    assert centroidx == 0.0
+    assert centroidy == 0.0

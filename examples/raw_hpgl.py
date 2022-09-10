@@ -1,10 +1,11 @@
 from cursor import data
 from cursor import path
 from cursor import renderer
+from cursor import collection
 
 
 if __name__ == "__main__":
-    pc = path.PathCollection()
+    pc = collection.Collection()
 
     p = path.Path()
     p.add(0, 0)

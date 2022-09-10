@@ -1,5 +1,6 @@
 from cursor.data import DataDirHandler, JsonCompressor
-from cursor.path import PathCollection, Path
+from cursor.path import Path
+from cursor.collection import Collection
 
 
 def test_experiments_path():
@@ -54,7 +55,7 @@ def test_test_recordings_path():
 
 
 def test_json_encoder():
-    mouse_recordings = PathCollection()
+    mouse_recordings = Collection()
     p1 = Path()
     p1.add(0, 0, 1626037613)
     mouse_recordings.add(p1)
@@ -63,7 +64,7 @@ def test_json_encoder():
     recs = {"mouse": mouse_recordings, "keys": keyboard_recodings}
     compressor = JsonCompressor()
     enc = compressor.json_zip(j=recs)
-    assert 120 <= len(enc["base64(zip(o))"]) <= 124
+    assert 120 <= len(enc["base64(zip(o))"]) <= 128
 
 
 def test_json_decoder():

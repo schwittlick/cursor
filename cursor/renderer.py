@@ -1,11 +1,10 @@
-import os
-import typing
-
-from cursor.path import PathCollection
-from cursor.path import Path
-from cursor.path import BoundingBox
+import cursor.path
+import cursor.bb
 
 import svgwrite
+import os
+import typing
+import sys
 import pathlib
 import wasabi
 import copy
@@ -23,16 +22,17 @@ class DrawingOutOfBoundsException(Exception):
 
 
 class PathIterator:
-    def __init__(self, paths):
-        assert isinstance(paths, PathCollection), "Only PathCollection objects allowed"
+    def __init__(self, paths: "cursor.collection.Collection"):
         self.paths = paths
 
-    def points(self):
+    def points(self) -> typing.Iterator["cursor.path.Position"]:
         for p in self.paths:
             for point in p.vertices:
                 yield point
 
-    def connections(self):
+    def connections(
+        self,
+    ) -> typing.Iterator[typing.Tuple["cursor.path.Position", "cursor.path.Position"]]:
         prev = None
 
         for p in self.paths:
@@ -52,28 +52,20 @@ class PathIterator:
 
 
 class SvgRenderer:
-    def __init__(self, folder):
-        assert isinstance(folder, pathlib.Path), "Only path objects allowed"
+    def __init__(self, folder: pathlib.Path):
         self.save_path = folder
         self.dwg = None
-        self.paths = PathCollection()
+        self.paths = cursor.collection.Collection()
         self.bbs = []
 
-    def render(self, paths):
-        if not isinstance(paths, PathCollection):
-            raise Exception("Only PathCollection and list of PathCollections allowed")
-
+    def render(self, paths: "cursor.collection.Collection") -> None:
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
-        # for path in paths:
-        #    log.good(f"with {len(path)} verts")
         self.paths += paths
 
-    def render_bb(self, bb):
-        assert isinstance(bb, BoundingBox), "Only BoundingBox objects allowed"
-
+    def render_bb(self, bb: "cursor.bb.BoundingBox") -> None:
         self.bbs.append(bb)
 
-        p1 = Path()
+        p1 = cursor.path.Path()
         p1.add(bb.x, bb.y)
         p1.add(bb.x2, bb.y)
         p1.add(bb.x2, bb.y2)
@@ -82,29 +74,23 @@ class SvgRenderer:
 
         self.paths.add(p1)
 
-    def save(self, filename: str):
+    def save(self, filename: str) -> None:
         bb = self.paths.bb()
 
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
         fname = self.save_path / (filename + ".svg")
-        self.dwg = svgwrite.Drawing(
-            fname.as_posix(), profile="tiny", size=(bb.x2 + bb.x, bb.y2 + bb.y)
-        )
+        self.dwg = svgwrite.Drawing(fname.as_posix(), profile="tiny", size=(bb.w, bb.h))
 
         it = PathIterator(self.paths)
         for conn in it.connections():
-            start = conn[0]
-            end = conn[1]
-
-            self.dwg.add(
-                self.dwg.line(
-                    start.pos(),
-                    end.pos(),
-                    stroke_width=0.5,
-                    stroke=svgwrite.rgb(0, 0, 0, "%"),
-                )
+            line = self.dwg.line(
+                conn[0].astuple(),
+                conn[1].astuple(),
+                stroke_width=0.5,
+                stroke="black",
             )
+            self.dwg.add(line)
 
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
@@ -116,38 +102,30 @@ class SvgRenderer:
 class GCodeRenderer:
     def __init__(
         self,
-        folder,
-        feedrate_xy=2000,
-        feedrate_z=1000,
-        z_down=3.5,
-        z_up=0.0,
-        invert_y=True,
+        folder: pathlib.Path,
+        feedrate_xy: int = 2000,
+        feedrate_z: int = 1000,
+        z_down: float = 3.5,
+        z_up: float = 0.0,
+        invert_y: bool = True,
     ):
-        assert isinstance(folder, pathlib.Path), "Only path objects allowed"
-
         self.save_path = folder
         self.z_down = z_down
         self.z_up = z_up
         self.feedrate_xy = feedrate_xy
         self.feedrate_z = feedrate_z
         self.invert_y = invert_y
-        self.paths = PathCollection()
+        self.paths = cursor.collection.Collection()
         self.bbs = []
 
-    def render(self, paths):
-        if not isinstance(paths, PathCollection):
-            raise Exception("Only PathCollection and list of PathCollections allowed")
-
+    def render(self, paths: "cursor.collection.Collection") -> None:
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
-        # for path in paths:
-        #    log.good(f"with {len(path)} verts")
         self.paths += paths
 
-    def render_bb(self, bb):
-        assert isinstance(bb, BoundingBox), "Only BoundingBox objects allowed"
+    def render_bb(self, bb: "cursor.bb.BoundingBox") -> None:
         self.bbs.append(bb)
 
-    def save(self, filename: str):
+    def save(self, filename: str) -> None:
         try:
             pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
             fname = self.save_path / (filename + ".nc")
@@ -192,44 +170,112 @@ class GCodeRenderer:
         except DrawingOutOfBoundsException as e:
             log.fail(f"Couldn't generate GCode- Out of Bounds with position {e}")
 
-    def __append_to_file(self, file, x, y):
-        # if y < DrawingMachine.Plotter.MAX_Y:
-        #    raise DrawingOutOfBoundsException(y)
-        # if x > DrawingMachine.Plotter.MAX_X:
-        #    raise DrawingOutOfBoundsException(x)
+    def __append_to_file(self, file: typing.TextIO, x: float, y: float) -> None:
         file.write(f"G01 X{x:.2f} Y{y:.2f} F{self.feedrate_xy}\n")
 
 
 class RealtimeRenderer:
-    def __init__(self):
-        pass
+    def __init__(self, w: int, h: int):
+        self.running = False
+        self.__cbs = []
+        self.w = w
+        self.h = h
+        self.pcs = []
+        self.selected = 0
 
-    def render_pc(self, app, _pc):
-        it = PathIterator(_pc)
+    def set_cb(self, key: str, cb: typing.Callable, reset: bool = False) -> None:
+        self.__cbs.append((ord(key), cb, reset))
 
-        for conn in it.connections():
-            start = conn[0]
-            end = conn[1]
+    def _pygameinit(self) -> None:
+        import pygame
 
-            app.line(start.x, start.y, end.x, end.y)
+        pygame.init()
+        self.screen = pygame.display.set_mode((self.w, self.h))
 
-    def render(self, paths):
-        from processing_py import App
+        self.screen.fill((255, 255, 255))
+        pygame.display.update()
+        self.running = True
 
-        app = App(800, 600)  # create window: width, height
+    def _line(
+        self, screen, p1: "cursor.path.Position", p2: "cursor.path.Position"
+    ) -> None:
+        import pygame
 
-        t = 0
-        while t < 500:
-            print(f"frame {t}")
-            t += 1
-            app.background(0, 0, 0)
-            app.fill(255, 255, 0)
-            app.ellipse(app.mouseX, app.mouseY, 50, 50)
-            app.fill(255, 255, 255)
-            app.stroke(255, 255, 255)
-            self.render_pc(app, paths)
-            app.redraw()
-        app.exit()
+        pygame.draw.line(screen, (0, 0, 0), p1.astuple(), p2.astuple())
+
+    def add(self, pc: "cursor.collection.Collection") -> None:
+        self.pcs.append(pc)
+
+    def set(self, pcs: typing.List["cursor.collection.Collection"]) -> None:
+        self.pcs = pcs
+        self.selected = 0
+
+    def render(self) -> None:
+        import pygame
+
+        if len(self.pcs) == 0:
+            log.fail("No paths to render. Quitting")
+            return
+
+        self._pygameinit()
+
+        frame_count = 0
+        while self.running:
+            pygame.display.set_caption(f"selected {self.selected}")
+            self.screen.fill((255, 255, 255))
+            it = PathIterator(self.pcs[self.selected])
+            ev = pygame.event.get()
+            for conn in it.connections():
+                start = conn[0]
+                end = conn[1]
+                self._line(self.screen, start, end)
+            pygame.display.update()
+
+            if frame_count % 60 == 0:
+                pressed = pygame.key.get_pressed()
+                if pressed[pygame.K_LEFT] and pressed[pygame.K_LCTRL]:
+                    self.selected -= 1
+                    if self.selected < 0:
+                        self.selected = len(self.pcs) - 1
+
+                if pressed[pygame.K_RIGHT] and pressed[pygame.K_LCTRL]:
+                    self.selected += 1
+                    if self.selected >= len(self.pcs):
+                        self.selected = 0
+
+                for cbk in self.__cbs:
+                    if pressed[cbk[0]] and pressed[pygame.K_LCTRL]:
+                        cbk[1](self.selected, self.pcs[self.selected])
+                        if cbk[2]:
+                            self.selected = 0
+
+            frame_count += 1
+            for event in ev:
+                if event.type == pygame.MOUSEBUTTONUP:
+                    pygame.display.update()
+                if event.type == pygame.KEYDOWN:
+                    for cbk in self.__cbs:
+                        if cbk[0] == event.key:
+                            cbk[1](self.selected, self.pcs[self.selected])
+                    # if event.key == pygame.K_s:
+                    #    if self.cb:
+                    #        self.cb(self.selected, self.pcs[self.selected])
+                    if event.key == pygame.K_ESCAPE:
+                        self.running = False
+                        pygame.quit()
+                        sys.exit(0)
+
+                    if event.key == pygame.K_LEFT:
+                        self.selected -= 1
+                        if self.selected < 0:
+                            self.selected = len(self.pcs) - 1
+                    if event.key == pygame.K_RIGHT:
+                        self.selected += 1
+                        if self.selected >= len(self.pcs):
+                            self.selected = 0
+
+                if event.type == pygame.QUIT:
+                    self.running = False
 
 
 class HPGLRenderer:
@@ -240,11 +286,11 @@ class HPGLRenderer:
         line_type_mapping: dict = None,
     ) -> None:
         self.__save_path = folder
-        self.__paths = PathCollection()
+        self.__paths = cursor.collection.Collection()
         self.__layer_pen_mapping = layer_pen_mapping
         self.__line_type_mapping = line_type_mapping
 
-    def render(self, paths: "PathCollection") -> None:
+    def render(self, paths: "cursor.collection.Collection") -> None:
         self.__paths += paths
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
 
@@ -267,12 +313,16 @@ class HPGLRenderer:
 
             _hpgl_string += f"SP{self.__get_pen_select(p.pen_select)};\n"
             _hpgl_string += f"LT{self.__linetype_from_layer(p.line_type)};\n"
-            _hpgl_string += f"VS{self.__get_velocity(p.velocity)};\n"
-            _hpgl_string += f"FS{self.__get_pen_force(p.pen_force)};\n"
+
+            if p.velocity:
+                _hpgl_string += f"VS{self.__get_velocity(p.velocity)};\n"
+
+            if p.pen_force:
+                _hpgl_string += f"FS{self.__get_pen_force(p.pen_force)};\n"
 
             _hpgl_string += f"PA{int(x)},{int(y)};\n"
             if p.is_polygon:
-                _hpgl_string += "PM0;"
+                _hpgl_string += "PM0;\n"
 
             _hpgl_string += "PD;\n"
 
@@ -284,10 +334,10 @@ class HPGLRenderer:
             _hpgl_string += "PU;\n"
 
             if p.is_polygon:
-                _hpgl_string += "PM2;"  # switch to PM2; to close and safe
-                _hpgl_string += "FP;"
+                _hpgl_string += "PM2;\n"  # switch to PM2; to close and safe
+                _hpgl_string += "FP;\n"
 
-        _hpgl_string += "PA0,0\n"
+        _hpgl_string += "PA0,0;\n"
         _hpgl_string += "SP0;\n"
 
         with open(fname.as_posix(), "w") as file:
@@ -338,16 +388,142 @@ class HPGLRenderer:
         return pen_force
 
 
+class TektronixRenderer:
+    def __init__(
+        self,
+        folder: pathlib.Path,
+    ):
+        self.__save_path = folder
+        self.__paths = cursor.collection.Collection()
+
+    def _coords_to_bytes(self, xcoord: int, ycoord: int, low_res: bool = False) -> str:
+        """
+        Converts integer coordinates to the funky 12-bit byte coordinate
+        codes expected by the Tek plotter in graph mode.
+        returns a byte string:
+        <HIGH Y><Remainders (low 2 bits added)><LOW Y><HIGH X><LOW X>
+
+        all characters are offset so they are in the typable ascii range
+        since they were designed for manual input on a 1970s tty/terminal keyboard
+        """
+        if low_res:
+            eb = ""
+        else:
+            remx = xcoord % 4
+            remy = ycoord % 4
+            eb = chr(96 + remx + (4 * remy))  # see Operators manual Appendix B-1
+
+        # the 'low' bits are actually the highest 5 of the lowest 7 bits
+        # there is also a lower precision mode that ignores the remainder
+        low_y = chr(96 + ((ycoord // 4) & 0b11111))
+        low_x = chr(64 + ((xcoord // 4) & 0b11111))
+
+        hi_y = chr(32 + (ycoord // 128))
+        hi_x = chr(32 + (xcoord // 128))
+
+        return hi_y + eb + low_y + hi_x + low_x
+
+    def render(self, paths: "cursor.collection.Collection") -> None:
+        self.__paths += paths
+        log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
+
+    def save(self, filename: str) -> str:
+        pathlib.Path(self.__save_path).mkdir(parents=True, exist_ok=True)
+        fname = self.__save_path / (filename + ".tek")
+
+        GS = chr(29)
+        ESC = chr(27)
+        FF = chr(12)
+        US = chr(31)
+        # BEL = chr(7)
+
+        # Escape + init? + Go-to-graph-mode
+        output_string = ESC + "AE" + GS
+
+        for p in self.__paths:
+            x = int(p.start_pos().x)
+            y = int(p.start_pos().y)
+            output_string += self._coords_to_bytes(x, y)  # move, pen-up
+            for line in p.vertices:
+                x = int(line.x)
+                y = int(line.y)
+                output_string += self._coords_to_bytes(x, y)  # draw, pen-down
+
+        # Escape + Move-to-home + Go-to-alpha-mode
+        output_string += ESC + FF + US
+
+        with open(fname.as_posix(), "wb") as file:
+            file.write(output_string.encode("utf-8"))
+
+        log.good(f"Finished saving {fname}")
+
+        return output_string
+
+
+class DigiplotRenderer:
+    def __init__(
+        self,
+        folder: pathlib.Path,
+    ):
+        self.__save_path = folder
+        self.__paths = cursor.collection.Collection()
+
+        self.PEN_DOWN = "I;"
+        self.PEN_UP = "H;"
+        self.GO_ABSOLUTE = "K;"
+
+    def render(self, paths: "cursor.collection.Collection") -> None:
+        self.__paths += paths
+        log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
+
+    @staticmethod
+    def _coord_string(x: int, y: int) -> str:
+        return f"X,{x};/Y,{y};"  # coord + go absolute
+
+    def save(self, filename: str) -> str:
+        pathlib.Path(self.__save_path).mkdir(parents=True, exist_ok=True)
+        fname = self.__save_path / (filename + ".digi")
+
+        output_string = ""
+
+        for p in self.__paths:
+            x = int(p.start_pos().x)
+            y = int(p.start_pos().y)
+            output_string += self._coord_string(x, y)
+            output_string += self.PEN_UP
+            output_string += self.GO_ABSOLUTE
+            for line in p.vertices:
+                x = int(line.x)
+                y = int(line.y)
+                output_string += self._coord_string(x, y)
+                output_string += self.PEN_DOWN
+                output_string += self.GO_ABSOLUTE
+
+        output_string += self._coord_string(0, 0)
+        output_string += self.PEN_UP
+        output_string += self.GO_ABSOLUTE
+
+        with open(fname.as_posix(), "wb") as file:
+            file.write(output_string.encode("utf-8"))
+
+        log.good(f"Finished saving {fname}")
+
+        return output_string
+
+
 class JpegRenderer:
     def __init__(self, folder: pathlib.Path):
         self.save_path = folder
         self.img = None
         self.img_draw = None
 
-    def render(self, paths, scale=1.0, frame=False, thickness=1):
-        if not isinstance(paths, PathCollection):
-            raise Exception("Only PathCollection allowed")
-
+    def render(
+        self,
+        paths: "cursor.collection.Collection",
+        scale: float = 1.0,
+        frame: bool = False,
+        thickness: int = 1,
+    ) -> None:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
         if len(paths) == 0:
@@ -396,20 +572,18 @@ class JpegRenderer:
         if frame:
             self.render_frame()
 
-    def save(self, filename: str):
+    def save(self, filename: str) -> None:
         fname = self.save_path / (filename + ".jpg")
         self.img.save(fname, "JPEG")
         log.good(f"Finished saving {fname}")
 
-    def render_bb(self, bb):
-        assert isinstance(bb, BoundingBox), "Only BoundingBox objects allowed"
-
+    def render_bb(self, bb: "cursor.bb.BoundingBox") -> None:
         self.img_draw.line(xy=(bb.x, bb.y, bb.x2, bb.y), fill="black", width=2)
         self.img_draw.line(xy=(bb.x, bb.y, bb.x, bb.y2), fill="black", width=2)
         self.img_draw.line(xy=(bb.x2, bb.y, bb.x2, bb.y2), fill="black", width=2)
         self.img_draw.line(xy=(bb.x, bb.y2, bb.x2, bb.y2), fill="black", width=2)
 
-    def render_frame(self):
+    def render_frame(self) -> None:
         w = self.img.size[0]
         h = self.img.size[1]
         self.img_draw.line(xy=(0, 0, w, 0), fill="black", width=2)
@@ -423,10 +597,10 @@ class VideoRenderer:
         self.save_path = folder
         self.images = []
 
-    def add_frame(self, img):
+    def add_frame(self, img) -> None:
         self.images.append(img)
 
-    def render_video(self, fname):
+    def render_video(self, fname: str) -> None:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
         text_file = (self.save_path / "list.txt").as_posix()
@@ -456,7 +630,7 @@ class AsciiRenderer:
         self.pixels = " .,:;i1tfLCG08#"
         self.output = ""
 
-    def get_raw_char(self, r: int, g: int, b: int, a: int):
+    def get_raw_char(self, r: int, g: int, b: int, a: int) -> str:
         value = r  # self.intensity(r, g, b, a)
         precision = 255 / (len(self.pixels) - 1)
         rawChar = self.pixels[int(round(value / precision))]
@@ -464,10 +638,16 @@ class AsciiRenderer:
         return rawChar
 
     @staticmethod
-    def intensity(r: int, g: int, b: int, a: int):
+    def intensity(r: int, g: int, b: int, a: int) -> int:
         return (r + g + b) * a
 
-    def render(self, paths, scale=1.0, frame=False, thickness=1):
+    def render(
+        self,
+        paths: "cursor.collection.Collection",
+        scale: float = 1.0,
+        frame: bool = False,
+        thickness: int = 1,
+    ):
         self.jpeg_renderer.render(paths, scale, frame, thickness)
 
         im = self.jpeg_renderer.img
@@ -485,7 +665,7 @@ class AsciiRenderer:
                 self.output = self.output + _a
             self.output = self.output + "\n"
 
-    def save(self, filename: str):
+    def save(self, filename: str) -> None:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
         fname = self.save_path / (filename + ".txt")
         with open(fname.as_posix(), "w") as file:
