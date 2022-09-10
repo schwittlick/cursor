@@ -1,11 +1,14 @@
-from cursor.bb import BoundingBox
-import cursor.misc
 from cursor.misc import dot_product
 from cursor.misc import length
 from cursor.misc import determinant
 from cursor.misc import mix
 from cursor.misc import entropy2
+from cursor.misc import map
+from cursor.misc import euclidean
+from cursor.misc import LinearDiscreteFrechet
+
 from cursor.position import Position
+from cursor.bb import BoundingBox
 
 import numpy as np
 import math
@@ -159,12 +162,12 @@ class Path:
 
         return self.vertices[-1]
 
-    def bb(self) -> "cursor.bb.BoundingBox":
+    def bb(self) -> BoundingBox:
         minx = min(self.vertices, key=lambda pos: pos.x).x
         miny = min(self.vertices, key=lambda pos: pos.y).y
         maxx = max(self.vertices, key=lambda pos: pos.x).x
         maxy = max(self.vertices, key=lambda pos: pos.y).y
-        b = cursor.bb.BoundingBox(minx, miny, maxx, maxy)
+        b = BoundingBox(minx, miny, maxx, maxy)
         return b
 
     def aspect_ratio(self) -> float:
@@ -229,7 +232,7 @@ class Path:
         else:
             self.translate(0.0, -abs(_bb.y))
 
-    def fit(self, bb: "cursor.bb.BoundingBox") -> None:
+    def fit(self, bb: BoundingBox) -> None:
         pass
 
     def morph(
@@ -525,8 +528,8 @@ class Path:
         """
         https://github.com/joaofig/discrete-frechet
         """
-        distance = cursor.misc.euclidean
-        fdfs = cursor.misc.LinearDiscreteFrechet(distance)
+        distance = euclidean
+        fdfs = LinearDiscreteFrechet(distance)
         return fdfs.distance(self.arr(), _path.arr())
 
     def centeroid(self) -> typing.Tuple[float, float]:
@@ -669,7 +672,7 @@ class Path:
 
         weights = [0] * size
         for i in range(size):
-            cur_weight = cursor.misc.map(i, 0, size, 1, shape, True)
+            cur_weight = map(i, 0, size, 1, shape, True)
             weights[i] = cur_weight
 
         result = self.copy()
@@ -724,7 +727,7 @@ class Path:
         y = y1 + ua * (y2 - y1)
         return (x, y)
 
-    def clip(self, bb: "cursor.bb.BoundingBox") -> typing.Optional[typing.List["Path"]]:
+    def clip(self, bb: BoundingBox) -> typing.Optional[typing.List["Path"]]:
         any_inside = False
         for v in self.vertices:
             if v.inside(bb):
