@@ -1,8 +1,8 @@
-import cursor.filter as cursor_filter
-import cursor.bb
-import cursor.misc
 from cursor.position import Position
 from cursor.path import Path
+from cursor.bb import BoundingBox
+
+import cursor.filter as cursor_filter
 
 import numpy as np
 import datetime
@@ -32,12 +32,12 @@ class Collection:
             utc_timestamp = datetime.datetime.timestamp(now)
             self._timestamp = utc_timestamp
 
-    def add(self, path: typing.Union["cursor.bb.BoundingBox", Path]) -> None:
+    def add(self, path: typing.Union["BoundingBox", Path]) -> None:
         if isinstance(path, Path):
             if path.empty():
                 return
             self.__paths.append(path)
-        if isinstance(path, cursor.bb.BoundingBox):
+        if isinstance(path, BoundingBox):
             p = Path()
             p.add(path.x, path.y)
             p.add(path.x, path.y2)
@@ -233,10 +233,10 @@ class Collection:
 
         return layered_pcs
 
-    def bb(self) -> "cursor.bb.BoundingBox":
+    def bb(self) -> "BoundingBox":
         mi = self.min()
         ma = self.max()
-        bb = cursor.bb.BoundingBox(mi[0], mi[1], ma[0], ma[1])
+        bb = BoundingBox(mi[0], mi[1], ma[0], ma[1])
         if bb.x is np.nan or bb.y is np.nan or bb.x2 is np.nan or bb.y2 is np.nan:
             log.fail("SHIT")
         return bb
@@ -295,7 +295,7 @@ class Collection:
         else:
             self.translate(0.0, -abs(_bb.y))
 
-    def clip(self, bb: "cursor.bb.BoundingBox") -> None:
+    def clip(self, bb: "BoundingBox") -> None:
         pp = []
         for p in self.__paths:
             clipped = p.clip(bb)
@@ -312,7 +312,7 @@ class Collection:
         padding_mm: int = None,
         padding_units: int = None,
         padding_percent: int = None,
-        output_bounds: "cursor.bb.BoundingBox" = None,
+        output_bounds: "BoundingBox" = None,
         cutoff_mm=None,
         keep_aspect=False,
     ) -> None:
@@ -445,7 +445,7 @@ class Collection:
         if xq < 2 and yq < 2:
             return
 
-        def calc_bb(x: int, y: int) -> cursor.bb.BoundingBox:
+        def calc_bb(x: int, y: int) -> BoundingBox:
             big_bb = self.bb()
 
             new_width = big_bb.w / xq
@@ -454,7 +454,7 @@ class Collection:
             _x = x * new_width
             _y = y * new_height
 
-            new_bb = cursor.bb.BoundingBox(_x, _y, _x + new_width, _y + new_height)
+            new_bb = BoundingBox(_x, _y, _x + new_width, _y + new_height)
 
             return new_bb
 
@@ -472,7 +472,7 @@ class Collection:
                     bbs[bbcounter] = bb
                     bbcounter += 1
 
-        def _count_inside(_bb: cursor.bb.BoundingBox, _pa: Path) -> int:
+        def _count_inside(_bb: BoundingBox, _pa: Path) -> int:
             c = 0
             for _p in _pa:
                 if _bb.inside(_p):

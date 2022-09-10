@@ -1,5 +1,4 @@
 import cursor.path
-import cursor.bb
 import cursor.position
 
 import math
@@ -15,13 +14,15 @@ class BoundingBox:
         self.w = math.dist([self.x], [self.x2])
         self.h = math.dist([self.y], [self.y2])
 
-    def __inside(self, point: "cursor.path.Position") -> bool:
+    def __inside(self, point: "cursor.position.Position") -> bool:
         return self.x <= point.x <= self.x2 and self.y <= point.y <= self.y2
 
     def inside(
         self,
         data: typing.Union[
-            "cursor.path.Position", "cursor.path.Path", "cursor.collection.Collection"
+            "cursor.position.Position",
+            "cursor.path.Path",
+            "cursor.collection.Collection",
         ],
     ) -> bool:
         if isinstance(data, cursor.path.Position):
@@ -49,10 +50,10 @@ class BoundingBox:
                     points_inside += 1
             return points_inside > points_outside
 
-    def center(self) -> "cursor.path.Position":
+    def center(self) -> "cursor.position.Position":
         center_x = (self.w / 2.0) + self.x
         center_y = (self.h / 2.0) + self.y
-        return cursor.path.Position(center_x, center_y)
+        return cursor.position.Position(center_x, center_y)
 
     def scale(self, fac: float) -> None:
         self.w = self.w * fac
