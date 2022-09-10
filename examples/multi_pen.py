@@ -1,6 +1,7 @@
-import cursor.path as path
-import cursor.device as device
-import cursor.export as export
+from cursor import path
+from cursor import collection
+from cursor import device
+from cursor import export
 
 if __name__ == "__main__":
     pc = collection.Collection()

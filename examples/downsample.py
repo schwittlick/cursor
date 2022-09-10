@@ -1,4 +1,4 @@
-from cursor import path
+from cursor import collection
 from cursor import renderer
 from cursor import data
 from cursor import device

@@ -3,6 +3,7 @@ import copy
 import typing
 import math
 
+
 class Position:
     def __init__(self, x: float = 0.0, y: float = 0.0, timestamp: int = 0):
         self._pos = np.array([x, y], dtype="float")
