@@ -1,4 +1,4 @@
-import cursor.bb
+from cursor.bb import BoundingBox
 import cursor.misc
 from cursor.misc import dot_product
 from cursor.misc import length
@@ -536,6 +536,22 @@ class Path:
         sum_y = np.sum(arr[:, 1])
         return sum_x / length, sum_y / length
 
+    def inside(self, bb: BoundingBox) -> bool:
+        for p in self:
+            if not p.inside(bb):
+                return False
+        return True
+
+    def mostly_inside(self, bb: BoundingBox) -> bool:
+        points_inside = 0
+        points_outside = 0
+        for p in self:
+            if not p.inside(bb):
+                points_outside += 1
+            else:
+                points_inside += 1
+        return points_inside > points_outside
+
     def _parallel(self, p1: "Position", p2: "Position", offset_amount: float):
         delta_y = p2.y - p1.y
         delta_x = p2.x - p1.x
@@ -684,7 +700,9 @@ class Path:
 
     def downsample(self, dist: float) -> None:
         prev = Position()
-        self.vertices = [prev := v for v in self.vertices if v.distance(prev) > dist]  # noqa: F841
+        self.vertices = [
+            prev := v for v in self.vertices if v.distance(prev) > dist
+        ]  # noqa: F841
 
     @staticmethod
     def intersect_segment(p1, p2, p3, p4):
@@ -709,7 +727,7 @@ class Path:
     def clip(self, bb: "cursor.bb.BoundingBox") -> typing.Optional[typing.List["Path"]]:
         any_inside = False
         for v in self.vertices:
-            if bb.inside(v):
+            if v.inside(bb):
                 any_inside = True
                 break
 
@@ -735,8 +753,8 @@ class Path:
         current_path = Path()
         for v in self.vertices:
             if prev_v is not None:
-                prev_inside = bb.inside(prev_v)
-                curr_inside = bb.inside(v)
+                prev_inside = prev_v.inside(bb)
+                curr_inside = v.inside(bb)
                 if prev_inside and curr_inside:
                     current_path.add_position(v)
                 if prev_inside and not curr_inside:
@@ -759,7 +777,7 @@ class Path:
                     )
                     current_path.add_position(Position(v.x, v.y))
             else:
-                if bb.inside(v):
+                if v.inside(bb):
                     current_path.add_position(v)
             prev_v = v
         if not current_path.empty():

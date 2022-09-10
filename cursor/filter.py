@@ -227,7 +227,7 @@ class BoundingBoxFilter(Filter):
         self.bb = bb
 
     def filter(self, paths):
-        paths[:] = [p for p in paths if self.bb.inside(p)]
+        paths[:] = [p for p in paths if p.inside(self.bb)]
 
 
 class MinPointCountFilter(Filter):

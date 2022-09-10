@@ -185,6 +185,13 @@ class Collection:
     def timestamp(self) -> float:
         return self._timestamp
 
+    def inside(self, bb: BoundingBox) -> bool:
+        for path in self:
+            for p in path:
+                if not p.inside(bb):
+                    return False
+        return True
+
     def get_all_line_types(self) -> typing.List[int]:
         types = []
         for p in self:
@@ -378,11 +385,11 @@ class Collection:
         output_bounds_center = Position(width / 2.0, height / 2.0)
 
         if output_bounds:
-            output_bounds_center = output_bounds.center()
+            output_bounds_center = Position.from_tuple(output_bounds.center())
 
         diff = (
-            output_bounds_center.x - paths_center.x,
-            output_bounds_center.y - paths_center.y,
+            output_bounds_center.x - paths_center[0],
+            output_bounds_center.y - paths_center[1],
         )
 
         log.info(
@@ -406,7 +413,7 @@ class Collection:
             cutoff_bb.y -= cuttoff_margin_diff_y
             cutoff_bb.y2 += cuttoff_margin_diff_y
 
-            self.__paths = [x for x in self.__paths if cutoff_bb.inside(x)]
+            self.__paths = [x for x in self.__paths if x.inside(cutoff_bb)]
 
     def reorder_tsp(self) -> None:
         """
@@ -475,7 +482,7 @@ class Collection:
         def _count_inside(_bb: BoundingBox, _pa: Path) -> int:
             c = 0
             for _p in _pa:
-                if _bb.inside(_p):
+                if _p.inside(_bb):
                     c += 1
             return c
 
