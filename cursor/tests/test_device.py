@@ -1,5 +1,7 @@
 from cursor import device
+from cursor import export
 from cursor import path
+from cursor import collection
 
 import pytest
 
@@ -11,15 +13,15 @@ def test_simple_export():
     p.add(5, 9)
     p.add(-3, -10)
 
-    pc = path.PathCollection()
+    pc = collection.Collection()
     pc.add(p)
 
-    cfg = device.Cfg()
+    cfg = export.Config()
     cfg.type = device.PlotterType.ROLAND_DPX3300
     cfg.dimension = device.PaperSize.LANDSCAPE_A1
     cfg.margin = 90
 
-    exp = device.Exporter()
+    exp = export.Exporter()
     exp.cfg = cfg
     exp.paths = pc
     exp.name = "composition59"

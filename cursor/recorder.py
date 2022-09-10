@@ -1,4 +1,5 @@
 from cursor import path
+from cursor import collection
 from cursor import data
 
 import atexit
@@ -16,7 +17,7 @@ log = wasabi.Printer()
 
 class Recorder:
     _timer = True
-    _mouse_recordings = path.PathCollection()
+    _mouse_recordings = collection.Collection()
     _keyboard_recodings = []
     _current_line = path.Path()
     _started = False

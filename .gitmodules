@@ -4,3 +4,6 @@
 [submodule "data/experiments"]
 	path = data/experiments
 	url = git@github.com:schwittlick/cursor-data.git
+[submodule "data/compositions"]
+	path = data/compositions
+	url = git@github.com:schwittlick/compositions.git

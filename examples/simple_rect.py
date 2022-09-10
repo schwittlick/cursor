@@ -1,9 +1,11 @@
-from cursor import device
+from cursor import collection
+from cursor import export
 from cursor import path
+from cursor import device
 
 
 if __name__ == "__main__":
-    pc = path.PathCollection()
+    pc = collection.Collection()
 
     p = path.Path()
     p.add(0, 0)
@@ -13,11 +15,11 @@ if __name__ == "__main__":
     p.add(0, 0)
     pc.add(p)
 
-    device.SimpleExportWrapper().ex(
+    export.ExportWrapper().ex(
         pc,
-        device.PlotterType.ROLAND_DPX3300_A3,
-        device.PaperSize.LANDSCAPE_A3,
-        10,
+        device.PlotterType.HP_7595A_A2,
+        device.PaperSize.LANDSCAPE_A2,
+        30,
         "simple_rect_example",
         "simple_rect",
     )
