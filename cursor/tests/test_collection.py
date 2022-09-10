@@ -58,13 +58,13 @@ def test_bb_inside():
 
     bb = BoundingBox(0, 0, 300, 300)
 
-    assert bb.inside(p1) is True
-    assert bb.inside(pc) is True
+    assert p1.inside(bb) is True
+    assert pc.inside(bb) is True
 
     p1.add(500, 500, 10023)
 
-    assert bb.inside(p1) is False
-    assert bb.inside(pc) is False
+    assert p1.inside(bb) is False
+    assert pc.inside(bb) is False
 
 
 def test_path_aspect_ratio():

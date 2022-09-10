@@ -1,3 +1,5 @@
+from cursor.bb import BoundingBox
+
 import numpy as np
 import copy
 import typing
@@ -8,6 +10,10 @@ class Position:
     def __init__(self, x: float = 0.0, y: float = 0.0, timestamp: int = 0):
         self._pos = np.array([x, y], dtype="float")
         self.timestamp = timestamp
+
+    @classmethod
+    def from_tuple(cls, xy_tuple: typing.Tuple[float, float]) -> "Position":
+        return cls(xy_tuple[0], xy_tuple[1])
 
     @property
     def x(self) -> float:
@@ -58,6 +64,9 @@ class Position:
 
     def scale(self, x: float, y: float) -> None:
         self._pos = np.multiply(self._pos, np.array([x, y]))
+
+    def inside(self, bb: BoundingBox) -> bool:
+        return bb.x <= self.x <= bb.x2 and bb.y <= self.y <= bb.y2
 
     def __eq__(self, o):
         """

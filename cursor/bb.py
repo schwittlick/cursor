@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import cursor.path
-import cursor.position
 
 import math
 import typing
@@ -14,46 +15,10 @@ class BoundingBox:
         self.w = math.dist([self.x], [self.x2])
         self.h = math.dist([self.y], [self.y2])
 
-    def __inside(self, point: "cursor.position.Position") -> bool:
-        return self.x <= point.x <= self.x2 and self.y <= point.y <= self.y2
-
-    def inside(
-        self,
-        data: typing.Union[
-            "cursor.position.Position",
-            "cursor.path.Path",
-            "cursor.collection.Collection",
-        ],
-    ) -> bool:
-        if isinstance(data, cursor.path.Position):
-            return self.__inside(data)
-        if isinstance(data, cursor.path.Path):
-            for p in data:
-                if not self.__inside(p):
-                    return False
-            return True
-        if isinstance(data, cursor.collection.Collection):
-            for path in data:
-                for p in path:
-                    if not self.__inside(p):
-                        return False
-            return True
-
-    def mostly_inside(self, data: "cursor.path.Path") -> bool:
-        points_inside = 0
-        points_outside = 0
-        if isinstance(data, cursor.path.Path):
-            for p in data:
-                if not self.__inside(p):
-                    points_outside += 1
-                else:
-                    points_inside += 1
-            return points_inside > points_outside
-
-    def center(self) -> "cursor.position.Position":
+    def center(self) -> typing.Tuple[float, float]:
         center_x = (self.w / 2.0) + self.x
         center_y = (self.h / 2.0) + self.y
-        return cursor.position.Position(center_x, center_y)
+        return center_x, center_y
 
     def scale(self, fac: float) -> None:
         self.w = self.w * fac
@@ -63,9 +28,7 @@ class BoundingBox:
         self.x2 = self.x + self.w
         self.y2 = self.y + self.h
 
-    def subdiv(
-        self, xpieces: int, ypieces: int
-    ) -> typing.List["cursor.bb.BoundingBox"]:
+    def subdiv(self, xpieces: int, ypieces: int) -> typing.List[BoundingBox]:
         bbs = []
         for x in range(xpieces):
             for y in range(ypieces):

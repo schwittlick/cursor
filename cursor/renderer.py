@@ -1,5 +1,6 @@
 import cursor.path
 import cursor.bb
+import cursor.position
 
 import svgwrite
 import os
@@ -25,14 +26,14 @@ class PathIterator:
     def __init__(self, paths: "cursor.collection.Collection"):
         self.paths = paths
 
-    def points(self) -> typing.Iterator["cursor.path.Position"]:
+    def points(self) -> typing.Iterator["cursor.position.Position"]:
         for p in self.paths:
             for point in p.vertices:
                 yield point
 
     def connections(
         self,
-    ) -> typing.Iterator[typing.Tuple["cursor.path.Position", "cursor.path.Position"]]:
+    ) -> typing.Iterator[typing.Tuple["cursor.position.Position", "cursor.position.Position"]]:
         prev = None
 
         for p in self.paths:
@@ -197,7 +198,7 @@ class RealtimeRenderer:
         self.running = True
 
     def _line(
-        self, screen, p1: "cursor.path.Position", p2: "cursor.path.Position"
+        self, screen, p1: "cursor.position.Position", p2: "cursor.position.Position"
     ) -> None:
         import pygame
 

@@ -512,3 +512,19 @@ def test_centroid():
 
     assert centroidx == 0.0
     assert centroidy == 0.0
+
+
+def test_bb_mostly_inside():
+    bb = BoundingBox(0, 0, 300, 300)
+    pa = Path()
+    pa.add(0, 0)
+    pa.add(0, 1)
+    pa.add(0, 3)
+    pa.add(-1, 3)
+    pa.add(-1, 5)
+
+    assert pa.mostly_inside(bb)
+
+    pa.add(-1, 10)
+
+    assert not pa.mostly_inside(bb)
