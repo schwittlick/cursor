@@ -704,8 +704,8 @@ class Path:
     def downsample(self, dist: float) -> None:
         prev = Position()
         self.vertices = [
-            prev := v for v in self.vertices if v.distance(prev) > dist
-        ]  # noqa: F841
+            prev := v for v in self.vertices if v.distance(prev) > dist  # noqa: F841
+        ]
 
     @staticmethod
     def intersect_segment(p1, p2, p3, p4):
