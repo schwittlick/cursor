@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import cursor.path
-
 import math
 import typing
 
