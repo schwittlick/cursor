@@ -44,6 +44,9 @@ class Path:
         else:
             self._vertices = []
 
+    def as_tuple_list(self) -> typing.List[typing.Tuple[float, float]]:
+        return [v.astuple() for v in self.vertices]
+
     @property
     def hash(self) -> str:
         return hashlib.md5(str(self.vertices).encode("utf-8")).hexdigest()
@@ -73,7 +76,7 @@ class Path:
         self._line_type = line_type
 
     @property
-    def layer(self) -> int:
+    def layer(self) -> str:
         return self._layer
 
     @layer.setter
@@ -233,6 +236,7 @@ class Path:
             self.translate(0.0, -abs(_bb.y))
 
     def fit(self, bb: BoundingBox) -> None:
+        # TODO: implement me
         pass
 
     def morph(

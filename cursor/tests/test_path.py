@@ -528,3 +528,12 @@ def test_bb_mostly_inside():
     pa.add(-1, 10)
 
     assert not pa.mostly_inside(bb)
+
+
+def test_as_tuple_list():
+    pa = Path()
+    pa.add(0, 0)
+    pa.add(1, 2)
+    pa.add(3, 4)
+
+    assert pa.as_tuple_list() == [(0, 0), (1, 2), (3, 4)]
