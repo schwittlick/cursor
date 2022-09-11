@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 from cursor.bb import BoundingBox
 
 import numpy as np
@@ -12,7 +15,7 @@ class Position:
         self.timestamp = timestamp
 
     @classmethod
-    def from_tuple(cls, xy_tuple: typing.Tuple[float, float]) -> "Position":
+    def from_tuple(cls, xy_tuple: typing.Tuple[float, float]) -> Position:
         return cls(xy_tuple[0], xy_tuple[1])
 
     @property
@@ -40,12 +43,12 @@ class Position:
     def time(self) -> int:
         return self.timestamp
 
-    def copy(self) -> "Position":
+    def copy(self) -> Position:
         return type(self)(
             copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(self.timestamp)
         )
 
-    def distance(self, t: "Position") -> float:
+    def distance(self, t: Position) -> float:
         return np.linalg.norm(self.arr() - t.arr())
 
     def rot(
@@ -95,5 +98,5 @@ class Position:
     def __hash__(self):
         return hash(repr(self))
 
-    def __mul__(self, other: "Position"):
+    def __mul__(self, other: Position):
         return self.arr() * other.arr()

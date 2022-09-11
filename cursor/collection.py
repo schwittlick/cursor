@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 from cursor.position import Position
 from cursor.path import Path
 from cursor.bb import BoundingBox
-
-import cursor.filter as cursor_filter
+from cursor.filter import Filter
+from cursor.filter import Sorter
 
 import numpy as np
 import datetime
@@ -32,7 +34,7 @@ class Collection:
             utc_timestamp = datetime.datetime.timestamp(now)
             self._timestamp = utc_timestamp
 
-    def add(self, path: typing.Union["BoundingBox", Path]) -> None:
+    def add(self, path: typing.Union[BoundingBox, Path]) -> None:
         if isinstance(path, Path):
             if path.empty():
                 return
@@ -46,7 +48,7 @@ class Collection:
             p.add(path.x, path.y)
             self.__paths.append(p)
 
-    def extend(self, pc: "Collection") -> None:
+    def extend(self, pc: Collection) -> None:
         new_paths = self.__paths + pc.get_all()
         self.__paths = new_paths
 
@@ -67,7 +69,7 @@ class Collection:
     def reverse(self) -> None:
         self.__paths.reverse()
 
-    def reversed(self) -> "Collection":
+    def reversed(self) -> Collection:
         c = copy.deepcopy(self.__paths)
         c.reverse()
         pc = Collection()
@@ -88,7 +90,7 @@ class Collection:
             return True
         return False
 
-    def copy(self) -> "Collection":
+    def copy(self) -> Collection:
         p = Collection()
         p.__paths.extend(copy.deepcopy(self.__paths))
         return p
@@ -99,28 +101,32 @@ class Collection:
     def random(self) -> Path:
         return self.__getitem__(random.randint(0, self.__len__() - 1))
 
-    def sort(self, pathsorter: "cursor_filter.Sorter", reference_path=None) -> None:
-        if isinstance(pathsorter, cursor_filter.Sorter):
-            pathsorter.sort(self.__paths, reference_path)
+    def sort(self, pathsorter: Sorter, reference_path: Path = None) -> None:
+        if isinstance(pathsorter, Sorter):
+            pathsorter.sort(
+                self.__paths, reference_path.as_tuple_list() if reference_path else None
+            )
         else:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
     def sorted(
-        self, pathsorter: "cursor_filter.Sorter", reference_path=None
+        self, pathsorter: Sorter, reference_path: Path = None
     ) -> typing.List[Path]:
-        if isinstance(pathsorter, cursor_filter.Sorter):
-            return pathsorter.sorted(self.__paths, reference_path)
+        if isinstance(pathsorter, Sorter):
+            return pathsorter.sorted(
+                self.__paths, reference_path.as_tuple_list() if reference_path else None
+            )
         else:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
-    def filter(self, pathfilter: "cursor_filter.Filter") -> None:
-        if isinstance(pathfilter, cursor_filter.Filter):
+    def filter(self, pathfilter: Filter) -> None:
+        if isinstance(pathfilter, Filter):
             pathfilter.filter(self.__paths)
         else:
             raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
 
-    def filtered(self, pathfilter: "cursor_filter.Filter") -> "Collection":
-        if isinstance(pathfilter, cursor_filter.Filter):
+    def filtered(self, pathfilter: Filter) -> Collection:
+        if isinstance(pathfilter, Filter):
 
             pc = Collection()
             pc.__paths = pathfilter.filtered(self.__paths)
@@ -131,7 +137,7 @@ class Collection:
     def __len__(self) -> int:
         return len(self.__paths)
 
-    def __add__(self, other: typing.Union[list, "Collection"]) -> "Collection":
+    def __add__(self, other: typing.Union[list, Collection]) -> Collection:
         if isinstance(other, Collection):
             new_paths = self.__paths + other.get_all()
             p = Collection()
@@ -170,7 +176,7 @@ class Collection:
 
     def __getitem__(
         self, item: typing.Union[int, slice]
-    ) -> typing.Union["Collection", Path]:
+    ) -> typing.Union[Collection, Path]:
         if isinstance(item, slice):
             start, stop, step = item.indices(len(self))
             _pc = Collection()
@@ -240,7 +246,7 @@ class Collection:
 
         return layered_pcs
 
-    def bb(self) -> "BoundingBox":
+    def bb(self) -> BoundingBox:
         mi = self.min()
         ma = self.max()
         bb = BoundingBox(mi[0], mi[1], ma[0], ma[1])
@@ -302,7 +308,7 @@ class Collection:
         else:
             self.translate(0.0, -abs(_bb.y))
 
-    def clip(self, bb: "BoundingBox") -> None:
+    def clip(self, bb: BoundingBox) -> None:
         pp = []
         for p in self.__paths:
             clipped = p.clip(bb)
@@ -319,7 +325,7 @@ class Collection:
         padding_mm: int = None,
         padding_units: int = None,
         padding_percent: int = None,
-        output_bounds: "BoundingBox" = None,
+        output_bounds: BoundingBox = None,
         cutoff_mm=None,
         keep_aspect=False,
     ) -> None:

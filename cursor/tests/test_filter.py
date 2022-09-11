@@ -3,11 +3,12 @@ from cursor.loader import Loader
 from cursor.path import Path
 from cursor.collection import Collection
 from cursor.bb import BoundingBox
+
 from cursor.filter import Filter
+from cursor.filter import Sorter
 from cursor.filter import BoundingBoxFilter
 from cursor.filter import MinPointCountFilter
 from cursor.filter import MaxPointCountFilter
-from cursor.filter import Sorter
 from cursor.filter import DistanceFilter
 
 import pytest
@@ -169,3 +170,26 @@ def test_distance_filter():
     pcol.filter(filter)
 
     assert len(pcol) == 1
+
+
+def test_filter_performance():
+    pcol = Collection()
+
+    length = 100
+
+    reference = Path()
+
+    for i in range(20):
+        reference.add(random.randint(0, 200), random.randint(0, 200))
+
+    for i in range(length):
+        p = Path()
+        for j in range(20):
+            p.add(random.randint(0, 200), random.randint(0, 200))
+        pcol.add(p)
+
+    f = Sorter(reverse=False, param=Sorter.FRECHET_DISTANCE)
+
+    new_col = pcol.sorted(f, reference)
+
+    assert len(new_col) == length
