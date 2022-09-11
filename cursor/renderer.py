@@ -8,8 +8,9 @@ from cursor.bb import BoundingBox
 import svgwrite
 import os
 import typing
-import sys
+import arcade
 import pathlib
+import random
 import wasabi
 import copy
 from PIL import Image, ImageDraw
@@ -178,106 +179,87 @@ class GCodeRenderer:
         file.write(f"G01 X{x:.2f} Y{y:.2f} F{self.feedrate_xy}\n")
 
 
-class RealtimeRenderer:
-    def __init__(self, w: int, h: int):
-        self.running = False
-        self.__cbs = []
-        self.w = w
-        self.h = h
-        self.pcs = []
-        self.selected = 0
+class RealtimeRenderer(arcade.Window):
+    def __init__(self, width, height, title):
+        super().__init__(width, height, title)
+        arcade.set_background_color(arcade.color.BLACK)
 
-    def set_cb(self, key: str, cb: typing.Callable, reset: bool = False) -> None:
-        self.__cbs.append((ord(key), cb, reset))
+        self.colors = [
+            getattr(arcade.color, color)
+            for color in dir(arcade.color)
+            if not color.startswith("__")
+        ]
 
-    def _pygameinit(self) -> None:
-        import pygame
+        self.clear_list()
 
-        pygame.init()
-        self.screen = pygame.display.set_mode((self.w, self.h))
+        self.cbs = {}
+        self.pressed = {}
 
-        self.screen.fill((255, 255, 255))
-        pygame.display.update()
-        self.running = True
+    @staticmethod
+    def run():
+        arcade.enable_timings(100)
+        arcade.run()
 
-    def _line(self, screen, p1: Position, p2: Position) -> None:
-        import pygame
+    def add_cb(self, key: arcade.key, cb: typing.Callable):
+        self.cbs[key] = cb
+        self.pressed[key] = False
 
-        pygame.draw.line(screen, (0, 0, 0), p1.astuple(), p2.astuple())
+    def clear_list(self):
+        self.shapes = arcade.ShapeElementList()
 
-    def add(self, pc: Collection) -> None:
-        self.pcs.append(pc)
+    def add_point(self, po: Position, width: int = 5, color: arcade.color = None):
+        if not color:
+            color = random.choice(self.colors)
 
-    def set(self, pcs: typing.List[Collection]) -> None:
-        self.pcs = pcs
-        self.selected = 0
+        point = arcade.create_ellipse(po.x, po.y, width, width, color)
+        self.shapes.append(point)
 
-    def render(self) -> None:
-        import pygame
+    def add_path(self, p: Path, line_width: int = 5, color: arcade.color = None):
+        if not color:
+            color = random.choice(self.colors)
 
-        if len(self.pcs) == 0:
-            log.fail("No paths to render. Quitting")
-            return
+        t = p.as_tuple_list()
+        line_strip = arcade.create_line_strip(t, color, line_width)
+        self.shapes.append(line_strip)
 
-        self._pygameinit()
+    def add_collection(
+        self, c: Collection, line_width: int = 5, color: arcade.color = None
+    ):
+        if not color:
+            color = random.choice(self.colors)
 
-        frame_count = 0
-        while self.running:
-            pygame.display.set_caption(f"selected {self.selected}")
-            self.screen.fill((255, 255, 255))
-            it = PathIterator(self.pcs[self.selected])
-            ev = pygame.event.get()
-            for conn in it.connections():
-                start = conn[0]
-                end = conn[1]
-                self._line(self.screen, start, end)
-            pygame.display.update()
+        for p in c:
+            self.add_path(p, line_width, color)
 
-            if frame_count % 60 == 0:
-                pressed = pygame.key.get_pressed()
-                if pressed[pygame.K_LEFT] and pressed[pygame.K_LCTRL]:
-                    self.selected -= 1
-                    if self.selected < 0:
-                        self.selected = len(self.pcs) - 1
+    def on_draw(self):
+        self.clear()
+        self.shapes.draw()
 
-                if pressed[pygame.K_RIGHT] and pressed[pygame.K_LCTRL]:
-                    self.selected += 1
-                    if self.selected >= len(self.pcs):
-                        self.selected = 0
+    def on_update(self, delta_time: float):
+        super().update(delta_time)
 
-                for cbk in self.__cbs:
-                    if pressed[cbk[0]] and pressed[pygame.K_LCTRL]:
-                        cbk[1](self.selected, self.pcs[self.selected])
-                        if cbk[2]:
-                            self.selected = 0
+        fps = int(arcade.get_fps())
+        caption = f"fps: {fps} shapes: {len(self.shapes)}"
+        self.set_caption(caption)
 
-            frame_count += 1
-            for event in ev:
-                if event.type == pygame.MOUSEBUTTONUP:
-                    pygame.display.update()
-                if event.type == pygame.KEYDOWN:
-                    for cbk in self.__cbs:
-                        if cbk[0] == event.key:
-                            cbk[1](self.selected, self.pcs[self.selected])
-                    # if event.key == pygame.K_s:
-                    #    if self.cb:
-                    #        self.cb(self.selected, self.pcs[self.selected])
-                    if event.key == pygame.K_ESCAPE:
-                        self.running = False
-                        pygame.quit()
-                        sys.exit(0)
+        for k, v in self.pressed.items():
+            if v:
+                self.cbs[k](self)
 
-                    if event.key == pygame.K_LEFT:
-                        self.selected -= 1
-                        if self.selected < 0:
-                            self.selected = len(self.pcs) - 1
-                    if event.key == pygame.K_RIGHT:
-                        self.selected += 1
-                        if self.selected >= len(self.pcs):
-                            self.selected = 0
+    def on_key_press(self, key: int, modifiers: int):
+        if key == arcade.key.ESCAPE:
+            arcade.exit()
+        elif key == arcade.key.C:
+            self.clear_list()
 
-                if event.type == pygame.QUIT:
-                    self.running = False
+        for k, v in self.cbs.items():
+            if key == k:
+                self.pressed[k] = True
+
+    def on_key_release(self, key: int, modifiers: int):
+        for k, v in self.cbs.items():
+            if key == k:
+                self.pressed[k] = False
 
 
 class HPGLRenderer:

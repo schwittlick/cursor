@@ -69,8 +69,8 @@ class Sorter:
             for element in sorted_idxes:
                 idx = element[0]
                 newlist.append(element[2])
-                # newlist[idx] = element[2].copy()
-
+                newlist.append(element[2].copy())
+            # TODO: I AM BROKEN
             paths = newlist
             # paths.sort(
             #    key=lambda n: n.frechet_similarity(reference_path),
@@ -122,14 +122,10 @@ class Sorter:
                 )
                 idx += 1
 
-            print(1)
             sorted_idxes = sorted(distances, key=itemgetter(1), reverse=self.__reverse)
-            print(2)
             sorted_list = []
             for element in sorted_idxes:
-                idx = element[0]
                 sorted_list.append(element[2])
-                # newlist[idx] = element[2].copy()
         else:
             raise Exception(f"Wrong param {self.__param} for {__class__.__name__}")
         elapsed = time.time() - t0
