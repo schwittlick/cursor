@@ -537,3 +537,11 @@ def test_as_tuple_list():
     pa.add(3, 4)
 
     assert pa.as_tuple_list() == [(0, 0), (1, 2), (3, 4)]
+
+
+def test_from_tuple_list():
+    tuple_list = [(0, 0), (1, 2), (3, 4)]
+    pa = Path.from_tuple_list(tuple_list)
+    assert pa[0] == Position(0, 0)
+    assert pa[1] == Position(1, 2)
+    assert pa[2] == Position(3, 4)

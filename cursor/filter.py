@@ -1,4 +1,4 @@
-import cursor.path as path
+from cursor.path import Path
 
 import sys
 import wasabi
@@ -33,7 +33,11 @@ class Sorter:
     def param(self, v):
         self.__param = v
 
-    def sort(self, paths: typing.List, reference_path: "path.Path" = None):
+    def sort(
+        self,
+        paths: typing.List[Path],
+        reference_path_tuple_list: typing.List[typing.Tuple[float, float]] = None,
+    ):
         t0 = time.time()
         if self.__param is self.SHANNON_X:
             paths.sort(key=lambda x: x.shannon_x, reverse=self.__reverse)
@@ -53,29 +57,11 @@ class Sorter:
             paths.sort(key=lambda x: x.pen_select, reverse=self.__reverse)
         elif self.__param is self.POINT_COUNT:
             paths.sort(key=lambda x: len(x), reverse=self.__reverse)
-        elif self.__param is self.FRECHET_DISTANCE and reference_path is not None:
-            distances = []
-            idx = 0
-            for pa in paths:
-                distances.append(
-                    (idx, pa.frechet_similarity(reference_path), pa.copy())
-                )
-                idx += 1
-
-            print(1)
-            sorted_idxes = sorted(distances, key=itemgetter(1), reverse=self.__reverse)
-            print(2)
-            newlist = []
-            for element in sorted_idxes:
-                idx = element[0]
-                newlist.append(element[2])
-                newlist.append(element[2].copy())
-            # TODO: I AM BROKEN
-            paths = newlist
-            # paths.sort(
-            #    key=lambda n: n.frechet_similarity(reference_path),
-            #    reverse=self.__reverse,
-            # )
+        elif (
+            self.__param is self.FRECHET_DISTANCE
+            and reference_path_tuple_list is not None
+        ):
+            raise Exception("Can't sort by Frechet Distance in-place. (yet)")
         else:
             raise Exception(
                 f"Unknown parameter {self.__param} for {__class__.__name__}"
@@ -83,7 +69,11 @@ class Sorter:
         elapsed = time.time() - t0
         log.good(f"Sorted via {__class__.__name__} took {round(elapsed * 1000)}ms.")
 
-    def sorted(self, paths: typing.List, reference_path=None):
+    def sorted(
+        self,
+        paths: typing.List,
+        reference_path_tuple_list: typing.List[typing.Tuple[float, float]] = None,
+    ):
         t0 = time.time()
         if self.__param is self.SHANNON_X:
             sorted_list = sorted(
@@ -113,19 +103,18 @@ class Sorter:
             )
         elif self.__param is self.POINT_COUNT:
             sorted_list = sorted(paths, key=lambda x: len(x), reverse=self.__reverse)
-        elif self.__param is self.FRECHET_DISTANCE and reference_path is not None:
-            distances = []
-            idx = 0
-            for pa in paths:
-                distances.append(
-                    (idx, pa.frechet_similarity(reference_path), pa.copy())
-                )
-                idx += 1
+        elif (
+            self.__param is self.FRECHET_DISTANCE
+            and reference_path_tuple_list is not None
+        ):
+            reference_path = Path.from_tuple_list(reference_path_tuple_list)
 
+            distances = [
+                (index, item.frechet_similarity(reference_path), item)
+                for index, item in enumerate(paths)
+            ]
             sorted_idxes = sorted(distances, key=itemgetter(1), reverse=self.__reverse)
-            sorted_list = []
-            for element in sorted_idxes:
-                sorted_list.append(element[2])
+            sorted_list = [el[2] for el in sorted_idxes]
         else:
             raise Exception(f"Wrong param {self.__param} for {__class__.__name__}")
         elapsed = time.time() - t0

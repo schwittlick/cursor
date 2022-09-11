@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from cursor.misc import dot_product
 from cursor.misc import length
 from cursor.misc import determinant
@@ -46,6 +48,12 @@ class Path:
 
     def as_tuple_list(self) -> typing.List[typing.Tuple[float, float]]:
         return [v.astuple() for v in self.vertices]
+
+    @classmethod
+    def from_tuple_list(
+        cls, tuple_list: typing.List[typing.Tuple[float, float]]
+    ) -> Path:
+        return Path([Position.from_tuple(p) for p in tuple_list])
 
     @property
     def hash(self) -> str:
