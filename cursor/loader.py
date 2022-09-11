@@ -1,6 +1,8 @@
-from cursor import data
-from cursor import path
-from cursor import collection
+from cursor.data import JsonCompressor
+from cursor.data import MyJsonDecoder
+from cursor.data import DateHandler
+from cursor.path import Path
+from cursor.collection import Collection
 
 import json
 import time
@@ -65,7 +67,7 @@ class Loader:
 
     def load_file(self, path: pathlib.Path) -> None:
         _fn = path.stem.replace("_compressed", "")
-        ts = data.DateHandler.get_timestamp_from_utc(float(_fn))
+        ts = DateHandler.get_timestamp_from_utc(float(_fn))
         log.info(f"Loading {path.stem}.json > {ts}")
 
         new_keys = []
@@ -73,9 +75,9 @@ class Loader:
             json_string = json_file.readline()
             try:
                 jd = eval(json_string)
-                _data = data.JsonCompressor().json_unzip(jd)
+                _data = JsonCompressor().json_unzip(jd)
             except RuntimeError:
-                _data = json.loads(json_string, cls=data.MyJsonDecoder)
+                _data = json.loads(json_string, cls=MyJsonDecoder)
             self._recordings.append(_data["mouse"])
             for keys in _data["keys"]:
                 new_keys.append(tuple(keys))
@@ -90,19 +92,19 @@ class Loader:
             return True
         return False
 
-    def all_collections(self) -> list[collection.Collection]:
+    def all_collections(self) -> list[Collection]:
         """
         :return: a copy of all recordings
         """
         return list(self._recordings)
 
-    def all_paths(self) -> collection.Collection:
+    def all_paths(self) -> Collection:
         """
         :return: all paths combined into one collection.PathCollection
         """
         return reduce(lambda pcol1, pcol2: pcol1 + pcol2, self._recordings)
 
-    def single(self, index: int) -> path.Path:
+    def single(self, index: int) -> Path:
         max_index = len(self._recordings) - 1
         if index > max_index:
             raise IndexError("Specified index too high. (> " + str(max_index) + ")")
