@@ -1,5 +1,6 @@
 import cursor.path
 import cursor.position
+import cursor.collection
 
 import pathlib
 import json
