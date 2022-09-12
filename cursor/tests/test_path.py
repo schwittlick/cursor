@@ -509,7 +509,7 @@ def test_arr():
     p.add(1, 2)
     p.add(3, 4)
 
-    arr = p.arr()
+    arr = p.as_array()
     assert arr.shape[0] == 3
     assert arr.shape[1] == 2
 

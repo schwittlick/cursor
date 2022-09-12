@@ -46,6 +46,16 @@ class Path:
     def as_tuple_list(self) -> typing.List[typing.Tuple[float, float]]:
         return [v.astuple() for v in self.vertices]
 
+    def as_array(self) -> np.array:
+        data = []
+        idx = 0
+        for p in self.vertices:
+            data.append(p.arr())
+
+            idx += 1
+        arr = np.array(data)
+        return arr
+
     @classmethod
     def from_tuple_list(
         cls, tuple_list: typing.List[typing.Tuple[float, float]]
@@ -125,16 +135,6 @@ class Path:
 
     def add_position(self, pos: Position) -> None:
         self.vertices.append(pos)
-
-    def arr(self) -> np.array:
-        data = []
-        idx = 0
-        for p in self.vertices:
-            data.append(p.arr())
-
-            idx += 1
-        arr = np.array(data)
-        return arr
 
     def clear(self) -> None:
         self.vertices.clear()
@@ -491,10 +491,10 @@ class Path:
         """
         distance = euclidean
         fdfs = LinearDiscreteFrechet(distance)
-        return fdfs.distance(self.arr(), _path.arr())
+        return fdfs.distance(self.as_array(), _path.as_array())
 
     def centeroid(self) -> typing.Tuple[float, float]:
-        arr = self.arr()
+        arr = self.as_array()
         length = arr.shape[0]
         sum_x = np.sum(arr[:, 0])
         sum_y = np.sum(arr[:, 1])
