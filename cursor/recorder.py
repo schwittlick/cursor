@@ -1,20 +1,18 @@
-import sys
-
 from cursor.path import Path
 from cursor.collection import Collection
 from cursor.data import DateHandler
 from cursor.data import JsonCompressor
 from cursor.data import DataDirHandler
+from cursor.misc import convert_pynput_btn_to_key
 
 import atexit
 import pyautogui
 import wasabi
-import pathlib
 import pystray
 import pynput
 import pymsgbox
 import threading
-
+import sys
 from PIL import Image
 
 log = wasabi.Printer()
@@ -82,7 +80,7 @@ class Recorder:
         try:
             key = btn.char
         except AttributeError as ae:
-            key = self.__convert_btn_to_key(btn)
+            key = convert_pynput_btn_to_key(btn)
             if key is None:
                 log.fail(f"Couldn't save key because of {ae}")
                 return
@@ -95,7 +93,7 @@ class Recorder:
         try:
             key = btn.char
         except AttributeError as ae:
-            key = self.__convert_btn_to_key(btn)
+            key = convert_pynput_btn_to_key(btn)
             if key is None:
                 log.fail(f"Couldn't save key because of {ae}")
                 return
@@ -122,62 +120,6 @@ class Recorder:
         with open(fname_compressed.as_posix(), "w") as fp:
             dump = JsonCompressor().json_zip(recs)
             fp.write(str(dump))
-
-    @staticmethod
-    def __convert_btn_to_key(btn):
-        """
-        these keyboard keys dont have char representation
-        we make it ourselves
-        """
-        if btn == pynput.keyboard.Key.space:
-            return " "
-
-        if btn == pynput.keyboard.Key.delete:
-            return "DEL"
-
-        if btn == pynput.keyboard.Key.cmd:
-            return "CMD"
-
-        if btn == pynput.keyboard.Key.cmd_l:
-            return "CMD_L"
-
-        if btn == pynput.keyboard.Key.cmd_r:
-            return "CMD_R"
-
-        if btn == pynput.keyboard.Key.alt:
-            return "ALT"
-
-        if btn == pynput.keyboard.Key.alt_l:
-            return "ALT_L"
-
-        if btn == pynput.keyboard.Key.alt_r:
-            return "ALT_R"
-
-        if btn == pynput.keyboard.Key.enter:
-            return "ENTER"
-
-        if btn == pynput.keyboard.Key.backspace:
-            return "BACKSPACE"
-
-        if btn == pynput.keyboard.Key.shift:
-            return "SHIFT"
-
-        if btn == pynput.keyboard.Key.shift_l:
-            return "SHIFT_L"
-
-        if btn == pynput.keyboard.Key.shift_r:
-            return "SHIFT_R"
-
-        if btn == pynput.keyboard.Key.ctrl:
-            return "CTRL"
-
-        if btn == pynput.keyboard.Key.ctrl_l:
-            return "CTRL_L"
-
-        if btn == pynput.keyboard.Key.ctrl_r:
-            return "CTRL_R"
-
-        return None
 
 
 rr = None
@@ -208,7 +150,7 @@ def main():
     def update(icon):
         icon.update_menu()
 
-    icon_path = pathlib.Path(__file__).resolve().parent.parent / "mouse-icon.gif"
+    icon_path = DataDirHandler().data_dir / "mouse-icon.gif"
     image = Image.open(icon_path.as_posix())
     global icon
     icon = pystray.Icon(
