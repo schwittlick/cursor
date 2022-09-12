@@ -374,16 +374,27 @@ def test_path_intersection3():
 def test_angles():
     p = Path()
     p.add(0.0, 1.0)
-    p.add(0.0, 1.0)
     p.add(1.0, 1.0)
     p.add(1.0, 0.0)
     p.add(0.5, 0.0)
 
-    changes = p.direction_changes()
-    assert changes[0] == 0.0
-    assert round(changes[1], 2) == 45.0  # wat
-    assert round(changes[2], 2) == 45.0
-    assert changes[3] == 0.0
+    changes = p.direction_changes(mapped=True)
+    assert changes[0] == 45.0
+    assert changes[1] == 45.0
+    assert changes[2] == 0.0
+
+
+def test_angles_posneg():
+    p = Path()
+    p.add(0.0, 1.0)
+    p.add(1.0, 1.0)
+    p.add(1.0, 0.0)
+    p.add(1.0, 1.0)
+
+    changes = p.direction_changes(mapped=False)
+    assert changes[0] == 45.0
+    assert changes[1] == 45.0
+    assert changes[2] == -45.0
 
 
 def disabled_test_similarity():
