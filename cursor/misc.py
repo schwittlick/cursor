@@ -9,18 +9,6 @@ from numba import typed
 from timeit import default_timer as timer
 
 
-def length(v: tuple[float, float]) -> float:
-    return np.sqrt(v[0] ** 2 + v[1] ** 2)
-
-
-def dot_product(v: tuple[float, float], w: tuple[float, float]) -> float:
-    return v[0] * w[0] + v[1] * w[1]
-
-
-def determinant(v: tuple[float, float], w: tuple[float, float]):
-    return v[0] * w[1] - v[1] * w[0]
-
-
 def mix(begin: float, end: float, perc: float):
     return ((end - begin) * perc) + begin
 
