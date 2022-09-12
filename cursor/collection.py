@@ -103,9 +103,7 @@ class Collection:
 
     def sort(self, pathsorter: Sorter, reference_path: Path = None) -> None:
         if isinstance(pathsorter, Sorter):
-            pathsorter.sort(
-                self.__paths, reference_path.as_tuple_list() if reference_path else None
-            )
+            pathsorter.sort(self.__paths, reference_path)
         else:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
@@ -113,9 +111,7 @@ class Collection:
         self, pathsorter: Sorter, reference_path: Path = None
     ) -> typing.List[Path]:
         if isinstance(pathsorter, Sorter):
-            return pathsorter.sorted(
-                self.__paths, reference_path.as_tuple_list() if reference_path else None
-            )
+            return pathsorter.sorted(self.__paths, reference_path)
         else:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 

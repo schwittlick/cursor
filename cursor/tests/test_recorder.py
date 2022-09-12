@@ -1,10 +1,9 @@
 from cursor.recorder import Recorder
 import pynput
-from pynput.keyboard import KeyCode
 
 
 def test_recorder1():
-    recorder = Recorder()
+    recorder = Recorder("suffix")
     recorder.on_move(0, 0)
     recorder.on_move(1, 0)
     recorder.on_move(0, 5000)
@@ -14,13 +13,13 @@ def test_recorder1():
     assert len(recorder._current_line) == 3
     assert len(recorder._keyboard_recodings) == 0
 
-    k = KeyCode(char="k")
+    k = pynput.keyboard.KeyCode(char="k")
     recorder.on_release(k)
     assert len(recorder._keyboard_recodings) == 1
     assert recorder._keyboard_recodings[0][0] == "k"
     assert recorder._keyboard_recodings[0][2] == 0
 
-    space = KeyCode(char=" ")
+    space = pynput.keyboard.KeyCode(char=" ")
     recorder.on_release(space)
     assert len(recorder._keyboard_recodings) == 2
     assert recorder._keyboard_recodings[1][0] == " "
