@@ -66,7 +66,10 @@ class Loader:
         log.info(f"This took {round(elapsed * 1000)}ms.")
 
     def load_file(self, path: pathlib.Path) -> None:
-        _fn = path.stem.replace("_compressed", "")
+        assert "_" in path.stem
+        # everything before _ will be interpreted as a timestamp
+        idx = path.stem.index("_")
+        _fn = path.stem[:idx]
         ts = DateHandler.get_timestamp_from_utc(float(_fn))
         log.info(f"Loading {path.stem}.json > {ts}")
 

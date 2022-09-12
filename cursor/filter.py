@@ -36,7 +36,7 @@ class Sorter:
     def sort(
         self,
         paths: typing.List[Path],
-        reference_path_tuple_list: typing.List[typing.Tuple[float, float]] = None,
+        reference_path: Path = None,
     ):
         t0 = time.time()
         if self.__param is self.SHANNON_X:
@@ -57,10 +57,7 @@ class Sorter:
             paths.sort(key=lambda x: x.pen_select, reverse=self.__reverse)
         elif self.__param is self.POINT_COUNT:
             paths.sort(key=lambda x: len(x), reverse=self.__reverse)
-        elif (
-            self.__param is self.FRECHET_DISTANCE
-            and reference_path_tuple_list is not None
-        ):
+        elif self.__param is self.FRECHET_DISTANCE and reference_path is not None:
             raise Exception("Can't sort by Frechet Distance in-place. (yet)")
         else:
             raise Exception(
@@ -71,8 +68,8 @@ class Sorter:
 
     def sorted(
         self,
-        paths: typing.List,
-        reference_path_tuple_list: typing.List[typing.Tuple[float, float]] = None,
+        paths: typing.List[Path],
+        reference_path: Path = None,
     ):
         t0 = time.time()
         if self.__param is self.SHANNON_X:
@@ -103,12 +100,7 @@ class Sorter:
             )
         elif self.__param is self.POINT_COUNT:
             sorted_list = sorted(paths, key=lambda x: len(x), reverse=self.__reverse)
-        elif (
-            self.__param is self.FRECHET_DISTANCE
-            and reference_path_tuple_list is not None
-        ):
-            reference_path = Path.from_tuple_list(reference_path_tuple_list)
-
+        elif self.__param is self.FRECHET_DISTANCE and reference_path is not None:
             distances = [
                 (index, item.frechet_similarity(reference_path), item)
                 for index, item in enumerate(paths)
