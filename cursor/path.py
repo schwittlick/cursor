@@ -3,8 +3,8 @@ from __future__ import annotations
 from cursor.misc import mix
 from cursor.misc import entropy2
 from cursor.misc import map
-from cursor.misc import euclidean
-from cursor.misc import LinearDiscreteFrechet
+from cursor.algorithm.frechet import euclidean
+from cursor.algorithm.frechet import LinearDiscreteFrechet
 
 from cursor.position import Position
 from cursor.bb import BoundingBox
@@ -363,35 +363,14 @@ class Path:
 
         return path
 
-    def direction_changes_pos_neg(self) -> typing.List[float]:
+    def direction_changes(self, mapped: bool = False) -> typing.List[float]:
         """
-        returns a list of radial direction changes from each point
-        to the next len() = self.__len() - 1
-        :return:
-        """
+        returns a list of radial angles from each point
+        mapped: default is output values between -360° and 360°
+        if True, mapped from 0 - 360°
 
-        angles = []
-        idx = 0
-        prev = 0
-        for _ in self.vertices:
-            if idx > 0:
-                f = self.vertices[idx - 1]
-                s = self.vertices[idx]
+        :return: len() = self.__len() - 1
 
-                ang = math.atan2(s.y - f.y, s.x - f.x)
-                ang = math.degrees(ang)
-
-                angles.append(ang - prev)
-                prev = ang
-            idx += 1
-
-        return angles
-
-    def direction_changes(self) -> typing.List[float]:
-        """
-        returns a list of radial direction changes from each point
-        to the next len() = self.__len() - 1
-        :return:
         """
         angles = []
         idx = 0
@@ -401,7 +380,10 @@ class Path:
                 s = self.vertices[idx]
                 ang1 = np.arctan2(*f.astuple()[::-1])
                 ang2 = np.arctan2(*s.astuple()[::-1])
-                angle = np.rad2deg((ang1 - ang2) % (2 * np.pi))
+                if mapped:
+                    angle = np.rad2deg((ang1 - ang2) % (2 * np.pi))
+                else:
+                    angle = np.rad2deg(ang1 - ang2)
                 angles.append(angle)
             idx += 1
 
