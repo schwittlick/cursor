@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-from cursor.misc import dot_product
-from cursor.misc import length
-from cursor.misc import determinant
 from cursor.misc import mix
 from cursor.misc import entropy2
 from cursor.misc import map
@@ -390,32 +387,6 @@ class Path:
 
         return angles
 
-    def inner_angle(self, v: tuple[float, float], w: tuple[float, float]):
-        dp = dot_product(v, w)
-        ll = length(v) * length(w)
-        if ll == 0.0:
-            return 0.0
-
-        cosx = dp / ll
-
-        if cosx < -1.0:
-            cosx = -1.0
-        if cosx > 1.0:
-            cosx = 1.0
-
-        rad = np.arccos(cosx)  # in radians
-        deg1 = math.degrees(rad)
-        return deg1  # returns degrees
-
-    def angle_clockwise(self, A, B):
-        inner = self.inner_angle(A, B)
-        det = determinant(A, B)
-        if det < 0:
-            # this is a property of the det. If the det < 0 then B is clockwise of A
-            return inner
-        else:  # if the det > 0 then A is immediately clockwise of B
-            return 360 - inner
-
     def direction_changes(self) -> typing.List[float]:
         """
         returns a list of radial direction changes from each point
@@ -428,14 +399,10 @@ class Path:
             if idx > 0:
                 f = self.vertices[idx - 1]
                 s = self.vertices[idx]
-                angle = self.angle_clockwise(f.astuple(), s.astuple())
-                # angle = angle_clockwise((1, 1), (1, -1))
-
-                if angle > 180:
-                    angle = 360 - angle
-
-                # angles.append(np.deg2rad(angle) % (2 * np.pi))
-                angles.append(angle % 360)
+                ang1 = np.arctan2(*f.astuple()[::-1])
+                ang2 = np.arctan2(*s.astuple()[::-1])
+                angle = np.rad2deg((ang1 - ang2) % (2 * np.pi))
+                angles.append(angle)
             idx += 1
 
         return angles

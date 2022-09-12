@@ -373,7 +373,7 @@ def test_path_intersection3():
 
 def test_angles():
     p = Path()
-    p.add(0.0, 0.0)
+    p.add(0.0, 1.0)
     p.add(0.0, 1.0)
     p.add(1.0, 1.0)
     p.add(1.0, 0.0)
