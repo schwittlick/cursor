@@ -42,6 +42,25 @@ class Path:
         else:
             self._vertices = []
 
+    def __repr__(self):
+        rep = (
+            f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} "
+            f"shannchan: {self.shannon_direction_changes} layer: {self.layer} "
+            f"type: {self.line_type} velocity: {self.velocity} "
+            f"bb: {self.bb()}"
+        )
+        return rep
+
+    def __len__(self) -> int:
+        return len(self.vertices)
+
+    def __iter__(self) -> typing.Iterator[Path]:
+        for v in self.vertices:
+            yield v
+
+    def __getitem__(self, item) -> Position:
+        return self._vertices[item]
+
     def as_tuple_list(self) -> typing.List[typing.Tuple[float, float]]:
         return [v.as_tuple() for v in self.vertices]
 
@@ -732,22 +751,3 @@ class Path:
         if not current_path.empty():
             new_paths.append(current_path)
         return new_paths
-
-    def __repr__(self):
-        rep = (
-            f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} "
-            f"shannchan: {self.shannon_direction_changes} layer: {self.layer} "
-            f"type: {self.line_type} velocity: {self.velocity} "
-            f"bb: {self.bb()}"
-        )
-        return rep
-
-    def __len__(self) -> int:
-        return len(self.vertices)
-
-    def __iter__(self) -> typing.Iterator[Path]:
-        for v in self.vertices:
-            yield v
-
-    def __getitem__(self, item) -> Position:
-        return self._vertices[item]
