@@ -4,7 +4,6 @@ from cursor.bb import BoundingBox
 
 import random
 import pytest
-import numpy as np
 
 
 def test_path_empty_start():
