@@ -59,8 +59,7 @@ class Collection:
         """
         removes all paths with only one point
         """
-        for p in self.__paths:
-            p.clean()
+        [p.clean() for p in self.__paths]
 
         len_before = len(self)
         self.__paths = [path for path in self.__paths if len(path) > 2]
@@ -76,8 +75,7 @@ class Collection:
         c = copy.deepcopy(self.__paths)
         c.reverse()
         pc = Collection()
-        for p in c:
-            pc.add(p)
+        [pc.add(p) for p in c]
 
         return pc
 
@@ -271,20 +269,16 @@ class Collection:
         return maxx, maxy
 
     def translate(self, x: float, y: float) -> None:
-        for p in self.__paths:
-            p.translate(x, y)
+        [p.translate(x, y) for p in self]
 
     def scale(self, x: float, y: float) -> None:
-        for p in self.__paths:
-            p.scale(x, y)
+        [p.scale(x, y) for p in self]
 
     def rot(self, delta: float) -> None:
-        for p in self.__paths:
-            p.rot(delta)
+        [p.rot(delta) for p in self]
 
     def downsample(self, dist: float) -> None:
-        for p in self.__paths:
-            p.downsample(dist)
+        [p.downsample(dist) for p in self]
 
     def log(self, str) -> None:
         log.good(f"{self.__class__.__name__}: {str}")
@@ -418,39 +412,6 @@ class Collection:
             cutoff_bb.y2 += cuttoff_margin_diff_y
 
             self.__paths = [x for x in self.__paths if x.inside(cutoff_bb)]
-
-    def reorder_tsp(self) -> None:
-        """
-        use this with caution, it works for 20 paths, but will run
-        out of memory for hundreds of points.. this implementation is
-        kind of useless here, but i'll leave it here for the moment..
-        you never know.
-        """
-        import mlrose_hiive as mlrose
-        import numpy as np
-
-        dist_list = []
-
-        for i in range(len(self)):
-            for j in range(len(self)):
-                if j is not i:
-                    a = self[i].bb().center()
-                    a = np.array(a, dtype=float)
-                    b = self[j].bb().center()
-                    b = np.array(b, dtype=float)
-                    dist = np.linalg.norm(a - b)
-                    if dist == 0.0:
-                        dist = 0.01
-                    dist_list.append((i, j, dist))
-
-        fitness_dists = mlrose.TravellingSales(distances=dist_list)
-        problem_fit = mlrose.TSPOpt(
-            length=len(self), fitness_fn=fitness_dists, maximize=False
-        )
-        best_state, best_fitness, fitness_curve = mlrose.genetic_alg(
-            problem_fit, random_state=2
-        )
-        self.__paths[:] = [self.__paths[i] for i in best_state]
 
     def reorder_quadrants(self, xq: int, yq: int) -> None:
         if xq < 2 and yq < 2:
