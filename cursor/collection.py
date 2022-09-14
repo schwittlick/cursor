@@ -82,8 +82,7 @@ class Collection:
         return pc
 
     def limit(self) -> None:
-        for p in self.__paths:
-            p.limit()
+        [p.limit() for p in self.__paths]
 
     def hash(self) -> str:
         return hashlib.md5(str(self.__paths).encode("utf-8")).hexdigest()

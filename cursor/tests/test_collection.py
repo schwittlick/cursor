@@ -376,6 +376,28 @@ def test_pathcollection_layer():
     assert len(v["custom"]) == 1
 
 
+def test_collection_limit():
+    c = Collection()
+
+    for i in range(10):
+        p = Path()
+
+        p.add(0.9, 0.9, 0)
+        p.add(0.9, 1.0, 0)
+        p.add(0.9, 1.1, 0)
+        p.add(0.1, 0.8, 0)
+        p.add(-0.1, 0.8, 0)
+        p.add(0.0, 0.0, 0)
+        p.add(1.0, 1.0, 0)
+
+        c.add(p)
+
+    c.limit()
+
+    for p in c:
+        assert len(p) == 5
+
+
 def test_pathcollection_line_types():
     p1 = Path(line_type=1)
     p1.add(0, 0)
