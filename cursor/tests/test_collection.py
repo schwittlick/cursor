@@ -93,6 +93,27 @@ def test_collection_as_array():
     assert arr[0][0, 1] == 101
 
 
+def test_collection_as_dataframe():
+    p1 = Path()
+    p1.add(100, 101)
+    p1.add(200, 201)
+    p1.add(300, 301)
+
+    p2 = Path()
+    p2.add(222, 223)
+    p2.add(333, 334)
+    p2.add(333, 334)
+
+    pc = Collection()
+    pc.add(p1)
+    pc.add(p2)
+
+    df = pc.as_dataframe()
+    assert df.ndim == 2
+    assert df.values.shape[0] == 6
+    assert df.values.shape[1] == 2
+
+
 def disabled_test_collection_as_array_performance():
     c = Collection()
     for pa in range(10000):

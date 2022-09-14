@@ -9,6 +9,7 @@ from cursor.position import Position
 from cursor.bb import BoundingBox
 
 import numpy as np
+import pandas as pd
 import math
 import hashlib
 import wasabi
@@ -65,7 +66,11 @@ class Path:
         return [v.as_tuple() for v in self.vertices]
 
     def as_array(self) -> np.array:
-        return np.array([p.as_array() for p in self.vertices])
+        return np.array([p.as_array() for p in self.vertices], dtype=object)
+
+    def as_dataframe(self) -> pd.DataFrame:
+        arr = self.as_array()
+        return pd.DataFrame(arr, columns=[f"position{p}" for p in range(arr.shape[1])])
 
     @classmethod
     def from_tuple_list(
