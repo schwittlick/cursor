@@ -263,18 +263,6 @@ class Path:
         self.scale(xscale, yscale)
 
         _bb = self.bb()
-        paths_center = _bb.center()
-
-        output_bounds_center = Position(bb.w / 2.0, bb.h / 2.0)
-
-        diff = (
-            output_bounds_center.x - paths_center[0],
-            output_bounds_center.y - paths_center[1],
-        )
-
-        # log.info(
-        #    f"{self.__class__.__name__}: fit: translated by {diff[0]:.2f} {diff[1]:.2f}"
-        # )
 
         self.translate(bb.x, bb.y)
 
