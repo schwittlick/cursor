@@ -34,6 +34,60 @@ class Collection:
             utc_timestamp = datetime.datetime.timestamp(now)
             self._timestamp = utc_timestamp
 
+    def __len__(self) -> int:
+        return len(self.__paths)
+
+    def __add__(self, other: typing.Union[list, Collection]) -> Collection:
+        if isinstance(other, Collection):
+            new_paths = self.__paths + other.get_all()
+            p = Collection()
+            p.__paths.extend(new_paths)
+            return p
+        if isinstance(other, list):
+            new_paths = self.__paths + other
+            p = Collection()
+            p.__paths.extend(new_paths)
+            return p
+        else:
+            raise Exception(
+                "You can only add another PathCollection or a list of paths"
+            )
+
+    def __repr__(self) -> str:
+        return f"PathCollection({self.__name}) -> ({len(self)})"
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Collection):
+            return NotImplemented
+
+        if len(self) != len(other):
+            return False
+
+        if self.timestamp() != other.timestamp():
+            return False
+
+        # todo: do more in depth test
+
+        return True
+
+    def __iter__(self):
+        for p in self.__paths:
+            yield p
+
+    def __getitem__(
+        self, item: typing.Union[int, slice]
+    ) -> typing.Union[Collection, Path]:
+        if isinstance(item, slice):
+            start, stop, step = item.indices(len(self))
+            _pc = Collection()
+            _pc.__paths = [self[i] for i in range(start, stop, step)]
+            return _pc
+
+        if len(self.__paths) < item + 1:
+            raise IndexError(f"Index {item} too high. Maximum is {len(self.__paths)}")
+
+        return self.__paths[item]
+
     def add(self, path: typing.Union[BoundingBox, Path]) -> None:
         if isinstance(path, Path):
             if path.empty():
@@ -129,60 +183,6 @@ class Collection:
             return pc
         else:
             raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
-
-    def __len__(self) -> int:
-        return len(self.__paths)
-
-    def __add__(self, other: typing.Union[list, Collection]) -> Collection:
-        if isinstance(other, Collection):
-            new_paths = self.__paths + other.get_all()
-            p = Collection()
-            p.__paths.extend(new_paths)
-            return p
-        if isinstance(other, list):
-            new_paths = self.__paths + other
-            p = Collection()
-            p.__paths.extend(new_paths)
-            return p
-        else:
-            raise Exception(
-                "You can only add another PathCollection or a list of paths"
-            )
-
-    def __repr__(self) -> str:
-        return f"PathCollection({self.__name}) -> ({len(self)})"
-
-    def __eq__(self, other) -> bool:
-        if not isinstance(other, Collection):
-            return NotImplemented
-
-        if len(self) != len(other):
-            return False
-
-        if self.timestamp() != other.timestamp():
-            return False
-
-        # todo: do more in depth test
-
-        return True
-
-    def __iter__(self):
-        for p in self.__paths:
-            yield p
-
-    def __getitem__(
-        self, item: typing.Union[int, slice]
-    ) -> typing.Union[Collection, Path]:
-        if isinstance(item, slice):
-            start, stop, step = item.indices(len(self))
-            _pc = Collection()
-            _pc.__paths = [self[i] for i in range(start, stop, step)]
-            return _pc
-
-        if len(self.__paths) < item + 1:
-            raise IndexError(f"Index {item} too high. Maximum is {len(self.__paths)}")
-
-        return self.__paths[item]
 
     def timestamp(self) -> float:
         return self._timestamp
