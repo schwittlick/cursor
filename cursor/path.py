@@ -199,9 +199,9 @@ class Path:
             dist = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
             return dist
 
-        for i in range(self.__len__() - 1):
-            current = self.__getitem__(i)
-            next = self.__getitem__(i + 1)
+        for i in range(len(self.vertices) - 1):
+            current = self[i]
+            next = self[i + 1]
 
             d = calculateDistance(current.x, current.y, next.x, next.y)
             dist += d
@@ -209,18 +209,15 @@ class Path:
         return dist
 
     def translate(self, x: float, y: float) -> None:
-        for p in self.vertices:
-            p.translate(x, y)
+        [p.translate(x, y) for p in self.vertices]
 
     def scale(self, x: float, y: float) -> None:
-        for p in self.vertices:
-            p.scale(x, y)
+        [p.scale(x, y) for p in self.vertices]
 
     def rot(
         self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)
     ) -> None:
-        for p in self.vertices:
-            p.rot(angle, origin)
+        [p.rot(angle, origin) for p in self.vertices]
 
     def move_to_origin(self) -> None:
         """
@@ -558,9 +555,8 @@ class Path:
         ac_offset = self._parallel(p1, p2, offset)
         vector_a = Position(p1.x - p2.x, p1.y - p2.y)
         vector_b = Position(p3.x - p2.x, p3.y - p2.y)
-        cp = self._cross_product(
-            vector_a.as_array(), vector_b.as_array()
-        )  # np.cross(vector_a.arr(), vector_b.arr())
+        cp = self._cross_product(vector_a.as_array(), vector_b.as_array())
+        # cp = np.cross(vector_a.as_array(), vector_b.as_array())
         if cp[2] < 0:
             corner_offset = corner_offset * -1
 

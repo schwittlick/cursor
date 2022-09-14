@@ -497,6 +497,7 @@ def test_offset():
     offset = p1.offset(0.2)
 
     assert offset[0].y == -0.2
+    # can't compare the rest
 
 
 def test_downsample():
