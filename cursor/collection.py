@@ -7,6 +7,7 @@ from cursor.filter import Filter
 from cursor.filter import Sorter
 
 import numpy as np
+import pandas as pd
 import datetime
 import pytz
 import random
@@ -103,7 +104,12 @@ class Collection:
             self.__paths.append(p)
 
     def as_array(self) -> np.array:
-        return np.array([p.as_array() for p in self.__paths])
+        return np.array([p.as_array() for p in self.__paths], dtype=object)
+
+    def as_dataframe(self):
+        df_list = [p.as_dataframe() for p in self.__paths]
+        df = pd.concat(df_list, axis=0)
+        return df
 
     def extend(self, pc: Collection) -> None:
         new_paths = self.__paths + pc.get_all()
