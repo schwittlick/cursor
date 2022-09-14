@@ -1,12 +1,11 @@
 from cursor.path import Path
-from cursor.position import Position
 from cursor.collection import Collection
 from cursor.bb import BoundingBox
+from cursor.misc import Timer
 
 import pytest
 import random
 import math
-import numpy as np
 
 
 def test_pathcollection_minmax():
@@ -92,6 +91,23 @@ def test_collection_as_array():
 
     assert arr[0][0, 0] == 100
     assert arr[0][0, 1] == 101
+
+
+def disabled_test_collection_as_array_performance():
+    c = Collection()
+    for pa in range(10000):
+        p1 = Path()
+
+        for i in range(1000):
+            p1.add(random.randint(-10000, 10000), random.randint(-10000, 10000))
+        c.add(p1)
+
+    timer = Timer()
+    timer.start()
+    arr = c.as_array()
+    timer.print_elapsed(f"as_array {len(c)} {len(c[0])}")
+
+    assert arr.shape[0] == 10000
 
 
 def test_path_aspect_ratio():
