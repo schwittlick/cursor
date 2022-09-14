@@ -1,6 +1,6 @@
-import cursor.path
-import cursor.position
-import cursor.collection
+from cursor.path import Path
+from cursor.position import Position
+from cursor.collection import Collection
 
 import pathlib
 import json
@@ -13,16 +13,16 @@ import pytz
 
 class MyJsonEncoder(json.JSONEncoder):
     def default(self, o):
-        if isinstance(o, cursor.collection.Collection):
+        if isinstance(o, Collection):
             return {
                 "paths": o.get_all(),
                 "timestamp": o.timestamp(),
             }
 
-        if isinstance(o, cursor.path.Path):
+        if isinstance(o, Path):
             return o.vertices
 
-        if isinstance(o, cursor.path.Position):
+        if isinstance(o, Position):
             return {"x": round(o.x, 4), "y": round(o.y, 4), "ts": round(o.timestamp, 2)}
 
 
@@ -32,16 +32,16 @@ class MyJsonDecoder(json.JSONDecoder):
 
     def object_hook(self, dct):
         if "x" in dct and "y" in dct and "ts" in dct:
-            p = cursor.position.Position(dct["x"], dct["y"], dct["ts"])
+            p = Position(dct["x"], dct["y"], dct["ts"])
             return p
         if "w" in dct and "h" in dct:
             s = pyautogui.Size(dct["w"], dct["h"])
             return s
         if "paths" in dct and "timestamp" in dct:
             ts = dct["timestamp"]
-            pc = cursor.collection.Collection(ts)
+            pc = Collection(ts)
             for p in dct["paths"]:
-                pc.add(cursor.path.Path(p))
+                pc.add(Path(p))
             return pc
         return dct
 
@@ -104,28 +104,28 @@ class DataDirHandler:
         self.data_dir = self.BASE_DIR / "data"
         self.test_data_dir = self.BASE_DIR / "cursor" / "tests" / "data"
 
-    def gcode(self, folder) -> pathlib.Path:
+    def gcode(self, folder: str) -> pathlib.Path:
         return self.data_dir / "experiments" / folder / "gcode"
 
-    def tek(self, folder) -> pathlib.Path:
+    def tek(self, folder: str) -> pathlib.Path:
         return self.data_dir / "experiments" / folder / "tek"
 
-    def digi(self, folder) -> pathlib.Path:
+    def digi(self, folder: str) -> pathlib.Path:
         return self.data_dir / "experiments" / folder / "digi"
 
-    def jpg(self, subfolder) -> pathlib.Path:
+    def jpg(self, subfolder: str) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "jpg"
 
-    def video(self, subfolder) -> pathlib.Path:
+    def video(self, subfolder: str) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "video"
 
-    def svg(self, subfolder) -> pathlib.Path:
+    def svg(self, subfolder: str) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "svg"
 
-    def hpgl(self, subfolder) -> pathlib.Path:
+    def hpgl(self, subfolder: str) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "hpgl"
 
-    def source(self, subfolder) -> pathlib.Path:
+    def source(self, subfolder: str) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "source"
 
     def images(self) -> pathlib.Path:
