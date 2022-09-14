@@ -182,7 +182,7 @@ class GCodeRenderer:
 class RealtimeRenderer(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
-        arcade.set_background_color(arcade.color.BLACK)
+        arcade.set_background_color(arcade.color.LICORICE)
 
         self.colors = [
             getattr(arcade.color, color)

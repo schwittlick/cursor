@@ -136,6 +136,7 @@ def save_exit(icon, item):
 
 def recorder_setup(icon):
     global rr
+    global suffix
 
     rr = Recorder(suffix)
     icon.visible = True
@@ -161,6 +162,7 @@ def main():
             pystray.MenuItem("Save & Exit", save_exit),
         ),
     )
+    global suffix
     suffix = pymsgbox.prompt("suffix", default="")
 
     if not suffix:

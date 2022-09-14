@@ -6,6 +6,7 @@ from cursor.bb import BoundingBox
 
 from cursor.filter import Filter
 from cursor.filter import Sorter
+from cursor.filter import SortParameter
 from cursor.filter import BoundingBoxFilter
 from cursor.filter import MinPointCountFilter
 from cursor.filter import MaxPointCountFilter
@@ -97,7 +98,7 @@ def test_entropy_sort():
             p.add(random.randint(-100, 100), random.randint(-100, 100))
         pcol.add(p)
 
-    sorter = Sorter(param=Sorter.SHANNON_X)
+    sorter = Sorter(param=SortParameter.SHANNON_X)
     pcol.sort(sorter)
 
     for i in range(len(pcol) - 1):
@@ -106,7 +107,7 @@ def test_entropy_sort():
 
         assert p0.shannon_x <= p1.shannon_x
 
-    sorter.param = Sorter.SHANNON_Y
+    sorter.param = SortParameter.SHANNON_Y
     pcol.sort(sorter)
 
     for i in range(len(pcol) - 1):
@@ -115,7 +116,7 @@ def test_entropy_sort():
 
         assert p0.shannon_y <= p1.shannon_y
 
-    sorter.param = Sorter.SHANNON_DIRECTION_CHANGES
+    sorter.param = SortParameter.SHANNON_DIRECTION_CHANGES
     pcol.sort(sorter)
 
     for i in range(len(pcol) - 1):
@@ -130,17 +131,17 @@ def test_entropy_sort2():
     dir = DataDirHandler().test_recordings()
     ll = Loader(directory=dir, limit_files=2)
     pcol = ll.all_paths()
-    sorter = Sorter(param=Sorter.SHANNON_X, reverse=True)
+    sorter = Sorter(param=SortParameter.SHANNON_X, reverse=True)
     pcol.sort(sorter)
     for i in range(10):
         print(pcol[i].hash)
 
-    sorter = Sorter(param=Sorter.SHANNON_Y, reverse=True)
+    sorter = Sorter(param=SortParameter.SHANNON_Y, reverse=True)
     pcol.sort(sorter)
     for i in range(10):
         print(pcol[i].hash)
 
-    sorter = Sorter(param=Sorter.SHANNON_DIRECTION_CHANGES, reverse=True)
+    sorter = Sorter(param=SortParameter.SHANNON_DIRECTION_CHANGES, reverse=True)
     pcol.sort(sorter)
     for i in range(10):
         print(pcol[i].hash)
@@ -175,7 +176,7 @@ def test_distance_filter():
 def test_filter_performance():
     pcol = Collection()
 
-    length = 100
+    length = 10  # 10000 = ~2s
 
     reference = Path()
 
@@ -188,8 +189,11 @@ def test_filter_performance():
             p.add(random.randint(0, 200), random.randint(0, 200))
         pcol.add(p)
 
-    f = Sorter(reverse=False, param=Sorter.FRECHET_DISTANCE)
+    pcol.add(reference)
+
+    f = Sorter(reverse=False, param=SortParameter.FRECHET_DISTANCE)
 
     new_col = pcol.sorted(f, reference)
 
-    assert len(new_col) == length
+    assert len(new_col) == length + 1
+    assert new_col[0].vertices == reference.vertices
