@@ -102,8 +102,8 @@ class Collection:
             p.add(path.x, path.y)
             self.__paths.append(p)
 
-    def as_array_list(self) -> typing.List:
-        return [el.as_array() for el in self.__paths]
+    def as_array(self) -> np.array:
+        return np.array([p.as_array() for p in self.__paths])
 
     def extend(self, pc: Collection) -> None:
         new_paths = self.__paths + pc.get_all()

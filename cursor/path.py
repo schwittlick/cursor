@@ -65,14 +65,7 @@ class Path:
         return [v.as_tuple() for v in self.vertices]
 
     def as_array(self) -> np.array:
-        data = []
-        idx = 0
-        for p in self.vertices:
-            data.append(p.as_array())
-
-            idx += 1
-        arr = np.array(data)
-        return arr
+        return np.array([p.as_array() for p in self.vertices])
 
     @classmethod
     def from_tuple_list(

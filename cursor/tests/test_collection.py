@@ -6,6 +6,7 @@ from cursor.bb import BoundingBox
 import pytest
 import random
 import math
+import numpy as np
 
 
 def test_pathcollection_minmax():
@@ -66,6 +67,31 @@ def test_bb_inside():
 
     assert p1.inside(bb) is False
     assert pc.inside(bb) is False
+
+
+def test_collection_as_array():
+    p1 = Path()
+    p1.add(100, 101)
+    p1.add(200, 201)
+    p1.add(300, 301)
+
+    p2 = Path()
+    p2.add(222, 223)
+    p2.add(333, 334)
+
+    pc = Collection()
+    pc.add(p1)
+    pc.add(p2)
+
+    arr = pc.as_array()
+
+    assert arr.shape[0] == 2
+
+    assert arr[0].shape[0] == 3
+    assert arr[1].shape[0] == 2
+
+    assert arr[0][0, 0] == 100
+    assert arr[0][0, 1] == 101
 
 
 def test_path_aspect_ratio():
