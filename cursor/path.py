@@ -37,19 +37,19 @@ class Path:
         self._pen_force = pen_force
         self._pen_select = pen_select
         self._is_polygon = is_polygon
-        if vertices:
+        if vertices is not None:
             self._vertices = list(vertices)
         else:
             self._vertices = []
 
     def as_tuple_list(self) -> typing.List[typing.Tuple[float, float]]:
-        return [v.astuple() for v in self.vertices]
+        return [v.as_tuple() for v in self.vertices]
 
     def as_array(self) -> np.array:
         data = []
         idx = 0
         for p in self.vertices:
-            data.append(p.arr())
+            data.append(p.as_array())
 
             idx += 1
         arr = np.array(data)
@@ -275,13 +275,13 @@ class Path:
             end = (end.x, end.y)
 
         path = Path()
-        end_np = self.end_pos().arr()
-        start_np = self.start_pos().arr()
+        end_np = self.end_pos().as_array()
+        start_np = self.start_pos().as_array()
         new_end_np = np.array(end, dtype=float)
         new_start_np = np.array(start, dtype=float)
 
         for point in self.vertices:
-            nparr = point.arr()
+            nparr = point.as_array()
 
             dir_old = np.subtract(end_np, start_np)
             dir_new = np.subtract(new_end_np, new_start_np)
@@ -293,8 +293,8 @@ class Path:
             nparr = nparr * mag_diff
             path.add(nparr[0], nparr[1], point.timestamp)
 
-        current_end = path.end_pos().arr()
-        current_start = path.start_pos().arr()
+        current_end = path.end_pos().as_array()
+        current_start = path.start_pos().as_array()
         current_start_to_end = np.subtract(current_end, current_start)
 
         new_start_to_end = np.subtract(new_end_np, new_start_np)
@@ -325,7 +325,7 @@ class Path:
         for p in path.vertices:
             p.rot(angle)
 
-        translation = np.subtract(new_start_np, path.start_pos().arr())
+        translation = np.subtract(new_start_np, path.start_pos().as_array())
         for p in path.vertices:
             p.translate(translation[0], translation[1])
 
@@ -399,8 +399,8 @@ class Path:
             if idx > 0:
                 f = self.vertices[idx - 1]
                 s = self.vertices[idx]
-                ang1 = np.arctan2(*f.astuple()[::-1])
-                ang2 = np.arctan2(*s.astuple()[::-1])
+                ang1 = np.arctan2(*f.as_tuple()[::-1])
+                ang2 = np.arctan2(*s.as_tuple()[::-1])
                 if mapped:
                     angle = np.rad2deg((ang1 - ang2) % (2 * np.pi))
                 else:
@@ -490,7 +490,7 @@ class Path:
         return sum_x / length, sum_y / length
 
     def inside(self, bb: BoundingBox) -> bool:
-        for p in self:
+        for p in self.vertices:
             if not p.inside(bb):
                 return False
         return True
@@ -559,7 +559,7 @@ class Path:
         vector_a = Position(p1.x - p2.x, p1.y - p2.y)
         vector_b = Position(p3.x - p2.x, p3.y - p2.y)
         cp = self._cross_product(
-            vector_a.arr(), vector_b.arr()
+            vector_a.as_array(), vector_b.as_array()
         )  # np.cross(vector_a.arr(), vector_b.arr())
         if cp[2] < 0:
             corner_offset = corner_offset * -1
@@ -638,12 +638,12 @@ class Path:
                 if left_position < 0 and closed:
                     left_position += n
                 if left_position >= 0:
-                    cur.translate(*self.vertices[left_position].astuple())
+                    cur.translate(*self.vertices[left_position].as_tuple())
                     sum += weights[j]
                 if right_position >= n and closed:
                     right_position -= n
                 if right_position < n:
-                    cur.translate(*self.vertices[right_position].astuple())
+                    cur.translate(*self.vertices[right_position].as_tuple())
                     sum += weights[j]
                 result.vertices[i].translate(cur.x * weights[j], cur.y * weights[j])
             result.vertices[i].x = result.vertices[i].x / sum
@@ -691,8 +691,8 @@ class Path:
             segment: Path, paths: typing.List[typing.Tuple[float, float, float, float]]
         ) -> typing.Tuple[float, float]:
             for p in paths:
-                tup1 = segment[0].astuple()
-                tup2 = segment[1].astuple()
+                tup1 = segment[0].as_tuple()
+                tup2 = segment[1].as_tuple()
                 intersect = Path.intersect_segment(
                     (p[0], p[1]), (p[2], p[3]), tup1, tup2
                 )
@@ -754,4 +754,4 @@ class Path:
             yield v
 
     def __getitem__(self, item) -> Position:
-        return self.vertices[item].copy()
+        return self._vertices[item]

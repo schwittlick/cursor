@@ -90,8 +90,8 @@ class SvgRenderer:
         it = PathIterator(self.paths)
         for conn in it.connections():
             line = self.dwg.line(
-                conn[0].astuple(),
-                conn[1].astuple(),
+                conn[0].as_tuple(),
+                conn[1].as_tuple(),
                 stroke_width=0.5,
                 stroke="black",
             )

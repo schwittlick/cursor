@@ -46,10 +46,11 @@ class Timer:
         self._time = time.perf_counter()
 
     def elapsed(self):
-        return time.perf_counter() - self._time
+        t1 = time.perf_counter()
+        return t1 - self._time
 
     def print_elapsed(self, msg):
-        log.info(f"{msg}: {round(self.elapsed()) * 1000}ms")
+        log.info(f"{msg}: {round(self.elapsed() * 1000)}ms")
 
 
 def convert_pynput_btn_to_key(btn):
