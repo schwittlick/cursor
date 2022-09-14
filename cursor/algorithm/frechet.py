@@ -4,6 +4,48 @@ from typing import Callable, Dict
 from numba import jit, types, int32, int64
 from numba import typed
 from timeit import default_timer as timer
+from multiprocessing import Process, Manager
+import typing
+
+
+def parallel_function(paths, out_array, idx, reference_path):
+    ll = [
+        (index, item.frechet_similarity(reference_path), item)
+        for index, item in enumerate(paths)
+    ]
+    out_array[idx] = ll
+
+
+def frechet_multiprocessing(paths: typing.List, reference_path):
+    cpus = 4  # os.cpu_count()
+
+    def chunks(a, n):
+        k, m = divmod(len(a), n)
+        return (a[i * k + min(i, m) : (i + 1) * k + min(i + 1, m)] for i in range(n))
+
+    paths_chunked = list(chunks(paths, cpus))
+
+    distances = []
+    with Manager() as manager:
+        shared_list = manager.list(range(cpus))
+        processes = []
+
+        for i in range(cpus):
+            p = Process(
+                target=parallel_function,
+                args=(paths_chunked[i], shared_list, i, reference_path),
+            )
+            p.start()
+            processes.append(p)
+
+        for p in processes:
+            p.join()
+
+        for i in shared_list:
+            for distance in i:
+                distances.append(distance)
+
+        return distances
 
 
 def _c(ca, i, j, p, q):

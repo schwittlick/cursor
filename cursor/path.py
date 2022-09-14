@@ -240,9 +240,44 @@ class Path:
         else:
             self.translate(0.0, -abs(_bb.y))
 
-    def fit(self, bb: BoundingBox) -> None:
-        # TODO: implement me
-        pass
+    def fit(self, bb: BoundingBox, padding: float, keep_aspect: bool = False) -> None:
+        self.move_to_origin()
+        _bb = self.bb()
+
+        _w = _bb.w
+        if _w == 0.0:
+            _w = 0.001
+        _h = _bb.h
+        if _h == 0.0:
+            _h = 0.001
+        xscale = (bb.w / _w) * padding
+        yscale = (bb.h / _h) * padding
+
+        if keep_aspect:
+            if xscale > yscale:
+                xscale = yscale
+            else:
+                yscale = xscale
+
+        #log.info(f"{self.__class__.__name__}: fit: scaled by {xscale:.2f} {yscale:.2f}")
+        self.scale(xscale, yscale)
+
+        _bb = self.bb()
+        paths_center = _bb.center()
+
+        output_bounds_center = Position(bb.w / 2.0, bb.h / 2.0)
+
+        diff = (
+            output_bounds_center.x - paths_center[0],
+            output_bounds_center.y - paths_center[1],
+        )
+
+        #log.info(
+        #    f"{self.__class__.__name__}: fit: translated by {diff[0]:.2f} {diff[1]:.2f}"
+        #)
+
+        self.translate(bb.x, bb.y)
+
 
     def morph(
         self,
@@ -391,43 +426,11 @@ class Path:
 
     @property
     def shannon_x(self) -> float:
-        distances = []
-
-        first = True
-        prevx = None
-        for v in self.vertices:
-            if first:
-                prevx = v.x
-                first = False
-                continue
-
-            dist = v.x - prevx
-            distances.append(dist)
-
-            prevx = v.x
-
-        entropy = entropy2(distances)
-        return entropy
+        return entropy2([v.x for v in self.vertices])
 
     @property
     def shannon_y(self) -> float:
-        distances = []
-
-        first = True
-        prevy = None
-        for v in self.vertices:
-            if first:
-                prevy = v.y
-                first = False
-                continue
-
-            dist = v.y - prevy
-            distances.append(dist)
-
-            prevy = v.y
-
-        entropy = entropy2(distances)
-        return entropy
+        return entropy2([v.y for v in self.vertices])
 
     @property
     def shannon_direction_changes(self) -> float:

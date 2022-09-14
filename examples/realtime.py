@@ -49,7 +49,7 @@ if __name__ == "__main__":
     pcs.append(pc1)
     pcs.append(pc2)
 
-    rr = renderer.RealtimeRenderer(*res)
+    rr = renderer.RealtimeRenderer(res[0], res[1], "title")
     rr.set_cb(save_callback)
     rr.set(pcs)
 

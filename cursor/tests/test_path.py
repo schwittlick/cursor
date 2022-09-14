@@ -2,6 +2,7 @@ from cursor.path import Path
 from cursor.position import Position
 from cursor.bb import BoundingBox
 
+import random
 import pytest
 
 
@@ -213,6 +214,63 @@ def test_entropy():
     sy1 = p1.shannon_y
     sy2 = p2.shannon_y
     assert sy1 > sy2
+
+
+def test_entropy_by_position1():
+    p1 = Path()
+    p1.add(10, 10)
+    p1.add(10, 10)
+    p1.add(10, 10)
+    p1.add(10, 10)
+
+    sx1 = p1.shannon_x
+    sy1 = p1.shannon_y
+
+    assert sx1 == 0.0
+    assert sy1 == 0.0
+
+
+def test_entropy_by_position2():
+    p1 = Path()
+    p1.add(10, 10)
+    p1.add(11, 10)
+    p1.add(12, 10)
+    p1.add(13, 10)
+
+    sx1 = p1.shannon_x
+    sy1 = p1.shannon_y
+
+    assert sx1 == 1.3862943611198906
+    assert sy1 == 0.0
+
+
+def test_entropy_by_position3():
+    # lower entropy value
+    # because repeated
+    p1 = Path()
+    p1.add(10, 10)
+    p1.add(11, 10)
+    p1.add(10, 10)
+    p1.add(11, 10)
+
+    sx1 = p1.shannon_x
+    sy1 = p1.shannon_y
+
+    assert sx1 == 0.6931471805599453
+    assert sy1 == 0.0
+
+
+def test_entropy_by_position4():
+    p1 = Path()
+
+    for i in range(20000):
+        p1.add(random.randint(-10000, 10000), random.randint(-10000, 10000))
+
+    sx1 = p1.shannon_x
+    sy1 = p1.shannon_y
+
+    assert sx1 > 9.3
+    assert sy1 > 9.3
 
 
 def test_path_clean():

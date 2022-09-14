@@ -3,9 +3,9 @@ from cursor.data import MyJsonDecoder
 from cursor.data import DateHandler
 from cursor.path import Path
 from cursor.collection import Collection
+from cursor.misc import Timer
 
 import json
-import time
 import wasabi
 import typing
 import pathlib
@@ -29,8 +29,8 @@ class Loader:
     def load_all(
         self, directory: pathlib.Path, limit_files: typing.Union[int, list[str]] = None
     ) -> None:
-        start_benchmark = time.time()
-
+        t = Timer()
+        t.start()
         all_json_files = [
             f for f in directory.iterdir() if self.is_file_and_json(directory / f)
         ]
@@ -56,14 +56,13 @@ class Loader:
             # pc.limit()
             pc.clean()
 
-        elapsed = time.time() - start_benchmark
         log.info(
             f"Loaded {absolut_path_count} paths from {len(self._recordings)} recordings"
         )
         log.info(
             f"Loaded {len(self._keyboard_recordings)} keys from {len(all_json_files)} recordings"
         )
-        log.info(f"This took {round(elapsed * 1000)}ms.")
+        log.info(f"This took {round(t.elapsed() * 1000)}ms.")
 
     def load_file(self, path: pathlib.Path) -> None:
         assert "_" in path.stem
