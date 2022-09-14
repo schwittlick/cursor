@@ -5,7 +5,6 @@ from cursor.misc import entropy2
 from cursor.misc import map
 from cursor.algorithm.frechet import euclidean
 from cursor.algorithm.frechet import LinearDiscreteFrechet
-
 from cursor.position import Position
 from cursor.bb import BoundingBox
 
@@ -24,7 +23,7 @@ log = wasabi.Printer()
 class Path:
     def __init__(
         self,
-        vertices: typing.Optional[list] = None,
+        vertices: typing.Optional[typing.List[Position]] = None,
         layer: typing.Optional[str] = "layer1",
         line_type: typing.Optional[int] = None,
         pen_velocity: typing.Optional[int] = None,
@@ -139,7 +138,7 @@ class Path:
     def clear(self) -> None:
         self.vertices.clear()
 
-    def copy(self) -> "Path":
+    def copy(self) -> Path:
         p = type(self)(copy.deepcopy(self.vertices))
         p.layer = self.layer
         p.velocity = self.velocity
@@ -152,7 +151,7 @@ class Path:
     def reverse(self) -> None:
         self.vertices.reverse()
 
-    def reversed(self) -> "Path":
+    def reversed(self) -> Path:
         c = copy.deepcopy(self.vertices)
         c.reverse()
         return Path(
@@ -268,9 +267,9 @@ class Path:
 
     def morph(
         self,
-        start: typing.Union["Position", typing.Tuple[float, float]],
-        end: typing.Union["Position", typing.Tuple[float, float]],
-    ) -> "Path":
+        start: typing.Union[Position, typing.Tuple[float, float]],
+        end: typing.Union[Position, typing.Tuple[float, float]],
+    ) -> Path:
         if isinstance(start, Position) and isinstance(end, Position):
             start = (start.x, start.y)
             end = (end.x, end.y)
@@ -332,7 +331,7 @@ class Path:
 
         return path
 
-    def intersect(self, newpath: "Path") -> typing.Tuple[bool, float, float]:
+    def intersect(self, newpath: Path) -> typing.Tuple[bool, float, float]:
         for p1 in range(len(newpath) - 1):
             for p2 in range(len(self) - 1):
                 line1Start = newpath[p1]
@@ -366,7 +365,7 @@ class Path:
 
         return False, 0.0, 0.0
 
-    def interp(self, newpath: "Path", perc: float) -> "Path":
+    def interp(self, newpath: Path, perc: float) -> Path:
         path = Path()
 
         maxpoint = max(len(newpath), len(self))
@@ -445,7 +444,7 @@ class Path:
             v for v in self.vertices if 1.0 >= v.x >= 0.0 and 1.0 >= v.y >= 0.0
         ]
 
-    def similarity(self, _path: "Path") -> float:
+    def similarity(self, _path: Path) -> float:
         """
         this does not really work..
 
@@ -475,7 +474,7 @@ class Path:
         result = 1 - spatial.distance.cosine(self.vertices, _path.vertices)
         return result[1]
 
-    def frechet_similarity(self, _path: "Path") -> float:
+    def frechet_similarity(self, _path: Path) -> float:
         """
         https://github.com/joaofig/discrete-frechet
         """
@@ -506,7 +505,7 @@ class Path:
                 points_inside += 1
         return points_inside > points_outside
 
-    def _parallel(self, p1: "Position", p2: "Position", offset_amount: float):
+    def _parallel(self, p1: Position, p2: Position, offset_amount: float):
         delta_y = p2.y - p1.y
         delta_x = p2.x - p1.x
         theta = math.atan2(delta_y, delta_x)
@@ -542,11 +541,11 @@ class Path:
 
     def _offset_angle(
         self,
-        p1: "Position",
-        p2: "Position",
-        p3: "Position",
+        p1: Position,
+        p2: Position,
+        p3: Position,
         offset: float,
-    ) -> "Path":
+    ) -> Path:
         a = p2.distance(p3)
         b = p1.distance(p2)
         c = p3.distance(p1)
@@ -577,7 +576,7 @@ class Path:
 
         return out_path
 
-    def offset(self, offset: float = 1.0) -> typing.Optional["Path"]:
+    def offset(self, offset: float = 1.0) -> typing.Optional[Path]:
         """
         copied from https://github.com/markroland/path-helper/blob/main/src/PathHelper.js <3
         """
@@ -678,7 +677,7 @@ class Path:
         y = y1 + ua * (y2 - y1)
         return (x, y)
 
-    def clip(self, bb: BoundingBox) -> typing.Optional[typing.List["Path"]]:
+    def clip(self, bb: BoundingBox) -> typing.Optional[typing.List[Path]]:
         any_inside = False
         for v in self.vertices:
             if v.inside(bb):
@@ -750,7 +749,7 @@ class Path:
     def __len__(self) -> int:
         return len(self.vertices)
 
-    def __iter__(self) -> typing.Iterator["Path"]:
+    def __iter__(self) -> typing.Iterator[Path]:
         for v in self.vertices:
             yield v
 
