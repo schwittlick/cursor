@@ -259,7 +259,7 @@ class Path:
             else:
                 yscale = xscale
 
-        #log.info(f"{self.__class__.__name__}: fit: scaled by {xscale:.2f} {yscale:.2f}")
+        # log.info(f"{self.__class__.__name__}: fit: scaled by {xscale:.2f} {yscale:.2f}")
         self.scale(xscale, yscale)
 
         _bb = self.bb()
@@ -272,12 +272,11 @@ class Path:
             output_bounds_center.y - paths_center[1],
         )
 
-        #log.info(
+        # log.info(
         #    f"{self.__class__.__name__}: fit: translated by {diff[0]:.2f} {diff[1]:.2f}"
-        #)
+        # )
 
         self.translate(bb.x, bb.y)
-
 
     def morph(
         self,
