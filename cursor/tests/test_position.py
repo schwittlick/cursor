@@ -3,6 +3,13 @@ from cursor.position import Position
 import pytest
 
 
+def test_timedpos_simple():
+    t = Position(1, 2, 100)
+    assert t.time() == 100
+    assert t.x == 1
+    assert t.y == 2
+
+
 def test_timedposition_copy():
     t1 = Position(0, 0, 0)
 
@@ -32,6 +39,14 @@ def test_timedposition_scale():
     assert t1.y == 4
 
 
+def test_timedpos_scale():
+    t = Position(1, 2, 100)
+    t.scale(5, 10)
+
+    assert t.x == 5.0
+    assert t.y == 20.0
+
+
 def test_timedpos_comparison():
     t1 = Position(0, 0, 0)
     t2 = Position(0, 0, 1)
@@ -47,17 +62,3 @@ def test_timedpos_comparison():
     b = False
     with pytest.raises(NotImplementedError):
         r = b == t1
-
-
-def test_timedpos_simple():
-    t = Position(1, 2, 100)
-    assert t.time() == 100
-    assert t.x == 1
-    assert t.y == 2
-
-
-def test_timedpos_scale():
-    t = Position(1, 2, 100)
-    t.scale(5, 10)
-    assert t.x == 5.0
-    assert t.y == 20.0

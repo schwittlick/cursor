@@ -1,4 +1,5 @@
 from cursor.path import Path
+from cursor.position import Position
 from cursor.collection import Collection
 from cursor.bb import BoundingBox
 

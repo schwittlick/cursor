@@ -34,10 +34,10 @@ class Position:
     def y(self, v: float) -> None:
         self._pos[1] = v
 
-    def astuple(self) -> tuple[float, float]:
+    def as_tuple(self) -> tuple[float, float]:
         return tuple(self._pos)
 
-    def arr(self) -> np.array:
+    def as_array(self) -> np.array:
         return self._pos
 
     def time(self) -> int:
@@ -49,7 +49,7 @@ class Position:
         )
 
     def distance(self, t: Position) -> float:
-        return np.linalg.norm(self.arr() - t.arr())
+        return np.linalg.norm(self.as_array() - t.as_array())
 
     def rot(
         self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)
@@ -63,10 +63,10 @@ class Position:
         self.y = qy
 
     def translate(self, x: float, y: float) -> None:
-        self._pos += (x, y)
+        self._pos += x, y
 
     def scale(self, x: float, y: float) -> None:
-        self._pos = np.multiply(self._pos, np.array([x, y]))
+        self._pos *= x, y
 
     def inside(self, bb: BoundingBox) -> bool:
         return bb.x <= self.x <= bb.x2 and bb.y <= self.y <= bb.y2
@@ -99,4 +99,4 @@ class Position:
         return hash(repr(self))
 
     def __mul__(self, other: Position):
-        return self.arr() * other.arr()
+        return self.as_array() * other.as_array()
