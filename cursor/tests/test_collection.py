@@ -1,4 +1,5 @@
 from cursor.path import Path
+from cursor.position import Position
 from cursor.collection import Collection
 from cursor.bb import BoundingBox
 from cursor.misc import Timer
@@ -94,24 +95,17 @@ def test_collection_as_array():
 
 
 def test_collection_as_dataframe():
-    p1 = Path()
-    p1.add(100, 101)
-    p1.add(200, 201)
-    p1.add(300, 301)
-
-    p2 = Path()
-    p2.add(222, 223)
-    p2.add(333, 334)
-    p2.add(333, 334)
+    p1 = Path.from_tuple_list([(100, 101), (200, 201), (300, 301)])
+    p2 = Path.from_tuple_list([(222, 223), (333, 334), (333, 334), (333, 334)])
+    p3 = Path.from_tuple_list([(222, 223)])
 
     pc = Collection()
-    pc.add(p1)
-    pc.add(p2)
+    pc.add([p1, p2, p3])
 
-    df = pc.as_dataframe()
+    df = pc.as_dataframe()  # concatenated
     assert df.ndim == 2
-    assert df.values.shape[0] == 6
-    assert df.values.shape[1] == 2
+    assert df.values.shape[0] == 4  # the maximum numer of points
+    assert df.values.shape[1] == 6  # 3 times x, y columns
 
 
 def disabled_test_collection_as_array_performance():

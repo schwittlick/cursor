@@ -181,12 +181,12 @@ def test_filter_performance():
     reference = Path()
 
     for i in range(20):
-        reference.add(random.randint(0, 200), random.randint(0, 200))
+        reference.add(random.random() * 200, random.random() * 200)
 
     for i in range(length):
         p = Path()
         for j in range(20):
-            p.add(random.randint(0, 200), random.randint(0, 200))
+            p.add(random.random() * 200, random.random() * 200)
         pcol.add(p)
 
     pcol.add(reference)
