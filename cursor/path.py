@@ -38,10 +38,10 @@ class Path:
         self._pen_force = pen_force
         self._pen_select = pen_select
         self._is_polygon = is_polygon
+        self._vertices = []
+
         if vertices is not None:
-            self._vertices = list(vertices)
-        else:
-            self._vertices = []
+            self._vertices = vertices
 
     def __repr__(self):
         rep = (
@@ -66,11 +66,11 @@ class Path:
         return [v.as_tuple() for v in self.vertices]
 
     def as_array(self) -> np.array:
-        return np.array([p.as_array() for p in self.vertices], dtype=object)
+        return np.array([p.as_array() for p in self.vertices])
 
     def as_dataframe(self) -> pd.DataFrame:
         arr = self.as_array()
-        return pd.DataFrame(arr, columns=[f"position{p}" for p in range(arr.shape[1])])
+        return pd.DataFrame(arr, columns=["x", "y"])
 
     @classmethod
     def from_tuple_list(
@@ -156,7 +156,7 @@ class Path:
         self.vertices.clear()
 
     def copy(self) -> Path:
-        p = type(self)(copy.deepcopy(self.vertices))
+        p = Path(None if self.empty() else copy.deepcopy(self.vertices))
         p.layer = self.layer
         p.velocity = self.velocity
         p.line_type = self.line_type

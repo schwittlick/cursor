@@ -89,11 +89,13 @@ class Collection:
 
         return self.__paths[item]
 
-    def add(self, path: typing.Union[BoundingBox, Path]) -> None:
+    def add(self, path: typing.Union[BoundingBox, Path, typing.List[Path]]) -> None:
         if isinstance(path, Path):
             if path.empty():
                 return
             self.__paths.append(path)
+        if isinstance(path, list):
+            [self.__paths.append(p) for p in path]
         if isinstance(path, BoundingBox):
             p = Path()
             p.add(path.x, path.y)
@@ -107,8 +109,7 @@ class Collection:
         return np.array([p.as_array() for p in self.__paths], dtype=object)
 
     def as_dataframe(self):
-        df_list = [p.as_dataframe() for p in self.__paths]
-        df = pd.concat(df_list, axis=0)
+        df = pd.concat([p.as_dataframe() for p in self.__paths], axis=1)
         return df
 
     def extend(self, pc: Collection) -> None:
