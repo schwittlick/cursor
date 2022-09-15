@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from cursor.misc import mix
-from cursor.misc import entropy2
 from cursor.misc import map
 from cursor.algorithm.frechet import euclidean
 from cursor.algorithm.frechet import LinearDiscreteFrechet
+from cursor.algorithm.entropy import calc_entropy
 from cursor.position import Position
 from cursor.bb import BoundingBox
 
@@ -15,6 +15,7 @@ import hashlib
 import wasabi
 import copy
 import typing
+from scipy import stats
 from scipy import spatial
 
 
@@ -45,8 +46,8 @@ class Path:
 
     def __repr__(self):
         rep = (
-            f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} "
-            f"shannchan: {self.shannon_direction_changes} layer: {self.layer} "
+            f"verts: {len(self.vertices)} shannx: {self.entropy_x} shanny: {self.entropy_y} "
+            f"shannchan: {self.entropy_direction_changes} layer: {self.layer} "
             f"type: {self.line_type} velocity: {self.velocity} "
             f"bb: {self.bb()}"
         )
@@ -425,19 +426,24 @@ class Path:
         return angles
 
     @property
-    def shannon_x(self) -> float:
-        return entropy2([v.x for v in self.vertices])
+    def entropy_x(self) -> float:
+        return calc_entropy([v.x for v in self.vertices])
 
     @property
-    def shannon_y(self) -> float:
-        return entropy2([v.y for v in self.vertices])
+    def entropy_y(self) -> float:
+        return calc_entropy([v.y for v in self.vertices])
 
     @property
-    def shannon_direction_changes(self) -> float:
-        entropy = entropy2(self.direction_changes())
-        if entropy is np.nan:
-            log.fail("LOL")
-        return entropy
+    def entropy_direction_changes(self) -> float:
+        return calc_entropy(self.direction_changes())
+
+    @property
+    def differential_entropy_x(self) -> float:
+        return stats.differential_entropy([v.x for v in self.vertices])
+
+    @property
+    def differential_entropy_y(self) -> float:
+        return stats.differential_entropy([v.y for v in self.vertices])
 
     def empty(self) -> bool:
         return len(self.vertices) < 1

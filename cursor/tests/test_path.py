@@ -207,12 +207,12 @@ def test_entropy():
     p2.add(200, 10, 10001)
     p2.add(200, 10, 10001)
 
-    sx1 = p1.shannon_x
-    sx2 = p2.shannon_x
+    sx1 = p1.entropy_x
+    sx2 = p2.entropy_x
     assert sx1 > sx2
 
-    sy1 = p1.shannon_y
-    sy2 = p2.shannon_y
+    sy1 = p1.entropy_y
+    sy2 = p2.entropy_y
     assert sy1 > sy2
 
 
@@ -223,8 +223,8 @@ def test_entropy_by_position1():
     p1.add(10, 10)
     p1.add(10, 10)
 
-    sx1 = p1.shannon_x
-    sy1 = p1.shannon_y
+    sx1 = p1.entropy_x
+    sy1 = p1.entropy_y
 
     assert sx1 == 0.0
     assert sy1 == 0.0
@@ -237,11 +237,23 @@ def test_entropy_by_position2():
     p1.add(12, 10)
     p1.add(13, 10)
 
-    sx1 = p1.shannon_x
-    sy1 = p1.shannon_y
+    sx1 = p1.entropy_x
+    sy1 = p1.entropy_y
 
     assert sx1 == 1.3862943611198906
     assert sy1 == 0.0
+
+
+def test_differential_entropy():
+    random.seed(0)
+
+    p1 = Path.from_tuple_list([(random.random(), random.random()) for _ in range(20)])
+
+    sx1 = p1.differential_entropy_x
+    sy1 = p1.differential_entropy_y
+
+    assert sx1 == -0.4213818697510453
+    assert sy1 == -0.021863950822575647
 
 
 def test_entropy_by_position3():
@@ -253,8 +265,8 @@ def test_entropy_by_position3():
     p1.add(10, 10)
     p1.add(11, 10)
 
-    sx1 = p1.shannon_x
-    sy1 = p1.shannon_y
+    sx1 = p1.entropy_x
+    sy1 = p1.entropy_y
 
     assert sx1 == 0.6931471805599453
     assert sy1 == 0.0
@@ -266,8 +278,8 @@ def test_entropy_by_position4():
     for i in range(20000):
         p1.add(random.randint(-10000, 10000), random.randint(-10000, 10000))
 
-    sx1 = p1.shannon_x
-    sy1 = p1.shannon_y
+    sx1 = p1.entropy_x
+    sy1 = p1.entropy_y
 
     assert sx1 > 9.3
     assert sy1 > 9.3

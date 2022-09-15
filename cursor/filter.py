@@ -14,19 +14,24 @@ log = wasabi.Printer()
 
 # noinspection PyArgumentList
 class SortParameter(Enum):
-    SHANNON_X = auto()
-    SHANNON_Y = auto()
-    SHANNON_DIRECTION_CHANGES = auto()
+    # https://de.wikipedia.org/wiki/Auff%C3%A4lligkeit_(Informationstheorie)
+    ENTROPY_X = auto()
+    ENTROPY_Y = auto()
+    ENTROPY_CROSS = auto()
+    ENTROPY_DIRECTION_CHANGES = auto()
     DISTANCE = auto()
     HASH = auto()
     LAYER = auto()
     PEN_SELECT = auto()
     POINT_COUNT = auto()
     FRECHET_DISTANCE = auto()
+    DIFFERENTIAL_ENTROPY_X = auto()
+    DIFFERENTIAL_ENTROPY_Y = auto()
+    DIFFERENTIAL_ENTROPY_CROSS = auto()
 
 
 class Sorter:
-    def __init__(self, reverse=False, param=SortParameter.SHANNON_X):
+    def __init__(self, reverse=False, param=SortParameter.ENTROPY_X):
         self.__reverse = reverse
         self.__param = param
 
@@ -45,13 +50,24 @@ class Sorter:
     ):
         t = Timer()
         t.start()
-        if self.__param is SortParameter.SHANNON_X:
-            paths.sort(key=lambda x: x.shannon_x, reverse=self.__reverse)
-        elif self.__param is SortParameter.SHANNON_Y:
-            paths.sort(key=lambda x: x.shannon_y, reverse=self.__reverse)
-        elif self.__param is SortParameter.SHANNON_DIRECTION_CHANGES:
+        if self.__param is SortParameter.ENTROPY_X:
+            paths.sort(key=lambda x: x.entropy_x, reverse=self.__reverse)
+        elif self.__param is SortParameter.ENTROPY_Y:
+            paths.sort(key=lambda x: x.entropy_y, reverse=self.__reverse)
+        elif self.__param is SortParameter.ENTROPY_CROSS:
+            paths.sort(key=lambda x: x.entropy_y * x.entropy_x, reverse=self.__reverse)
+        elif self.__param is SortParameter.DIFFERENTIAL_ENTROPY_X:
+            paths.sort(key=lambda x: x.differential_entropy_x, reverse=self.__reverse)
+        elif self.__param is SortParameter.DIFFERENTIAL_ENTROPY_Y:
+            paths.sort(key=lambda x: x.differential_entropy_y, reverse=self.__reverse)
+        elif self.__param is SortParameter.DIFFERENTIAL_ENTROPY_CROSS:
             paths.sort(
-                key=lambda x: x.shannon_direction_changes, reverse=self.__reverse
+                key=lambda x: x.differential_entropy_x * x.differential_entropy_y,
+                reverse=self.__reverse,
+            )
+        elif self.__param is SortParameter.ENTROPY_DIRECTION_CHANGES:
+            paths.sort(
+                key=lambda x: x.entropy_direction_changes, reverse=self.__reverse
             )
         elif self.__param is SortParameter.DISTANCE:
             paths.sort(key=lambda x: x.distance, reverse=self.__reverse)
@@ -81,18 +97,26 @@ class Sorter:
     ):
         t = Timer()
         t.start()
-        if self.__param is SortParameter.SHANNON_X:
+        if self.__param is SortParameter.ENTROPY_X:
             sorted_list = sorted(
-                paths, key=lambda x: x.shannon_x, reverse=self.__reverse
+                paths, key=lambda x: x.entropy_x, reverse=self.__reverse
             )
-        elif self.__param is SortParameter.SHANNON_Y:
+        elif self.__param is SortParameter.ENTROPY_Y:
             sorted_list = sorted(
-                paths, key=lambda x: x.shannon_y, reverse=self.__reverse
+                paths, key=lambda x: x.entropy_y, reverse=self.__reverse
             )
-        elif self.__param is SortParameter.SHANNON_DIRECTION_CHANGES:
+        elif self.__param is SortParameter.ENTROPY_CROSS:
+            sorted_list = sorted(
+                paths, key=lambda x: x.entropy_y * x.entropy_x, reverse=self.__reverse
+            )
+        elif self.__param is SortParameter.DIFFERENTIAL_ENTROPY_X:
+            sorted_list = sorted(
+                paths, key=lambda x: x.differential_entropy_x, reverse=self.__reverse
+            )
+        elif self.__param is SortParameter.ENTROPY_DIRECTION_CHANGES:
             sorted_list = sorted(
                 paths,
-                key=lambda x: x.shannon_direction_changes,
+                key=lambda x: x.entropy_direction_changes,
                 reverse=self.__reverse,
             )
         elif self.__param is SortParameter.DISTANCE:
@@ -152,7 +176,7 @@ class EntropyMinFilter(Filter):
         t.start()
         len_before = len(paths)
         paths[:] = [
-            p for p in paths if p.shannon_x > self.min_x and p.shannon_y > self.min_y
+            p for p in paths if p.entropy_x > self.min_x and p.entropy_y > self.min_y
         ]
         len_after = len(paths)
 
@@ -180,7 +204,7 @@ class EntropyMaxFilter(Filter):
         len_before = len(paths)
 
         paths[:] = [
-            p for p in paths if p.shannon_x < self.max_x and p.shannon_y < self.max_y
+            p for p in paths if p.entropy_x < self.max_x and p.entropy_y < self.max_y
         ]
 
         len_after = len(paths)
@@ -207,7 +231,7 @@ class DirectionChangeEntropyFilter(Filter):
         len_before = len(paths)
 
         paths[:] = [
-            p for p in paths if self.max > p.shannon_direction_changes > self.min
+            p for p in paths if self.max > p.entropy_direction_changes > self.min
         ]
 
         len_after = len(paths)

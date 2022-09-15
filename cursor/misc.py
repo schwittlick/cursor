@@ -11,33 +11,6 @@ def mix(begin: float, end: float, perc: float):
     return ((end - begin) * perc) + begin
 
 
-def entropy2(labels: list, base=None) -> float:
-    from math import log, e
-
-    """ Computes entropy of label distribution. """
-
-    n_labels = len(labels)
-
-    if n_labels <= 1:
-        return 0
-
-    value, counts = np.unique(labels, return_counts=True)
-    probs = counts / n_labels
-    n_classes = np.count_nonzero(probs)
-
-    if n_classes <= 1:
-        return 0
-
-    ent = 0.0
-
-    # Compute entropy
-    base = e if base is None else base
-    for i in probs:
-        ent -= i * log(i, base)
-
-    return ent
-
-
 class Timer:
     def __init__(self):
         self._time = None
