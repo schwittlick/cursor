@@ -6,22 +6,23 @@ import sys
 import wasabi
 import copy
 import typing
-import enum
+from enum import Enum, auto
 from operator import itemgetter
 
 log = wasabi.Printer()
 
 
-class SortParameter(enum.Enum):
-    SHANNON_X = 1
-    SHANNON_Y = 2
-    SHANNON_DIRECTION_CHANGES = 3
-    DISTANCE = 4
-    HASH = 5
-    LAYER = 6
-    PEN_SELECT = 7
-    POINT_COUNT = 8
-    FRECHET_DISTANCE = 9
+# noinspection PyArgumentList
+class SortParameter(Enum):
+    SHANNON_X = auto()
+    SHANNON_Y = auto()
+    SHANNON_DIRECTION_CHANGES = auto()
+    DISTANCE = auto()
+    HASH = auto()
+    LAYER = auto()
+    PEN_SELECT = auto()
+    POINT_COUNT = auto()
+    FRECHET_DISTANCE = auto()
 
 
 class Sorter:
