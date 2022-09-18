@@ -88,7 +88,7 @@ class Sorter:
             raise Exception(
                 f"Unknown parameter {self.__param} for {__class__.__name__}"
             )
-        log.good(f"Sorted via {__class__.__name__} took {round(t.elapsed() * 1000)}ms.")
+        t.print_elapsed(f"Sorted via {__class__.__name__} took ")
 
     def sorted(
         self,
