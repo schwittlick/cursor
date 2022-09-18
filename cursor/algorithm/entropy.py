@@ -2,11 +2,10 @@ import numpy as np
 from scipy import stats
 from math import log, e
 
-from collections import Counter
-
 
 def calc_entropy(labels, base=None):
-    _, counts = np.unique(labels, return_counts=True)
+    values, counts = np.unique(labels, return_counts=True)
+    # TODO: use data in entropy directly, don't use sorted unique elements?
     return stats.entropy(counts, base=base)
 
 

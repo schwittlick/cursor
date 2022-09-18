@@ -227,9 +227,7 @@ class RealtimeRenderer(arcade.Window):
     ):
         if not color:
             color = random.choice(self.colors)
-
-        for p in c:
-            self.add_path(p, line_width, color)
+        [self.add(p, line_width, color) for p in c]
 
     def on_draw(self):
         self.clear()
@@ -560,6 +558,9 @@ class JpegRenderer:
         fname = self.save_path / (filename + ".jpg")
         self.img.save(fname, "JPEG")
         log.good(f"Finished saving {fname}")
+
+    def image(self) -> Image:
+        return self.img
 
     def render_bb(self, bb: BoundingBox) -> None:
         self.img_draw.line(xy=(bb.x, bb.y, bb.x2, bb.y), fill="black", width=2)
