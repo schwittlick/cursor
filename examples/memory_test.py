@@ -1,12 +1,13 @@
 from cursor.loader import Loader
 from cursor.data import DataDirHandler
 
-from collections import Counter
 import linecache
 import os
 import tracemalloc
 
-import cProfile, pstats, io
+import cProfile
+import pstats
+import io
 from pstats import SortKey
 
 
@@ -59,7 +60,6 @@ if __name__ == "__main__":
         pr.enable()
 
         load()
-
 
         pr.disable()
         s = io.StringIO()
