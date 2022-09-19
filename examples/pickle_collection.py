@@ -5,6 +5,8 @@ from cursor.data import DataDirHandler
 from cursor.bb import BoundingBox
 from cursor.collection import Collection
 
+from cursor.misc import Timer
+
 
 def save_frechet():
     dir = DataDirHandler().recordings()
@@ -25,13 +27,15 @@ def save_frechet():
 
     c = Collection()
     c.add(paths_sorted)
-    c.to_pickle("frechet_all.pickle")
+    timer = Timer()
+    c.simplify(0.1)
+    timer.print_elapsed(f"simplifying took")
+    c.save_pickle("frechet_all_simplified.pickle")
 
 
 def save_entropy_crossed() -> None:
-    name = "entropy_direction_changes_40_norm.pickle"
     dir = DataDirHandler().recordings()
-    ll = Loader(directory=dir, limit_files=40)
+    ll = Loader(directory=dir, limit_files=None)
 
     keep_aspect_ratio = False
     c = ll.all_paths()
@@ -40,13 +44,62 @@ def save_entropy_crossed() -> None:
     for p in c:
         p.fit(bb, 1.0, keep_aspect_ratio)
 
-    sorter = Sorter(param=SortParameter.ENTROPY_DIRECTION_CHANGES, reverse=True)
+    #sorter = Sorter(param=SortParameter.ENTROPY_Y, reverse=True)
 
+    #paths_sorted = c.sorted(sorter)
+
+    #c = Collection()
+    #c.add(paths_sorted)
+    #timer = Timer()
+    #c.simplify(0.01)
+    #timer.print_elapsed(f"simplifying took")
+    #name = "entropy_y_all_norm_simplified_0.01.pickle"
+    #c.save_pickle(name)
+
+    timer = Timer()
+    c.simplify(0.01)
+    timer.print_elapsed(f"simplifying took")
+
+    sorter = Sorter(param=SortParameter.ENTROPY_CROSS, reverse=True)
     paths_sorted = c.sorted(sorter)
 
     c = Collection()
     c.add(paths_sorted)
-    c.to_pickle(name)
+    name = "entropy_cross_all_norm_presimplified_0.01.pickle"
+    c.save_pickle(name)
+
+    sorter = Sorter(param=SortParameter.ENTROPY_Y, reverse=True)
+    paths_sorted = c.sorted(sorter)
+
+    c = Collection()
+    c.add(paths_sorted)
+    name = "entropy_y_all_norm_presimplified_0.01.pickle"
+    c.save_pickle(name)
+
+    sorter = Sorter(param=SortParameter.ENTROPY_X, reverse=True)
+    paths_sorted = c.sorted(sorter)
+
+    c = Collection()
+    c.add(paths_sorted)
+    name = "entropy_x_all_norm_presimplified_0.01.pickle"
+    c.save_pickle(name)
+
+
+    sorter = Sorter(param=SortParameter.DISTANCE, reverse=True)
+    paths_sorted = c.sorted(sorter)
+
+    c = Collection()
+    c.add(paths_sorted)
+    name = "distance_all_norm_presimplified_0.01.pickle"
+    c.save_pickle(name)
+
+    sorter = Sorter(param=SortParameter.POINT_COUNT, reverse=True)
+    paths_sorted = c.sorted(sorter)
+
+    c = Collection()
+    c.add(paths_sorted)
+    name = "pointcount_all_norm_presimplified_0.01.pickle"
+    c.save_pickle(name)
 
 
 if __name__ == "__main__":

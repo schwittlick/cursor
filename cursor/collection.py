@@ -91,7 +91,7 @@ class Collection:
 
         return self.__paths[item]
 
-    def to_pickle(self, fname: str) -> None:
+    def save_pickle(self, fname: str) -> None:
         fn = DataDirHandler().pickles() / fname
         file_to_store = open(fn.as_posix(), "wb")
         pickle.dump(self, file_to_store)
@@ -127,6 +127,9 @@ class Collection:
     def as_dataframe(self):
         df = pd.concat([p.as_dataframe() for p in self.__paths], axis=1)
         return df
+
+    def point_count(self) -> int:
+        return sum([len(p) for p in self])
 
     def extend(self, pc: Collection) -> None:
         new_paths = self.__paths + pc.get_all()
@@ -302,6 +305,14 @@ class Collection:
 
     def downsample(self, dist: float) -> None:
         [p.downsample(dist) for p in self]
+
+    def simplify(self, e: float) -> None:
+        count = self.point_count()
+
+        for p in self:
+            p.simplify(e)
+
+        log.info(f"C::simplify from {count} to {self.point_count()} points.")
 
     def log(self, str) -> None:
         log.good(f"{self.__class__.__name__}: {str}")
