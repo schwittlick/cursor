@@ -1,88 +1,6 @@
-from cursor.path import Path
-from cursor.position import Position
-from cursor.collection import Collection
-
 import pathlib
-import json
-import base64
-import zlib
-import pyautogui
 import datetime
 import pytz
-
-
-class MyJsonEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, Collection):
-            return {
-                "paths": o.get_all(),
-                "timestamp": o.timestamp(),
-            }
-
-        if isinstance(o, Path):
-            return o.vertices
-
-        if isinstance(o, Position):
-            return {"x": round(o.x, 4), "y": round(o.y, 4), "ts": round(o.timestamp, 2)}
-
-
-class MyJsonDecoder(json.JSONDecoder):
-    def __init__(self, *args, **kwargs):
-        json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
-
-    def object_hook(self, dct):
-        if "x" in dct and "y" in dct and "ts" in dct:
-            p = Position(dct["x"], dct["y"], dct["ts"])
-            return p
-        if "w" in dct and "h" in dct:
-            s = pyautogui.Size(dct["w"], dct["h"])
-            return s
-        if "paths" in dct and "timestamp" in dct:
-            ts = dct["timestamp"]
-            pc = Collection(ts)
-            for p in dct["paths"]:
-                pc.add(Path(p))
-            return pc
-        return dct
-
-
-class JsonCompressor:
-    ZIPJSON_KEY = "base64(zip(o))"
-
-    def json_zip(self, j):
-        dumped = json.dumps(j, cls=MyJsonEncoder)
-        dumped_encoded = dumped.encode("utf-8")
-        compressed = zlib.compress(dumped_encoded)
-        encoded = {self.ZIPJSON_KEY: base64.b64encode(compressed).decode("ascii")}
-
-        return encoded
-
-    def json_unzip(self, j, insist=True):
-        try:
-            assert j[self.ZIPJSON_KEY]
-            assert set(j.keys()) == {self.ZIPJSON_KEY}
-        except AssertionError:
-            if insist:
-                raise RuntimeError(
-                    "JSON not in the expected format {"
-                    + str(self.ZIPJSON_KEY)
-                    + ": zipstring}"
-                )
-            else:
-                return j
-
-        try:
-            decoded = base64.b64decode(j[self.ZIPJSON_KEY])
-            decompressed = zlib.decompress(decoded)
-        except zlib.error:
-            raise RuntimeError("Could not decode/unzip the contents")
-
-        try:
-            decompressed = json.loads(decompressed, cls=MyJsonDecoder)
-        except TypeError and json.JSONDecodeError:
-            raise RuntimeError("Could interpret the unzipped contents")
-
-        return decompressed
 
 
 class DateHandler:
@@ -175,3 +93,6 @@ class DataDirHandler:
 
     def file(self, fname: str) -> pathlib.Path:
         return self.data_dir / fname
+
+    def pickles(self) -> pathlib.Path:
+        return self.data_dir / "pickles"

@@ -113,6 +113,16 @@ class Sorter:
             sorted_list = sorted(
                 paths, key=lambda x: x.differential_entropy_x, reverse=self.__reverse
             )
+        elif self.__param is SortParameter.DIFFERENTIAL_ENTROPY_Y:
+            sorted_list = sorted(
+                paths, key=lambda x: x.differential_entropy_y, reverse=self.__reverse
+            )
+        elif self.__param is SortParameter.DIFFERENTIAL_ENTROPY_CROSS:
+            sorted_list = sorted(
+                paths,
+                key=lambda x: x.differential_entropy_x * x.differential_entropy_y,
+                reverse=self.__reverse,
+            )
         elif self.__param is SortParameter.ENTROPY_DIRECTION_CHANGES:
             sorted_list = sorted(
                 paths,

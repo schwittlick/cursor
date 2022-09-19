@@ -1,4 +1,5 @@
-from cursor.data import DataDirHandler, JsonCompressor
+from cursor.data import DataDirHandler
+from cursor.loader import JsonCompressor
 from cursor.path import Path
 from cursor.collection import Collection
 

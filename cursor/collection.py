@@ -5,6 +5,7 @@ from cursor.path import Path
 from cursor.bb import BoundingBox
 from cursor.filter import Filter
 from cursor.filter import Sorter
+from cursor.data import DataDirHandler
 
 import numpy as np
 import pandas as pd
@@ -17,6 +18,7 @@ import copy
 import typing
 import operator
 import time
+import pickle
 
 
 log = wasabi.Printer()
@@ -89,20 +91,34 @@ class Collection:
 
         return self.__paths[item]
 
+    def to_pickle(self, fname: str) -> None:
+        fn = DataDirHandler().pickles() / fname
+        file_to_store = open(fn.as_posix(), "wb")
+        pickle.dump(self, file_to_store)
+
+    @staticmethod
+    def from_pickle(fname: str) -> Collection:
+        fn = DataDirHandler().pickles() / fname
+        with open(fn, "rb") as file:
+            return pickle.load(file)
+
     def add(self, path: typing.Union[BoundingBox, Path, typing.List[Path]]) -> None:
         if isinstance(path, Path):
             if path.empty():
                 return
             self.__paths.append(path)
         if isinstance(path, list):
-            [self.__paths.append(p) for p in path]
+            self.__paths.extend(path)
         if isinstance(path, BoundingBox):
-            p = Path()
-            p.add(path.x, path.y)
-            p.add(path.x, path.y2)
-            p.add(path.x2, path.y2)
-            p.add(path.x2, path.y)
-            p.add(path.x, path.y)
+            p = Path().from_tuple_list(
+                [
+                    (path.x, path.y),
+                    (path.x, path.y2),
+                    (path.x2, path.y2),
+                    (path.x2, path.y),
+                    (path.x, path.y),
+                ]
+            )
             self.__paths.append(p)
 
     def as_array(self) -> np.array:

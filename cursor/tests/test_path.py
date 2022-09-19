@@ -252,8 +252,8 @@ def test_differential_entropy():
     sx1 = p1.differential_entropy_x
     sy1 = p1.differential_entropy_y
 
-    assert sx1 == -0.4213818697510453
-    assert sy1 == -0.021863950822575647
+    assert sx1 == -0.6385796795422417
+    assert sy1 == -0.027332474538620543
 
 
 def test_entropy_by_position3():

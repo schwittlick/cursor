@@ -13,7 +13,7 @@ def mix(begin: float, end: float, perc: float):
 
 class Timer:
     def __init__(self):
-        self._time = None
+        self.start()
 
     def start(self):
         self._time = time.perf_counter()
