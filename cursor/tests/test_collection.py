@@ -144,6 +144,7 @@ def test_simplify_collection():
 
     assert c.point_count() == 881
 
+
 def test_simplify_performance():
     random.seed(0)
     c = Collection()
@@ -162,7 +163,6 @@ def test_simplify_performance():
     c.simplify(0.1)
 
     timer.print_elapsed(f"simplify {len(c)} {len(c[0])}")
-
 
 
 def test_path_aspect_ratio():
