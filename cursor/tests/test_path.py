@@ -256,6 +256,16 @@ def test_differential_entropy():
     assert sy1 == -0.027332474538620543
 
 
+def test_simplify_random():
+    random.seed(0)
+
+    p1 = Path.from_tuple_list([(random.random(), random.random()) for _ in range(20)])
+
+    p1.simplify(0.01)
+
+    assert len(p1) == 18
+
+
 def test_entropy_by_position3():
     # lower entropy value
     # because repeated
@@ -525,6 +535,24 @@ def test_downsample():
     p1.downsample(1.1)
 
     assert len(p1) == 4
+
+
+def test_rdp():
+    p1 = Path()
+    p1.add(0, 0)
+    p1.add(1, 0)
+    p1.add(2, 0)
+    p1.add(3, 0)
+    p1.add(4, 0)
+    p1.add(6, 0)
+    p1.add(7, 0)
+    p1.add(7.2, 0)
+
+    p1.simplify(0.1)
+
+    assert len(p1) == 2
+    assert p1[0] == Position(0, 0)
+    assert p1[1] == Position(7.2, 0)
 
 
 def test_intersect():

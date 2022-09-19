@@ -243,6 +243,7 @@ class RealtimeRenderer(arcade.Window):
         for k, v in self.pressed.items():
             if v:
                 self.cbs[k](self)
+                self.pressed[k] = False
 
     def on_key_press(self, key: int, modifiers: int):
         if key == arcade.key.ESCAPE:

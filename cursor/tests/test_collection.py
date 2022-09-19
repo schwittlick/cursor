@@ -126,6 +126,45 @@ def disabled_test_collection_as_array_performance():
     assert arr.shape[0] == 10000
 
 
+def test_simplify_collection():
+    random.seed(0)
+    c = Collection()
+    for pa in range(10):
+        p1 = Path()
+
+        for i in range(100):
+            p1.add(random.random(), random.random())
+        c.add(p1)
+
+    assert c.point_count() == 1000
+    timer = Timer()
+    timer.start()
+    c.simplify(0.1)
+    timer.print_elapsed(f"simplify {len(c)} {len(c[0])}")
+
+    assert c.point_count() == 881
+
+def test_simplify_performance():
+    random.seed(0)
+    c = Collection()
+    for pa in range(100):
+        p1 = Path()
+
+        for i in range(1000):
+            p1.add(random.random(), random.random())
+        c.add(p1)
+
+    assert c.point_count() == 100000
+
+    timer = Timer()
+    timer.start()
+
+    c.simplify(0.1)
+
+    timer.print_elapsed(f"simplify {len(c)} {len(c[0])}")
+
+
+
 def test_path_aspect_ratio():
     p = Path()
     p.add(0, 0)

@@ -5,6 +5,7 @@ from cursor.misc import map
 from cursor.algorithm.frechet import euclidean
 from cursor.algorithm.frechet import LinearDiscreteFrechet
 from cursor.algorithm.entropy import calc_entropy
+from cursor.algorithm import ramer_douglas_peucker
 from cursor.position import Position
 from cursor.bb import BoundingBox
 
@@ -680,6 +681,13 @@ class Path:
         self.vertices = [
             prev := v for v in self.vertices if v.distance(prev) > dist  # noqa: F841
         ]
+
+    def simplify(self, e: float = 1.0) -> None:
+        # before = len(self.vertices)
+        self.vertices = Path.from_tuple_list(
+            ramer_douglas_peucker.rdp(self.as_tuple_list(), e)
+        ).vertices
+        # log.info(f"Path::simplify({e}) reduced points {before} -> {len(self.vertices)}")
 
     @staticmethod
     def intersect_segment(p1, p2, p3, p4):
