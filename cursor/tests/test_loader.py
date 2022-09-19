@@ -3,8 +3,14 @@ from cursor.data import DataDirHandler
 
 import pytest
 
+import cProfile, pstats, io
+from pstats import SortKey
+
 
 def test_loader_simple():
+    pr = cProfile.Profile()
+    pr.enable()
+
     dir = DataDirHandler().test_recordings()
     ll = Loader(directory=dir)
 
@@ -14,7 +20,7 @@ def test_loader_simple():
 
 def test_loader_keys():
     dir = DataDirHandler().test_recordings()
-    ll = Loader(directory=dir)
+    ll = Loader(directory=dir, load_keys=True)
     rec = ll.keys()
     assert len(rec) == 3
 

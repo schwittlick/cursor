@@ -227,7 +227,7 @@ class RealtimeRenderer(arcade.Window):
     ):
         if not color:
             color = random.choice(self.colors)
-        [self.add(p, line_width, color) for p in c]
+        [self.add_path(p, line_width, color) for p in c]
 
     def on_draw(self):
         self.clear()

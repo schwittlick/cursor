@@ -276,7 +276,7 @@ class Path:
         # log.info(f"{self.__class__.__name__}: fit: scaled by {xscale:.2f} {yscale:.2f}")
         self.scale(xscale, yscale)
 
-        _bb = self.bb()
+        # _bb = self.bb()
 
         self.translate(bb.x, bb.y)
 
@@ -439,11 +439,17 @@ class Path:
 
     @property
     def differential_entropy_x(self) -> float:
-        return stats.differential_entropy([v.x for v in self.vertices])
+        return stats.differential_entropy(
+            [v.x for v in self.vertices],
+            window_length=max(int(len(self.vertices) * 0.1), 1),
+        )
 
     @property
     def differential_entropy_y(self) -> float:
-        return stats.differential_entropy([v.y for v in self.vertices])
+        return stats.differential_entropy(
+            [v.y for v in self.vertices],
+            window_length=max(int(len(self.vertices) * 0.1), 1),
+        )
 
     def empty(self) -> bool:
         return len(self.vertices) < 1
@@ -452,7 +458,6 @@ class Path:
         """
         removes consecutive duplicates
         """
-
         prev = Position()
         self.vertices = [prev := v for v in self.vertices if prev != v]  # noqa: F841
 
