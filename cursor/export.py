@@ -153,9 +153,11 @@ class Exporter:
             for layer, pc in separate_layers.items():
                 sizename = PaperSizeName.names[self.cfg.dimension]
                 machinename = PlotterName.names[self.cfg.type]
+                h = hashlib.sha256(ms.encode("utf-8")).hexdigest()
+                hash = h[:4] + h[len(h) - 4 :]
                 fname = (
                     f"{self.name}_{self.suffix}_{sizename}_{machinename}_{layer}_"
-                    f"{hashlib.sha256(ms.encode('utf-8')).hexdigest()}"
+                    f"{hash}"
                 )
 
                 jpeg_folder = DataDirHandler().jpg(self.name)
@@ -167,10 +169,9 @@ class Exporter:
             source_folder = DataDirHandler().source(self.name)
             sizename = PaperSizeName.names[self.cfg.dimension]
             machinename = PlotterName.names[self.cfg.type]
-            fname = (
-                f"{self.name}_{self.suffix}_{sizename}_{machinename}_"
-                f"{hashlib.sha256(ms.encode('utf-8')).hexdigest()}.py"
-            )
+            h = hashlib.sha256(ms.encode("utf-8")).hexdigest()
+            hash = h[:4] + h[len(h) - 4 :]
+            fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}_" f"{hash}.py"
 
             pathlib.Path(source_folder).mkdir(parents=True, exist_ok=True)
             log.good(f"Saved source to {source_folder / fname}")
@@ -187,7 +188,9 @@ class Exporter:
 
         sizename = PaperSizeName.names[self.cfg.dimension]
         machinename = PlotterName.names[self.cfg.type]
-        fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}_{hashlib.sha256(ms.encode('utf-8')).hexdigest()}"
+        h = hashlib.sha256(ms.encode("utf-8")).hexdigest()
+        hash = h[:4] + h[len(h) - 4 :]
+        fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}_{hash}"
         format = ExportFormatMappings.maps[self.cfg.type]
         if self.linetype_mapping and format is ExportFormat.HPGL:
             hpgl_folder = DataDirHandler().hpgl(self.name)

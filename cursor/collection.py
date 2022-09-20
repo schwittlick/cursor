@@ -95,6 +95,7 @@ class Collection:
         fn = DataDirHandler().pickles() / fname
         file_to_store = open(fn.as_posix(), "wb")
         pickle.dump(self, file_to_store)
+        log.info(f"Saved {fn.as_posix()}")
 
     @staticmethod
     def from_pickle(fname: str) -> Collection:
