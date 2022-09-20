@@ -44,21 +44,71 @@ def save_entropy_crossed() -> None:
     for p in c:
         p.fit(bb, 1.0, keep_aspect_ratio)
 
-    # sorter = Sorter(param=SortParameter.ENTROPY_Y, reverse=True)
-
-    # paths_sorted = c.sorted(sorter)
-
-    # c = Collection()
-    # c.add(paths_sorted)
-    # timer = Timer()
-    # c.simplify(0.01)
-    # timer.print_elapsed(f"simplifying took")
-    # name = "entropy_y_all_norm_simplified_0.01.pickle"
-    # c.save_pickle(name)
-
-    timer = Timer()
     c.simplify(0.01)
-    timer.print_elapsed("simplifying took")
+
+    sorter = Sorter(param=SortParameter.ENTROPY_X, reverse=True)
+    paths_sorted = c.sorted(sorter)
+
+    sorter = Sorter(param=SortParameter.FRECHET_DISTANCE, reverse=False)
+    paths_sorted = c.sorted(sorter, paths_sorted[6])
+
+    c = Collection()
+    c.add(paths_sorted)
+    name = "frechet_squiggle_all_norm_simplified_0.01.pickle"
+    c.save_pickle(name)
+
+    import sys
+    sys.exit(0)
+
+    sorter = Sorter(param=SortParameter.FRECHET_DISTANCE, reverse=False)
+    paths_sorted = c.sorted(sorter, c.random())
+
+    c = Collection()
+    c.add(paths_sorted)
+    name = "frechet1_all_norm_simplified_0.01.pickle"
+    c.save_pickle(name)
+
+    sorter = Sorter(param=SortParameter.FRECHET_DISTANCE, reverse=False)
+    paths_sorted = c.sorted(sorter, c.random())
+
+    c = Collection()
+    c.add(paths_sorted)
+    name = "frechet2_all_norm_simplified_0.01.pickle"
+    c.save_pickle(name)
+
+    sorter = Sorter(param=SortParameter.FRECHET_DISTANCE, reverse=False)
+    paths_sorted = c.sorted(sorter, c.random())
+
+    c = Collection()
+    c.add(paths_sorted)
+    name = "frechet3_all_norm_simplified_0.01.pickle"
+    c.save_pickle(name)
+
+
+    sorter = Sorter(param=SortParameter.VARIATION_X, reverse=True)
+    paths_sorted = c.sorted(sorter)
+
+    c = Collection()
+    c.add(paths_sorted)
+    name = "variation_x_all_norm_simplified_0.01.pickle"
+    c.save_pickle(name)
+
+    sorter = Sorter(param=SortParameter.VARIATION_Y, reverse=True)
+    paths_sorted = c.sorted(sorter)
+
+    c = Collection()
+    c.add(paths_sorted)
+    name = "variation_y_all_norm_simplified_0.01.pickle"
+    c.save_pickle(name)
+
+
+    sorter = Sorter(param=SortParameter.ENTROPY_Y, reverse=True)
+    paths_sorted = c.sorted(sorter)
+
+    c = Collection()
+    c.add(paths_sorted)
+    name = "entropy_y_all_norm_simplified_0.01.pickle"
+    c.save_pickle(name)
 
     sorter = Sorter(param=SortParameter.ENTROPY_CROSS, reverse=True)
     paths_sorted = c.sorted(sorter)
