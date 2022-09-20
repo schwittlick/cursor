@@ -183,7 +183,7 @@ class RealtimeRenderer(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
         arcade.set_background_color(arcade.color.LICORICE)
-
+        self.__title = title
         self.colors = [
             getattr(arcade.color, color)
             for color in dir(arcade.color)
@@ -200,6 +200,10 @@ class RealtimeRenderer(arcade.Window):
         arcade.enable_timings(100)
         arcade.run()
 
+    @property
+    def title(self):
+        return self.__title
+
     def add_cb(self, key: arcade.key, cb: typing.Callable):
         self.cbs[key] = cb
         self.pressed[key] = False
@@ -214,7 +218,7 @@ class RealtimeRenderer(arcade.Window):
         point = arcade.create_ellipse(po.x, po.y, width, width, color)
         self.shapes.append(point)
 
-    def add_path(self, p: Path, line_width: int = 5, color: arcade.color = None):
+    def add_path(self, p: Path, line_width: float = 5, color: arcade.color = None):
         if not color:
             color = random.choice(self.colors)
 
@@ -223,7 +227,7 @@ class RealtimeRenderer(arcade.Window):
         self.shapes.append(line_strip)
 
     def add_collection(
-        self, c: Collection, line_width: int = 5, color: arcade.color = None
+        self, c: Collection, line_width: float = 5, color: arcade.color = None
     ):
         if not color:
             color = random.choice(self.colors)
