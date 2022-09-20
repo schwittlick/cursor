@@ -245,6 +245,20 @@ def test_entropy_by_position2():
     assert sy1 == 0.0
 
 
+def test_variation():
+    p1 = Path()
+    p1.add(10, 10)
+    p1.add(11, 10)
+    p1.add(12, 10)
+    p1.add(13, 10)
+
+    sx = p1.variation_x
+    sy = p1.variation_y
+
+    assert math.isclose(sx, 0.11226038684659179)
+    assert math.isclose(sy, 0.0)
+
+
 def test_differential_entropy():
     random.seed(0)
 
