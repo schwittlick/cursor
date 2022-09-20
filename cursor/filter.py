@@ -28,6 +28,8 @@ class SortParameter(Enum):
     DIFFERENTIAL_ENTROPY_X = auto()
     DIFFERENTIAL_ENTROPY_Y = auto()
     DIFFERENTIAL_ENTROPY_CROSS = auto()
+    VARIATION_X = auto()
+    VARIATION_Y = auto()
 
 
 class Sorter:
@@ -84,6 +86,10 @@ class Sorter:
             and reference_path is not None
         ):
             raise Exception("Can't sort by Frechet Distance in-place. (yet)")
+        elif self.__param is SortParameter.VARIATION_X:
+            paths.sort(key=lambda x: x.variation_x, reverse=self.__reverse)
+        elif self.__param is SortParameter.VARIATION_Y:
+            paths.sort(key=lambda x: x.variation_y, reverse=self.__reverse)
         else:
             raise Exception(
                 f"Unknown parameter {self.__param} for {__class__.__name__}"
@@ -162,6 +168,14 @@ class Sorter:
 
             sorted_idxes = sorted(distances, key=itemgetter(1), reverse=self.__reverse)
             sorted_list = [el[2] for el in sorted_idxes]
+        elif self.__param is SortParameter.VARIATION_X:
+            sorted_list = sorted(
+                paths, key=lambda x: x.variation_x, reverse=self.__reverse
+            )
+        elif self.__param is SortParameter.VARIATION_Y:
+            sorted_list = sorted(
+                paths, key=lambda x: x.variation_y, reverse=self.__reverse
+            )
         else:
             raise Exception(f"Wrong param {self.__param} for {__class__.__name__}")
         log.good(f"Sorted via {__class__.__name__} took {round(t.elapsed() * 1000)}ms.")

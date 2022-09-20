@@ -508,6 +508,14 @@ class Path:
         fdfs = LinearDiscreteFrechet(distance)
         return fdfs.distance(self.as_array(), _path.as_array())
 
+    @property
+    def variation_x(self):
+        return stats.variation([v.x for v in self.vertices], ddof=1)
+
+    @property
+    def variation_y(self):
+        return stats.variation([v.y for v in self.vertices], ddof=1)
+
     def centeroid(self) -> typing.Tuple[float, float]:
         arr = self.as_array()
         length = arr.shape[0]
