@@ -4,6 +4,7 @@ from cursor.bb import BoundingBox
 
 import random
 import pytest
+import math
 
 
 def test_path_empty_start():
@@ -252,8 +253,8 @@ def test_differential_entropy():
     sx1 = p1.differential_entropy_x
     sy1 = p1.differential_entropy_y
 
-    assert sx1 == -0.6385796795422417
-    assert sy1 == -0.027332474538620543
+    assert math.isclose(sx1, -0.63857967954)
+    assert math.isclose(sy1, -0.02733247453)
 
 
 def test_simplify_random():
