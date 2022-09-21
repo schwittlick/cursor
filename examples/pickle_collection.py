@@ -57,9 +57,6 @@ def save_entropy_crossed() -> None:
     name = "frechet_squiggle_all_norm_simplified_0.01.pickle"
     c.save_pickle(name)
 
-    import sys
-    sys.exit(0)
-
     sorter = Sorter(param=SortParameter.FRECHET_DISTANCE, reverse=False)
     paths_sorted = c.sorted(sorter, c.random())
 
@@ -84,7 +81,6 @@ def save_entropy_crossed() -> None:
     name = "frechet3_all_norm_simplified_0.01.pickle"
     c.save_pickle(name)
 
-
     sorter = Sorter(param=SortParameter.VARIATION_X, reverse=True)
     paths_sorted = c.sorted(sorter)
 
@@ -100,7 +96,6 @@ def save_entropy_crossed() -> None:
     c.add(paths_sorted)
     name = "variation_y_all_norm_simplified_0.01.pickle"
     c.save_pickle(name)
-
 
     sorter = Sorter(param=SortParameter.ENTROPY_Y, reverse=True)
     paths_sorted = c.sorted(sorter)
