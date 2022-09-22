@@ -1,18 +1,22 @@
-import cursor.bb
-import cursor.misc
-from cursor.misc import dot_product
-from cursor.misc import length
-from cursor.misc import determinant
+from __future__ import annotations
+
 from cursor.misc import mix
-from cursor.misc import entropy2
+from cursor.misc import map
+from cursor.algorithm.frechet import euclidean
+from cursor.algorithm.frechet import LinearDiscreteFrechet
+from cursor.algorithm.entropy import calc_entropy
+from cursor.algorithm import ramer_douglas_peucker
 from cursor.position import Position
+from cursor.bb import BoundingBox
 
 import numpy as np
+import pandas as pd
 import math
 import hashlib
 import wasabi
 import copy
 import typing
+from scipy import stats
 from scipy import spatial
 
 
@@ -22,7 +26,7 @@ log = wasabi.Printer()
 class Path:
     def __init__(
         self,
-        vertices: typing.Optional[list] = None,
+        vertices: typing.Optional[typing.List[Position]] = None,
         layer: typing.Optional[str] = "layer1",
         line_type: typing.Optional[int] = None,
         pen_velocity: typing.Optional[int] = None,
@@ -36,10 +40,45 @@ class Path:
         self._pen_force = pen_force
         self._pen_select = pen_select
         self._is_polygon = is_polygon
-        if vertices:
-            self._vertices = list(vertices)
-        else:
-            self._vertices = []
+        self._vertices = []
+
+        if vertices is not None:
+            self._vertices = vertices
+
+    def __repr__(self):
+        rep = (
+            f"verts: {len(self.vertices)} shannx: {self.entropy_x} shanny: {self.entropy_y} "
+            f"shannchan: {self.entropy_direction_changes} layer: {self.layer} "
+            f"type: {self.line_type} velocity: {self.velocity} "
+            f"bb: {self.bb()}"
+        )
+        return rep
+
+    def __len__(self) -> int:
+        return len(self.vertices)
+
+    def __iter__(self) -> typing.Iterator[Path]:
+        for v in self.vertices:
+            yield v
+
+    def __getitem__(self, item) -> Position:
+        return self._vertices[item]
+
+    def as_tuple_list(self) -> typing.List[typing.Tuple[float, float]]:
+        return [v.as_tuple() for v in self.vertices]
+
+    def as_array(self) -> np.array:
+        return np.array([p.as_array() for p in self.vertices])
+
+    def as_dataframe(self) -> pd.DataFrame:
+        arr = self.as_array()
+        return pd.DataFrame(arr, columns=["x", "y"])
+
+    @classmethod
+    def from_tuple_list(
+        cls, tuple_list: typing.List[typing.Tuple[float, float]]
+    ) -> Path:
+        return Path([Position.from_tuple(p) for p in tuple_list])
 
     @property
     def hash(self) -> str:
@@ -70,7 +109,7 @@ class Path:
         self._line_type = line_type
 
     @property
-    def layer(self) -> int:
+    def layer(self) -> str:
         return self._layer
 
     @layer.setter
@@ -109,27 +148,21 @@ class Path:
     def is_polygon(self, is_polygon) -> None:
         self._is_polygon = is_polygon
 
+    def is_closed(self) -> bool:
+        assert len(self) > 2
+        return self.start_pos() == self.end_pos()
+
     def add(self, x: float, y: float, timestamp: int = 0) -> None:
         self.vertices.append(Position(x, y, timestamp))
 
     def add_position(self, pos: Position) -> None:
         self.vertices.append(pos)
 
-    def arr(self) -> np.array:
-        data = []
-        idx = 0
-        for p in self.vertices:
-            data.append(p.arr())
-
-            idx += 1
-        arr = np.array(data)
-        return arr
-
     def clear(self) -> None:
         self.vertices.clear()
 
-    def copy(self) -> "Path":
-        p = type(self)(copy.deepcopy(self.vertices))
+    def copy(self) -> Path:
+        p = Path(None if self.empty() else copy.deepcopy(self.vertices))
         p.layer = self.layer
         p.velocity = self.velocity
         p.line_type = self.line_type
@@ -141,7 +174,7 @@ class Path:
     def reverse(self) -> None:
         self.vertices.reverse()
 
-    def reversed(self) -> "Path":
+    def reversed(self) -> Path:
         c = copy.deepcopy(self.vertices)
         c.reverse()
         return Path(
@@ -159,12 +192,12 @@ class Path:
 
         return self.vertices[-1]
 
-    def bb(self) -> "cursor.bb.BoundingBox":
+    def bb(self) -> BoundingBox:
         minx = min(self.vertices, key=lambda pos: pos.x).x
         miny = min(self.vertices, key=lambda pos: pos.y).y
         maxx = max(self.vertices, key=lambda pos: pos.x).x
         maxy = max(self.vertices, key=lambda pos: pos.y).y
-        b = cursor.bb.BoundingBox(minx, miny, maxx, maxy)
+        b = BoundingBox(minx, miny, maxx, maxy)
         return b
 
     def aspect_ratio(self) -> float:
@@ -189,9 +222,9 @@ class Path:
             dist = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
             return dist
 
-        for i in range(self.__len__() - 1):
-            current = self.__getitem__(i)
-            next = self.__getitem__(i + 1)
+        for i in range(len(self.vertices) - 1):
+            current = self[i]
+            next = self[i + 1]
 
             d = calculateDistance(current.x, current.y, next.x, next.y)
             dist += d
@@ -199,18 +232,15 @@ class Path:
         return dist
 
     def translate(self, x: float, y: float) -> None:
-        for p in self.vertices:
-            p.translate(x, y)
+        [p.translate(x, y) for p in self.vertices]
 
     def scale(self, x: float, y: float) -> None:
-        for p in self.vertices:
-            p.scale(x, y)
+        [p.scale(x, y) for p in self.vertices]
 
     def rot(
         self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)
     ) -> None:
-        for p in self.vertices:
-            p.rot(angle, origin)
+        [p.rot(angle, origin) for p in self.vertices]
 
     def move_to_origin(self) -> None:
         """
@@ -229,26 +259,49 @@ class Path:
         else:
             self.translate(0.0, -abs(_bb.y))
 
-    def fit(self, bb: "cursor.bb.BoundingBox") -> None:
-        pass
+    def fit(self, bb: BoundingBox, padding: float, keep_aspect: bool = False) -> None:
+        self.move_to_origin()
+        _bb = self.bb()
+
+        _w = _bb.w
+        if _w == 0.0:
+            _w = 0.001
+        _h = _bb.h
+        if _h == 0.0:
+            _h = 0.001
+        xscale = (bb.w / _w) * padding
+        yscale = (bb.h / _h) * padding
+
+        if keep_aspect:
+            if xscale > yscale:
+                xscale = yscale
+            else:
+                yscale = xscale
+
+        # log.info(f"{self.__class__.__name__}: fit: scaled by {xscale:.2f} {yscale:.2f}")
+        self.scale(xscale, yscale)
+
+        # _bb = self.bb()
+
+        self.translate(bb.x, bb.y)
 
     def morph(
         self,
-        start: typing.Union["Position", typing.Tuple[float, float]],
-        end: typing.Union["Position", typing.Tuple[float, float]],
-    ) -> "Path":
+        start: typing.Union[Position, typing.Tuple[float, float]],
+        end: typing.Union[Position, typing.Tuple[float, float]],
+    ) -> Path:
         if isinstance(start, Position) and isinstance(end, Position):
             start = (start.x, start.y)
             end = (end.x, end.y)
 
         path = Path()
-        end_np = self.end_pos().arr()
-        start_np = self.start_pos().arr()
+        end_np = self.end_pos().as_array()
+        start_np = self.start_pos().as_array()
         new_end_np = np.array(end, dtype=float)
         new_start_np = np.array(start, dtype=float)
 
         for point in self.vertices:
-            nparr = point.arr()
+            nparr = point.as_array()
 
             dir_old = np.subtract(end_np, start_np)
             dir_new = np.subtract(new_end_np, new_start_np)
@@ -260,8 +313,8 @@ class Path:
             nparr = nparr * mag_diff
             path.add(nparr[0], nparr[1], point.timestamp)
 
-        current_end = path.end_pos().arr()
-        current_start = path.start_pos().arr()
+        current_end = path.end_pos().as_array()
+        current_start = path.start_pos().as_array()
         current_start_to_end = np.subtract(current_end, current_start)
 
         new_start_to_end = np.subtract(new_end_np, new_start_np)
@@ -292,13 +345,13 @@ class Path:
         for p in path.vertices:
             p.rot(angle)
 
-        translation = np.subtract(new_start_np, path.start_pos().arr())
+        translation = np.subtract(new_start_np, path.start_pos().as_array())
         for p in path.vertices:
             p.translate(translation[0], translation[1])
 
         return path
 
-    def intersect(self, newpath: "Path") -> typing.Tuple[bool, float, float]:
+    def intersect(self, newpath: Path) -> typing.Tuple[bool, float, float]:
         for p1 in range(len(newpath) - 1):
             for p2 in range(len(self) - 1):
                 line1Start = newpath[p1]
@@ -332,7 +385,7 @@ class Path:
 
         return False, 0.0, 0.0
 
-    def interp(self, newpath: "Path", perc: float) -> "Path":
+    def interp(self, newpath: Path, perc: float) -> Path:
         path = Path()
 
         maxpoint = max(len(newpath), len(self))
@@ -351,61 +404,14 @@ class Path:
 
         return path
 
-    def direction_changes_pos_neg(self) -> typing.List[float]:
+    def direction_changes(self, mapped: bool = False) -> typing.List[float]:
         """
-        returns a list of radial direction changes from each point
-        to the next len() = self.__len() - 1
-        :return:
-        """
+        returns a list of radial angles from each point
+        mapped: default is output values between -360° and 360°
+        if True, mapped from 0 - 360°
 
-        angles = []
-        idx = 0
-        prev = 0
-        for _ in self.vertices:
-            if idx > 0:
-                f = self.vertices[idx - 1]
-                s = self.vertices[idx]
+        :return: len() = self.__len() - 1
 
-                ang = math.atan2(s.y - f.y, s.x - f.x)
-                ang = math.degrees(ang)
-
-                angles.append(ang - prev)
-                prev = ang
-            idx += 1
-
-        return angles
-
-    def inner_angle(self, v: tuple[float, float], w: tuple[float, float]):
-        dp = dot_product(v, w)
-        ll = length(v) * length(w)
-        if ll == 0.0:
-            return 0.0
-
-        cosx = dp / ll
-
-        if cosx < -1.0:
-            cosx = -1.0
-        if cosx > 1.0:
-            cosx = 1.0
-
-        rad = np.arccos(cosx)  # in radians
-        deg1 = math.degrees(rad)
-        return deg1  # returns degrees
-
-    def angle_clockwise(self, A, B):
-        inner = self.inner_angle(A, B)
-        det = determinant(A, B)
-        if det < 0:
-            # this is a property of the det. If the det < 0 then B is clockwise of A
-            return inner
-        else:  # if the det > 0 then A is immediately clockwise of B
-            return 360 - inner
-
-    def direction_changes(self) -> typing.List[float]:
-        """
-        returns a list of radial direction changes from each point
-        to the next len() = self.__len() - 1
-        :return:
         """
         angles = []
         idx = 0
@@ -413,64 +419,42 @@ class Path:
             if idx > 0:
                 f = self.vertices[idx - 1]
                 s = self.vertices[idx]
-                angle = self.angle_clockwise(f.astuple(), s.astuple())
-                # angle = angle_clockwise((1, 1), (1, -1))
-
-                if angle > 180:
-                    angle = 360 - angle
-
-                # angles.append(np.deg2rad(angle) % (2 * np.pi))
-                angles.append(angle % 360)
+                ang1 = np.arctan2(*f.as_tuple()[::-1])
+                ang2 = np.arctan2(*s.as_tuple()[::-1])
+                if mapped:
+                    angle = np.rad2deg((ang1 - ang2) % (2 * np.pi))
+                else:
+                    angle = np.rad2deg(ang1 - ang2)
+                angles.append(angle)
             idx += 1
 
         return angles
 
     @property
-    def shannon_x(self) -> float:
-        distances = []
-
-        first = True
-        prevx = None
-        for v in self.vertices:
-            if first:
-                prevx = v.x
-                first = False
-                continue
-
-            dist = v.x - prevx
-            distances.append(dist)
-
-            prevx = v.x
-
-        entropy = entropy2(distances)
-        return entropy
+    def entropy_x(self) -> float:
+        return calc_entropy([v.x for v in self.vertices])
 
     @property
-    def shannon_y(self) -> float:
-        distances = []
-
-        first = True
-        prevy = None
-        for v in self.vertices:
-            if first:
-                prevy = v.y
-                first = False
-                continue
-
-            dist = v.y - prevy
-            distances.append(dist)
-
-            prevy = v.y
-
-        entropy = entropy2(distances)
-        return entropy
+    def entropy_y(self) -> float:
+        return calc_entropy([v.y for v in self.vertices])
 
     @property
-    def shannon_direction_changes(self) -> float:
-        entropy = entropy2(self.direction_changes())
-        if entropy is np.nan:
-            log.fail("LOL")
-        return entropy
+    def entropy_direction_changes(self) -> float:
+        return calc_entropy(self.direction_changes())
+
+    @property
+    def differential_entropy_x(self) -> float:
+        return stats.differential_entropy(
+            [v.x for v in self.vertices],
+            window_length=max(int(len(self.vertices) * 0.1), 1),
+        )
+
+    @property
+    def differential_entropy_y(self) -> float:
+        return stats.differential_entropy(
+            [v.y for v in self.vertices],
+            window_length=max(int(len(self.vertices) * 0.1), 1),
+        )
 
     def empty(self) -> bool:
         return len(self.vertices) < 1
@@ -479,7 +463,6 @@ class Path:
         """
         removes consecutive duplicates
         """
-
         prev = Position()
         self.vertices = [prev := v for v in self.vertices if prev != v]  # noqa: F841
 
@@ -491,7 +474,7 @@ class Path:
             v for v in self.vertices if 1.0 >= v.x >= 0.0 and 1.0 >= v.y >= 0.0
         ]
 
-    def similarity(self, _path: "Path") -> float:
+    def similarity(self, _path: Path) -> float:
         """
         this does not really work..
 
@@ -521,22 +504,46 @@ class Path:
         result = 1 - spatial.distance.cosine(self.vertices, _path.vertices)
         return result[1]
 
-    def frechet_similarity(self, _path: "Path") -> float:
+    def frechet_similarity(self, _path: Path) -> float:
         """
         https://github.com/joaofig/discrete-frechet
         """
-        distance = cursor.misc.euclidean
-        fdfs = cursor.misc.LinearDiscreteFrechet(distance)
-        return fdfs.distance(self.arr(), _path.arr())
+        distance = euclidean
+        fdfs = LinearDiscreteFrechet(distance)
+        return fdfs.distance(self.as_array(), _path.as_array())
+
+    @property
+    def variation_x(self):
+        return stats.variation([v.x for v in self.vertices], ddof=1)
+
+    @property
+    def variation_y(self):
+        return stats.variation([v.y for v in self.vertices], ddof=1)
 
     def centeroid(self) -> typing.Tuple[float, float]:
-        arr = self.arr()
+        arr = self.as_array()
         length = arr.shape[0]
         sum_x = np.sum(arr[:, 0])
         sum_y = np.sum(arr[:, 1])
         return sum_x / length, sum_y / length
 
-    def _parallel(self, p1: "Position", p2: "Position", offset_amount: float):
+    def inside(self, bb: BoundingBox) -> bool:
+        for p in self.vertices:
+            if not p.inside(bb):
+                return False
+        return True
+
+    def mostly_inside(self, bb: BoundingBox) -> bool:
+        points_inside = 0
+        points_outside = 0
+        for p in self:
+            if not p.inside(bb):
+                points_outside += 1
+            else:
+                points_inside += 1
+        return points_inside > points_outside
+
+    def _parallel(self, p1: Position, p2: Position, offset_amount: float):
         delta_y = p2.y - p1.y
         delta_x = p2.x - p1.x
         theta = math.atan2(delta_y, delta_x)
@@ -572,11 +579,11 @@ class Path:
 
     def _offset_angle(
         self,
-        p1: "Position",
-        p2: "Position",
-        p3: "Position",
+        p1: Position,
+        p2: Position,
+        p3: Position,
         offset: float,
-    ) -> "Path":
+    ) -> Path:
         a = p2.distance(p3)
         b = p1.distance(p2)
         c = p3.distance(p1)
@@ -589,9 +596,8 @@ class Path:
         ac_offset = self._parallel(p1, p2, offset)
         vector_a = Position(p1.x - p2.x, p1.y - p2.y)
         vector_b = Position(p3.x - p2.x, p3.y - p2.y)
-        cp = self._cross_product(
-            vector_a.arr(), vector_b.arr()
-        )  # np.cross(vector_a.arr(), vector_b.arr())
+        cp = self._cross_product(vector_a.as_array(), vector_b.as_array())
+        # cp = np.cross(vector_a.as_array(), vector_b.as_array())
         if cp[2] < 0:
             corner_offset = corner_offset * -1
 
@@ -607,7 +613,7 @@ class Path:
 
         return out_path
 
-    def offset(self, offset: float = 1.0) -> typing.Optional["Path"]:
+    def offset(self, offset: float = 1.0) -> typing.Optional[Path]:
         """
         copied from https://github.com/markroland/path-helper/blob/main/src/PathHelper.js <3
         """
@@ -653,7 +659,7 @@ class Path:
 
         weights = [0] * size
         for i in range(size):
-            cur_weight = cursor.misc.map(i, 0, size, 1, shape, True)
+            cur_weight = map(i, 0, size, 1, shape, True)
             weights[i] = cur_weight
 
         result = self.copy()
@@ -669,12 +675,12 @@ class Path:
                 if left_position < 0 and closed:
                     left_position += n
                 if left_position >= 0:
-                    cur.translate(*self.vertices[left_position].astuple())
+                    cur.translate(*self.vertices[left_position].as_tuple())
                     sum += weights[j]
                 if right_position >= n and closed:
                     right_position -= n
                 if right_position < n:
-                    cur.translate(*self.vertices[right_position].astuple())
+                    cur.translate(*self.vertices[right_position].as_tuple())
                     sum += weights[j]
                 result.vertices[i].translate(cur.x * weights[j], cur.y * weights[j])
             result.vertices[i].x = result.vertices[i].x / sum
@@ -684,7 +690,16 @@ class Path:
 
     def downsample(self, dist: float) -> None:
         prev = Position()
-        self.vertices = [prev := v for v in self.vertices if v.distance(prev) > dist]  # noqa: F841
+        self.vertices = [
+            prev := v for v in self.vertices if v.distance(prev) > dist  # noqa: F841
+        ]
+
+    def simplify(self, e: float = 1.0) -> None:
+        # before = len(self.vertices)
+        self.vertices = Path.from_tuple_list(
+            ramer_douglas_peucker.rdp(self.as_tuple_list(), e)
+        ).vertices
+        # log.info(f"Path::simplify({e}) reduced points {before} -> {len(self.vertices)}")
 
     @staticmethod
     def intersect_segment(p1, p2, p3, p4):
@@ -706,10 +721,10 @@ class Path:
         y = y1 + ua * (y2 - y1)
         return (x, y)
 
-    def clip(self, bb: "cursor.bb.BoundingBox") -> typing.Optional[typing.List["Path"]]:
+    def clip(self, bb: BoundingBox) -> typing.Optional[typing.List[Path]]:
         any_inside = False
         for v in self.vertices:
-            if bb.inside(v):
+            if v.inside(bb):
                 any_inside = True
                 break
 
@@ -720,8 +735,8 @@ class Path:
             segment: Path, paths: typing.List[typing.Tuple[float, float, float, float]]
         ) -> typing.Tuple[float, float]:
             for p in paths:
-                tup1 = segment[0].astuple()
-                tup2 = segment[1].astuple()
+                tup1 = segment[0].as_tuple()
+                tup2 = segment[1].as_tuple()
                 intersect = Path.intersect_segment(
                     (p[0], p[1]), (p[2], p[3]), tup1, tup2
                 )
@@ -735,8 +750,8 @@ class Path:
         current_path = Path()
         for v in self.vertices:
             if prev_v is not None:
-                prev_inside = bb.inside(prev_v)
-                curr_inside = bb.inside(v)
+                prev_inside = prev_v.inside(bb)
+                curr_inside = v.inside(bb)
                 if prev_inside and curr_inside:
                     current_path.add_position(v)
                 if prev_inside and not curr_inside:
@@ -759,28 +774,9 @@ class Path:
                     )
                     current_path.add_position(Position(v.x, v.y))
             else:
-                if bb.inside(v):
+                if v.inside(bb):
                     current_path.add_position(v)
             prev_v = v
         if not current_path.empty():
             new_paths.append(current_path)
         return new_paths
-
-    def __repr__(self):
-        rep = (
-            f"verts: {len(self.vertices)} shannx: {self.shannon_x} shanny: {self.shannon_y} "
-            f"shannchan: {self.shannon_direction_changes} layer: {self.layer} "
-            f"type: {self.line_type} velocity: {self.velocity} "
-            f"bb: {self.bb()}"
-        )
-        return rep
-
-    def __len__(self) -> int:
-        return len(self.vertices)
-
-    def __iter__(self) -> typing.Iterator["Path"]:
-        for v in self.vertices:
-            yield v
-
-    def __getitem__(self, item) -> Position:
-        return self.vertices[item].copy()

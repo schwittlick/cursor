@@ -17,7 +17,7 @@ extras_require = {}
 
 setup(
     name="cursor",
-    version="21.07.23",
+    version="220909",
     description="cursor line experiments",
     long_description=long_description,
     author="Marcel Schwittlick",
@@ -42,6 +42,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.10",
     ],
 )

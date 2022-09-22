@@ -1,15 +1,94 @@
-from cursor import data
-from cursor import path
-from cursor import collection
+from cursor.data import DateHandler
+from cursor.path import Path
+from cursor.position import Position
+from cursor.collection import Collection
+from cursor.misc import Timer
 
-import json
-import time
 import wasabi
 import typing
 import pathlib
+import json
+import base64
+import zlib
+import pyautogui
 from functools import reduce
 
 log = wasabi.Printer()
+
+
+class MyJsonEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, Collection):
+            return {
+                "paths": o.get_all(),
+                "timestamp": o.timestamp(),
+            }
+
+        if isinstance(o, Path):
+            return o.vertices
+
+        if isinstance(o, Position):
+            return {"x": round(o.x, 4), "y": round(o.y, 4), "ts": round(o.timestamp, 2)}
+
+
+class MyJsonDecoder(json.JSONDecoder):
+    def __init__(self, *args, **kwargs):
+        json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
+
+    # @profile
+    def object_hook(self, dct):
+        if "x" in dct:
+            return Position(dct["x"], dct["y"], dct["ts"])
+        if "w" in dct and "h" in dct:
+            s = pyautogui.Size(dct["w"], dct["h"])
+            return s
+        if "paths" in dct and "timestamp" in dct:
+            ts = dct["timestamp"]
+            pc = Collection(ts)
+            for _p in dct["paths"]:
+                pc.add(Path(_p))
+            return pc
+        return dct
+
+
+class JsonCompressor:
+    ZIPJSON_KEY = "base64(zip(o))"
+
+    def json_zip(self, j):
+        dumped = json.dumps(j, cls=MyJsonEncoder)
+        dumped_encoded = dumped.encode("utf-8")
+        compressed = zlib.compress(dumped_encoded)
+        encoded = {self.ZIPJSON_KEY: base64.b64encode(compressed).decode("ascii")}
+
+        return encoded
+
+    # @profile
+    def json_unzip(self, j, insist=True):
+        try:
+            assert j[self.ZIPJSON_KEY]
+            assert set(j.keys()) == {self.ZIPJSON_KEY}
+        except AssertionError:
+            if insist:
+                raise RuntimeError(
+                    "JSON not in the expected format {"
+                    + str(self.ZIPJSON_KEY)
+                    + ": zipstring}"
+                )
+            else:
+                return j
+
+        try:
+            decoded = base64.b64decode(j[self.ZIPJSON_KEY])
+            decompressed = zlib.decompress(decoded)
+        except zlib.error:
+            raise RuntimeError("Could not decode/unzip the contents")
+
+        try:
+            decompressed = json.loads(decompressed, cls=MyJsonDecoder)
+        except TypeError and json.JSONDecodeError:
+            raise RuntimeError("Could interpret the unzipped contents")
+
+        return decompressed
 
 
 class Loader:
@@ -17,18 +96,24 @@ class Loader:
         self,
         directory: pathlib.Path = None,
         limit_files: typing.Union[int, list[str]] = None,
+        load_keys: bool = False,
     ):
         self._recordings = []
         self._keyboard_recordings = []
 
         if directory is not None:
-            self.load_all(directory=directory, limit_files=limit_files)
+            self.load_all(
+                directory=directory, limit_files=limit_files, load_keys=load_keys
+            )
 
     def load_all(
-        self, directory: pathlib.Path, limit_files: typing.Union[int, list[str]] = None
+        self,
+        directory: pathlib.Path,
+        limit_files: typing.Union[int, list[str]] = None,
+        load_keys: bool = False,
     ) -> None:
-        start_benchmark = time.time()
-
+        t = Timer()
+        t.start()
         all_json_files = [
             f for f in directory.iterdir() if self.is_file_and_json(directory / f)
         ]
@@ -46,25 +131,28 @@ class Loader:
 
         for file in all_json_files:
             full_path = directory / file
-            self.load_file(full_path)
+            self.load_file(full_path, load_keys)
 
         absolut_path_count = sum(len(pc) for pc in self._recordings)
 
         for pc in self._recordings:
+            # pc.limit()
             pc.clean()
 
-        elapsed = time.time() - start_benchmark
         log.info(
             f"Loaded {absolut_path_count} paths from {len(self._recordings)} recordings"
         )
         log.info(
             f"Loaded {len(self._keyboard_recordings)} keys from {len(all_json_files)} recordings"
         )
-        log.info(f"This took {round(elapsed * 1000)}ms.")
+        log.info(f"This took {round(t.elapsed() * 1000)}ms.")
 
-    def load_file(self, path: pathlib.Path) -> None:
-        _fn = path.stem.replace("_compressed", "")
-        ts = data.DateHandler.get_timestamp_from_utc(float(_fn))
+    def load_file(self, path: pathlib.Path, load_keys: bool = False) -> None:
+        assert "_" in path.stem
+        # everything before _ will be interpreted as a timestamp
+        idx = path.stem.index("_")
+        _fn = path.stem[:idx]
+        ts = DateHandler.get_timestamp_from_utc(float(_fn))
         log.info(f"Loading {path.stem}.json > {ts}")
 
         new_keys = []
@@ -72,12 +160,13 @@ class Loader:
             json_string = json_file.readline()
             try:
                 jd = eval(json_string)
-                _data = data.JsonCompressor().json_unzip(jd)
+                _data = JsonCompressor().json_unzip(jd)
             except RuntimeError:
-                _data = json.loads(json_string, cls=data.MyJsonDecoder)
+                _data = json.loads(json_string, cls=MyJsonDecoder)
             self._recordings.append(_data["mouse"])
-            for keys in _data["keys"]:
-                new_keys.append(tuple(keys))
+            if load_keys:
+                for keys in _data["keys"]:
+                    new_keys.append(tuple(keys))
 
         self._keyboard_recordings.extend(new_keys)
         log.good(f"Loaded {len(self._recordings[-1])} paths")
@@ -89,19 +178,19 @@ class Loader:
             return True
         return False
 
-    def all_collections(self) -> list[collection.Collection]:
+    def all_collections(self) -> list[Collection]:
         """
         :return: a copy of all recordings
         """
         return list(self._recordings)
 
-    def all_paths(self) -> collection.Collection:
+    def all_paths(self) -> Collection:
         """
         :return: all paths combined into one collection.PathCollection
         """
         return reduce(lambda pcol1, pcol2: pcol1 + pcol2, self._recordings)
 
-    def single(self, index: int) -> path.Path:
+    def single(self, index: int) -> Path:
         max_index = len(self._recordings) - 1
         if index > max_index:
             raise IndexError("Specified index too high. (> " + str(max_index) + ")")

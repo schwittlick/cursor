@@ -1,87 +1,6 @@
-import cursor.path
-import cursor.position
-
 import pathlib
-import json
-import base64
-import zlib
-import pyautogui
 import datetime
 import pytz
-
-
-class MyJsonEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, cursor.collection.Collection):
-            return {
-                "paths": o.get_all(),
-                "timestamp": o.timestamp(),
-            }
-
-        if isinstance(o, cursor.path.Path):
-            return o.vertices
-
-        if isinstance(o, cursor.path.Position):
-            return {"x": round(o.x, 4), "y": round(o.y, 4), "ts": round(o.timestamp, 2)}
-
-
-class MyJsonDecoder(json.JSONDecoder):
-    def __init__(self, *args, **kwargs):
-        json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
-
-    def object_hook(self, dct):
-        if "x" in dct and "y" in dct and "ts" in dct:
-            p = cursor.position.Position(dct["x"], dct["y"], dct["ts"])
-            return p
-        if "w" in dct and "h" in dct:
-            s = pyautogui.Size(dct["w"], dct["h"])
-            return s
-        if "paths" in dct and "timestamp" in dct:
-            ts = dct["timestamp"]
-            pc = cursor.collection.Collection(ts)
-            for p in dct["paths"]:
-                pc.add(cursor.path.Path(p))
-            return pc
-        return dct
-
-
-class JsonCompressor:
-    ZIPJSON_KEY = "base64(zip(o))"
-
-    def json_zip(self, j):
-        dumped = json.dumps(j, cls=MyJsonEncoder)
-        dumped_encoded = dumped.encode("utf-8")
-        compressed = zlib.compress(dumped_encoded)
-        encoded = {self.ZIPJSON_KEY: base64.b64encode(compressed).decode("ascii")}
-
-        return encoded
-
-    def json_unzip(self, j, insist=True):
-        try:
-            assert j[self.ZIPJSON_KEY]
-            assert set(j.keys()) == {self.ZIPJSON_KEY}
-        except AssertionError:
-            if insist:
-                raise RuntimeError(
-                    "JSON not in the expected format {"
-                    + str(self.ZIPJSON_KEY)
-                    + ": zipstring}"
-                )
-            else:
-                return j
-
-        try:
-            decoded = base64.b64decode(j[self.ZIPJSON_KEY])
-            decompressed = zlib.decompress(decoded)
-        except zlib.error:
-            raise RuntimeError("Could not decode/unzip the contents")
-
-        try:
-            decompressed = json.loads(decompressed, cls=MyJsonDecoder)
-        except TypeError and json.JSONDecodeError:
-            raise RuntimeError("Could interpret the unzipped contents")
-
-        return decompressed
 
 
 class DateHandler:
@@ -103,28 +22,28 @@ class DataDirHandler:
         self.data_dir = self.BASE_DIR / "data"
         self.test_data_dir = self.BASE_DIR / "cursor" / "tests" / "data"
 
-    def gcode(self, folder) -> pathlib.Path:
+    def gcode(self, folder: str) -> pathlib.Path:
         return self.data_dir / "experiments" / folder / "gcode"
 
-    def tek(self, folder) -> pathlib.Path:
+    def tek(self, folder: str) -> pathlib.Path:
         return self.data_dir / "experiments" / folder / "tek"
 
-    def digi(self, folder) -> pathlib.Path:
+    def digi(self, folder: str) -> pathlib.Path:
         return self.data_dir / "experiments" / folder / "digi"
 
-    def jpg(self, subfolder) -> pathlib.Path:
+    def jpg(self, subfolder: str) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "jpg"
 
-    def video(self, subfolder) -> pathlib.Path:
+    def video(self, subfolder: str) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "video"
 
-    def svg(self, subfolder) -> pathlib.Path:
+    def svg(self, subfolder: str) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "svg"
 
-    def hpgl(self, subfolder) -> pathlib.Path:
+    def hpgl(self, subfolder: str) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "hpgl"
 
-    def source(self, subfolder) -> pathlib.Path:
+    def source(self, subfolder: str) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "source"
 
     def images(self) -> pathlib.Path:
@@ -174,3 +93,6 @@ class DataDirHandler:
 
     def file(self, fname: str) -> pathlib.Path:
         return self.data_dir / fname
+
+    def pickles(self) -> pathlib.Path:
+        return self.data_dir / "pickles"

@@ -7,8 +7,8 @@
 
 setup
 
-    pyenv install 3.9.0
-    pyenv virtualenv 3.9.0 cursor
+    pyenv install 3.10.7
+    pyenv virtualenv 3.10.7 cursor
     pyenv activate cursor
     pip install -r requirements.txt
     git submodule update --init

@@ -1,8 +1,24 @@
-from cursor import renderer
-from cursor import data
-from cursor import device
-from cursor import collection
-
+from cursor.collection import Collection
+from cursor.data import DataDirHandler
+from cursor.renderer import (
+    HPGLRenderer,
+    JpegRenderer,
+    GCodeRenderer,
+    TektronixRenderer,
+    DigiplotRenderer,
+    SvgRenderer,
+)
+from cursor.device import (
+    PlotterType,
+    PaperSize,
+    Paper,
+    PaperSizeName,
+    PlotterName,
+    MinmaxMapping,
+    XYFactors,
+    ExportFormatMappings,
+    ExportFormat,
+)
 import inspect
 import hashlib
 import wasabi
@@ -19,19 +35,19 @@ class Config:
         self.__cutoff = None
 
     @property
-    def type(self) -> device.PlotterType:
+    def type(self) -> PlotterType:
         return self.__type
 
     @type.setter
-    def type(self, t: device.PlotterType) -> None:
+    def type(self, t: PlotterType) -> None:
         self.__type = t
 
     @property
-    def dimension(self) -> device.PaperSize:
+    def dimension(self) -> PaperSize:
         return self.__dimensions
 
     @dimension.setter
-    def dimension(self, t: device.PaperSize):
+    def dimension(self, t: PaperSize):
         self.__dimensions = t
 
     @property
@@ -52,8 +68,6 @@ class Config:
 
 
 class Exporter:
-    from cursor import path
-
     def __init__(self):
         self.__paths = None
         self.__cfg = None
@@ -64,11 +78,11 @@ class Exporter:
         self.__linetype_mapping = None
 
     @property
-    def paths(self) -> collection.Collection:
+    def paths(self) -> Collection:
         return self.__paths
 
     @paths.setter
-    def paths(self, t: collection.Collection) -> None:
+    def paths(self, t: Collection) -> None:
         self.__paths = t
 
     @property
@@ -126,7 +140,7 @@ class Exporter:
 
         # jpeg fitting roughly
         self.paths.fit(
-            device.Paper.sizes[self.cfg.dimension],
+            Paper.sizes[self.cfg.dimension],
             padding_mm=self.cfg.margin,
             cutoff_mm=self.cfg.cutoff,
         )
@@ -137,26 +151,27 @@ class Exporter:
         if jpg:
             separate_layers = self.paths.get_layers()
             for layer, pc in separate_layers.items():
-                sizename = device.PaperSizeName.names[self.cfg.dimension]
-                machinename = device.PlotterName.names[self.cfg.type]
+                sizename = PaperSizeName.names[self.cfg.dimension]
+                machinename = PlotterName.names[self.cfg.type]
+                h = hashlib.sha256(ms.encode("utf-8")).hexdigest()
+                hash = h[:4] + h[len(h) - 4 :]
                 fname = (
                     f"{self.name}_{self.suffix}_{sizename}_{machinename}_{layer}_"
-                    f"{hashlib.sha256(ms.encode('utf-8')).hexdigest()}"
+                    f"{hash}"
                 )
 
-                jpeg_folder = data.DataDirHandler().jpg(self.name)
-                jpeg_renderer = renderer.JpegRenderer(jpeg_folder)
+                jpeg_folder = DataDirHandler().jpg(self.name)
+                jpeg_renderer = JpegRenderer(jpeg_folder)
                 jpeg_renderer.render(pc, scale=8.0)
                 jpeg_renderer.save(f"{fname}")
 
         if source:
-            source_folder = data.DataDirHandler().source(self.name)
-            sizename = device.PaperSizeName.names[self.cfg.dimension]
-            machinename = device.PlotterName.names[self.cfg.type]
-            fname = (
-                f"{self.name}_{self.suffix}_{sizename}_{machinename}_"
-                f"{hashlib.sha256(ms.encode('utf-8')).hexdigest()}.py"
-            )
+            source_folder = DataDirHandler().source(self.name)
+            sizename = PaperSizeName.names[self.cfg.dimension]
+            machinename = PlotterName.names[self.cfg.type]
+            h = hashlib.sha256(ms.encode("utf-8")).hexdigest()
+            hash = h[:4] + h[len(h) - 4 :]
+            fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}_" f"{hash}.py"
 
             pathlib.Path(source_folder).mkdir(parents=True, exist_ok=True)
             log.good(f"Saved source to {source_folder / fname}")
@@ -164,29 +179,31 @@ class Exporter:
                 file.write(ms)
 
         self.paths.fit(
-            device.Paper.sizes[self.cfg.dimension],
-            xy_factor=device.XYFactors.fac[self.cfg.type],
+            Paper.sizes[self.cfg.dimension],
+            xy_factor=XYFactors.fac[self.cfg.type],
             padding_mm=self.cfg.margin,
-            output_bounds=device.MinmaxMapping.maps[self.cfg.type],
+            output_bounds=MinmaxMapping.maps[self.cfg.type],
             cutoff_mm=self.cfg.cutoff,
         )
 
-        sizename = device.PaperSizeName.names[self.cfg.dimension]
-        machinename = device.PlotterName.names[self.cfg.type]
-        fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}_{hashlib.sha256(ms.encode('utf-8')).hexdigest()}"
-        format = device.ExportFormatMappings.maps[self.cfg.type]
-        if self.linetype_mapping and format is device.ExportFormat.HPGL:
-            hpgl_folder = data.DataDirHandler().hpgl(self.name)
-            hpgl_renderer = renderer.HPGLRenderer(
+        sizename = PaperSizeName.names[self.cfg.dimension]
+        machinename = PlotterName.names[self.cfg.type]
+        h = hashlib.sha256(ms.encode("utf-8")).hexdigest()
+        hash = h[:4] + h[len(h) - 4 :]
+        fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}_{hash}"
+        format = ExportFormatMappings.maps[self.cfg.type]
+        if self.linetype_mapping and format is ExportFormat.HPGL:
+            hpgl_folder = DataDirHandler().hpgl(self.name)
+            hpgl_renderer = HPGLRenderer(
                 hpgl_folder, line_type_mapping=self.linetype_mapping
             )
             hpgl_renderer.render(self.paths)
             hpgl_renderer.save(f"{fname}")
         if self.layer_pen_mapping is not None:
-            if format is device.ExportFormat.HPGL:
-                hpgl_folder = data.DataDirHandler().hpgl(self.name)
+            if format is ExportFormat.HPGL:
+                hpgl_folder = DataDirHandler().hpgl(self.name)
 
-                hpgl_renderer = renderer.HPGLRenderer(
+                hpgl_renderer = HPGLRenderer(
                     hpgl_folder, layer_pen_mapping=self.layer_pen_mapping
                 )
                 hpgl_renderer.render(self.paths)
@@ -194,50 +211,70 @@ class Exporter:
         else:
             separate_layers = self.paths.get_layers()
             for layer, pc in separate_layers.items():
-                if format is device.ExportFormat.HPGL:
-                    hpgl_folder = data.DataDirHandler().hpgl(self.name)
-                    hpgl_renderer = renderer.HPGLRenderer(hpgl_folder)
+                if format is ExportFormat.HPGL:
+                    hpgl_folder = DataDirHandler().hpgl(self.name)
+                    hpgl_renderer = HPGLRenderer(hpgl_folder)
                     hpgl_renderer.render(pc)
                     hpgl_renderer.save(f"{fname}_{layer}")
 
-                if format is device.ExportFormat.SVG:
-                    svg_dir = data.DataDirHandler().svg(self.name)
-                    svg_renderer = renderer.SvgRenderer(svg_dir)
+                if format is ExportFormat.SVG:
+                    svg_dir = DataDirHandler().svg(self.name)
+                    svg_renderer = SvgRenderer(svg_dir)
                     svg_renderer.render(pc)
                     svg_renderer.save(f"{fname}_{layer}")
 
-                if format is device.ExportFormat.GCODE:
-                    gcode_folder = data.DataDirHandler().gcode(self.name)
+                if format is ExportFormat.GCODE:
+                    gcode_folder = DataDirHandler().gcode(self.name)
                     if self.gcode_speed:
-                        gcode_renderer = renderer.GCodeRenderer(
-                            gcode_folder, z_down=4.5
-                        )
+                        gcode_renderer = GCodeRenderer(gcode_folder, z_down=4.5)
                     else:
-                        gcode_renderer = renderer.GCodeRenderer(
+                        gcode_renderer = GCodeRenderer(
                             gcode_folder, feedrate_xy=self.gcode_speed, z_down=4.5
                         )
                     gcode_renderer.render(pc)
                     gcode_renderer.save(f"{layer}_{fname}")
 
-                if format is device.ExportFormat.TEK:
-                    tek_folder = data.DataDirHandler().tek(self.name)
-                    tek_renderer = renderer.TektronixRenderer(tek_folder)
+                if format is ExportFormat.TEK:
+                    tek_folder = DataDirHandler().tek(self.name)
+                    tek_renderer = TektronixRenderer(tek_folder)
                     tek_renderer.render(pc)
                     tek_renderer.save(f"{layer}_{fname}")
 
-                if format is device.ExportFormat.DIGI:
-                    digi_folder = data.DataDirHandler().digi(self.name)
-                    digi_renderer = renderer.DigiplotRenderer(digi_folder)
+                if format is ExportFormat.DIGI:
+                    digi_folder = DataDirHandler().digi(self.name)
+                    digi_renderer = DigiplotRenderer(digi_folder)
                     digi_renderer.render(pc)
                     digi_renderer.save(f"{layer}_{fname}")
+
+
+def save_wrapper(pc, projname, fname):
+    jpeg_folder = DataDirHandler().jpg(projname)
+    jpeg_renderer = JpegRenderer(jpeg_folder)
+
+    jpeg_renderer.render(pc, scale=1.0)
+    jpeg_renderer.save(fname)
+
+    svg_folder = DataDirHandler().svg(projname)
+    svg_renderer = SvgRenderer(svg_folder)
+
+    svg_renderer.render(pc)
+    svg_renderer.save(fname)
+
+
+def save_wrapper_jpeg(pc, projname, fname, scale=4.0, thickness=3):
+    folder = DataDirHandler().jpg(projname)
+    jpeg_renderer = JpegRenderer(folder)
+
+    jpeg_renderer.render(pc, scale=scale, thickness=thickness)
+    jpeg_renderer.save(fname)
 
 
 class ExportWrapper:
     def ex(
         self,
-        paths: collection.Collection,
-        ptype: device.PlotterType,
-        psize: device.PaperSize,
+        paths: Collection,
+        ptype: PlotterType,
+        psize: PaperSize,
         margin: int,
         name: str = "output_name",
         suffix: str = "",

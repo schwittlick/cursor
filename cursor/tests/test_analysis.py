@@ -27,9 +27,9 @@ def test_simple_histogram():
     for p2 in pps:
         # print(p2)
         # changes = p2.direction_changes()
-        shannxs.append(p2.shannon_x)
-        shannys.append(p2.shannon_y)
-        shannchan.append(p2.shannon_direction_changes)
+        shannxs.append(p2.entropy_x)
+        shannys.append(p2.entropy_y)
+        shannchan.append(p2.entropy_direction_changes)
         # print(changes)
         # hist, bins = h.get(changes)
         # print("1")

@@ -1,10 +1,14 @@
-import cursor.filter as cursor_filter
-import cursor.bb
-import cursor.misc
+from __future__ import annotations
+
 from cursor.position import Position
 from cursor.path import Path
+from cursor.bb import BoundingBox
+from cursor.filter import Filter
+from cursor.filter import Sorter
+from cursor.data import DataDirHandler
 
 import numpy as np
+import pandas as pd
 import datetime
 import pytz
 import random
@@ -14,6 +18,7 @@ import copy
 import typing
 import operator
 import time
+import pickle
 
 
 log = wasabi.Printer()
@@ -32,106 +37,10 @@ class Collection:
             utc_timestamp = datetime.datetime.timestamp(now)
             self._timestamp = utc_timestamp
 
-    def add(self, path: typing.Union["cursor.bb.BoundingBox", Path]) -> None:
-        if isinstance(path, Path):
-            if path.empty():
-                return
-            self.__paths.append(path)
-        if isinstance(path, cursor.bb.BoundingBox):
-            p = Path()
-            p.add(path.x, path.y)
-            p.add(path.x, path.y2)
-            p.add(path.x2, path.y2)
-            p.add(path.x2, path.y)
-            p.add(path.x, path.y)
-            self.__paths.append(p)
-
-    def extend(self, pc: "Collection") -> None:
-        new_paths = self.__paths + pc.get_all()
-        self.__paths = new_paths
-
-    def clean(self) -> None:
-        """
-        removes all paths with only one point
-        """
-        for p in self.__paths:
-            p.clean()
-
-        len_before = len(self)
-        self.__paths = [path for path in self.__paths if len(path) > 2]
-
-        log.good(
-            f"PathCollection::clean: reduced path count from {len_before} to {len(self)}"
-        )
-
-    def reverse(self) -> None:
-        self.__paths.reverse()
-
-    def reversed(self) -> "Collection":
-        c = copy.deepcopy(self.__paths)
-        c.reverse()
-        pc = Collection()
-        for p in c:
-            pc.add(p)
-
-        return pc
-
-    def limit(self) -> None:
-        for p in self.__paths:
-            p.limit()
-
-    def hash(self) -> str:
-        return hashlib.md5(str(self.__paths).encode("utf-8")).hexdigest()
-
-    def empty(self) -> bool:
-        if len(self.__paths) == 0:
-            return True
-        return False
-
-    def copy(self) -> "Collection":
-        p = Collection()
-        p.__paths.extend(copy.deepcopy(self.__paths))
-        return p
-
-    def get_all(self) -> typing.List[Path]:
-        return self.__paths
-
-    def random(self) -> Path:
-        return self.__getitem__(random.randint(0, self.__len__() - 1))
-
-    def sort(self, pathsorter: "cursor_filter.Sorter", reference_path=None) -> None:
-        if isinstance(pathsorter, cursor_filter.Sorter):
-            pathsorter.sort(self.__paths, reference_path)
-        else:
-            raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
-
-    def sorted(
-        self, pathsorter: "cursor_filter.Sorter", reference_path=None
-    ) -> typing.List[Path]:
-        if isinstance(pathsorter, cursor_filter.Sorter):
-            return pathsorter.sorted(self.__paths, reference_path)
-        else:
-            raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
-
-    def filter(self, pathfilter: "cursor_filter.Filter") -> None:
-        if isinstance(pathfilter, cursor_filter.Filter):
-            pathfilter.filter(self.__paths)
-        else:
-            raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
-
-    def filtered(self, pathfilter: "cursor_filter.Filter") -> "Collection":
-        if isinstance(pathfilter, cursor_filter.Filter):
-
-            pc = Collection()
-            pc.__paths = pathfilter.filtered(self.__paths)
-            return pc
-        else:
-            raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
-
     def __len__(self) -> int:
         return len(self.__paths)
 
-    def __add__(self, other: typing.Union[list, "Collection"]) -> "Collection":
+    def __add__(self, other: typing.Union[list, Collection]) -> Collection:
         if isinstance(other, Collection):
             new_paths = self.__paths + other.get_all()
             p = Collection()
@@ -144,7 +53,7 @@ class Collection:
             return p
         else:
             raise Exception(
-                "You can only add another PathCollection or a list of paths"
+                "You can only add another Collection or a list of paths"
             )
 
     def __repr__(self) -> str:
@@ -170,7 +79,7 @@ class Collection:
 
     def __getitem__(
         self, item: typing.Union[int, slice]
-    ) -> typing.Union["Collection", Path]:
+    ) -> typing.Union[Collection, Path]:
         if isinstance(item, slice):
             start, stop, step = item.indices(len(self))
             _pc = Collection()
@@ -182,8 +91,135 @@ class Collection:
 
         return self.__paths[item]
 
+    def save_pickle(self, fname: str) -> None:
+        fn = DataDirHandler().pickles() / fname
+        file_to_store = open(fn.as_posix(), "wb")
+        pickle.dump(self, file_to_store)
+        log.info(f"Saved {fn.as_posix()}")
+
+    @staticmethod
+    def from_pickle(fname: str) -> Collection:
+        fn = DataDirHandler().pickles() / fname
+        with open(fn, "rb") as file:
+            return pickle.load(file)
+
+    def add(self, path: typing.Union[BoundingBox, Path, typing.List[Path]]) -> None:
+        if isinstance(path, Path):
+            if path.empty():
+                return
+            self.__paths.append(path)
+        if isinstance(path, list):
+            self.__paths.extend(path)
+        if isinstance(path, BoundingBox):
+            p = Path().from_tuple_list(
+                [
+                    (path.x, path.y),
+                    (path.x, path.y2),
+                    (path.x2, path.y2),
+                    (path.x2, path.y),
+                    (path.x, path.y),
+                ]
+            )
+            self.__paths.append(p)
+
+    def as_array(self) -> np.array:
+        return np.array([p.as_array() for p in self.__paths], dtype=object)
+
+    def as_dataframe(self):
+        df = pd.concat([p.as_dataframe() for p in self.__paths], axis=1)
+        return df
+
+    def point_count(self) -> int:
+        return sum([len(p) for p in self])
+
+    def extend(self, pc: Collection) -> None:
+        new_paths = self.__paths + pc.get_all()
+        self.__paths = new_paths
+
+    def clean(self) -> None:
+        """
+        removes all paths with only one point
+        """
+        [p.clean() for p in self.__paths]
+
+        len_before = len(self)
+        self.__paths = [path for path in self.__paths if len(path) > 2]
+
+        log.good(
+            f"PathCollection::clean: reduced path count from {len_before} to {len(self)}"
+        )
+
+    def reverse(self) -> None:
+        self.__paths.reverse()
+
+    def reversed(self) -> Collection:
+        c = copy.deepcopy(self.__paths)
+        c.reverse()
+        pc = Collection()
+        [pc.add(p) for p in c]
+
+        return pc
+
+    def limit(self) -> None:
+        [p.limit() for p in self.__paths]
+
+    def hash(self) -> str:
+        return hashlib.md5(str(self.__paths).encode("utf-8")).hexdigest()
+
+    def empty(self) -> bool:
+        if len(self.__paths) == 0:
+            return True
+        return False
+
+    def copy(self) -> Collection:
+        p = Collection()
+        p.__paths.extend(copy.deepcopy(self.__paths))
+        return p
+
+    def get_all(self) -> typing.List[Path]:
+        return self.__paths
+
+    def random(self) -> Path:
+        return self.__getitem__(random.randint(0, self.__len__() - 1))
+
+    def sort(self, pathsorter: Sorter, reference_path: Path = None) -> None:
+        if isinstance(pathsorter, Sorter):
+            pathsorter.sort(self.__paths, reference_path)
+        else:
+            raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
+
+    def sorted(
+        self, pathsorter: Sorter, reference_path: Path = None
+    ) -> typing.List[Path]:
+        if isinstance(pathsorter, Sorter):
+            return pathsorter.sorted(self.__paths, reference_path)
+        else:
+            raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
+
+    def filter(self, pathfilter: Filter) -> None:
+        if isinstance(pathfilter, Filter):
+            pathfilter.filter(self.__paths)
+        else:
+            raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
+
+    def filtered(self, pathfilter: Filter) -> Collection:
+        if isinstance(pathfilter, Filter):
+
+            pc = Collection()
+            pc.__paths = pathfilter.filtered(self.__paths)
+            return pc
+        else:
+            raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
+
     def timestamp(self) -> float:
         return self._timestamp
+
+    def inside(self, bb: BoundingBox) -> bool:
+        for path in self:
+            for p in path:
+                if not p.inside(bb):
+                    return False
+        return True
 
     def get_all_line_types(self) -> typing.List[int]:
         types = []
@@ -233,10 +269,10 @@ class Collection:
 
         return layered_pcs
 
-    def bb(self) -> "cursor.bb.BoundingBox":
+    def bb(self) -> BoundingBox:
         mi = self.min()
         ma = self.max()
-        bb = cursor.bb.BoundingBox(mi[0], mi[1], ma[0], ma[1])
+        bb = BoundingBox(mi[0], mi[1], ma[0], ma[1])
         if bb.x is np.nan or bb.y is np.nan or bb.x2 is np.nan or bb.y2 is np.nan:
             log.fail("SHIT")
         return bb
@@ -260,20 +296,24 @@ class Collection:
         return maxx, maxy
 
     def translate(self, x: float, y: float) -> None:
-        for p in self.__paths:
-            p.translate(x, y)
+        [p.translate(x, y) for p in self]
 
     def scale(self, x: float, y: float) -> None:
-        for p in self.__paths:
-            p.scale(x, y)
+        [p.scale(x, y) for p in self]
 
     def rot(self, delta: float) -> None:
-        for p in self.__paths:
-            p.rot(delta)
+        [p.rot(delta) for p in self]
 
     def downsample(self, dist: float) -> None:
-        for p in self.__paths:
-            p.downsample(dist)
+        [p.downsample(dist) for p in self]
+
+    def simplify(self, e: float) -> None:
+        count = self.point_count()
+
+        for p in self:
+            p.simplify(e)
+
+        log.info(f"C::simplify from {count} to {self.point_count()} points.")
 
     def log(self, str) -> None:
         log.good(f"{self.__class__.__name__}: {str}")
@@ -295,7 +335,7 @@ class Collection:
         else:
             self.translate(0.0, -abs(_bb.y))
 
-    def clip(self, bb: "cursor.bb.BoundingBox") -> None:
+    def clip(self, bb: BoundingBox) -> None:
         pp = []
         for p in self.__paths:
             clipped = p.clip(bb)
@@ -312,7 +352,7 @@ class Collection:
         padding_mm: int = None,
         padding_units: int = None,
         padding_percent: int = None,
-        output_bounds: "cursor.bb.BoundingBox" = None,
+        output_bounds: BoundingBox = None,
         cutoff_mm=None,
         keep_aspect=False,
     ) -> None:
@@ -378,11 +418,11 @@ class Collection:
         output_bounds_center = Position(width / 2.0, height / 2.0)
 
         if output_bounds:
-            output_bounds_center = output_bounds.center()
+            output_bounds_center = Position.from_tuple(output_bounds.center())
 
         diff = (
-            output_bounds_center.x - paths_center.x,
-            output_bounds_center.y - paths_center.y,
+            output_bounds_center.x - paths_center[0],
+            output_bounds_center.y - paths_center[1],
         )
 
         log.info(
@@ -406,46 +446,13 @@ class Collection:
             cutoff_bb.y -= cuttoff_margin_diff_y
             cutoff_bb.y2 += cuttoff_margin_diff_y
 
-            self.__paths = [x for x in self.__paths if cutoff_bb.inside(x)]
-
-    def reorder_tsp(self) -> None:
-        """
-        use this with caution, it works for 20 paths, but will run
-        out of memory for hundreds of points.. this implementation is
-        kind of useless here, but i'll leave it here for the moment..
-        you never know.
-        """
-        import mlrose_hiive as mlrose
-        import numpy as np
-
-        dist_list = []
-
-        for i in range(len(self)):
-            for j in range(len(self)):
-                if j is not i:
-                    a = self[i].bb().center()
-                    a = np.array(a, dtype=float)
-                    b = self[j].bb().center()
-                    b = np.array(b, dtype=float)
-                    dist = np.linalg.norm(a - b)
-                    if dist == 0.0:
-                        dist = 0.01
-                    dist_list.append((i, j, dist))
-
-        fitness_dists = mlrose.TravellingSales(distances=dist_list)
-        problem_fit = mlrose.TSPOpt(
-            length=len(self), fitness_fn=fitness_dists, maximize=False
-        )
-        best_state, best_fitness, fitness_curve = mlrose.genetic_alg(
-            problem_fit, random_state=2
-        )
-        self.__paths[:] = [self.__paths[i] for i in best_state]
+            self.__paths = [x for x in self.__paths if x.inside(cutoff_bb)]
 
     def reorder_quadrants(self, xq: int, yq: int) -> None:
         if xq < 2 and yq < 2:
             return
 
-        def calc_bb(x: int, y: int) -> cursor.bb.BoundingBox:
+        def calc_bb(x: int, y: int) -> BoundingBox:
             big_bb = self.bb()
 
             new_width = big_bb.w / xq
@@ -454,7 +461,7 @@ class Collection:
             _x = x * new_width
             _y = y * new_height
 
-            new_bb = cursor.bb.BoundingBox(_x, _y, _x + new_width, _y + new_height)
+            new_bb = BoundingBox(_x, _y, _x + new_width, _y + new_height)
 
             return new_bb
 
@@ -472,10 +479,10 @@ class Collection:
                     bbs[bbcounter] = bb
                     bbcounter += 1
 
-        def _count_inside(_bb: cursor.bb.BoundingBox, _pa: Path) -> int:
+        def _count_inside(_bb: BoundingBox, _pa: Path) -> int:
             c = 0
             for _p in _pa:
-                if _bb.inside(_p):
+                if _p.inside(_bb):
                     c += 1
             return c
 

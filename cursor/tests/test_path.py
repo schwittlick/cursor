@@ -2,7 +2,9 @@ from cursor.path import Path
 from cursor.position import Position
 from cursor.bb import BoundingBox
 
+import random
 import pytest
+import math
 
 
 def test_path_empty_start():
@@ -206,13 +208,106 @@ def test_entropy():
     p2.add(200, 10, 10001)
     p2.add(200, 10, 10001)
 
-    sx1 = p1.shannon_x
-    sx2 = p2.shannon_x
+    sx1 = p1.entropy_x
+    sx2 = p2.entropy_x
     assert sx1 > sx2
 
-    sy1 = p1.shannon_y
-    sy2 = p2.shannon_y
+    sy1 = p1.entropy_y
+    sy2 = p2.entropy_y
     assert sy1 > sy2
+
+
+def test_entropy_by_position1():
+    p1 = Path()
+    p1.add(10, 10)
+    p1.add(10, 10)
+    p1.add(10, 10)
+    p1.add(10, 10)
+
+    sx1 = p1.entropy_x
+    sy1 = p1.entropy_y
+
+    assert sx1 == 0.0
+    assert sy1 == 0.0
+
+
+def test_entropy_by_position2():
+    p1 = Path()
+    p1.add(10, 10)
+    p1.add(11, 10)
+    p1.add(12, 10)
+    p1.add(13, 10)
+
+    sx1 = p1.entropy_x
+    sy1 = p1.entropy_y
+
+    assert sx1 == 1.3862943611198906
+    assert sy1 == 0.0
+
+
+def test_variation():
+    p1 = Path()
+    p1.add(10, 10)
+    p1.add(11, 10)
+    p1.add(12, 10)
+    p1.add(13, 10)
+
+    sx = p1.variation_x
+    sy = p1.variation_y
+
+    assert math.isclose(sx, 0.11226038684659179)
+    assert math.isclose(sy, 0.0)
+
+
+def test_differential_entropy():
+    random.seed(0)
+
+    p1 = Path.from_tuple_list([(random.random(), random.random()) for _ in range(20)])
+
+    sx1 = p1.differential_entropy_x
+    sy1 = p1.differential_entropy_y
+
+    assert math.isclose(sx1, -0.63857967954)
+    assert math.isclose(sy1, -0.02733247453)
+
+
+def test_simplify_random():
+    random.seed(0)
+
+    p1 = Path.from_tuple_list([(random.random(), random.random()) for _ in range(20)])
+
+    p1.simplify(0.01)
+
+    assert len(p1) == 18
+
+
+def test_entropy_by_position3():
+    # lower entropy value
+    # because repeated
+    p1 = Path()
+    p1.add(10, 10)
+    p1.add(11, 10)
+    p1.add(10, 10)
+    p1.add(11, 10)
+
+    sx1 = p1.entropy_x
+    sy1 = p1.entropy_y
+
+    assert sx1 == 0.6931471805599453
+    assert sy1 == 0.0
+
+
+def test_entropy_by_position4():
+    p1 = Path()
+
+    for i in range(20000):
+        p1.add(random.randint(-10000, 10000), random.randint(-10000, 10000))
+
+    sx1 = p1.entropy_x
+    sy1 = p1.entropy_y
+
+    assert sx1 > 9.3
+    assert sy1 > 9.3
 
 
 def test_path_clean():
@@ -373,17 +468,28 @@ def test_path_intersection3():
 
 def test_angles():
     p = Path()
-    p.add(0.0, 0.0)
     p.add(0.0, 1.0)
     p.add(1.0, 1.0)
     p.add(1.0, 0.0)
     p.add(0.5, 0.0)
 
-    changes = p.direction_changes()
-    assert changes[0] == 0.0
-    assert round(changes[1], 2) == 45.0  # wat
-    assert round(changes[2], 2) == 45.0
-    assert changes[3] == 0.0
+    changes = p.direction_changes(mapped=True)
+    assert changes[0] == 45.0
+    assert changes[1] == 45.0
+    assert changes[2] == 0.0
+
+
+def test_angles_posneg():
+    p = Path()
+    p.add(0.0, 1.0)
+    p.add(1.0, 1.0)
+    p.add(1.0, 0.0)
+    p.add(1.0, 1.0)
+
+    changes = p.direction_changes(mapped=False)
+    assert changes[0] == 45.0
+    assert changes[1] == 45.0
+    assert changes[2] == -45.0
 
 
 def disabled_test_similarity():
@@ -427,6 +533,7 @@ def test_offset():
     offset = p1.offset(0.2)
 
     assert offset[0].y == -0.2
+    # can't compare the rest
 
 
 def test_downsample():
@@ -443,6 +550,24 @@ def test_downsample():
     p1.downsample(1.1)
 
     assert len(p1) == 4
+
+
+def test_rdp():
+    p1 = Path()
+    p1.add(0, 0)
+    p1.add(1, 0)
+    p1.add(2, 0)
+    p1.add(3, 0)
+    p1.add(4, 0)
+    p1.add(6, 0)
+    p1.add(7, 0)
+    p1.add(7.2, 0)
+
+    p1.simplify(0.1)
+
+    assert len(p1) == 2
+    assert p1[0] == Position(0, 0)
+    assert p1[1] == Position(7.2, 0)
 
 
 def test_intersect():
@@ -498,7 +623,7 @@ def test_arr():
     p.add(1, 2)
     p.add(3, 4)
 
-    arr = p.arr()
+    arr = p.as_array()
     assert arr.shape[0] == 3
     assert arr.shape[1] == 2
 
@@ -512,3 +637,49 @@ def test_centroid():
 
     assert centroidx == 0.0
     assert centroidy == 0.0
+
+
+def test_bb_mostly_inside():
+    bb = BoundingBox(0, 0, 300, 300)
+    pa = Path()
+    pa.add(0, 0)
+    pa.add(0, 1)
+    pa.add(0, 3)
+    pa.add(-1, 3)
+    pa.add(-1, 5)
+
+    assert pa.mostly_inside(bb)
+
+    pa.add(-1, 10)
+
+    assert not pa.mostly_inside(bb)
+
+
+def test_is_closed():
+    pa = Path()
+    pa.add(0, 0)
+    pa.add(0, 1)
+    pa.add(0, 0)
+
+    assert pa.is_closed()
+
+    pa.add(-1, 10)
+
+    assert not pa.is_closed()
+
+
+def test_as_tuple_list():
+    pa = Path()
+    pa.add(0, 0)
+    pa.add(1, 2)
+    pa.add(3, 4)
+
+    assert pa.as_tuple_list() == [(0, 0), (1, 2), (3, 4)]
+
+
+def test_from_tuple_list():
+    tuple_list = [(0, 0), (1, 2), (3, 4)]
+    pa = Path.from_tuple_list(tuple_list)
+    assert pa[0] == Position(0, 0)
+    assert pa[1] == Position(1, 2)
+    assert pa[2] == Position(3, 4)

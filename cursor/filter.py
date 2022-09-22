@@ -1,27 +1,39 @@
-import cursor.path as path
+from cursor.path import Path
+from cursor.misc import Timer
+from cursor.algorithm import frechet
 
 import sys
 import wasabi
-import time
 import copy
 import typing
+from enum import Enum, auto
 from operator import itemgetter
 
 log = wasabi.Printer()
 
 
-class Sorter:
-    SHANNON_X = 1
-    SHANNON_Y = 2
-    SHANNON_DIRECTION_CHANGES = 3
-    DISTANCE = 4
-    HASH = 5
-    LAYER = 6
-    PEN_SELECT = 7
-    POINT_COUNT = 8
-    FRECHET_DISTANCE = 9
+# noinspection PyArgumentList
+class SortParameter(Enum):
+    # https://de.wikipedia.org/wiki/Auff%C3%A4lligkeit_(Informationstheorie)
+    ENTROPY_X = auto()
+    ENTROPY_Y = auto()
+    ENTROPY_CROSS = auto()
+    ENTROPY_DIRECTION_CHANGES = auto()
+    DISTANCE = auto()
+    HASH = auto()
+    LAYER = auto()
+    PEN_SELECT = auto()
+    POINT_COUNT = auto()
+    FRECHET_DISTANCE = auto()
+    DIFFERENTIAL_ENTROPY_X = auto()
+    DIFFERENTIAL_ENTROPY_Y = auto()
+    DIFFERENTIAL_ENTROPY_CROSS = auto()
+    VARIATION_X = auto()
+    VARIATION_Y = auto()
 
-    def __init__(self, reverse=False, param=SHANNON_X):
+
+class Sorter:
+    def __init__(self, reverse=False, param=SortParameter.ENTROPY_X):
         self.__reverse = reverse
         self.__param = param
 
@@ -33,107 +45,140 @@ class Sorter:
     def param(self, v):
         self.__param = v
 
-    def sort(self, paths: typing.List, reference_path: "path.Path" = None):
-        t0 = time.time()
-        if self.__param is self.SHANNON_X:
-            paths.sort(key=lambda x: x.shannon_x, reverse=self.__reverse)
-        elif self.__param is self.SHANNON_Y:
-            paths.sort(key=lambda x: x.shannon_y, reverse=self.__reverse)
-        elif self.__param is self.SHANNON_DIRECTION_CHANGES:
+    def sort(
+        self,
+        paths: typing.List[Path],
+        reference_path: Path = None,
+    ):
+        t = Timer()
+        t.start()
+        if self.__param is SortParameter.ENTROPY_X:
+            paths.sort(key=lambda x: x.entropy_x, reverse=self.__reverse)
+        elif self.__param is SortParameter.ENTROPY_Y:
+            paths.sort(key=lambda x: x.entropy_y, reverse=self.__reverse)
+        elif self.__param is SortParameter.ENTROPY_CROSS:
+            paths.sort(key=lambda x: x.entropy_y * x.entropy_x, reverse=self.__reverse)
+        elif self.__param is SortParameter.DIFFERENTIAL_ENTROPY_X:
+            paths.sort(key=lambda x: x.differential_entropy_x, reverse=self.__reverse)
+        elif self.__param is SortParameter.DIFFERENTIAL_ENTROPY_Y:
+            paths.sort(key=lambda x: x.differential_entropy_y, reverse=self.__reverse)
+        elif self.__param is SortParameter.DIFFERENTIAL_ENTROPY_CROSS:
             paths.sort(
-                key=lambda x: x.shannon_direction_changes, reverse=self.__reverse
+                key=lambda x: x.differential_entropy_x * x.differential_entropy_y,
+                reverse=self.__reverse,
             )
-        elif self.__param is self.DISTANCE:
+        elif self.__param is SortParameter.ENTROPY_DIRECTION_CHANGES:
+            paths.sort(
+                key=lambda x: x.entropy_direction_changes, reverse=self.__reverse
+            )
+        elif self.__param is SortParameter.DISTANCE:
             paths.sort(key=lambda x: x.distance, reverse=self.__reverse)
-        elif self.__param is self.HASH:
+        elif self.__param is SortParameter.HASH:
             paths.sort(key=lambda x: x.hash, reverse=self.__reverse)
-        elif self.__param is self.LAYER:
+        elif self.__param is SortParameter.LAYER:
             paths.sort(key=lambda x: x.layer, reverse=self.__reverse)
-        elif self.__param is self.PEN_SELECT:
+        elif self.__param is SortParameter.PEN_SELECT:
             paths.sort(key=lambda x: x.pen_select, reverse=self.__reverse)
-        elif self.__param is self.POINT_COUNT:
+        elif self.__param is SortParameter.POINT_COUNT:
             paths.sort(key=lambda x: len(x), reverse=self.__reverse)
-        elif self.__param is self.FRECHET_DISTANCE and reference_path is not None:
-            distances = []
-            idx = 0
-            for pa in paths:
-                distances.append(
-                    (idx, pa.frechet_similarity(reference_path), pa.copy())
-                )
-                idx += 1
-
-            print(1)
-            sorted_idxes = sorted(distances, key=itemgetter(1), reverse=self.__reverse)
-            print(2)
-            newlist = []
-            for element in sorted_idxes:
-                idx = element[0]
-                newlist.append(element[2])
-                # newlist[idx] = element[2].copy()
-
-            paths = newlist
-            # paths.sort(
-            #    key=lambda n: n.frechet_similarity(reference_path),
-            #    reverse=self.__reverse,
-            # )
+        elif (
+            self.__param is SortParameter.FRECHET_DISTANCE
+            and reference_path is not None
+        ):
+            raise Exception("Can't sort by Frechet Distance in-place. (yet)")
+        elif self.__param is SortParameter.VARIATION_X:
+            paths.sort(key=lambda x: x.variation_x, reverse=self.__reverse)
+        elif self.__param is SortParameter.VARIATION_Y:
+            paths.sort(key=lambda x: x.variation_y, reverse=self.__reverse)
         else:
             raise Exception(
                 f"Unknown parameter {self.__param} for {__class__.__name__}"
             )
-        elapsed = time.time() - t0
-        log.good(f"Sorted via {__class__.__name__} took {round(elapsed * 1000)}ms.")
+        t.print_elapsed(f"Sorted via {__class__.__name__} took ")
 
-    def sorted(self, paths: typing.List, reference_path=None):
-        t0 = time.time()
-        if self.__param is self.SHANNON_X:
+    def sorted(
+        self,
+        paths: typing.List[Path],
+        reference_path: Path = None,
+    ):
+        t = Timer()
+        t.start()
+        if self.__param is SortParameter.ENTROPY_X:
             sorted_list = sorted(
-                paths, key=lambda x: x.shannon_x, reverse=self.__reverse
+                paths, key=lambda x: x.entropy_x, reverse=self.__reverse
             )
-        elif self.__param is self.SHANNON_Y:
+        elif self.__param is SortParameter.ENTROPY_Y:
             sorted_list = sorted(
-                paths, key=lambda x: x.shannon_y, reverse=self.__reverse
+                paths, key=lambda x: x.entropy_y, reverse=self.__reverse
             )
-        elif self.__param is self.SHANNON_DIRECTION_CHANGES:
+        elif self.__param is SortParameter.ENTROPY_CROSS:
+            sorted_list = sorted(
+                paths, key=lambda x: x.entropy_y * x.entropy_x, reverse=self.__reverse
+            )
+        elif self.__param is SortParameter.DIFFERENTIAL_ENTROPY_X:
+            sorted_list = sorted(
+                paths, key=lambda x: x.differential_entropy_x, reverse=self.__reverse
+            )
+        elif self.__param is SortParameter.DIFFERENTIAL_ENTROPY_Y:
+            sorted_list = sorted(
+                paths, key=lambda x: x.differential_entropy_y, reverse=self.__reverse
+            )
+        elif self.__param is SortParameter.DIFFERENTIAL_ENTROPY_CROSS:
             sorted_list = sorted(
                 paths,
-                key=lambda x: x.shannon_direction_changes,
+                key=lambda x: x.differential_entropy_x * x.differential_entropy_y,
                 reverse=self.__reverse,
             )
-        elif self.__param is self.DISTANCE:
+        elif self.__param is SortParameter.ENTROPY_DIRECTION_CHANGES:
+            sorted_list = sorted(
+                paths,
+                key=lambda x: x.entropy_direction_changes,
+                reverse=self.__reverse,
+            )
+        elif self.__param is SortParameter.DISTANCE:
             sorted_list = sorted(
                 paths, key=lambda x: x.distance, reverse=self.__reverse
             )
-        elif self.__param is self.HASH:
+        elif self.__param is SortParameter.HASH:
             sorted_list = sorted(paths, key=lambda x: x.hash, reverse=self.__reverse)
-        elif self.__param is self.LAYER:
+        elif self.__param is SortParameter.LAYER:
             sorted_list = sorted(paths, key=lambda x: x.layer, reverse=self.__reverse)
-        elif self.__param is self.PEN_SELECT:
+        elif self.__param is SortParameter.PEN_SELECT:
             sorted_list = sorted(
                 paths, key=lambda x: x.pen_select, reverse=self.__reverse
             )
-        elif self.__param is self.POINT_COUNT:
+        elif self.__param is SortParameter.POINT_COUNT:
             sorted_list = sorted(paths, key=lambda x: len(x), reverse=self.__reverse)
-        elif self.__param is self.FRECHET_DISTANCE and reference_path is not None:
-            distances = []
-            idx = 0
-            for pa in paths:
-                distances.append(
-                    (idx, pa.frechet_similarity(reference_path), pa.copy())
-                )
-                idx += 1
+        elif (
+            self.__param is SortParameter.FRECHET_DISTANCE
+            and reference_path is not None
+        ):
+            use_multiprocessing = False
+            # don't use multiprocessing
+            # transferring memory to processes takes too long
+            # at least on windows duh
+            # test this on unix with start_method='fork' method
+            if use_multiprocessing:
+                distances = frechet.frechet_multiprocessing(paths, reference_path)
+            else:
+                distances = [
+                    (index, item.frechet_similarity(reference_path), item)
+                    for index, item in enumerate(paths)
+                ]
 
-            print(1)
             sorted_idxes = sorted(distances, key=itemgetter(1), reverse=self.__reverse)
-            print(2)
-            sorted_list = []
-            for element in sorted_idxes:
-                idx = element[0]
-                sorted_list.append(element[2])
-                # newlist[idx] = element[2].copy()
+            sorted_list = [el[2] for el in sorted_idxes]
+        elif self.__param is SortParameter.VARIATION_X:
+            sorted_list = sorted(
+                paths, key=lambda x: x.variation_x, reverse=self.__reverse
+            )
+        elif self.__param is SortParameter.VARIATION_Y:
+            sorted_list = sorted(
+                paths, key=lambda x: x.variation_y, reverse=self.__reverse
+            )
         else:
             raise Exception(f"Wrong param {self.__param} for {__class__.__name__}")
-        elapsed = time.time() - t0
-        log.good(f"Sorted via {__class__.__name__} took {round(elapsed * 1000)}ms.")
+        log.good(f"Sorted via {__class__.__name__} took {round(t.elapsed() * 1000)}ms.")
         return sorted_list
 
 
@@ -151,15 +196,17 @@ class EntropyMinFilter(Filter):
         self.min_y = min_y_entropy
 
     def filter(self, paths):
-        t0 = time.time()
+        t = Timer()
+        t.start()
         len_before = len(paths)
         paths[:] = [
-            p for p in paths if p.shannon_x > self.min_x and p.shannon_y > self.min_y
+            p for p in paths if p.entropy_x > self.min_x and p.entropy_y > self.min_y
         ]
         len_after = len(paths)
 
-        elapsed = time.time() - t0
-        log.good(f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
+        log.good(
+            f"Filtering via {__class__.__name__} took {round(t.elapsed() * 1000)}ms."
+        )
         log.good(
             f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
         )
@@ -176,15 +223,16 @@ class EntropyMaxFilter(Filter):
         self.max_y = max_y_entropy
 
     def filter(self, paths):
-        t0 = time.time()
+        t = Timer()
+        t.start()
         len_before = len(paths)
 
         paths[:] = [
-            p for p in paths if p.shannon_x < self.max_x and p.shannon_y < self.max_y
+            p for p in paths if p.entropy_x < self.max_x and p.entropy_y < self.max_y
         ]
 
         len_after = len(paths)
-        elapsed = time.time() - t0
+        elapsed = t.elapsed()
         log.good(f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
         log.good(
             f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
@@ -202,16 +250,18 @@ class DirectionChangeEntropyFilter(Filter):
         self.max = max_entropy
 
     def filter(self, paths):
-        t0 = time.time()
+        t = Timer()
+        t.start()
         len_before = len(paths)
 
         paths[:] = [
-            p for p in paths if self.max > p.shannon_direction_changes > self.min
+            p for p in paths if self.max > p.entropy_direction_changes > self.min
         ]
 
         len_after = len(paths)
-        elapsed = time.time() - t0
-        log.good(f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
+        log.good(
+            f"Filtering via {__class__.__name__} took {round(t.elapsed() * 1000)}ms."
+        )
         log.good(
             f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
         )
@@ -227,7 +277,7 @@ class BoundingBoxFilter(Filter):
         self.bb = bb
 
     def filter(self, paths):
-        paths[:] = [p for p in paths if self.bb.inside(p)]
+        paths[:] = [p for p in paths if p.inside(self.bb)]
 
 
 class MinPointCountFilter(Filter):
@@ -235,14 +285,16 @@ class MinPointCountFilter(Filter):
         self.point_count = point_count
 
     def filter(self, paths):
-        t0 = time.time()
+        t = Timer()
+        t.start()
         len_before = len(paths)
 
         paths[:] = [p for p in paths if len(p) >= self.point_count]
 
         len_after = len(paths)
-        elapsed = time.time() - t0
-        log.good(f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
+        log.good(
+            f"Filtering via {__class__.__name__} took {round(t.elapsed() * 1000)}ms."
+        )
         log.good(
             f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
         )
@@ -258,14 +310,16 @@ class MaxPointCountFilter(Filter):
         self.point_count = point_count
 
     def filter(self, paths):
-        t0 = time.time()
+        t = Timer()
+        t.start()
         len_before = len(paths)
 
         paths[:] = [p for p in paths if len(p) <= self.point_count]
 
         len_after = len(paths)
-        elapsed = time.time() - t0
-        log.good(f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
+        log.good(
+            f"Filtering via {__class__.__name__} took {round(t.elapsed() * 1000)}ms."
+        )
         log.good(
             f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
         )
@@ -302,6 +356,8 @@ class DistanceBetweenPointsFilter(Filter):
         self.max_distance = max_distance
 
     def filter(self, paths):
+        t = Timer()
+        t.start()
         len_before = len(paths)
 
         for pa in paths:
@@ -319,6 +375,8 @@ class DistanceBetweenPointsFilter(Filter):
         log.good(
             f"DistanceBetweenPointsFilter: reduced path count from {len_before} to {len_after}"
         )
+
+        log.good(f"This took {t.elapsed()}s")
 
 
 class MinTravelDistanceFilter(Filter):

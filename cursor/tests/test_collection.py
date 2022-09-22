@@ -1,6 +1,7 @@
 from cursor.path import Path
 from cursor.collection import Collection
 from cursor.bb import BoundingBox
+from cursor.misc import Timer
 
 import pytest
 import random
@@ -58,13 +59,110 @@ def test_bb_inside():
 
     bb = BoundingBox(0, 0, 300, 300)
 
-    assert bb.inside(p1) is True
-    assert bb.inside(pc) is True
+    assert p1.inside(bb) is True
+    assert pc.inside(bb) is True
 
     p1.add(500, 500, 10023)
 
-    assert bb.inside(p1) is False
-    assert bb.inside(pc) is False
+    assert p1.inside(bb) is False
+    assert pc.inside(bb) is False
+
+
+def test_collection_as_array():
+    p1 = Path()
+    p1.add(100, 101)
+    p1.add(200, 201)
+    p1.add(300, 301)
+
+    p2 = Path()
+    p2.add(222, 223)
+    p2.add(333, 334)
+
+    pc = Collection()
+    pc.add(p1)
+    pc.add(p2)
+
+    arr = pc.as_array()
+
+    assert arr.shape[0] == 2
+
+    assert arr[0].shape[0] == 3
+    assert arr[1].shape[0] == 2
+
+    assert arr[0][0, 0] == 100
+    assert arr[0][0, 1] == 101
+
+
+def test_collection_as_dataframe():
+    p1 = Path.from_tuple_list([(100, 101), (200, 201), (300, 301)])
+    p2 = Path.from_tuple_list([(222, 223), (333, 334), (333, 334), (333, 334)])
+    p3 = Path.from_tuple_list([(222, 223)])
+
+    pc = Collection()
+    pc.add([p1, p2, p3])
+
+    df = pc.as_dataframe()  # concatenated
+    assert df.ndim == 2
+    assert (
+        df.values.shape[0] == 4
+    )  # the maximum numer of points in a path (rest are filled up with nan's)
+    assert df.values.shape[1] == 6  # 3 times x, y columns
+
+
+def disabled_test_collection_as_array_performance():
+    c = Collection()
+    for pa in range(10000):
+        p1 = Path()
+
+        for i in range(1000):
+            p1.add(random.randint(-10000, 10000), random.randint(-10000, 10000))
+        c.add(p1)
+
+    timer = Timer()
+    timer.start()
+    arr = c.as_array()
+    timer.print_elapsed(f"as_array {len(c)} {len(c[0])}")
+
+    assert arr.shape[0] == 10000
+
+
+def test_simplify_collection():
+    random.seed(0)
+    c = Collection()
+    for pa in range(10):
+        p1 = Path()
+
+        for i in range(100):
+            p1.add(random.random(), random.random())
+        c.add(p1)
+
+    assert c.point_count() == 1000
+    timer = Timer()
+    timer.start()
+    c.simplify(0.1)
+    timer.print_elapsed(f"simplify {len(c)} {len(c[0])}")
+
+    assert c.point_count() == 881
+
+
+def test_simplify_performance():
+    random.seed(0)
+    c = Collection()
+    for pa in range(100):
+        p1 = Path()
+
+        for i in range(1000):
+            p1.add(random.random(), random.random())
+        c.add(p1)
+
+    assert c.point_count() == 100000
+
+    timer = Timer()
+    timer.start()
+
+    c.simplify(0.1)
+
+    timer.print_elapsed(f"simplify {len(c)} {len(c[0])}")
 
 
 def test_path_aspect_ratio():
@@ -373,6 +471,28 @@ def test_pathcollection_layer():
 
     assert len(v["layer1"]) == 2
     assert len(v["custom"]) == 1
+
+
+def test_collection_limit():
+    c = Collection()
+
+    for i in range(10):
+        p = Path()
+
+        p.add(0.9, 0.9, 0)
+        p.add(0.9, 1.0, 0)
+        p.add(0.9, 1.1, 0)
+        p.add(0.1, 0.8, 0)
+        p.add(-0.1, 0.8, 0)
+        p.add(0.0, 0.0, 0)
+        p.add(1.0, 1.0, 0)
+
+        c.add(p)
+
+    c.limit()
+
+    for p in c:
+        assert len(p) == 5
 
 
 def test_pathcollection_line_types():

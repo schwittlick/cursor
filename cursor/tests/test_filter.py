@@ -3,11 +3,13 @@ from cursor.loader import Loader
 from cursor.path import Path
 from cursor.collection import Collection
 from cursor.bb import BoundingBox
+
 from cursor.filter import Filter
+from cursor.filter import Sorter
+from cursor.filter import SortParameter
 from cursor.filter import BoundingBoxFilter
 from cursor.filter import MinPointCountFilter
 from cursor.filter import MaxPointCountFilter
-from cursor.filter import Sorter
 from cursor.filter import DistanceFilter
 
 import pytest
@@ -87,6 +89,30 @@ def test_point_count_filter():
     assert len(pcol) == 0
 
 
+def test_sort_simple():
+    pcol = Collection()
+
+    for i in range(500):
+        p = Path()
+        for _ in range(1000):
+            p.add(random.randint(-100, 100), random.randint(-100, 100))
+        pcol.add(p)
+
+    from cursor.misc import Timer
+
+    timer = Timer()
+    timer.start()
+    sorter = Sorter(param=SortParameter.ENTROPY_X)
+    pcol.sort(sorter)
+    timer.print_elapsed("sorting differential extropy x")
+
+    for i in range(len(pcol) - 1):
+        p0 = pcol[i]
+        p1 = pcol[i + 1]
+
+        assert p0.entropy_x <= p1.entropy_x
+
+
 def test_entropy_sort():
     pcol = Collection()
 
@@ -96,32 +122,37 @@ def test_entropy_sort():
             p.add(random.randint(-100, 100), random.randint(-100, 100))
         pcol.add(p)
 
-    sorter = Sorter(param=Sorter.SHANNON_X)
+    from cursor.misc import Timer
+
+    timer = Timer()
+    timer.start()
+    sorter = Sorter(param=SortParameter.ENTROPY_X)
+    pcol.sort(sorter)
+    timer.print_elapsed("sorting shannon x")
+
+    for i in range(len(pcol) - 1):
+        p0 = pcol[i]
+        p1 = pcol[i + 1]
+
+        assert p0.entropy_x <= p1.entropy_x
+
+    sorter.param = SortParameter.ENTROPY_Y
     pcol.sort(sorter)
 
     for i in range(len(pcol) - 1):
         p0 = pcol[i]
         p1 = pcol[i + 1]
 
-        assert p0.shannon_x <= p1.shannon_x
+        assert p0.entropy_y <= p1.entropy_y
 
-    sorter.param = Sorter.SHANNON_Y
+    sorter.param = SortParameter.ENTROPY_DIRECTION_CHANGES
     pcol.sort(sorter)
 
     for i in range(len(pcol) - 1):
         p0 = pcol[i]
         p1 = pcol[i + 1]
 
-        assert p0.shannon_y <= p1.shannon_y
-
-    sorter.param = Sorter.SHANNON_DIRECTION_CHANGES
-    pcol.sort(sorter)
-
-    for i in range(len(pcol) - 1):
-        p0 = pcol[i]
-        p1 = pcol[i + 1]
-
-        assert p0.shannon_direction_changes <= p1.shannon_direction_changes
+        assert p0.entropy_direction_changes <= p1.entropy_direction_changes
 
 
 def test_entropy_sort2():
@@ -129,17 +160,17 @@ def test_entropy_sort2():
     dir = DataDirHandler().test_recordings()
     ll = Loader(directory=dir, limit_files=2)
     pcol = ll.all_paths()
-    sorter = Sorter(param=Sorter.SHANNON_X, reverse=True)
+    sorter = Sorter(param=SortParameter.ENTROPY_X, reverse=True)
     pcol.sort(sorter)
     for i in range(10):
         print(pcol[i].hash)
 
-    sorter = Sorter(param=Sorter.SHANNON_Y, reverse=True)
+    sorter = Sorter(param=SortParameter.ENTROPY_Y, reverse=True)
     pcol.sort(sorter)
     for i in range(10):
         print(pcol[i].hash)
 
-    sorter = Sorter(param=Sorter.SHANNON_DIRECTION_CHANGES, reverse=True)
+    sorter = Sorter(param=SortParameter.ENTROPY_DIRECTION_CHANGES, reverse=True)
     pcol.sort(sorter)
     for i in range(10):
         print(pcol[i].hash)
@@ -169,3 +200,29 @@ def test_distance_filter():
     pcol.filter(filter)
 
     assert len(pcol) == 1
+
+
+def test_filter_performance():
+    pcol = Collection()
+
+    length = 10  # 10000 = ~2s
+
+    reference = Path()
+
+    for i in range(20):
+        reference.add(random.random() * 200, random.random() * 200)
+
+    for i in range(length):
+        p = Path()
+        for j in range(20):
+            p.add(random.random() * 200, random.random() * 200)
+        pcol.add(p)
+
+    pcol.add(reference)
+
+    f = Sorter(reverse=False, param=SortParameter.FRECHET_DISTANCE)
+
+    new_col = pcol.sorted(f, reference)
+
+    assert len(new_col) == length + 1
+    assert new_col[0].vertices == reference.vertices

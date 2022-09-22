@@ -14,7 +14,7 @@ def test_loader_simple():
 
 def test_loader_keys():
     dir = DataDirHandler().test_recordings()
-    ll = Loader(directory=dir)
+    ll = Loader(directory=dir, load_keys=True)
     rec = ll.keys()
     assert len(rec) == 3
 
@@ -35,7 +35,7 @@ def test_loader_single():
 
 def test_loader_single_file():
     dir = DataDirHandler().test_recordings()
-    single_file = dir / "1565088885.39372_compressed.json"
+    single_file = dir / "1565088885.39372_suffix.json"
     ll = Loader()
     ll.load_file(single_file)
     # that specific file has 18 paths

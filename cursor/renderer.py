@@ -1,11 +1,16 @@
-import cursor.path
-import cursor.bb
+from __future__ import annotations
+
+from cursor.path import Path
+from cursor.collection import Collection
+from cursor.position import Position
+from cursor.bb import BoundingBox
 
 import svgwrite
 import os
 import typing
-import sys
+import arcade
 import pathlib
+import random
 import wasabi
 import copy
 from PIL import Image, ImageDraw
@@ -22,17 +27,17 @@ class DrawingOutOfBoundsException(Exception):
 
 
 class PathIterator:
-    def __init__(self, paths: "cursor.collection.Collection"):
+    def __init__(self, paths: Collection):
         self.paths = paths
 
-    def points(self) -> typing.Iterator["cursor.path.Position"]:
+    def points(self) -> typing.Iterator[Position]:
         for p in self.paths:
             for point in p.vertices:
                 yield point
 
     def connections(
         self,
-    ) -> typing.Iterator[typing.Tuple["cursor.path.Position", "cursor.path.Position"]]:
+    ) -> typing.Iterator[typing.Tuple[Position, Position]]:
         prev = None
 
         for p in self.paths:
@@ -55,17 +60,17 @@ class SvgRenderer:
     def __init__(self, folder: pathlib.Path):
         self.save_path = folder
         self.dwg = None
-        self.paths = cursor.collection.Collection()
+        self.paths = Collection()
         self.bbs = []
 
-    def render(self, paths: "cursor.collection.Collection") -> None:
+    def render(self, paths: Collection) -> None:
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
         self.paths += paths
 
-    def render_bb(self, bb: "cursor.bb.BoundingBox") -> None:
+    def render_bb(self, bb: BoundingBox) -> None:
         self.bbs.append(bb)
 
-        p1 = cursor.path.Path()
+        p1 = Path()
         p1.add(bb.x, bb.y)
         p1.add(bb.x2, bb.y)
         p1.add(bb.x2, bb.y2)
@@ -85,8 +90,8 @@ class SvgRenderer:
         it = PathIterator(self.paths)
         for conn in it.connections():
             line = self.dwg.line(
-                conn[0].astuple(),
-                conn[1].astuple(),
+                conn[0].as_tuple(),
+                conn[1].as_tuple(),
                 stroke_width=0.5,
                 stroke="black",
             )
@@ -115,14 +120,14 @@ class GCodeRenderer:
         self.feedrate_xy = feedrate_xy
         self.feedrate_z = feedrate_z
         self.invert_y = invert_y
-        self.paths = cursor.collection.Collection()
+        self.paths = Collection()
         self.bbs = []
 
-    def render(self, paths: "cursor.collection.Collection") -> None:
+    def render(self, paths: Collection) -> None:
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
         self.paths += paths
 
-    def render_bb(self, bb: "cursor.bb.BoundingBox") -> None:
+    def render_bb(self, bb: BoundingBox) -> None:
         self.bbs.append(bb)
 
     def save(self, filename: str) -> None:
@@ -174,108 +179,97 @@ class GCodeRenderer:
         file.write(f"G01 X{x:.2f} Y{y:.2f} F{self.feedrate_xy}\n")
 
 
-class RealtimeRenderer:
-    def __init__(self, w: int, h: int):
-        self.running = False
-        self.__cbs = []
-        self.w = w
-        self.h = h
-        self.pcs = []
-        self.selected = 0
+class RealtimeRenderer(arcade.Window):
+    def __init__(self, width, height, title):
+        super().__init__(width, height, title)
+        arcade.set_background_color(arcade.color.LICORICE)
+        self.__title = title
+        self.colors = [
+            getattr(arcade.color, color)
+            for color in dir(arcade.color)
+            if not color.startswith("__")
+        ]
 
-    def set_cb(self, key: str, cb: typing.Callable, reset: bool = False) -> None:
-        self.__cbs.append((ord(key), cb, reset))
+        self.clear_list()
 
-    def _pygameinit(self) -> None:
-        import pygame
+        self.cbs = {}
+        self.pressed = {}
 
-        pygame.init()
-        self.screen = pygame.display.set_mode((self.w, self.h))
+    @staticmethod
+    def run():
+        arcade.enable_timings(100)
+        arcade.run()
 
-        self.screen.fill((255, 255, 255))
-        pygame.display.update()
-        self.running = True
+    @property
+    def title(self):
+        return self.__title
 
-    def _line(
-        self, screen, p1: "cursor.path.Position", p2: "cursor.path.Position"
-    ) -> None:
-        import pygame
+    def add_cb(self, key: arcade.key, cb: typing.Callable):
+        self.cbs[key] = cb
+        self.pressed[key] = False
 
-        pygame.draw.line(screen, (0, 0, 0), p1.astuple(), p2.astuple())
+    def clear_list(self):
+        self.shapes = arcade.ShapeElementList()
 
-    def add(self, pc: "cursor.collection.Collection") -> None:
-        self.pcs.append(pc)
+    def add_point(self, po: Position, width: int = 5, color: arcade.color = None):
+        if not color:
+            color = random.choice(self.colors)
 
-    def set(self, pcs: typing.List["cursor.collection.Collection"]) -> None:
-        self.pcs = pcs
-        self.selected = 0
+        point = arcade.create_ellipse(po.x, po.y, width, width, color)
+        self.shapes.append(point)
 
-    def render(self) -> None:
-        import pygame
+    def add_path(self, p: Path, line_width: float = 5, color: arcade.color = None):
+        if not color:
+            color = random.choice(self.colors)
 
-        if len(self.pcs) == 0:
-            log.fail("No paths to render. Quitting")
-            return
+        t = p.as_tuple_list()
+        line_strip = arcade.create_line_strip(t, color, line_width)
+        self.shapes.append(line_strip)
 
-        self._pygameinit()
+    def add_polygon(self, p: Path, color: arcade.color = None):
+        #assert p.is_closed()
+        if not color:
+            color = random.choice(self.colors)
 
-        frame_count = 0
-        while self.running:
-            pygame.display.set_caption(f"selected {self.selected}")
-            self.screen.fill((255, 255, 255))
-            it = PathIterator(self.pcs[self.selected])
-            ev = pygame.event.get()
-            for conn in it.connections():
-                start = conn[0]
-                end = conn[1]
-                self._line(self.screen, start, end)
-            pygame.display.update()
+        self.shapes.append(arcade.create_polygon(p.as_tuple_list(), color))
 
-            if frame_count % 60 == 0:
-                pressed = pygame.key.get_pressed()
-                if pressed[pygame.K_LEFT] and pressed[pygame.K_LCTRL]:
-                    self.selected -= 1
-                    if self.selected < 0:
-                        self.selected = len(self.pcs) - 1
+    def add_collection(
+        self, c: Collection, line_width: float = 5, color: arcade.color = None
+    ):
+        if not color:
+            color = random.choice(self.colors)
+        [self.add_path(p, line_width, color) for p in c]
 
-                if pressed[pygame.K_RIGHT] and pressed[pygame.K_LCTRL]:
-                    self.selected += 1
-                    if self.selected >= len(self.pcs):
-                        self.selected = 0
+    def on_draw(self):
+        self.clear()
+        self.shapes.draw()
 
-                for cbk in self.__cbs:
-                    if pressed[cbk[0]] and pressed[pygame.K_LCTRL]:
-                        cbk[1](self.selected, self.pcs[self.selected])
-                        if cbk[2]:
-                            self.selected = 0
+    def on_update(self, delta_time: float):
+        super().update(delta_time)
 
-            frame_count += 1
-            for event in ev:
-                if event.type == pygame.MOUSEBUTTONUP:
-                    pygame.display.update()
-                if event.type == pygame.KEYDOWN:
-                    for cbk in self.__cbs:
-                        if cbk[0] == event.key:
-                            cbk[1](self.selected, self.pcs[self.selected])
-                    # if event.key == pygame.K_s:
-                    #    if self.cb:
-                    #        self.cb(self.selected, self.pcs[self.selected])
-                    if event.key == pygame.K_ESCAPE:
-                        self.running = False
-                        pygame.quit()
-                        sys.exit(0)
+        fps = int(arcade.get_fps())
+        caption = f"fps: {fps} shapes: {len(self.shapes)}"
+        self.set_caption(caption)
 
-                    if event.key == pygame.K_LEFT:
-                        self.selected -= 1
-                        if self.selected < 0:
-                            self.selected = len(self.pcs) - 1
-                    if event.key == pygame.K_RIGHT:
-                        self.selected += 1
-                        if self.selected >= len(self.pcs):
-                            self.selected = 0
+        for k, v in self.pressed.items():
+            if v:
+                self.cbs[k](self)
+                self.pressed[k] = False
 
-                if event.type == pygame.QUIT:
-                    self.running = False
+    def on_key_press(self, key: int, modifiers: int):
+        if key == arcade.key.ESCAPE:
+            arcade.exit()
+        elif key == arcade.key.C:
+            self.clear_list()
+
+        for k, v in self.cbs.items():
+            if key == k:
+                self.pressed[k] = True
+
+    def on_key_release(self, key: int, modifiers: int):
+        for k, v in self.cbs.items():
+            if key == k:
+                self.pressed[k] = False
 
 
 class HPGLRenderer:
@@ -286,11 +280,11 @@ class HPGLRenderer:
         line_type_mapping: dict = None,
     ) -> None:
         self.__save_path = folder
-        self.__paths = cursor.collection.Collection()
+        self.__paths = Collection()
         self.__layer_pen_mapping = layer_pen_mapping
         self.__line_type_mapping = line_type_mapping
 
-    def render(self, paths: "cursor.collection.Collection") -> None:
+    def render(self, paths: Collection) -> None:
         self.__paths += paths
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
 
@@ -394,7 +388,7 @@ class TektronixRenderer:
         folder: pathlib.Path,
     ):
         self.__save_path = folder
-        self.__paths = cursor.collection.Collection()
+        self.__paths = Collection()
 
     def _coords_to_bytes(self, xcoord: int, ycoord: int, low_res: bool = False) -> str:
         """
@@ -423,7 +417,7 @@ class TektronixRenderer:
 
         return hi_y + eb + low_y + hi_x + low_x
 
-    def render(self, paths: "cursor.collection.Collection") -> None:
+    def render(self, paths: Collection) -> None:
         self.__paths += paths
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
 
@@ -466,13 +460,13 @@ class DigiplotRenderer:
         folder: pathlib.Path,
     ):
         self.__save_path = folder
-        self.__paths = cursor.collection.Collection()
+        self.__paths = Collection()
 
         self.PEN_DOWN = "I;"
         self.PEN_UP = "H;"
         self.GO_ABSOLUTE = "K;"
 
-    def render(self, paths: "cursor.collection.Collection") -> None:
+    def render(self, paths: Collection) -> None:
         self.__paths += paths
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
 
@@ -519,7 +513,7 @@ class JpegRenderer:
 
     def render(
         self,
-        paths: "cursor.collection.Collection",
+        paths: Collection,
         scale: float = 1.0,
         frame: bool = False,
         thickness: int = 1,
@@ -577,7 +571,10 @@ class JpegRenderer:
         self.img.save(fname, "JPEG")
         log.good(f"Finished saving {fname}")
 
-    def render_bb(self, bb: "cursor.bb.BoundingBox") -> None:
+    def image(self) -> Image:
+        return self.img
+
+    def render_bb(self, bb: BoundingBox) -> None:
         self.img_draw.line(xy=(bb.x, bb.y, bb.x2, bb.y), fill="black", width=2)
         self.img_draw.line(xy=(bb.x, bb.y, bb.x, bb.y2), fill="black", width=2)
         self.img_draw.line(xy=(bb.x2, bb.y, bb.x2, bb.y2), fill="black", width=2)
@@ -643,7 +640,7 @@ class AsciiRenderer:
 
     def render(
         self,
-        paths: "cursor.collection.Collection",
+        paths: Collection,
         scale: float = 1.0,
         frame: bool = False,
         thickness: int = 1,
