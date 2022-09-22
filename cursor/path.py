@@ -148,6 +148,10 @@ class Path:
     def is_polygon(self, is_polygon) -> None:
         self._is_polygon = is_polygon
 
+    def is_closed(self) -> bool:
+        assert len(self) > 2
+        return self.start_pos() == self.end_pos()
+
     def add(self, x: float, y: float, timestamp: int = 0) -> None:
         self.vertices.append(Position(x, y, timestamp))
 
