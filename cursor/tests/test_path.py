@@ -655,6 +655,19 @@ def test_bb_mostly_inside():
     assert not pa.mostly_inside(bb)
 
 
+def test_is_closed():
+    pa = Path()
+    pa.add(0, 0)
+    pa.add(0, 1)
+    pa.add(0, 0)
+
+    assert pa.is_closed()
+
+    pa.add(-1, 10)
+
+    assert not pa.is_closed()
+
+
 def test_as_tuple_list():
     pa = Path()
     pa.add(0, 0)

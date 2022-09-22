@@ -226,6 +226,13 @@ class RealtimeRenderer(arcade.Window):
         line_strip = arcade.create_line_strip(t, color, line_width)
         self.shapes.append(line_strip)
 
+    def add_polygon(self, p: Path, color: arcade.color = None):
+        #assert p.is_closed()
+        if not color:
+            color = random.choice(self.colors)
+
+        self.shapes.append(arcade.create_polygon(p.as_tuple_list(), color))
+
     def add_collection(
         self, c: Collection, line_width: float = 5, color: arcade.color = None
     ):

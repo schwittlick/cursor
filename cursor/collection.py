@@ -53,7 +53,7 @@ class Collection:
             return p
         else:
             raise Exception(
-                "You can only add another PathCollection or a list of paths"
+                "You can only add another Collection or a list of paths"
             )
 
     def __repr__(self) -> str:
