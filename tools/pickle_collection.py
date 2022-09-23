@@ -1,4 +1,4 @@
-from cursor.filter import SortParameter, Sorter
+from cursor.sorter import SortParameter, Sorter
 from cursor.loader import Loader
 from cursor.data import DataDirHandler
 

@@ -4,7 +4,7 @@ from cursor.position import Position
 from cursor.path import Path
 from cursor.bb import BoundingBox
 from cursor.filter import Filter
-from cursor.filter import Sorter
+from cursor.sorter import Sorter
 from cursor.data import DataDirHandler
 
 import numpy as np
