@@ -2,7 +2,7 @@ from cursor.data import DataDirHandler
 from cursor.data import DateHandler
 from cursor.device import PlotterType, PaperSize
 from cursor.export import ExportWrapper
-from cursor.filter import SortParameter, Sorter
+from cursor.sorter import SortParameter, Sorter
 from cursor.path import Path
 from cursor.collection import Collection
 from cursor.renderer import RealtimeRenderer
