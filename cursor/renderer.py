@@ -192,7 +192,7 @@ class RealtimeRenderer(arcade.Window):
 
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
-        arcade.set_background_color(arcade.color.LICORICE)
+        arcade.set_background_color(arcade.color.GRAY)
         self.__title = title
         self.colors = [
             getattr(arcade.color, color)
@@ -230,8 +230,9 @@ class RealtimeRenderer(arcade.Window):
     def add_point(self, po: Position, width: int = 5, color: arcade.color = None):
         if not color:
             color = random.choice(self.colors)
-
-        point = arcade.create_ellipse(po.x, po.y, width, width, color)
+        _x = po.x
+        _y = self.height - po.y
+        point = arcade.create_ellipse(_x, _y, width, width, color)
         self.shapes.append(point)
 
     def add_path(self, p: Path, line_width: float = 5, color: arcade.color = None):
@@ -239,7 +240,11 @@ class RealtimeRenderer(arcade.Window):
             color = random.choice(self.colors)
 
         t = p.as_tuple_list()
-        line_strip = arcade.create_line_strip(t, color, line_width)
+        new_tups = []
+        for tup in p.as_tuple_list():
+            new_tup = (tup[0], self.height - tup[1])
+            new_tups.append(new_tup)
+        line_strip = arcade.create_line_strip(new_tups, color, line_width)
         self.shapes.append(line_strip)
 
     def add_polygon(self, p: Path, color: arcade.color = None):

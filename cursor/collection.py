@@ -52,9 +52,7 @@ class Collection:
             p.__paths.extend(new_paths)
             return p
         else:
-            raise Exception(
-                "You can only add another Collection or a list of paths"
-            )
+            raise Exception("You can only add another Collection or a list of paths")
 
     def __repr__(self) -> str:
         return f"PathCollection({self.__name}) -> ({len(self)})"
@@ -317,6 +315,13 @@ class Collection:
             p.simplify(e)
 
         log.info(f"C::simplify from {count} to {self.point_count()} points.")
+
+    def split_by_color(self):
+        new_paths = []
+        for p in self:
+            new_paths.extend(p.split_by_color())
+
+        self.__paths = new_paths
 
     def log(self, str) -> None:
         log.good(f"{self.__class__.__name__}: {str}")
