@@ -156,8 +156,14 @@ class Path:
         y = math.isclose(start.y, end.y)
         return x and y
 
-    def add(self, x: float, y: float, timestamp: int = 0) -> None:
-        self.vertices.append(Position(x, y, timestamp))
+    def add(
+        self,
+        x: float,
+        y: float,
+        timestamp: int = 0,
+        color: typing.Tuple[int, int, int] = None,
+    ) -> None:
+        self.vertices.append(Position(x, y, timestamp, color))
 
     def add_position(self, pos: Position) -> None:
         self.vertices.append(pos)
@@ -784,3 +790,20 @@ class Path:
         if not current_path.empty():
             new_paths.append(current_path)
         return new_paths
+
+    def split_by_color(self) -> typing.List[Path]:
+        paths_list = []
+        current = Path()
+        current.add_position(self.vertices[0])
+        for v in self.vertices:
+            if current[-1].color == v.color:
+                current.add_position(v)
+            else:
+                current.add(v.x, v.y, v.timestamp, current[-1].color)
+                paths_list.append(current)
+                current = Path()
+                current.add_position(v)
+
+        current.add_position(self.vertices[-1])
+        paths_list.append(current)
+        return paths_list

@@ -9,7 +9,7 @@ def test_loader_simple():
     ll = Loader(directory=dir)
 
     rec = ll.all_collections()
-    assert len(rec) == 2
+    assert len(rec) == 3
 
 
 def test_loader_keys():
@@ -40,6 +40,17 @@ def test_loader_single_file():
     ll.load_file(single_file)
     # that specific file has 18 paths
     assert len(ll.all_paths()) == 18
+
+
+def test_loader_color_recording():
+    dir = DataDirHandler().test_recordings()
+    single_file = dir / "1664178785.14013_with_colors.json"
+    ll = Loader()
+    ll.load_file(single_file)
+    assert len(ll.all_paths()) == 7
+    for pa in ll.all_paths():
+        for p in pa:
+            assert p.color is not None
 
 
 def test_loader_limit_files():
