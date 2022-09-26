@@ -150,7 +150,11 @@ class Path:
 
     def is_closed(self) -> bool:
         assert len(self) > 2
-        return self.start_pos() == self.end_pos()
+        start = self.start_pos()
+        end = self.end_pos()
+        x = math.isclose(start.x, end.x)
+        y = math.isclose(start.y, end.y)
+        return x and y
 
     def add(self, x: float, y: float, timestamp: int = 0) -> None:
         self.vertices.append(Position(x, y, timestamp))

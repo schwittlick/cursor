@@ -136,6 +136,9 @@ class Collection:
         new_paths = self.__paths + pc.get_all()
         self.__paths = new_paths
 
+    def clear(self) -> None:
+        self.__paths.clear()
+
     def clean(self) -> None:
         """
         removes all paths with only one point

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from cursor.data import DataDirHandler, DateHandler
 from cursor.path import Path
 from cursor.collection import Collection
 from cursor.position import Position
@@ -10,6 +11,7 @@ import os
 import typing
 import arcade
 import pathlib
+import pymsgbox
 import random
 import wasabi
 import copy
@@ -180,6 +182,14 @@ class GCodeRenderer:
 
 
 class RealtimeRenderer(arcade.Window):
+    def screenshot(self, renderer: RealtimeRenderer):
+        folder = DataDirHandler().jpg(f"{renderer.title}")
+        suffix = pymsgbox.prompt("suffix", default="")
+        fn = folder / f"{DateHandler().utc_timestamp()}_{suffix}.png"
+        folder.mkdir(parents=True, exist_ok=True)
+        log.good(f"saving {fn.as_posix()}")
+        arcade.get_image().save(fn.as_posix(), "PNG")
+
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
         arcade.set_background_color(arcade.color.LICORICE)
@@ -194,6 +204,9 @@ class RealtimeRenderer(arcade.Window):
 
         self.cbs = {}
         self.pressed = {}
+        self._on_mouse = None
+
+        self.add_cb(arcade.key.S, self.screenshot)
 
     @staticmethod
     def run():
@@ -203,6 +216,9 @@ class RealtimeRenderer(arcade.Window):
     @property
     def title(self):
         return self.__title
+
+    def set_on_mouse_cb(self, cb: typing.Callable):
+        self._on_mouse = cb
 
     def add_cb(self, key: arcade.key, cb: typing.Callable):
         self.cbs[key] = cb
@@ -227,7 +243,7 @@ class RealtimeRenderer(arcade.Window):
         self.shapes.append(line_strip)
 
     def add_polygon(self, p: Path, color: arcade.color = None):
-        #assert p.is_closed()
+        # assert p.is_closed()
         if not color:
             color = random.choice(self.colors)
 
@@ -270,6 +286,10 @@ class RealtimeRenderer(arcade.Window):
         for k, v in self.cbs.items():
             if key == k:
                 self.pressed[k] = False
+
+    def on_mouse_motion(self, x, y, dx, dy):
+        if self._on_mouse:
+            self._on_mouse(x, y, dx, dy)
 
 
 class HPGLRenderer:
