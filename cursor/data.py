@@ -67,6 +67,15 @@ class DataDirHandler:
     def recordings(self) -> pathlib.Path:
         return self.data_dir / "recordings"
 
+    def recordings_legacy(self) -> pathlib.Path:
+        return self.data_dir / "recordings_legacy"
+
+    def recordings_simplified(self) -> pathlib.Path:
+        return self.data_dir / "recordings_simplified"
+
+    def recordings_legacy_simplified(self) -> pathlib.Path:
+        return self.data_dir / "recordings_legacy_simplified"
+
     def test_images(self) -> pathlib.Path:
         return self.test_data_dir / "jpg"
 

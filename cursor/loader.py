@@ -44,7 +44,10 @@ class MyJsonDecoder(json.JSONDecoder):
     def object_hook(self, dct):
         if "x" in dct:
             if "c" in dct:
-                c = tuple(dct["c"])
+                if dct["c"] is not None:
+                    c = tuple(dct["c"])
+                else:
+                    c = None
             else:
                 c = None
             return Position(dct["x"], dct["y"], dct["ts"], c)
