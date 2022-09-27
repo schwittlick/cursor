@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from shapely.geometry import LineString, MultiLineString
+
 from cursor.misc import mix
 from cursor.misc import map
 from cursor.algorithm.frechet import euclidean
@@ -650,13 +652,43 @@ class Path:
 
         return offset_path
 
-    def parallel_offset(self):
-        # from shapely.geometry import LineString
+    def parallel_offset(self, dist: float) -> typing.List[Path]:
+        def iter_and_return_path(offset):
+            pa = Path()
+            for x, y in offset.coords:
+                pa.add(x, y)
+            return pa
 
-        """
-        same as above but via shapely lib
-        """
-        pass
+        def add_if(pa, out):
+            if len(pa) > 2:
+                pa.simplify(0.01)
+                out.append(pa)
+
+        return_paths = []
+
+        line = LineString(self.as_tuple_list())
+        try:
+            # offset = line.parallel_offset(v)
+            result = line.parallel_offset(dist)
+
+            if type(result) is MultiLineString:
+                print("MultiLineString")
+                for poi in result:
+                    pa = iter_and_return_path(poi)
+                    add_if(pa, return_paths)
+
+                # rr.last_length = len(offset)
+            elif type(result) is LineString:
+                print("LineString")
+                pa = iter_and_return_path(result)
+                add_if(pa, return_paths)
+
+            else:
+                print(f"nothing matched for type {type(result)}")
+        except ValueError as ve:
+            print(f"Exception {ve}")
+
+        return return_paths
 
     @staticmethod
     def clamp(n, smallest, largest):
