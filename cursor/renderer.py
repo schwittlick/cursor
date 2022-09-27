@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from arcade.experimental.uislider import UISlider
+from arcade.gui import UIManager, UIOnChangeEvent, UIAnchorWidget, UIWidget
+
 from cursor.data import DataDirHandler, DateHandler
 from cursor.path import Path
 from cursor.collection import Collection
@@ -190,6 +193,12 @@ class RealtimeRenderer(arcade.Window):
         log.good(f"saving {fn.as_posix()}")
         arcade.get_image().save(fn.as_posix(), "PNG")
 
+    def enter_fullscreen(self, rr: RealtimeRenderer):
+        rr.set_fullscreen(not rr.fullscreen)
+
+    def toggle_gui(self, rr: RealtimeRenderer):
+        self._draw_gui = not self._draw_gui
+
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
         arcade.set_background_color(arcade.color.GRAY)
@@ -204,9 +213,30 @@ class RealtimeRenderer(arcade.Window):
 
         self.cbs = {}
         self.pressed = {}
+        self.long_press = {}
         self._on_mouse = None
+        self._draw_gui = True
 
-        self.add_cb(arcade.key.S, self.screenshot)
+        self.add_cb(arcade.key.S, self.screenshot, False)
+        self.add_cb(arcade.key.F, self.enter_fullscreen, False)
+        self.add_cb(arcade.key.G, self.toggle_gui, False)
+
+        self.manager = UIManager()
+        self.manager.enable()
+
+    def add_slider(self):
+        ui_slider = UISlider(value=50, width=300, height=50)
+
+        @ui_slider.event()
+        def on_change(event: UIOnChangeEvent):
+            print(ui_slider.value)
+            # label.text = f"{ui_slider.value:02.0f}"
+            # label.fit_content()
+
+        self.manager.add(UIAnchorWidget(child=ui_slider))
+
+    def set_bg_color(self, col: arcade.color):
+        arcade.set_background_color(col)
 
     @staticmethod
     def run():
@@ -220,9 +250,10 @@ class RealtimeRenderer(arcade.Window):
     def set_on_mouse_cb(self, cb: typing.Callable):
         self._on_mouse = cb
 
-    def add_cb(self, key: arcade.key, cb: typing.Callable):
+    def add_cb(self, key: arcade.key, cb: typing.Callable, long_press: bool = True):
         self.cbs[key] = cb
         self.pressed[key] = False
+        self.long_press[key] = long_press
 
     def clear_list(self):
         self.shapes = arcade.ShapeElementList()
@@ -239,11 +270,12 @@ class RealtimeRenderer(arcade.Window):
         if not color:
             color = random.choice(self.colors)
 
-        t = p.as_tuple_list()
+        # in arcade the coordinate origin is at the bottom left *facepalm*
         new_tups = []
         for tup in p.as_tuple_list():
             new_tup = (tup[0], self.height - tup[1])
             new_tups.append(new_tup)
+
         line_strip = arcade.create_line_strip(new_tups, color, line_width)
         self.shapes.append(line_strip)
 
@@ -264,6 +296,8 @@ class RealtimeRenderer(arcade.Window):
     def on_draw(self):
         self.clear()
         self.shapes.draw()
+        if self._draw_gui:
+            self.manager.draw()
 
     def on_update(self, delta_time: float):
         super().update(delta_time)
@@ -275,7 +309,8 @@ class RealtimeRenderer(arcade.Window):
         for k, v in self.pressed.items():
             if v:
                 self.cbs[k](self)
-                self.pressed[k] = False
+                if not self.long_press[k]:
+                    self.pressed[k] = False
 
     def on_key_press(self, key: int, modifiers: int):
         if key == arcade.key.ESCAPE:
