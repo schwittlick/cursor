@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from shapely.geometry import LineString, MultiLineString
+from shapely.geometry import LineString, MultiLineString, JOIN_STYLE
+from shapely.geometry.base import BaseGeometry
 
 from cursor.misc import mix
 from cursor.misc import map
@@ -653,13 +654,13 @@ class Path:
         return offset_path
 
     def parallel_offset(self, dist: float) -> typing.List[Path]:
-        def iter_and_return_path(offset):
+        def iter_and_return_path(offset: BaseGeometry) -> Path:
             pa = Path()
             for x, y in offset.coords:
                 pa.add(x, y)
             return pa
 
-        def add_if(pa, out):
+        def add_if(pa: Path, out: typing.List[Path]):
             if len(pa) > 2:
                 pa.simplify(0.01)
                 out.append(pa)
@@ -668,18 +669,21 @@ class Path:
 
         line = LineString(self.as_tuple_list())
         try:
-            # offset = line.parallel_offset(v)
-            result = line.parallel_offset(dist)
+            side = "right" if dist < 0 else "left"
+            result = line.parallel_offset(
+                abs(dist),
+                side=side,
+                resolution=256,
+                join_style=JOIN_STYLE.mitre,
+                mitre_limit=1.0,
+            )
 
             if type(result) is MultiLineString:
-                print("MultiLineString")
-                for poi in result:
+                for poi in result.geoms:
                     pa = iter_and_return_path(poi)
                     add_if(pa, return_paths)
 
-                # rr.last_length = len(offset)
             elif type(result) is LineString:
-                print("LineString")
                 pa = iter_and_return_path(result)
                 add_if(pa, return_paths)
 

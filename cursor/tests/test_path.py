@@ -355,11 +355,12 @@ def test_path_offset_shapely():
     p.add(-0.1, 0.8, 0)
     p.add(0.0, 0.0, 0)
     p.add(1.0, 1.0, 0)
+    p.scale(10, 10)
 
     new = p.parallel_offset(1)
 
     assert len(new) == 1
-    assert len(new[0]) == 26
+    assert len(new[0]) == 6
 
 
 def test_path_reverse():
