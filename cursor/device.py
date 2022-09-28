@@ -1,4 +1,4 @@
-from cursor.bb import BoundingBox
+from cursor.bb import BoundingBox as BB
 
 from enum import Enum
 import wasabi
@@ -65,34 +65,28 @@ class ExportFormatMappings:
 
 class MinmaxMapping:
     maps = {
-        PlotterType.ROLAND_DPX3300: BoundingBox(-16920, -11180, 16340, 11180),
-        PlotterType.ROLAND_DPX3300_A2: BoundingBox(-16920, -11180, 5440, 4629),
-        PlotterType.ROLAND_DPX3300_A3: BoundingBox(-16920, -11180, -1112, -3276),
-        PlotterType.DIY_PLOTTER: BoundingBox(0, 0, 3350, -1715),
-        PlotterType.AXIDRAW: BoundingBox(0, 0, 0, 0),  # todo: missing real bounds
-        PlotterType.HP_7475A_A4: BoundingBox(0, 0, 11040, 7721),
-        PlotterType.HP_7475A_A3: BoundingBox(0, 0, 16158, 11040),
-        PlotterType.ROLAND_DXY1200: BoundingBox(
-            0, 0, 16158, 11040
-        ),  # todo: missing real bounds
-        PlotterType.ROLAND_DXY980: BoundingBox(0, 0, 16158, 11040),
-        PlotterType.HP_7595A: BoundingBox(
-            -23160, -17602, 23160 + 1160, 17602
-        ),  # minimum 35mm padding
-        PlotterType.ROLAND_PNC1000: BoundingBox(
-            0, 0, 17200, 40000
-        ),  # actually unlimited y
-        PlotterType.HP_7595A_A3: BoundingBox(-7728, -5752, 7728 + 960, 5752),
-        PlotterType.TEKTRONIX_4662: BoundingBox(
-            0, 0, 4095, 2731
-        ),  # 10x15 inches (25.4 x 38.1 cm)
-        PlotterType.HP_7596B: BoundingBox(-15500, -11100, 15500 + 22 * 40, 11100),
-        PlotterType.HP_7596B_A3: BoundingBox(-6800, -5250, 6800, 5250),
-        PlotterType.HP_7596B_25_25: BoundingBox(-4310, -3444, 4310 + 800, 3444),
-        PlotterType.DIGIPLOT_A1: BoundingBox(0, 0, 33600, 23700),
-        PlotterType.HP_7470A: BoundingBox(0, 0, 10900, 7650),
-        PlotterType.HP_7550A: BoundingBox(0, 0, 15970, 10870),
-        PlotterType.HP_7595A_A2: BoundingBox(-11684, -7729 - 960, 11684, 7729),
+        PlotterType.ROLAND_DPX3300: BB(-16920, -11180, 16340, 11180),
+        PlotterType.ROLAND_DPX3300_A2: BB(-16920, -11180, 5440, 4629),
+        PlotterType.ROLAND_DPX3300_A3: BB(-16920, -11180, -1112, -3276),
+        PlotterType.DIY_PLOTTER: BB(0, 0, 3350, -1715),
+        PlotterType.AXIDRAW: BB(0, 0, 0, 0),  # todo: missing real bounds
+        PlotterType.HP_7475A_A4: BB(0, 0, 11040, 7721),
+        PlotterType.HP_7475A_A3: BB(0, 0, 16158, 11040),
+        PlotterType.ROLAND_DXY1200: BB(0, 0, 16158, 11040),  # todo: missing real bounds
+        PlotterType.ROLAND_DXY980: BB(0, 0, 16158, 11040),
+        PlotterType.HP_7595A: BB(-23160, -17602, 23160 + 1160, 17602),
+        # HP_7595A: minimum 35mm padding
+        PlotterType.ROLAND_PNC1000: BB(0, 0, 17200, 40000),  # actually unlimited y
+        PlotterType.HP_7595A_A3: BB(-7728, -5752, 7728 + 960, 5752),
+        PlotterType.TEKTRONIX_4662: BB(0, 0, 4095, 2731),
+        # tekronix: 10x15 inches (25.4 x 38.1 cm)
+        PlotterType.HP_7596B: BB(-15500, -11100, 15500 + 22 * 40, 11100),
+        PlotterType.HP_7596B_A3: BB(-6800, -5250, 6800, 5250),
+        PlotterType.HP_7596B_25_25: BB(-4310, -3444, 4310 + 800, 3444),
+        PlotterType.DIGIPLOT_A1: BB(0, 0, 33600, 23700),
+        PlotterType.HP_7470A: BB(0, 0, 10900, 7650),
+        PlotterType.HP_7550A: BB(0, 0, 15970, 10870),
+        PlotterType.HP_7595A_A2: BB(-11684, -7729 - 960, 11684, 7729),
     }
 
 

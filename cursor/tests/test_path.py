@@ -345,6 +345,49 @@ def test_path_limit():
     assert len(p) == 5
 
 
+def test_path_offset_shapely():
+    p = Path()
+
+    p.add(0.9, 0.9, 0)
+    p.add(0.9, 1.0, 0)
+    p.add(0.9, 1.1, 0)
+    p.add(0.1, 0.8, 0)
+    p.add(-0.1, 0.8, 0)
+    p.add(0.0, 0.0, 0)
+    p.add(1.0, 1.0, 0)
+    p.scale(10, 10)
+
+    new = p.parallel_offset(1)
+
+    assert len(new) == 1
+    assert len(new[0]) == 6
+
+
+def test_path_nearest_points():
+    p = Path()
+
+    p.add(0.0, 0.0, 0)
+    p.add(1.0, 1.1, 0)
+    p.add(2.0, 0.0, 0)
+
+    new = p.nearest_points(Position(1.0, 2.0))
+
+    assert new.x == 1.0
+    assert new.y == 1.1
+
+
+def test_path_dilate():
+    p = Path()
+
+    p.add(0.0, 0.0, 0)
+    p.add(1.0, 1.1, 0)
+    p.add(2.0, 0.0, 0)
+
+    new = p.dilate_erode(2.0)
+
+    assert len(new) == 78
+
+
 def test_path_reverse():
     p1 = Path()
 

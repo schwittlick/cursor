@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from shapely.geometry import LineString, MultiLineString, JOIN_STYLE, Point
+from shapely.geometry.base import BaseGeometry
+
 from cursor.misc import mix
 from cursor.misc import map
 from cursor.algorithm.frechet import euclidean
@@ -150,10 +153,20 @@ class Path:
 
     def is_closed(self) -> bool:
         assert len(self) > 2
-        return self.start_pos() == self.end_pos()
+        start = self.start_pos()
+        end = self.end_pos()
+        x = math.isclose(start.x, end.x)
+        y = math.isclose(start.y, end.y)
+        return x and y
 
-    def add(self, x: float, y: float, timestamp: int = 0) -> None:
-        self.vertices.append(Position(x, y, timestamp))
+    def add(
+        self,
+        x: float,
+        y: float,
+        timestamp: int = 0,
+        color: typing.Tuple[int, int, int] = None,
+    ) -> None:
+        self.vertices.append(Position(x, y, timestamp, color))
 
     def add_position(self, pos: Position) -> None:
         self.vertices.append(pos)
@@ -241,6 +254,25 @@ class Path:
         self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)
     ) -> None:
         [p.rot(angle, origin) for p in self.vertices]
+
+    def nearest_points(self, pos: Position) -> Position:
+        """
+        finds the closest point on the path
+        may not be one of the discrete points
+        """
+        line = LineString(self.as_tuple_list())
+        nearest = line.interpolate(line.project(Point(pos.x, pos.y)))
+        return Position(nearest.x, nearest.y)
+
+    def dilate_erode(self, dist: float) -> Path:
+        """
+        erodes with negative dist
+        """
+        line = LineString(self.as_tuple_list())
+        res = line.buffer(dist).exterior.coords
+        r = Path()
+        [r.add(x, y) for x, y in res]
+        return r
 
     def move_to_origin(self) -> None:
         """
@@ -640,13 +672,46 @@ class Path:
 
         return offset_path
 
-    def parallel_offset(self):
-        # from shapely.geometry import LineString
+    def parallel_offset(self, dist: float) -> typing.List[Path]:
+        def iter_and_return_path(offset: BaseGeometry) -> Path:
+            pa = Path()
+            for x, y in offset.coords:
+                pa.add(x, y)
+            return pa
 
-        """
-        same as above but via shapely lib
-        """
-        pass
+        def add_if(pa: Path, out: typing.List[Path]):
+            if len(pa) > 2:
+                pa.simplify(0.01)
+                out.append(pa)
+
+        return_paths = []
+
+        line = LineString(self.as_tuple_list())
+        try:
+            side = "right" if dist < 0 else "left"
+            result = line.parallel_offset(
+                abs(dist),
+                side=side,
+                resolution=256,
+                join_style=JOIN_STYLE.mitre,
+                mitre_limit=1.0,
+            )
+
+            if type(result) is MultiLineString:
+                for poi in result.geoms:
+                    pa = iter_and_return_path(poi)
+                    add_if(pa, return_paths)
+
+            elif type(result) is LineString:
+                pa = iter_and_return_path(result)
+                add_if(pa, return_paths)
+
+            else:
+                print(f"nothing matched for type {type(result)}")
+        except ValueError as ve:
+            print(f"Exception {ve}")
+
+        return return_paths
 
     @staticmethod
     def clamp(n, smallest, largest):
@@ -780,3 +845,20 @@ class Path:
         if not current_path.empty():
             new_paths.append(current_path)
         return new_paths
+
+    def split_by_color(self) -> typing.List[Path]:
+        paths_list = []
+        current = Path()
+        current.add_position(self.vertices[0])
+        for v in self.vertices:
+            if current[-1].color == v.color:
+                current.add_position(v)
+            else:
+                current.add(v.x, v.y, v.timestamp, current[-1].color)
+                paths_list.append(current)
+                current = Path()
+                current.add_position(v)
+
+        current.add_position(self.vertices[-1])
+        paths_list.append(current)
+        return paths_list

@@ -10,9 +10,16 @@ import math
 
 
 class Position:
-    def __init__(self, x: float = 0.0, y: float = 0.0, timestamp: int = 0):
+    def __init__(
+        self,
+        x: float = 0.0,
+        y: float = 0.0,
+        timestamp: int = 0,
+        color: typing.Tuple[int, int, int] = None,
+    ):
         self._pos = np.array([x, y], dtype=float)
         self.timestamp = timestamp
+        self.color = color
 
     @classmethod
     def from_tuple(cls, xy_tuple: typing.Tuple[float, float]) -> Position:
@@ -93,7 +100,7 @@ class Position:
         return self.timestamp > o.timestamp
 
     def __repr__(self):
-        return f"({self.x:.3f}, {self.y:.3f}, {self.timestamp:.3f})"
+        return f"({self.x:.3f}, {self.y:.3f}, {self.timestamp:.3f}, {self.color})"
 
     def __hash__(self):
         return hash(repr(self))

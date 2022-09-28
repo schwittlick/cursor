@@ -4,7 +4,7 @@ from cursor.position import Position
 from cursor.path import Path
 from cursor.bb import BoundingBox
 from cursor.filter import Filter
-from cursor.filter import Sorter
+from cursor.sorter import Sorter
 from cursor.data import DataDirHandler
 
 import numpy as np
@@ -52,9 +52,7 @@ class Collection:
             p.__paths.extend(new_paths)
             return p
         else:
-            raise Exception(
-                "You can only add another Collection or a list of paths"
-            )
+            raise Exception("You can only add another Collection or a list of paths")
 
     def __repr__(self) -> str:
         return f"PathCollection({self.__name}) -> ({len(self)})"
@@ -135,6 +133,9 @@ class Collection:
     def extend(self, pc: Collection) -> None:
         new_paths = self.__paths + pc.get_all()
         self.__paths = new_paths
+
+    def clear(self) -> None:
+        self.__paths.clear()
 
     def clean(self) -> None:
         """
@@ -314,6 +315,13 @@ class Collection:
             p.simplify(e)
 
         log.info(f"C::simplify from {count} to {self.point_count()} points.")
+
+    def split_by_color(self):
+        new_paths = []
+        for p in self:
+            new_paths.extend(p.split_by_color())
+
+        self.__paths = new_paths
 
     def log(self, str) -> None:
         log.good(f"{self.__class__.__name__}: {str}")

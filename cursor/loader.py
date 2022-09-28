@@ -28,7 +28,12 @@ class MyJsonEncoder(json.JSONEncoder):
             return o.vertices
 
         if isinstance(o, Position):
-            return {"x": round(o.x, 4), "y": round(o.y, 4), "ts": round(o.timestamp, 2)}
+            return {
+                "x": round(o.x, 4),
+                "y": round(o.y, 4),
+                "ts": round(o.timestamp, 2),
+                "c": o.color if o.color else None,
+            }
 
 
 class MyJsonDecoder(json.JSONDecoder):
@@ -38,7 +43,14 @@ class MyJsonDecoder(json.JSONDecoder):
     # @profile
     def object_hook(self, dct):
         if "x" in dct:
-            return Position(dct["x"], dct["y"], dct["ts"])
+            if "c" in dct:
+                if dct["c"] is not None:
+                    c = tuple(dct["c"])
+                else:
+                    c = None
+            else:
+                c = None
+            return Position(dct["x"], dct["y"], dct["ts"], c)
         if "w" in dct and "h" in dct:
             s = pyautogui.Size(dct["w"], dct["h"])
             return s

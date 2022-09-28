@@ -15,6 +15,8 @@ import threading
 import sys
 from PIL import Image
 
+from cursor.position import Position
+
 log = wasabi.Printer()
 
 
@@ -61,13 +63,21 @@ class Recorder:
     def on_move(self, x, y):
         _x = x / self._resolution[0]
         _y = y / self._resolution[1]
-        self._current_line.add(_x, _y, int(DateHandler.utc_timestamp()))
+        try:
+            _c = pyautogui.pixel(x, y)
+        except WindowsError as we:
+            _c = (0, 0, 0)
+            log.fail(f"Could not get color at cursor position: {we}. Saving (0, 0, 0)")
+        except Exception as e:
+            log.fail(f"Something else didnt work {e}")
+            _c = (0, 0, 0)
+        _t = int(DateHandler.utc_timestamp())
+        _p = Position(_x, _y, _t, _c)
+        self._current_line.add_position(_p)
 
     def on_click(self, x, y, button, pressed):
         if not self._started and pressed:
-            _x = x / self._resolution[0]
-            _y = y / self._resolution[1]
-            self._current_line.add(_x, _y, int(DateHandler.utc_timestamp()))
+            self.on_move(x, y)
             self._started = True
         elif self._started and pressed:
             self._mouse_recordings.add(self._current_line.copy())
