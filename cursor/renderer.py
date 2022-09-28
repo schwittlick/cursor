@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from arcade.experimental.uislider import UISlider
-from arcade.gui import UIManager, UIOnChangeEvent, UIAnchorWidget, UIWidget
+from arcade.gui import UIManager, UIOnChangeEvent, UIAnchorWidget
 
 from cursor.data import DataDirHandler, DateHandler
 from cursor.path import Path

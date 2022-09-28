@@ -34,7 +34,7 @@ def save(m, name):
 
 
 def parse_and_save_v1():
-    base_folder = "Z:\Dropbox\CODE\intellij_workspace\MouseStudio\data\\v1\\"
+    base_folder = "Z:\\Dropbox\\CODE\\intellij_workspace\\MouseStudio\\data\\v1\\"
     base = pathlib.Path(base_folder)
     for folder in base.iterdir():
         if folder.is_dir():

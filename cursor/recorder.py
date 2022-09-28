@@ -68,8 +68,8 @@ class Recorder:
         except WindowsError as we:
             _c = (0, 0, 0)
             log.fail(f"Could not get color at cursor position: {we}. Saving (0, 0, 0)")
-        except:
-            log.fail(f"Something else didnt work")
+        except Exception as e:
+            log.fail(f"Something else didnt work {e}")
             _c = (0, 0, 0)
         _t = int(DateHandler.utc_timestamp())
         _p = Position(_x, _y, _t, _c)
