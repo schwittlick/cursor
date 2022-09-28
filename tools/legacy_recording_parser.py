@@ -67,7 +67,7 @@ def parse_and_save_v1():
 
 
 def parse_and_save_v2():
-    base_folder = "Z:\Dropbox\CODE\intellij_workspace\MouseStudio\data\\v2\\"
+    base_folder = "Z:\\Dropbox\\CODE\\intellij_workspace\\MouseStudio\\data\\v2\\"
     base = pathlib.Path(base_folder)
 
     for folder in base.iterdir():
