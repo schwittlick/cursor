@@ -363,6 +363,19 @@ def test_path_offset_shapely():
     assert len(new[0]) == 6
 
 
+def test_path_nearest_points():
+    p = Path()
+
+    p.add(0.0, 0.0, 0)
+    p.add(1.0, 1.1, 0)
+    p.add(2.0, 0.0, 0)
+
+    new = p.nearest_points(Position(1.0, 2.0))
+
+    assert new.x == 1.0
+    assert new.y == 1.1
+
+
 def test_path_reverse():
     p1 = Path()
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from shapely.geometry import LineString, MultiLineString, JOIN_STYLE
+from shapely.geometry import LineString, MultiLineString, JOIN_STYLE, Point
 from shapely.geometry.base import BaseGeometry
 
 from cursor.misc import mix
@@ -254,6 +254,15 @@ class Path:
         self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)
     ) -> None:
         [p.rot(angle, origin) for p in self.vertices]
+
+    def nearest_points(self, pos: Position) -> Position:
+        """
+        finds the closest point on the path
+        may not be one of the discrete points
+        """
+        line = LineString(self.as_tuple_list())
+        nearest = line.interpolate(line.project(Point(pos.x, pos.y)))
+        return Position(nearest.x, nearest.y)
 
     def move_to_origin(self) -> None:
         """
