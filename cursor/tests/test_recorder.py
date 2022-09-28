@@ -4,7 +4,7 @@ import pytest
 from cursor.recorder import Recorder
 
 
-@pytest.disable()
+@pytest.mark.skip(reason="doesnt work with ci anymore because it doesnt stop?")
 def test_recorder1():
     recorder = Recorder("suffix")
     recorder.on_move(0, 0)
