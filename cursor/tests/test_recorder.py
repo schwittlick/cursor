@@ -1,7 +1,10 @@
-from cursor.recorder import Recorder
 import pynput
+import pytest
+
+from cursor.recorder import Recorder
 
 
+@pytest.disable()
 def test_recorder1():
     recorder = Recorder("suffix")
     recorder.on_move(0, 0)
