@@ -6,6 +6,7 @@ from cursor.path import Path
 from cursor.position import Position
 from cursor.collection import Collection
 from cursor.bb import BoundingBox
+from cursor.renderer import RealtimeRenderer
 
 
 def output_cathegory(coco, cat):
@@ -90,9 +91,7 @@ if __name__ == "__main__":
     # import sys
     # sys.exit()
 
-    fn = (
-        DataDirHandler().pickles() / "mscoco2017" / f"train_all_sorted_entropy_x.pickle"
-    )
+    fn = DataDirHandler().pickles() / "mscoco2017" / "train_all_sorted_entropy_x.pickle"
     su.save_pickle(fn.as_posix())
 
     import sys

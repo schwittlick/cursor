@@ -376,6 +376,18 @@ def test_path_nearest_points():
     assert new.y == 1.1
 
 
+def test_path_dilate():
+    p = Path()
+
+    p.add(0.0, 0.0, 0)
+    p.add(1.0, 1.1, 0)
+    p.add(2.0, 0.0, 0)
+
+    new = p.dilate_erode(2.0)
+
+    assert len(new) == 78
+
+
 def test_path_reverse():
     p1 = Path()
 

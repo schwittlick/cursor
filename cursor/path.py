@@ -264,6 +264,16 @@ class Path:
         nearest = line.interpolate(line.project(Point(pos.x, pos.y)))
         return Position(nearest.x, nearest.y)
 
+    def dilate_erode(self, dist: float) -> Path:
+        """
+        erodes with negative dist
+        """
+        line = LineString(self.as_tuple_list())
+        res = line.buffer(dist).exterior.coords
+        r = Path()
+        [r.add(x, y) for x, y in res]
+        return r
+
     def move_to_origin(self) -> None:
         """
         moves path to zero origin

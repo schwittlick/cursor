@@ -66,8 +66,8 @@ def test_entropy_sort():
 
 
 def test_entropy_sort2():
-    l = Loader(directory=DataDirHandler().test_recordings(), limit_files=2)
-    c = l.all_paths()
+    loader = Loader(directory=DataDirHandler().test_recordings(), limit_files=2)
+    c = loader.all_paths()
 
     s = Sorter(param=SortParameter.ENTROPY_X, reverse=True)
     c.sort(s)
