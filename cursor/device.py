@@ -63,6 +63,30 @@ class ExportFormatMappings:
     }
 
 
+class PaperSize(Enum):
+    PORTRAIT_36_48 = 0
+    LANDSCAPE_48_36 = 1
+    PORTRAIT_42_56 = 2
+    LANDSCAPE_56_42 = 3
+    PORTRAIT_50_70 = 4
+    LANDSCAPE_70_50 = 5
+    SQUARE_70_70 = 6
+    PORTRAIT_70_100 = 7
+    LANDSCAPE_100_70 = 8
+    LANDSCAPE_A4 = 9
+    PORTRAIT_A4 = 10
+    LANDSCAPE_A1 = 11
+    LANDSCAPE_A0 = 12
+    PORTRAIT_A3 = 13
+    LANDSCAPE_A3 = 14
+    LANDSCAPE_80_50 = 15
+    PORTRAIT_50_80 = 16
+    LANDSCAPE_A2 = 17
+    SQUARE_59_59 = 18
+    SQUARE_25_25 = 19
+    LANDSCAPE_A1_HP_7596B = 20
+
+
 class MinmaxMapping:
     maps = {
         PlotterType.ROLAND_DPX3300: BB(-16920, -11180, 16340, 11180),
@@ -90,30 +114,6 @@ class MinmaxMapping:
     }
 
 
-class PaperSize(Enum):
-    PORTRAIT_36_48 = 0
-    LANDSCAPE_48_36 = 1
-    PORTRAIT_42_56 = 2
-    LANDSCAPE_56_42 = 3
-    PORTRAIT_50_70 = 4
-    LANDSCAPE_70_50 = 5
-    SQUARE_70_70 = 6
-    PORTRAIT_70_100 = 7
-    LANDSCAPE_100_70 = 8
-    LANDSCAPE_A4 = 9
-    PORTRAIT_A4 = 10
-    LANDSCAPE_A1 = 11
-    LANDSCAPE_A0 = 12
-    PORTRAIT_A3 = 13
-    LANDSCAPE_A3 = 14
-    LANDSCAPE_80_50 = 15
-    PORTRAIT_50_80 = 16
-    LANDSCAPE_A2 = 17
-    SQUARE_59_59 = 18
-    SQUARE_25_25 = 19
-    LANDSCAPE_A1_HP_7596B = 20
-
-
 class PlotterName:
     names = {
         PlotterType.ROLAND_DPX3300: "dpx3300",
@@ -136,6 +136,31 @@ class PlotterName:
         PlotterType.HP_7470A: "hp7470a",
         PlotterType.HP_7550A: "hp7550a",
         PlotterType.HP_7595A_A2: "hp7595a_draftmaster_sx_a2",
+    }
+
+
+class XYFactors:
+    fac = {
+        PlotterType.ROLAND_DPX3300: (40, 40),
+        PlotterType.ROLAND_DPX3300_A2: (40, 40),
+        PlotterType.ROLAND_DPX3300_A3: (40, 40),
+        PlotterType.DIY_PLOTTER: (2.85714, 2.90572),
+        PlotterType.AXIDRAW: (3.704, 3.704),
+        PlotterType.HP_7475A_A3: (40, 40),
+        PlotterType.HP_7475A_A4: (40, 40),
+        PlotterType.ROLAND_DXY1200: (40, 40),
+        PlotterType.ROLAND_DXY980: (40, 40),
+        PlotterType.HP_7595A: (40, 40),
+        PlotterType.ROLAND_PNC1000: (40, 40),
+        PlotterType.HP_7595A_A3: (37, 37),
+        PlotterType.TEKTRONIX_4662: (9.75, 9.19525),
+        PlotterType.HP_7596B: (39.948, 40),
+        PlotterType.HP_7596B_A3: (39.948, 40),
+        PlotterType.HP_7596B_25_25: (40, 40),
+        PlotterType.DIGIPLOT_A1: (40, 40),
+        PlotterType.HP_7470A: (40, 40),
+        PlotterType.HP_7550A: (40, 40),
+        PlotterType.HP_7595A_A2: (40, 39.5),
     }
 
 
@@ -188,29 +213,4 @@ class Paper:
         PaperSize.SQUARE_59_59: (590, 590),
         PaperSize.SQUARE_25_25: (215, 170),
         PaperSize.LANDSCAPE_A1_HP_7596B: (776, 555),
-    }
-
-
-class XYFactors:
-    fac = {
-        PlotterType.ROLAND_DPX3300: (40, 40),
-        PlotterType.ROLAND_DPX3300_A2: (40, 40),
-        PlotterType.ROLAND_DPX3300_A3: (40, 40),
-        PlotterType.DIY_PLOTTER: (2.85714, 2.90572),
-        PlotterType.AXIDRAW: (3.704, 3.704),
-        PlotterType.HP_7475A_A3: (40, 40),
-        PlotterType.HP_7475A_A4: (40, 40),
-        PlotterType.ROLAND_DXY1200: (40, 40),
-        PlotterType.ROLAND_DXY980: (40, 40),
-        PlotterType.HP_7595A: (40, 40),
-        PlotterType.ROLAND_PNC1000: (40, 40),
-        PlotterType.HP_7595A_A3: (37, 37),
-        PlotterType.TEKTRONIX_4662: (9.75, 9.19525),
-        PlotterType.HP_7596B: (39.948, 40),
-        PlotterType.HP_7596B_A3: (39.948, 40),
-        PlotterType.HP_7596B_25_25: (40, 40),
-        PlotterType.DIGIPLOT_A1: (40, 40),
-        PlotterType.HP_7470A: (40, 40),
-        PlotterType.HP_7550A: (40, 40),
-        PlotterType.HP_7595A_A2: (40, 39.5),
     }
