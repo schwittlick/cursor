@@ -76,6 +76,7 @@ class Exporter:
         self.__gcode_speed = None
         self.__layer_pen_mapping = None
         self.__linetype_mapping = None
+        self.__keep_aspect_ratio = None
 
     @property
     def paths(self) -> Collection:
@@ -133,6 +134,14 @@ class Exporter:
     def linetype_mapping(self, m: dict) -> None:
         self.__linetype_mapping = m
 
+    @property
+    def keep_aspect_ratio(self) -> bool:
+        return self.__keep_aspect_ratio
+
+    @keep_aspect_ratio.setter
+    def keep_aspect_ratio(self, kar: bool) -> None:
+        self.__keep_aspect_ratio = kar
+
     def run(self, jpg: bool = False, source: bool = False) -> None:
         if self.cfg is None or self.paths is None or self.name is None:
             log.fail("Config, Name or Paths is None. Not exporting anything")
@@ -143,6 +152,7 @@ class Exporter:
             Paper.sizes[self.cfg.dimension],
             padding_mm=self.cfg.margin,
             cutoff_mm=self.cfg.cutoff,
+            keep_aspect=self.keep_aspect_ratio
         )
 
         module = inspect.getmodule(inspect.stack()[2][0])
@@ -184,6 +194,7 @@ class Exporter:
             padding_mm=self.cfg.margin,
             output_bounds=MinmaxMapping.maps[self.cfg.type],
             cutoff_mm=self.cfg.cutoff,
+            keep_aspect=self.keep_aspect_ratio
         )
 
         sizename = PaperSizeName.names[self.cfg.dimension]
@@ -283,6 +294,7 @@ class ExportWrapper:
         hpgl_pen_layer_mapping=None,
         hpgl_linetype_mapping=None,
         export_reversed=None,
+        keep_aspect_ratio=False,
     ):
         config = Config()
         config.type = ptype
@@ -300,6 +312,7 @@ class ExportWrapper:
         exp.gcode_speed = gcode_speed
         exp.layer_pen_mapping = hpgl_pen_layer_mapping
         exp.linetype_mapping = hpgl_linetype_mapping
+        exp.keep_aspect_ratio = keep_aspect_ratio
         exp.run(True, True)
         if export_reversed:
             exp.paths.reverse()

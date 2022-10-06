@@ -191,7 +191,7 @@ class RealtimeRenderer(arcade.Window):
         fn = folder / f"{DateHandler().utc_timestamp()}_{suffix}.png"
         folder.mkdir(parents=True, exist_ok=True)
         log.good(f"saving {fn.as_posix()}")
-        arcade.get_image().save(fn.as_posix(), "PNG")
+        arcade.get_image(0, 0, self.width, self.height).save(fn.as_posix(), "PNG")
 
     def enter_fullscreen(self, rr: RealtimeRenderer):
         rr.set_fullscreen(not rr.fullscreen)
@@ -200,11 +200,11 @@ class RealtimeRenderer(arcade.Window):
         self._draw_gui = not self._draw_gui
 
     def __init__(self, width, height, title):
-        super().__init__(width, height, title)
+        super().__init__(width=width, height=height, title=title, samples=16)
         arcade.set_background_color(arcade.color.GRAY)
         self.__title = title
         self.colors = [
-            getattr(arcade.color, color)
+            (color, getattr(arcade.color, color))
             for color in dir(arcade.color)
             if not color.startswith("__")
         ]
@@ -260,7 +260,7 @@ class RealtimeRenderer(arcade.Window):
 
     def add_point(self, po: Position, width: int = 5, color: arcade.color = None):
         if not color:
-            color = random.choice(self.colors)
+            color = random.choice(self.colors)[1]
         _x = po.x
         _y = self.height - po.y
         point = arcade.create_ellipse(_x, _y, width, width, color)
@@ -268,7 +268,7 @@ class RealtimeRenderer(arcade.Window):
 
     def add_path(self, p: Path, line_width: float = 5, color: arcade.color = None):
         if not color:
-            color = random.choice(self.colors)
+            color = random.choice(self.colors)[1]
 
         # in arcade the coordinate origin is at the bottom left *facepalm*
         new_tups = []
@@ -282,7 +282,7 @@ class RealtimeRenderer(arcade.Window):
     def add_polygon(self, p: Path, color: arcade.color = None):
         # assert p.is_closed()
         if not color:
-            color = random.choice(self.colors)
+            color = random.choice(self.colors)[1]
 
         self.shapes.append(arcade.create_polygon(p.as_tuple_list(), color))
 
@@ -290,7 +290,7 @@ class RealtimeRenderer(arcade.Window):
         self, c: Collection, line_width: float = 5, color: arcade.color = None
     ):
         if not color:
-            color = random.choice(self.colors)
+            color = random.choice(self.colors)[1]
         [self.add_path(p, line_width, color) for p in c]
 
     def on_draw(self):
