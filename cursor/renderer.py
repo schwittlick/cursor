@@ -191,7 +191,14 @@ class RealtimeRenderer(arcade.Window):
         fn = folder / f"{DateHandler().utc_timestamp()}_{suffix}.png"
         folder.mkdir(parents=True, exist_ok=True)
         log.good(f"saving {fn.as_posix()}")
-        arcade.get_image(0, 0, self.width, self.height).save(fn.as_posix(), "PNG")
+        try:
+            arcade.get_image(0, 0, self.width, self.height).save(fn.as_posix(), "PNG")
+        except ValueError as ve:
+            pass
+        except OSError as oe:
+            pass
+        finally:
+            pass
 
     def enter_fullscreen(self, rr: RealtimeRenderer):
         rr.set_fullscreen(not rr.fullscreen)

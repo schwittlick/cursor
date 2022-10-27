@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from shapely.geometry import LineString, MultiLineString, JOIN_STYLE, Point
 from shapely.geometry.base import BaseGeometry
+from shapely.ops import unary_union
 
 from cursor.misc import mix
 from cursor.misc import map
@@ -18,6 +19,7 @@ import math
 import hashlib
 import wasabi
 import copy
+import collections
 import typing
 from scipy import stats
 from scipy import spatial
@@ -713,6 +715,25 @@ class Path:
 
         return return_paths
 
+    def intersection_points(self) -> list:
+        ls = LineString(self.as_tuple_list())
+        mls = unary_union(ls)
+
+        try:
+            coords_list = []
+            for non_itersecting_ls in mls:
+                coords_list.extend(non_itersecting_ls.coords)
+
+            return [
+                item
+                for item, count in collections.Counter(coords_list).items()
+                if count > 1
+            ]
+        except TypeError as te:
+            log.warn("Couldnt calculate intersection points")
+            log.warn(f"{te}")
+            return []
+
     @staticmethod
     def clamp(n, smallest, largest):
         return max(smallest, min(n, largest))
@@ -862,3 +883,33 @@ class Path:
         current.add_position(self.vertices[-1])
         paths_list.append(current)
         return paths_list
+
+    def clip_shapely(self, bb: BoundingBox) -> typing.List[Path]:
+        def iter_and_return_path(offset: BaseGeometry) -> Path:
+            pa = Path()
+            for x, y in offset.coords:
+                pa.add(x, y)
+            return pa
+
+        def add_if(pa: Path, out: typing.List[Path]):
+            if len(pa) > 2:
+                pa.simplify(0.01)
+                out.append(pa)
+
+        from shapely.ops import clip_by_rect
+
+        line = LineString(self.as_tuple_list())
+        result = clip_by_rect(line, bb.x, bb.y, bb.x2, bb.y2)
+
+        return_paths = []
+
+        if type(result) is MultiLineString:
+            for poi in result.geoms:
+                pa = iter_and_return_path(poi)
+                add_if(pa, return_paths)
+
+        elif type(result) is LineString:
+            pa = iter_and_return_path(result)
+            add_if(pa, return_paths)
+
+        return return_paths
