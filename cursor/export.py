@@ -172,7 +172,7 @@ class Exporter:
 
                 jpeg_folder = DataDirHandler().jpg(self.name)
                 jpeg_renderer = JpegRenderer(jpeg_folder)
-                jpeg_renderer.render(pc, scale=8.0)
+                jpeg_renderer.render(pc, scale=4.0)
                 jpeg_renderer.save(f"{fname}")
 
         if source:
@@ -313,7 +313,7 @@ class ExportWrapper:
         exp.layer_pen_mapping = hpgl_pen_layer_mapping
         exp.linetype_mapping = hpgl_linetype_mapping
         exp.keep_aspect_ratio = keep_aspect_ratio
-        exp.run(True, True)
+        exp.run(False, False)
         if export_reversed:
             exp.paths.reverse()
             exp.suffix = exp.suffix + "_reversed_"

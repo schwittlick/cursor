@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from shapely.geometry import LineString
+
 from cursor.position import Position
 from cursor.path import Path
 from cursor.bb import BoundingBox
@@ -353,6 +355,10 @@ class Collection:
 
         self.__paths = pp
 
+    def clip_shapely(self, bb: BoundingBox) -> None:
+        for p in self.__paths:
+            p.clip_shapely(bb)
+
     def fit(
         self,
         size=tuple[int, int],
@@ -420,6 +426,26 @@ class Collection:
         self.scale(xscale, yscale)
 
         # centering
+        self.move_to_center(width, height, output_bounds)
+
+        if cutoff_mm is not None:
+            cuttoff_margin_diff = padding_mm - cutoff_mm
+
+            if cuttoff_margin_diff > 0:
+                return
+
+            cuttoff_margin_diff_x = cuttoff_margin_diff * xy_factor[0]
+            cuttoff_margin_diff_y = cuttoff_margin_diff * xy_factor[1]
+
+            cutoff_bb = self.bb()
+            cutoff_bb.x -= cuttoff_margin_diff_x
+            cutoff_bb.x2 += cuttoff_margin_diff_x
+            cutoff_bb.y -= cuttoff_margin_diff_y
+            cutoff_bb.y2 += cuttoff_margin_diff_y
+
+            self.__paths = [x for x in self.__paths if x.inside(cutoff_bb)]
+
+    def move_to_center(self, width, height, output_bounds=None):
         _bb = self.bb()
         paths_center = _bb.center()
 
@@ -438,23 +464,6 @@ class Collection:
         )
 
         self.translate(diff[0], diff[1])
-
-        if cutoff_mm is not None:
-            cuttoff_margin_diff = padding_mm - cutoff_mm
-
-            if cuttoff_margin_diff > 0:
-                return
-
-            cuttoff_margin_diff_x = cuttoff_margin_diff * xy_factor[0]
-            cuttoff_margin_diff_y = cuttoff_margin_diff * xy_factor[1]
-
-            cutoff_bb = self.bb()
-            cutoff_bb.x -= cuttoff_margin_diff_x
-            cutoff_bb.x2 += cuttoff_margin_diff_x
-            cutoff_bb.y -= cuttoff_margin_diff_y
-            cutoff_bb.y2 += cuttoff_margin_diff_y
-
-            self.__paths = [x for x in self.__paths if x.inside(cutoff_bb)]
 
     def reorder_quadrants(self, xq: int, yq: int) -> None:
         if xq < 2 and yq < 2:
