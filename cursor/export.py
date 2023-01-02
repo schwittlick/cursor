@@ -197,6 +197,9 @@ class Exporter:
             keep_aspect=self.keep_aspect_ratio
         )
 
+        distance_mm = int(self.paths.calc_travel_distance(XYFactors.fac[self.cfg.type][0]))
+        log.info(f"Total pen-down distance: {distance_mm / 1000}meters")
+
         sizename = PaperSizeName.names[self.cfg.dimension]
         machinename = PlotterName.names[self.cfg.type]
         h = hashlib.sha256(ms.encode("utf-8")).hexdigest()

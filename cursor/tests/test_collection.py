@@ -7,6 +7,8 @@ import pytest
 import random
 import math
 
+from cursor.position import Position
+
 
 def test_pathcollection_minmax():
     pcol = Collection()
@@ -493,6 +495,13 @@ def test_collection_limit():
 
     for p in c:
         assert len(p) == 5
+
+
+def test_collection_travel_distance():
+    c = Collection()
+    c.add(Path([Position(0, 0), Position(10, 0), Position(10, 10)]))
+    dist = c.calc_travel_distance(40)
+    assert dist == 0.5
 
 
 def test_pathcollection_line_types():

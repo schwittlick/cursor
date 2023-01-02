@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from shapely.geometry import LineString
-
 from cursor.position import Position
 from cursor.path import Path
 from cursor.bb import BoundingBox
@@ -10,6 +8,7 @@ from cursor.sorter import Sorter
 from cursor.data import DataDirHandler
 
 import numpy as np
+from functools import reduce
 import pandas as pd
 import datetime
 import pytz
@@ -358,6 +357,9 @@ class Collection:
     def clip_shapely(self, bb: BoundingBox) -> None:
         for p in self.__paths:
             p.clip_shapely(bb)
+
+    def calc_travel_distance(self, fac) -> float:
+        return reduce(lambda a, b: a + b, [x.distance / fac for x in self.__paths])
 
     def fit(
         self,
