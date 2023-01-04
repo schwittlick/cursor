@@ -103,6 +103,14 @@ class JsonCompressor:
         return decompressed
 
 
+class HPGLLoader:
+    def __init__(self, fn: pathlib.Path):
+        from hpgl.cli import hpgl2svg 
+        from hpgl.hpgl import parse_hpgl 
+
+        # why parse hpgl
+        pathlist = parse_hpgl(fn.as_posix())
+
 class Loader:
     def __init__(
         self,
