@@ -167,8 +167,8 @@ def parse_hpgl(gl_file):
     char_rel_width = 0.0075
     char_rel_height = 0.0075
 
-    char_abs_width = 0
-    char_abs_height = 0
+    # char_abs_width = 0
+    # char_abs_height = 0
 
     pen_width = 1
     stroke_weight = 0
@@ -334,7 +334,7 @@ def parse_hpgl(gl_file):
             # rise = float(s)
         elif cmd == 'DF':
             # defaults
-            pen_down = False
+            # pen_down = False
             cur_pen = 1
             cur_x = 0
             cur_y = 0
