@@ -99,7 +99,7 @@ class DataDirHandler:
 
     def test_recordings(self) -> pathlib.Path:
         return self.test_data_dir / "test_recordings"
-    
+
     def test_hpgl(self) -> pathlib.Path:
         return self.test_data_dir / "test_hpgl"
 

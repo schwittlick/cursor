@@ -127,7 +127,6 @@ class HPGLLoader:
                     c.add(pa)
         return c
 
-
     @staticmethod
     def is_file_and_hpgl(path: pathlib.Path) -> bool:
         if path.is_file() and path.as_posix().endswith(".hpgl"):
