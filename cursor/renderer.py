@@ -193,9 +193,9 @@ class RealtimeRenderer(arcade.Window):
         log.good(f"saving {fn.as_posix()}")
         try:
             arcade.get_image(0, 0, self.width, self.height).save(fn.as_posix(), "PNG")
-        except ValueError as ve:
+        except ValueError:
             pass
-        except OSError as oe:
+        except OSError:
             pass
         finally:
             pass

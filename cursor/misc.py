@@ -108,22 +108,20 @@ def generate_perlin_noise_2d(shape, res):
     return np.sqrt(2) * ((1 - t[:, :, 1]) * n0 + t[:, :, 1] * n1)
 
 
-def map(value, inputMin, inputMax, outputMin, outputMax, clamp):
-    outVal = (value - inputMin) / (inputMax - inputMin) * (
-            outputMax - outputMin
-    ) + outputMin
+def map(value, imin, imax, omin, omax, clamp):
+    outVal = (value - imin) / (imax - imin) * (omax - omin) + omin
 
     if clamp:
-        if outputMax < outputMin:
-            if outVal < outputMax:
-                outVal = outputMax
-            elif outVal > outputMin:
-                outVal = outputMin
+        if omax < omin:
+            if outVal < omax:
+                outVal = omax
+            elif outVal > omin:
+                outVal = omin
     else:
-        if outVal > outputMax:
-            outVal = outputMax
-        elif outVal < outputMin:
-            outVal = outputMin
+        if outVal > omax:
+            outVal = omax
+        elif outVal < omin:
+            outVal = omin
     return outVal
 
 
@@ -247,13 +245,13 @@ def parse_hpgl(gl_file):
             while c != ',':
                 s += c
                 c = glf.read(1)
-            char_abs_width = float(s)
+            # char_abs_width = float(s)
             s = ''
             c = glf.read(1)
             while c != ';':
                 s += c
                 c = glf.read(1)
-            char_abs_height = float(s)
+            # char_abs_height = float(s)
         elif cmd == 'PA':
             # plot absolute
 
@@ -354,7 +352,7 @@ def parse_hpgl(gl_file):
             label_term_print = False
         elif cmd == 'IN':
             # init
-            pen_down = False
+            # pen_down = False
             cur_pen = 1
             cur_x = 0
             cur_y = 0
