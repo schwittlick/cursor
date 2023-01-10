@@ -2,10 +2,10 @@
 
 | Name                           | Who     | Size  | Status                  | Connection        | Language | Pen connection    | Pen count |
 | ------------------------------ | ------- | ----- | ----------------------- | ----------------- | -------- | ----------------- | --------- |
-| DPX3300                        | Marcel  | A1    | OK                      | *DP25 & Parallel  | HPGL     | *HP/RO            | 8         |
+| [DPX3300](dpx3300.md)          | Marcel  | A1    | OK                      | *DP25 & Parallel  | HPGL     | *HP/RO            | 8         |
 | DPX3300                        | Marcel  | A1    | Y-Axis <br>broken       | DP25 & Parallel   | HPGL     | HP/RO             | 8         |
-| HP 7550 Plus                   | Marcel  | A3    |                         | DP25 F & HP-IB    | HPGL     | HP/RO             | 8         |
-| HP 7550A                       | Marcel  | A3    | OK                      | DP25 F & HP-IB    | HPGL     | HP/RO             | 8         |
+| HP 7550 Plus                   | Marcel  | A3    |  OK (Serial)                      | DP25 F & HP-IB    | HPGL     | HP/RO             | 8         |
+| HP 7550A                       | Marcel  | A3    | OK (Serial)                     | DP25 F & HP-IB    | HPGL     | HP/RO             | 8         |
 | Graphtec MP2000                | Marcel  | A3    |                         | DP25 M & HP-IB    |          |                   | 8         |
 | Graphtec MP3100                | Marcel  | A3    |                         | DP25 M & HP-IB    |          |                   | 8         |
 | Phoenix Contact CMS-P1-Plotter | Marcel  | A3    |                         | DP15 M / Parallel |          |                   | 4         |

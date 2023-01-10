@@ -99,6 +99,11 @@ Joystick disconnected on the inside
     python sendhpgl.py /dev/ttyUSB0 1200 0 ~/../plot/digii/None_simple_rect_example_simple_rect_landscape_a1_digiplot_a1_1dbf7144266374ee479325f40560b78250e73b321b75a7b63d2d1147160e00cc.digi 
 
 
+#### HP 7550A
+
+usw gender switcher
+when loading paper, press top left button first to change source to manually feed paper
+
 #### HP 7470A
 
     OH; does not work..
