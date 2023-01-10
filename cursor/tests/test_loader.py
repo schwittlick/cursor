@@ -1,4 +1,4 @@
-from cursor.loader import Loader
+from cursor.loader import Loader, HPGLLoader
 from cursor.data import DataDirHandler
 
 import pytest
@@ -10,6 +10,13 @@ def test_loader_simple():
 
     rec = ll.all_collections()
     assert len(rec) == 3
+
+
+def test_hpglloader_simple():
+    dir = DataDirHandler().test_hpgl()
+    hp = HPGLLoader(directory=dir)
+    c = hp.all()
+    assert len(c) == 1
 
 
 def test_loader_keys():

@@ -2,7 +2,7 @@ from cursor.data import DateHandler
 from cursor.path import Path
 from cursor.position import Position
 from cursor.collection import Collection
-from cursor.misc import Timer
+from cursor.misc import Timer, parse_hpgl
 
 import wasabi
 import typing
@@ -103,20 +103,44 @@ class JsonCompressor:
         return decompressed
 
 
-
 class HPGLLoader:
-    def __init__(self, fn: pathlib.Path):
-        from misc import parse_hpgl
+    """
+    Parse HPGL so its possible to re-open files & look at via vpype?
+    """
 
-        # why parse hpgl
-        pathlist = parse_hpgl(fn.as_posix())
+    def __init__(self, directory: pathlib.Path):
+        assert directory
+        self.directory = directory
+
+    def all(self) -> Collection:
+        hpgl_files = [
+            f for f in self.directory.iterdir() if self.is_file_and_hpgl(self.directory / f)
+        ]
+
+        c = Collection()
+        for f in hpgl_files:
+            pathlist, w, h = parse_hpgl(f.as_posix())
+            for pen, pw, points in pathlist:
+                pa = Path.from_tuple_list(points)
+                pa.pen_select = pen
+                if len(pa) > 1:
+                    c.add(pa)
+        return c
+
+
+    @staticmethod
+    def is_file_and_hpgl(path: pathlib.Path) -> bool:
+        if path.is_file() and path.as_posix().endswith(".hpgl"):
+            return True
+        return False
+
 
 class Loader:
     def __init__(
-        self,
-        directory: pathlib.Path = None,
-        limit_files: typing.Union[int, list[str]] = None,
-        load_keys: bool = False,
+            self,
+            directory: pathlib.Path = None,
+            limit_files: typing.Union[int, list[str]] = None,
+            load_keys: bool = False,
     ):
         self._recordings = []
         self._keyboard_recordings = []
@@ -127,10 +151,10 @@ class Loader:
             )
 
     def load_all(
-        self,
-        directory: pathlib.Path,
-        limit_files: typing.Union[int, list[str]] = None,
-        load_keys: bool = False,
+            self,
+            directory: pathlib.Path,
+            limit_files: typing.Union[int, list[str]] = None,
+            load_keys: bool = False,
     ) -> None:
         t = Timer()
         t.start()

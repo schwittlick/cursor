@@ -153,7 +153,7 @@ def parse_hpgl(gl_file):
     THE SOFTWARE.
     """
 
-    border = 10
+    border = 0
 
     pen_down = False
     cur_pen = 1
@@ -178,6 +178,7 @@ def parse_hpgl(gl_file):
     label_term = chr(3)
     label_term_print = False
 
+    pts = []
     paths = []
     labels = []
 
@@ -188,20 +189,29 @@ def parse_hpgl(gl_file):
 
     while True:
         c = glf.read(1)
-        while c == ';' or c == ' ' or c == '\r' or c == '\n':
+        c_str = c.decode()
+        while c_str == ';' or c_str == ' ' or c_str == '\r' or c_str == '\n':
             c = glf.read(1)
+            c_str = c.decode()
+
         cmd = c + glf.read(1)
         cmd = cmd.upper()
 
         if len(cmd) < 2:
             break
 
+        cmd = cmd.decode()
+
         if cmd == 'PU':
             # pen up
             pen_down = False
+            paths.append((cur_pen, pen_width, pts))
+            pts = []
         elif cmd == 'PD':
             # pen down
             pen_down = True
+            paths.append((cur_pen, pen_width, pts))
+            pts = []
         elif cmd == 'SP':
             # select pen
             c = glf.read(1)
@@ -248,8 +258,6 @@ def parse_hpgl(gl_file):
             # plot absolute
 
             c = ''
-            pts = [(cur_x, cur_y, cto_x, cto_y)]
-
             while c != ';':
                 s = ''
                 c = glf.read(1)
@@ -258,29 +266,34 @@ def parse_hpgl(gl_file):
                     cur_y = 0
                     cto_x = 0
                     cto_y = 0
-                    pts.append((0,0,0,0))
+                    pts.append((0,0))
                     break
-                while c == '-' or ord(c) >= 48 and ord(c) <= 57:
-                    s += c
+                while c.decode() == '-' or ord(c) >= 48 and ord(c) <= 57:
+                    s += c.decode()
                     c = glf.read(1)
 
+                if len(s) < 1:
+                    break
                 cur_x = int(s)
 
                 s = ''
                 c = glf.read(1)
-                while c == '-' or ord(c) >= 48 and ord(c) <= 57:
-                    s += c
+                while c.decode() == '-' or ord(c) >= 48 and ord(c) <= 57:
+                    s += c.decode()
                     c = glf.read(1)
 
+                if len(s) < 1:
+                    break
                 cur_y = int(s)
 
                 cto_x = 0
                 cto_y = 0
 
-                pts.append((cur_x, cur_y, 0, 0))
+                pts.append((cur_x, cur_y))
 
-            if pen_down:
-                paths.append((cur_pen, pen_width, pts))
+            #if pen_down:
+            #    if len(pts) > 1:
+            #        paths.append((cur_pen, pen_width, pts))
         elif cmd == 'LB':
             # label
 
@@ -383,14 +396,14 @@ def parse_hpgl(gl_file):
     max_y = round(max_y+0.5)
 
     # add text offsets
-    paths2 = []
-    for path in paths:
-        pen, width, pts = path
-        pts2 = []
-        for p in pts:
-            pts2.append((p[0] + p[2]*max_x, p[1] + p[3]*max_y))
-        paths2.append((pen, width, pts2))
-    paths = paths2
+    #paths2 = []
+    #for path in paths:
+    #    pen, width, pts = path
+    #    pts2 = []
+    #    for p in pts:
+    #        pts2.append((p[0] + p[2]*max_x, p[1] + p[3]*max_y))
+    #    paths2.append((pen, width, pts2))
+    #paths = paths2
 
     # render text
     for lb in labels:
@@ -414,16 +427,18 @@ def parse_hpgl(gl_file):
     max_x += border*2
     max_y += border*2
 
-    # flip y axis and shift
-    paths2 = []
-    for path in paths:
-        pen, width, pts = path
-        pts2 = []
-        for p in pts:
-            pts2.append((p[0]+border, max_y-p[1]-border))
-        paths2.append((pen, width, pts2))
+    return paths, max_x, max_y
 
-    return paths2, max_x, max_y
+    # flip y axis and shift
+    #paths2 = []
+    #for path in paths:
+    #    pen, width, pts = path
+    #    pts2 = []
+    #    for p in pts:
+    #        pts2.append((p[0]+border, max_y-p[1]-border))
+    #    paths2.append((pen, width, pts2))
+
+    #return paths2, max_x, max_y
 
 
 stick_font = {
