@@ -153,7 +153,7 @@ def parse_hpgl(gl_file):
 
     border = 0
 
-    pen_down = False
+    # pen_down = False
     cur_pen = 1
     cur_x = 0
     cur_y = 0
@@ -202,12 +202,12 @@ def parse_hpgl(gl_file):
 
         if cmd == 'PU':
             # pen up
-            pen_down = False
+            # pen_down = False
             paths.append((cur_pen, pen_width, pts))
             pts = []
         elif cmd == 'PD':
             # pen down
-            pen_down = True
+            # pen_down = True
             paths.append((cur_pen, pen_width, pts))
             pts = []
         elif cmd == 'SP':
