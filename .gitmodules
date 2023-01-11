@@ -7,3 +7,6 @@
 [submodule "data/compositions"]
 	path = data/compositions
 	url = git@github.com:schwittlick/compositions.git
+[submodule "deps/sdf"]
+	path = deps/sdf
+	url = git@github.com:schwittlick/sdf.git
