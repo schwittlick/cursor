@@ -8,7 +8,6 @@
 | Graphtec MP3100                | Marcel  | A3    |                         | DP25 M & HP-IB    |          |                   | 8         |
 | Phoenix Contact CMS-P1-Plotter | Marcel  | A3    |                         | DP15 M / Parallel |          |                   | 4         |
 | HP 7470A                       | Marcel  | A4    | OK                      | DP25 M            | HPGL     |                   | 2         |
-| HP 7470A                       | Marcel  | A4    |                         | HP-IB             | HPGL     |                   | 2         |
 | HP 7475A                       | Marcel  | A3/A4 |                         | DP25 M            | HPGL     | HP/RO             | 6         |
 | HP 7475A                       | Marcel  | A3/A4 |                         | DP25 M            | HPGL     | HP/RO             | 6         |
 | HP 7475A                       | Marcel  | A3/A4 |                         | DP25 M            | HPGL     | HP/RO             | 6         |
@@ -28,11 +27,12 @@
 | HP DraftMaster RX Plus         | Marcel  | A0    | X-Axis <br>broken       | DP25 M & HP-IB    | HPGL     |                   | 8         |
 | HP DraftMaster II              | Marcel  | A0    | OK                      | DP25 M & HP-IB    | HPGL     |                   | 8         |
 | HP DraftPro EXL                | Brendan | A0    |                         | DP25 M            | HPGL     | HP/RO             | 8         |
-| HP 7580B                       | Marcel  | ??    |                         | DP25 M            | HPGL     | HP/RO             | 8         |
+| HP 7580B                       | Marcel  | A1    | Missing carousel        | DP25 M            | HPGL     | HP/RO             | 8         |
 | Calcomp 1023                   | Marcel  | ~A1   | paper wheels <br>broken | DP25 M            |          | Calcomp pens      | 8         |
 | Aritma 512                     | Marcel  | A3    |                         | DP9 M             |          | HP/RO             | 8         |
 | Sekonic SPL-430                | Marcel  | A4    |                         | DP25M & Parallel  |          |                   |           |
-| HP ColorPro                    | Marcel  | A4    |                         | CCIT T            | HPGL     |                   |           |
+| HP ColorPro                    | Marcel  | A4    |                         | CCIT T            | HPGL     |                   | 6         |
+| HP ColorPro                    | Marcel  | A4    |                         | HP-IB             | HPGL     |                   | 6         |
 | Panasonic KX-L09D              | Marcel  | A4    | no docu                 | dp25 M            | ???      |                   |           |
 | Roland CAMM-1 PNC-1000         | Marcel  | ~A2   | OK                      |                   | HPGL     | HP/RO             | 1         |
 | Aritma Minigraph 0507          | Marcel  | A4    | NOK                     | DP25 F            |          |                   | 1         |
