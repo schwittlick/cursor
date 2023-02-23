@@ -27,6 +27,9 @@ class PlotterType(Enum):
     HP_7470A = 17
     HP_7550A = 18
     HP_7595A_A2 = 19
+    ROLAND_PNC1000_50x100 = 20
+    HP_7595A_A0 = 21
+
 
 
 class ExportFormat(Enum):
@@ -60,6 +63,9 @@ class ExportFormatMappings:
         PlotterType.HP_7470A: ExportFormat.HPGL,
         PlotterType.HP_7550A: ExportFormat.HPGL,
         PlotterType.HP_7595A_A2: ExportFormat.HPGL,
+        PlotterType.ROLAND_PNC1000_50x100: ExportFormat.HPGL,
+        PlotterType.HP_7595A_A0: ExportFormat.HPGL,
+
     }
 
 
@@ -85,6 +91,7 @@ class PaperSize(Enum):
     SQUARE_59_59 = 18
     SQUARE_25_25 = 19
     LANDSCAPE_A1_HP_7596B = 20
+    PORTRAIT_50_100 = 21
 
 
 class MinmaxMapping:
@@ -100,8 +107,10 @@ class MinmaxMapping:
         PlotterType.ROLAND_DXY980: BB(0, 0, 16158, 11040),
         PlotterType.HP_7595A: BB(-23160, -17602, 23160 + 1160, 17602),
         # HP_7595A: minimum 35mm padding
-        PlotterType.ROLAND_PNC1000: BB(0, 0, 17200, 40000),  # actually unlimited y
+        PlotterType.ROLAND_PNC1000: BB(0, 0, 18800, 40000),  # actually unlimited y
+        PlotterType.ROLAND_PNC1000_50x100: BB(260, 560, 18700, 39000),  # for 50x100cm paper centered
         PlotterType.HP_7595A_A3: BB(-7728, -5752, 7728 + 960, 5752),
+        PlotterType.HP_7595A_A0: BB(-21760, -15400, 22880, 15480),
         PlotterType.TEKTRONIX_4662: BB(0, 0, 4095, 2731),
         # tekronix: 10x15 inches (25.4 x 38.1 cm)
         PlotterType.HP_7596B: BB(-15500, -11100, 15500 + 22 * 40, 11100),
@@ -136,6 +145,8 @@ class PlotterName:
         PlotterType.HP_7470A: "hp7470a",
         PlotterType.HP_7550A: "hp7550a",
         PlotterType.HP_7595A_A2: "hp7595a_draftmaster_sx_a2",
+        PlotterType.ROLAND_PNC1000_50x100: "roland_pnc1000",
+        PlotterType.HP_7595A_A0: "hp7595a_draftmaster_sx_a0",
     }
 
 
@@ -161,6 +172,8 @@ class XYFactors:
         PlotterType.HP_7470A: (40, 40),
         PlotterType.HP_7550A: (40, 40),
         PlotterType.HP_7595A_A2: (40, 39.5),
+        PlotterType.ROLAND_PNC1000_50x100: (40.04, 40.04),
+        PlotterType.HP_7595A_A0: (39.9, 40.04),
     }
 
 
@@ -187,6 +200,7 @@ class PaperSizeName:
         PaperSize.SQUARE_59_59: "square_59_59",
         PaperSize.SQUARE_25_25: "square_25_25",
         PaperSize.LANDSCAPE_A1_HP_7596B: "landscape_a1",
+        PaperSize.PORTRAIT_50_100: "portrait_50x100",
     }
 
 
@@ -204,7 +218,7 @@ class Paper:
         PaperSize.LANDSCAPE_A4: (297, 210),
         PaperSize.PORTRAIT_A4: (210, 297),
         PaperSize.LANDSCAPE_A1: (841, 594),
-        PaperSize.LANDSCAPE_A0: (1189, 841),
+        PaperSize.LANDSCAPE_A0: (1119, 771),
         PaperSize.PORTRAIT_A3: (297, 420),
         PaperSize.LANDSCAPE_A3: (420, 297),
         PaperSize.LANDSCAPE_80_50: (800, 500),
@@ -213,4 +227,5 @@ class Paper:
         PaperSize.SQUARE_59_59: (590, 590),
         PaperSize.SQUARE_25_25: (215, 170),
         PaperSize.LANDSCAPE_A1_HP_7596B: (776, 555),
+        PaperSize.PORTRAIT_50_100: (460, 960),
     }
