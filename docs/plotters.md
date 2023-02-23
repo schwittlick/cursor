@@ -12,6 +12,7 @@
 | HP 7475A                       | Marcel  | A3/A4 |                         | DP25 M            | HPGL     | HP/RO             | 6         |
 | HP 7475A                       | Marcel  | A3/A4 |                         | DP25 M            | HPGL     | HP/RO             | 6         |
 | HP 7475A                       | Marcel  | A3/A4 | Cutter mod              | DP25 M            | HPGL     | HP/RO             | 6         |
+| HP 7475A                       | Marcel  | A3/A4 | Cutter mod              | DP25 M            | HPGL     | HP/RO             | 6         |
 | HP 7475A                       | Marcel  | A3/A4 |                         | HP-IB             | HPGL     | HP/RO             | 6         |
 | Roland DXY 980                 | Marcel  | A3    |                         | DP25 M & HP-IB    | HPGL     | HP/RO             | 8         |
 | Roland DXY 885                 | Marcel  | A3    |                         | DP25 M & HP-IB    | HPGL     | HP/RO             | 8         |

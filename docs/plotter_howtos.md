@@ -40,6 +40,7 @@
     - usb to parallel port adapter
     - chmod 777 /dev/usb/lp0
     - cat file.hpgl /dev/usb/lp0
+    - or via serial: OI: 1000; OH: 18800,64000
 
 #### HP7475a GPIB HPIB
     https://pearl-hifi.com/06_Lit_Archive/15_Mfrs_Publications/20_HP_Agilent/HP_7475A_Plotter/HP_7475A_Op_Interconnect.pdf
