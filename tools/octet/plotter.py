@@ -6,16 +6,20 @@ class Plotter:
         self.port = port
         self.baud = baud
         self.timeout = timeout
-        self.client = Client()
+        self.ip = "192.168.2.124"
+        self.client = Client(self.ip)
+        self.is_connected = False
 
     def __prefix(self):
         return f"{self.port},{self.baud},{self.timeout},"
 
     def connect(self):
         self.client.connect()
+        self.is_connected = True
 
     def disconnect(self):
         self.client.close()
+        self.is_connected = False
 
     def open_serial(self):
         self.client.send(f"{self.__prefix()}OPEN")

@@ -40,19 +40,38 @@ if __name__ == '__main__':
         CONNECT_Y = 1
 
         button = lp.poll()
+
         if button != []:
-            print(button)
-            p = plotters[0]
-            if button[0] == 0 and button[1] == 1 and button[2]:
+            if button[0] == 0 and button[1] == 0:
+                logger.fail("RESET Novation")
+                for i in range(8):
+                    for j in range(8):
+                        lp.lp.LedCtrlXY(i, j, 0, 0)
+                continue
+
+            p = plotters[button[0]]
+
+            if button[2]:
                 lp.lp.LedCtrlXY(button[0], button[1], 1, 1)
-            if button[0] == 0 and button[1] == 1 and not button[2]:
-                p.open_serial()
-                success, data = p.recv()
-                print(success)
-                if success:
-                    lp.lp.LedCtrlXY(button[0], button[1], 1, 1)
+            else:
+                # TODO: this should check for serial.is_open() on server side
+                # add a protocol entry to server.py: IS_OPEN
+                if p.is_connected:
+                    p.close_serial()
+                    success, data = p.recv()
+                    logger.info(success, data)
+                    if success:
+                        lp.lp.LedCtrlXY(button[0], button[1], 0, 0)
+                    else:
+                        lp.lp.LedCtrlXY(button[0], button[1], 1, 1)
                 else:
-                    lp.lp.LedCtrlXY(button[0], button[1], 0, 0)
+                    p.open_serial()
+                    success, data = p.recv()
+                    logger.info(success, data)
+                    if success:
+                        lp.lp.LedCtrlXY(button[0], button[1], 1, 1)
+                    else:
+                        lp.lp.LedCtrlXY(button[0], button[1], 0, 0)
 
     timer.print_elapsed("end")
 
