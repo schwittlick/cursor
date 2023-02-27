@@ -498,7 +498,6 @@ class Path:
         removes consecutive duplicates
         """
         prev = Position()
-
         self.vertices = [prev := v for v in self.vertices if prev.x != v.x or prev.y != v.y]  # noqa: F841
 
     def limit(self) -> None:
