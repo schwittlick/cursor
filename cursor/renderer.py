@@ -228,8 +228,13 @@ class RealtimeRenderer(arcade.Window):
         self.add_cb(arcade.key.F, self.enter_fullscreen, False)
         self.add_cb(arcade.key.G, self.toggle_gui, False)
 
+        self.background = None
+
         self.manager = UIManager()
         self.manager.enable()
+
+    def set_bg(self, p: pathlib.Path):
+        self.background = arcade.load_texture(p)
 
     def add_slider(self):
         ui_slider = UISlider(value=50, width=300, height=50)
@@ -242,8 +247,11 @@ class RealtimeRenderer(arcade.Window):
 
         self.manager.add(UIAnchorWidget(child=ui_slider))
 
-    def set_bg_color(self, col: arcade.color):
-        arcade.set_background_color(col)
+    def set_bg_color(self, col: arcade.color = None):
+        if col:
+            arcade.set_background_color(col)
+        else:
+            arcade.set_background_color(random.choice(self.colors)[1])
 
     @staticmethod
     def run():
@@ -302,6 +310,10 @@ class RealtimeRenderer(arcade.Window):
 
     def on_draw(self):
         self.clear()
+
+        if self.background:
+            arcade.draw_lrwh_rectangle_textured(0, 0, self.width, self.height, self.background)
+
         self.shapes.draw()
         if self._draw_gui:
             self.manager.draw()
