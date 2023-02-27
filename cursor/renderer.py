@@ -41,7 +41,7 @@ class PathIterator:
                 yield point
 
     def connections(
-        self,
+            self,
     ) -> typing.Iterator[typing.Tuple[Position, Position]]:
         prev = None
 
@@ -111,13 +111,13 @@ class SvgRenderer:
 
 class GCodeRenderer:
     def __init__(
-        self,
-        folder: pathlib.Path,
-        feedrate_xy: int = 2000,
-        feedrate_z: int = 1000,
-        z_down: float = 3.5,
-        z_up: float = 0.0,
-        invert_y: bool = True,
+            self,
+            folder: pathlib.Path,
+            feedrate_xy: int = 2000,
+            feedrate_z: int = 1000,
+            z_down: float = 3.5,
+            z_up: float = 0.0,
+            invert_y: bool = True,
     ):
         self.save_path = folder
         self.z_down = z_down
@@ -294,7 +294,7 @@ class RealtimeRenderer(arcade.Window):
         self.shapes.append(arcade.create_polygon(p.as_tuple_list(), color))
 
     def add_collection(
-        self, c: Collection, line_width: float = 5, color: arcade.color = None
+            self, c: Collection, line_width: float = 5, color: arcade.color = None
     ):
         if not color:
             color = random.choice(self.colors)[1]
@@ -341,10 +341,10 @@ class RealtimeRenderer(arcade.Window):
 
 class HPGLRenderer:
     def __init__(
-        self,
-        folder: pathlib.Path,
-        layer_pen_mapping: dict = None,
-        line_type_mapping: dict = None,
+            self,
+            folder: pathlib.Path,
+            layer_pen_mapping: dict = None,
+            line_type_mapping: dict = None,
     ) -> None:
         self.__save_path = folder
         self.__paths = Collection()
@@ -361,8 +361,10 @@ class HPGLRenderer:
 
         _hpgl_string = ""
 
-        _hpgl_string += "SP1;\n"
-        _hpgl_string += "PA0,0\n"
+        _prev_line_type = 0
+        _prev_velocity = 0
+        _prev_force = 0
+        _prev_pen = 0
 
         first = True
         for p in self.__paths:
@@ -372,14 +374,24 @@ class HPGLRenderer:
             x = p.start_pos().x
             y = p.start_pos().y
 
-            _hpgl_string += f"SP{self.__get_pen_select(p.pen_select)};\n"
-            _hpgl_string += f"LT{self.__linetype_from_layer(p.line_type)};\n"
+            if _prev_pen != p.pen_select:
+                _hpgl_string += f"SP{self.__get_pen_select(p.pen_select)};\n"
+                _prev_pen = p.pen_select
+
+            if p.line_type:
+                if _prev_line_type != p.line_type:
+                    _hpgl_string += f"LT{self.__linetype_from_layer(p.line_type)};\n"
+                    _prev_line_type = p.line_type
 
             if p.velocity:
-                _hpgl_string += f"VS{self.__get_velocity(p.velocity)};\n"
+                if _prev_velocity != p.velocity:
+                    _hpgl_string += f"VS{self.__get_velocity(p.velocity)};\n"
+                    _prev_velocity = p.velocity
 
             if p.pen_force:
-                _hpgl_string += f"FS{self.__get_pen_force(p.pen_force)};\n"
+                if _prev_force != p.pen_force:
+                    _hpgl_string += f"FS{self.__get_pen_force(p.pen_force)};\n"
+                    _prev_force = p.pen_force
 
             _hpgl_string += f"PA{int(x)},{int(y)};\n"
             if p.is_polygon:
@@ -390,7 +402,7 @@ class HPGLRenderer:
             for line in p.vertices:
                 x = line.x
                 y = line.y
-                _hpgl_string += f"PA{int(x)},{int(y)};\n"
+                # _hpgl_string += f"PA{int(x)},{int(y)};\n"
 
             _hpgl_string += "PU;\n"
 
@@ -451,8 +463,8 @@ class HPGLRenderer:
 
 class TektronixRenderer:
     def __init__(
-        self,
-        folder: pathlib.Path,
+            self,
+            folder: pathlib.Path,
     ):
         self.__save_path = folder
         self.__paths = Collection()
@@ -523,8 +535,8 @@ class TektronixRenderer:
 
 class DigiplotRenderer:
     def __init__(
-        self,
-        folder: pathlib.Path,
+            self,
+            folder: pathlib.Path,
     ):
         self.__save_path = folder
         self.__paths = Collection()
@@ -579,11 +591,11 @@ class JpegRenderer:
         self.img_draw = None
 
     def render(
-        self,
-        paths: Collection,
-        scale: float = 1.0,
-        frame: bool = False,
-        thickness: int = 1,
+            self,
+            paths: Collection,
+            scale: float = 1.0,
+            frame: bool = False,
+            thickness: int = 1,
     ) -> None:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
@@ -706,11 +718,11 @@ class AsciiRenderer:
         return (r + g + b) * a
 
     def render(
-        self,
-        paths: Collection,
-        scale: float = 1.0,
-        frame: bool = False,
-        thickness: int = 1,
+            self,
+            paths: Collection,
+            scale: float = 1.0,
+            frame: bool = False,
+            thickness: int = 1,
     ):
         self.jpeg_renderer.render(paths, scale, frame, thickness)
 
