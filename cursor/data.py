@@ -11,8 +11,12 @@ class DateHandler:
         return utc_timestamp
 
     @staticmethod
+    def datetime_from_timestamp(ts: float):
+        return datetime.datetime.fromtimestamp(ts)
+
+    @staticmethod
     def get_timestamp_from_utc(ts: float) -> str:
-        dt = datetime.datetime.fromtimestamp(ts)
+        dt = DateHandler.datetime_from_timestamp(ts)
         return dt.strftime("%d/%m/%y %H:%M:%S.%f")
 
 
