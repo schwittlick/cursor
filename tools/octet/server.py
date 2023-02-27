@@ -3,7 +3,7 @@ import threading
 import serial
 import wasabi
 
-logger = wasabi.Printer(pretty=True, no_print=True)
+logger = wasabi.Printer(pretty=True, no_print=False)
 
 MAX_SERIAL_CONNECTIONS = 8
 
@@ -164,5 +164,5 @@ class Server:
 
 
 if __name__ == '__main__':
-    server = Server()
+    server = Server('192.168.2.124')
     server.listen()
