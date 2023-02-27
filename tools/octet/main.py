@@ -1,4 +1,4 @@
-from cursor.misc import Timer
+from cursor.timer import Timer
 from tools.octet.launchpad_wrapper import NovationLaunchpad
 
 from tools.octet.plotter import Plotter
@@ -7,14 +7,14 @@ import time
 
 logger = wasabi.Printer(pretty=True, no_print=False)
 
-CONFIG = [["COM1", "9600", "500"],
-          ["COM2", "9600", "500"],
-          ["COM3", "9600", "500"],
-          ["COM4", "9600", "500"],
-          ["COM5", "9600", "500"],
-          ["COM6", "9600", "500"],
-          ["COM7", "9600", "500"],
-          ["COM8", "9600", "500"]]
+CONFIG = [["/dev/ttyUSB1", "9600", "500"],
+          ["/dev/ttyUSB2", "9600", "500"],
+          ["/dev/ttyUSB3", "9600", "500"],
+          ["/dev/ttyUSB4", "9600", "500"],
+          ["/dev/ttyUSB5", "9600", "500"],
+          ["/dev/ttyUSB6", "9600", "500"],
+          ["/dev/ttyUSB7", "9600", "500"],
+          ["/dev/ttyUSB8", "9600", "500"]]
 
 
 def log(tup):

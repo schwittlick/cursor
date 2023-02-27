@@ -1,4 +1,4 @@
-from cursor.misc import Timer
+from cursor.timer import Timer
 
 import sys
 import wasabi

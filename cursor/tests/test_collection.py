@@ -1,7 +1,7 @@
 from cursor.path import Path
 from cursor.collection import Collection
 from cursor.bb import BoundingBox
-from cursor.misc import Timer
+from cursor.timer import Timer
 
 import pytest
 import random
