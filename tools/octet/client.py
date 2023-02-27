@@ -38,6 +38,7 @@ class Client:
         if s is None:
             return False, "No Feedback"
         s = s.decode().rstrip()
+
         # Receive the feedback message from the server
         data = self.recvall(int(s) + 2)  # a little extra
         data = data.decode()

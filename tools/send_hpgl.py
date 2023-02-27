@@ -1,6 +1,5 @@
 # Send HP-GL code to 7475A plotter
 # Copyright (C) 2019  Luca Schmid
-# Copyright (C) 2022  Marcel Schwittlick
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,43 +17,12 @@
 from argparse import ArgumentParser
 from serial import Serial
 from time import sleep
-import socket
-
-
-class TCPConnection:
-    def __init__(self, sock=None):
-        if sock is None:
-            self.sock = socket.socket(
-                socket.AF_INET, socket.SOCK_STREAM)
-        else:
-            self.sock = sock
-
-    def connect(self, host, port):
-        try:
-            self.sock.connect((host, port))
-            print('Successful Connection')
-        except:
-            print('Connection Failed')
-
-    def bind(self):
-        self.sock.bind(('localhost', 12349))
-        self.sock.listen(1)
-        conn, addr = self.sock.accept()
-        print('Connected by', addr)
-        return conn
-
-    def readlines(self):
-        data = self.sock.recv(1024).decode()
-        print(data)
-        return data
-
 
 def read_code(path):
     code = 'IN;'
     with open(path, 'r') as f:
         code = f.read()
     return code
-
 
 def check_avail(serial):
     serial.write(b'\x1B.B')
@@ -64,68 +32,40 @@ def check_avail(serial):
         if len(b) > 0:
             n = n * 10 + b[0] - 48
         b = serial.read()
-    # print(f"avail {n}")
     return n
-
 
 def show_progress(pos, total, length=100):
     fill = length * pos // total
-    print('\rProgress: [' + fill * '\u2588' + (length - fill) * '\u2591' + '] ' + str(pos) + ' of ' + str(
-        total) + ' bytes sent', end='\r')
+    print('\rProgress: [' + fill * '\u2588' + (length-fill) * '\u2591' + '] ' + str(pos) + ' of ' + str(total) + ' bytes sent', end='\r')
     if pos == total:
         print()
 
-
 def main():
-    listen = TCPConnection()
-    c = listen.bind()
-    # listen.connect('localhost', 12349)
-    # listen.readlines()
-
-    while True:
-        print("Waiting for data")
-        data = c.recv(1024)
-        if not data:
-            break
-
-    data = listen.readlines()
-    if data == 'P':
-        print('Pausing')
-        while data == 'P':
-            sleep(0.1)
-            data = listen.readlines()
-        print('Resuming')
-
     parser = ArgumentParser()
     parser.add_argument('port')
     parser.add_argument('file')
     args = parser.parse_args()
 
     serial = Serial(port=args.port, timeout=0)
-
     code = read_code(args.file)
     pos = 0
-
-    # draftmasters 1024
-    # hp 7475 & 7550 512
-    # hp 7440 255
 
     show_progress(pos, len(code))
     while pos < len(code):
         avail = check_avail(serial)
-        if avail < 1024:
+        print(avail)
+        if avail < 255:
             sleep(0.01)
             continue
 
         end = pos + avail
-        if len(code) - pos < avail:
+        if len(code)-pos < avail:
             end = len(code)
 
         serial.write(code[pos:end].encode('utf-8'))
         pos = end
 
         show_progress(pos, len(code))
-
 
 if __name__ == '__main__':
     main()
