@@ -41,7 +41,7 @@ class PathIterator:
                 yield point
 
     def connections(
-        self,
+            self,
     ) -> typing.Iterator[typing.Tuple[Position, Position]]:
         prev = None
 
@@ -111,13 +111,13 @@ class SvgRenderer:
 
 class GCodeRenderer:
     def __init__(
-        self,
-        folder: pathlib.Path,
-        feedrate_xy: int = 2000,
-        feedrate_z: int = 1000,
-        z_down: float = 3.5,
-        z_up: float = 0.0,
-        invert_y: bool = True,
+            self,
+            folder: pathlib.Path,
+            feedrate_xy: int = 2000,
+            feedrate_z: int = 1000,
+            z_down: float = 3.5,
+            z_up: float = 0.0,
+            invert_y: bool = True,
     ):
         self.save_path = folder
         self.z_down = z_down
@@ -228,8 +228,13 @@ class RealtimeRenderer(arcade.Window):
         self.add_cb(arcade.key.F, self.enter_fullscreen, False)
         self.add_cb(arcade.key.G, self.toggle_gui, False)
 
+        self.background = None
+
         self.manager = UIManager()
         self.manager.enable()
+
+    def set_bg(self, p: pathlib.Path):
+        self.background = arcade.load_texture(p)
 
     def add_slider(self):
         ui_slider = UISlider(value=50, width=300, height=50)
@@ -242,8 +247,11 @@ class RealtimeRenderer(arcade.Window):
 
         self.manager.add(UIAnchorWidget(child=ui_slider))
 
-    def set_bg_color(self, col: arcade.color):
-        arcade.set_background_color(col)
+    def set_bg_color(self, col: arcade.color = None):
+        if col:
+            arcade.set_background_color(col)
+        else:
+            arcade.set_background_color(random.choice(self.colors)[1])
 
     @staticmethod
     def run():
@@ -294,7 +302,7 @@ class RealtimeRenderer(arcade.Window):
         self.shapes.append(arcade.create_polygon(p.as_tuple_list(), color))
 
     def add_collection(
-        self, c: Collection, line_width: float = 5, color: arcade.color = None
+            self, c: Collection, line_width: float = 5, color: arcade.color = None
     ):
         if not color:
             color = random.choice(self.colors)[1]
@@ -302,6 +310,10 @@ class RealtimeRenderer(arcade.Window):
 
     def on_draw(self):
         self.clear()
+
+        if self.background:
+            arcade.draw_lrwh_rectangle_textured(0, 0, self.width, self.height, self.background)
+
         self.shapes.draw()
         if self._draw_gui:
             self.manager.draw()
@@ -341,10 +353,10 @@ class RealtimeRenderer(arcade.Window):
 
 class HPGLRenderer:
     def __init__(
-        self,
-        folder: pathlib.Path,
-        layer_pen_mapping: dict = None,
-        line_type_mapping: dict = None,
+            self,
+            folder: pathlib.Path,
+            layer_pen_mapping: dict = None,
+            line_type_mapping: dict = None,
     ) -> None:
         self.__save_path = folder
         self.__paths = Collection()
@@ -451,8 +463,8 @@ class HPGLRenderer:
 
 class TektronixRenderer:
     def __init__(
-        self,
-        folder: pathlib.Path,
+            self,
+            folder: pathlib.Path,
     ):
         self.__save_path = folder
         self.__paths = Collection()
@@ -523,8 +535,8 @@ class TektronixRenderer:
 
 class DigiplotRenderer:
     def __init__(
-        self,
-        folder: pathlib.Path,
+            self,
+            folder: pathlib.Path,
     ):
         self.__save_path = folder
         self.__paths = Collection()
@@ -579,11 +591,11 @@ class JpegRenderer:
         self.img_draw = None
 
     def render(
-        self,
-        paths: Collection,
-        scale: float = 1.0,
-        frame: bool = False,
-        thickness: int = 1,
+            self,
+            paths: Collection,
+            scale: float = 1.0,
+            frame: bool = False,
+            thickness: int = 1,
     ) -> None:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
@@ -706,11 +718,11 @@ class AsciiRenderer:
         return (r + g + b) * a
 
     def render(
-        self,
-        paths: Collection,
-        scale: float = 1.0,
-        frame: bool = False,
-        thickness: int = 1,
+            self,
+            paths: Collection,
+            scale: float = 1.0,
+            frame: bool = False,
+            thickness: int = 1,
     ):
         self.jpeg_renderer.render(paths, scale, frame, thickness)
 
