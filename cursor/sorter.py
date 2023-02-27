@@ -15,6 +15,7 @@ class SortParameter(Enum):
     ENTROPY_CROSS = auto()
     ENTROPY_DIRECTION_CHANGES = auto()
     DISTANCE = auto()
+    DURATION = auto()
     HASH = auto()
     LAYER = auto()
     PEN_SELECT = auto()
