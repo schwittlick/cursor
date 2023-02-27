@@ -1,6 +1,6 @@
 from cursor.algorithm import frechet
 from cursor.path import Path
-from cursor.misc import Timer
+from cursor.timer import Timer
 
 import typing
 from enum import Enum, auto

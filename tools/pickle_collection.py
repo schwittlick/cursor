@@ -7,7 +7,7 @@ from cursor.data import DataDirHandler
 from cursor.bb import BoundingBox
 from cursor.collection import Collection
 
-from cursor.misc import Timer
+from cursor.timer import Timer
 
 
 def save_frechet():

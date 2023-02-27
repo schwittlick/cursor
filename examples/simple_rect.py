@@ -1,25 +1,27 @@
-from cursor import collection
-from cursor import export
-from cursor import path
-from cursor import device
-
+from cursor.collection import Collection
+from cursor.path import Path
+from cursor.export import ExportWrapper
+from cursor.device import PlotterType, PaperSize
 
 if __name__ == "__main__":
-    pc = collection.Collection()
+    c = Collection()
 
-    p = path.Path()
+    p = Path()
     p.add(0, 0)
     p.add(1, 0)
     p.add(1, 1)
     p.add(0, 1)
     p.add(0, 0)
-    pc.add(p)
 
-    export.ExportWrapper().ex(
-        pc,
-        device.PlotterType.HP_7595A_A2,
-        device.PaperSize.LANDSCAPE_A2,
-        30,
+    p.velocity = 100
+
+    c.add(p)
+
+    ExportWrapper().ex(
+        c,
+        PlotterType.HP_7595A_A0,
+        PaperSize.LANDSCAPE_A0,
+        0,
         "simple_rect_example",
-        "simple_rect",
+        "test",
     )

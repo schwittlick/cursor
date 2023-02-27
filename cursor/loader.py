@@ -2,7 +2,7 @@ from cursor.data import DateHandler
 from cursor.path import Path
 from cursor.position import Position
 from cursor.collection import Collection
-from cursor.misc import Timer
+from cursor.timer import Timer
 
 import wasabi
 import typing

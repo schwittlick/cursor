@@ -1,4 +1,3 @@
-import time
 import numpy as np
 import inspect
 import pynput
@@ -10,21 +9,6 @@ log = wasabi.Printer()
 
 def mix(begin: float, end: float, perc: float):
     return ((end - begin) * perc) + begin
-
-
-class Timer:
-    def __init__(self):
-        self.start()
-
-    def start(self):
-        self._time = time.perf_counter()
-
-    def elapsed(self):
-        t1 = time.perf_counter()
-        return t1 - self._time
-
-    def print_elapsed(self, msg):
-        log.info(f"{msg}: {round(self.elapsed() * 1000)}ms")
 
 
 def convert_pynput_btn_to_key(btn):
