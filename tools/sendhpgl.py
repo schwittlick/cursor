@@ -18,6 +18,7 @@
 from argparse import ArgumentParser
 from serial import Serial
 from time import sleep
+import sys
 
 def read_code(path):
     code = 'IN;'
@@ -33,7 +34,7 @@ def check_avail(serial):
         if len(b) > 0:
             n = n * 10 + b[0] - 48
         b = serial.read()
-    print(f"avail {n}")
+    #print(f"avail {n}")
     return n
 
 def show_progress(pos, total, length=100):
@@ -49,13 +50,18 @@ def main():
     args = parser.parse_args()
 
     serial = Serial(port=args.port, timeout=0)
+
     code = read_code(args.file)
     pos = 0
+
+    # draftmasters 1024
+    # hp 7475 & 7550 512
+    # hp 7440 255
 
     show_progress(pos, len(code))
     while pos < len(code):
         avail = check_avail(serial)
-        if avail < 255:
+        if avail < 1024:
             sleep(0.01)
             continue
 
