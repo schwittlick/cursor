@@ -1,3 +1,5 @@
+import sys
+
 from cursor.sorter import SortParameter, Sorter
 from cursor.loader import Loader
 from cursor.data import DataDirHandler
@@ -34,7 +36,7 @@ def save_frechet():
 
 
 def save_entropy_crossed() -> None:
-    dir = DataDirHandler().recordings()
+    dir = DataDirHandler().recordings_all()
     ll = Loader(directory=dir, limit_files=None)
 
     keep_aspect_ratio = False
@@ -48,6 +50,13 @@ def save_entropy_crossed() -> None:
 
     sorter = Sorter(param=SortParameter.ENTROPY_X, reverse=True)
     paths_sorted = c.sorted(sorter)
+
+    c = Collection()
+    c.add(paths_sorted)
+    name = "all_norm_simplified_0.001.pickle"
+    c.save_pickle(name)
+
+    sys.exit(0)
 
     sorter = Sorter(param=SortParameter.FRECHET_DISTANCE, reverse=False)
     paths_sorted = c.sorted(sorter, paths_sorted[6])
