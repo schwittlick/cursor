@@ -131,6 +131,7 @@ class Server:
                 try:
                     # Read the first 4 bytes to get the message length
                     raw_msglen = self.recvall(socket_connection, 4)
+
                     if not raw_msglen:
                         break
                     msglen = int.from_bytes(raw_msglen, 'big')
@@ -154,6 +155,7 @@ class Server:
                         if serial_connection is None:
                             feedback = "Error: Max number of serial connections reached"
                             self.send_feedback(socket_connection, False, feedback)
+
                             continue
 
                         # Do something with the serial connection

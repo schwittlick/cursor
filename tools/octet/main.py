@@ -224,5 +224,3 @@ if __name__ == '__main__':
     if checker_thread:
         checker_thread.stop()
         checker_thread.join()
-
-    # p1.disconnect()
