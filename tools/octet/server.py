@@ -153,6 +153,7 @@ class Server:
                                 serial_connection.write(b"OI;\r\n")
                                 response = serial_connection.read_until(b"\r\n").decode()
                                 feedback = response.strip()
+                                logger.info(f"oi returned: {feedback}")
                                 self.send_feedback(socket_connection, True, feedback)
                             else:
                                 self.send_feedback(socket_connection, False, "SERIAL PORT IS NOT OPEN")
