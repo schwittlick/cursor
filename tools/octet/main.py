@@ -25,13 +25,21 @@ def log(tup):
         logger.fail(msg)
 
 
-def set_novation_button(x: int, y: int, state: bool):
+def set_novation_button(data, x: int, y: int, state: bool):
     value = 1 if state else 0
-    lp.lp.LedCtrlXY(button[x], button[y], value, value)
+    lp.lp.LedCtrlXY(data[x], data[y], value, value)
+
+
+def reset_novation():
+    logger.warn("RESET Novation")
+    for i in range(8):
+        for j in range(8):
+            lp.lp.LedCtrlXY(i, j, 0, 0)
 
 
 if __name__ == '__main__':
     lp = NovationLaunchpad()
+    reset_novation()
 
     plotters = []
     for cfg in CONFIG:
@@ -47,18 +55,16 @@ if __name__ == '__main__':
         button = lp.poll()
 
         if button != []:
+            logger.info(button)
 
             if button[0] == 0 and button[1] == 0:
-                logger.fail("RESET Novation")
-                for i in range(8):
-                    for j in range(8):
-                        set_novation_button(i, j, False)
+                reset_novation()
 
                 continue
 
             p = plotters[button[0]]
             if button[2]:
-                set_novation_button(0, 1, True)
+                set_novation_button(button, 0, 1, True)
             else:
                 # if serial is open, close it
                 if p.is_connected:
@@ -67,9 +73,9 @@ if __name__ == '__main__':
                         success, data = p.recv()
                         logger.info(f"closing serial {success} -> {data}")
                         if success:
-                            set_novation_button(0, 1, False)
+                            set_novation_button(button, 0, 1, False)
                         else:
-                            set_novation_button(0, 1, True)
+                            set_novation_button(button, 0, 1, True)
                     else:
                         # otherwise open it
                         p.open_serial()
@@ -80,11 +86,11 @@ if __name__ == '__main__':
                             success, data = p.recv()
                             logger.info(success, data)
                             if success:
-                                set_novation_button(0, 1, True)
+                                set_novation_button(button, 0, 1, True)
                             else:
-                                set_novation_button(0, 1, False)
+                                set_novation_button(button, 0, 1, False)
                         else:
-                            set_novation_button(0, 1, False)
+                            set_novation_button(button, 0, 1, False)
                 else:
                     logger.warn(f"Not connected to {p}")
     timer.print_elapsed("end")
