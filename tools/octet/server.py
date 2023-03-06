@@ -155,12 +155,15 @@ class Server:
                                 serial_connection.write(b"OI;\r\n")
                                 logger.info(f"oi 2: ")
 
-                                response = serial_connection.read_until(b"\r\n").decode()
-                                logger.info(f"oi 3: ")
+                                response = serial_connection.read_until(b"\r\n")
+                                if response:
+                                    response = response.decode()
 
-                                feedback = response.strip()
-                                logger.info(f"oi 4: {feedback}")
-                                self.send_feedback(socket_connection, True, feedback)
+                                    feedback = response.strip()
+                                    logger.info(f"oi 4: {feedback}")
+                                    self.send_feedback(socket_connection, True, feedback)
+                                else:
+                                    self.send_feedback(socket_connection, False, "SERIAL PORT DID NOT RESPOND")
                             else:
                                 self.send_feedback(socket_connection, False, "SERIAL PORT IS NOT OPEN")
 
