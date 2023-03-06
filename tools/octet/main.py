@@ -56,7 +56,7 @@ if __name__ == '__main__':
             else:
                 # TODO: this should check for serial.is_open() on server side
                 # add a protocol entry to server.py: IS_OPEN
-                if p.is_connected:
+                if p.is_open_serial():
                     p.close_serial()
                     success, data = p.recv()
                     logger.info(success, data)
