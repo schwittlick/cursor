@@ -150,13 +150,13 @@ class Server:
                                 self.send_feedback(socket_connection, False, "SERIAL PORT IS NOT OPEN")
                         elif command == "OI;":
                             if serial_connection.is_open():
-                                logger.info(f"oi 1: {feedback}")
+                                logger.info(f"oi 1: ")
 
                                 serial_connection.write(b"OI;\r\n")
-                                logger.info(f"oi 2: {feedback}")
+                                logger.info(f"oi 2: ")
 
                                 response = serial_connection.read_until(b"\r\n").decode()
-                                logger.info(f"oi 3: {feedback}")
+                                logger.info(f"oi 3: ")
 
                                 feedback = response.strip()
                                 logger.info(f"oi 4: {feedback}")
