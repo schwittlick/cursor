@@ -138,15 +138,22 @@ class Server:
                             else:
                                 self.send_feedback(socket_connection, False, "IS NOT OPEN")
                         elif command == "OH;":
-                            serial_connection.write(b"OH;\r\n")
-                            response = serial_connection.read_until(b"\r\n").decode()
-                            feedback = response.strip()
-                            self.send_feedback(socket_connection, True, feedback)
+                            if serial_connection.is_open():
+                                serial_connection.write(b"OH;\r\n")
+                                response = serial_connection.read_until(b"\r\n").decode()
+                                feedback = response.strip()
+                                self.send_feedback(socket_connection, True, feedback)
+                            else:
+                                self.send_feedback(socket_connection, False, "SERIAL PORT IS NOT OPEN")
                         elif command == "OI;":
-                            serial_connection.write(b"OI;\r\n")
-                            response = serial_connection.read_until(b"\r\n").decode()
-                            feedback = response.strip()
-                            self.send_feedback(socket_connection, True, feedback)
+                            if serial_connection.is_open():
+                                serial_connection.write(b"OI;\r\n")
+                                response = serial_connection.read_until(b"\r\n").decode()
+                                feedback = response.strip()
+                                self.send_feedback(socket_connection, True, feedback)
+                            else:
+                                self.send_feedback(socket_connection, False, "SERIAL PORT IS NOT OPEN")
+
                     except serial.SerialException as e:
                         feedback = f"Error: {type(e)}"
                         logger.warn(feedback)

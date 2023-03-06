@@ -47,7 +47,6 @@ if __name__ == '__main__':
         button = lp.poll()
 
         if button != []:
-            print(button)
 
             if button[0] == 0 and button[1] == 0:
                 logger.fail("RESET Novation")
@@ -66,17 +65,16 @@ if __name__ == '__main__':
                     if p.is_open_serial():
                         p.close_serial()
                         success, data = p.recv()
-                        logger.info(success, data)
+                        logger.info(f"closing serial {success} -> {data}")
                         if success:
                             set_novation_button(0, 1, False)
-
                         else:
                             set_novation_button(0, 1, True)
                     else:
                         # otherwise open it
                         p.open_serial()
                         success, data = p.recv()
-                        logger.info(success, data)
+                        logger.info(f"opening serial {success} -> {data}")
                         if success:
                             p.get_model()
                             success, data = p.recv()
