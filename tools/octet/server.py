@@ -21,8 +21,8 @@ class SerialConnection:
     def is_open(self):
         if self.serial:
             return self.serial.is_open()
-        else:
-            return False
+
+        return False
 
     def close(self):
         self.serial.close()
@@ -127,6 +127,12 @@ class Server:
                             ser_conn.timeout = timeout
                             ser_conn.open()
                             self.send_feedback(conn, True, "OPEN OK")
+                        elif command == "IS_OPEN":
+                            is_open = ser_conn.is_open()
+                            if is_open:
+                                self.send_feedback(conn, True, "IS OPEN")
+                            else:
+                                self.send_feedback(conn, False, "IS NOT OPEN")
                         elif command == "OH;":
                             ser_conn.write(b"OH;\r\n")
                             response = ser_conn.read_until(b"\r\n").decode()

@@ -21,6 +21,9 @@ class Plotter:
         self.client.close()
         self.is_connected = False
 
+    def is_open_serial(self):
+        self.client.send(f"{self.__prefix()}IS_OPEN")
+
     def open_serial(self):
         self.client.send(f"{self.__prefix()}OPEN")
 
