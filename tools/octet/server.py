@@ -18,7 +18,7 @@ class SerialConnection:
 
     def is_open(self):
         if self.serial:
-            return self.serial.is_open()
+            return self.serial.is_open
 
         return False
 
