@@ -128,15 +128,18 @@ class Server:
                             serial_connection.open()
                             is_open = serial_connection.is_open()
                             if is_open:
-                                self.send_feedback(socket_connection, True, "IS OPEN")
+                                self.send_feedback(socket_connection, True,
+                                                   f"OPENING SERIAL {serial_connection.port} SUCCEEDED")
                             else:
-                                self.send_feedback(socket_connection, False, "IS NOT OPEN")
+                                self.send_feedback(socket_connection, False,
+                                                   f"OPENING SERIAL  {serial_connection.port} FAILED")
                         elif command == "IS_OPEN":
                             is_open = serial_connection.is_open()
                             if is_open:
-                                self.send_feedback(socket_connection, True, "IS OPEN")
+                                self.send_feedback(socket_connection, True, f"SERIAL {serial_connection.port} IS OPEN")
                             else:
-                                self.send_feedback(socket_connection, False, "IS NOT OPEN")
+                                self.send_feedback(socket_connection, False,
+                                                   f"SERIAL {serial_connection.port} IS NOT OPEN")
                         elif command == "OH;":
                             if serial_connection.is_open():
                                 serial_connection.write(b"OH;\r\n")
