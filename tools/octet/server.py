@@ -172,6 +172,7 @@ class Server:
                     logger.warn(f"Connection closed by {socket_connection.getpeername()}")
 
                     break
+        logger.info(f"Disconnected {socket_connection}")
         self.clients.remove(socket_connection)
 
     def send_feedback(self, conn, success, message):
