@@ -21,6 +21,12 @@ class Plotter:
         self.client.close()
         self.is_connected = False
 
+    def get_model(self):
+        self.client.send(f"{self.__prefix()}OI;")
+
+    def get_bounds(self):
+        self.client.send(f"{self.__prefix()}OH;")
+
     def is_open_serial(self):
         self.client.send(f"{self.__prefix()}IS_OPEN")
 

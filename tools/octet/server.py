@@ -3,9 +3,7 @@ import threading
 import serial
 import wasabi
 
-logger = wasabi.Printer(pretty=True, no_print=False)
-
-MAX_SERIAL_CONNECTIONS = 8
+logger = wasabi.Printer(pretty=False, no_print=False)
 
 
 class SerialConnection:
@@ -47,6 +45,8 @@ class SerialConnection:
 
 
 class Server:
+    MAX_SERIAL_CONNECTIONS = 8
+
     def __init__(self, host='localhost', port=12345):
         self.host = host
         self.port = port
@@ -61,7 +61,7 @@ class Server:
             if conn.port == port:
                 return conn
         # If not, create a new serial connection if the max limit is not reached
-        if len(self.serial_connections) < MAX_SERIAL_CONNECTIONS:
+        if len(self.serial_connections) < Server.MAX_SERIAL_CONNECTIONS:
             conn = SerialConnection(port, 9600, 1)
             self.serial_connections.append(conn)
             return conn
@@ -70,28 +70,28 @@ class Server:
 
     def listen(self):
         self.socket.listen()
-        print(f"Server is listening on {self.host}:{self.port}")
+        logger.info(f"Server is listening on {self.host}:{self.port}")
         while True:
             conn, addr = self.socket.accept()
-            print(f"Connected by {addr}")
+            logger.info(f"Connected by {addr}")
             self.clients.append(conn)
             client_thread = threading.Thread(target=self.handle_client, args=(conn,))
             client_thread.start()
 
-    def handle_client(self, conn):
-        with conn:
+    def handle_client(self, socket_connection):
+        with socket_connection:
             while True:
                 try:
                     # Read the first 4 bytes to get the message length
-                    raw_msglen = self.recvall(conn, 4)
+                    raw_msglen = self.recvall(socket_connection, 4)
                     if not raw_msglen:
                         break
                     msglen = int.from_bytes(raw_msglen, 'big')
                     # Read the message data
-                    data = self.recvall(conn, msglen)
+                    data = self.recvall(socket_connection, msglen)
                     if not data:
                         break
-                    logger.info(f"Received from {conn.getpeername()}: {data.decode()}")
+                    logger.info(f"Received from {socket_connection.getpeername()}: {data.decode()}")
                     # Extract serial connection parameters from message
                     params = data.decode().split(",")
                     if len(params) != 4:
@@ -103,59 +103,61 @@ class Server:
                     command = params[3]
                     # Connect to serial port
                     try:
-                        ser_conn = self.get_serial_connection(port)
-                        if ser_conn is None:
+                        serial_connection = self.get_serial_connection(port)
+                        if serial_connection is None:
                             feedback = "Error: Max number of serial connections reached"
-                            self.send_feedback(conn, False, feedback)
+                            self.send_feedback(socket_connection, False, feedback)
                             continue
 
                         # Do something with the serial connection
                         if command == "CLOSE":
-                            if ser_conn.is_open():
-                                ser_conn.close()
-                                self.serial_connections.remove(ser_conn)
-                                self.send_feedback(conn, True, "CLOSED")
+                            if serial_connection.is_open():
+                                serial_connection.close()
+                                self.serial_connections.remove(serial_connection)
+                                self.send_feedback(socket_connection, True, "CLOSED")
                                 continue
-                            elif ser_conn in self.serial_connections:
-                                self.serial_connections.remove(ser_conn)
-                                self.send_feedback(conn, True, "ONLY REMOVED")
+                            elif serial_connection in self.serial_connections:
+                                self.serial_connections.remove(serial_connection)
+                                self.send_feedback(socket_connection, True, "ONLY REMOVED")
                                 continue
 
-                            self.send_feedback(conn, False, "NOT REGISTERED")
+                            self.send_feedback(socket_connection, False, "NOT REGISTERED")
                         elif command == "OPEN":
-                            ser_conn.baudrate = baudrate
-                            ser_conn.timeout = timeout
-                            ser_conn.open()
-                            self.send_feedback(conn, True, "OPEN OK")
+                            serial_connection.baudrate = baudrate
+                            serial_connection.timeout = timeout
+                            serial_connection.open()
+                            self.send_feedback(socket_connection, True, "OPEN OK")
                         elif command == "IS_OPEN":
-                            is_open = ser_conn.is_open()
+                            is_open = serial_connection.is_open()
                             if is_open:
-                                self.send_feedback(conn, True, "IS OPEN")
+                                self.send_feedback(socket_connection, True, "IS OPEN")
                             else:
-                                self.send_feedback(conn, False, "IS NOT OPEN")
+                                self.send_feedback(socket_connection, False, "IS NOT OPEN")
                         elif command == "OH;":
-                            ser_conn.write(b"OH;\r\n")
-                            response = ser_conn.read_until(b"\r\n").decode()
+                            serial_connection.write(b"OH;\r\n")
+                            response = serial_connection.read_until(b"\r\n").decode()
                             feedback = response.strip()
-                            self.send_feedback(conn, True, feedback)
+                            self.send_feedback(socket_connection, True, feedback)
                         elif command == "OI;":
-                            ser_conn.write(b"OI;\r\n")
-                            response = ser_conn.read_until(b"\r\n").decode()
+                            serial_connection.write(b"OI;\r\n")
+                            response = serial_connection.read_until(b"\r\n").decode()
                             feedback = response.strip()
-                            self.send_feedback(conn, True, feedback)
+                            self.send_feedback(socket_connection, True, feedback)
                     except serial.SerialException as e:
                         feedback = f"Error: {type(e)}"
                         logger.warn(feedback)
-                        self.send_feedback(conn, False, feedback)
+                        self.send_feedback(socket_connection, False, feedback)
                 except ConnectionResetError:
-                    logger.warn(f"Connection closed by {conn.getpeername()}")
+                    logger.warn(f"Connection closed by {socket_connection.getpeername()}")
 
                     break
-        self.clients.remove(conn)
+        self.clients.remove(socket_connection)
 
     def send_feedback(self, conn, success, message):
         # Send feedback message to client
         msg = f"{str(len(message)).ljust(8)} {1 if success else 0}{message}"
+        logger.info(msg)
+
         conn.sendall(msg.encode())
 
     def recvall(self, conn, n):
