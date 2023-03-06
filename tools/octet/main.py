@@ -25,6 +25,11 @@ def log(tup):
         logger.fail(msg)
 
 
+def set_novation_button(x: int, y: int, state: bool):
+    value = 1 if state else 0
+    lp.lp.LedCtrlXY(button[x], button[y], value, value)
+
+
 if __name__ == '__main__':
     lp = NovationLaunchpad()
 
@@ -46,32 +51,40 @@ if __name__ == '__main__':
                 logger.fail("RESET Novation")
                 for i in range(8):
                     for j in range(8):
-                        lp.lp.LedCtrlXY(i, j, 0, 0)
+                        set_novation_button(i, j, False)
+
                 continue
 
             p = plotters[button[0]]
 
             if button[2]:
-                lp.lp.LedCtrlXY(button[0], button[1], 1, 1)
+                set_novation_button(0, 1, True)
             else:
-                # TODO: this should check for serial.is_open() on server side
-                # add a protocol entry to server.py: IS_OPEN
+                # if serial is open, close it
                 if p.is_open_serial():
                     p.close_serial()
                     success, data = p.recv()
                     logger.info(success, data)
                     if success:
-                        lp.lp.LedCtrlXY(button[0], button[1], 0, 0)
+                        set_novation_button(0, 1, False)
+
                     else:
-                        lp.lp.LedCtrlXY(button[0], button[1], 1, 1)
+                        set_novation_button(0, 1, True)
                 else:
+                    # otherwise open it
                     p.open_serial()
                     success, data = p.recv()
                     logger.info(success, data)
                     if success:
-                        lp.lp.LedCtrlXY(button[0], button[1], 1, 1)
+                        p.get_model()
+                        success, data = p.recv()
+                        logger.info(success, data)
+                        if success:
+                            set_novation_button(0, 1, True)
+                        else:
+                            set_novation_button(0, 1, False)
                     else:
-                        lp.lp.LedCtrlXY(button[0], button[1], 0, 0)
+                        set_novation_button(0, 1, False)
 
     timer.print_elapsed("end")
 
