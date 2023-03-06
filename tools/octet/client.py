@@ -12,7 +12,7 @@ class Client:
 
     def connect(self) -> bool:
         try:
-            self.socket.settimeout(1)
+            self.socket.settimeout(5)
             self.socket.connect((self.host, self.port))
 
             if self.socket.fileno() != -1:
