@@ -126,7 +126,11 @@ class Server:
                             serial_connection.baudrate = baudrate
                             serial_connection.timeout = timeout
                             serial_connection.open()
-                            self.send_feedback(socket_connection, True, "OPEN OK")
+                            is_open = serial_connection.is_open()
+                            if is_open:
+                                self.send_feedback(socket_connection, True, "IS OPEN")
+                            else:
+                                self.send_feedback(socket_connection, False, "IS NOT OPEN")
                         elif command == "IS_OPEN":
                             is_open = serial_connection.is_open()
                             if is_open:

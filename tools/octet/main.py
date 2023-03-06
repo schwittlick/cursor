@@ -7,14 +7,14 @@ import time
 
 logger = wasabi.Printer(pretty=True, no_print=False)
 
-CONFIG = [["/dev/ttyUSB1", "9600", "500"],
-          ["/dev/ttyUSB2", "9600", "500"],
-          ["/dev/ttyUSB3", "9600", "500"],
-          ["/dev/ttyUSB4", "9600", "500"],
-          ["/dev/ttyUSB5", "9600", "500"],
-          ["/dev/ttyUSB6", "9600", "500"],
-          ["/dev/ttyUSB7", "9600", "500"],
-          ["/dev/ttyUSB8", "9600", "500"]]
+CONFIG = [["192.168.2.125", "12345", "/dev/ttyUSB1", "9600", "500"],
+          ["192.168.2.124", "12345", "/dev/ttyUSB2", "9600", "500"],
+          ["192.168.2.124", "12345", "/dev/ttyUSB3", "9600", "500"],
+          ["192.168.2.124", "12345", "/dev/ttyUSB4", "9600", "500"],
+          ["192.168.2.124", "12345", "/dev/ttyUSB5", "9600", "500"],
+          ["192.168.2.124", "12345", "/dev/ttyUSB6", "9600", "500"],
+          ["192.168.2.124", "12345", "/dev/ttyUSB7", "9600", "500"],
+          ["192.168.2.124", "12345", "/dev/ttyUSB8", "9600", "500"]]
 
 
 def log(tup):
@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
     plotters = []
     for cfg in CONFIG:
-        p = Plotter(cfg[0], int(cfg[1]), int(cfg[2]))
+        p = Plotter(cfg[0], int(cfg[1]), cfg[2], int(cfg[3]), int(cfg[4]))
         p.connect()
         plotters.append(p)
 
@@ -47,6 +47,8 @@ if __name__ == '__main__':
         button = lp.poll()
 
         if button != []:
+            print(button)
+
             if button[0] == 0 and button[1] == 0:
                 logger.fail("RESET Novation")
                 for i in range(8):
@@ -56,36 +58,37 @@ if __name__ == '__main__':
                 continue
 
             p = plotters[button[0]]
-
             if button[2]:
                 set_novation_button(0, 1, True)
             else:
                 # if serial is open, close it
-                if p.is_open_serial():
-                    p.close_serial()
-                    success, data = p.recv()
-                    logger.info(success, data)
-                    if success:
-                        set_novation_button(0, 1, False)
-
-                    else:
-                        set_novation_button(0, 1, True)
-                else:
-                    # otherwise open it
-                    p.open_serial()
-                    success, data = p.recv()
-                    logger.info(success, data)
-                    if success:
-                        p.get_model()
+                if p.is_connected:
+                    if p.is_open_serial():
+                        p.close_serial()
                         success, data = p.recv()
                         logger.info(success, data)
                         if success:
+                            set_novation_button(0, 1, False)
+
+                        else:
                             set_novation_button(0, 1, True)
+                    else:
+                        # otherwise open it
+                        p.open_serial()
+                        success, data = p.recv()
+                        logger.info(success, data)
+                        if success:
+                            p.get_model()
+                            success, data = p.recv()
+                            logger.info(success, data)
+                            if success:
+                                set_novation_button(0, 1, True)
+                            else:
+                                set_novation_button(0, 1, False)
                         else:
                             set_novation_button(0, 1, False)
-                    else:
-                        set_novation_button(0, 1, False)
-
+                else:
+                    logger.warn(f"Not connected to {p}")
     timer.print_elapsed("end")
 
     # p1.disconnect()

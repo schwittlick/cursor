@@ -1,4 +1,7 @@
 import socket
+import wasabi
+
+logger = wasabi.Printer(pretty=False, no_print=False)
 
 
 class Client:
@@ -7,9 +10,20 @@ class Client:
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    def connect(self):
-        self.socket.connect((self.host, self.port))
-        self.socket.settimeout(1)
+    def connect(self) -> bool:
+        try:
+            self.socket.settimeout(1)
+            self.socket.connect((self.host, self.port))
+
+            if self.socket.fileno() != -1:
+                logger.info(f"Connected to {self.host}:{self.port}")
+                return True
+            else:
+                logger.info(f"Not connected to {self.host}:{self.port}")
+                return False
+        except TimeoutError as te:
+            logger.info(f"Not connected to {self.host}:{self.port} ({te})")
+            return False
 
     def send(self, data):
         # Prepend the message length as 4 bytes in big-endian order

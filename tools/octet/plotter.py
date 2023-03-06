@@ -2,20 +2,20 @@ from tools.octet.client import Client
 
 
 class Plotter:
-    def __init__(self, port, baud, timeout):
-        self.port = port
+    def __init__(self, ip, port, serial_port, baud, timeout):
+        self.serial_port = serial_port
         self.baud = baud
         self.timeout = timeout
-        self.ip = "192.168.2.124"
-        self.client = Client(self.ip)
+        self.ip = ip
+        self.port = port
+        self.client = Client(self.ip, self.port)
         self.is_connected = False
 
     def __prefix(self):
-        return f"{self.port},{self.baud},{self.timeout},"
+        return f"{self.serial_port},{self.baud},{self.timeout},"
 
     def connect(self):
-        self.client.connect()
-        self.is_connected = True
+        self.is_connected = self.client.connect()
 
     def disconnect(self):
         self.client.close()
