@@ -5,6 +5,8 @@ from tools.octet.plotter import Plotter
 import wasabi
 import time
 
+import atexit
+
 logger = wasabi.Printer(pretty=True, no_print=False)
 
 CONFIG = [["192.168.2.125", "12345", "/dev/ttyUSB1", "9600", "500"],
@@ -37,6 +39,12 @@ def reset_novation():
             lp.lp.LedCtrlXY(i, j, 0, 0)
 
 
+def save_exit():
+    lp.close()
+
+
+atexit.register(save_exit)
+
 if __name__ == '__main__':
     lp = NovationLaunchpad()
     reset_novation()
@@ -68,7 +76,9 @@ if __name__ == '__main__':
             else:
                 # if serial is open, close it
                 if p.is_connected:
-                    if p.is_open_serial():
+                    p.is_open_serial()
+                    is_serial_open, msg = p.recv()
+                    if is_serial_open:
                         p.close_serial()
                         success, data = p.recv()
                         logger.info(f"closing serial {success} -> {data}")
