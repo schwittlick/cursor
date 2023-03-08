@@ -2,8 +2,9 @@ import socket
 import threading
 import serial
 import wasabi
+import time
 
-logger = wasabi.Printer(pretty=False, no_print=False)
+logger = wasabi.Printer(pretty=True, no_print=False)
 
 
 class SerialConnection:
@@ -12,6 +13,7 @@ class SerialConnection:
         self.baudrate = baudrate
         self.timeout = timeout
         self.serial = None
+        self.current_buffer = ""
 
     def open(self):
         self.serial = serial.Serial(self.port, self.baudrate, timeout=self.timeout)
@@ -24,6 +26,9 @@ class SerialConnection:
 
     def close(self):
         self.serial.close()
+
+    def readline(self):
+        return self.serial.readline().decode("utf-8")
 
     def read_until(self, expected):
         buffer = bytearray()
@@ -42,6 +47,36 @@ class SerialConnection:
 
     def write(self, data):
         self.serial.write(data)
+        self.serial.flushOutput()
+
+    def check_avail(self):
+        self.serial.write(b'\x1B.B')
+        self.serial.flushOutput()
+        b = b''
+        n = 0
+        while b != b'\r':
+            if len(b) > 0:
+                n = n * 10 + b[0] - 48
+            b = self.serial.read()
+        return n
+
+    def buffer(self, data, chunk=255):
+        pos = 0
+        self.current_buffer = data
+        while pos < len(self.current_buffer):
+            #logger.info(f"missing to send: {self.current_buffer[pos:]}")
+            avail = self.check_avail()
+            logger.info(f"free mem: {avail}")
+            if avail < chunk:
+                time.sleep(0.01)
+                continue
+
+            end = pos + avail
+            if len(self.current_buffer) - pos < avail:
+                end = len(self.current_buffer)
+
+            self.serial.write(self.current_buffer[pos:end].encode("utf-8"))
+            pos = end
 
 
 class Server:
@@ -70,10 +105,10 @@ class Server:
 
     def listen(self):
         self.socket.listen()
-        logger.info(f"Server is listening on {self.host}:{self.port}")
+        logger.good(f"Server is listening on {self.host}:{self.port}")
         while True:
             conn, addr = self.socket.accept()
-            logger.info(f"Connected by {addr}")
+            logger.good(f"Connected by {addr}")
             self.clients.append(conn)
             client_thread = threading.Thread(target=self.handle_client, args=(conn,))
             client_thread.start()
@@ -91,15 +126,15 @@ class Server:
                     data = self.recvall(socket_connection, msglen)
                     if not data:
                         break
-                    logger.info(f"Received from {socket_connection.getpeername()}: {data.decode()}")
+                    logger.good(f"Received from {socket_connection.getpeername()}: {data.decode()}")
                     # Extract serial connection parameters from message
-                    params = data.decode().split(",")
+                    params = data.decode().split("#")
                     if len(params) != 4:
-                        logger.info(f"Invalid message format: {data.decode()}")
+                        logger.fail(f"Invalid message format: {data.decode()}")
                         continue
                     port = params[0]
                     baudrate = int(params[1])
-                    timeout = int(params[2])
+                    timeout = float(params[2])
                     command = params[3]
                     # Connect to serial port
                     try:
@@ -122,6 +157,14 @@ class Server:
                                 continue
 
                             self.send_feedback(socket_connection, False, "NOT REGISTERED")
+                        elif command.startswith("DATA"):
+                            data = command[4:]
+                            is_open = serial_connection.is_open()
+                            if not is_open:
+                                continue
+                            serial_connection.buffer(data)
+                            self.send_feedback(socket_connection, True,
+                                               f"SUCCESSFULLY SENT DATA")
                         elif command == "OPEN":
                             serial_connection.baudrate = baudrate
                             serial_connection.timeout = timeout
@@ -143,24 +186,20 @@ class Server:
                         elif command == "OH;":
                             if serial_connection.is_open():
                                 serial_connection.write(b"OH;\r\n")
-                                response = serial_connection.read_until(b"\r\n").decode()
-                                feedback = response.strip()
-                                self.send_feedback(socket_connection, True, feedback)
+                                response = serial_connection.readline()
+                                if response:
+                                    feedback = response.strip()
+                                    self.send_feedback(socket_connection, True, feedback)
+                                else:
+                                    self.send_feedback(socket_connection, False, "SERIAL PORT DID NOT RESPOND")
                             else:
                                 self.send_feedback(socket_connection, False, "SERIAL PORT IS NOT OPEN")
                         elif command == "OI;":
                             if serial_connection.is_open():
-                                logger.info(f"oi 1: ")
-
                                 serial_connection.write(b"OI;\r\n")
-                                logger.info(f"oi 2: ")
-
-                                response = serial_connection.read_until(b"\r\n")
+                                response = serial_connection.readline()
                                 if response:
-                                    response = response.decode()
-
                                     feedback = response.strip()
-                                    logger.info(f"oi 4: {feedback}")
                                     self.send_feedback(socket_connection, True, feedback)
                                 else:
                                     self.send_feedback(socket_connection, False, "SERIAL PORT DID NOT RESPOND")
@@ -169,20 +208,19 @@ class Server:
 
                     except serial.SerialException as e:
                         feedback = f"Error: {type(e)}"
-                        logger.warn(feedback)
+                        logger.fail(feedback)
                         self.send_feedback(socket_connection, False, feedback)
                 except ConnectionResetError:
-                    logger.warn(f"Connection closed by {socket_connection.getpeername()}")
+                    logger.fail(f"Connection closed by {socket_connection.getpeername()}")
 
                     break
-        logger.info(f"Disconnected {socket_connection}")
+        logger.good(f"Disconnected {socket_connection}")
         self.clients.remove(socket_connection)
 
     def send_feedback(self, conn, success, message):
         # Send feedback message to client
         msg = f"{str(len(message)).ljust(8)} {1 if success else 0}{message}"
-        logger.info(msg)
-
+        logger.good(msg)
         conn.sendall(msg.encode())
 
     def recvall(self, conn, n):
