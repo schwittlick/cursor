@@ -367,10 +367,7 @@ class HPGLRenderer:
         self.__paths += paths
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
 
-    def save(self, filename: str) -> str:
-        pathlib.Path(self.__save_path).mkdir(parents=True, exist_ok=True)
-        fname = self.__save_path / (filename + ".hpgl")
-
+    def generate_string(self):
         _hpgl_string = ""
 
         _prev_line_type = 0
@@ -414,7 +411,7 @@ class HPGLRenderer:
             for line in p.vertices:
                 x = line.x
                 y = line.y
-                # _hpgl_string += f"PA{int(x)},{int(y)};\n"
+                _hpgl_string += f"PA{int(x)},{int(y)};\n"
 
             _hpgl_string += "PU;\n"
 
@@ -422,8 +419,17 @@ class HPGLRenderer:
                 _hpgl_string += "PM2;\n"  # switch to PM2; to close and safe
                 _hpgl_string += "FP;\n"
 
-        _hpgl_string += "PA0,0;\n"
-        _hpgl_string += "SP0;\n"
+        return _hpgl_string
+
+    def __add_home(self, hpgl_string):
+        return f"{hpgl_string}PA0,0;SP0;\n"
+
+    def save(self, filename: str) -> str:
+        pathlib.Path(self.__save_path).mkdir(parents=True, exist_ok=True)
+        fname = self.__save_path / (filename + ".hpgl")
+
+        _hpgl_string = self.generate_string()
+        _hpgl_string = self.__add_home(_hpgl_string)
 
         with open(fname.as_posix(), "w") as file:
             file.write(_hpgl_string)
