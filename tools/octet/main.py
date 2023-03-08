@@ -82,7 +82,7 @@ def go_up_down(_plotter):
     global process_running
     process_running[_plotter.serial_port] = True
     d = MinmaxMapping.maps[_plotter.type]
-    result, feedback = _plotter.send_data(f"PU;PA{d.x},{d.y};PA{d.w},{d.h}")
+    result, feedback = _plotter.send_data(f"PU;PA{d.x},{0};PA{d.w},{0}")
 
     print(f"done with updown {result} + {feedback}")
 

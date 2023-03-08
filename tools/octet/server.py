@@ -68,7 +68,7 @@ class SerialConnection:
             avail = self.check_avail()
             logger.info(f"free mem: {avail}")
             if avail < chunk:
-                time.sleep(0.01)
+                time.sleep(0.1)
                 continue
 
             end = pos + avail
@@ -76,6 +76,7 @@ class SerialConnection:
                 end = len(self.current_buffer)
 
             self.serial.write(self.current_buffer[pos:end].encode("utf-8"))
+            self.serial.flushOutput()
             pos = end
 
 
