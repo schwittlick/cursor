@@ -25,18 +25,24 @@ class Client:
             logger.info(f"Not connected to {self.host}:{self.port} ({te})")
             return False
 
+    def set_timeout(self, to: float):
+        self.socket.settimeout(to)
+
     def send(self, data):
         # Prepend the message length as 4 bytes in big-endian order
         msg = len(data).to_bytes(4, byteorder='big') + data.encode()
         self.socket.sendall(msg)
 
     def receive_feedback(self):
-        s = self.recvall(8).decode().rstrip()
+        s = self.recvall(8)
+        if s is None:
+            return False, "No Feedback"
+        s = s.decode().rstrip()
         # Receive the feedback message from the server
         data = self.recvall(int(s) + 2)  # a little extra
         data = data.decode()
         if not data:
-            return None
+            return False, "No Data"
         success = True if data[1] == "1" else False
         feedback = data[2:]
         return success, feedback
