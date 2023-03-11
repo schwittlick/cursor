@@ -1,4 +1,5 @@
 import configparser
+import logging
 import pathlib
 import threading
 import wasabi
@@ -23,7 +24,6 @@ recordings = DataDirHandler().recordings()
 _loader = Loader(directory=recordings, limit_files=1)
 all_paths = _loader.all_paths()
 
-process_running = {}
 gui_threads = {}
 
 plotters = []
@@ -54,9 +54,6 @@ class QuitButton(arcade.gui.UIFlatButton):
 
 
 def run_blocking_process(_plotter):
-    global process_running
-    process_running[_plotter.serial_port] = True
-
     feedback = ""
     for i in range(2):
         # Replace this with your own blocking process
@@ -69,7 +66,6 @@ def run_blocking_process(_plotter):
         result, feedback = _plotter.send_data(d)
         print(f"done with button {result} + {feedback}")
 
-    process_running[_plotter.serial_port] = False
     return feedback
 
 
@@ -101,19 +97,11 @@ class TestButton(arcade.gui.UIFlatButton):
 
 
 def go_up_down(_plotter):
-    global process_running
-
-    if _plotter.type is None:
-        logger.info(f"plotter is none")
-        return
-
-    process_running[_plotter.serial_port] = True
     d = MinmaxMapping.maps[_plotter.type]
     result, feedback = _plotter.send_data(f"PU;PA{d.x},{0};PA{d.w},{0}")
 
     print(f"done with updown {result} + {feedback}")
 
-    process_running[_plotter.serial_port] = False
     return feedback
 
 
@@ -121,35 +109,26 @@ def go_up_down(_plotter):
 def on_key_press(key, modifiers):
     global process_running
     global gui_threads
-    if key == arcade.key.P:
-        for plotter in plotters:
-            if not plotter.port in gui_threads.keys():
-                # if not process_running[plotter.serial_port]:
-                thread = GuiThread(plotter.port)
-                thread.plotter = plotter
+
+    for plotter in plotters:
+        if not plotter.port in gui_threads.keys():
+            thread = GuiThread(plotter.port)
+            thread.plotter = plotter
+
+            if key == arcade.key.P:
                 thread.func = go_up_down
-                thread.start()
+            elif key == arcade.key.L:
+                thread.func = run_blocking_process
 
-                gui_threads[plotter.port] = thread
+            # only start if no other thread for this port is running
+            thread.start()
 
-                # process_thread = threading.Thread(target=go_up_down, args=(plotter,))
-                # process_thread.start()
-                # processes need to be saved and carefully ended by main thread.
-                # process_thread.join()  # Wait for the thread to finish
-                logger.good(f"finished starting thread for {plotter.serial_port}")
+            gui_threads[plotter.port] = thread
 
-            else:
-                logger.warn(f"discarding data for {plotter.serial_port}")
-    elif key == arcade.key.L:
-        for plotter in plotters:
-            if not process_running[plotter.serial_port]:
-                process_thread = threading.Thread(target=run_blocking_process, args=(plotter,))
-                process_thread.start()
-                # process_thread.join()  # Wait for the thread to finish
-                logger.good(f"finished starting thread for {plotter.serial_port}")
+            logger.good(f"finished starting thread for {plotter.serial_port}")
 
-            else:
-                logger.warn(f"discarding data for {plotter.serial_port}")
+        else:
+            logger.warn(f"discarding data for {plotter.serial_port}")
 
 
 def rendering(collection: Collection, type: PlotterType) -> str:

@@ -18,20 +18,13 @@ class GuiThread(threading.Thread):
         self.func = None
 
     def run(self):
+        print(f"Thread {self.thread_id} started")
+
         try:
             self.func(self.plotter)
-        except ValueError as e:
+        except Exception as e:
             print(f"gui thread crashed: {e}")
 
-        print(f"Thread {self.thread_id} started")
-        for i in range(10):
-            if not self.running:
-                print(f"Thread {self.thread_id} paused")
-                while not self.running:
-                    time.sleep(1)
-                print(f"Thread {self.thread_id} resumed")
-            print(f"Thread {self.thread_id} running ({i + 1}/10)")
-            time.sleep(0.1)
         print(f"Thread {self.thread_id} finished")
 
     def stop(self):
@@ -66,7 +59,7 @@ class CheckerThread(threading.Thread):
                 elif not thread.is_alive():
                     # Remove the thread from the list if it's finished
                     del self.threads[port]
-                    #self.threads.remove(thread)
+                    # self.threads.remove(thread)
                 else:
                     # Resume the thread if it was paused
                     thread.resume()
