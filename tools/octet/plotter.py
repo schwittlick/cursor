@@ -26,7 +26,7 @@ class Plotter:
 
     def send_data(self, data):
         self.client.send(f"{self.__prefix()}DATA{data}")
-        self.client.set_timeout(10)
+        self.client.set_timeout(0.5)
         return self.recv()
 
     def get_model(self):
