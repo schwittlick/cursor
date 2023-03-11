@@ -1,5 +1,7 @@
+import configparser
 import pathlib
 import threading
+import wasabi
 
 import arcade
 import arcade.gui
@@ -9,15 +11,11 @@ from cursor.data import DataDirHandler
 from cursor.device import Paper, PaperSize, XYFactors, MinmaxMapping, PlotterType
 from cursor.loader import Loader
 from cursor.renderer import HPGLRenderer
-from cursor.timer import Timer
-from tools.octet.discovery import discover
-from tools.octet.gui import MainWindow
-from tools.octet.launchpad_wrapper import NovationLaunchpad
 
+from tools.octet.discovery import discover
+from tools.octet.gui import MainWindow, GuiThread, CheckerThread
+from tools.octet.launchpad_wrapper import NovationLaunchpad, reset_novation, set_novation_button, lp, novation_poll
 from tools.octet.plotter import Plotter
-import wasabi
-import time
-import sys
 
 logger = wasabi.Printer(pretty=True, no_print=False)
 
@@ -26,15 +24,33 @@ _loader = Loader(directory=recordings, limit_files=1)
 all_paths = _loader.all_paths()
 
 process_running = {}
+gui_threads = {}
 
 plotters = []
 
+checker_thread = None
+
+config = configparser.ConfigParser()
+
+# Load the configuration file
+config.read('config_client.ini')
+
+# Get the values of the parameters
+hostname = config.get('CONFIG', 'hostname')
+target = config.get('CONFIG', 'target')
+port = config.getint('CONFIG', 'port')
+offline_mode = config.getboolean('CONFIG', 'offline_mode')
+
+
 class QuitButton(arcade.gui.UIFlatButton):
     def on_click(self, event: arcade.gui.UIOnClickEvent):
+        if not lp:
+            arcade.exit()
+            return
         if lp.lp:
             lp.close()
         arcade.exit()
-        sys.exit()
+        # sys.exit()
 
 
 def run_blocking_process(_plotter):
@@ -63,6 +79,15 @@ class TestButton(arcade.gui.UIFlatButton):
         self.plotter = plotter
 
     def on_click(self, event: arcade.gui.UIOnClickEvent):
+        global gui_threads
+        if not self.plotter.port in gui_threads.keys():
+            # if not process_running[plotter.serial_port]:
+            thread = GuiThread(self.plotter.port)
+            thread.plotter = self.plotter
+            thread.func = run_blocking_process
+            thread.start()
+
+            gui_threads[self.plotter.port] = thread
 
         global process_running
         if not process_running[self.plotter.serial_port]:
@@ -75,11 +100,13 @@ class TestButton(arcade.gui.UIFlatButton):
             logger.warn(f"discarding data for {self.plotter.serial_port}")
 
 
-USE_NOVATION = True
-
-
 def go_up_down(_plotter):
     global process_running
+
+    if _plotter.type is None:
+        logger.info(f"plotter is none")
+        return
+
     process_running[_plotter.serial_port] = True
     d = MinmaxMapping.maps[_plotter.type]
     result, feedback = _plotter.send_data(f"PU;PA{d.x},{0};PA{d.w},{0}")
@@ -89,15 +116,25 @@ def go_up_down(_plotter):
     process_running[_plotter.serial_port] = False
     return feedback
 
+
 # Define the key press callback function
 def on_key_press(key, modifiers):
     global process_running
-
+    global gui_threads
     if key == arcade.key.P:
         for plotter in plotters:
-            if not process_running[plotter.serial_port]:
-                process_thread = threading.Thread(target=go_up_down, args=(plotter,))
-                process_thread.start()
+            if not plotter.port in gui_threads.keys():
+                # if not process_running[plotter.serial_port]:
+                thread = GuiThread(plotter.port)
+                thread.plotter = plotter
+                thread.func = go_up_down
+                thread.start()
+
+                gui_threads[plotter.port] = thread
+
+                # process_thread = threading.Thread(target=go_up_down, args=(plotter,))
+                # process_thread.start()
+                # processes need to be saved and carefully ended by main thread.
                 # process_thread.join()  # Wait for the thread to finish
                 logger.good(f"finished starting thread for {plotter.serial_port}")
 
@@ -115,30 +152,6 @@ def on_key_press(key, modifiers):
                 logger.warn(f"discarding data for {plotter.serial_port}")
 
 
-def log(tup):
-    success, msg = tup
-    if success:
-        logger.good(msg)
-    else:
-        logger.fail(msg)
-
-
-def set_novation_button(data, x: int, y: int, state: bool):
-    if not lp:
-        return
-    value = 1 if state else 0
-    lp.lp.LedCtrlXY(data[x], data[y], value, value)
-
-
-def reset_novation():
-    logger.warn("RESET Novation")
-    if not lp.lp:
-        return
-    for i in range(8):
-        for j in range(8):
-            lp.lp.LedCtrlXY(i, j, 0, 0)
-
-
 def rendering(collection: Collection, type: PlotterType) -> str:
     collection.fit(
         Paper.sizes[PaperSize.LANDSCAPE_A3],
@@ -154,11 +167,10 @@ def rendering(collection: Collection, type: PlotterType) -> str:
 
 
 if __name__ == '__main__':
-    plotter_map = {"7475A": PlotterType.HP_7475A_A3, "7550A": PlotterType.HP_7550A}
-
-    if USE_NOVATION:
-        lp = NovationLaunchpad()
-        reset_novation()
+    plotter_map = {"7475A": PlotterType.HP_7475A_A3,
+                   "7550A": PlotterType.HP_7550A,
+                   "7595A": PlotterType.HP_7595A,
+                   "7576B": PlotterType.HP_7596B}
 
     window = MainWindow()
     window.on_key_press = on_key_press
@@ -166,9 +178,23 @@ if __name__ == '__main__':
 
     discovered_plotters = discover()
 
+    checker_thread = CheckerThread(gui_threads)
+    checker_thread.start()
+
+    if offline_mode:
+        # add test plotter in offline mode
+        test_plotter = Plotter("localhost", 12345, "/dev/ttyUSB0", 9600, 0.5)
+        test_plotter.type = PlotterType.HP_7475A_A3
+        test_plotter.connect()
+        test_plotter.open_serial()
+        plotters.append(test_plotter)
+
+        tb1 = TestButton(text=f"Test Plotter", width=200, plotter=test_plotter)
+        window.add(tb1)
+
     for plo in discovered_plotters:
-        ip = "192.168.2.124"
-        tcp_port = 12345
+        ip = target
+        tcp_port = port
         baud = 9600
         timeout = 0.5
         port = plo[0]
@@ -194,57 +220,13 @@ if __name__ == '__main__':
     window.finalize()
     arcade.run()
 
-    timer = Timer()
-    while True:
-        time.sleep(0.001)
-        CONNECT_Y = 1
+    # novation_poll(plotters)
 
-        if not lp.lp:
-            continue
+    for thread in gui_threads:
+        thread.join()
 
-        button = lp.poll()
-
-        if button != []:
-            logger.info(button)
-
-            if button[0] == 0 and button[1] == 0:
-                reset_novation()
-
-                continue
-
-            p = plotters[button[0]]
-            if button[2]:
-                set_novation_button(button, 0, 1, True)
-            else:
-                # if serial is open, close it
-                if p.is_connected:
-                    p.is_open_serial()
-                    is_serial_open, msg = p.recv()
-                    if is_serial_open:
-                        p.close_serial()
-                        success, data = p.recv()
-                        logger.info(f"closing serial {success} -> {data}")
-                        if success:
-                            set_novation_button(button, 0, 1, False)
-                        else:
-                            set_novation_button(button, 0, 1, True)
-                    else:
-                        # otherwise open it
-                        p.open_serial()
-                        success, data = p.recv()
-                        logger.info(f"opening serial {success} -> {data}")
-                        if success:
-                            p.get_model()
-                            success, data = p.recv()
-                            logger.info(success, data)
-                            if success:
-                                set_novation_button(button, 0, 1, True)
-                            else:
-                                set_novation_button(button, 0, 1, False)
-                        else:
-                            set_novation_button(button, 0, 1, False)
-                else:
-                    logger.warn(f"Not connected to {p}")
-    timer.print_elapsed("end")
+    # Stop the checker thread
+    checker_thread.stop()
+    checker_thread.join()
 
     # p1.disconnect()

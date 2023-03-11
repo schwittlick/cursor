@@ -3,6 +3,7 @@ import threading
 import serial
 import wasabi
 import time
+import configparser
 
 logger = wasabi.Printer(pretty=True, no_print=False)
 
@@ -64,7 +65,7 @@ class SerialConnection:
         pos = 0
         self.current_buffer = data
         while pos < len(self.current_buffer):
-            #logger.info(f"missing to send: {self.current_buffer[pos:]}")
+            # logger.info(f"missing to send: {self.current_buffer[pos:]}")
             avail = self.check_avail()
             logger.info(f"free mem: {avail}")
             if avail < chunk:
@@ -106,13 +107,21 @@ class Server:
 
     def listen(self):
         self.socket.listen()
+        self.socket.settimeout(1)
         logger.good(f"Server is listening on {self.host}:{self.port}")
         while True:
-            conn, addr = self.socket.accept()
-            logger.good(f"Connected by {addr}")
-            self.clients.append(conn)
-            client_thread = threading.Thread(target=self.handle_client, args=(conn,))
-            client_thread.start()
+            try:
+                conn, addr = self.socket.accept()
+                logger.good(f"Connected by {addr}")
+                self.clients.append(conn)
+                client_thread = threading.Thread(target=self.handle_client, args=(conn,))
+                client_thread.start()
+            except TimeoutError:
+                pass
+            except KeyboardInterrupt as e:
+                logger.good("Safe exit")
+            except:
+                print("ok")
 
     def handle_client(self, socket_connection):
         with socket_connection:
@@ -236,5 +245,15 @@ class Server:
 
 
 if __name__ == '__main__':
-    server = Server('192.168.2.124')
+    config = configparser.ConfigParser()
+
+    # Load the configuration file
+    config.read('config.ini')
+
+    # Get the values of the parameters
+    hostname = config.get('CONFIG', 'hostname')
+    ip = config.get('CONFIG', 'ip')
+    port = config.getint('CONFIG', 'port')
+
+    server = Server(ip)
     server.listen()
