@@ -117,7 +117,7 @@ class Server:
                 client_thread = threading.Thread(target=self.handle_client, args=(conn,))
                 client_thread.start()
             except TimeoutError:
-                pass
+                time.sleep(1)
             except KeyboardInterrupt as e:
                 logger.good("Safe exit")
             except:
