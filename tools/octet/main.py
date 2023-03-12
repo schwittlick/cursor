@@ -18,8 +18,6 @@ from tools.octet.plotter import Plotter
 
 logger = wasabi.Printer(pretty=True, no_print=False)
 
-# gui_threads = {}
-
 plotters = []
 
 checker_thread = None
@@ -61,7 +59,6 @@ def on_key_press(key, modifiers):
 
     for plotter in plotters:
         if plotter.thread is None:
-            # if not plotter.serial_port in gui_threads.keys():
             thread = GuiThread(plotter.serial_port)
             thread.speed = global_speed
             thread.c = all_paths
@@ -138,8 +135,6 @@ def connect_plotters(cfg, discovered) -> list:
 
 
 if __name__ == '__main__':
-
-
     window = MainWindow()
     window.on_key_press = on_key_press
     window.add(QuitButton(text="Quit", width=200))
@@ -155,14 +150,13 @@ if __name__ == '__main__':
         discovered_plotters = discover()
         plotters = connect_plotters(config, discovered_plotters)
 
-        checker_thread = CheckerThread(plotters)
-        checker_thread.start()
-
-        window.render_plotters(plotters)
+    checker_thread = CheckerThread(plotters)
+    checker_thread.start()
+    window.render_plotters(plotters)
 
 
     def on_change(v):
-        print(v)
+        logger.info(f"global_speed: {v}")
         global global_speed
         global_speed = v
 
@@ -177,8 +171,8 @@ if __name__ == '__main__':
         if plo.thread:
             plo.thread.join()
 
-    # Stop the checker thread
-    checker_thread.stop()
-    checker_thread.join()
+    if checker_thread:
+        checker_thread.stop()
+        checker_thread.join()
 
     # p1.disconnect()
