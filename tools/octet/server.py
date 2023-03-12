@@ -79,6 +79,7 @@ class SerialConnection:
             self.serial.write(self.current_buffer[pos:end].encode("utf-8"))
             self.serial.flushOutput()
             pos = end
+        logger.info(f"Finished sending {data}")
 
 
 class Server:
@@ -120,8 +121,9 @@ class Server:
                 time.sleep(1)
             except KeyboardInterrupt as e:
                 logger.good("Safe exit")
+                return
             except:
-                print("ok")
+                pass
 
     def handle_client(self, socket_connection):
         with socket_connection:
@@ -221,7 +223,7 @@ class Server:
                         logger.fail(feedback)
                         self.send_feedback(socket_connection, False, feedback)
                 except ConnectionResetError:
-                    logger.fail(f"Connection closed by {socket_connection.getpeername()}")
+                    logger.fail(f"Connection closed by")
 
                     break
         logger.good(f"Disconnected {socket_connection}")

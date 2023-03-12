@@ -5,14 +5,14 @@ logger = wasabi.Printer(pretty=False, no_print=False)
 
 
 class Client:
-    def __init__(self, host='localhost', port=12345):
+    def __init__(self, host: str = 'localhost', port: int = 12345):
         self.host = host
         self.port = port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def connect(self) -> bool:
         try:
-            self.socket.settimeout(5)
+            #logger.info(f"Connecting to")
             self.socket.connect((self.host, self.port))
 
             if self.socket.fileno() != -1:
@@ -31,6 +31,7 @@ class Client:
     def send(self, data):
         # Prepend the message length as 4 bytes in big-endian order
         msg = len(data).to_bytes(4, byteorder='big') + data.encode()
+        logger.info(f"sending {data}")
         self.socket.sendall(msg)
 
     def receive_feedback(self):

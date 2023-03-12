@@ -1,30 +1,24 @@
 import configparser
-import logging
-import pathlib
 import threading
+from random import randint
+
 import wasabi
 
 import arcade
 import arcade.gui
 
 from cursor.collection import Collection
-from cursor.data import DataDirHandler
-from cursor.device import Paper, PaperSize, XYFactors, MinmaxMapping, PlotterType
-from cursor.loader import Loader
-from cursor.renderer import HPGLRenderer
+from cursor.device import MinmaxMapping, PlotterType
+from tools.octet.data import all_paths
 
 from tools.octet.discovery import discover
-from tools.octet.gui import MainWindow, GuiThread, CheckerThread
+from tools.octet.gui import MainWindow, GuiThread, CheckerThread, TestButton
 from tools.octet.launchpad_wrapper import NovationLaunchpad, reset_novation, set_novation_button, lp, novation_poll
 from tools.octet.plotter import Plotter
 
 logger = wasabi.Printer(pretty=True, no_print=False)
 
-recordings = DataDirHandler().recordings()
-_loader = Loader(directory=recordings, limit_files=1)
-all_paths = _loader.all_paths()
-
-gui_threads = {}
+# gui_threads = {}
 
 plotters = []
 
@@ -38,12 +32,19 @@ config.read('config_client.ini')
 # Get the values of the parameters
 hostname = config.get('CONFIG', 'hostname')
 target = config.get('CONFIG', 'target')
-port = config.getint('CONFIG', 'port')
+
 offline_mode = config.getboolean('CONFIG', 'offline_mode')
+
+global_speed = 40
 
 
 class QuitButton(arcade.gui.UIFlatButton):
     def on_click(self, event: arcade.gui.UIOnClickEvent):
+
+        for plo in plotters:
+            plo.close_serial()
+            plo.client.close()
+
         if not lp:
             arcade.exit()
             return
@@ -53,112 +54,95 @@ class QuitButton(arcade.gui.UIFlatButton):
         # sys.exit()
 
 
-def run_blocking_process(_plotter):
-    feedback = ""
-    for i in range(2):
-        # Replace this with your own blocking process
-        c = Collection()
-        line = all_paths.random()
-        line.velocity = 110
-        c.add(line)
-        d = rendering(c, _plotter.type)
-        # print(f"data: {d}")
-        result, feedback = _plotter.send_data(d)
-        print(f"done with button {result} + {feedback}")
-
-    return feedback
-
-
-class TestButton(arcade.gui.UIFlatButton):
-    def __init__(self, plotter, **kwargs):
-        super().__init__(**kwargs)
-        self.plotter = plotter
-
-    def on_click(self, event: arcade.gui.UIOnClickEvent):
-        global gui_threads
-        if not self.plotter.port in gui_threads.keys():
-            # if not process_running[plotter.serial_port]:
-            thread = GuiThread(self.plotter.port)
-            thread.plotter = self.plotter
-            thread.func = run_blocking_process
-            thread.start()
-
-            gui_threads[self.plotter.port] = thread
-
-        global process_running
-        if not process_running[self.plotter.serial_port]:
-            process_thread = threading.Thread(target=run_blocking_process, args=(self.plotter,))
-            process_thread.start()
-            # process_thread.join()  # Wait for the thread to finish
-            logger.good(f"finished starting thread for {self.plotter.serial_port}")
-
-        else:
-            logger.warn(f"discarding data for {self.plotter.serial_port}")
-
-
-def go_up_down(_plotter):
-    d = MinmaxMapping.maps[_plotter.type]
-    result, feedback = _plotter.send_data(f"PU;PA{d.x},{0};PA{d.w},{0}")
-
-    print(f"done with updown {result} + {feedback}")
-
-    return feedback
-
 
 # Define the key press callback function
 def on_key_press(key, modifiers):
-    global process_running
-    global gui_threads
+    global global_speed
 
     for plotter in plotters:
-        if not plotter.port in gui_threads.keys():
-            thread = GuiThread(plotter.port)
+        if plotter.thread is None:
+            # if not plotter.serial_port in gui_threads.keys():
+            thread = GuiThread(plotter.serial_port)
+            thread.speed = global_speed
+            thread.c = all_paths
             thread.plotter = plotter
 
             if key == arcade.key.P:
-                thread.func = go_up_down
+                thread.func = Plotter.go_up_down
             elif key == arcade.key.L:
-                thread.func = run_blocking_process
+                thread.func = Plotter.draw_random_line
+            elif key == arcade.key.O:
+                thread.func = Plotter.pen_down_up
+            elif key == arcade.key.I:
+                thread.func = Plotter.random_pos
+            elif key == arcade.key.S:
+                thread.func = Plotter.set_speed
+            elif key == arcade.key.Q:
+                thread.func = Plotter.init
 
             # only start if no other thread for this port is running
             thread.start()
 
-            gui_threads[plotter.port] = thread
+            plotter.thread = thread
 
-            logger.good(f"finished starting thread for {plotter.serial_port}")
+            logger.good(f"finished starting thread for {plotter.type} at {plotter.serial_port}")
 
         else:
             logger.warn(f"discarding data for {plotter.serial_port}")
 
 
-def rendering(collection: Collection, type: PlotterType) -> str:
-    collection.fit(
-        Paper.sizes[PaperSize.LANDSCAPE_A3],
-        xy_factor=XYFactors.fac[type],
-        padding_mm=20,
-        output_bounds=MinmaxMapping.maps[type],
-        keep_aspect=True
-    )
+def async_func(model, ip: str, tcp_port: int, serial_port: str, baud: int, timeout: float):
+    p = Plotter(ip, tcp_port, serial_port, baud, timeout)
+    p.connect()
+    p.open_serial()
 
-    r = HPGLRenderer(pathlib.Path(""))
-    r.render(collection)
-    return r.generate_string()
+    plotter_map = {"7475A": PlotterType.HP_7475A_A3,
+                   "7550A": PlotterType.HP_7550A,
+                   "7595A": PlotterType.HP_7595A_A0,
+                   "7596A": PlotterType.HP_7595A_A0}
+
+    for k, v in plotter_map.items():
+        if k == model:
+            p.type = v
+            return p
+
+    return None
+
+
+def connect_plotters(cfg, discovered) -> list:
+    ip = target
+    tcp_port = cfg.getint('CONFIG', 'port')
+    baud = 9600
+    timeout = config.getfloat('CONFIG', 'serial_timeout')
+
+    results = []
+
+    threads = []
+    for plo in discovered:
+        if not plo:
+            continue
+        serial_port = plo[0]
+        model = plo[1]
+
+        thread = threading.Thread(
+            target=lambda: results.append(async_func(model, ip, tcp_port, serial_port, baud, timeout))
+        )
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+    print(results)
+    return results
 
 
 if __name__ == '__main__':
-    plotter_map = {"7475A": PlotterType.HP_7475A_A3,
-                   "7550A": PlotterType.HP_7550A,
-                   "7595A": PlotterType.HP_7595A,
-                   "7576B": PlotterType.HP_7596B}
+
 
     window = MainWindow()
     window.on_key_press = on_key_press
     window.add(QuitButton(text="Quit", width=200))
-
-    discovered_plotters = discover()
-
-    checker_thread = CheckerThread(gui_threads)
-    checker_thread.start()
 
     if offline_mode:
         # add test plotter in offline mode
@@ -167,42 +151,31 @@ if __name__ == '__main__':
         test_plotter.connect()
         test_plotter.open_serial()
         plotters.append(test_plotter)
+    else:
+        discovered_plotters = discover()
+        plotters = connect_plotters(config, discovered_plotters)
 
-        tb1 = TestButton(text=f"Test Plotter", width=200, plotter=test_plotter)
-        window.add(tb1)
+        checker_thread = CheckerThread(plotters)
+        checker_thread.start()
 
-    for plo in discovered_plotters:
-        ip = target
-        tcp_port = port
-        baud = 9600
-        timeout = 0.5
-        port = plo[0]
-        process_running[port] = False
+        window.render_plotters(plotters)
 
-        p = Plotter(ip, tcp_port, port, baud, timeout)
-        p.connect()
-        p.open_serial()
-        success, model = p.get_model()
-        if success:
-            print(f"success opening {port} -> {model}")
-            plotters.append(p)
 
-            for k, v in plotter_map.items():
-                if k == model:
-                    p.type = v
-                    tb1 = TestButton(text=f"Plotter {model}", width=200, plotter=p)
-                    window.add(tb1)
-        else:
-            p.close_serial()
-            p.disconnect()
+    def on_change(v):
+        print(v)
+        global global_speed
+        global_speed = v
 
+
+    window.add_slider(on_change)
     window.finalize()
     arcade.run()
 
     # novation_poll(plotters)
 
-    for thread in gui_threads:
-        thread.join()
+    for plo in plotters:
+        if plo.thread:
+            plo.thread.join()
 
     # Stop the checker thread
     checker_thread.stop()
