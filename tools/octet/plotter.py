@@ -146,6 +146,36 @@ class Plotter:
             keep_aspect=True
         )
 
+        dims = MinmaxMapping.maps[tt]
+        trans = Plotter.transformFn((c.bb().x, c.bb.y), (c.bb().x2, c.bb.y2), (dims.x, dims.y), (dims.x2, dims.y2))
+        for pa in c:
+            for poi in pa.vertices:
+                n_poi = trans(poi.as_tuple())
+                poi.x = n_poi.x
+                poi.y = n_poi.y
+
         r = HPGLRenderer(pathlib.Path(""))
         r.render(c)
         return r.generate_string()
+
+    @staticmethod
+    def transformFn(stl, sbr, dtl, dbr):
+        stlx, stly = stl;
+        sbrx, sbry = sbr;
+        dtlx, dtly = dtl;
+        dbrx, dbry = dbr;
+
+        sdx, sdy = sbrx - stlx, sbry - stly
+        ddx, ddy = dbrx - dtlx, dbry - dtly
+
+        ry, rx = ddx / sdx, ddy / sdy
+        a = math.min(rx, ry)
+
+        ox, oy = (ddx - sdx * a) * 0.5 + dtlx, (ddy - sdy * a) * 0.5 + dtly
+        bx, by = -stlx * a + ox, -stly * a + oy
+
+        def calc(inp):
+            x, y = inp
+            return x * a + bx, y * a + by
+
+        return calc
