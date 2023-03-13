@@ -31,7 +31,7 @@ class Client:
     def send(self, data):
         # Prepend the message length as 4 bytes in big-endian order
         msg = len(data).to_bytes(4, byteorder='big') + data.encode()
-        logger.info(f"sending {data}")
+        #logger.info(f"sending {data}")
         self.socket.sendall(msg)
 
     def receive_feedback(self):
