@@ -69,10 +69,6 @@ class GuiThread(threading.Thread):
                 if not self.buffer.empty():
                     self.func = self.buffer.get()
                     s = self.buffer.qsize()
-                    logger.info(f"{s} threads left")
-                    #if self.label:
-                    #    self.label.text = str(s)
-                   # self.label.text = "ss"
 
                     try:
                         logger.info(self.button)
