@@ -1,18 +1,22 @@
 import pathlib
 from random import randint
+import math
 
 import wasabi
 
+from cursor.timer import Timer
 from cursor.collection import Collection
 from cursor.device import PlotterType, PaperSize, XYFactors, Paper, MinmaxMapping
 from cursor.renderer import HPGLRenderer
 from tools.octet.client import Client
+from tools.octet.data import all_paths
+from tools.octet.gui import GuiThread
 
 logger = wasabi.Printer(pretty=True, no_print=False)
 
 
 class Plotter:
-    def __init__(self, ip: str, port: int, serial_port: str, baud: int, timeout: float):
+    def     __init__(self, ip: str, port: int, serial_port: str, baud: int, timeout: float):
         self.serial_port = serial_port
         self.baud = baud
         self.timeout = timeout
@@ -23,9 +27,13 @@ class Plotter:
         self.is_connected = False
         self.msg_delimiter = '#'
         self.type = None
-        self.thread = None
-        self.button = None
+
         self.xy = (0, 0)
+
+        self.thread = GuiThread(self.serial_port, self)
+        self.thread.c = all_paths
+        self.thread.speed = 40
+        self.thread.start()
 
     def __prefix(self):
         return f"{self.serial_port}{self.msg_delimiter}{self.baud}" \
@@ -72,16 +80,14 @@ class Plotter:
             line = col.random()
             line.velocity = speed
             c.add(line)
-            logger.info(c)
-            logger.info(plotter)
             d = Plotter.rendering(c, plotter.type)
-            logger.info(d)
             plotter.xy = line.end_pos().as_tuple()
 
             result, feedback = plotter.send_data(d)
             logger.info(f"{result} : {feedback}")
             return feedback
         except Exception as e:
+            logger.fail(e.__traceback__.tb_lineno)
             logger.fail(f"FAILED {e}")
 
     @staticmethod
@@ -115,7 +121,6 @@ class Plotter:
 
         return feedback
 
-
     @staticmethod
     def pen_down_up(plotter: "Plotter", col: Collection, speed):
         times = randint(1, 100)
@@ -135,29 +140,24 @@ class Plotter:
 
         return feedback
 
-
     @staticmethod
     def rendering(c: Collection, tt: PlotterType) -> str:
-        c.fit(
-            Paper.sizes[PaperSize.LANDSCAPE_A3],
-            xy_factor=XYFactors.fac[tt],
-            padding_mm=20,
-            output_bounds=MinmaxMapping.maps[tt],
-            keep_aspect=True
-        )
-
         dims = MinmaxMapping.maps[tt]
-        trans = Plotter.transformFn((c.bb().x, c.bb.y), (c.bb().x2, c.bb.y2), (dims.x, dims.y), (dims.x2, dims.y2))
+        trans = Plotter.transformFn((c.bb().x, c.bb().y), (c.bb().x2, c.bb().y2), (dims.x, dims.y), (dims.x2, dims.y2))
         for pa in c:
             for poi in pa.vertices:
                 n_poi = trans(poi.as_tuple())
-                poi.x = n_poi.x
-                poi.y = n_poi.y
+                poi.x = n_poi[0]
+                poi.y = n_poi[1]
 
         r = HPGLRenderer(pathlib.Path(""))
         r.render(c)
         return r.generate_string()
 
+    """
+    ty lars wander 
+    https://larswander.com/writing/centering-and-scaling/
+    """
     @staticmethod
     def transformFn(stl, sbr, dtl, dbr):
         stlx, stly = stl;
@@ -169,13 +169,13 @@ class Plotter:
         ddx, ddy = dbrx - dtlx, dbry - dtly
 
         ry, rx = ddx / sdx, ddy / sdy
-        a = math.min(rx, ry)
+        a = min(rx, ry)
 
         ox, oy = (ddx - sdx * a) * 0.5 + dtlx, (ddy - sdy * a) * 0.5 + dtly
         bx, by = -stlx * a + ox, -stly * a + oy
 
         def calc(inp):
-            x, y = inp
+            x, y = inp[0], inp[1]
             return x * a + bx, y * a + by
 
         return calc

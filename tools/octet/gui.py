@@ -7,13 +7,15 @@ import arcade.gui
 
 import threading
 import time
+import queue
+import traceback
 
 import wasabi
 from arcade.experimental.uislider import UISlider
-from arcade.gui import UIOnChangeEvent
+from arcade.gui import UIOnChangeEvent, UILabel
 
 from tools.octet.data import all_paths
-from tools.octet.plotter import Plotter
+#from tools.octet.plotter import Plotter
 
 
 
@@ -33,36 +35,67 @@ class TestButton(arcade.gui.UIFlatButton):
             thread.plotter = self.plotter
             thread.speed = 40
             thread.c = self.col
-            thread.func = Plotter.random_pos
+            #thread.func = Plotter.random_pos
             thread.start()
 
 
 class GuiThread(threading.Thread):
-    def __init__(self, thread_id):
+    def __init__(self, thread_id, plotter):
         threading.Thread.__init__(self)
         self.thread_id = thread_id
         self.running = True
-        self.plotter = None
+        self.plotter = plotter
         self.speed = None
         self.func = None
         self.c = None
+        self.stopped = False
+        self.buffer = queue.Queue()
+        self.button = None
+        self.label = None
+
+    def add(self, func):
+        self.buffer.put(func)
 
     def run(self):
         print(f"Thread for {self.plotter.type} at {self.plotter.serial_port} started")
+        while True:
+            if self.stopped:
+                return
 
-        try:
-            self.plotter.button.text = "running"
-            self.func(self.plotter, self.c, self.speed)
-            self.plotter.button.text = self.plotter.type
-        except Exception as e:
-            self.plotter.button.text = "crashed"
-            logger.fail(f"gui thread crashed: {e}")
-            logger.fail(e.__traceback__)
+            if not self.running:
+                time.sleep(0.1)
+                continue
+            else:
+                if not self.buffer.empty():
+                    self.func = self.buffer.get()
+                    s = self.buffer.qsize()
+                    logger.info(f"{s} threads left")
+                    #if self.label:
+                    #    self.label.text = str(s)
+                   # self.label.text = "ss"
+
+                    try:
+                        logger.info(self.button)
+                        if self.button:
+                            self.button.text = str(s)
+                        self.func(self.plotter, self.c, self.speed)
+
+                        if self.button:
+                            self.button.text = self.plotter.type
+                    except Exception as e:
+                        # self.button.text = "crashed"
+                        logger.fail(f"gui thread crashed: {e}")
+                        logger.fail(f"{traceback.format_exc()}")
+
+                else:
+                    time.sleep(0.1)
+                    #self.pause()
+                    continue
 
         print(f"Thread for {self.plotter.type} at {self.plotter.serial_port} finished")
 
     def stop(self):
-        self.running = False
+        self.stopped = True
 
     def pause(self):
         self.running = False
@@ -123,8 +156,12 @@ class MainWindow(arcade.Window):
     def render_plotters(self, plotters):
         for plo in plotters:
             tb1 = TestButton(text=f"Plotter {plo.type}", width=200, plotter=plo, col=all_paths)
-            plo.button = tb1
+            plo.thread.button = tb1
             self.add(tb1)
+
+            lab = UILabel(text="0")
+            plo.thread.label = lab
+            self.v_box.add(lab)
 
     def add(self, button):
         self.v_box.add(button)

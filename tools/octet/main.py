@@ -12,7 +12,7 @@ from cursor.device import MinmaxMapping, PlotterType
 from tools.octet.data import all_paths
 
 from tools.octet.discovery import discover
-from tools.octet.gui import MainWindow, GuiThread, CheckerThread, TestButton
+from tools.octet.gui import MainWindow, CheckerThread, TestButton
 from tools.octet.launchpad_wrapper import NovationLaunchpad, reset_novation, set_novation_button, lp, novation_poll
 from tools.octet.plotter import Plotter
 
@@ -58,34 +58,25 @@ def on_key_press(key, modifiers):
     global global_speed
 
     for plotter in plotters:
-        if plotter.thread is None:
-            thread = GuiThread(plotter.serial_port)
-            thread.speed = global_speed
-            thread.c = all_paths
-            thread.plotter = plotter
+        if not plotter.thread:
+            logger.warn(f"Ignored keypres bc plotter thread is not ready")
+            continue
+        #if not plotter.thread.running:
+        if key == arcade.key.P:
+            plotter.thread.add(Plotter.go_up_down)
+        elif key == arcade.key.L:
+            for i in range(4):
+                plotter.thread.add(Plotter.draw_random_line)
+        elif key == arcade.key.O:
+            plotter.thread.add(Plotter.pen_down_up)
+        elif key == arcade.key.I:
+            plotter.thread.add(Plotter.random_pos)
+        elif key == arcade.key.S:
+            plotter.thread.add(Plotter.set_speed)
+        elif key == arcade.key.Q:
+            plotter.thread.add(Plotter.init)
 
-            if key == arcade.key.P:
-                thread.func = Plotter.go_up_down
-            elif key == arcade.key.L:
-                thread.func = Plotter.draw_random_line
-            elif key == arcade.key.O:
-                thread.func = Plotter.pen_down_up
-            elif key == arcade.key.I:
-                thread.func = Plotter.random_pos
-            elif key == arcade.key.S:
-                thread.func = Plotter.set_speed
-            elif key == arcade.key.Q:
-                thread.func = Plotter.init
-
-            # only start if no other thread for this port is running
-            thread.start()
-
-            plotter.thread = thread
-
-            logger.good(f"finished starting thread for {plotter.type} at {plotter.serial_port}")
-
-        else:
-            logger.warn(f"discarding data for {plotter.serial_port}")
+        plotter.thread.resume()
 
 
 def async_func(model, ip: str, tcp_port: int, serial_port: str, baud: int, timeout: float):
@@ -169,6 +160,7 @@ if __name__ == '__main__':
 
     for plo in plotters:
         if plo.thread:
+            plo.thread.stop()
             plo.thread.join()
 
     if checker_thread:
