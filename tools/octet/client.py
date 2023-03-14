@@ -12,7 +12,6 @@ class Client:
 
     def connect(self) -> bool:
         try:
-            #logger.info(f"Connecting to")
             self.socket.connect((self.host, self.port))
 
             if self.socket.fileno() != -1:
@@ -31,7 +30,7 @@ class Client:
     def send(self, data):
         # Prepend the message length as 4 bytes in big-endian order
         msg = len(data).to_bytes(4, byteorder='big') + data.encode()
-        #logger.info(f"sending {data}")
+        # logger.info(f"sending {data}")
         self.socket.sendall(msg)
 
     def receive_feedback(self):

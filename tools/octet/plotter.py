@@ -1,8 +1,12 @@
 import pathlib
 from random import randint
 import math
-
+import queue
+import time
+import threading
 import wasabi
+import traceback
+import socket
 
 from cursor.timer import Timer
 from cursor.collection import Collection
@@ -10,9 +14,104 @@ from cursor.device import PlotterType, PaperSize, XYFactors, Paper, MinmaxMappin
 from cursor.renderer import HPGLRenderer
 from tools.octet.client import Client
 from tools.octet.data import all_paths
-from tools.octet.gui import GuiThread
 
 logger = wasabi.Printer(pretty=True, no_print=False)
+
+class GuiThread(threading.Thread):
+    def __init__(self, thread_id, plotter):
+        threading.Thread.__init__(self)
+        self.thread_id = thread_id
+        self.running = True
+        self.plotter = plotter
+        self.speed = None
+        self.func = None
+        self.c = None
+        self.stopped = False
+        self.buffer = queue.Queue()
+        self.button = None
+        self.label = None
+
+        self.task_completed_cb = None
+
+    def set_cb(self, cb):
+        self.task_completed_cb = cb
+
+    def add(self, func):
+        self.buffer.put(func)
+
+    def run(self):
+        logger.info(f"Thread for {self.plotter.type} at {self.plotter.serial_port} started")
+        while True:
+            if self.stopped:
+                return
+
+            if not self.running:
+                time.sleep(0.1)
+                continue
+            else:
+                if not self.buffer.empty():
+                    self.func = self.buffer.get()
+                    s = self.buffer.qsize()
+
+                    try:
+                        if self.task_completed_cb:
+                            self.task_completed_cb(s)
+                        self.func(self.plotter, self.c, self.speed)
+
+
+                    except socket.timeout as e:
+                        logger.fail(f"{self.plotter.type} at {self.plotter} timed out")
+                    except Exception as e:
+                        logger.fail(f"Scheduled call failed: {e}")
+                        logger.fail(f"{traceback.format_exc()}")
+
+                else:
+                    time.sleep(0.1)
+                    continue
+
+        logger.info(f"Thread for {self.plotter.type} at {self.plotter.serial_port} finished")
+
+    def stop(self):
+        self.stopped = True
+
+    def pause(self):
+        self.running = False
+
+    def resume(self):
+        self.running = True
+
+
+class CheckerThread(threading.Thread):
+    def __init__(self, plotters):
+        threading.Thread.__init__(self)
+        self.plotters = plotters
+        self.running = True
+
+    def run(self):
+        while True:
+            if not self.running:
+                logger.info("Checker thread finished")
+                return
+
+            time.sleep(1)
+            threads = {}
+            for plo in self.plotters:
+                threads[plo.serial_port] = plo
+
+            dict_copy = threads.copy()
+            for port, plo in dict_copy.items():
+                if not plo.thread:
+                    continue
+                if not plo.thread.running:
+                    plo.thread.pause()
+                elif not plo.thread.is_alive():
+                    plo.thread = None
+                else:
+                    # Resume the thread if it was paused
+                    plo.thread.resume()
+
+    def stop(self):
+        self.running = False
 
 
 class Plotter:
@@ -34,6 +133,9 @@ class Plotter:
         self.thread.c = all_paths
         self.thread.speed = 40
         self.thread.start()
+
+    def __repr__(self):
+        return f"{self.serial_port}"
 
     def __prefix(self):
         return f"{self.serial_port}{self.msg_delimiter}{self.baud}" \
@@ -75,20 +177,16 @@ class Plotter:
 
     @staticmethod
     def draw_random_line(plotter: "Plotter", col: Collection, speed):
-        try:
-            c = Collection()
-            line = col.random()
-            line.velocity = speed
-            c.add(line)
-            d = Plotter.rendering(c, plotter.type)
-            plotter.xy = line.end_pos().as_tuple()
+        c = Collection()
+        line = col.random()
+        line.velocity = speed
+        c.add(line)
+        d = Plotter.rendering(c, plotter.type)
+        plotter.xy = line.end_pos().as_tuple()
 
-            result, feedback = plotter.send_data(d)
-            logger.info(f"{result} : {feedback}")
-            return feedback
-        except Exception as e:
-            logger.fail(e.__traceback__.tb_lineno)
-            logger.fail(f"FAILED {e}")
+        result, feedback = plotter.send_data(d)
+        logger.info(f"{result} : {feedback}")
+        return feedback
 
     @staticmethod
     def init(plo, c, speed):
