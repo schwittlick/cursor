@@ -12,9 +12,9 @@ from cursor.device import MinmaxMapping, PlotterType
 from tools.octet.data import all_paths
 
 from tools.octet.discovery import discover
-from tools.octet.gui import MainWindow, CheckerThread, TestButton
+from tools.octet.gui import MainWindow, TestButton
 from tools.octet.launchpad_wrapper import NovationLaunchpad, reset_novation, set_novation_button, lp, novation_poll
-from tools.octet.plotter import Plotter
+from tools.octet.plotter import Plotter, CheckerThread
 
 logger = wasabi.Printer(pretty=True, no_print=False)
 
@@ -61,12 +61,11 @@ def on_key_press(key, modifiers):
         if not plotter.thread:
             logger.warn(f"Ignored keypres bc plotter thread is not ready")
             continue
-        #if not plotter.thread.running:
         if key == arcade.key.P:
             plotter.thread.add(Plotter.go_up_down)
         elif key == arcade.key.L:
-            for i in range(4):
-                plotter.thread.add(Plotter.draw_random_line)
+            #for i in range(4):
+            plotter.thread.add(Plotter.draw_random_line)
         elif key == arcade.key.O:
             plotter.thread.add(Plotter.pen_down_up)
         elif key == arcade.key.I:
