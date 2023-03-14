@@ -27,7 +27,7 @@ class TestButton(arcade.gui.UIFlatButton):
 
 class MainWindow(arcade.Window):
     def __init__(self):
-        super().__init__(800, 600, "OCTET 2023", resizable=True)
+        super().__init__(1000, 600, "OCTET 2023", resizable=True)
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
 
@@ -38,7 +38,7 @@ class MainWindow(arcade.Window):
     def render_plotters(self, plotters):
         for plo in plotters:
             container = arcade.gui.UIBoxLayout(vertical=False)
-            tb1 = TestButton(text=f"{plo.type}", width=100, plotter=plo, col=all_paths)
+            tb1 = TestButton(text=f"{plo.type}", width=300, plotter=plo, col=all_paths)
             plo.thread.button = tb1
             container.add(tb1)
 
@@ -55,20 +55,25 @@ class MainWindow(arcade.Window):
             container.add(tb2)
 
             tb3 = arcade.gui.UIFlatButton(text=f"random_line", width=100, )
-            tb3.on_click = second_clicked
+            tb3.on_click = third_clicked
             container.add(tb3)
 
-            lab = UILabel(text="0")
-            plo.thread.label = lab
-            container.add(lab)
+            tb4 = arcade.gui.UIFlatButton(text=f"threads", width=100, )
+            #tb4.on_click = second_clicked
+            container.add(tb4)
+
+            #lab = UILabel(text="0", width=100, x=50)
+            #plo.thread.label = lab
+            #container.add(lab)
             self.add(container)
 
-            def update_label(t):
-                lab.text = str(t)
+            def update_label(t, bu):
+                bu.text = str(t)
+                #lab.text = str(t)
 
             def set_label(t):
-                arcade.schedule(lambda dt: update_label(t), interval=0)
-                arcade.unschedule(lambda dt: update_label(t))
+                arcade.schedule(lambda dt: update_label(t, tb4), interval=0)
+                arcade.unschedule(lambda dt: update_label(t, tb4))
 
             plo.thread.set_cb(set_label)
 
@@ -77,13 +82,13 @@ class MainWindow(arcade.Window):
 
     def add_slider(self, f):
         slider = UISlider(
-            text="global_speed",
+            text="speed_all",
             center_x=300,
             center_y=100,
             height=50,
             min_value=1,
             max_value=110,
-            value=50,
+            value=40,
             on_value_change=f,
         )
 

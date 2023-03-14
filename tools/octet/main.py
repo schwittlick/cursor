@@ -7,15 +7,12 @@ import wasabi
 import arcade
 import arcade.gui
 
-from cursor.collection import Collection
-from cursor.device import MinmaxMapping, PlotterType
-from tools.octet.data import all_paths
+from cursor.device import PlotterType
 
 from tools.octet.discovery import discover
-from tools.octet.gui import MainWindow, TestButton
+from tools.octet.gui import MainWindow
 from tools.octet.launchpad_wrapper import NovationLaunchpad, reset_novation, set_novation_button, lp, novation_poll
 from tools.octet.plotter import Plotter, CheckerThread
-
 logger = wasabi.Printer(pretty=True, no_print=False)
 
 plotters = []
@@ -32,8 +29,6 @@ hostname = config.get('CONFIG', 'hostname')
 target = config.get('CONFIG', 'target')
 
 offline_mode = config.getboolean('CONFIG', 'offline_mode')
-
-global_speed = 40
 
 
 class QuitButton(arcade.gui.UIFlatButton):
@@ -55,8 +50,6 @@ class QuitButton(arcade.gui.UIFlatButton):
 
 # Define the key press callback function
 def on_key_press(key, modifiers):
-    global global_speed
-
     for plotter in plotters:
         if not plotter.thread:
             logger.warn(f"Ignored keypres bc plotter thread is not ready")
@@ -74,6 +67,8 @@ def on_key_press(key, modifiers):
             plotter.thread.add(Plotter.set_speed)
         elif key == arcade.key.Q:
             plotter.thread.add(Plotter.init)
+        elif key == arcade.key.F:
+            plotter.thread.add(Plotter.c73)
 
         plotter.thread.resume()
 
@@ -85,8 +80,8 @@ def async_func(model, ip: str, tcp_port: int, serial_port: str, baud: int, timeo
 
     plotter_map = {"7475A": PlotterType.HP_7475A_A3,
                    "7550A": PlotterType.HP_7550A,
-                   "7595A": PlotterType.HP_7595A_A0,
-                   "7596A": PlotterType.HP_7595A_A0}
+                   "7595A": PlotterType.HP_7596B,
+                   "7596A": PlotterType.HP_7596B}
 
     for k, v in plotter_map.items():
         if k == model:
@@ -146,9 +141,9 @@ if __name__ == '__main__':
 
 
     def on_change(v):
-        logger.info(f"global_speed: {v}")
-        global global_speed
-        global_speed = v
+        logger.info(f"setting speed for all: {v}")
+        for plo in plotters:
+            plo.thread.speed = v
 
 
     window.add_slider(on_change)
