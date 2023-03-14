@@ -1,4 +1,5 @@
 import pathlib
+import random
 from random import randint
 import math
 import queue
@@ -8,6 +9,7 @@ import wasabi
 import traceback
 import socket
 
+from cursor.filter import DistanceFilter
 from cursor.timer import Timer
 from cursor.collection import Collection
 from cursor.device import PlotterType, PaperSize, XYFactors, Paper, MinmaxMapping
@@ -185,7 +187,29 @@ class Plotter:
         plotter.xy = line.end_pos().as_tuple()
 
         result, feedback = plotter.send_data(d)
-        logger.info(f"{result} : {feedback}")
+        logger.info(f"{plotter.type} : {result} : {feedback}")
+        return feedback
+
+    @staticmethod
+    def c73(plotter: "Plotter", col: Collection, speed):
+        c = Collection()
+
+        line = col.random()
+        line.velocity = plotter.thread.speed
+
+        for i in range(10):
+            l = line.copy()
+            l.translate(1, 0)
+            c.add(l)
+
+        bounds = MinmaxMapping.maps[plotter.type]
+        offset_x = random.randint(0, int(bounds.w * 0.8))
+        offset_y = random.randint(0, int(bounds.h * 0.8))
+        d = Plotter.rendering(c, plotter.type, 0.1, (offset_x, offset_y))
+        plotter.xy = line.end_pos().as_tuple()
+
+        result, feedback = plotter.send_data(d)
+        logger.info(f"{plotter.type} : {result} : {feedback}")
         return feedback
 
     @staticmethod
@@ -230,23 +254,22 @@ class Plotter:
 
     @staticmethod
     def set_speed(plotter: "Plotter", col: Collection, speed):
-        global global_speed
-        logger.info(f"sending speed {global_speed}")
-        result, feedback = plotter.send_data(f"VS{global_speed};")
+        logger.info(f"sending speed {plotter.thread.speed}")
+        result, feedback = plotter.send_data(f"VS{plotter.thread.speed};")
 
         print(f"done set speed {result} + {feedback}")
 
         return feedback
 
     @staticmethod
-    def rendering(c: Collection, tt: PlotterType) -> str:
+    def rendering(c: Collection, tt: PlotterType, scale = 1.0, offset = (0,0)) -> str:
         dims = MinmaxMapping.maps[tt]
         trans = Plotter.transformFn((c.bb().x, c.bb().y), (c.bb().x2, c.bb().y2), (dims.x, dims.y), (dims.x2, dims.y2))
         for pa in c:
             for poi in pa.vertices:
                 n_poi = trans(poi.as_tuple())
-                poi.x = n_poi[0]
-                poi.y = n_poi[1]
+                poi.x = (n_poi[0] * scale) + offset[0]
+                poi.y = (n_poi[1] * scale) + offset[1]
 
         r = HPGLRenderer(pathlib.Path(""))
         r.render(c)

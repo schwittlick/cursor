@@ -7,7 +7,7 @@ logger = wasabi.Printer(pretty=True, no_print=False)
 
 def async_discover(serial_port):
     try:
-        ser = serial.Serial(serial_port, baudrate=9600, timeout=1.5)
+        ser = serial.Serial(serial_port, baudrate=9600, timeout=5)
         ser.write("OI;\n".encode("utf-8"))
         ret = ser.readline().decode("utf-8")
         model = ret.strip()

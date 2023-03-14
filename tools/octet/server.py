@@ -61,7 +61,7 @@ class SerialConnection:
             b = self.serial.read()
         return n
 
-    def buffer(self, data, chunk=255):
+    def buffer(self, data, chunk=512):
         pos = 0
         self.current_buffer = data
         while pos < len(self.current_buffer):
