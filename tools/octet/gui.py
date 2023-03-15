@@ -21,7 +21,7 @@ class TestButton(arcade.gui.UIFlatButton):
 
     def on_click(self, event: arcade.gui.UIOnClickEvent):
         logger.info(self.plotter)
-        self.plotter.thread.add(Plotter.init, 0.5)
+        self.plotter.thread.add(Plotter.init)
         self.plotter.thread.resume()
 
 
@@ -44,12 +44,12 @@ class MainWindow(arcade.Window):
 
             def second_clicked(event):
                 _plo = event.source.plotter
-                _plo.thread.add(Plotter.random_pos, 0.5)
+                _plo.thread.add(Plotter.random_pos)
                 _plo.thread.resume()
 
             def third_clicked(event):
                 _plo = event.source.plotter
-                _plo.thread.add(Plotter.draw_random_line, 0.5)
+                _plo.thread.add(Plotter.draw_random_line)
                 _plo.thread.resume()
 
             tb2 = arcade.gui.UIFlatButton(text=f"pos", width=100, )

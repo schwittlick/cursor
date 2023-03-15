@@ -1,4 +1,5 @@
 import configparser
+import sys
 import threading
 
 import wasabi
@@ -11,6 +12,7 @@ from cursor.device import PlotterType
 from tools.octet.discovery import discover
 from tools.octet.gui import MainWindow
 from tools.octet.launchpad_wrapper import NovationLaunchpad, reset_novation, set_novation_button, lp, novation_poll
+from tools.octet.midique import Midique
 from tools.octet.plotter import Plotter, CheckerThread
 logger = wasabi.Printer(pretty=True, no_print=False)
 
@@ -54,20 +56,20 @@ def on_key_press(key, modifiers):
             logger.warn(f"Ignored keypres bc plotter thread is not ready")
             continue
         if key == arcade.key.P:
-            plotter.thread.add(Plotter.go_up_down, 0.5)
+            plotter.thread.add(Plotter.go_up_down)
         elif key == arcade.key.L:
             #for i in range(4):
-            plotter.thread.add(Plotter.draw_random_line, 0.5)
+            plotter.thread.add(Plotter.draw_random_line)
         elif key == arcade.key.O:
-            plotter.thread.add(Plotter.pen_down_up, 0.5)
+            plotter.thread.add(Plotter.pen_down_up)
         elif key == arcade.key.I:
-            plotter.thread.add(Plotter.random_pos, 0.5)
+            plotter.thread.add(Plotter.random_pos)
         elif key == arcade.key.S:
-            plotter.thread.add(Plotter.set_speed, 0.5)
+            plotter.thread.add(Plotter.set_speed)
         elif key == arcade.key.Q:
-            plotter.thread.add(Plotter.init, 0.5)
+            plotter.thread.add(Plotter.init)
         elif key == arcade.key.F:
-            plotter.thread.add(Plotter.c73, 0.5)
+            plotter.thread.add(Plotter.c73)
 
         plotter.thread.resume()
 
@@ -119,6 +121,8 @@ def connect_plotters(cfg, discovered) -> list:
 
 
 if __name__ == '__main__':
+    midique = Midique(1)
+
     window = MainWindow()
     window.on_key_press = on_key_press
     window.add(QuitButton(text="Quit", width=200))
@@ -138,6 +142,9 @@ if __name__ == '__main__':
     checker_thread = CheckerThread(plotters)
     checker_thread.start()
     window.render_plotters(plotters)
+
+    midique.connect(35, plotters[0].set_delay)
+    midique.listen()
 
 
     def on_change(v):
