@@ -54,20 +54,20 @@ def on_key_press(key, modifiers):
             logger.warn(f"Ignored keypres bc plotter thread is not ready")
             continue
         if key == arcade.key.P:
-            plotter.thread.add(Plotter.go_up_down)
+            plotter.thread.add(Plotter.go_up_down, 0.5)
         elif key == arcade.key.L:
             #for i in range(4):
-            plotter.thread.add(Plotter.draw_random_line)
+            plotter.thread.add(Plotter.draw_random_line, 0.5)
         elif key == arcade.key.O:
-            plotter.thread.add(Plotter.pen_down_up)
+            plotter.thread.add(Plotter.pen_down_up, 0.5)
         elif key == arcade.key.I:
-            plotter.thread.add(Plotter.random_pos)
+            plotter.thread.add(Plotter.random_pos, 0.5)
         elif key == arcade.key.S:
-            plotter.thread.add(Plotter.set_speed)
+            plotter.thread.add(Plotter.set_speed, 0.5)
         elif key == arcade.key.Q:
-            plotter.thread.add(Plotter.init)
+            plotter.thread.add(Plotter.init, 0.5)
         elif key == arcade.key.F:
-            plotter.thread.add(Plotter.c73)
+            plotter.thread.add(Plotter.c73, 0.5)
 
         plotter.thread.resume()
 
