@@ -17,6 +17,7 @@ from tools.octet.data import all_paths
 
 logger = wasabi.Printer(pretty=True, no_print=False)
 
+
 class GuiThread(threading.Thread):
     def __init__(self, thread_id, plotter):
         threading.Thread.__init__(self)
@@ -24,10 +25,11 @@ class GuiThread(threading.Thread):
         self.running = True
         self.plotter = plotter
         self.speed = None
-        self.func = None
         self.c = None
         self.stopped = False
+
         self.buffer = queue.Queue()
+        self.delays = queue.Queue()
 
         # arcade flat ui buttons
         self.button = None
@@ -38,9 +40,10 @@ class GuiThread(threading.Thread):
     def set_cb(self, cb):
         self.task_completed_cb = cb
 
-    def add(self, func):
-        logger.info(f"Added {func.__name__} to {self.plotter.type}")
+    def add(self, func, delay: float = 0.0):
+        logger.info(f"Added {func.__name__} to {self.plotter.type} with delay {delay}")
         self.buffer.put(func)
+        self.delays.put(delay)
 
     def run(self):
         logger.info(f"Thread for {self.plotter.type} at {self.plotter.serial_port} started")
@@ -53,11 +56,14 @@ class GuiThread(threading.Thread):
                 continue
             else:
                 if not self.buffer.empty():
-                    self.func = self.buffer.get()
+                    func = self.buffer.get()
+                    delay = self.delays.get()
                     s = self.buffer.qsize()
 
+                    time.sleep(delay)
+
                     if not self.plotter.serial_port:
-                        time.sleep(0.5)
+                        # default time of task
                         self.thread_count.text = str(s)
                         if self.task_completed_cb:
                             self.task_completed_cb(s)
@@ -66,7 +72,7 @@ class GuiThread(threading.Thread):
                     try:
 
                         # run
-                        self.func(self.plotter, self.c, self.speed)
+                        func(self.plotter, self.c, self.speed)
 
                         if self.task_completed_cb:
                             self.task_completed_cb(s)
@@ -127,7 +133,7 @@ class CheckerThread(threading.Thread):
 
 
 class Plotter:
-    def     __init__(self, ip: str, port: int, serial_port: typing.Union[str, None], baud: int, timeout: float):
+    def __init__(self, ip: str, port: int, serial_port: typing.Union[str, None], baud: int, timeout: float):
         self.serial_port = serial_port
         self.baud = baud
         self.timeout = timeout
@@ -263,7 +269,7 @@ class Plotter:
 
     @staticmethod
     def pen_down_up(plotter: "Plotter", col: Collection, speed):
-        times = randint(1, 100)
+        times = 2# randint(1, 100)
         result, feedback = plotter.send_data(f"PD;PU;PA{plotter.xy[0]},{plotter.xy[1]};" * times)
 
         print(f"done pen updown {result} + {feedback}")
@@ -280,7 +286,7 @@ class Plotter:
         return feedback
 
     @staticmethod
-    def rendering(c: Collection, tt: PlotterType, scale = 1.0, offset = (0,0)) -> str:
+    def rendering(c: Collection, tt: PlotterType, scale=1.0, offset=(0, 0)) -> str:
         dims = MinmaxMapping.maps[tt]
         trans = Plotter.transformFn((c.bb().x, c.bb().y), (c.bb().x2, c.bb().y2), (dims.x, dims.y), (dims.x2, dims.y2))
         for pa in c:
@@ -297,6 +303,7 @@ class Plotter:
     ty lars wander 
     https://larswander.com/writing/centering-and-scaling/
     """
+
     @staticmethod
     def transformFn(stl, sbr, dtl, dbr):
         stlx, stly = stl;

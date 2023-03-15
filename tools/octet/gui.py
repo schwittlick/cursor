@@ -21,7 +21,7 @@ class TestButton(arcade.gui.UIFlatButton):
 
     def on_click(self, event: arcade.gui.UIOnClickEvent):
         logger.info(self.plotter)
-        self.plotter.thread.add(Plotter.init)
+        self.plotter.thread.add(Plotter.init, 0.5)
         self.plotter.thread.resume()
 
 
@@ -44,12 +44,12 @@ class MainWindow(arcade.Window):
 
             def second_clicked(event):
                 _plo = event.source.plotter
-                _plo.thread.add(Plotter.random_pos)
+                _plo.thread.add(Plotter.random_pos, 0.5)
                 _plo.thread.resume()
 
             def third_clicked(event):
                 _plo = event.source.plotter
-                _plo.thread.add(Plotter.draw_random_line)
+                _plo.thread.add(Plotter.draw_random_line, 0.5)
                 _plo.thread.resume()
 
             tb2 = arcade.gui.UIFlatButton(text=f"pos", width=100, )
@@ -66,24 +66,12 @@ class MainWindow(arcade.Window):
             tb4.plotter = plo
             #tb4.on_click = second_clicked
             plo.thread.thread_count = tb4
-
-
             container.add(tb4)
 
-            #lab = UILabel(text="0", width=100, x=50)
-            #plo.thread.label = lab
-            #container.add(lab)
             self.add(container)
 
-            def update_label(t, bu):
-                bu.text = str(t)
-                #lab.text = str(t)
-
-            def set_label(t):
-                arcade.schedule(lambda dt: update_label(t, tb4), interval=0)
-                arcade.unschedule(lambda dt: update_label(t, tb4))
-
-            #plo.thread.set_cb(set_label)
+            # optional complete cb
+            # plo.thread.set_cb(set_label)
 
     def add(self, button):
         self.v_box.add(button)
