@@ -43,6 +43,10 @@ class GuiThread(threading.Thread):
     def add(self, func):
         current_delay = self.plotter.get_delay()
         logger.info(f"Added {func.__name__} to {self.plotter.type} with delay {current_delay}")
+
+        if self.buffer.qsize() >= 5:
+            logger.warn(f"Discarding ...")
+            return
         self.buffer.put(func)
         self.delays.put(current_delay)
 
@@ -57,15 +61,16 @@ class GuiThread(threading.Thread):
                 continue
             else:
                 if not self.buffer.empty():
+
+
                     func = self.buffer.get()
                     delay = self.delays.get()
-                    s = self.buffer.qsize()
 
+                    s = self.buffer.qsize()
+                    self.thread_count.text = str(s)
                     time.sleep(delay)
 
                     if not self.plotter.serial_port:
-                        # default time of task
-                        self.thread_count.text = str(s)
                         if self.task_completed_cb:
                             self.task_completed_cb(s)
                         continue
@@ -76,6 +81,7 @@ class GuiThread(threading.Thread):
                         func(self.plotter, self.c, self.speed)
 
                         if self.task_completed_cb:
+                            self.thread_count.text = str(s - 1)
                             self.task_completed_cb(s)
 
                     except socket.timeout as e:
@@ -86,7 +92,7 @@ class GuiThread(threading.Thread):
 
 
                 else:
-                    time.sleep(0.1)
+                    time.sleep(0.01)
                     continue
 
         logger.info(f"Thread for {self.plotter.type} at {self.plotter.serial_port} finished")
@@ -161,7 +167,7 @@ class Plotter:
 
     def set_delay(self, delay:float):
         # coming straight from midi (0-1000)
-        self.__delay = round(delay/100)
+        self.__delay = delay/300
         logger.info(f"plotter.delay = {self.__delay} -> {self.type}")
 
 
@@ -274,6 +280,9 @@ class Plotter:
         y = randint(d.y, d.y2)
         plotter.xy = (x, y)
 
+        # calculate time to draw it at current speed
+        # speep for that long
+
         result, feedback = plotter.send_data(f"PD;PA{randint(d.x, d.x2)},{randint(d.y, d.y2)};PU;" * 1)
 
         print(f"random_pos done {result} + {feedback}")
@@ -284,7 +293,7 @@ class Plotter:
     def pen_down_up(plotter: "Plotter", col: Collection, speed):
         times = 2# randint(1, 100)
         result, feedback = plotter.send_data(f"PD;PU;PA{plotter.xy[0]},{plotter.xy[1]};" * times)
-
+        time.sleep(0.2)
         print(f"done pen updown {result} + {feedback}")
 
         return feedback

@@ -52,6 +52,11 @@ class MainWindow(arcade.Window):
                 _plo.thread.add(Plotter.draw_random_line)
                 _plo.thread.resume()
 
+            def penupdown_clicked(event):
+                _plo = event.source.plotter
+                _plo.thread.add(Plotter.pen_down_up)
+                _plo.thread.resume()
+
             tb2 = arcade.gui.UIFlatButton(text=f"pos", width=100, )
             tb2.plotter = plo
             tb2.on_click = second_clicked
@@ -61,6 +66,11 @@ class MainWindow(arcade.Window):
             tb3.plotter = plo
             tb3.on_click = third_clicked
             container.add(tb3)
+
+            pud = arcade.gui.UIFlatButton(text=f"pen up down", width=100, )
+            pud.plotter = plo
+            pud.on_click = penupdown_clicked
+            container.add(pud)
 
             tb4 = arcade.gui.UIFlatButton(text=f"threads", width=100, )
             tb4.plotter = plo
