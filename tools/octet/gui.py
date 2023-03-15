@@ -43,23 +43,31 @@ class MainWindow(arcade.Window):
             container.add(tb1)
 
             def second_clicked(event):
-                plo.thread.add(Plotter.random_pos)
-                plo.thread.resume()
+                _plo = event.source.plotter
+                _plo.thread.add(Plotter.random_pos)
+                _plo.thread.resume()
 
             def third_clicked(event):
-                plo.thread.add(Plotter.draw_random_line)
-                plo.thread.resume()
+                _plo = event.source.plotter
+                _plo.thread.add(Plotter.draw_random_line)
+                _plo.thread.resume()
 
-            tb2 = arcade.gui.UIFlatButton(text=f"random_pos", width=100, )
+            tb2 = arcade.gui.UIFlatButton(text=f"pos", width=100, )
+            tb2.plotter = plo
             tb2.on_click = second_clicked
             container.add(tb2)
 
-            tb3 = arcade.gui.UIFlatButton(text=f"random_line", width=100, )
+            tb3 = arcade.gui.UIFlatButton(text=f"line", width=100, )
+            tb3.plotter = plo
             tb3.on_click = third_clicked
             container.add(tb3)
 
             tb4 = arcade.gui.UIFlatButton(text=f"threads", width=100, )
+            tb4.plotter = plo
             #tb4.on_click = second_clicked
+            plo.thread.thread_count = tb4
+
+
             container.add(tb4)
 
             #lab = UILabel(text="0", width=100, x=50)
@@ -75,7 +83,7 @@ class MainWindow(arcade.Window):
                 arcade.schedule(lambda dt: update_label(t, tb4), interval=0)
                 arcade.unschedule(lambda dt: update_label(t, tb4))
 
-            plo.thread.set_cb(set_label)
+            #plo.thread.set_cb(set_label)
 
     def add(self, button):
         self.v_box.add(button)

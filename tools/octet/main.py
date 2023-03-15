@@ -1,6 +1,5 @@
 import configparser
 import threading
-from random import randint
 
 import wasabi
 
@@ -126,11 +125,12 @@ if __name__ == '__main__':
 
     if offline_mode:
         # add test plotter in offline mode
-        test_plotter = Plotter("localhost", 12345, "/dev/ttyUSB0", 9600, 0.5)
-        test_plotter.type = PlotterType.HP_7475A_A3
-        test_plotter.connect()
-        test_plotter.open_serial()
-        plotters.append(test_plotter)
+        for i in range(8):
+            test_plotter = Plotter("localhost", 12345, None, 9600, 0.5)
+            test_plotter.type = PlotterType.HP_7475A_A3
+            test_plotter.connect()
+            #test_plotter.open_serial()
+            plotters.append(test_plotter)
     else:
         discovered_plotters = discover()
         plotters = connect_plotters(config, discovered_plotters)

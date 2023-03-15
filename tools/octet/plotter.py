@@ -1,7 +1,7 @@
 import pathlib
 import random
+import typing
 from random import randint
-import math
 import queue
 import time
 import threading
@@ -9,10 +9,8 @@ import wasabi
 import traceback
 import socket
 
-from cursor.filter import DistanceFilter
-from cursor.timer import Timer
 from cursor.collection import Collection
-from cursor.device import PlotterType, PaperSize, XYFactors, Paper, MinmaxMapping
+from cursor.device import PlotterType, MinmaxMapping
 from cursor.renderer import HPGLRenderer
 from tools.octet.client import Client
 from tools.octet.data import all_paths
@@ -30,8 +28,10 @@ class GuiThread(threading.Thread):
         self.c = None
         self.stopped = False
         self.buffer = queue.Queue()
+
+        # arcade flat ui buttons
         self.button = None
-        self.label = None
+        self.thread_count = None
 
         self.task_completed_cb = None
 
@@ -39,6 +39,7 @@ class GuiThread(threading.Thread):
         self.task_completed_cb = cb
 
     def add(self, func):
+        logger.info(f"Added {func.__name__} to {self.plotter.type}")
         self.buffer.put(func)
 
     def run(self):
@@ -55,11 +56,20 @@ class GuiThread(threading.Thread):
                     self.func = self.buffer.get()
                     s = self.buffer.qsize()
 
-                    try:
+                    if not self.plotter.serial_port:
+                        time.sleep(0.5)
+                        self.thread_count.text = str(s)
                         if self.task_completed_cb:
                             self.task_completed_cb(s)
+                        continue
+
+                    try:
+
+                        # run
                         self.func(self.plotter, self.c, self.speed)
 
+                        if self.task_completed_cb:
+                            self.task_completed_cb(s)
 
                     except socket.timeout as e:
                         logger.fail(f"{self.plotter.type} at {self.plotter} timed out")
@@ -117,7 +127,7 @@ class CheckerThread(threading.Thread):
 
 
 class Plotter:
-    def     __init__(self, ip: str, port: int, serial_port: str, baud: int, timeout: float):
+    def     __init__(self, ip: str, port: int, serial_port: typing.Union[str, None], baud: int, timeout: float):
         self.serial_port = serial_port
         self.baud = baud
         self.timeout = timeout
@@ -177,17 +187,16 @@ class Plotter:
     def recv(self):
         return self.client.receive_feedback()
 
-    @staticmethod
-    def draw_random_line(plotter: "Plotter", col: Collection, speed):
+    def draw_random_line(self, col: Collection, speed):
         c = Collection()
         line = col.random()
         line.velocity = speed
         c.add(line)
-        d = Plotter.rendering(c, plotter.type)
-        plotter.xy = line.end_pos().as_tuple()
+        d = Plotter.rendering(c, self.type)
+        self.xy = line.end_pos().as_tuple()
 
-        result, feedback = plotter.send_data(d)
-        logger.info(f"{plotter.type} : {result} : {feedback}")
+        result, feedback = self.send_data(d)
+        logger.info(f"{self.type} : {result} : {feedback}")
         return feedback
 
     @staticmethod
@@ -222,9 +231,17 @@ class Plotter:
         return feedback
 
     @staticmethod
+    def take_pen(plo, c, speed):
+        result, feedback = plo.send_data(f"SP1;")
+
+        print(f"done init  {result} + {feedback}")
+
+        return feedback
+
+    @staticmethod
     def go_up_down(plotter: "Plotter", col: Collection, speed):
         d = MinmaxMapping.maps[plotter.type]
-        result, feedback = plotter.send_data(f"PA{d.x},{0};PA{d.w},{0};PD;PU;")
+        result, feedback = plotter.send_data(f"PU;PA{d.x},{0};PA{d.w},{0};PD;PU;")
         plotter.xy = (d.w, 0)
 
         print(f"done with updown {result} + {feedback}")
@@ -236,8 +253,9 @@ class Plotter:
         d = MinmaxMapping.maps[plotter.type]
         x = randint(d.x, d.x2)
         y = randint(d.y, d.y2)
+        plotter.xy = (x, y)
 
-        result, feedback = plotter.send_data(f"PD;PA{randint(d.x, d.x2)},{randint(d.y, d.y2)};PU;" * 10)
+        result, feedback = plotter.send_data(f"PD;PA{randint(d.x, d.x2)},{randint(d.y, d.y2)};PU;" * 1)
 
         print(f"random_pos done {result} + {feedback}")
 
