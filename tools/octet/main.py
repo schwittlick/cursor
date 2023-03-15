@@ -61,7 +61,9 @@ def on_key_press(key, modifiers):
             #for i in range(4):
             plotter.thread.add(Plotter.draw_random_line)
         elif key == arcade.key.O:
-            plotter.thread.add(Plotter.pen_down_up)
+            logger.info(f"only sending pen up down to hp7475")
+            if plotter.type == PlotterType.HP_7475A_A3:
+                plotter.thread.add(Plotter.pen_down_up)
         elif key == arcade.key.I:
             plotter.thread.add(Plotter.random_pos)
         elif key == arcade.key.S:
@@ -143,8 +145,7 @@ if __name__ == '__main__':
     checker_thread.start()
     window.render_plotters(plotters)
 
-    midique.connect(35, plotters[0].set_delay)
-    midique.listen()
+
 
 
     def on_change(v):
@@ -155,9 +156,20 @@ if __name__ == '__main__':
 
     window.add_slider(on_change)
     window.finalize()
+
+    for i in range(len(plotters)):
+        midique.connect((32 + 3) + i * 4, plotters[i].set_delay)
+    #midique.connect(35, plotters[0].set_delay)
+    #midique.connect(39, plotters[1].set_delay)
+    #midique.connect(343, plotters[2].set_delay)
+    midique.listen()
+
+
     arcade.run()
 
     # novation_poll(plotters)
+
+    midique.stop()
 
     for plo in plotters:
         if plo.thread:
