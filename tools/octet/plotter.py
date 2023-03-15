@@ -40,10 +40,11 @@ class GuiThread(threading.Thread):
     def set_cb(self, cb):
         self.task_completed_cb = cb
 
-    def add(self, func, delay: float = 0.0):
-        logger.info(f"Added {func.__name__} to {self.plotter.type} with delay {delay}")
+    def add(self, func):
+        current_delay = self.plotter.get_delay()
+        logger.info(f"Added {func.__name__} to {self.plotter.type} with delay {current_delay}")
         self.buffer.put(func)
-        self.delays.put(delay)
+        self.delays.put(current_delay)
 
     def run(self):
         logger.info(f"Thread for {self.plotter.type} at {self.plotter.serial_port} started")
@@ -82,6 +83,7 @@ class GuiThread(threading.Thread):
                     except Exception as e:
                         logger.fail(f"Scheduled call failed: {e}")
                         logger.fail(f"{traceback.format_exc()}")
+
 
                 else:
                     time.sleep(0.1)
@@ -147,6 +149,8 @@ class Plotter:
 
         self.xy = (0, 0)
 
+        self.__delay = 0.0
+
         self.thread = GuiThread(self.serial_port, self)
         self.thread.c = all_paths
         self.thread.speed = 40
@@ -154,6 +158,15 @@ class Plotter:
 
     def __repr__(self):
         return f"{self.serial_port}"
+
+    def set_delay(self, delay:float):
+        # coming straight from midi (0-1000)
+        self.__delay = round(delay/100)
+        logger.info(f"plotter.delay = {self.__delay} -> {self.type}")
+
+
+    def get_delay(self):
+        return self.__delay
 
     def __prefix(self):
         return f"{self.serial_port}{self.msg_delimiter}{self.baud}" \
