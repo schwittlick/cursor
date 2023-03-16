@@ -1,5 +1,4 @@
 import configparser
-import sys
 import threading
 
 import wasabi
@@ -14,6 +13,7 @@ from tools.octet.gui import MainWindow
 from tools.octet.launchpad_wrapper import NovationLaunchpad, reset_novation, set_novation_button, lp, novation_poll
 from tools.octet.midique import Midique
 from tools.octet.plotter import Plotter, CheckerThread
+
 logger = wasabi.Printer(pretty=True, no_print=False)
 
 plotters = []
@@ -30,14 +30,15 @@ hostname = config.get('CONFIG', 'hostname')
 target = config.get('CONFIG', 'target')
 
 offline_mode = config.getboolean('CONFIG', 'offline_mode')
-
+USE_MIDIQUE = config.getboolean('CONFIG', 'midique')
 
 class QuitButton(arcade.gui.UIFlatButton):
     def on_click(self, event: arcade.gui.UIOnClickEvent):
 
         for plo in plotters:
-            plo.close_serial()
-            plo.client.close()
+            if plo.serial_port:
+                plo.close_serial()
+                plo.client.close()
 
         if not lp:
             arcade.exit()
@@ -46,7 +47,6 @@ class QuitButton(arcade.gui.UIFlatButton):
             lp.close()
         arcade.exit()
         # sys.exit()
-
 
 
 # Define the key press callback function
@@ -58,7 +58,7 @@ def on_key_press(key, modifiers):
         if key == arcade.key.P:
             plotter.thread.add(Plotter.go_up_down)
         elif key == arcade.key.L:
-            #for i in range(4):
+            # for i in range(4):
             plotter.thread.add(Plotter.draw_random_line)
         elif key == arcade.key.O:
             logger.info(f"only sending pen up down to hp7475")
@@ -123,7 +123,8 @@ def connect_plotters(cfg, discovered) -> list:
 
 
 if __name__ == '__main__':
-    midique = Midique(1)
+    if USE_MIDIQUE:
+        midique = Midique(1)
 
     window = MainWindow()
     window.on_key_press = on_key_press
@@ -135,7 +136,7 @@ if __name__ == '__main__':
             test_plotter = Plotter("localhost", 12345, None, 9600, 0.5)
             test_plotter.type = PlotterType.HP_7475A_A3
             test_plotter.connect()
-            #test_plotter.open_serial()
+            # test_plotter.open_serial()
             plotters.append(test_plotter)
     else:
         discovered_plotters = discover()
@@ -144,8 +145,6 @@ if __name__ == '__main__':
     checker_thread = CheckerThread(plotters)
     checker_thread.start()
     window.render_plotters(plotters)
-
-
 
 
     def on_change(v):
@@ -157,19 +156,21 @@ if __name__ == '__main__':
     window.add_slider(on_change)
     window.finalize()
 
-    for i in range(len(plotters)):
-        midique.connect((32 + 3) + i * 4, plotters[i].set_delay)
-    #midique.connect(35, plotters[0].set_delay)
-    #midique.connect(39, plotters[1].set_delay)
-    #midique.connect(343, plotters[2].set_delay)
-    midique.listen()
+    if USE_MIDIQUE:
+        for i in range(len(plotters)):
+            midique.connect((32 + 3) + i * 4, plotters[i].set_delay)
+        midique.listen()
+
+    lp = NovationLaunchpad()
 
 
     arcade.run()
 
-    # novation_poll(plotters)
 
-    midique.stop()
+    if USE_MIDIQUE:
+        midique.stop()
+
+    lp.close()
 
     for plo in plotters:
         if plo.thread:

@@ -1,4 +1,5 @@
 import sys
+import threading
 import time
 import wasabi
 
@@ -47,7 +48,7 @@ def novation_poll(plotters):
 
             p = plotters[button[0]]
             if button[2]:
-                set_novation_button(button, 0, 1, True)
+                set_novation_button(lp, button, 0, 1, True)
             else:
                 # if serial is open, close it
                 if p.is_connected:
@@ -58,9 +59,9 @@ def novation_poll(plotters):
                         success, data = p.recv()
                         logger.info(f"closing serial {success} -> {data}")
                         if success:
-                            set_novation_button(button, 0, 1, False)
+                            set_novation_button(lp, button, 0, 1, False)
                         else:
-                            set_novation_button(button, 0, 1, True)
+                            set_novation_button(lp, button, 0, 1, True)
                     else:
                         # otherwise open it
                         p.open_serial()
@@ -71,11 +72,11 @@ def novation_poll(plotters):
                             success, data = p.recv()
                             logger.info(success, data)
                             if success:
-                                set_novation_button(button, 0, 1, True)
+                                set_novation_button(lp, button, 0, 1, True)
                             else:
-                                set_novation_button(button, 0, 1, False)
+                                set_novation_button(lp, button, 0, 1, False)
                         else:
-                            set_novation_button(button, 0, 1, False)
+                            set_novation_button(lp, button, 0, 1, False)
                 else:
                     logger.warn(f"Not connected to {p}")
     timer.print_elapsed("end")
@@ -90,12 +91,52 @@ def set_novation_button(lp, data, x: int, y: int, state: bool):
 
 def reset_novation(lp):
     logger.warn("RESET Novation")
-    if not lp.lp:
+    if not lp:
         return
     for i in range(8):
         for j in range(8):
-            lp.lp.LedCtrlXY(i, j, 0, 0)
+            lp.LedCtrlXY(i, j, 0, 0)
 
+
+
+class LaunchpadThread(threading.Thread):
+    def __init__(self, lp):
+        threading.Thread.__init__(self)
+        self.running = True
+        self.lp = lp
+        self.cbs = {}
+
+    def poll(self):
+        buts = self.lp.ButtonStateXY()
+        if buts != []:
+            brightness = 2 if buts[2] else 0
+            self.lp.LedCtrlXY(buts[0], buts[1], brightness, brightness)
+        return buts
+
+    def run(self):
+        while True:
+            time.sleep(0.001)
+
+            if not self.running:
+                logger.info(f"Stopping Launchpad thread, Stop")
+                return
+
+            if not self.lp:
+                logger.info(f"Stopping Launchpad thread, Launchpad not working")
+                return
+
+            button = self.poll()
+
+            if button != []:
+                logger.info(button)
+
+                if button[0] == 0 and button[1] == 0:
+                    reset_novation(self.lp)
+                    continue
+
+
+    def stop(self):
+        self.running = False
 
 class NovationLaunchpad:
     def __init__(self):
@@ -106,30 +147,36 @@ class NovationLaunchpad:
             if self.lp.Open(0):
                 print("Launchpad Mk1/S/Mini")
                 self.mode = "Mk1"
+            else:
+                logger.fail(f"Opening Launchpad failed")
+        else:
+            logger.fail(f"Couldn't start Launchpad")
 
         if self.mode is None:
             print("Did not find any Launchpads, meh...")
             return
 
-    def poll(self):
-        buts = self.lp.ButtonStateXY()
-        if buts != []:
-            brightness = 2 if buts[2] else 0
-            self.lp.LedCtrlXY(buts[0], buts[1], brightness, brightness)
-        return buts
+        self.thread = LaunchpadThread(self.lp)
+        self.thread.start()
+
+    def reset(self):
+        logger.warn("RESET Novation")
+        if not self.lp.lp:
+            return
+        for i in range(8):
+            for j in range(8):
+                self.lp.lp.LedCtrlXY(i, j, 0, 0)
 
     def close(self):
         logger.good(f"Safely exited {self.lp}")
         self.lp.Close()
+        self.thread.stop()
 
 
 def main():
     lp = NovationLaunchpad()
+    lp.close()
 
-    while True:
-        state = lp.poll()
-
-        time.sleep(0.001)
 
 
 if __name__ == '__main__':
