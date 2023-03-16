@@ -50,6 +50,12 @@ class GuiThread(threading.Thread):
         self.buffer.put(func)
         self.delays.put(current_delay)
 
+        self.update_thread_count_ui()
+
+    def update_thread_count_ui(self):
+        s = self.buffer.qsize()
+        self.thread_count.text = str(s)
+
     def run(self):
         logger.info(f"Thread for {self.plotter.type} at {self.plotter.serial_port} started")
         while True:
@@ -61,13 +67,10 @@ class GuiThread(threading.Thread):
                 continue
             else:
                 if not self.buffer.empty():
-
-
                     func = self.buffer.get()
                     delay = self.delays.get()
 
-                    s = self.buffer.qsize()
-                    self.thread_count.text = str(s)
+                    self.update_thread_count_ui()
                     time.sleep(delay)
 
                     if not self.plotter.serial_port:
