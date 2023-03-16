@@ -142,10 +142,11 @@ class NovationLaunchpad:
     def __init__(self):
         self.mode = None
         self.lp = None
+        logger.info(f"{launchpad.Launchpad().ListAll()}")
         if launchpad.Launchpad().Check(0):
             self.lp = launchpad.Launchpad()
             if self.lp.Open(0):
-                print("Launchpad Mk1/S/Mini")
+                logger.info("Novation Launchpad Mini")
                 self.mode = "Mk1"
             else:
                 logger.fail(f"Opening Launchpad failed")
@@ -153,7 +154,7 @@ class NovationLaunchpad:
             logger.fail(f"Couldn't start Launchpad")
 
         if self.mode is None:
-            print("Did not find any Launchpads, meh...")
+            logger.fail("Did not find any Launchpads, meh...")
             return
 
         self.thread = LaunchpadThread(self.lp)
@@ -169,7 +170,8 @@ class NovationLaunchpad:
 
     def close(self):
         logger.good(f"Safely exited {self.lp}")
-        self.lp.Close()
+        if self.lp:
+            self.lp.Close()
         self.thread.stop()
 
 
