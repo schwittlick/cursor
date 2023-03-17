@@ -130,10 +130,11 @@ if __name__ == '__main__':
     if USE_LAUNCHPAD:
         lp = NovationLaunchpad()
         for i in range(len(plotters)):
-            lp.connect(0 + i, lambda: plotters[i].thread.add(Plotter.go_up_down))
-            lp.connect(16 + i, lambda: plotters[i].thread.add(Plotter.c73))
-            lp.connect(32 + i, lambda: plotters[i].thread.add(Plotter.draw_random_line))
-            lp.connect(48 + i, lambda: plotters[i].thread.add(Plotter.pen_down_up))
+            p = plotters[i]
+            lp.connect(0 + i, lambda: p.thread.add(p.go_up_down))
+            lp.connect(16 + i, lambda: p.thread.add(p.c73))
+            lp.connect(32 + i, lambda: p.thread.add(p.draw_random_line))
+            lp.connect(48 + i, lambda: p.thread.add(p.pen_down_up))
         lp.listen()
 
     arcade.run()
