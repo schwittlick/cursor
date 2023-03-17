@@ -1,8 +1,7 @@
-import sys
 import threading
 import time
-from threading import Thread
 
+import rtmidi
 import wasabi
 from rtmidi.midiutil import open_midiinput
 
@@ -13,7 +12,10 @@ class MidiThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         self.running = True
-        self.midiin, self.port_name = open_midiinput(1)
+        ports = rtmidi.MidiIn().get_ports()
+        for i in range(len(ports)):
+            if "Midique" in ports[i]:
+                self.midiin, self.port_name = open_midiinput(i)
         self.cbs = {}
 
     def run(self):
@@ -24,11 +26,11 @@ class MidiThread(threading.Thread):
             time.sleep(0.01)
 
             if not self.running:
-                logger.info("Midi thread finished")
+                logger.info("Midique thread finished")
                 return
 
             if not self.midiin:
-                logger.info(f"Midi thread finished midi connection dead")
+                logger.info(f"Midique thread finished midi connection dead")
                 return
             msg = self.midiin.get_message()
 
@@ -37,8 +39,9 @@ class MidiThread(threading.Thread):
                 timer += deltatime
 
                 if prev_msg is not None:
+                    # TODO: why check delay?
                     if deltatime < 0.01:
-                        #print("wtf")
+                        # print("wtf")
                         print(message)
                         buttonid = message[1]
                         if buttonid == 32:
@@ -46,7 +49,7 @@ class MidiThread(threading.Thread):
                             return
                         # print("second msg:" + str(message[2]))
                         # print(f"{message[2]} {prev_msg[2]}")
-                        #print(f"{bin(prev_msg[2])} {bin(message[2])}")
+                        # print(f"{bin(prev_msg[2])} {bin(message[2])}")
                         b1 = message[2].to_bytes(1, byteorder='big')
                         b2 = prev_msg[2].to_bytes(2, byteorder='big')
                         con = b2 + b1
@@ -67,19 +70,14 @@ class MidiThread(threading.Thread):
 
     def stop(self):
         self.running = False
-        print("Exit.")
+        logger.info("Exit Midique thread.")
+        self.join()
         self.midiin.close_port()
         del self.midiin
 
 
 class Midique:
-    def __init__(self, port):
-        try:
-            global middin
-            midiin, self.port_name = open_midiinput(port)
-        except (EOFError, KeyboardInterrupt):
-            sys.exit()
-
+    def __init__(self):
         self.thread = None
         self.cbs = {}
 
