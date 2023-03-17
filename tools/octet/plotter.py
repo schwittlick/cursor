@@ -9,8 +9,9 @@ import wasabi
 import traceback
 import socket
 
+from cursor import misc
 from cursor.collection import Collection
-from cursor.device import PlotterType, MinmaxMapping
+from cursor.device import PlotterType, MinmaxMapping, MaxSpeed
 from cursor.renderer import HPGLRenderer
 from tools.octet.client import Client
 from tools.octet.data import all_paths
@@ -37,14 +38,17 @@ class GuiThread(threading.Thread):
 
         self.task_completed_cb = None
 
+        self.max_buffer_size = 20
+
     def set_cb(self, cb):
         self.task_completed_cb = cb
 
     def add(self, func):
         current_delay = self.plotter.get_delay()
-        logger.info(f"Added {func.__name__} to {self.plotter.type} at {self.plotter.serial_port} with delay {current_delay}")
+        logger.info(
+            f"Added {func.__name__} to {self.plotter.type} at {self.plotter.serial_port} with delay {current_delay}")
 
-        if self.buffer.qsize() >= 5:
+        if self.buffer.qsize() >= self.max_buffer_size:
             logger.warn(f"Discarding ...")
             return
         self.buffer.put(func)
@@ -173,6 +177,13 @@ class Plotter:
         self.__delay = delay / 300
         logger.info(f"plotter.delay = {self.__delay} -> {self.type}")
 
+    def set_speed(self, speed: float):
+        # coming straight from midi (0-1000)
+        max_sped = MaxSpeed.fac[self.type]
+        self.thread.speed = misc.map(speed, 0, 1000, 0, max_sped, True)
+        logger.info(f"plotter.speed = {self.thread.speed} -> {self.type}")
+
+
     def get_delay(self):
         return self.__delay
 
@@ -224,10 +235,10 @@ class Plotter:
         offset_x = random.randint(0, int(bounds.w * 0.8))
         offset_y = random.randint(0, int(bounds.h * 0.8))
 
-        d = self.rendering(c, self.type, 0.1, (offset_x, offset_y))
+        d = self.scale(c, self.type, 0.1, (offset_x, offset_y))
         self.xy = line.end_pos().as_tuple()
 
-        result, feedback = self.send_data(d)
+        result, feedback = self.send_data(self.render(d))
         logger.info(f"{self.type} : {result} : {feedback}")
         return feedback
 
@@ -236,20 +247,25 @@ class Plotter:
 
         line = col.random()
         line.velocity = self.thread.speed
-
-        for i in range(10):
-            l = line.copy()
-            l = l.offset(i*0.01)
-            print(l)
-            c.add(l)
+        c.add(line)
 
         bounds = MinmaxMapping.maps[self.type]
         offset_x = random.randint(0, int(bounds.w * 0.8))
         offset_y = random.randint(0, int(bounds.h * 0.8))
-        d = self.rendering(c, self.type, 0.1, (offset_x, offset_y))
-        self.xy = line.end_pos().as_tuple()
+        d = self.scale(c, self.type, 0.1, (offset_x, offset_y))
 
-        result, feedback = self.send_data(d)
+        out = Collection()
+        transformed_line = d[0]
+        for i in range(10):
+            out.add(transformed_line.copy().offset(i * 10))
+
+        last_line = out[len(out) -1]
+        self.xy = last_line.end_pos().as_tuple()
+
+        result, feedback = self.send_data(f"VS{self.thread.speed}")
+        logger.info(f"{self.type} : {result} set speed {self.thread.speed}")
+
+        result, feedback = self.send_data(self.render(out))
         logger.info(f"{self.type} : {result} : {feedback}")
         return feedback
 
@@ -314,7 +330,7 @@ class Plotter:
 
         return feedback
 
-    def rendering(self, c: Collection, tt: PlotterType, scale=1.0, offset=(0, 0)) -> str:
+    def scale(self, c: Collection, tt: PlotterType, scale=1.0, offset=(0, 0)) -> Collection:
         dims = MinmaxMapping.maps[tt]
         cbb = c.bb()
         trans = Plotter.transformFn((cbb.x, cbb.y), (cbb.x2, cbb.y2), (dims.x, dims.y), (dims.x2, dims.y2))
@@ -323,7 +339,9 @@ class Plotter:
                 n_poi = trans(poi.as_tuple())
                 poi.x = (n_poi[0] * scale) + offset[0]
                 poi.y = (n_poi[1] * scale) + offset[1]
+        return c
 
+    def render(self, c: Collection):
         r = HPGLRenderer(pathlib.Path(""))
         r.render(c)
         return r.generate_string()

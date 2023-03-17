@@ -124,11 +124,19 @@ if __name__ == '__main__':
     if USE_MIDIQUE:
         midique = Midique()
         for i in range(len(plotters)):
+            midique.connect((31 + 3) + i * 4, plotters[i].set_speed)
             midique.connect((32 + 3) + i * 4, plotters[i].set_delay)
         midique.listen()
 
     if USE_LAUNCHPAD:
         lp = NovationLaunchpad()
+
+        # button on very right
+        lp.connect(8, lambda _p=plotters: [pp.thread.add(pp.go_up_down) for pp in _p])
+        lp.connect(16 + 8, lambda _p=plotters: [pp.thread.add(pp.c73) for pp in _p])
+        lp.connect(32 + 8, lambda _p=plotters: [pp.thread.add(pp.draw_random_line) for pp in _p])
+        lp.connect(48 + 8, lambda _p=plotters: [pp.thread.add(pp.pen_down_up) for pp in _p])
+
         for i in range(len(plotters)):
             p = plotters[i]
             lp.connect(0 + i, lambda _p=p: _p.thread.add(_p.go_up_down))
