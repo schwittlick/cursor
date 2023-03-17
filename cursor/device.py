@@ -114,6 +114,7 @@ class MinmaxMapping:
         PlotterType.TEKTRONIX_4662: BB(0, 0, 4095, 2731),
         # tekronix: 10x15 inches (25.4 x 38.1 cm)
         PlotterType.HP_7596B: BB(-15500, -11100, 15500 + 22 * 40, 11100),
+
         PlotterType.HP_7596B_A3: BB(-6800, -5250, 6800, 5250),
         PlotterType.HP_7596B_25_25: BB(-4310, -3444, 4310 + 800, 3444),
         PlotterType.DIGIPLOT_A1: BB(0, 0, 33600, 23700),
@@ -176,6 +177,32 @@ class XYFactors:
         PlotterType.HP_7595A_A0: (39.9, 40.04),
     }
 
+
+class MaxSpeed:
+    fac = {
+        PlotterType.ROLAND_DPX3300: 40,
+        PlotterType.ROLAND_DPX3300_A2: 40,
+        PlotterType.ROLAND_DPX3300_A3: 40,
+        PlotterType.DIY_PLOTTER: 1,
+        PlotterType.AXIDRAW: 1,
+        PlotterType.HP_7475A_A3: 40,
+        PlotterType.HP_7475A_A4: 40,
+        PlotterType.ROLAND_DXY1200: 40,
+        PlotterType.ROLAND_DXY980: 40,
+        PlotterType.HP_7595A: 110,
+        PlotterType.ROLAND_PNC1000: 40,
+        PlotterType.HP_7595A_A3: 40,
+        PlotterType.TEKTRONIX_4662: 1,
+        PlotterType.HP_7596B: 110,
+        PlotterType.HP_7596B_A3: 110,
+        PlotterType.HP_7596B_25_25: 110,
+        PlotterType.DIGIPLOT_A1: 1,
+        PlotterType.HP_7470A: 40,
+        PlotterType.HP_7550A: 80,
+        PlotterType.HP_7595A_A2: 110,
+        PlotterType.ROLAND_PNC1000_50x100: 40,
+        PlotterType.HP_7595A_A0: 110,
+    }
 
 class PaperSizeName:
     names = {
