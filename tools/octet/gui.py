@@ -57,22 +57,22 @@ class MainWindow(arcade.Window):
                 logger.warn(f"Ignored keypres bc plotter thread is not ready")
                 continue
             if key == arcade.key.P:
-                plotter.thread.add(Plotter.go_up_down)
+                plotter.thread.add(plotter.go_up_down)
             elif key == arcade.key.L:
                 # for i in range(4):
-                plotter.thread.add(Plotter.draw_random_line)
+                plotter.thread.add(plotter.draw_random_line)
             elif key == arcade.key.O:
                 logger.info(f"only sending pen up down to hp7475")
                 if plotter.type == PlotterType.HP_7475A_A3:
-                    plotter.thread.add(Plotter.pen_down_up)
+                    plotter.thread.add(plotter.pen_down_up)
             elif key == arcade.key.R:
-                plotter.thread.add(Plotter.random_pos)
+                plotter.thread.add(plotter.random_pos)
             elif key == arcade.key.S:
-                plotter.thread.add(Plotter.set_speed)
+                plotter.thread.add(plotter.set_speed)
             elif key == arcade.key.I:
-                plotter.thread.add(Plotter.init)
+                plotter.thread.add(plotter.init)
             elif key == arcade.key.C:
-                plotter.thread.add(Plotter.c73)
+                plotter.thread.add(plotter.c73)
 
             plotter.thread.resume()
 
@@ -85,17 +85,17 @@ class MainWindow(arcade.Window):
 
             def second_clicked(event):
                 _plo = event.source.plotter
-                _plo.thread.add(Plotter.random_pos)
+                _plo.thread.add(_plo.random_pos)
                 _plo.thread.resume()
 
             def third_clicked(event):
                 _plo = event.source.plotter
-                _plo.thread.add(Plotter.draw_random_line)
+                _plo.thread.add(_plo.draw_random_line)
                 _plo.thread.resume()
 
             def penupdown_clicked(event):
                 _plo = event.source.plotter
-                _plo.thread.add(Plotter.pen_down_up)
+                _plo.thread.add(_plo.pen_down_up)
                 _plo.thread.resume()
 
             tb2 = arcade.gui.UIFlatButton(text=f"pos", width=100, )

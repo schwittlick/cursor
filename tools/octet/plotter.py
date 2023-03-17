@@ -219,98 +219,95 @@ class Plotter:
         line = col.random()
         line.velocity = speed
         c.add(line)
-        d = Plotter.rendering(c, self.type)
+
+        bounds = MinmaxMapping.maps[self.type]
+        offset_x = random.randint(0, int(bounds.w * 0.8))
+        offset_y = random.randint(0, int(bounds.h * 0.8))
+
+        d = self.rendering(c, self.type, 0.1, (offset_x, offset_y))
         self.xy = line.end_pos().as_tuple()
 
         result, feedback = self.send_data(d)
         logger.info(f"{self.type} : {result} : {feedback}")
         return feedback
 
-    @staticmethod
-    def c73(plotter: "Plotter", col: Collection, speed):
+    def c73(self, col: Collection, speed):
         c = Collection()
 
         line = col.random()
-        line.velocity = plotter.thread.speed
+        line.velocity = self.thread.speed
 
         for i in range(10):
             l = line.copy()
             l.translate(1, 0)
             c.add(l)
 
-        bounds = MinmaxMapping.maps[plotter.type]
+        bounds = MinmaxMapping.maps[self.type]
         offset_x = random.randint(0, int(bounds.w * 0.8))
         offset_y = random.randint(0, int(bounds.h * 0.8))
-        d = Plotter.rendering(c, plotter.type, 0.1, (offset_x, offset_y))
-        plotter.xy = line.end_pos().as_tuple()
+        d = self.rendering(c, self.type, 0.1, (offset_x, offset_y))
+        self.xy = line.end_pos().as_tuple()
 
-        result, feedback = plotter.send_data(d)
-        logger.info(f"{plotter.type} : {result} : {feedback}")
+        result, feedback = self.send_data(d)
+        logger.info(f"{self.type} : {result} : {feedback}")
         return feedback
 
-    @staticmethod
-    def init(plo, c, speed):
-        result, feedback = plo.send_data(f"IN;SP1;LT;VS{speed};PA0,0;")
-        plo.xy = (0, 0)
+    def init(self, c, speed):
+        result, feedback = self.send_data(f"IN;SP1;LT;VS{speed};PA0,0;")
+        self.xy = (0, 0)
 
         print(f"done init  {result} + {feedback}")
 
         return feedback
 
-    @staticmethod
-    def take_pen(plo, c, speed):
-        result, feedback = plo.send_data(f"SP1;")
+    def take_pen(self, c, speed):
+        result, feedback = self.send_data(f"SP1;")
 
         print(f"done init  {result} + {feedback}")
 
         return feedback
 
-    @staticmethod
-    def go_up_down(plotter: "Plotter", col: Collection, speed):
-        d = MinmaxMapping.maps[plotter.type]
-        result, feedback = plotter.send_data(f"PU;PA{d.x},{0};PA{d.w},{0};PD;PU;")
-        plotter.xy = (d.w, 0)
+    def go_up_down(self, col: Collection, speed):
+        d = MinmaxMapping.maps[self.type]
+        result, feedback = self.send_data(f"PU;PA{d.x},{0};PA{d.w},{0};PD;PU;")
+        self.xy = (d.w, 0)
 
         print(f"done with updown {result} + {feedback}")
 
         return feedback
 
-    @staticmethod
-    def random_pos(plotter: "Plotter", col: Collection, speed):
-        d = MinmaxMapping.maps[plotter.type]
+    def random_pos(self, col: Collection, speed):
+        d = MinmaxMapping.maps[self.type]
         x = randint(d.x, d.x2)
         y = randint(d.y, d.y2)
-        plotter.xy = (x, y)
+        self.xy = (x, y)
 
         # calculate time to draw it at current speed
         # speep for that long
 
-        result, feedback = plotter.send_data(f"PD;PA{randint(d.x, d.x2)},{randint(d.y, d.y2)};PU;" * 1)
+        result, feedback = self.send_data(f"PD;PA{randint(d.x, d.x2)},{randint(d.y, d.y2)};PU;" * 1)
 
         print(f"random_pos done {result} + {feedback}")
 
         return feedback
 
-    @staticmethod
-    def pen_down_up(plotter: "Plotter", col: Collection, speed):
+    def pen_down_up(self, col: Collection, speed):
         times = 2  # randint(1, 100)
-        result, feedback = plotter.send_data(f"PD;PU;PA{plotter.xy[0]},{plotter.xy[1]};" * times)
+        result, feedback = self.send_data(f"PD;PU;PA{self.xy[0]},{self.xy[1]};" * times)
         time.sleep(0.2)
         print(f"done pen updown {result} + {feedback}")
 
         return feedback
 
-    @staticmethod
-    def set_speed(plotter: "Plotter", col: Collection, speed):
-        logger.info(f"sending speed {plotter.thread.speed}")
-        result, feedback = plotter.send_data(f"VS{plotter.thread.speed};")
+    def set_speed(self, col: Collection, speed):
+        logger.info(f"sending speed {self.thread.speed}")
+        result, feedback = self.send_data(f"VS{self.thread.speed};")
 
         print(f"done set speed {result} + {feedback}")
 
         return feedback
 
-    @staticmethod
-    def rendering(c: Collection, tt: PlotterType, scale=1.0, offset=(0, 0)) -> str:
+    def rendering(self, c: Collection, tt: PlotterType, scale=1.0, offset=(0, 0)) -> str:
         dims = MinmaxMapping.maps[tt]
         trans = Plotter.transformFn((c.bb().x, c.bb().y), (c.bb().x2, c.bb().y2), (dims.x, dims.y), (dims.x2, dims.y2))
         for pa in c:
@@ -330,10 +327,10 @@ class Plotter:
 
     @staticmethod
     def transformFn(stl, sbr, dtl, dbr):
-        stlx, stly = stl;
-        sbrx, sbry = sbr;
-        dtlx, dtly = dtl;
-        dbrx, dbry = dbr;
+        stlx, stly = stl
+        sbrx, sbry = sbr
+        dtlx, dtly = dtl
+        dbrx, dbry = dbr
 
         sdx, sdy = sbrx - stlx, sbry - stly
         ddx, ddy = dbrx - dtlx, dbry - dtly
