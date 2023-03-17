@@ -11,12 +11,18 @@ logger = wasabi.Printer(pretty=True, no_print=False)
 class MidiThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
-        self.running = True
+        self.cbs = {}
+
         ports = rtmidi.MidiIn().get_ports()
         for i in range(len(ports)):
             if "Midique" in ports[i]:
+                logger.info(f"Detected Midique")
                 self.midiin, self.port_name = open_midiinput(i)
-        self.cbs = {}
+                self.running = True
+                return
+
+        logger.fail(f"Failed to detect Midique")
+        self.running = False
 
     def run(self):
         timer = time.time()
@@ -26,12 +32,9 @@ class MidiThread(threading.Thread):
             time.sleep(0.01)
 
             if not self.running:
-                logger.info("Midique thread finished")
+                logger.info(f"Stopping Midique Launchpad thread")
                 return
 
-            if not self.midiin:
-                logger.info(f"Midique thread finished midi connection dead")
-                return
             msg = self.midiin.get_message()
 
             if msg:
@@ -41,36 +44,25 @@ class MidiThread(threading.Thread):
                 if prev_msg is not None:
                     # TODO: why check delay?
                     if deltatime < 0.01:
-                        # print("wtf")
                         print(message)
                         buttonid = message[1]
-                        if buttonid == 32:
-                            # end thread
-                            return
-                        # print("second msg:" + str(message[2]))
-                        # print(f"{message[2]} {prev_msg[2]}")
-                        # print(f"{bin(prev_msg[2])} {bin(message[2])}")
                         b1 = message[2].to_bytes(1, byteorder='big')
                         b2 = prev_msg[2].to_bytes(2, byteorder='big')
                         con = b2 + b1
                         v = int.from_bytes(con, 'big')
                         norm = v / 32636 * 1000
-                        # print(f"{b1} {b2} {norm}")
-                        print(f"{norm}")
                         if buttonid in self.cbs.keys():
-                            logger.info(f"running cb {self.cbs[buttonid]}")
                             self.cbs[buttonid](norm)
-                        # print(f"value: {prev_msg[2] * message[2]}")
                     else:
                         pass
-                        # print(f"first msg {message[2]}")
 
                 prev_msg = message
-                # print("[%s] @%0.6f %r" % (port_name, timer, message))
 
     def stop(self):
+        if not self.running:
+            return
+
         self.running = False
-        logger.info("Exit Midique thread.")
         self.join()
         self.midiin.close_port()
         del self.midiin

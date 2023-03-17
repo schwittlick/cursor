@@ -168,11 +168,10 @@ class Plotter:
     def __repr__(self):
         return f"{self.serial_port}"
 
-    def set_delay(self, delay:float):
+    def set_delay(self, delay: float):
         # coming straight from midi (0-1000)
-        self.__delay = delay/300
+        self.__delay = delay / 300
         logger.info(f"plotter.delay = {self.__delay} -> {self.type}")
-
 
     def get_delay(self):
         return self.__delay
@@ -294,7 +293,7 @@ class Plotter:
 
     @staticmethod
     def pen_down_up(plotter: "Plotter", col: Collection, speed):
-        times = 2# randint(1, 100)
+        times = 2  # randint(1, 100)
         result, feedback = plotter.send_data(f"PD;PU;PA{plotter.xy[0]},{plotter.xy[1]};" * times)
         time.sleep(0.2)
         print(f"done pen updown {result} + {feedback}")

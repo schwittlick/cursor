@@ -7,6 +7,7 @@ from arcade.gui import UIOnChangeEvent, UILabel
 
 import wasabi
 
+from cursor.device import PlotterType
 from tools.octet.data import all_paths
 from tools.octet.plotter import Plotter
 
@@ -34,6 +35,46 @@ class MainWindow(arcade.Window):
         arcade.set_background_color(arcade.color.DARK_BLUE_GRAY)
 
         self.v_box = arcade.gui.UIBoxLayout(vertical=True)
+
+        self.plotter = None
+
+    # Define the key press callback function
+    def on_key_press(self, key, modifiers):
+        if key == arcade.key.F:
+            self.set_fullscreen(not self.fullscreen)
+            width, height = self.get_size()
+            self.set_viewport(0, width, 0, height)
+            return
+        elif key == arcade.key.Q:
+            arcade.exit()
+            return
+
+        if not self.plotters:
+            logger.fail("Plotters not in main gui thread yet")
+            return
+        for plotter in self.plotters:
+            if not plotter.thread:
+                logger.warn(f"Ignored keypres bc plotter thread is not ready")
+                continue
+            if key == arcade.key.P:
+                plotter.thread.add(Plotter.go_up_down)
+            elif key == arcade.key.L:
+                # for i in range(4):
+                plotter.thread.add(Plotter.draw_random_line)
+            elif key == arcade.key.O:
+                logger.info(f"only sending pen up down to hp7475")
+                if plotter.type == PlotterType.HP_7475A_A3:
+                    plotter.thread.add(Plotter.pen_down_up)
+            elif key == arcade.key.R:
+                plotter.thread.add(Plotter.random_pos)
+            elif key == arcade.key.S:
+                plotter.thread.add(Plotter.set_speed)
+            elif key == arcade.key.I:
+                plotter.thread.add(Plotter.init)
+            elif key == arcade.key.C:
+                plotter.thread.add(Plotter.c73)
+
+            plotter.thread.resume()
 
     def render_plotters(self, plotters):
         for plo in plotters:
@@ -74,7 +115,7 @@ class MainWindow(arcade.Window):
 
             tb4 = arcade.gui.UIFlatButton(text=f"threads", width=100, )
             tb4.plotter = plo
-            #tb4.on_click = second_clicked
+            # tb4.on_click = second_clicked
             plo.thread.thread_count = tb4
             container.add(tb4)
 
