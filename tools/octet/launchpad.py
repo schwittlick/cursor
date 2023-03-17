@@ -12,26 +12,27 @@ logger = wasabi.Printer(pretty=True, no_print=False)
 class LaunchpadThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
-        self.running = True
+        self.cbs = {}
 
         ports = rtmidi.MidiIn().get_ports()
         for i in range(len(ports)):
             if "Launchpad" in ports[i]:
+                logger.info(f"Detected Novation Launchpad")
                 self.midiin, self.port_name = open_midiinput(i)
+                self.running = True
+                return
 
-        self.cbs = {}
+        logger.fail(f"Failed to detect Novation Launchpad")
+        self.running = False
 
     def run(self):
         while True:
             time.sleep(0.01)
 
             if not self.running:
-                logger.info("Launchpad thread finished")
+                logger.info(f"Stopping Novation Launchpad thread")
                 return
 
-            if not self.midiin:
-                logger.info(f"Launchpad thread finished midi connection dead")
-                return
             msg = self.midiin.get_message()
 
             if msg:
@@ -39,13 +40,12 @@ class LaunchpadThread(threading.Thread):
 
                 print(message)
                 buttonid = message[1]
-                logger.info(f"buttonid= {buttonid}")
                 if buttonid in self.cbs.keys():
-                    logger.info(f"running cb {self.cbs[buttonid]}")
                     self.cbs[buttonid]()
 
     def stop(self):
-        logger.info("Exit Launchpad thread.")
+        if not self.running:
+            return
 
         self.running = False
         self.join()

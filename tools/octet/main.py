@@ -1,8 +1,6 @@
 import configparser
 import threading
-
 import wasabi
-
 import arcade
 import arcade.gui
 
@@ -36,46 +34,12 @@ USE_LAUNCHPAD = config.getboolean('CONFIG', 'launchpad')
 
 class QuitButton(arcade.gui.UIFlatButton):
     def on_click(self, event: arcade.gui.UIOnClickEvent):
-
         for plo in plotters:
             if plo.serial_port:
                 plo.close_serial()
                 plo.client.close()
 
-        if not lp:
-            arcade.exit()
-            return
-        if lp.lp:
-            lp.close()
         arcade.exit()
-        # sys.exit()
-
-
-# Define the key press callback function
-def on_key_press(key, modifiers):
-    for plotter in plotters:
-        if not plotter.thread:
-            logger.warn(f"Ignored keypres bc plotter thread is not ready")
-            continue
-        if key == arcade.key.P:
-            plotter.thread.add(Plotter.go_up_down)
-        elif key == arcade.key.L:
-            # for i in range(4):
-            plotter.thread.add(Plotter.draw_random_line)
-        elif key == arcade.key.O:
-            logger.info(f"only sending pen up down to hp7475")
-            if plotter.type == PlotterType.HP_7475A_A3:
-                plotter.thread.add(Plotter.pen_down_up)
-        elif key == arcade.key.I:
-            plotter.thread.add(Plotter.random_pos)
-        elif key == arcade.key.S:
-            plotter.thread.add(Plotter.set_speed)
-        elif key == arcade.key.Q:
-            plotter.thread.add(Plotter.init)
-        elif key == arcade.key.F:
-            plotter.thread.add(Plotter.c73)
-
-        plotter.thread.resume()
 
 
 def async_func(model, ip: str, tcp_port: int, serial_port: str, baud: int, timeout: float):
@@ -125,10 +89,7 @@ def connect_plotters(cfg, discovered) -> list:
 
 
 if __name__ == '__main__':
-    if USE_MIDIQUE:
-
     window = MainWindow()
-    window.on_key_press = on_key_press
     window.add(QuitButton(text="Quit", width=200))
 
     if offline_mode:
@@ -136,12 +97,15 @@ if __name__ == '__main__':
         for i in range(8):
             test_plotter = Plotter("localhost", 12345, None, 9600, 0.5)
             test_plotter.type = PlotterType.HP_7475A_A3
+            test_plotter.client.set_timeout(0.1)
             test_plotter.connect()
             # test_plotter.open_serial()
             plotters.append(test_plotter)
     else:
         discovered_plotters = discover()
         plotters = connect_plotters(config, discovered_plotters)
+
+    window.plotters = plotters
 
     checker_thread = CheckerThread(plotters)
     checker_thread.start()
@@ -166,8 +130,10 @@ if __name__ == '__main__':
     if USE_LAUNCHPAD:
         lp = NovationLaunchpad()
         for i in range(len(plotters)):
-            lp.connect(i, plotters[i].thread.add(Plotter.go_up_down))
-            lp.connect(16 + i, plotters[i].thread.add(Plotter.c73))
+            lp.connect(0 + i, lambda: plotters[i].thread.add(Plotter.go_up_down))
+            lp.connect(16 + i, lambda: plotters[i].thread.add(Plotter.c73))
+            lp.connect(32 + i, lambda: plotters[i].thread.add(Plotter.draw_random_line))
+            lp.connect(48 + i, lambda: plotters[i].thread.add(Plotter.pen_down_up))
         lp.listen()
 
     arcade.run()
