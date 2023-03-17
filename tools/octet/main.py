@@ -10,7 +10,7 @@ from cursor.device import PlotterType
 
 from tools.octet.discovery import discover
 from tools.octet.gui import MainWindow
-from tools.octet.launchpad_wrapper import NovationLaunchpad, reset_novation, set_novation_button, lp, novation_poll
+from tools.octet.launchpad import NovationLaunchpad
 from tools.octet.midique import Midique
 from tools.octet.plotter import Plotter, CheckerThread
 
@@ -31,6 +31,8 @@ target = config.get('CONFIG', 'target')
 
 offline_mode = config.getboolean('CONFIG', 'offline_mode')
 USE_MIDIQUE = config.getboolean('CONFIG', 'midique')
+USE_LAUNCHPAD = config.getboolean('CONFIG', 'launchpad')
+
 
 class QuitButton(arcade.gui.UIFlatButton):
     def on_click(self, event: arcade.gui.UIOnClickEvent):
@@ -124,7 +126,6 @@ def connect_plotters(cfg, discovered) -> list:
 
 if __name__ == '__main__':
     if USE_MIDIQUE:
-        midique = Midique(1)
 
     window = MainWindow()
     window.on_key_press = on_key_press
@@ -157,20 +158,25 @@ if __name__ == '__main__':
     window.finalize()
 
     if USE_MIDIQUE:
+        midique = Midique()
         for i in range(len(plotters)):
             midique.connect((32 + 3) + i * 4, plotters[i].set_delay)
         midique.listen()
 
-    lp = NovationLaunchpad()
-
+    if USE_LAUNCHPAD:
+        lp = NovationLaunchpad()
+        for i in range(len(plotters)):
+            lp.connect(i, plotters[i].thread.add(Plotter.go_up_down))
+            lp.connect(16 + i, plotters[i].thread.add(Plotter.c73))
+        lp.listen()
 
     arcade.run()
-
 
     if USE_MIDIQUE:
         midique.stop()
 
-    lp.close()
+    if USE_LAUNCHPAD:
+        lp.stop()
 
     for plo in plotters:
         if plo.thread:
