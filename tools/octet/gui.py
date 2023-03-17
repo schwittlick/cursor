@@ -36,7 +36,7 @@ class MainWindow(arcade.Window):
 
         self.v_box = arcade.gui.UIBoxLayout(vertical=True)
 
-        self.plotter = None
+        self.plotters = None
 
     # Define the key press callback function
     def on_key_press(self, key, modifiers):
@@ -76,8 +76,8 @@ class MainWindow(arcade.Window):
 
             plotter.thread.resume()
 
-    def render_plotters(self, plotters):
-        for plo in plotters:
+    def render_plotters(self):
+        for plo in self.plotters:
             container = arcade.gui.UIBoxLayout(vertical=False)
             tb1 = TestButton(text=f"{plo.type}", width=300, plotter=plo, col=all_paths)
             plo.thread.button = tb1

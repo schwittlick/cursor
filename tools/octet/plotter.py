@@ -42,7 +42,7 @@ class GuiThread(threading.Thread):
 
     def add(self, func):
         current_delay = self.plotter.get_delay()
-        logger.info(f"Added {func.__name__} to {self.plotter.type} with delay {current_delay}")
+        logger.info(f"Added {func.__name__} to {self.plotter.type} at {self.plotter.serial_port} with delay {current_delay}")
 
         if self.buffer.qsize() >= 5:
             logger.warn(f"Discarding ...")
@@ -81,7 +81,7 @@ class GuiThread(threading.Thread):
                     try:
 
                         # run
-                        func(self.plotter, self.c, self.speed)
+                        func(self.c, self.speed)
 
                         if self.task_completed_cb:
                             self.thread_count.text = str(s - 1)
@@ -239,7 +239,8 @@ class Plotter:
 
         for i in range(10):
             l = line.copy()
-            l.translate(1, 0)
+            l = l.offset(i*0.01)
+            print(l)
             c.add(l)
 
         bounds = MinmaxMapping.maps[self.type]
@@ -299,6 +300,12 @@ class Plotter:
 
         return feedback
 
+    def reset(self, col: Collection, speed):
+        result, feedback = self.send_data(f"SP0;PA0,0;")
+        print(f"done pen updown {result} + {feedback}")
+
+        return feedback
+
     def set_speed(self, col: Collection, speed):
         logger.info(f"sending speed {self.thread.speed}")
         result, feedback = self.send_data(f"VS{self.thread.speed};")
@@ -309,7 +316,8 @@ class Plotter:
 
     def rendering(self, c: Collection, tt: PlotterType, scale=1.0, offset=(0, 0)) -> str:
         dims = MinmaxMapping.maps[tt]
-        trans = Plotter.transformFn((c.bb().x, c.bb().y), (c.bb().x2, c.bb().y2), (dims.x, dims.y), (dims.x2, dims.y2))
+        cbb = c.bb()
+        trans = Plotter.transformFn((cbb.x, cbb.y), (cbb.x2, cbb.y2), (dims.x, dims.y), (dims.x2, dims.y2))
         for pa in c:
             for poi in pa.vertices:
                 n_poi = trans(poi.as_tuple())

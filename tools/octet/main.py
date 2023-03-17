@@ -106,10 +106,10 @@ if __name__ == '__main__':
         plotters = connect_plotters(config, discovered_plotters)
 
     window.plotters = plotters
+    window.render_plotters()
 
     checker_thread = CheckerThread(plotters)
     checker_thread.start()
-    window.render_plotters(plotters)
 
 
     def on_change(v):
@@ -131,10 +131,12 @@ if __name__ == '__main__':
         lp = NovationLaunchpad()
         for i in range(len(plotters)):
             p = plotters[i]
-            lp.connect(0 + i, lambda: p.thread.add(p.go_up_down))
-            lp.connect(16 + i, lambda: p.thread.add(p.c73))
-            lp.connect(32 + i, lambda: p.thread.add(p.draw_random_line))
-            lp.connect(48 + i, lambda: p.thread.add(p.pen_down_up))
+            lp.connect(0 + i, lambda _p=p: _p.thread.add(_p.go_up_down))
+            lp.connect(16 + i, lambda _p=p: _p.thread.add(_p.c73))
+            lp.connect(32 + i, lambda _p=p: _p.thread.add(_p.draw_random_line))
+            lp.connect(48 + i, lambda _p=p: _p.thread.add(_p.pen_down_up))
+
+            lp.connect(104 + i, lambda _p=p: _p.thread.add(_p.reset))
         lp.listen()
 
     arcade.run()

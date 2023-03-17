@@ -14,6 +14,7 @@ class MidiThread(threading.Thread):
         self.cbs = {}
 
         ports = rtmidi.MidiIn().get_ports()
+        print(ports)
         for i in range(len(ports)):
             if "Midique" in ports[i]:
                 logger.info(f"Detected Midique")
@@ -83,3 +84,9 @@ class Midique:
         self.thread = MidiThread()
         self.thread.cbs = self.cbs
         self.thread.start()
+
+
+if __name__ == '__main__':
+    lp = Midique()
+    lp.listen()
+    # lp.close()

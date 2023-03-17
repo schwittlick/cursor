@@ -40,6 +40,9 @@ class LaunchpadThread(threading.Thread):
 
                 print(message)
                 buttonid = message[1]
+                if message[2] == 127:
+                    # button up
+                    continue
                 if buttonid in self.cbs.keys():
                     self.cbs[buttonid]()
 
