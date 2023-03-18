@@ -84,7 +84,11 @@ def connect_plotters(cfg, discovered) -> list:
     for thread in threads:
         thread.join()
 
-    print(results)
+    results = sorted(
+        results,
+        key=lambda x: x.type.value
+    )
+
     return results
 
 
@@ -124,8 +128,9 @@ if __name__ == '__main__':
     if USE_MIDIQUE:
         midique = Midique()
         for i in range(len(plotters)):
-            midique.connect((31 + 3) + i * 4, plotters[i].set_speed)
-            midique.connect((32 + 3) + i * 4, plotters[i].set_delay)
+            plo = plotters[i]
+            midique.connect((31 + 3) + i * 4, lambda sp, _p=plo: _p.set_speed(sp))
+            midique.connect((32 + 3) + i * 4, lambda delay, _p=plo: _p.set_delay(delay))
         midique.listen()
 
     if USE_LAUNCHPAD:
@@ -135,16 +140,23 @@ if __name__ == '__main__':
         lp.connect(8, lambda _p=plotters: [pp.thread.add(pp.go_up_down) for pp in _p])
         lp.connect(16 + 8, lambda _p=plotters: [pp.thread.add(pp.c73) for pp in _p])
         lp.connect(32 + 8, lambda _p=plotters: [pp.thread.add(pp.draw_random_line) for pp in _p])
-        lp.connect(48 + 8, lambda _p=plotters: [pp.thread.add(pp.pen_down_up) for pp in _p])
+        lp.connect(48 + 8,
+                   lambda _p=plotters: [pp.thread.add(pp.pen_down_up) if _p.type == PlotterType.HP_7475A_A3 else None
+                                        for pp in _p])
 
         for i in range(len(plotters)):
             p = plotters[i]
             lp.connect(0 + i, lambda _p=p: _p.thread.add(_p.go_up_down))
             lp.connect(16 + i, lambda _p=p: _p.thread.add(_p.c73))
             lp.connect(32 + i, lambda _p=p: _p.thread.add(_p.draw_random_line))
-            lp.connect(48 + i, lambda _p=p: _p.thread.add(_p.pen_down_up))
+            lp.connect(48 + i,
+                       lambda _p=p: _p.thread.add(_p.pen_down_up))
 
-            lp.connect(104 + i, lambda _p=p: _p.thread.add(_p.reset))
+            def clear_and_reset(pl):
+                pl.thread.clear()
+                pl.thread.add(pl.reset)
+
+            lp.connect(104 + i, lambda _p=p: clear_and_reset(_p))
         lp.listen()
 
     arcade.run()

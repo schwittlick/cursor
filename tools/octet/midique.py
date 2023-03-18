@@ -53,6 +53,8 @@ class MidiThread(threading.Thread):
                         v = int.from_bytes(con, 'big')
                         norm = v / 32636 * 1000
                         if buttonid in self.cbs.keys():
+                            print(self.cbs[buttonid])
+                            print(norm)
                             self.cbs[buttonid](norm)
                     else:
                         pass

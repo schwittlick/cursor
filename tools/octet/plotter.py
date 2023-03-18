@@ -38,10 +38,17 @@ class GuiThread(threading.Thread):
 
         self.task_completed_cb = None
 
-        self.max_buffer_size = 20
+        self.max_buffer_size = 50
 
     def set_cb(self, cb):
         self.task_completed_cb = cb
+
+    def clear(self):
+        while self.buffer.qsize() > 0:
+            logger.info(f"Removing a task from {self.plotter}")
+            self.buffer.get()
+            self.delays.get()
+            self.update_thread_count_ui()
 
     def add(self, func):
         current_delay = self.plotter.get_delay()
@@ -58,7 +65,7 @@ class GuiThread(threading.Thread):
 
     def update_thread_count_ui(self):
         s = self.buffer.qsize()
-        self.thread_count.text = str(s)
+        self.thread_count.text = "↔️ " + str(s)
 
     def run(self):
         logger.info(f"Thread for {self.plotter.type} at {self.plotter.serial_port} started")
@@ -79,7 +86,8 @@ class GuiThread(threading.Thread):
 
                     if not self.plotter.serial_port:
                         if self.task_completed_cb:
-                            self.task_completed_cb(s)
+                            # TODO: callback
+                            self.task_completed_cb()
                         continue
 
                     try:
@@ -88,16 +96,13 @@ class GuiThread(threading.Thread):
                         func(self.c, self.speed)
 
                         if self.task_completed_cb:
-                            self.thread_count.text = str(s - 1)
-                            self.task_completed_cb(s)
+                            self.task_completed_cb()
 
                     except socket.timeout as e:
                         logger.fail(f"{self.plotter.type} at {self.plotter} timed out")
                     except Exception as e:
                         logger.fail(f"Scheduled call failed: {e}")
                         logger.fail(f"{traceback.format_exc()}")
-
-
                 else:
                     time.sleep(0.01)
                     continue
@@ -170,7 +175,7 @@ class Plotter:
         self.thread.start()
 
     def __repr__(self):
-        return f"{self.serial_port}"
+        return f"{self.type} at {self.serial_port} online={self.is_connected}"
 
     def set_delay(self, delay: float):
         # coming straight from midi (0-1000)
@@ -180,9 +185,8 @@ class Plotter:
     def set_speed(self, speed: float):
         # coming straight from midi (0-1000)
         max_sped = MaxSpeed.fac[self.type]
-        self.thread.speed = misc.map(speed, 0, 1000, 0, max_sped, True)
+        self.thread.speed = misc.map(speed, 0, 1000, 1, max_sped, True)
         logger.info(f"plotter.speed = {self.thread.speed} -> {self.type}")
-
 
     def get_delay(self):
         return self.__delay
@@ -250,20 +254,19 @@ class Plotter:
         c.add(line)
 
         bounds = MinmaxMapping.maps[self.type]
-        offset_x = random.randint(0, int(bounds.w * 0.8))
-        offset_y = random.randint(0, int(bounds.h * 0.8))
-        d = self.scale(c, self.type, 0.1, (offset_x, offset_y))
+        offset_x = random.randint(0, int(bounds.w * 0.6))
+        offset_y = random.randint(0, int(bounds.h * 0.6))
+        d = self.scale(c, self.type, 0.4, (offset_x, offset_y))
 
         out = Collection()
         transformed_line = d[0]
-        for i in range(10):
+        for i in range(5):
             out.add(transformed_line.copy().offset(i * 10))
 
-        last_line = out[len(out) -1]
+        last_line = out[len(out) - 1]
         self.xy = last_line.end_pos().as_tuple()
 
-        result, feedback = self.send_data(f"VS{self.thread.speed}")
-        logger.info(f"{self.type} : {result} set speed {self.thread.speed}")
+        self.send_speed(self.thread.speed)
 
         result, feedback = self.send_data(self.render(out))
         logger.info(f"{self.type} : {result} : {feedback}")
@@ -322,7 +325,7 @@ class Plotter:
 
         return feedback
 
-    def set_speed(self, col: Collection, speed):
+    def send_speed(self, speed):
         logger.info(f"sending speed {self.thread.speed}")
         result, feedback = self.send_data(f"VS{self.thread.speed};")
 

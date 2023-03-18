@@ -9,6 +9,7 @@ logger = wasabi.Printer(pretty=True, no_print=False)
 def async_discover(serial_port):
     try:
         ser = serial.Serial(serial_port, baudrate=9600, timeout=5)
+        ser.flush()
         ser.write("OI;\n".encode("utf-8"))
         ret = ser.readline().decode("utf-8")
         model = ret.strip()
@@ -45,10 +46,8 @@ def discover() -> list:
 
     for thread in threads:
         thread.join()
-
-    logger.info(data)
     data = list(filter(lambda x: x is not None, data))
-    logger.info(data)
+
     return data
 
 
