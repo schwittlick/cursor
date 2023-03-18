@@ -9,6 +9,7 @@ import wasabi
 
 from cursor.device import PlotterType
 from tools.octet.data import all_paths
+from tools.octet.mouse import MouseThread
 from tools.octet.plotter import Plotter
 
 logger = wasabi.Printer(pretty=True, no_print=False)
@@ -76,6 +77,8 @@ class MainWindow(arcade.Window):
                 plotter.thread.add(plotter.init)
             elif key == arcade.key.C:
                 plotter.thread.add(plotter.c73)
+            elif key == arcade.key.M:
+                plotter.thread.add(plotter.mouse)
 
             plotter.thread.resume()
 
@@ -137,6 +140,18 @@ class MainWindow(arcade.Window):
             tb4.on_click = clear_queue
             plo.thread.thread_count = tb4
             container.add(tb4)
+
+            tb5 = arcade.gui.UIFlatButton(text=f"speed️", width=100, )
+            tb5.plotter = plo
+            #tb5.on_click = clear_queue
+            plo.thread.speed_label = tb5
+            container.add(tb5)
+
+            tb6 = arcade.gui.UIFlatButton(text=f"pen", width=100, )
+            tb6.plotter = plo
+            # tb5.on_click = clear_queue
+            plo.thread.pen_label = tb6
+            container.add(tb6)
 
             self.add(container)
 

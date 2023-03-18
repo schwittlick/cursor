@@ -15,6 +15,7 @@ from cursor.device import PlotterType, MinmaxMapping, MaxSpeed
 from cursor.renderer import HPGLRenderer
 from tools.octet.client import Client
 from tools.octet.data import all_paths
+from tools.octet.mouse import MouseThread
 
 logger = wasabi.Printer(pretty=True, no_print=False)
 
@@ -25,7 +26,7 @@ class GuiThread(threading.Thread):
         self.thread_id = thread_id
         self.running = True
         self.plotter = plotter
-        self.speed = None
+        self._speed = None
         self.c = None
         self.stopped = False
 
@@ -35,10 +36,22 @@ class GuiThread(threading.Thread):
         # arcade flat ui buttons
         self.button = None
         self.thread_count = None
+        self.speed_label = None
+        self.pen_label = None
 
         self.task_completed_cb = None
 
         self.max_buffer_size = 50
+
+    @property
+    def speed(self):
+        return self._speed
+
+    @speed.setter
+    def speed(self, v):
+        if self.speed_label:
+            self.speed_label.text = str(int(v))
+        self._speed = v
 
     def set_cb(self, cb):
         self.task_completed_cb = cb
@@ -166,6 +179,8 @@ class Plotter:
         self.type = None
 
         self.xy = (0, 0)
+        self.current_pen = 0
+        self.max_pens = 3
 
         self.__delay = 0.0
 
@@ -173,6 +188,8 @@ class Plotter:
         self.thread.c = all_paths
         self.thread.speed = 40
         self.thread.start()
+
+        self.mouse_thread = None
 
     def __repr__(self):
         return f"{self.type} at {self.serial_port} online={self.is_connected}"
@@ -242,9 +259,32 @@ class Plotter:
         d = self.scale(c, self.type, 0.1, (offset_x, offset_y))
         self.xy = line.end_pos().as_tuple()
 
+        for pa in d:
+            pa.pen_select = self.current_pen
         result, feedback = self.send_data(self.render(d))
         logger.info(f"{self.type} : {result} : {feedback}")
         return feedback
+
+    def go_to_pos(self, xy):
+        bounds = MinmaxMapping.maps[self.type]
+        new_pos_x = misc.map(xy[0], 0, 3000, bounds.x, bounds.x2, True)
+        new_pos_y = misc.map(xy[1], 0, 3000, bounds.y, bounds.y2, True)
+        result, feedback = self.send_data(f"SP{self.current_pen};VS{self.thread.speed};PD;PA{new_pos_x},{new_pos_y};PU;")
+        print(f"done pen updown {result} + {feedback}")
+
+        return feedback
+
+    def mouse(self, col, speed):
+        if not self.mouse_thread:
+            logger.info(f"starting mouse")
+
+            self.mouse_thread = MouseThread(lambda xy, s=self: s.go_to_pos(xy))
+            self.mouse_thread.start()
+        else:
+            logger.info(f"stopping mouse")
+            self.mouse_thread.kill()
+            self.mouse_thread.join()
+            self.mouse_thread = None
 
     def c73(self, col: Collection, speed):
         c = Collection()
@@ -254,8 +294,8 @@ class Plotter:
         c.add(line)
 
         bounds = MinmaxMapping.maps[self.type]
-        offset_x = random.randint(0, int(bounds.w * 0.6))
-        offset_y = random.randint(0, int(bounds.h * 0.6))
+        offset_x = random.randint(int(bounds.x), int(bounds.x2 - bounds.w*0.4))
+        offset_y = random.randint(int(bounds.y), int(bounds.y2 - bounds.h*0.4))
         d = self.scale(c, self.type, 0.4, (offset_x, offset_y))
 
         out = Collection()
@@ -268,6 +308,8 @@ class Plotter:
 
         self.send_speed(self.thread.speed)
 
+        for pa in out:
+            pa.pen_select = self.current_pen
         result, feedback = self.send_data(self.render(out))
         logger.info(f"{self.type} : {result} : {feedback}")
         return feedback
@@ -275,13 +317,18 @@ class Plotter:
     def init(self, c, speed):
         result, feedback = self.send_data(f"IN;SP1;LT;VS{speed};PA0,0;")
         self.xy = (0, 0)
+        self.current_pen = 1
 
         print(f"done init  {result} + {feedback}")
 
         return feedback
 
-    def take_pen(self, c, speed):
-        result, feedback = self.send_data(f"SP1;")
+    def next_pen(self, c, speed):
+        self.current_pen += 1
+        if self.current_pen > self.max_pens:
+            self.current_pen = 1
+        self.thread.pen_label.text = str(self.current_pen)
+        result, feedback = self.send_data(f"SP{self.current_pen};")
 
         print(f"done init  {result} + {feedback}")
 
@@ -322,6 +369,8 @@ class Plotter:
     def reset(self, col: Collection, speed):
         result, feedback = self.send_data(f"SP0;PA0,0;")
         print(f"done pen updown {result} + {feedback}")
+        self.current_pen = 0
+        self.xy = (0, 0)
 
         return feedback
 
