@@ -16,18 +16,25 @@ def mousepos():
 
 
 class MouseThread(threading.Thread):
-    def __init__(self):
+    def __init__(self, cb):
         threading.Thread.__init__(self)
         self.killed = False
+        self.cb = cb
+        self._prev_mp = (0,0)
 
     def run(self):
         try:
             while True:
                 if self.stopped():
                     break
-                text = "{0}".format(mousepos())
+                mp = mousepos()
+                if mp == self._prev_mp:
+                    continue
+                text = "{0}".format(mp)
+                self.cb(mp)
                 print(text)
                 sleep(0.01)
+                self._prev_mp = mp
         except (KeyboardInterrupt, SystemExit):
             sys.exit()
 
@@ -38,5 +45,5 @@ class MouseThread(threading.Thread):
         return self.killed
 
 if __name__ == '__main__':
-    mouseThread = MouseThread()
+    mouseThread = MouseThread(lambda p: print(p))
     mouseThread.start()

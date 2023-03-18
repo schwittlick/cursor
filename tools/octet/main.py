@@ -4,7 +4,7 @@ import wasabi
 import arcade
 import arcade.gui
 
-from cursor.device import PlotterType
+from cursor.device import PlotterType, MaxSpeed
 
 from tools.octet.discovery import discover
 from tools.octet.gui import MainWindow
@@ -55,6 +55,7 @@ def async_func(model, ip: str, tcp_port: int, serial_port: str, baud: int, timeo
     for k, v in plotter_map.items():
         if k == model:
             p.type = v
+            p.thread.speed = MaxSpeed.fac[v]
             return p
 
     return None
@@ -136,14 +137,18 @@ if __name__ == '__main__':
     if USE_LAUNCHPAD:
         lp = NovationLaunchpad()
 
+        def add_pen_up_down(_plotters):
+            for p in _plotters:
+                if p.type == PlotterType.HP_7475A_A3:
+                    p.thread.add(p.pen_down_up)
+
         # button on very right
         lp.connect(8, lambda _p=plotters: [pp.thread.add(pp.go_up_down) for pp in _p])
         lp.connect(16 + 8, lambda _p=plotters: [pp.thread.add(pp.c73) for pp in _p])
         lp.connect(32 + 8, lambda _p=plotters: [pp.thread.add(pp.draw_random_line) for pp in _p])
         lp.connect(48 + 8,
-                   lambda _p=plotters: [pp.thread.add(pp.pen_down_up) if _p.type == PlotterType.HP_7475A_A3 else None
-                                        for pp in _p])
-
+                   lambda _plotters=plotters: add_pen_up_down(_plotters))
+        lp.connect(112 + 8, lambda _p=plotters: [pp.thread.add(pp.next_pen) for pp in _p])
         for i in range(len(plotters)):
             p = plotters[i]
             lp.connect(0 + i, lambda _p=p: _p.thread.add(_p.go_up_down))
@@ -151,6 +156,8 @@ if __name__ == '__main__':
             lp.connect(32 + i, lambda _p=p: _p.thread.add(_p.draw_random_line))
             lp.connect(48 + i,
                        lambda _p=p: _p.thread.add(_p.pen_down_up))
+
+            lp.connect(112 + i, lambda _p=p: _p.thread.add(_p.next_pen))
 
             def clear_and_reset(pl):
                 pl.thread.clear()
