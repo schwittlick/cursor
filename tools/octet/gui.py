@@ -48,6 +48,11 @@ class MainWindow(arcade.Window):
         elif key == arcade.key.Q:
             arcade.exit()
             return
+        elif key == arcade.key.S:
+            for p in self.plotters:
+                p.connect()
+                p.open_serial()
+            pass
 
         if not self.plotters:
             logger.fail("Plotters not in main gui thread yet")
@@ -67,8 +72,6 @@ class MainWindow(arcade.Window):
                     plotter.thread.add(plotter.pen_down_up)
             elif key == arcade.key.R:
                 plotter.thread.add(plotter.random_pos)
-            elif key == arcade.key.S:
-                plotter.thread.add(plotter.set_speed)
             elif key == arcade.key.I:
                 plotter.thread.add(plotter.init)
             elif key == arcade.key.C:
@@ -85,37 +88,53 @@ class MainWindow(arcade.Window):
 
             def second_clicked(event):
                 _plo = event.source.plotter
-                _plo.thread.add(_plo.random_pos)
+                _plo.thread.add(_plo.go_up_down)
                 _plo.thread.resume()
 
             def third_clicked(event):
                 _plo = event.source.plotter
-                _plo.thread.add(_plo.draw_random_line)
+                _plo.thread.add(_plo.c73)
                 _plo.thread.resume()
 
             def penupdown_clicked(event):
                 _plo = event.source.plotter
-                _plo.thread.add(_plo.pen_down_up)
+                _plo.thread.add(_plo.draw_random_line)
                 _plo.thread.resume()
 
-            tb2 = arcade.gui.UIFlatButton(text=f"pos", width=100, )
+            def penupdown_clicked2(event):
+                _plo = event.source.plotter
+                _plo.thread.add(_plo.pen_up_down)
+                _plo.thread.resume()
+
+            def clear_queue(event):
+                _plo = event.source.plotter
+                _plo.thread.clear()
+                _plo.thread.add(_plo.reset)
+                _plo.thread.resume()
+
+            tb2 = arcade.gui.UIFlatButton(text=f"⬆⬇️️ page", width=100, )
             tb2.plotter = plo
             tb2.on_click = second_clicked
             container.add(tb2)
 
-            tb3 = arcade.gui.UIFlatButton(text=f"line", width=100, )
+            tb3 = arcade.gui.UIFlatButton(text=f"c73", width=100, )
             tb3.plotter = plo
             tb3.on_click = third_clicked
             container.add(tb3)
 
-            pud = arcade.gui.UIFlatButton(text=f"pen up down", width=100, )
+            pud = arcade.gui.UIFlatButton(text=f"🃏", width=100, )
             pud.plotter = plo
             pud.on_click = penupdown_clicked
             container.add(pud)
 
-            tb4 = arcade.gui.UIFlatButton(text=f"threads", width=100, )
+            pud2 = arcade.gui.UIFlatButton(text=f"⬆⬇️️ pen", width=100, )
+            pud2.plotter = plo
+            pud2.on_click = penupdown_clicked2
+            container.add(pud2)
+
+            tb4 = arcade.gui.UIFlatButton(text=f"↔️", width=100, )
             tb4.plotter = plo
-            # tb4.on_click = second_clicked
+            tb4.on_click = clear_queue
             plo.thread.thread_count = tb4
             container.add(tb4)
 

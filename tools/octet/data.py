@@ -1,5 +1,5 @@
 from cursor.data import DataDirHandler
-from cursor.filter import DistanceFilter, MaxPointCountFilter
+from cursor.filter import DistanceFilter, MaxPointCountFilter, MinPointCountFilter
 from cursor.loader import Loader
 from cursor.collection import Collection
 from cursor.path import Path
@@ -13,7 +13,7 @@ all_paths = _loader.all_paths()
 df = DistanceFilter(5)
 all_paths.filter(df)
 
-pcf = MaxPointCountFilter(10)
+pcf = MinPointCountFilter(10)
 all_paths.filter(pcf)
 #all_paths = Collection()
 #p = Path()
