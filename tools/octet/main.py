@@ -10,7 +10,8 @@ from tools.octet.discovery import discover
 from tools.octet.gui import MainWindow
 from tools.octet.launchpad import NovationLaunchpad
 from tools.octet.midique import Midique
-from tools.octet.plotter import Plotter, CheckerThread
+from tools.octet.plotter import Plotter
+from tools.octet.plotterthread import CheckerThread
 
 logger = wasabi.Printer(pretty=True, no_print=False)
 
@@ -137,10 +138,12 @@ if __name__ == '__main__':
     if USE_LAUNCHPAD:
         lp = NovationLaunchpad()
 
+
         def add_pen_up_down(_plotters):
             for p in _plotters:
                 if p.type == PlotterType.HP_7475A_A3:
                     p.thread.add(p.pen_down_up)
+
 
         # button on very right
         lp.connect(8, lambda _p=plotters: [pp.thread.add(pp.go_up_down) for pp in _p])
@@ -149,6 +152,7 @@ if __name__ == '__main__':
         lp.connect(48 + 8,
                    lambda _plotters=plotters: add_pen_up_down(_plotters))
         lp.connect(112 + 8, lambda _p=plotters: [pp.thread.add(pp.next_pen) for pp in _p])
+
         for i in range(len(plotters)):
             p = plotters[i]
             lp.connect(0 + i, lambda _p=p: _p.thread.add(_p.go_up_down))
@@ -159,9 +163,11 @@ if __name__ == '__main__':
 
             lp.connect(112 + i, lambda _p=p: _p.thread.add(_p.next_pen))
 
+
             def clear_and_reset(pl):
                 pl.thread.clear()
                 pl.thread.add(pl.reset)
+
 
             lp.connect(104 + i, lambda _p=p: clear_and_reset(_p))
         lp.listen()

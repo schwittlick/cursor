@@ -2,12 +2,8 @@ import pathlib
 import random
 import typing
 from random import randint
-import queue
 import time
-import threading
 import wasabi
-import traceback
-import socket
 
 from cursor import misc
 from cursor.collection import Collection
@@ -16,153 +12,9 @@ from cursor.renderer import HPGLRenderer
 from tools.octet.client import Client
 from tools.octet.data import all_paths
 from tools.octet.mouse import MouseThread
+from tools.octet.plotterthread import PlotterThread
 
 logger = wasabi.Printer(pretty=True, no_print=False)
-
-
-class GuiThread(threading.Thread):
-    def __init__(self, thread_id, plotter):
-        threading.Thread.__init__(self)
-        self.thread_id = thread_id
-        self.running = True
-        self.plotter = plotter
-        self._speed = None
-        self.c = None
-        self.stopped = False
-
-        self.buffer = queue.Queue()
-        self.delays = queue.Queue()
-
-        # arcade flat ui buttons
-        self.button = None
-        self.thread_count = None
-        self.speed_label = None
-        self.pen_label = None
-
-        self.task_completed_cb = None
-
-        self.max_buffer_size = 50
-
-    @property
-    def speed(self):
-        return self._speed
-
-    @speed.setter
-    def speed(self, v):
-        if self.speed_label:
-            self.speed_label.text = str(int(v))
-        self._speed = v
-
-    def set_cb(self, cb):
-        self.task_completed_cb = cb
-
-    def clear(self):
-        while self.buffer.qsize() > 0:
-            logger.info(f"Removing a task from {self.plotter}")
-            self.buffer.get()
-            self.delays.get()
-            self.update_thread_count_ui()
-
-    def add(self, func):
-        current_delay = self.plotter.get_delay()
-        logger.info(
-            f"Added {func.__name__} to {self.plotter.type} at {self.plotter.serial_port} with delay {current_delay}")
-
-        if self.buffer.qsize() >= self.max_buffer_size:
-            logger.warn(f"Discarding ...")
-            return
-        self.buffer.put(func)
-        self.delays.put(current_delay)
-
-        self.update_thread_count_ui()
-
-    def update_thread_count_ui(self):
-        s = self.buffer.qsize()
-        self.thread_count.text = "↔️ " + str(s)
-
-    def run(self):
-        logger.info(f"Thread for {self.plotter.type} at {self.plotter.serial_port} started")
-        while True:
-            if self.stopped:
-                return
-
-            if not self.running:
-                time.sleep(0.1)
-                continue
-            else:
-                if not self.buffer.empty():
-                    func = self.buffer.get()
-                    delay = self.delays.get()
-
-                    self.update_thread_count_ui()
-                    time.sleep(delay)
-
-                    if not self.plotter.serial_port:
-                        if self.task_completed_cb:
-                            # TODO: callback
-                            self.task_completed_cb()
-                        continue
-
-                    try:
-
-                        # run
-                        func(self.c, self.speed)
-
-                        if self.task_completed_cb:
-                            self.task_completed_cb()
-
-                    except socket.timeout as e:
-                        logger.fail(f"{self.plotter.type} at {self.plotter} timed out")
-                    except Exception as e:
-                        logger.fail(f"Scheduled call failed: {e}")
-                        logger.fail(f"{traceback.format_exc()}")
-                else:
-                    time.sleep(0.01)
-                    continue
-
-        logger.info(f"Thread for {self.plotter.type} at {self.plotter.serial_port} finished")
-
-    def stop(self):
-        self.stopped = True
-
-    def pause(self):
-        self.running = False
-
-    def resume(self):
-        self.running = True
-
-
-class CheckerThread(threading.Thread):
-    def __init__(self, plotters):
-        threading.Thread.__init__(self)
-        self.plotters = plotters
-        self.running = True
-
-    def run(self):
-        while True:
-            if not self.running:
-                logger.info("Checker thread finished")
-                return
-
-            time.sleep(1)
-            threads = {}
-            for plo in self.plotters:
-                threads[plo.serial_port] = plo
-
-            dict_copy = threads.copy()
-            for port, plo in dict_copy.items():
-                if not plo.thread:
-                    continue
-                if not plo.thread.running:
-                    plo.thread.pause()
-                elif not plo.thread.is_alive():
-                    plo.thread = None
-                else:
-                    # Resume the thread if it was paused
-                    plo.thread.resume()
-
-    def stop(self):
-        self.running = False
 
 
 class Plotter:
@@ -184,7 +36,7 @@ class Plotter:
 
         self.__delay = 0.0
 
-        self.thread = GuiThread(self.serial_port, self)
+        self.thread = PlotterThread(self.serial_port, self)
         self.thread.c = all_paths
         self.thread.speed = 40
         self.thread.start()
@@ -269,7 +121,8 @@ class Plotter:
         bounds = MinmaxMapping.maps[self.type]
         new_pos_x = misc.map(xy[0], 0, 3000, bounds.x, bounds.x2, True)
         new_pos_y = misc.map(xy[1], 0, 3000, bounds.y, bounds.y2, True)
-        result, feedback = self.send_data(f"SP{self.current_pen};VS{self.thread.speed};PD;PA{new_pos_x},{new_pos_y};PU;")
+        result, feedback = self.send_data(
+            f"SP{self.current_pen};VS{self.thread.speed};PD;PA{new_pos_x},{new_pos_y};PU;")
         print(f"done pen updown {result} + {feedback}")
 
         return feedback
@@ -294,8 +147,8 @@ class Plotter:
         c.add(line)
 
         bounds = MinmaxMapping.maps[self.type]
-        offset_x = random.randint(int(bounds.x), int(bounds.x2 - bounds.w*0.4))
-        offset_y = random.randint(int(bounds.y), int(bounds.y2 - bounds.h*0.4))
+        offset_x = random.randint(int(bounds.x), int(bounds.x2 - bounds.w * 0.4))
+        offset_y = random.randint(int(bounds.y), int(bounds.y2 - bounds.h * 0.4))
         d = self.scale(c, self.type, 0.4, (offset_x, offset_y))
 
         out = Collection()
@@ -313,6 +166,9 @@ class Plotter:
         result, feedback = self.send_data(self.render(out))
         logger.info(f"{self.type} : {result} : {feedback}")
         return feedback
+
+    def c83(self, col, speed):
+        pass
 
     def init(self, c, speed):
         result, feedback = self.send_data(f"IN;SP1;LT;VS{speed};PA0,0;")

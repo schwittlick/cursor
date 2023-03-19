@@ -1,15 +1,12 @@
-import socket
-
 import arcade
 import arcade.gui
 from arcade.experimental.uislider import UISlider
-from arcade.gui import UIOnChangeEvent, UILabel
+from arcade.gui import UIOnChangeEvent
 
 import wasabi
 
 from cursor.device import PlotterType
 from tools.octet.data import all_paths
-from tools.octet.mouse import MouseThread
 from tools.octet.plotter import Plotter
 
 logger = wasabi.Printer(pretty=True, no_print=False)
@@ -143,7 +140,7 @@ class MainWindow(arcade.Window):
 
             tb5 = arcade.gui.UIFlatButton(text=f"speed️", width=100, )
             tb5.plotter = plo
-            #tb5.on_click = clear_queue
+            # tb5.on_click = clear_queue
             plo.thread.speed_label = tb5
             container.add(tb5)
 
