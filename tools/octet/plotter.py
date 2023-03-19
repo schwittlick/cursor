@@ -6,8 +6,10 @@ import time
 import wasabi
 
 from cursor import misc
+from cursor.bb import BoundingBox
 from cursor.collection import Collection
 from cursor.device import PlotterType, MinmaxMapping, MaxSpeed
+from cursor.path import Path
 from cursor.renderer import HPGLRenderer
 from tools.octet.client import Client
 from tools.octet.data import all_paths
@@ -108,7 +110,7 @@ class Plotter:
         offset_x = random.randint(0, int(bounds.w * 0.8))
         offset_y = random.randint(0, int(bounds.h * 0.8))
 
-        d = self.scale(c, self.type, 0.1, (offset_x, offset_y))
+        d = self.scale(c, 0.1, (offset_x, offset_y))
         self.xy = line.end_pos().as_tuple()
 
         for pa in d:
@@ -149,7 +151,7 @@ class Plotter:
         bounds = MinmaxMapping.maps[self.type]
         offset_x = random.randint(int(bounds.x), int(bounds.x2 - bounds.w * 0.4))
         offset_y = random.randint(int(bounds.y), int(bounds.y2 - bounds.h * 0.4))
-        d = self.scale(c, self.type, 0.4, (offset_x, offset_y))
+        d = self.scale(c, 0.4, (offset_x, offset_y))
 
         out = Collection()
         transformed_line = d[0]
@@ -168,7 +170,50 @@ class Plotter:
         return feedback
 
     def c83(self, col, speed):
-        pass
+        out = Collection()
+
+        bounds = MinmaxMapping.maps[self.type]
+        start_x = random.randint(int(bounds.x), int(bounds.x2))
+        start_y = random.randint(int(bounds.y), int(bounds.y2))
+        random_w = random.randint(1, int(bounds.w / 100))
+        random_h = random.randint(1, int(bounds.h / 100))
+        for y in range(random_h):
+            for x in range(random_w):
+                pa = Path()
+                pa.pen_select = self.current_pen
+                pa.velocity = self.thread.speed
+                pa.add(start_x + x, start_y + y)
+                pa.add(start_x + x, start_y + y)
+                self.xy = (start_x + x, start_y + y)
+                out.add(pa)
+
+        self.send_speed(self.thread.speed)
+
+        result, feedback = self.send_data(self.render(out))
+        logger.info(f"{self.type} : {result} : {feedback}")
+        return feedback
+
+    def small_line_field(self, col, speed):
+        c = Collection()
+
+        line = col.random()
+        line.velocity = self.thread.speed
+        line.pen_select = self.current_pen
+        c.add(line)
+        out = Collection()
+        for i in range(10):
+            bounds = MinmaxMapping.maps[self.type]
+            start_x = random.randint(int(bounds.x), int(bounds.x2))
+            start_y = random.randint(int(bounds.y), int(bounds.y2))
+            random_w = random.randint(1, int(bounds.w / 100))
+            random_h = random.randint(1, int(bounds.h / 100))
+            c = self.transform(c, BoundingBox(start_x, start_y, start_x + random_w, start_y + random_h))
+            for pa in c:
+                out.add(pa.copy())
+
+        result, feedback = self.send_data(self.render(out))
+        logger.info(f"{self.type} : {result} : {feedback}")
+        return feedback
 
     def init(self, c, speed):
         result, feedback = self.send_data(f"IN;SP1;LT;VS{speed};PA0,0;")
@@ -238,15 +283,23 @@ class Plotter:
 
         return feedback
 
-    def scale(self, c: Collection, tt: PlotterType, scale=1.0, offset=(0, 0)) -> Collection:
-        dims = MinmaxMapping.maps[tt]
+    def scale(self, c: Collection, scale=1.0, offset=(0, 0)) -> Collection:
+        c = self.transform(c, MinmaxMapping.maps[self.type])
+
+        for pa in c:
+            for poi in pa.vertices:
+                poi.x = (poi.x * scale) + offset[0]
+                poi.y = (poi.y * scale) + offset[1]
+        return c
+
+    def transform(self, c, dims):
         cbb = c.bb()
         trans = Plotter.transformFn((cbb.x, cbb.y), (cbb.x2, cbb.y2), (dims.x, dims.y), (dims.x2, dims.y2))
         for pa in c:
             for poi in pa.vertices:
                 n_poi = trans(poi.as_tuple())
-                poi.x = (n_poi[0] * scale) + offset[0]
-                poi.y = (n_poi[1] * scale) + offset[1]
+                poi.x = n_poi[0]
+                poi.y = n_poi[1]
         return c
 
     def render(self, c: Collection):
