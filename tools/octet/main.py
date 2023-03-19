@@ -151,6 +151,10 @@ if __name__ == '__main__':
         lp.connect(32 + 8, lambda _p=plotters: [pp.thread.add(pp.draw_random_line) for pp in _p])
         lp.connect(48 + 8,
                    lambda _plotters=plotters: add_pen_up_down(_plotters))
+        lp.connect(64 + 8,
+                   lambda _p=plotters: [pp.thread.add(pp.c83) for pp in _p])
+        lp.connect(80 + 8,
+                   lambda _p=plotters: [pp.thread.add(pp.small_line_field) for pp in _p])
         lp.connect(112 + 8, lambda _p=plotters: [pp.thread.add(pp.next_pen) for pp in _p])
 
         for i in range(len(plotters)):
@@ -160,6 +164,10 @@ if __name__ == '__main__':
             lp.connect(32 + i, lambda _p=p: _p.thread.add(_p.draw_random_line))
             lp.connect(48 + i,
                        lambda _p=p: _p.thread.add(_p.pen_down_up))
+            lp.connect(64 + i,
+                       lambda _p=p: _p.thread.add(_p.c83))
+            lp.connect(80 + i,
+                       lambda _p=p: _p.thread.add(_p.small_line_field))
 
             lp.connect(112 + i, lambda _p=p: _p.thread.add(_p.next_pen))
 
