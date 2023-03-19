@@ -34,7 +34,7 @@ class Plotter:
 
         self.xy = (0, 0)
         self.current_pen = 0
-        self.max_pens = 3
+        self.max_pens = 2
 
         self.__delay = 0.0
 
@@ -175,16 +175,18 @@ class Plotter:
         bounds = MinmaxMapping.maps[self.type]
         start_x = random.randint(int(bounds.x), int(bounds.x2))
         start_y = random.randint(int(bounds.y), int(bounds.y2))
-        random_w = random.randint(1, int(bounds.w / 100))
-        random_h = random.randint(1, int(bounds.h / 100))
+        random_w = 10 # random.randint(1, int(bounds.w / 100))
+        random_h = 10# random.randint(1, int(bounds.h / 100))
+        step_size = 40
         for y in range(random_h):
             for x in range(random_w):
-                pa = Path()
+                pos = (start_x + x * step_size, start_y + y * step_size)
+                pa = Path.from_tuple_list([pos, pos])
+
                 pa.pen_select = self.current_pen
                 pa.velocity = self.thread.speed
-                pa.add(start_x + x, start_y + y)
-                pa.add(start_x + x, start_y + y)
-                self.xy = (start_x + x, start_y + y)
+
+                self.xy = pos
                 out.add(pa)
 
         self.send_speed(self.thread.speed)
@@ -214,6 +216,13 @@ class Plotter:
         result, feedback = self.send_data(self.render(out))
         logger.info(f"{self.type} : {result} : {feedback}")
         return feedback
+
+    def signature(self, col, speed):
+        # draw signature
+        pass
+
+    def chatgpt_simulated_mouse_movement(self, col, speed):
+        pass
 
     def init(self, c, speed):
         result, feedback = self.send_data(f"IN;SP1;LT;VS{speed};PA0,0;")
