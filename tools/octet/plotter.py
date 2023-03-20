@@ -115,7 +115,8 @@ class Plotter:
 
         for pa in d:
             pa.pen_select = self.current_pen
-        result, feedback = self.send_data(self.render(d))
+        data, duration = self.render(d)
+        result, feedback = self.send_data(data)
         logger.info(f"{self.type} : {result} : {feedback}")
         return feedback
 
@@ -165,7 +166,8 @@ class Plotter:
 
         for pa in out:
             pa.pen_select = self.current_pen
-        result, feedback = self.send_data(self.render(out))
+        data, duration = self.render(out)
+        result, feedback = self.send_data(data)
         logger.info(f"{self.type} : {result} : {feedback}")
         return feedback
 
@@ -191,7 +193,8 @@ class Plotter:
 
         self.send_speed(self.thread.speed)
 
-        result, feedback = self.send_data(self.render(out))
+        data, duration = self.render(out)
+        result, feedback = self.send_data(data)
         logger.info(f"{self.type} : {result} : {feedback}")
         return feedback
 
@@ -314,7 +317,9 @@ class Plotter:
     def render(self, c: Collection):
         r = HPGLRenderer(pathlib.Path(""))
         r.render(c)
-        return r.generate_string()
+        seconds = r.estimated_duration(self.thread.speed)
+        logger.info(f"this will take approx {seconds}s.")
+        return r.generate_string(), seconds
 
     """
     ty lars wander 
