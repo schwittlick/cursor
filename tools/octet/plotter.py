@@ -177,9 +177,9 @@ class Plotter:
         bounds = MinmaxMapping.maps[self.type]
         start_x = random.randint(int(bounds.x), int(bounds.x2))
         start_y = random.randint(int(bounds.y), int(bounds.y2))
-        random_w = 10 # random.randint(1, int(bounds.w / 100))
-        random_h = 10# random.randint(1, int(bounds.h / 100))
-        step_size = 40
+        random_w = random.randint(1, 100)
+        random_h = random.randint(1, 100)
+        step_size = 20
         for y in range(random_h):
             for x in range(random_w):
                 pos = (start_x + x * step_size, start_y + y * step_size)
@@ -216,7 +216,8 @@ class Plotter:
             for pa in c:
                 out.add(pa.copy())
 
-        result, feedback = self.send_data(self.render(out))
+        data, duration = self.render(out)
+        result, feedback = self.send_data(data)
         logger.info(f"{self.type} : {result} : {feedback}")
         return feedback
 
@@ -224,8 +225,59 @@ class Plotter:
         # draw signature
         pass
 
+    def __generate_line(self, start_x, start_y, end_x, end_y, num_points, rangex, rangey):
+        """
+        Generate a list of (x, y) points representing a straight line
+        from (start_x, start_y) to (end_x, end_y), with num_points
+        points that have slightly randomized y coordinates.
+        """
+        import random
+        from noise import pnoise1
+        points = []
+        for i in range(num_points):
+            x_noise_strength = 0.01
+            y_noise_strength = 0.01
+            y_random_strength = 0.05
+
+            points = []
+            for i in range(num_points):
+                t = i / (num_points - 1)
+                x = start_x + (end_x - start_x) * t
+                y = start_y + (end_y - start_y) * t
+                x_offset = x_noise_strength * pnoise1(random.random() + t * 10)
+                y_offset = y_random_strength * (random.random() - 0.5) + y_noise_strength * pnoise1(
+                    random.random() + t * 20)
+                x += x_offset * rangex
+                y += y_offset * rangey
+                points.append((x, y))
+        return points
+
     def chatgpt_simulated_mouse_movement(self, col, speed):
-        pass
+        out = Collection()
+        for i in range(1):
+            bounds = MinmaxMapping.maps[self.type]
+            start_x = random.randint(int(bounds.x), int(bounds.x2))
+            start_y = random.randint(int(bounds.y), int(bounds.y2))
+            end_x = random.randint(int(bounds.x), int(bounds.x2))
+            end_y = random.randint(int(bounds.y), int(bounds.y2))
+            points = self.__generate_line(start_x, start_y, end_x, end_y, 50, bounds.w, bounds.h)
+            path = Path.from_tuple_list(points)
+            path.pen_select = self.current_pen
+
+            c = Collection()
+            c.add(path)
+
+            #c = self.transform(c, bounds)
+            for pa in c:
+                out.add(pa.copy())
+
+        self.send_speed(self.thread.speed)
+        for pa in out:
+            pa.pen_select = self.current_pen
+        data, duration = self.render(out)
+        result, feedback = self.send_data(data)
+        logger.info(f"{self.type} : {result} : {feedback}")
+        return feedback
 
     def init(self, c, speed):
         result, feedback = self.send_data(f"IN;SP1;LT;VS{speed};PA0,0;")

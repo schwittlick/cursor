@@ -144,6 +144,10 @@ if __name__ == '__main__':
                 if p.type == PlotterType.HP_7475A_A3:
                     p.thread.add(p.pen_down_up)
 
+        def add_simulated(_plotters):
+            print("SIMULATED")
+            for p in _plotters:
+                p.thread.add(p.chatgpt_simulated_mouse_movement)
 
         # button on very right
         lp.connect(8, lambda _p=plotters: [pp.thread.add(pp.go_up_down) for pp in _p])
@@ -155,6 +159,8 @@ if __name__ == '__main__':
                    lambda _p=plotters: [pp.thread.add(pp.c83) for pp in _p])
         lp.connect(80 + 8,
                    lambda _p=plotters: [pp.thread.add(pp.small_line_field) for pp in _p])
+        lp.connect(96 + 8,
+                   lambda _p=plotters: add_simulated(_p))
         lp.connect(112 + 8, lambda _p=plotters: [pp.thread.add(pp.next_pen) for pp in _p])
 
         for i in range(len(plotters)):
@@ -168,12 +174,14 @@ if __name__ == '__main__':
                        lambda _p=p: _p.thread.add(_p.c83))
             lp.connect(80 + i,
                        lambda _p=p: _p.thread.add(_p.small_line_field))
+            lp.connect(96 + i,
+                       lambda _p=p: _p.thread.add(_p.chatgpt_simulated_mouse_movement))
 
             lp.connect(112 + i, lambda _p=p: _p.thread.add(_p.next_pen))
 
 
             def clear_and_reset(pl):
-                pl.thread.clear()
+                #pl.thread.clear()
                 pl.thread.add(pl.reset)
 
 
