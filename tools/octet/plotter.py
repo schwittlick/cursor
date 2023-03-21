@@ -49,8 +49,8 @@ class Plotter:
         return f"{self.type} at {self.serial_port} online={self.is_connected}"
 
     def set_delay(self, delay: float):
-        # coming straight from midi (0-1000)
-        self.__delay = delay / 300
+        # coming straight from midi normalized
+        self.__delay = delay * 100
         logger.info(f"plotter.delay = {self.__delay} -> {self.type}")
 
     def set_speed(self, speed: float):
@@ -122,10 +122,10 @@ class Plotter:
 
     def go_to_pos(self, xy):
         bounds = MinmaxMapping.maps[self.type]
-        new_pos_x = misc.map(xy[0], 0, 3000, bounds.x, bounds.x2, True)
-        new_pos_y = misc.map(xy[1], 0, 3000, bounds.y, bounds.y2, True)
+        new_pos_x = misc.map(xy[0], 0, 1, bounds.x, bounds.x2, True)
+        new_pos_y = misc.map(xy[1], 0, 1, bounds.y, bounds.y2, True)
         result, feedback = self.send_data(
-            f"SP{self.current_pen};VS{self.thread.speed};PD;PA{new_pos_x},{new_pos_y};PU;")
+            f"SP{self.current_pen};VS{self.thread.speed};PD;PA{new_pos_x},{new_pos_y};")
         print(f"done pen updown {result} + {feedback}")
 
         return feedback
@@ -141,6 +141,8 @@ class Plotter:
             self.mouse_thread.kill()
             self.mouse_thread.join()
             self.mouse_thread = None
+            result, feedback = self.send_data(f"PU;")
+            logger.info(f"PU; {result} -> {feedback}")
 
     def c73(self, col: Collection, speed):
         c = Collection()
@@ -156,7 +158,10 @@ class Plotter:
 
         out = Collection()
         transformed_line = d[0]
-        for i in range(5):
+        min = 1
+        max = 10
+        times = random.randint(min, max)
+        for i in range(times):
             out.add(transformed_line.copy().offset(i * 10))
 
         last_line = out[len(out) - 1]
@@ -177,9 +182,9 @@ class Plotter:
         bounds = MinmaxMapping.maps[self.type]
         start_x = random.randint(int(bounds.x), int(bounds.x2))
         start_y = random.randint(int(bounds.y), int(bounds.y2))
-        random_w = random.randint(1, 100)
-        random_h = random.randint(1, 100)
-        step_size = 20
+        random_w = random.randint(1, 50)
+        random_h = random.randint(1, 50)
+        step_size = random.randint(15, 35)  # 20 is good
         for y in range(random_h):
             for x in range(random_w):
                 pos = (start_x + x * step_size, start_y + y * step_size)
@@ -264,12 +269,13 @@ class Plotter:
             path = Path.from_tuple_list(points)
             path.pen_select = self.current_pen
 
-            c = Collection()
-            c.add(path)
+            min = 1
+            max = 10
+            times = random.randint(min, max)
+            for i in range(times):
+                out.add(path.copy().offset(i * 10))
 
-            #c = self.transform(c, bounds)
-            for pa in c:
-                out.add(pa.copy())
+            out.add(path)
 
         self.send_speed(self.thread.speed)
         for pa in out:

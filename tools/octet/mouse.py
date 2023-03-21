@@ -8,6 +8,8 @@ from time import sleep
 
 from Xlib import display
 
+from cursor import misc
+
 
 def mousepos():
     """mousepos() --> (x, y) get the mouse coordinates on the screen (linux, Xlib)."""
@@ -20,7 +22,17 @@ class MouseThread(threading.Thread):
         threading.Thread.__init__(self)
         self.killed = False
         self.cb = cb
-        self._prev_mp = (0,0)
+        self._prev_mp = (0, 0)
+
+        d = display.Display()
+        root = d.screen().root
+        desktop = root.get_geometry()
+        self.w = desktop.width
+        self.h = desktop.height
+
+    """
+    returning normalized screen position 
+    """
 
     def run(self):
         try:
@@ -30,9 +42,10 @@ class MouseThread(threading.Thread):
                 mp = mousepos()
                 if mp == self._prev_mp:
                     continue
-                text = "{0}".format(mp)
-                self.cb(mp)
-                print(text)
+
+                x = misc.map(mp[0], 0, self.w, 0, 1, True)
+                y = misc.map(mp[1], 0, self.h, 0, 1, True)
+                self.cb((x, y))
                 sleep(0.01)
                 self._prev_mp = mp
         except (KeyboardInterrupt, SystemExit):
@@ -43,6 +56,7 @@ class MouseThread(threading.Thread):
 
     def stopped(self):
         return self.killed
+
 
 if __name__ == '__main__':
     mouseThread = MouseThread(lambda p: print(p))
