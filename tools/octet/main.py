@@ -112,6 +112,7 @@ if __name__ == '__main__':
         plotters = connect_plotters(config, discovered_plotters)
 
     window.plotters = plotters
+    window.add_labels()
     window.render_plotters()
 
     checker_thread = CheckerThread(plotters)
@@ -131,8 +132,10 @@ if __name__ == '__main__':
         midique = Midique()
         for i in range(len(plotters)):
             plo = plotters[i]
-            midique.connect((31 + 3) + i * 4, lambda sp, _p=plo: _p.set_speed(sp))
-            midique.connect((32 + 3) + i * 4, lambda delay, _p=plo: _p.set_delay(delay))
+            midique.connect((29 + 3) + i * 4, lambda sp, _p=plo: _p.set_value1(sp))
+            midique.connect((30 + 3) + i * 4, lambda sp, _p=plo: _p.set_value2(sp))
+            midique.connect((32 + 3) + i * 4, lambda sp, _p=plo: _p.set_speed(sp))
+            #midique.connect((32 + 3) + i * 4, lambda delay, _p=plo: _p.set_delay(delay))
         midique.listen()
 
     if USE_LAUNCHPAD:
@@ -144,13 +147,15 @@ if __name__ == '__main__':
                 if p.type == PlotterType.HP_7475A_A3:
                     p.thread.add(p.pen_down_up)
 
+
         def add_simulated(_plotters):
             print("SIMULATED")
             for p in _plotters:
                 p.thread.add(p.chatgpt_simulated_mouse_movement)
 
+
         # button on very right
-        lp.connect(8, lambda _p=plotters: [pp.thread.add(pp.go_up_down) for pp in _p])
+        lp.connect(8, lambda _p=plotters: [pp.thread.add(pp.mouse) for pp in _p])
         lp.connect(16 + 8, lambda _p=plotters: [pp.thread.add(pp.c73) for pp in _p])
         lp.connect(32 + 8, lambda _p=plotters: [pp.thread.add(pp.draw_random_line) for pp in _p])
         lp.connect(48 + 8,
@@ -181,7 +186,7 @@ if __name__ == '__main__':
 
 
             def clear_and_reset(pl):
-                #pl.thread.clear()
+                # pl.thread.clear()
                 pl.thread.add(pl.reset)
 
 

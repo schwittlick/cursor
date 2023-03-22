@@ -44,7 +44,7 @@ class MidiThread(threading.Thread):
 
                 if prev_msg is not None:
                     # TODO: why check delay?
-                    if deltatime < 0.01:
+                    if deltatime < 0.001:
                         print(message)
                         buttonid = message[1]
                         b1 = message[2].to_bytes(1, byteorder='big')
@@ -52,9 +52,8 @@ class MidiThread(threading.Thread):
                         con = b2 + b1
                         v = int.from_bytes(con, 'big')
                         norm = v / 32636 * 1000
+                        logger.info(f"v: {norm}")
                         if buttonid in self.cbs.keys():
-                            print(self.cbs[buttonid])
-                            print(norm)
                             self.cbs[buttonid](norm)
                     else:
                         pass

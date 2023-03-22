@@ -30,6 +30,9 @@ class PlotterThread(threading.Thread):
         self.remaining_seconds = []
         self.remaining_seconds_label = None
 
+        self.v1_label = None
+        self.v2_label = None
+
         self.task_completed_cb = None
 
         self.max_buffer_size = 50
