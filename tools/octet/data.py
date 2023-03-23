@@ -7,7 +7,7 @@ from cursor.path import Path
 import random
 
 recordings = DataDirHandler().recordings()
-_loader = Loader(directory=recordings, limit_files=1)
+_loader = Loader(directory=recordings, limit_files=5)
 all_paths = _loader.all_paths()
 
 df = DistanceFilter(5)
@@ -15,6 +15,9 @@ all_paths.filter(df)
 
 pcf = MinPointCountFilter(10)
 all_paths.filter(pcf)
+
+pcf2 = MaxPointCountFilter(30)
+all_paths.filter(pcf2)
 #all_paths = Collection()
 #p = Path()
 #for i in range(100):

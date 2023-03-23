@@ -45,7 +45,7 @@ class MouseThread(threading.Thread):
 
                 x = misc.map(mp[0], 0, self.w, 0, 1, True)
                 y = misc.map(mp[1], 0, self.h, 0, 1, True)
-                self.cb((x, y))
+                self.cb((y, x))
                 sleep(0.01)
                 self._prev_mp = mp
         except (KeyboardInterrupt, SystemExit):

@@ -20,7 +20,8 @@ logger = wasabi.Printer(pretty=True, no_print=False)
 
 
 class Plotter:
-    def __init__(self, ip: str, port: int, serial_port: typing.Union[str, None], baud: int, timeout: float):
+    def __init__(self, ip: str, port: int, serial_port: typing.Union[str, None], baud: int, timeout: float,
+                 pen_count: int):
         self.serial_port = serial_port
         self.baud = baud
         self.timeout = timeout
@@ -34,7 +35,8 @@ class Plotter:
 
         self.xy = (0, 0)
         self.current_pen = 0
-        self.max_pens = 2
+        self.max_pens = pen_count
+        self.line_distance = 10
 
         self.__delay = 0.0
 
@@ -71,6 +73,11 @@ class Plotter:
         logger.info(f"v1: {v2}")
         self.thread.v2_label.text = str(int(v2))
         self.__value2 = v2
+
+    def set_line_distance(self, d):
+        self.line_distance = misc.map(d, 0, 1000, 10, 50, True)
+        self.thread.line_distance_label.text = str(int(self.line_distance))
+        logger.info(f"setting line distance to {self.line_distance}")
 
     def get_value1(self, min, max) -> int:
         return int(misc.map(self.__value1, 0, 1000, min, max, True))
@@ -134,11 +141,12 @@ class Plotter:
 
         out = Collection()
         transformed_line = d[0]
-        min = self.get_value1(1, 100)
-        max = self.get_value2(1, 100)
-        times = random.randint(min, max)
+        # min = self.get_value1(1, 100)
+        # max = self.get_value2(1, 100)
+        # times = random.randint(min, max)
+        times = self.get_value1(1, 100)
         for i in range(times):
-            out.add(transformed_line.copy().offset(i * 10))
+            out.add(transformed_line.copy().offset(i * int(self.line_distance)))
         out[len(out) - 1].end_pos()
         self.xy = out[len(out) - 1].end_pos().as_tuple()
 
@@ -155,7 +163,7 @@ class Plotter:
         new_pos_y = misc.map(xy[1], 0, 1, bounds.y, bounds.y2, True)
         result, feedback = self.send_data(
             f"SP{self.current_pen};VS{self.thread.speed};PD;PA{new_pos_x},{new_pos_y};")
-        #print(f"done pen updown {result} + {feedback}")
+        # print(f"done pen updown {result} + {feedback}")
 
         return feedback
 
@@ -187,11 +195,12 @@ class Plotter:
 
         out = Collection()
         transformed_line = d[0]
-        min = self.get_value1(1, 100)
-        max = self.get_value2(1, 100)
-        times = random.randint(min, max)
+        # min = self.get_value1(1, 100)
+        # max = self.get_value2(1, 100)
+        # times = random.randint(min, max)
+        times = self.get_value1(1, 100)
         for i in range(times):
-            out.add(transformed_line.copy().offset(i * 10))
+            out.add(transformed_line.copy().offset(i * int(self.line_distance)))
 
         last_line = out[len(out) - 1]
         self.xy = last_line.end_pos().as_tuple()
@@ -211,14 +220,20 @@ class Plotter:
         bounds = MinmaxMapping.maps[self.type]
         start_x = random.randint(int(bounds.x), int(bounds.x2))
         start_y = random.randint(int(bounds.y), int(bounds.y2))
-        min = self.get_value1(1, 100)
-        max = self.get_value2(1, 100)
-        random_w = random.randint(min, max)
-        random_h = random.randint(min, max)
+        # min = self.get_value1(1, 100)
+        # max = self.get_value2(1, 100)
+        # random_w = random.randint(min, max)
+        # random_h = random.randint(min, max)
+        w = self.get_value1(1, 100)
+        h = w  # self.get_value2(1, 100)
         step_size = random.randint(15, 35)  # 20 is good
-        for y in range(random_h):
-            for x in range(random_w):
+
+        for y in range(h):
+            for x in range(w):
+                v2 = self.get_value2(0, 400)
+
                 pos = (start_x + x * step_size, start_y + y * step_size)
+                pos = (pos[0] + random.randint(-v2, v2), pos[1] + random.randint(-v2, v2))
                 pa = Path.from_tuple_list([pos, pos])
 
                 pa.pen_select = self.current_pen
@@ -235,17 +250,20 @@ class Plotter:
         return feedback
 
     def small_line_field(self, col, speed):
-        c = Collection()
 
-        line = col.random()
-        line.velocity = self.thread.speed
-        line.pen_select = self.current_pen
-        c.add(line)
         out = Collection()
-        min = self.get_value1(1, 100)
-        max = self.get_value2(1, 100)
-        random_linecount = random.randint(min, max)
-        for i in range(random_linecount):
+        # min = self.get_value1(1, 100)
+        # max = self.get_value2(1, 100)
+        # random_linecount = random.randint(min, max)
+        linecount = self.get_value1(1, 100)
+        for i in range(linecount):
+            c = Collection()
+
+            line = col.random()
+            line.velocity = self.thread.speed
+            line.pen_select = self.current_pen
+            c.add(line)
+
             bounds = MinmaxMapping.maps[self.type]
             start_x = random.randint(int(bounds.x), int(bounds.x2))
             start_y = random.randint(int(bounds.y), int(bounds.y2))
@@ -303,11 +321,12 @@ class Plotter:
             path = Path.from_tuple_list(points)
             path.pen_select = self.current_pen
 
-            min = self.get_value1(1, 100)
-            max = self.get_value2(1, 100)
-            times = random.randint(min, max)
+            # min = self.get_value1(1, 100)
+            # max = self.get_value2(1, 100)
+            # times = random.randint(min, max)
+            times = self.get_value1(1, 100)
             for i in range(times):
-                out.add(path.copy().offset(i * 10))
+                out.add(path.copy().offset(i * int(self.line_distance)))
 
             out.add(path)
 
@@ -324,7 +343,7 @@ class Plotter:
         self.xy = (0, 0)
         self.current_pen = 1
 
-        #print(f"done init  {result} + {feedback}")
+        # print(f"done init  {result} + {feedback}")
 
         return feedback
 
@@ -335,7 +354,7 @@ class Plotter:
         self.thread.pen_label.text = str(self.current_pen)
         result, feedback = self.send_data(f"SP{self.current_pen};")
 
-        #print(f"done init  {result} + {feedback}")
+        # print(f"done init  {result} + {feedback}")
 
         return feedback
 
@@ -364,9 +383,10 @@ class Plotter:
         return feedback
 
     def pen_down_up(self, col: Collection, speed):
-        min = self.get_value1(1, 100)
-        max = self.get_value2(1, 100)
-        times = random.randint(min, max)
+        # min = self.get_value1(1, 100)
+        # max = self.get_value2(1, 100)
+        # times = random.randint(min, max)
+        times = self.get_value1(1, 100)
 
         # times = 2  # randint(1, 100)
         result, feedback = self.send_data(f"PD;PU;PA{self.xy[0]},{self.xy[1]};" * times)
@@ -377,7 +397,8 @@ class Plotter:
 
     def reset(self, col: Collection, speed):
         result, feedback = self.send_data(f"SP0;PA0,0;")
-        #print(f"done pen updown {result} + {feedback}")
+        self.thread.pen_label.text = str(self.current_pen)
+        # print(f"done pen updown {result} + {feedback}")
         self.current_pen = 0
         self.xy = (0, 0)
 

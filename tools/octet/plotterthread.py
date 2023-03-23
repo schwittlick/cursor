@@ -29,6 +29,7 @@ class PlotterThread(threading.Thread):
         self.pen_label = None
         self.remaining_seconds = []
         self.remaining_seconds_label = None
+        self.line_distance_label = None
 
         self.v1_label = None
         self.v2_label = None
