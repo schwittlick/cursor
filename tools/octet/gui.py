@@ -20,7 +20,7 @@ class TestButton(arcade.gui.UIFlatButton):
 
     def on_click(self, event: arcade.gui.UIOnClickEvent):
         logger.info(self.plotter)
-        self.plotter.thread.add(Plotter.init)
+        self.plotter.thread.add(self.plotter.init)
         self.plotter.thread.resume()
 
 
@@ -89,6 +89,7 @@ class MainWindow(arcade.Window):
         container.add(arcade.gui.UIFlatButton(text=f"pen", width=button_width, ))
         container.add(arcade.gui.UIFlatButton(text=f"v1", width=button_width, ))
         container.add(arcade.gui.UIFlatButton(text=f"v2", width=button_width, ))
+        container.add(arcade.gui.UIFlatButton(text=f"line dist", width=button_width, ))
 
         self.add(container)
 
@@ -179,6 +180,11 @@ class MainWindow(arcade.Window):
             v2_button.plotter = plo
             plo.thread.v2_label = v2_button
             container.add(v2_button)
+
+            ld_button = arcade.gui.UIFlatButton(text=f"10", width=button_width, )
+            ld_button.plotter = plo
+            plo.thread.line_distance_label = ld_button
+            container.add(ld_button)
 
             self.add(container)
 

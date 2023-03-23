@@ -43,14 +43,14 @@ class QuitButton(arcade.gui.UIFlatButton):
         arcade.exit()
 
 
-def async_func(model, ip: str, tcp_port: int, serial_port: str, baud: int, timeout: float):
-    p = Plotter(ip, tcp_port, serial_port, baud, timeout)
+def async_func(model, ip: str, tcp_port: int, serial_port: str, baud: int, timeout: float, pen_count: int):
+    p = Plotter(ip, tcp_port, serial_port, baud, timeout, pen_count)
     p.connect()
     p.open_serial()
 
     plotter_map = {"7475A": PlotterType.HP_7475A_A3,
                    "7550A": PlotterType.HP_7550A,
-                   "7595A": PlotterType.HP_7596B,
+                   "7595A": PlotterType.HP_7595A,
                    "7596A": PlotterType.HP_7596B}
 
     for k, v in plotter_map.items():
@@ -67,6 +67,7 @@ def connect_plotters(cfg, discovered) -> list:
     tcp_port = cfg.getint('CONFIG', 'port')
     baud = 9600
     timeout = config.getfloat('CONFIG', 'serial_timeout')
+    PEN_COUNT = config.getint('CONFIG', 'pens')
 
     results = []
 
@@ -78,7 +79,7 @@ def connect_plotters(cfg, discovered) -> list:
         model = plo[1]
 
         thread = threading.Thread(
-            target=lambda: results.append(async_func(model, ip, tcp_port, serial_port, baud, timeout))
+            target=lambda: results.append(async_func(model, ip, tcp_port, serial_port, baud, timeout, PEN_COUNT))
         )
         threads.append(thread)
         thread.start()
@@ -101,7 +102,7 @@ if __name__ == '__main__':
     if offline_mode:
         # add test plotter in offline mode
         for i in range(8):
-            test_plotter = Plotter("localhost", 12345, None, 9600, 0.5)
+            test_plotter = Plotter("localhost", 12345, None, 9600, 0.5, 2)
             test_plotter.type = PlotterType.HP_7475A_A3
             test_plotter.client.set_timeout(0.1)
             test_plotter.connect()
@@ -134,8 +135,29 @@ if __name__ == '__main__':
             plo = plotters[i]
             midique.connect((29 + 3) + i * 4, lambda sp, _p=plo: _p.set_value1(sp))
             midique.connect((30 + 3) + i * 4, lambda sp, _p=plo: _p.set_value2(sp))
+            midique.connect((31 + 3) + i * 4, lambda d, _p=plo: _p.set_line_distance(d))
             midique.connect((32 + 3) + i * 4, lambda sp, _p=plo: _p.set_speed(sp))
-            #midique.connect((32 + 3) + i * 4, lambda delay, _p=plo: _p.set_delay(delay))
+
+        def set_master_v1(v, _plotters):
+            for p in _plotters:
+                p.set_value1(v)
+
+        def set_master_v2(v, _plotters):
+            for p in _plotters:
+                p.set_value2(v)
+
+        def set_master_speed(v, _plotters):
+            for p in _plotters:
+                p.set_speed(v)
+
+        def set_master_line_distance(v, _plotters):
+            for p in _plotters:
+                p.set_line_distance(v)
+
+        midique.connect(64, lambda sp, pl=plotters: set_master_v1(sp, pl))
+        midique.connect(65, lambda sp, pl=plotters: set_master_v2(sp, pl))
+        midique.connect(66, lambda sp, pl=plotters: set_master_line_distance(sp, pl))
+        midique.connect(67, lambda sp, pl=plotters: set_master_speed(sp, pl))
         midique.listen()
 
     if USE_LAUNCHPAD:
@@ -170,7 +192,7 @@ if __name__ == '__main__':
 
         for i in range(len(plotters)):
             p = plotters[i]
-            lp.connect(0 + i, lambda _p=p: _p.thread.add(_p.go_up_down))
+            lp.connect(0 + i, lambda _p=p: _p.thread.add(_p.mouse))
             lp.connect(16 + i, lambda _p=p: _p.thread.add(_p.c73))
             lp.connect(32 + i, lambda _p=p: _p.thread.add(_p.draw_random_line))
             lp.connect(48 + i,
