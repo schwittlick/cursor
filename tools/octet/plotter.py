@@ -152,6 +152,7 @@ class Plotter:
 
         for pa in d:
             pa.pen_select = self.current_pen
+            pa.velocity = self.thread.speed
         data, duration = self.render(d)
         result, feedback = self.send_data(data)
         logger.info(f"{self.type} : {result} : {feedback}")
