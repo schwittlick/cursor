@@ -7,6 +7,8 @@ log = wasabi.Printer()
 
 
 class PlotterType(Enum):
+    def __str__(self):
+        return self.name
     ROLAND_DPX3300 = 0
     DIY_PLOTTER = 1
     AXIDRAW = 2
@@ -105,7 +107,8 @@ class MinmaxMapping:
         PlotterType.HP_7475A_A3: BB(0, 0, 16158, 11040),
         PlotterType.ROLAND_DXY1200: BB(0, 0, 16158, 11040),  # todo: missing real bounds
         PlotterType.ROLAND_DXY980: BB(0, 0, 16158, 11040),
-        PlotterType.HP_7595A: BB(-23160, -17602, 23160 + 1160, 17602),
+        #PlotterType.HP_7595A_A0: BB(-23160, -17602, 23160 + 1160, 17602),
+        PlotterType.HP_7595A: BB(-16090, -11684, 16090, 11684),
         # HP_7595A: minimum 35mm padding
         PlotterType.ROLAND_PNC1000: BB(0, 0, 18800, 40000),  # actually unlimited y
         PlotterType.ROLAND_PNC1000_50x100: BB(260, 560, 18700, 39000),  # for 50x100cm paper centered

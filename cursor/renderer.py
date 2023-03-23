@@ -367,6 +367,14 @@ class HPGLRenderer:
         self.__paths += paths
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
 
+    def estimated_duration(self, speed) -> int:
+        s = 0
+        for p in self.__paths:
+            mm = p.distance / 400 # for hp plotters its 40
+            seconds = mm / speed * 10
+            s += seconds
+        return s
+
     def generate_string(self):
         _hpgl_string = ""
 
