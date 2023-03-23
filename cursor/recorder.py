@@ -65,12 +65,13 @@ class Recorder:
         _y = y / self._resolution[1]
         try:
             _c = pyautogui.pixel(x, y)
-        except WindowsError as we:
-            _c = (0, 0, 0)
-            log.fail(f"Could not get color at cursor position: {we}. Saving (0, 0, 0)")
+
         except NotImplementedError as e:
             log.fail(f"Something else didnt work {e}")
             _c = (0, 0, 0)
+        except:
+            _c = (0, 0, 0)
+            log.fail(f"Could not get color at cursor position {_x}x{_y}. Saving (0, 0, 0)")
         _t = int(DateHandler.utc_timestamp())
         _p = Position(_x, _y, _t, _c)
         self._current_line.add_position(_p)
