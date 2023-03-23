@@ -33,15 +33,6 @@ USE_MIDIQUE = config.getboolean('CONFIG', 'midique')
 USE_LAUNCHPAD = config.getboolean('CONFIG', 'launchpad')
 
 
-class QuitButton(arcade.gui.UIFlatButton):
-    def on_click(self, event: arcade.gui.UIOnClickEvent):
-        for plo in plotters:
-            if plo.serial_port:
-                plo.close_serial()
-                plo.client.close()
-
-        arcade.exit()
-
 
 def async_func(model, ip: str, tcp_port: int, serial_port: str, baud: int, timeout: float, pen_count: int):
     p = Plotter(ip, tcp_port, serial_port, baud, timeout, pen_count)
@@ -97,7 +88,6 @@ def connect_plotters(cfg, discovered) -> list:
 
 if __name__ == '__main__':
     window = MainWindow()
-    window.add(QuitButton(text="Quit", width=200))
 
     if offline_mode:
         # add test plotter in offline mode
@@ -126,7 +116,7 @@ if __name__ == '__main__':
             plo.thread.speed = v
 
 
-    window.add_slider(on_change)
+    #window.add_slider(on_change)
     window.finalize()
 
     if USE_MIDIQUE:

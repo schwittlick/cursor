@@ -7,7 +7,6 @@ import wasabi
 
 from cursor.device import PlotterType
 from tools.octet.data import all_paths
-from tools.octet.plotter import Plotter
 
 logger = wasabi.Printer(pretty=True, no_print=False)
 
@@ -30,7 +29,7 @@ class MainWindow(arcade.Window):
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
 
-        arcade.set_background_color(arcade.color.DARK_BLUE_GRAY)
+        arcade.set_background_color(arcade.color.BLACK)
 
         self.v_box = arcade.gui.UIBoxLayout(vertical=True)
 
@@ -39,11 +38,13 @@ class MainWindow(arcade.Window):
     # Define the key press callback function
     def on_key_press(self, key, modifiers):
         if key == arcade.key.F:
-            self.set_fullscreen(not self.fullscreen)
-            width, height = self.get_size()
-            self.set_viewport(0, width, 0, height)
+            self.toggle_fullscreen()
             return
         elif key == arcade.key.Q:
+            for plo in self.plotters:
+                if plo.serial_port:
+                    plo.close_serial()
+                    plo.client.close()
             arcade.exit()
             return
         elif key == arcade.key.S:
@@ -89,7 +90,7 @@ class MainWindow(arcade.Window):
         container.add(arcade.gui.UIFlatButton(text=f"pen", width=button_width, ))
         container.add(arcade.gui.UIFlatButton(text=f"v1", width=button_width, ))
         container.add(arcade.gui.UIFlatButton(text=f"v2", width=button_width, ))
-        container.add(arcade.gui.UIFlatButton(text=f"line dist", width=button_width, ))
+        container.add(arcade.gui.UIFlatButton(text=f"pad", width=button_width, ))
 
         self.add(container)
 
@@ -181,10 +182,10 @@ class MainWindow(arcade.Window):
             plo.thread.v2_label = v2_button
             container.add(v2_button)
 
-            ld_button = arcade.gui.UIFlatButton(text=f"10", width=button_width, )
-            ld_button.plotter = plo
-            plo.thread.line_distance_label = ld_button
-            container.add(ld_button)
+            padding_button = arcade.gui.UIFlatButton(text=f"10", width=button_width, )
+            padding_button.plotter = plo
+            plo.thread.line_distance_label = padding_button
+            container.add(padding_button)
 
             self.add(container)
 
@@ -193,6 +194,11 @@ class MainWindow(arcade.Window):
 
     def add(self, button):
         self.v_box.add(button)
+
+    def toggle_fullscreen(self):
+        self.set_fullscreen(not self.fullscreen)
+        width, height = self.get_size()
+        self.set_viewport(0, width, 0, height)
 
     def add_slider(self, f):
         slider = UISlider(
@@ -219,6 +225,8 @@ class MainWindow(arcade.Window):
                 anchor_y="center_y",
                 child=self.v_box)
         )
+
+        self.toggle_fullscreen()
 
     def on_draw(self):
         self.clear()
