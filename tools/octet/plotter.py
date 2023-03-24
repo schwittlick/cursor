@@ -9,6 +9,7 @@ from cursor import misc
 from cursor.bb import BoundingBox
 from cursor.collection import Collection
 from cursor.device import PlotterType, MinmaxMapping, MaxSpeed
+from cursor.filter import EntropyMinFilter, EntropyMaxFilter
 from cursor.path import Path
 from cursor.renderer import HPGLRenderer
 from tools.octet.client import Client
@@ -50,6 +51,8 @@ class Plotter:
 
         self.mouse_thread = None
 
+        self.last_col = None
+
     def __repr__(self):
         return f"{self.type} at {self.serial_port} online={self.is_connected}"
 
@@ -83,7 +86,10 @@ class Plotter:
         return int(misc.map(self.__value1, 0, 1000, min, max, True))
 
     def get_value2(self, min, max) -> int:
-        return int(misc.map(self.__value2, 0, 1000, min, max, True))
+        return int(self.get_value2(min, max))
+
+    def get_value2f(self, min, max) -> float:
+        return misc.map(self.__value2, 0, 1000, min, max, True)
 
     def get_delay(self):
         return self.__delay
@@ -183,9 +189,27 @@ class Plotter:
             logger.info(f"PU; {result} -> {feedback}")
 
     def c73(self, col: Collection, speed):
+        v2 = self.get_value2f(1.5, 5.5)
+        fcol = col
+        if self.last_col:
+            last_col, last_v2 = self.last_col
+            logger.info(f"v2: {v2} lastv2:{last_v2}")
+            if last_v2 != v2:
+                logger.warn(f"v2 c73: {v2}")
+
+                # highpass filter
+                fmin = EntropyMinFilter(v2 - 0.5, v2 - 0.5)
+                fcol = col.filtered(fmin)
+
+                # lowpass filter
+                fmax = EntropyMaxFilter(v2 + 0.5, v2 + 0.5)
+                fcol = fcol.filtered(fmax)
+
+        self.last_col = fcol, v2
+
         c = Collection()
 
-        line = col.random()
+        line = fcol.random()
         line.velocity = self.thread.speed
         c.add(line)
 
