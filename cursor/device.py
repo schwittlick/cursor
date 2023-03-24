@@ -31,6 +31,7 @@ class PlotterType(Enum):
     HP_7595A_A2 = 19
     ROLAND_PNC1000_50x100 = 20
     HP_7595A_A0 = 21
+    HP_7596A = 22
 
 
 
@@ -67,6 +68,7 @@ class ExportFormatMappings:
         PlotterType.HP_7595A_A2: ExportFormat.HPGL,
         PlotterType.ROLAND_PNC1000_50x100: ExportFormat.HPGL,
         PlotterType.HP_7595A_A0: ExportFormat.HPGL,
+        PlotterType.HP_7596A: ExportFormat.HPGL,
 
     }
 
@@ -117,6 +119,7 @@ class MinmaxMapping:
         PlotterType.TEKTRONIX_4662: BB(0, 0, 4095, 2731),
         # tekronix: 10x15 inches (25.4 x 38.1 cm)
         PlotterType.HP_7596B: BB(-15500, -11100, 15500 + 22 * 40, 11100),
+        PlotterType.HP_7596A: BB(-16100, -11600, 16100, 11600),
 
         PlotterType.HP_7596B_A3: BB(-6800, -5250, 6800, 5250),
         PlotterType.HP_7596B_25_25: BB(-4310, -3444, 4310 + 800, 3444),
@@ -151,6 +154,7 @@ class PlotterName:
         PlotterType.HP_7595A_A2: "hp7595a_draftmaster_sx_a2",
         PlotterType.ROLAND_PNC1000_50x100: "roland_pnc1000",
         PlotterType.HP_7595A_A0: "hp7595a_draftmaster_sx_a0",
+        PlotterType.HP_7596A: "hp7596a_draftmaster_II_a1",
     }
 
 
@@ -178,6 +182,7 @@ class XYFactors:
         PlotterType.HP_7595A_A2: (40, 39.5),
         PlotterType.ROLAND_PNC1000_50x100: (40.04, 40.04),
         PlotterType.HP_7595A_A0: (39.9, 40.04),
+        PlotterType.HP_7596A: (40.0, 40.0),
     }
 
 
@@ -205,6 +210,7 @@ class MaxSpeed:
         PlotterType.HP_7595A_A2: 110,
         PlotterType.ROLAND_PNC1000_50x100: 40,
         PlotterType.HP_7595A_A0: 110,
+        PlotterType.HP_7596A: 110,
     }
 
 class PaperSizeName:
