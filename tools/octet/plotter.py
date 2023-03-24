@@ -86,7 +86,7 @@ class Plotter:
         return int(misc.map(self.__value1, 0, 1000, min, max, True))
 
     def get_value2(self, min, max) -> int:
-        return int(self.get_value2(min, max))
+        return int(self.get_value2f(min, max))
 
     def get_value2f(self, min, max) -> float:
         return misc.map(self.__value2, 0, 1000, min, max, True)
@@ -211,21 +211,30 @@ class Plotter:
 
         line = fcol.random()
         line.velocity = self.thread.speed
-        c.add(line)
 
         bounds = MinmaxMapping.maps[self.type]
         offset_x = random.randint(int(bounds.x), int(bounds.x2 - bounds.w * 0.4))
         offset_y = random.randint(int(bounds.y), int(bounds.y2 - bounds.h * 0.4))
-        d = self.scale(c, 0.4, (offset_x, offset_y))
+
+        startx = random.randint(int(bounds.x), int(bounds.x2))
+        starty = random.randint(int(bounds.y), int(bounds.y2))
+        endx = random.randint(int(bounds.x), int(bounds.x2))
+        endy = random.randint(int(bounds.y), int(bounds.y2))
+
+        line = line.morph((startx, starty), (endx, endy))
+        #c.add(line)
+
+
+        #d = self.scale(c, 0.4, (offset_x, offset_y))
 
         out = Collection()
-        transformed_line = d[0]
+        #transformed_line = d[0]
         # min = self.get_value1(1, 100)
         # max = self.get_value2(1, 100)
         # times = random.randint(min, max)
         times = self.get_value1(1, 100)
         for i in range(times):
-            out.add(transformed_line.copy().offset(i * int(self.line_distance)))
+            out.add(line.copy().offset(i * int(self.line_distance)))
 
         last_line = out[len(out) - 1]
         self.xy = last_line.end_pos().as_tuple()
@@ -249,13 +258,13 @@ class Plotter:
         # max = self.get_value2(1, 100)
         # random_w = random.randint(min, max)
         # random_h = random.randint(min, max)
-        w = self.get_value1(1, 100)
+        w = self.get_value1(10, 100)
         h = w  # self.get_value2(1, 100)
         step_size = random.randint(15, 35)  # 20 is good
+        v2 = self.get_value2(0, 400)
 
         for y in range(h):
             for x in range(w):
-                v2 = self.get_value2(0, 400)
 
                 pos = (start_x + x * step_size, start_y + y * step_size)
                 pos = (pos[0] + random.randint(-v2, v2), pos[1] + random.randint(-v2, v2))
@@ -335,25 +344,26 @@ class Plotter:
         return points
 
     def chatgpt_simulated_mouse_movement(self, col, speed):
+        point_count = self.get_value2(1, 100)
         out = Collection()
-        for i in range(1):
-            bounds = MinmaxMapping.maps[self.type]
-            start_x = random.randint(int(bounds.x), int(bounds.x2))
-            start_y = random.randint(int(bounds.y), int(bounds.y2))
-            end_x = random.randint(int(bounds.x), int(bounds.x2))
-            end_y = random.randint(int(bounds.y), int(bounds.y2))
-            points = self.__generate_line(start_x, start_y, end_x, end_y, 50, bounds.w, bounds.h)
-            path = Path.from_tuple_list(points)
-            path.pen_select = self.current_pen
+        bounds = MinmaxMapping.maps[self.type]
+        start_x = random.randint(int(bounds.x), int(bounds.x2))
+        start_y = random.randint(int(bounds.y), int(bounds.y2))
+        end_x = random.randint(int(bounds.x), int(bounds.x2))
+        end_y = random.randint(int(bounds.y), int(bounds.y2))
+        points = self.__generate_line(start_x, start_y, end_x, end_y, point_count, bounds.w, bounds.h)
+        path = Path.from_tuple_list(points)
+        path.pen_select = self.current_pen
 
-            # min = self.get_value1(1, 100)
-            # max = self.get_value2(1, 100)
-            # times = random.randint(min, max)
-            times = self.get_value1(1, 100)
-            for i in range(times):
-                out.add(path.copy().offset(i * int(self.line_distance)))
+        # min = self.get_value1(1, 100)
+        # max = self.get_value2(1, 100)
+        # times = random.randint(min, max)
 
-            out.add(path)
+        times = self.get_value1(1, 100)
+        for i in range(times):
+            out.add(path.copy().offset(i * int(self.line_distance)))
+
+        out.add(path)
 
         self.send_speed(self.thread.speed)
         for pa in out:
@@ -422,9 +432,10 @@ class Plotter:
 
     def reset(self, col: Collection, speed):
         result, feedback = self.send_data(f"SP0;PA0,0;")
-        self.thread.pen_label.text = str(self.current_pen)
         # print(f"done pen updown {result} + {feedback}")
         self.current_pen = 0
+        self.thread.pen_label.text = str(self.current_pen)
+
         self.xy = (0, 0)
 
         return feedback

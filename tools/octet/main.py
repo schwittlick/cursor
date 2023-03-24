@@ -42,7 +42,7 @@ def async_func(model, ip: str, tcp_port: int, serial_port: str, baud: int, timeo
     plotter_map = {"7475A": PlotterType.HP_7475A_A3,
                    "7550A": PlotterType.HP_7550A,
                    "7595A": PlotterType.HP_7595A,
-                   "7596A": PlotterType.HP_7596B}
+                   "7596A": PlotterType.HP_7596A}
 
     for k, v in plotter_map.items():
         if k == model:
