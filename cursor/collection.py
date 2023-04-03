@@ -145,7 +145,7 @@ class Collection:
         [p.clean() for p in self.__paths]
 
         len_before = len(self)
-        self.__paths = [path for path in self.__paths if len(path) > 2]
+        self.__paths = [path for path in self.__paths if len(path) > 1]
 
         log.good(
             f"PathCollection::clean: reduced path count from {len_before} to {len(self)}"
