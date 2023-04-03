@@ -119,7 +119,7 @@ class Server:
                 client_thread.start()
             except TimeoutError:
                 time.sleep(1)
-            except KeyboardInterrupt as e:
+            except KeyboardInterrupt:
                 logger.good("Safe exit")
                 return
             except:
@@ -176,7 +176,7 @@ class Server:
                                 continue
                             serial_connection.buffer(data)
                             self.send_feedback(socket_connection, True,
-                                               f"SUCCESSFULLY SENT DATA")
+                                               "SUCCESSFULLY SENT DATA")
                         elif command == "OPEN":
                             serial_connection.baudrate = baudrate
                             serial_connection.timeout = timeout
@@ -184,14 +184,16 @@ class Server:
                             is_open = serial_connection.is_open()
                             if is_open:
                                 self.send_feedback(socket_connection, True,
-                                                   f"OPENING SERIAL {serial_connection.port} SUCCEEDED")
+                                                   f"OPENING SERIAL "
+                                                   f"{serial_connection.port} SUCCEEDED")
                             else:
                                 self.send_feedback(socket_connection, False,
                                                    f"OPENING SERIAL  {serial_connection.port} FAILED")
                         elif command == "IS_OPEN":
                             is_open = serial_connection.is_open()
                             if is_open:
-                                self.send_feedback(socket_connection, True, f"SERIAL {serial_connection.port} IS OPEN")
+                                self.send_feedback(socket_connection, True,
+                                                   f"SERIAL {serial_connection.port} IS OPEN")
                             else:
                                 self.send_feedback(socket_connection, False,
                                                    f"SERIAL {serial_connection.port} IS NOT OPEN")
@@ -223,7 +225,7 @@ class Server:
                         logger.fail(feedback)
                         self.send_feedback(socket_connection, False, feedback)
                 except ConnectionResetError:
-                    logger.fail(f"Connection closed by")
+                    logger.fail("Connection closed")
 
                     break
         logger.good(f"Disconnected {socket_connection}")

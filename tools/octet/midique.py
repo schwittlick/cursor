@@ -17,12 +17,12 @@ class MidiThread(threading.Thread):
         print(ports)
         for i in range(len(ports)):
             if "Midique" in ports[i]:
-                logger.info(f"Detected Midique")
+                logger.info("Detected Midique")
                 self.midiin, self.port_name = open_midiinput(i)
                 self.running = True
                 return
 
-        logger.fail(f"Failed to detect Midique")
+        logger.fail("Failed to detect Midique")
         self.running = False
 
     def run(self):
@@ -33,7 +33,7 @@ class MidiThread(threading.Thread):
             time.sleep(0.01)
 
             if not self.running:
-                logger.info(f"Stopping Midique Launchpad thread")
+                logger.info("Stopping Midique Launchpad thread")
                 return
 
             msg = self.midiin.get_message()
@@ -45,7 +45,7 @@ class MidiThread(threading.Thread):
                 if prev_msg is not None:
                     # TODO: why check delay?
                     if deltatime < 0.01:
-                        #print(message)
+                        # print(message)
                         buttonid = message[1]
                         b1 = message[2].to_bytes(1, byteorder='big')
                         b2 = prev_msg[2].to_bytes(2, byteorder='big')

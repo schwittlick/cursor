@@ -64,7 +64,7 @@ class PlotterThread(threading.Thread):
             f"Added {func.__name__} to {self.plotter.type} at {self.plotter.serial_port} with delay {current_delay}")
 
         if self.buffer.qsize() >= self.max_buffer_size:
-            logger.warn(f"Discarding ...")
+            logger.warn("Discarding ...")
             return
         self.buffer.put(func)
         self.delays.put(current_delay)
@@ -107,7 +107,7 @@ class PlotterThread(threading.Thread):
                             self.task_completed_cb()
 
                     except socket.timeout as e:
-                        logger.fail(f"{self.plotter.type} at {self.plotter} timed out")
+                        logger.fail(f"{self.plotter.type} at {self.plotter} timed out: {e}")
                     except Exception as e:
                         logger.fail(f"Scheduled call failed: {e}")
                         logger.fail(f"{traceback.format_exc()}")

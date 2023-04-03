@@ -58,7 +58,7 @@ class MainWindow(arcade.Window):
             return
         for plotter in self.plotters:
             if not plotter.thread:
-                logger.warn(f"Ignored keypres bc plotter thread is not ready")
+                logger.warn("Ignored keypres bc plotter thread is not ready")
                 continue
             if key == arcade.key.P:
                 plotter.thread.add(plotter.go_up_down)
@@ -66,7 +66,7 @@ class MainWindow(arcade.Window):
                 # for i in range(4):
                 plotter.thread.add(plotter.draw_random_line)
             elif key == arcade.key.O:
-                logger.info(f"only sending pen up down to hp7475")
+                logger.info("only sending pen up down to hp7475")
                 if plotter.type == PlotterType.HP_7475A_A3:
                     plotter.thread.add(plotter.pen_down_up)
             elif key == arcade.key.R:
@@ -84,13 +84,13 @@ class MainWindow(arcade.Window):
         container = arcade.gui.UIBoxLayout(vertical=False)
 
         button_width = 100
-        container.add(arcade.gui.UIFlatButton(text=f"plotter️", width=150, ))
-        container.add(arcade.gui.UIFlatButton(text=f"queue", width=button_width, ))
-        container.add(arcade.gui.UIFlatButton(text=f"speed", width=button_width, ))
-        container.add(arcade.gui.UIFlatButton(text=f"pen", width=button_width, ))
-        container.add(arcade.gui.UIFlatButton(text=f"v1", width=button_width, ))
-        container.add(arcade.gui.UIFlatButton(text=f"v2", width=button_width, ))
-        container.add(arcade.gui.UIFlatButton(text=f"pad", width=button_width, ))
+        container.add(arcade.gui.UIFlatButton(text="plotter️", width=150, ))
+        container.add(arcade.gui.UIFlatButton(text="queue", width=button_width, ))
+        container.add(arcade.gui.UIFlatButton(text="speed", width=button_width, ))
+        container.add(arcade.gui.UIFlatButton(text="pen", width=button_width, ))
+        container.add(arcade.gui.UIFlatButton(text="v1", width=button_width, ))
+        container.add(arcade.gui.UIFlatButton(text="v2", width=button_width, ))
+        container.add(arcade.gui.UIFlatButton(text="pad", width=button_width, ))
 
         self.add(container)
 
@@ -128,61 +128,61 @@ class MainWindow(arcade.Window):
                 _plo.thread.add(_plo.reset)
                 _plo.thread.resume()
 
-            #tb2 = arcade.gui.UIFlatButton(text=f"⬆⬇️️ page", width=button_width, )
-            #tb2.plotter = plo
-            #tb2.on_click = second_clicked
-            #container.add(tb2)
+            # tb2 = arcade.gui.UIFlatButton(text=f"⬆⬇️️ page", width=button_width, )
+            # tb2.plotter = plo
+            # tb2.on_click = second_clicked
+            # container.add(tb2)
 
-            #tb3 = arcade.gui.UIFlatButton(text=f"c73", width=button_width, )
-            #tb3.plotter = plo
-            #tb3.on_click = third_clicked
-            #container.add(tb3)
+            # tb3 = arcade.gui.UIFlatButton(text=f"c73", width=button_width, )
+            # tb3.plotter = plo
+            # tb3.on_click = third_clicked
+            # container.add(tb3)
 
-            #pud = arcade.gui.UIFlatButton(text=f"🃏", width=button_width, )
-            #pud.plotter = plo
-            #pud.on_click = penupdown_clicked
-            #container.add(pud)
+            # pud = arcade.gui.UIFlatButton(text=f"🃏", width=button_width, )
+            # pud.plotter = plo
+            # pud.on_click = penupdown_clicked
+            # container.add(pud)
 
-            #pud2 = arcade.gui.UIFlatButton(text=f"⬆⬇️️ pen", width=button_width, )
-            #pud2.plotter = plo
-            #pud2.on_click = penupdown_clicked2
-            #container.add(pud2)
+            # pud2 = arcade.gui.UIFlatButton(text=f"⬆⬇️️ pen", width=button_width, )
+            # pud2.plotter = plo
+            # pud2.on_click = penupdown_clicked2
+            # container.add(pud2)
 
-            tb4 = arcade.gui.UIFlatButton(text=f"↔️", width=button_width, )
+            tb4 = arcade.gui.UIFlatButton(text="↔️", width=button_width, )
             tb4.plotter = plo
             tb4.on_click = clear_queue
             plo.thread.thread_count = tb4
             container.add(tb4)
 
-            tb5 = arcade.gui.UIFlatButton(text=f"40", width=button_width, )
+            tb5 = arcade.gui.UIFlatButton(text="40", width=button_width, )
             tb5.plotter = plo
             # tb5.on_click = clear_queue
             plo.thread.speed_label = tb5
             container.add(tb5)
 
-            tb6 = arcade.gui.UIFlatButton(text=f"0", width=button_width, )
+            tb6 = arcade.gui.UIFlatButton(text="0", width=button_width, )
             tb6.plotter = plo
             # tb5.on_click = clear_queue
             plo.thread.pen_label = tb6
             container.add(tb6)
 
-            tb7 = arcade.gui.UIFlatButton(text=f"0", width=button_width, )
+            tb7 = arcade.gui.UIFlatButton(text="0", width=button_width, )
             tb7.plotter = plo
             # tb5.on_click = clear_queue
             plo.thread.remaining_seconds_label = tb7
-            #container.add(tb7)
+            # container.add(tb7)
 
-            v1_button = arcade.gui.UIFlatButton(text=f"0", width=button_width, )
+            v1_button = arcade.gui.UIFlatButton(text="0", width=button_width, )
             v1_button.plotter = plo
             plo.thread.v1_label = v1_button
             container.add(v1_button)
 
-            v2_button = arcade.gui.UIFlatButton(text=f"1000", width=button_width, )
+            v2_button = arcade.gui.UIFlatButton(text="1000", width=button_width, )
             v2_button.plotter = plo
             plo.thread.v2_label = v2_button
             container.add(v2_button)
 
-            padding_button = arcade.gui.UIFlatButton(text=f"10", width=button_width, )
+            padding_button = arcade.gui.UIFlatButton(text="10", width=button_width, )
             padding_button.plotter = plo
             plo.thread.line_distance_label = padding_button
             container.add(padding_button)

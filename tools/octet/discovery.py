@@ -18,7 +18,6 @@ def async_discover(serial_port):
             logger.info(f"Discovery {serial_port} -> {model}")
 
             return (serial_port, model)
-            # data.append((serial_port, model))
         ser.close()
         return None
     except serial.SerialException:

@@ -1,7 +1,6 @@
 import configparser
 import threading
 import wasabi
-import arcade
 import arcade.gui
 
 from cursor.device import PlotterType, MaxSpeed
@@ -31,7 +30,6 @@ target = config.get('CONFIG', 'target')
 offline_mode = config.getboolean('CONFIG', 'offline_mode')
 USE_MIDIQUE = config.getboolean('CONFIG', 'midique')
 USE_LAUNCHPAD = config.getboolean('CONFIG', 'launchpad')
-
 
 
 def async_func(model, ip: str, tcp_port: int, serial_port: str, baud: int, timeout: float, pen_count: int):
@@ -116,7 +114,7 @@ if __name__ == '__main__':
             plo.thread.speed = v
 
 
-    #window.add_slider(on_change)
+    # window.add_slider(on_change)
     window.finalize()
 
     if USE_MIDIQUE:
@@ -128,21 +126,26 @@ if __name__ == '__main__':
             midique.connect((31 + 3) + i * 4, lambda d, _p=plo: _p.set_line_distance(d))
             midique.connect((32 + 3) + i * 4, lambda sp, _p=plo: _p.set_speed(sp))
 
+
         def set_master_v1(v, _plotters):
             for p in _plotters:
                 p.set_value1(v)
+
 
         def set_master_v2(v, _plotters):
             for p in _plotters:
                 p.set_value2(v)
 
+
         def set_master_speed(v, _plotters):
             for p in _plotters:
                 p.set_speed(v)
 
+
         def set_master_line_distance(v, _plotters):
             for p in _plotters:
                 p.set_line_distance(v)
+
 
         midique.connect(64, lambda sp, pl=plotters: set_master_v1(sp, pl))
         midique.connect(65, lambda sp, pl=plotters: set_master_v2(sp, pl))

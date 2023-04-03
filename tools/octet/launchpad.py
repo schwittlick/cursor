@@ -1,4 +1,3 @@
-import sys
 import threading
 import time
 
@@ -17,12 +16,12 @@ class LaunchpadThread(threading.Thread):
         ports = rtmidi.MidiIn().get_ports()
         for i in range(len(ports)):
             if "Launchpad" in ports[i]:
-                logger.info(f"Detected Novation Launchpad")
+                logger.info("Detected Novation Launchpad")
                 self.midiin, self.port_name = open_midiinput(i)
                 self.running = True
                 return
 
-        logger.fail(f"Failed to detect Novation Launchpad")
+        logger.fail("Failed to detect Novation Launchpad")
         self.running = False
 
     def run(self):
@@ -30,7 +29,7 @@ class LaunchpadThread(threading.Thread):
             time.sleep(0.01)
 
             if not self.running:
-                logger.info(f"Stopping Novation Launchpad thread")
+                logger.info("Stopping Novation Launchpad thread")
                 return
 
             msg = self.midiin.get_message()
