@@ -18,35 +18,6 @@
 from argparse import ArgumentParser
 from serial import Serial
 from time import sleep
-import socket
-
-
-class TCPConnection:
-    def __init__(self, sock=None):
-        if sock is None:
-            self.sock = socket.socket(
-                socket.AF_INET, socket.SOCK_STREAM)
-        else:
-            self.sock = sock
-
-    def connect(self, host, port):
-        try:
-            self.sock.connect((host, port))
-            print('Successful Connection')
-        except:
-            print('Connection Failed')
-
-    def bind(self):
-        self.sock.bind(('localhost', 12349))
-        self.sock.listen(1)
-        conn, addr = self.sock.accept()
-        print('Connected by', addr)
-        return conn
-
-    def readlines(self):
-        data = self.sock.recv(1024).decode()
-        print(data)
-        return data
 
 
 def read_code(path):
@@ -77,25 +48,6 @@ def show_progress(pos, total, length=100):
 
 
 def main():
-    listen = TCPConnection()
-    c = listen.bind()
-    # listen.connect('localhost', 12349)
-    # listen.readlines()
-
-    while True:
-        print("Waiting for data")
-        data = c.recv(1024)
-        if not data:
-            break
-
-    data = listen.readlines()
-    if data == 'P':
-        print('Pausing')
-        while data == 'P':
-            sleep(0.1)
-            data = listen.readlines()
-        print('Resuming')
-
     parser = ArgumentParser()
     parser.add_argument('port')
     parser.add_argument('file')
