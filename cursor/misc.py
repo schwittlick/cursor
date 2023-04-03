@@ -94,9 +94,7 @@ def generate_perlin_noise_2d(shape, res):
 
 
 def map(value, inputMin, inputMax, outputMin, outputMax, clamp):
-    outVal = (value - inputMin) / (inputMax - inputMin) * (
-            outputMax - outputMin
-    ) + outputMin
+    outVal = (value - inputMin) / (inputMax - inputMin) * (outputMax - outputMin) + outputMin
 
     if clamp:
         if outputMax < outputMin:

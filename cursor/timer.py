@@ -3,6 +3,7 @@ import wasabi
 
 log = wasabi.Printer()
 
+
 class Timer:
     def __init__(self):
         self.start()

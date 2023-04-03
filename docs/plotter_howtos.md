@@ -13,7 +13,9 @@
     A0 DIY
 
 
+##### CalComp 1023
 
+    - PCI and CPGL mode?
 
 ##### HP 7595A & 7596A
     - serial cable with usb adapter
