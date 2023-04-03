@@ -164,7 +164,7 @@ class Exporter:
                 sizename = PaperSizeName.names[self.cfg.dimension]
                 machinename = PlotterName.names[self.cfg.type]
                 h = hashlib.sha256(ms.encode("utf-8")).hexdigest()
-                hash = h[:4] + h[len(h) - 4 :]
+                hash = h[:4] + h[len(h) - 4:]
                 fname = (
                     f"{self.name}_{self.suffix}_{sizename}_{machinename}_{layer}_"
                     f"{hash}"
@@ -180,7 +180,7 @@ class Exporter:
             sizename = PaperSizeName.names[self.cfg.dimension]
             machinename = PlotterName.names[self.cfg.type]
             h = hashlib.sha256(ms.encode("utf-8")).hexdigest()
-            hash = h[:4] + h[len(h) - 4 :]
+            hash = h[:4] + h[len(h) - 4:]
             fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}_" f"{hash}.py"
 
             pathlib.Path(source_folder).mkdir(parents=True, exist_ok=True)
@@ -203,7 +203,7 @@ class Exporter:
         sizename = PaperSizeName.names[self.cfg.dimension]
         machinename = PlotterName.names[self.cfg.type]
         h = hashlib.sha256(ms.encode("utf-8")).hexdigest()
-        hash = h[:4] + h[len(h) - 4 :]
+        hash = h[:4] + h[len(h) - 4:]
         fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}_{hash}"
         format = ExportFormatMappings.maps[self.cfg.type]
         if self.linetype_mapping and format is ExportFormat.HPGL:
@@ -285,19 +285,19 @@ def save_wrapper_jpeg(pc, projname, fname, scale=4.0, thickness=3):
 
 class ExportWrapper:
     def ex(
-        self,
-        paths: Collection,
-        ptype: PlotterType,
-        psize: PaperSize,
-        margin: int,
-        name: str = "output_name",
-        suffix: str = "",
-        cutoff: int = None,
-        gcode_speed: int = None,
-        hpgl_pen_layer_mapping=None,
-        hpgl_linetype_mapping=None,
-        export_reversed=None,
-        keep_aspect_ratio=False,
+            self,
+            paths: Collection,
+            ptype: PlotterType,
+            psize: PaperSize,
+            margin: int,
+            name: str = "output_name",
+            suffix: str = "",
+            cutoff: int = None,
+            gcode_speed: int = None,
+            hpgl_pen_layer_mapping=None,
+            hpgl_linetype_mapping=None,
+            export_reversed=None,
+            keep_aspect_ratio=False,
     ):
         config = Config()
         config.type = ptype

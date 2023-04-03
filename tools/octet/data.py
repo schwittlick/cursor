@@ -1,25 +1,6 @@
 from cursor.data import DataDirHandler
-from cursor.filter import DistanceFilter, MaxPointCountFilter, MinPointCountFilter
 from cursor.loader import Loader
-from cursor.collection import Collection
-from cursor.path import Path
-
-import random
 
 recordings = DataDirHandler().recordings()
 _loader = Loader(directory=recordings, limit_files=5)
 all_paths = _loader.all_paths()
-
-#df = DistanceFilter(5)
-#all_paths.filter(df)
-
-#pcf = MinPointCountFilter(10)
-#all_paths.filter(pcf)
-
-#pcf2 = MaxPointCountFilter(30)
-#all_paths.filter(pcf2)
-#all_paths = Collection()
-#p = Path()
-#for i in range(100):
-#    p.add(random.randint(-10, 10), random.randint(-10, 10))
-#all_paths.add(p)

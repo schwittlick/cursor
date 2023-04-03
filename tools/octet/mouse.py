@@ -31,9 +31,8 @@ class MouseThread(threading.Thread):
         self.h = desktop.height
 
     """
-    returning normalized screen position 
+    returning normalized screen position
     """
-
     def run(self):
         try:
             while True:

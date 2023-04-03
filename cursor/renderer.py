@@ -193,9 +193,9 @@ class RealtimeRenderer(arcade.Window):
         log.good(f"saving {fn.as_posix()}")
         try:
             arcade.get_image(0, 0, self.width, self.height).save(fn.as_posix(), "PNG")
-        except ValueError as ve:
+        except ValueError:
             pass
-        except OSError as oe:
+        except OSError:
             pass
         finally:
             pass
@@ -370,7 +370,7 @@ class HPGLRenderer:
     def estimated_duration(self, speed) -> int:
         s = 0
         for p in self.__paths:
-            mm = p.distance / 400 # for hp plotters its 40
+            mm = p.distance / 400  # for hp plotters its 40
             seconds = mm / speed * 10
             s += seconds
         return s
