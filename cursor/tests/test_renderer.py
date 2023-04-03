@@ -117,11 +117,9 @@ def test_hpglrenderer():
 
     r = HPGLRenderer(DataDirHandler().test_hpgls())
     r.render(pc)
-    hpgl_data = r.save("test1")
+    hpgl_data = r.generate_string()
 
     expected_result = (
-        "SP1;\n"
-        "PA0,0\n"
         "PU;\n"
         "SP1;\n"
         "LT;\n"
@@ -130,15 +128,11 @@ def test_hpglrenderer():
         "PA-10,-10;\n"
         "PA10,-10;\n"
         "PU;\n"
-        "SP1;\n"
-        "LT;\n"
         "PA10,-10;\n"
         "PD;\n"
         "PA10,-10;\n"
         "PA10,10;\n"
         "PU;\n"
-        "PA0,0;\n"
-        "SP0;\n"
     )
     assert hpgl_data == expected_result
 
