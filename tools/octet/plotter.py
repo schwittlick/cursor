@@ -169,7 +169,7 @@ class Plotter:
         new_pos_x = misc.map(xy[0], 0, 1, bounds.x, bounds.x2, True)
         new_pos_y = misc.map(xy[1], 0, 1, bounds.y, bounds.y2, True)
         result, feedback = self.send_data(
-            f"SP{self.current_pen};VS{self.thread.speed};PD;PA{new_pos_x},{new_pos_y};")
+            f"SP{self.current_pen};VS{self.thread.speed};PU;PA{new_pos_x},{new_pos_y};")
         # print(f"done pen updown {result} + {feedback}")
 
         return feedback
