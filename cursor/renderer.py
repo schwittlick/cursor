@@ -414,7 +414,7 @@ class HPGLRenderer:
             if p.is_polygon:
                 _hpgl_string += "PM0;\n"
 
-            _hpgl_string += "PD;\n"
+            _hpgl_string += "PU;\n"
 
             for line in p.vertices:
                 x = line.x
