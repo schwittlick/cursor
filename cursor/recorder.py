@@ -5,7 +5,6 @@ from cursor.loader import JsonCompressor
 from cursor.data import DataDirHandler
 from cursor.misc import convert_pynput_btn_to_key
 
-import atexit
 import pyautogui
 import wasabi
 import pystray
@@ -32,8 +31,6 @@ class Recorder:
         self._start_time_stamp = DateHandler.utc_timestamp()
         self._resolution = pyautogui.size()
 
-        atexit.register(self.save)
-
         log.good("Setting up mouse hook")
         self.mouse_listener = pynput.mouse.Listener(
             on_move=self.on_move, on_click=self.on_click
@@ -46,7 +43,7 @@ class Recorder:
         )
         self.key_listener.start()
 
-        log.good("Setting up 10s auto-save")
+        log.good("Setting up 5min auto-save")
         self.__save_async()
 
         log.good("Started cursor recorder")
@@ -56,8 +53,7 @@ class Recorder:
 
     def __save_async(self):
         self.save()
-        # every 10s
-        self._timer = threading.Timer(10, self.__save_async, [])
+        self._timer = threading.Timer(60*5, self.__save_async, [])
         self._timer.start()
 
     def on_move(self, x, y):
@@ -170,7 +166,7 @@ def main():
         image,
         menu=pystray.Menu(
             pystray.MenuItem(lambda text: status, update),
-            pystray.MenuItem("Save & Exit", save_exit),
+            pystray.MenuItem("Exit", save_exit),
         ),
     )
     global suffix
