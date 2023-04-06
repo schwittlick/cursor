@@ -214,6 +214,33 @@ class MaxSpeed:
     }
 
 
+class BufferSize:
+    fac = {
+        PlotterType.ROLAND_DPX3300: 0,  # 0 = not tested
+        PlotterType.ROLAND_DPX3300_A2: 0,
+        PlotterType.ROLAND_DPX3300_A3: 0,
+        PlotterType.DIY_PLOTTER: 1,
+        PlotterType.AXIDRAW: 1,
+        PlotterType.HP_7475A_A3: 512,
+        PlotterType.HP_7475A_A4: 512,
+        PlotterType.ROLAND_DXY1200: 0,
+        PlotterType.ROLAND_DXY980: 0,
+        PlotterType.HP_7595A: 1024,
+        PlotterType.ROLAND_PNC1000: 0,
+        PlotterType.HP_7595A_A3: 1024,
+        PlotterType.TEKTRONIX_4662: 0,
+        PlotterType.HP_7596B: 1024,
+        PlotterType.HP_7596B_A3: 1024,
+        PlotterType.HP_7596B_25_25: 1024,
+        PlotterType.DIGIPLOT_A1: 0,
+        PlotterType.HP_7470A: 256,
+        PlotterType.HP_7550A: 512,
+        PlotterType.HP_7595A_A2: 1024,
+        PlotterType.ROLAND_PNC1000_50x100: 0,
+        PlotterType.HP_7595A_A0: 1024,
+    }
+
+
 class PaperSizeName:
     names = {
         PaperSize.PORTRAIT_36_48: "portrait_36_48",
