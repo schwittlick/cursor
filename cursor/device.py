@@ -7,6 +7,9 @@ log = wasabi.Printer()
 
 
 class PlotterType(Enum):
+    def __str__(self):
+        return self.name
+
     ROLAND_DPX3300 = 0
     DIY_PLOTTER = 1
     AXIDRAW = 2
@@ -29,7 +32,7 @@ class PlotterType(Enum):
     HP_7595A_A2 = 19
     ROLAND_PNC1000_50x100 = 20
     HP_7595A_A0 = 21
-
+    HP_7596A = 22
 
 
 class ExportFormat(Enum):
@@ -65,6 +68,7 @@ class ExportFormatMappings:
         PlotterType.HP_7595A_A2: ExportFormat.HPGL,
         PlotterType.ROLAND_PNC1000_50x100: ExportFormat.HPGL,
         PlotterType.HP_7595A_A0: ExportFormat.HPGL,
+        PlotterType.HP_7596A: ExportFormat.HPGL,
 
     }
 
@@ -105,7 +109,8 @@ class MinmaxMapping:
         PlotterType.HP_7475A_A3: BB(0, 0, 16158, 11040),
         PlotterType.ROLAND_DXY1200: BB(0, 0, 16158, 11040),  # todo: missing real bounds
         PlotterType.ROLAND_DXY980: BB(0, 0, 16158, 11040),
-        PlotterType.HP_7595A: BB(-23160, -17602, 23160 + 1160, 17602),
+        # PlotterType.HP_7595A_A0: BB(-23160, -17602, 23160 + 1160, 17602),
+        PlotterType.HP_7595A: BB(-16090, -11684, 16090, 11684),
         # HP_7595A: minimum 35mm padding
         PlotterType.ROLAND_PNC1000: BB(0, 0, 18800, 40000),  # actually unlimited y
         PlotterType.ROLAND_PNC1000_50x100: BB(260, 560, 18700, 39000),  # for 50x100cm paper centered
@@ -114,6 +119,8 @@ class MinmaxMapping:
         PlotterType.TEKTRONIX_4662: BB(0, 0, 4095, 2731),
         # tekronix: 10x15 inches (25.4 x 38.1 cm)
         PlotterType.HP_7596B: BB(-15500, -11100, 15500 + 22 * 40, 11100),
+        PlotterType.HP_7596A: BB(-16100, -11600, 16100, 11600),
+
         PlotterType.HP_7596B_A3: BB(-6800, -5250, 6800, 5250),
         PlotterType.HP_7596B_25_25: BB(-4310, -3444, 4310 + 800, 3444),
         PlotterType.DIGIPLOT_A1: BB(0, 0, 33600, 23700),
@@ -147,6 +154,7 @@ class PlotterName:
         PlotterType.HP_7595A_A2: "hp7595a_draftmaster_sx_a2",
         PlotterType.ROLAND_PNC1000_50x100: "roland_pnc1000",
         PlotterType.HP_7595A_A0: "hp7595a_draftmaster_sx_a0",
+        PlotterType.HP_7596A: "hp7596a_draftmaster_II_a1",
     }
 
 
@@ -174,6 +182,35 @@ class XYFactors:
         PlotterType.HP_7595A_A2: (40, 39.5),
         PlotterType.ROLAND_PNC1000_50x100: (40.04, 40.04),
         PlotterType.HP_7595A_A0: (39.9, 40.04),
+        PlotterType.HP_7596A: (40.0, 40.0),
+    }
+
+
+class MaxSpeed:
+    fac = {
+        PlotterType.ROLAND_DPX3300: 40,
+        PlotterType.ROLAND_DPX3300_A2: 40,
+        PlotterType.ROLAND_DPX3300_A3: 40,
+        PlotterType.DIY_PLOTTER: 1,
+        PlotterType.AXIDRAW: 1,
+        PlotterType.HP_7475A_A3: 40,
+        PlotterType.HP_7475A_A4: 40,
+        PlotterType.ROLAND_DXY1200: 40,
+        PlotterType.ROLAND_DXY980: 40,
+        PlotterType.HP_7595A: 110,
+        PlotterType.ROLAND_PNC1000: 40,
+        PlotterType.HP_7595A_A3: 40,
+        PlotterType.TEKTRONIX_4662: 1,
+        PlotterType.HP_7596B: 110,
+        PlotterType.HP_7596B_A3: 110,
+        PlotterType.HP_7596B_25_25: 110,
+        PlotterType.DIGIPLOT_A1: 1,
+        PlotterType.HP_7470A: 40,
+        PlotterType.HP_7550A: 80,
+        PlotterType.HP_7595A_A2: 110,
+        PlotterType.ROLAND_PNC1000_50x100: 40,
+        PlotterType.HP_7595A_A0: 110,
+        PlotterType.HP_7596A: 110,
     }
 
 

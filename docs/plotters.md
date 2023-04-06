@@ -13,7 +13,10 @@
 | HP 7475A                       | Marcel  | A3/A4 |                         | DP25 M            | HPGL     | HP/RO             | 6         |
 | HP 7475A                       | Marcel  | A3/A4 | Cutter mod              | DP25 M            | HPGL     | HP/RO             | 6         |
 | HP 7475A                       | Marcel  | A3/A4 | Cutter mod              | DP25 M            | HPGL     | HP/RO             | 6         |
+| HP 7475A                       | Marcel  | A3/A4 |                         | DP25 M            | HPGL     | HP/RO             | 6         |
 | HP 7475A                       | Marcel  | A3/A4 |                         | HP-IB             | HPGL     | HP/RO             | 6         |
+| HP 7475A                       | Marcel  | A3/A4 |                         | HP-IB             | HPGL     | HP/RO             | 6         |
+| HP 7044A                       | Marcel  | A4    | Analog Plotter          | Voltage           | -        | Unique pen        | 1         |
 | Roland DXY 980                 | Marcel  | A3    |                         | DP25 M & HP-IB    | HPGL     | HP/RO             | 8         |
 | Roland DXY 885                 | Marcel  | A3    |                         | DP25 M & HP-IB    | HPGL     | HP/RO             | 8         |
 | Roland DXY 1200                | Marcel  | A3    | OK                      | DP25 M & HP-IB    | HPGL     | HP/RO             | 8         |
@@ -28,6 +31,7 @@
 | HP DraftMaster RX Plus         | Marcel  | A0    | X-Axis <br>broken       | DP25 M & HP-IB    | HPGL     |                   | 8         |
 | HP DraftMaster II              | Marcel  | A0    | OK                      | DP25 M & HP-IB    | HPGL     |                   | 8         |
 | HP DraftPro EXL                | Brendan | A0    |                         | DP25 M            | HPGL     | HP/RO             | 8         |
+| HP DraftPro (7570A)            | Marcel  | A2    |                         | DP25 M            | HPGL     | HP/RO             | 8         |
 | HP 7580B                       | Marcel  | A1    | Missing carousel        | DP25 M            | HPGL     | HP/RO             | 8         |
 | Calcomp 1023                   | Marcel  | ~A1   | paper wheels <br>broken | DP25 M            |          | Calcomp pens      | 8         |
 | Aritma 512                     | Marcel  | A3    |                         | DP9 M             |          | HP/RO             | 8         |
@@ -40,6 +44,8 @@
 | DIY plotter (lasersaur)        | Marcel  | ~A0   | OK                      | USB-A             | GCODE    | max diameter 23mm | 1         |
 | BBC Goerz Metrawatt SE 293     | Marcel  | ~A3   |                         | DP25 M            | ???      |                   | 8         |
 | Robotron Reiss K 6418          | Marcel  | ~A3   |                         | Custom            | ???      |                   | 1         |
+| Mutoh X500                     | Marcel  | ~A0   |                         | DP25 M?           | HPGL2    | Mutoh Pens / Standard HP? | 8         |
+| Océ Graphics G1022             | Marcel  | ~A3   |                         | DP25 M & HP-IB    | ???      | HP/RO             | 6         |
 
 *HP/RO  : Standard pens for HP and Roland machines
 *DP     : D-Sub RS-232-C
