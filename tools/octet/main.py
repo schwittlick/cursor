@@ -1,15 +1,14 @@
 import configparser
-import threading
-import wasabi
+
 import arcade.gui
+import wasabi
 
-from cursor.device import PlotterType, MaxSpeed
-
-from tools.octet.discovery import discover
+from cursor.device import PlotterType
 from tools.octet.gui import MainWindow
 from tools.octet.launchpad import NovationLaunchpad
 from tools.octet.midique import Midique
 from tools.octet.plotter import Plotter
+from tools.octet.plotter_detector import PlotterDetector
 from tools.octet.plotterthread import CheckerThread
 
 logger = wasabi.Printer(pretty=True, no_print=False)
@@ -23,70 +22,18 @@ config = configparser.ConfigParser()
 # Load the configuration file
 config.read('config_client.ini')
 
-# Get the values of the parameters
-hostname = config.get('CONFIG', 'hostname')
-target = config.get('CONFIG', 'target')
-
 offline_mode = config.getboolean('CONFIG', 'offline_mode')
 USE_MIDIQUE = config.getboolean('CONFIG', 'midique')
 USE_LAUNCHPAD = config.getboolean('CONFIG', 'launchpad')
 
-
-def async_func(model, ip: str, tcp_port: int, serial_port: str, baud: int, timeout: float, pen_count: int):
-    p = Plotter(ip, tcp_port, serial_port, baud, timeout, pen_count)
-    p.connect()
-    p.open_serial()
-
-    plotter_map = {"7475A": PlotterType.HP_7475A_A3,
-                   "7550A": PlotterType.HP_7550A,
-                   "7595A": PlotterType.HP_7595A,
-                   "7596A": PlotterType.HP_7596A,
-                   "DXY-1200": PlotterType.ROLAND_DXY1200}
-
-    for k, v in plotter_map.items():
-        if k == model:
-            p.type = v
-            p.thread.speed = MaxSpeed.fac[v]
-            return p
-
-    return None
-
-
-def connect_plotters(cfg, discovered) -> list:
-    ip = target
-    tcp_port = cfg.getint('CONFIG', 'port')
-    baud = 9600
-    timeout = config.getfloat('CONFIG', 'serial_timeout')
-    PEN_COUNT = config.getint('CONFIG', 'pens')
-
-    results = []
-
-    threads = []
-    for plo in discovered:
-        if not plo:
-            continue
-        serial_port = plo[0]
-        model = plo[1]
-
-        thread = threading.Thread(
-            target=lambda: results.append(async_func(model, ip, tcp_port, serial_port, baud, timeout, PEN_COUNT))
-        )
-        threads.append(thread)
-        thread.start()
-
-    for thread in threads:
-        thread.join()
-
-    results = sorted(
-        results,
-        key=lambda x: x.type.value
-    )
-
-    return results
-
-
 if __name__ == '__main__':
     window = MainWindow()
+
+    tcp_port = config.getint('CONFIG', 'port')
+    timeout = config.getfloat('CONFIG', 'serial_timeout')
+    pen_count = config.getint('CONFIG', 'pens')
+    target = config.get('CONFIG', 'target')
+    hostname = config.get('CONFIG', 'hostname')
 
     if offline_mode:
         # add test plotter in offline mode
@@ -98,8 +45,8 @@ if __name__ == '__main__':
             # test_plotter.open_serial()
             plotters.append(test_plotter)
     else:
-        discovered_plotters = discover()
-        plotters = connect_plotters(config, discovered_plotters)
+        pd = PlotterDetector(tcp_port, timeout, pen_count, target)
+        plotters = pd.detect()
 
     window.plotters = plotters
     window.add_labels()
