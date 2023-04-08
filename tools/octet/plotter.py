@@ -69,12 +69,14 @@ class Plotter:
 
     def set_value1(self, v1: float):
         logger.info(f"v1: {v1}")
-        self.thread.v1_label.text = str(int(v1))
+        if self.thread.v1_label:
+            self.thread.v1_label.text = str(int(v1))
         self.__value1 = v1
 
     def set_value2(self, v2: float):
         logger.info(f"v1: {v2}")
-        self.thread.v2_label.text = str(int(v2))
+        if self.thread.v2_label:
+            self.thread.v2_label.text = str(int(v2))
         self.__value2 = v2
 
     def set_line_distance(self, d):
