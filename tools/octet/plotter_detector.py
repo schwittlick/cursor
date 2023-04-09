@@ -1,5 +1,7 @@
 import threading
 
+import serial
+
 from cursor.device import MaxSpeed, PlotterHpglNames
 from tools.octet.discovery import discover
 from tools.octet.plotter import Plotter
@@ -23,12 +25,19 @@ class PlotterDetector:
     def __init__(self, _tcp_port, _timeout, _pen_count, _target):
         self.ip = _target
         self.tcp_port = _tcp_port
-        self.baud = 9600
+
+        self.baudrate = 9600
+        self.stopbits = serial.STOPBITS_ONE
+        self.bytesize = serial.EIGHTBITS
+        self.parity = serial.PARITY_NONE
+        self.xonxoff = False
         self.timeout = _timeout
+
         self.pen_count = _pen_count
 
     def detect(self):
-        discovered = discover()
+        discovered = discover(baudrate=self.baudrate, stopbits=self.stopbits, bytesize=self.bytesize,
+                              parity=self.parity, xonxoff=self.xonxoff, timeout=self.timeout)
 
         results = []
 
@@ -41,7 +50,8 @@ class PlotterDetector:
 
             thread = threading.Thread(
                 target=lambda: results.append(
-                    attempt_detect(model, self.ip, self.tcp_port, serial_port, self.baud, self.timeout, self.pen_count))
+                    attempt_detect(model, self.ip, self.tcp_port, serial_port, self.baudrate, self.timeout,
+                                   self.pen_count))
             )
             threads.append(thread)
             thread.start()
