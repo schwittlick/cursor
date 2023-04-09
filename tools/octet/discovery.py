@@ -6,9 +6,12 @@ import wasabi
 logger = wasabi.Printer(pretty=True, no_print=False)
 
 
-def async_discover(serial_port):
+def async_discover(serial_port, baudrate=9600, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS,
+                   parity=serial.PARITY_NONE,
+                   xonxoff=False, timeout=5):
+    ser = serial.Serial(port=serial_port, baudrate=baudrate, stopbits=stopbits, bytesize=bytesize, parity=parity,
+                        xonxoff=xonxoff, timeout=timeout)
     try:
-        ser = serial.Serial(serial_port, baudrate=9600, timeout=5)
         ser.flush()
         ser.write("OI;\n".encode("utf-8"))
         ret = ser.readline().decode("utf-8")
@@ -28,18 +31,18 @@ def async_discover(serial_port):
         return None
 
 
-def discover() -> list:
+def discover(baudrate=9600, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE,
+             xonxoff=False, timeout=5) -> list:
     ports = list(serial.tools.list_ports.comports())
     data = []
 
     threads = []
 
-    def check(port):
-        return async_discover(port.device)
-
     for port in ports:
         thread = threading.Thread(
-            target=lambda: data.append(async_discover(port.device)))
+            target=lambda: data.append(
+                async_discover(port.device, baudrate, stopbits=stopbits, bytesize=bytesize, parity=parity,
+                               xonxoff=xonxoff, timeout=timeout)))
         threads.append(thread)
         thread.start()
 

@@ -414,7 +414,9 @@ class HPGLRenderer:
             if p.is_polygon:
                 _hpgl_string += "PM0;\n"
 
-            _hpgl_string += "PU;\n"
+            # change this for laser disabled pen down movement
+            #_hpgl_string += "PU;\n"
+            _hpgl_string += "PD;\n"
 
             for line in p.vertices:
                 x = line.x

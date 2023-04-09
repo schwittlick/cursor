@@ -45,7 +45,7 @@
 | DIY plotter (lasersaur)        | Marcel  | ~A0   | OK                      | USB-A             | GCODE    | max diameter 23mm         | 1         |
 | BBC Goerz Metrawatt SE 293     | Marcel  | ~A3   |                         | DP25 M            | ???      |                           | 8         |
 | Robotron Reiss K 6418          | Marcel  | ~A3   |                         | Custom            | ???      |                           | 1         |
-| Mutoh X500                     | Marcel  | ~A0   |                         | DP25 M?           | HPGL2    | Mutoh Pens / Standard HP? | 8         |
+| Mutoh XP-500                   | Marcel  | ~A0   |                         | DP25 M?           | MP-GL    | Mutoh Pens / Standard HP? | 8         |
 | Océ Graphics G1022             | Marcel  | ~A3   |                         | DP25 M & HP-IB    | ???      | HP/RO                     | 6         |
 
 *HP/RO  : Standard pens for HP and Roland machines
