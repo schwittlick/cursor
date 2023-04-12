@@ -161,29 +161,13 @@ class PlotterName:
 
 class PlotterHpglNames:
     names = {
-        PlotterType.ROLAND_DPX3300: "-",
-        PlotterType.ROLAND_DPX3300_A2: "-",
-        PlotterType.ROLAND_DPX3300_A3: "-",
-        PlotterType.AXIDRAW: "-",
-        PlotterType.DIY_PLOTTER: "-",
-        PlotterType.HP_7475A_A3: "7475A",
-        PlotterType.HP_7475A_A4: "7475A",
-        PlotterType.ROLAND_DXY1200: "DXY-1200",
-        PlotterType.ROLAND_DXY980: "DXY-980",
-        PlotterType.HP_7595A: "7595A",
-        PlotterType.ROLAND_PNC1000: "-",
-        PlotterType.HP_7595A_A3: "7595A",
-        PlotterType.TEKTRONIX_4662: "-",
-        PlotterType.HP_7596B: "7596A",
-        PlotterType.HP_7596B_A3: "7596A",
-        PlotterType.HP_7596B_25_25: "7596A",
-        PlotterType.DIGIPLOT_A1: "-",
-        PlotterType.HP_7470A: "7470A",
-        PlotterType.HP_7550A: "7550A",
-        PlotterType.HP_7595A_A2: "7595A",
-        PlotterType.ROLAND_PNC1000_50x100: "-",
-        PlotterType.HP_7595A_A0: "7595A",
-        PlotterType.HP_7596A: "7596A",
+        "7475A": PlotterType.HP_7475A_A3,
+        "DXY-1200": PlotterType.ROLAND_DXY1200,
+        "DXY-980": PlotterType.ROLAND_DXY980,
+        "7595A": PlotterType.HP_7595A,
+        "7596A": PlotterType.HP_7596B,
+        "7470A": PlotterType.HP_7470A,
+        "7550A": PlotterType.HP_7550A,
     }
 
 

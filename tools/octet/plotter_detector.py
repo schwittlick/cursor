@@ -1,10 +1,13 @@
 import threading
 
 import serial
+import wasabi
 
 from cursor.device import MaxSpeed, PlotterHpglNames
 from tools.octet.discovery import discover
 from tools.octet.plotter import Plotter
+
+logger = wasabi.Printer(pretty=True, no_print=False)
 
 
 def attempt_detect(model, ip: str, tcp_port: int, serial_port: str, baud: int, timeout: float, pen_count: int):
@@ -12,45 +15,46 @@ def attempt_detect(model, ip: str, tcp_port: int, serial_port: str, baud: int, t
     p.connect()
     p.open_serial()
 
-    for k, v in PlotterHpglNames.names.items():
-        if v == model:
-            p.type = k
-            p.thread.speed = MaxSpeed.fac[k]
-            return p
+    p_names = PlotterHpglNames.names
+    if model in p_names.keys():
+        p_type = p_names[model]
+        p.type = p_type
+        p.thread.speed = MaxSpeed.fac[p_type]
+        return p
 
     return None
 
 
 class PlotterDetector:
-    def __init__(self, _tcp_port, _timeout, _pen_count, _target):
-        self.ip = _target
-        self.tcp_port = _tcp_port
+    def __init__(self, target, tcp_port, timeout, pen_count=1, baud=9600, stopbits=serial.STOPBITS_ONE,
+                 bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, xonxoff=False):
+        self.ip = target
+        self.tcp_port = tcp_port
+        self.timeout = timeout
 
-        self.baudrate = 9600
-        self.stopbits = serial.STOPBITS_ONE
-        self.bytesize = serial.EIGHTBITS
-        self.parity = serial.PARITY_NONE
-        self.xonxoff = False
-        self.timeout = _timeout
+        self.pen_count = pen_count
 
-        self.pen_count = _pen_count
+        self.baudrate = baud
+        self.stopbits = stopbits
+        self.bytesize = bytesize
+        self.parity = parity
+        self.xonxoff = xonxoff
 
     def detect(self):
-        discovered = discover(baudrate=self.baudrate, stopbits=self.stopbits, bytesize=self.bytesize,
-                              parity=self.parity, xonxoff=self.xonxoff, timeout=self.timeout)
-
-        results = []
-
+        p_discovered = discover(baudrate=self.baudrate, stopbits=self.stopbits, bytesize=self.bytesize,
+                                parity=self.parity, xonxoff=self.xonxoff, timeout=self.timeout)
+        valid_plotters = []
         threads = []
-        for plo in discovered:
-            if not plo:
+
+        for p in p_discovered:
+            if not p:
                 continue
-            serial_port = plo[0]
-            model = plo[1]
+            serial_port = p[0]
+            model_name_oi = p[1]
 
             thread = threading.Thread(
-                target=lambda: results.append(
-                    attempt_detect(model, self.ip, self.tcp_port, serial_port, self.baudrate, self.timeout,
+                target=lambda: valid_plotters.append(
+                    attempt_detect(model_name_oi, self.ip, self.tcp_port, serial_port, self.baudrate, self.timeout,
                                    self.pen_count))
             )
             threads.append(thread)
@@ -59,9 +63,11 @@ class PlotterDetector:
         for thread in threads:
             thread.join()
 
-        results = sorted(
-            results,
-            key=lambda x: x.type.value
-        )
+        valid_plotters.sort(key=lambda x: x.type.value)
+        return valid_plotters
 
-        return results
+
+if __name__ == '__main__':
+    pd = PlotterDetector("localhost", 12345, 0.5)
+    plotters = pd.detect()
+    logger.info(plotters)
