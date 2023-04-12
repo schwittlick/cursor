@@ -6,7 +6,6 @@ import serial
 from cursor.collection import Collection
 from cursor.data import DataDirHandler
 from cursor.device import PlotterType, PaperSize, MinmaxMapping, Paper
-from cursor.export import ExportWrapper
 from cursor.filter import MaxPointCountFilter, MinPointCountFilter
 from cursor.loader import Loader
 from cursor.renderer import HPGLRenderer
@@ -114,15 +113,6 @@ def get_data():
         hpgl_renderer.render(pc)
         data = hpgl_renderer.generate_string()
         return data
-
-        ExportWrapper().ex(
-            pc,
-            PlotterType.HP_7596B_A3,
-            PaperSize.LANDSCAPE_A3,
-            30,
-            "composition73_mutoh",
-            f"{suffix}_small",
-        )
 
 
 if __name__ == "__main__":
