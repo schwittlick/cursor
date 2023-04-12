@@ -38,14 +38,14 @@ if __name__ == '__main__':
     if offline_mode:
         # add test plotter in offline mode
         for i in range(8):
-            test_plotter = Plotter("localhost", 12345, None, 9600, 0.5, 2)
+            test_plotter = Plotter("localhost", 12345, 0.1)
             test_plotter.type = PlotterType.HP_7475A_A3
             test_plotter.client.set_timeout(0.1)
             test_plotter.connect()
             # test_plotter.open_serial()
             plotters.append(test_plotter)
     else:
-        pd = PlotterDetector(tcp_port, timeout, pen_count, target)
+        pd = PlotterDetector(target, tcp_port, timeout, pen_count)
         plotters = pd.detect()
 
     window.plotters = plotters
