@@ -55,9 +55,10 @@ def main():
     parser.add_argument('arduino_port')
     args = parser.parse_args()
 
-    serial = Serial(port=args.port, timeout=0)
-    serial_arduino = Serial(port=args.arduino_port, timeout=0)
-
+    serial = Serial(port=args.port, timeout=100)
+    serial_arduino = Serial(port=args.arduino_port, timeout=100)
+    all = serial_arduino.read_all()
+    print(f"all={all}")
     code = read_code(args.file)
     pos = 0
 
