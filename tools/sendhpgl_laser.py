@@ -89,6 +89,8 @@ def main():
                 continue
             if c == "PU":
                 serial_arduino.write(LASER_OFF.encode('utf-8'))
+                ret = serial_arduino.read_all()
+                print(f"received {ret}")
                 continue
             if c.startswith("SP"):
                 continue
