@@ -86,6 +86,8 @@ def main():
         for c in commands:
             if c == "PD":
                 serial_arduino.write(LASER_ON.encode('utf-8'))
+                ret = serial_arduino.read_all()
+                print(f"received {ret}")
                 continue
             if c == "PU":
                 serial_arduino.write(LASER_OFF.encode('utf-8'))
