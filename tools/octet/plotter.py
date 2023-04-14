@@ -430,7 +430,7 @@ class Plotter:
 
     def transform(self, c, dims):
         cbb = c.bb()
-        trans = Plotter.transformFn((cbb.x, cbb.y), (cbb.x2, cbb.y2), (dims.x, dims.y), (dims.x2, dims.y2))
+        trans = misc.transformFn((cbb.x, cbb.y), (cbb.x2, cbb.y2), (dims.x, dims.y), (dims.x2, dims.y2))
         for pa in c:
             for poi in pa.vertices:
                 n_poi = trans(poi.as_tuple())
@@ -445,29 +445,3 @@ class Plotter:
         logger.info(f"this will take approx {seconds}s.")
         return r.generate_string(), seconds
 
-    """
-    ty lars wander
-    https://larswander.com/writing/centering-and-scaling/
-    """
-
-    @staticmethod
-    def transformFn(stl, sbr, dtl, dbr):
-        stlx, stly = stl
-        sbrx, sbry = sbr
-        dtlx, dtly = dtl
-        dbrx, dbry = dbr
-
-        sdx, sdy = sbrx - stlx, sbry - stly
-        ddx, ddy = dbrx - dtlx, dbry - dtly
-
-        ry, rx = ddx / sdx, ddy / sdy
-        a = min(rx, ry)
-
-        ox, oy = (ddx - sdx * a) * 0.5 + dtlx, (ddy - sdy * a) * 0.5 + dtly
-        bx, by = -stlx * a + ox, -stly * a + oy
-
-        def calc(inp):
-            x, y = inp[0], inp[1]
-            return x * a + bx, y * a + by
-
-        return calc
