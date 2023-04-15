@@ -1,43 +1,43 @@
 from __future__ import annotations
 
-from shapely.geometry import LineString, MultiLineString, JOIN_STYLE, Point
-from shapely.geometry.base import BaseGeometry
-from shapely.ops import unary_union
-
-from cursor.misc import mix
-from cursor.misc import map
-from cursor.algorithm.frechet import euclidean
-from cursor.algorithm.frechet import LinearDiscreteFrechet
-from cursor.algorithm.entropy import calc_entropy
-from cursor.algorithm import ramer_douglas_peucker
-from cursor.position import Position
-from cursor.bb import BoundingBox
+import collections
+import copy
+import hashlib
+import math
+import typing
 
 import numpy as np
 import pandas as pd
-import math
-import hashlib
+import shapely
 import wasabi
-import copy
-import collections
-import typing
-from scipy import stats
 from scipy import spatial
+from scipy import stats
+from shapely import union_all
+from shapely.geometry import LineString, MultiLineString, JOIN_STYLE, Point
+from shapely.geometry.base import BaseGeometry
 
+from cursor.algorithm import ramer_douglas_peucker
+from cursor.algorithm.entropy import calc_entropy
+from cursor.algorithm.frechet import LinearDiscreteFrechet
+from cursor.algorithm.frechet import euclidean
+from cursor.bb import BoundingBox
+from cursor.misc import map
+from cursor.misc import mix
+from cursor.position import Position
 
 log = wasabi.Printer()
 
 
 class Path:
     def __init__(
-        self,
-        vertices: typing.Optional[typing.List[Position]] = None,
-        layer: typing.Optional[str] = "layer1",
-        line_type: typing.Optional[int] = None,
-        pen_velocity: typing.Optional[int] = None,
-        pen_force: typing.Optional[int] = None,
-        pen_select: typing.Optional[int] = None,
-        is_polygon: typing.Optional[bool] = False,
+            self,
+            vertices: typing.Optional[typing.List[Position]] = None,
+            layer: typing.Optional[str] = "layer1",
+            line_type: typing.Optional[int] = None,
+            pen_velocity: typing.Optional[int] = None,
+            pen_force: typing.Optional[int] = None,
+            pen_select: typing.Optional[int] = None,
+            is_polygon: typing.Optional[bool] = False,
     ):
         self._layer = layer
         self._line_type = line_type
@@ -81,7 +81,7 @@ class Path:
 
     @classmethod
     def from_tuple_list(
-        cls, tuple_list: typing.List[typing.Tuple[float, float]]
+            cls, tuple_list: typing.List[typing.Tuple[float, float]]
     ) -> Path:
         return Path([Position.from_tuple(p) for p in tuple_list])
 
@@ -162,11 +162,11 @@ class Path:
         return x and y
 
     def add(
-        self,
-        x: float,
-        y: float,
-        timestamp: int = 0,
-        color: typing.Tuple[int, int, int] = None,
+            self,
+            x: float,
+            y: float,
+            timestamp: int = 0,
+            color: typing.Tuple[int, int, int] = None,
     ) -> None:
         self.vertices.append(Position(x, y, timestamp, color))
 
@@ -253,7 +253,7 @@ class Path:
         [p.scale(x, y) for p in self.vertices]
 
     def rot(
-        self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)
+            self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)
     ) -> None:
         [p.rot(angle, origin) for p in self.vertices]
 
@@ -320,9 +320,9 @@ class Path:
         self.translate(bb.x, bb.y)
 
     def morph(
-        self,
-        start: typing.Union[Position, typing.Tuple[float, float]],
-        end: typing.Union[Position, typing.Tuple[float, float]],
+            self,
+            start: typing.Union[Position, typing.Tuple[float, float]],
+            end: typing.Union[Position, typing.Tuple[float, float]],
     ) -> Path:
         if isinstance(start, Position) and isinstance(end, Position):
             start = (start.x, start.y)
@@ -371,8 +371,8 @@ class Path:
         # solution taken from here:
         # http://www.gamedev.net/topic/556500-angle-between-vectors/
         if (
-            current_start_to_end[0] * new_start_to_end[1]
-            < current_start_to_end[1] * new_start_to_end[0]
+                current_start_to_end[0] * new_start_to_end[1]
+                < current_start_to_end[1] * new_start_to_end[0]
         ):
             angle = 2 * math.pi - angle
 
@@ -400,19 +400,19 @@ class Path:
                 compareA = diffLAx * line1Start.y - diffLAy * line1Start.x
                 compareB = diffLBx * line2Start.y - diffLBy * line2Start.x
                 if ((diffLAx * line2Start.y - diffLAy * line2Start.x) < compareA) ^ (
-                    (diffLAx * line2End.y - diffLAy * line2End.x) < compareA
+                        (diffLAx * line2End.y - diffLAy * line2End.x) < compareA
                 ) and ((diffLBx * line1Start.y - diffLBy * line1Start.x) < compareB) ^ (
-                    (diffLBx * line1End.y - diffLBy * line1End.x) < compareB
+                        (diffLBx * line1End.y - diffLBy * line1End.x) < compareB
                 ):
                     ok = (diffLAx * diffLBy) - (diffLAy * diffLBx)
                     if ok == 0:
                         ok = 0.01
                     lDetDivInv = 1 / ok
                     intersectionx = (
-                        -((diffLAx * compareB) - (compareA * diffLBx)) * lDetDivInv
+                            -((diffLAx * compareB) - (compareA * diffLBx)) * lDetDivInv
                     )
                     intersectiony = (
-                        -((diffLAy * compareB) - (compareA * diffLBy)) * lDetDivInv
+                            -((diffLAy * compareB) - (compareA * diffLBy)) * lDetDivInv
                     )
 
                     return True, intersectionx, intersectiony
@@ -499,6 +499,9 @@ class Path:
         """
         prev = Position()
         self.vertices = [prev := v for v in self.vertices if prev.x != v.x or prev.y != v.y]  # noqa: F841
+        self.vertices = [prev := v for v in self.vertices if v.x is not None and v.y is not None]  # noqa: F841
+        self.vertices = [prev := v for v in self.vertices if v.x is not np.nan and v.y is not np.nan]  # noqa: F841
+        self.vertices = [prev := v for v in self.vertices if not math.isnan(v.x) and not math.isnan(v.y)]  # noqa: F841
 
     def limit(self) -> None:
         """
@@ -612,11 +615,11 @@ class Path:
         return [new_a, new_b]
 
     def _offset_angle(
-        self,
-        p1: Position,
-        p2: Position,
-        p3: Position,
-        offset: float,
+            self,
+            p1: Position,
+            p2: Position,
+            p3: Position,
+            offset: float,
     ) -> Path:
         a = p2.distance(p3)
         b = p1.distance(p2)
@@ -717,22 +720,36 @@ class Path:
 
     def intersection_points(self) -> list:
         ls = LineString(self.as_tuple_list())
-        mls = unary_union(ls)
+        # mls = unary_union(ls, 1)
+        ls.normalize()
+        mls = union_all(ls, 0.001)
+        t = type(mls)
+        linestring = None
+        if t == shapely.geometry.multilinestring.MultiLineString:
+            points = []
+            for l in mls.geoms:
+                for p in l.coords:
+                    points.append(p)
+            #linestring = mls.geoms[1]
+            linestring = LineString(points)
+        if t == shapely.geometry.linestring.LineString:
+            linestring = mls
 
-        try:
-            coords_list = []
-            for non_itersecting_ls in mls:
-                coords_list.extend(non_itersecting_ls.coords)
+        # try:
+        coords_list = []
+        for non_itersecting_ls in linestring.coords:
+            coords_list.append(non_itersecting_ls)
+            # coords_list.extend(non_itersecting_ls.coords)
 
-            return [
-                item
-                for item, count in collections.Counter(coords_list).items()
-                if count > 1
-            ]
-        except TypeError as te:
-            log.warn("Couldnt calculate intersection points")
-            log.warn(f"{te}")
-            return []
+        return [
+            item
+            for item, count in collections.Counter(coords_list).items()
+            if count > 1
+        ]
+        # except TypeError as te:
+        #    log.warn("Couldnt calculate intersection points")
+        #    log.warn(f"{te}")
+        #    return []
 
     @staticmethod
     def clamp(n, smallest, largest):
@@ -818,7 +835,7 @@ class Path:
             return
 
         def get_intersection(
-            segment: Path, paths: typing.List[typing.Tuple[float, float, float, float]]
+                segment: Path, paths: typing.List[typing.Tuple[float, float, float, float]]
         ) -> typing.Tuple[float, float]:
             for p in paths:
                 tup1 = segment[0].as_tuple()
