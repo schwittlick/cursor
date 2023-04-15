@@ -68,23 +68,31 @@ def main():
 
     snip = code.replace("\n", "")
     commands = snip.split(";")
+    current = "PD"
     for c in commands:
         if c == "PD":
             serial_arduino.write(LASER_ON.encode('utf-8'))
             ret = serial_arduino.read_all()
             print(f"received {ret}")
-            continue
+            current = c
         if c == "PU":
             serial_arduino.write(LASER_OFF.encode('utf-8'))
             ret = serial_arduino.read_all()
             print(f"received {ret}")
-            continue
+            current = c
         if c.startswith("SP"):
-            continue
+            pass
         if c.startswith('PA'):
+
             pos = c[2:].split(',')
             po = (int(pos[0]), int(pos[1]))
             serial.write(f"{c};".encode('utf-8'))
+
+            if current == 'PU':
+                # sleep because it already
+                # reports back that it arrived
+                time.sleep(1.0)
+
             succ = poll(serial, po)
             log.info(f'poll: {succ}')
         if c.startswith('VS') or c.startswith('LT'):
