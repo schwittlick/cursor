@@ -1,24 +1,27 @@
 # Send HP-GL code to 7475A plotter
 # Copyright (C) 2019  Luca Schmid
 # Copyright (C) 2022  Marcel Schwittlick
+import time
+import typing
+from argparse import ArgumentParser
+from time import sleep
+
+import serial
+import wasabi
+from serial import Serial
+
+log = wasabi.Printer()
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-from argparse import ArgumentParser
-from time import sleep
-
-from serial import Serial
 
 
 def read_code(path):
@@ -57,50 +60,73 @@ def main():
 
     serial = Serial(port=args.port, timeout=100)
     serial_arduino = Serial(port=args.arduino_port, timeout=100)
-    all = serial_arduino.read_all()
-    print(f"all={all}")
+
     code = read_code(args.file)
-    pos = 0
 
-    # hp 7475, draftmasters 1024
-    # hp 7475 & 7550 512
-    # hp 7440 255
-
-    BUFFER_SIZE = 512
     LASER_ON = "10"
     LASER_OFF = "0"
 
-    show_progress(pos, len(code))
-    while pos < len(code):
-        avail = check_avail(serial)
-        if avail < BUFFER_SIZE:
-            sleep(0.01)
+    snip = code.replace("\n", "")
+    commands = snip.split(";")
+    for c in commands:
+        if c == "PD":
+            serial_arduino.write(LASER_ON.encode('utf-8'))
+            ret = serial_arduino.read_all()
+            print(f"received {ret}")
+            continue
+        if c == "PU":
+            serial_arduino.write(LASER_OFF.encode('utf-8'))
+            ret = serial_arduino.read_all()
+            print(f"received {ret}")
+            continue
+        if c.startswith("SP"):
+            continue
+        if c.startswith('PA'):
+            pos = c[2:].split(',')
+            po = (int(pos[0]), int(pos[1]))
+            serial.write(f"{c};".encode('utf-8'))
+            succ = poll(serial, po)
+            log.info(f'poll: {succ}')
+        if c.startswith('VS') or c.startswith('LT'):
+            serial.write(f"{c};".encode('utf-8'))
+
+
+def readit(port):
+    response = ''
+    while True:
+        response += port.read().decode()
+        if '\r' in response:
+            return response
+
+def poll(ser: serial.Serial, target_pos: typing.Tuple):
+    ser.write('OA;'.encode('utf-8'))
+    ret = readit(ser).rstrip()
+    if len(ret) == 0:
+        return False
+    current_pos = ret.split(',')
+    current_po = (int(current_pos[0]), int(current_pos[1]))
+
+    attempts = 0
+    while current_po != target_pos:
+        ser.write('OA;'.encode('utf-8'))
+        ret = readit(ser).rstrip()
+        if len(ret) == 0:
+            attempts += 1
             continue
 
-        end = pos + avail
-        if len(code) - pos < avail:
-            end = len(code)
+        if ',' not in ret:
+            attempts += 1
+            continue
 
-        snip = code[pos:end]
-        snip = snip.replace("\n", "")
-        commands = snip.split(";")
-        for c in commands:
-            if c == "PD":
-                serial_arduino.write(LASER_ON.encode('utf-8'))
-                ret = serial_arduino.read_all()
-                print(f"received {ret}")
-                continue
-            if c == "PU":
-                serial_arduino.write(LASER_OFF.encode('utf-8'))
-                ret = serial_arduino.read_all()
-                print(f"received {ret}")
-                continue
-            if c.startswith("SP"):
-                continue
-            serial.write(c.encode('utf-8'))
-        pos = end
+        current_pos = ret.split(',')
+        current_po = (int(current_pos[0]), int(current_pos[1]))
 
-        show_progress(pos, len(code))
+
+        time.sleep(0.1)
+
+        if attempts > 10:
+            return False
+    return True
 
 
 if __name__ == '__main__':
