@@ -1,4 +1,5 @@
 import threading
+import typing
 
 import serial.tools.list_ports
 import wasabi
@@ -6,9 +7,10 @@ import wasabi
 logger = wasabi.Printer(pretty=True, no_print=False)
 
 
-def async_discover(serial_port, baudrate=9600, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS,
-                   parity=serial.PARITY_NONE,
-                   xonxoff=False, timeout=5):
+def async_discover(serial_port, baudrate: int = 9600, stopbits: typing.Tuple = serial.STOPBITS_ONE,
+                   bytesize: typing.Tuple = serial.EIGHTBITS,
+                   parity: str = serial.PARITY_NONE,
+                   xonxoff: bool = False, timeout: float = 5):
     ser = serial.Serial(port=serial_port, baudrate=baudrate, stopbits=stopbits, bytesize=bytesize, parity=parity,
                         xonxoff=xonxoff, timeout=timeout)
     try:
@@ -32,7 +34,7 @@ def async_discover(serial_port, baudrate=9600, stopbits=serial.STOPBITS_ONE, byt
 
 
 def discover(baudrate=9600, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE,
-             xonxoff=False, timeout=5) -> list:
+             xonxoff=False, timeout=0.1) -> list:
     ports = list(serial.tools.list_ports.comports())
     data = []
 
