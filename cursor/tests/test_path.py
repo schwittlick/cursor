@@ -726,3 +726,17 @@ def test_from_tuple_list():
     assert pa[0] == Position(0, 0)
     assert pa[1] == Position(1, 2)
     assert pa[2] == Position(3, 4)
+
+def test_intersection_points():
+    p1 = Path()
+    p1.add(0, 0)
+    p1.add(1, 1)
+    p1.add(2, 2)
+    p1.add(0, 2)
+    p1.add(0, 1)
+    p1.add(1, 0)
+
+    intersections = p1.intersection_points()
+    assert len(intersections) == 1
+
+    assert intersections[0] == (0.5, 0.5)

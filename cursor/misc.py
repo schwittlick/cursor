@@ -1,8 +1,10 @@
-import numpy as np
 import inspect
+import typing
+
+import cv2
+import numpy as np
 import pynput
 import wasabi
-import cv2
 
 log = wasabi.Printer()
 
@@ -200,3 +202,31 @@ class ditherModule(object):
 
 def current_source(frame):
     return inspect.getsource(inspect.getmodule(frame))
+
+
+"""
+ty lars wander
+https://larswander.com/writing/centering-and-scaling/
+"""
+
+
+def transformFn(stl, sbr, dtl, dbr):
+    stlx, stly = stl
+    sbrx, sbry = sbr
+    dtlx, dtly = dtl
+    dbrx, dbry = dbr
+
+    sdx, sdy = sbrx - stlx, sbry - stly
+    ddx, ddy = dbrx - dtlx, dbry - dtly
+
+    ry, rx = ddx / sdx, ddy / sdy
+    a = min(rx, ry)
+
+    ox, oy = (ddx - sdx * a) * 0.5 + dtlx, (ddy - sdy * a) * 0.5 + dtly
+    bx, by = -stlx * a + ox, -stly * a + oy
+
+    def calc(inp: typing.Tuple[float, float]):
+        x, y = inp.x, inp.y
+        return x * a + bx, y * a + by
+
+    return calc
