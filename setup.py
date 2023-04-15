@@ -30,6 +30,7 @@ setup(
         "console_scripts": [
             "cursor_recorder = cursor.recorder:main",
             "composition57 = experiments.composition57:main",
+            "discovery = tools.octet.discovery:discover",
         ]
     },
     license="MIT",
