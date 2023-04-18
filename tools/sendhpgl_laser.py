@@ -60,10 +60,11 @@ def main():
 
     serial = Serial(port=args.port, timeout=100)
     serial_arduino = Serial(port=args.arduino_port, timeout=100)
+    serial_arduino.flush()
 
     code = read_code(args.file)
 
-    LASER_ON = "10"
+    LASER_ON = "100"
     LASER_OFF = "0"
 
     snip = code.replace("\n", "")
@@ -132,7 +133,7 @@ def poll(ser: serial.Serial, target_pos: typing.Tuple):
 
         time.sleep(0.1)
 
-        if attempts > 10:
+        if attempts > 20:
             return False
     return True
 
