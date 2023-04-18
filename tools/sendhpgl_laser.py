@@ -69,10 +69,11 @@ def main():
 
     snip = code.replace("\n", "")
     commands = snip.split(";")
-    current = "PD"
+    current = "PU"
+    current_PWM = 0
     for c in commands:
         if c == "PD":
-            serial_arduino.write(LASER_ON.encode('utf-8'))
+            serial_arduino.write(f"{current_PWM}".encode('utf-8'))
             ret = serial_arduino.read_all()
             print(f"received {ret}")
             current = c
@@ -94,9 +95,15 @@ def main():
                 # reports back that it arrived
                 time.sleep(1.0)
 
+            # todo: enable
             succ = poll(serial, po)
             log.info(f'poll: {succ}')
-        if c.startswith('VS') or c.startswith('LT'):
+        if c.startswith('VS'):
+            import re
+            number = int(re.findall(r'\d+', c)[0])
+            current_PWM = number
+            print(number)
+        if c.startswith('LT'):
             serial.write(f"{c};".encode('utf-8'))
 
 
