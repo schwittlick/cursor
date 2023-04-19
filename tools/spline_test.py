@@ -203,7 +203,10 @@ if __name__ == "__main__":
     c.add(p)
 
     for i in range(42):
-        c.add(p.parallel_offset(-10 * i))
+        _pa = p.parallel_offset(-10 * i)
+        for __pa in _pa:
+            __pa.velocity = 42 - i
+        c.add(_pa)
 
     cole = c
     rr = RealtimeRenderer(dimensions[0] * 4, dimensions[1] * 4, "spline")
