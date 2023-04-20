@@ -99,13 +99,14 @@ def main():
 
             # todo: enable
             succ = poll(serial, po)
-            log.info(f'poll: {succ}')
+            #log.info(f'poll: {succ}')
         if c.startswith('PWM'):
             import re
             number = int(re.findall(r'\d+', c)[0])
             current_PWM = number
             print(number)
         if c.startswith('VS') or c.startswith('LT'):
+            print(f"{c}")
             serial.write(f"{c};".encode('utf-8'))
 
 
