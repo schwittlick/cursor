@@ -12,6 +12,7 @@ from serial import Serial
 
 log = wasabi.Printer()
 
+
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -83,6 +84,7 @@ def main():
             print(f"received {ret}")
             current = c
         if c.startswith("SP"):
+            # ignore pen select
             pass
         if c.startswith('PA'):
 
@@ -98,12 +100,12 @@ def main():
             # todo: enable
             succ = poll(serial, po)
             log.info(f'poll: {succ}')
-        if c.startswith('VS'):
+        if c.startswith('PWM'):
             import re
             number = int(re.findall(r'\d+', c)[0])
             current_PWM = number
             print(number)
-        if c.startswith('LT'):
+        if c.startswith('VS') or c.startswith('LT'):
             serial.write(f"{c};".encode('utf-8'))
 
 
@@ -113,6 +115,7 @@ def readit(port):
         response += port.read().decode()
         if '\r' in response:
             return response
+
 
 def poll(ser: serial.Serial, target_pos: typing.Tuple):
     ser.write('OA;'.encode('utf-8'))
@@ -136,7 +139,6 @@ def poll(ser: serial.Serial, target_pos: typing.Tuple):
 
         current_pos = ret.split(',')
         current_po = (int(current_pos[0]), int(current_pos[1]))
-
 
         time.sleep(0.1)
 
