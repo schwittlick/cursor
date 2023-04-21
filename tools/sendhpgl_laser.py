@@ -78,11 +78,13 @@ def main():
             ret = serial_arduino.read_all()
             print(f"received {ret}")
             current = c
+            serial.write(f"{c};".encode('utf-8'))
         if c == "PU":
             serial_arduino.write(LASER_OFF.encode('utf-8'))
             ret = serial_arduino.read_all()
             print(f"received {ret}")
             current = c
+            serial.write(f"{c};".encode('utf-8'))
         if c.startswith("SP"):
             # ignore pen select
             pass
