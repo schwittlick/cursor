@@ -216,6 +216,8 @@ class RealtimeRenderer(arcade.Window):
             if not color.startswith("__")
         ]
 
+        self.shapes = None
+        self.collection = None
         self.clear_list()
 
         self.cbs = {}
@@ -272,6 +274,7 @@ class RealtimeRenderer(arcade.Window):
 
     def clear_list(self):
         self.shapes = arcade.ShapeElementList()
+        self.collection = Collection()
 
     def add_point(self, po: Position, width: int = 5, color: arcade.color = None):
         if not color:
@@ -293,6 +296,7 @@ class RealtimeRenderer(arcade.Window):
 
         line_strip = arcade.create_line_strip(new_tups, color, line_width)
         self.shapes.append(line_strip)
+        self.collection.add(p)
 
     def add_polygon(self, p: Path, color: arcade.color = None):
         # assert p.is_closed()
@@ -382,6 +386,7 @@ class HPGLRenderer:
         _prev_velocity = 0
         _prev_force = 0
         _prev_pen = 0
+        _prev_pwm = 0
 
         first = True
         for p in self.__paths:
@@ -410,12 +415,17 @@ class HPGLRenderer:
                     _hpgl_string += f"FS{self.__get_pen_force(p.pen_force)};\n"
                     _prev_force = p.pen_force
 
+            if p.laser_pwm:
+                if _prev_pwm != p.laser_pwm:
+                    _hpgl_string += f"PWM{p.laser_pwm};\n"
+                    _prev_pwm = p.laser_pwm
+
             _hpgl_string += f"PA{int(x)},{int(y)};\n"
             if p.is_polygon:
                 _hpgl_string += "PM0;\n"
 
             # change this for laser disabled pen down movement
-            #_hpgl_string += "PU;\n"
+            # _hpgl_string += "PU;\n"
             _hpgl_string += "PD;\n"
 
             for line in p.vertices:
