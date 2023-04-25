@@ -38,6 +38,7 @@ class Path:
             pen_force: typing.Optional[int] = None,
             pen_select: typing.Optional[int] = None,
             is_polygon: typing.Optional[bool] = False,
+            laser_pwm: typing.Optional[int] = None
     ):
         self._layer = layer
         self._line_type = line_type
@@ -45,6 +46,8 @@ class Path:
         self._pen_force = pen_force
         self._pen_select = pen_select
         self._is_polygon = is_polygon
+        self._laser_pwm = laser_pwm
+
         self._vertices = []
 
         if vertices is not None:
@@ -144,6 +147,14 @@ class Path:
     @velocity.setter
     def velocity(self, pen_velocity) -> None:
         self._pen_velocity = pen_velocity
+
+    @property
+    def laser_pwm(self) -> int:
+        return self._laser_pwm
+
+    @laser_pwm.setter
+    def laser_pwm(self, laser_pwm) -> None:
+        self._laser_pwm = laser_pwm
 
     @property
     def is_polygon(self) -> bool:
@@ -730,7 +741,7 @@ class Path:
             for l in mls.geoms:
                 for p in l.coords:
                     points.append(p)
-            #linestring = mls.geoms[1]
+            # linestring = mls.geoms[1]
             linestring = LineString(points)
         if t == shapely.geometry.linestring.LineString:
             linestring = mls
