@@ -21,13 +21,12 @@ import operator
 import time
 import pickle
 
-
 log = wasabi.Printer()
 
 
 class Collection:
     def __init__(
-        self, timestamp: typing.Union[float, None] = None, name: str = "noname"
+            self, timestamp: typing.Union[float, None] = None, name: str = "noname"
     ):
         self.__paths: typing.List[Path] = []
         self.__name = name
@@ -77,7 +76,7 @@ class Collection:
             yield p
 
     def __getitem__(
-        self, item: typing.Union[int, slice]
+            self, item: typing.Union[int, slice]
     ) -> typing.Union[Collection, Path]:
         if isinstance(item, slice):
             start, stop, step = item.indices(len(self))
@@ -120,6 +119,9 @@ class Collection:
                 ]
             )
             self.__paths.append(p)
+
+    def pop(self, idx: int) -> Path:
+        return self.__paths.pop(idx)
 
     def as_array(self) -> np.array:
         return np.array([p.as_array() for p in self.__paths], dtype=object)
@@ -191,7 +193,7 @@ class Collection:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
     def sorted(
-        self, pathsorter: Sorter, reference_path: Path = None
+            self, pathsorter: Sorter, reference_path: Path = None
     ) -> typing.List[Path]:
         if isinstance(pathsorter, Sorter):
             return pathsorter.sorted(self.__paths, reference_path)
@@ -362,15 +364,15 @@ class Collection:
         return reduce(lambda a, b: a + b, [x.distance / fac for x in self.__paths])
 
     def fit(
-        self,
-        size=tuple[int, int],
-        xy_factor: tuple[float, float] = (1.0, 1.0),
-        padding_mm: int = None,
-        padding_units: int = None,
-        padding_percent: int = None,
-        output_bounds: BoundingBox = None,
-        cutoff_mm=None,
-        keep_aspect=False,
+            self,
+            size=tuple[int, int],
+            xy_factor: tuple[float, float] = (1.0, 1.0),
+            padding_mm: int = None,
+            padding_units: int = None,
+            padding_percent: int = None,
+            output_bounds: BoundingBox = None,
+            cutoff_mm=None,
+            keep_aspect=False,
     ) -> None:
         """
         fits (scales and centers) a collection of paths into a bounding box. units can be in pixels or mm

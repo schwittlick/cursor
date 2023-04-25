@@ -95,7 +95,7 @@ def generate_perlin_noise_2d(shape, res):
     return np.sqrt(2) * ((1 - t[:, :, 1]) * n0 + t[:, :, 1] * n1)
 
 
-def map(value, inputMin, inputMax, outputMin, outputMax, clamp):
+def map(value, inputMin, inputMax, outputMin, outputMax, clamp=True):
     outVal = (value - inputMin) / (inputMax - inputMin) * (outputMax - outputMin) + outputMin
 
     if clamp:
