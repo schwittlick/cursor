@@ -65,7 +65,6 @@ def main():
 
     code = read_code(args.file)
 
-    LASER_ON = "100"
     LASER_OFF = "0"
 
     snip = code.replace("\n", "")
@@ -84,7 +83,8 @@ def main():
             ret = serial_arduino.read_all()
             print(f"received {ret}")
             current = c
-            serial.write(f"{c};".encode('utf-8'))
+            # no need to do pen up
+            # serial.write(f"{c};".encode('utf-8'))
         if c.startswith("SP"):
             # ignore pen select
             pass
@@ -99,9 +99,8 @@ def main():
                 # reports back that it arrived
                 time.sleep(1.0)
 
-            # todo: enable
             succ = poll(serial, po)
-            #log.info(f'poll: {succ}')
+            # log.info(f'poll: {succ}')
         if c.startswith('PWM'):
             import re
             number = int(re.findall(r'\d+', c)[0])
