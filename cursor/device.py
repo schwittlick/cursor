@@ -97,6 +97,7 @@ class PaperSize(Enum):
     SQUARE_25_25 = 19
     LANDSCAPE_A1_HP_7596B = 20
     PORTRAIT_50_100 = 21
+    PHOTO_PAPER_178_240_LANDSCAPE = 22
 
 
 class MinmaxMapping:
@@ -278,6 +279,7 @@ class PaperSizeName:
         PaperSize.SQUARE_25_25: "square_25_25",
         PaperSize.LANDSCAPE_A1_HP_7596B: "landscape_a1",
         PaperSize.PORTRAIT_50_100: "portrait_50x100",
+        PaperSize.PHOTO_PAPER_178_240_LANDSCAPE: "photo_paper_178x240",
     }
 
 
@@ -305,4 +307,5 @@ class Paper:
         PaperSize.SQUARE_25_25: (215, 170),
         PaperSize.LANDSCAPE_A1_HP_7596B: (776, 555),
         PaperSize.PORTRAIT_50_100: (460, 960),
+        PaperSize.PHOTO_PAPER_178_240_LANDSCAPE: (240, 178),
     }
