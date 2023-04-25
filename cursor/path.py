@@ -4,6 +4,7 @@ import collections
 import copy
 import hashlib
 import math
+import sys
 import typing
 
 import numpy as np
@@ -65,7 +66,7 @@ class Path:
     def __len__(self) -> int:
         return len(self.vertices)
 
-    def __iter__(self) -> typing.Iterator[Path]:
+    def __iter__(self) -> typing.Iterator[Position]:
         for v in self.vertices:
             yield v
 
@@ -503,6 +504,19 @@ class Path:
 
     def empty(self) -> bool:
         return len(self.vertices) < 1
+
+    def index_of_closest(self, point: tuple[float, float]) -> int:
+        assert len(self) > 1
+        min_distance = sys.float_info.max
+        closest = 0
+        for paa in self:
+            dist = paa.distance(point)
+            if dist < min_distance:
+                min_distance = dist
+                closest = self.vertices.index(paa)
+        assert min_distance != sys.float_info.max
+        log.info(f"mindist: {min_distance}")
+        return closest
 
     def clean(self) -> None:
         """
