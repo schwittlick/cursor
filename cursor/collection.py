@@ -1,25 +1,26 @@
 from __future__ import annotations
 
-from cursor.position import Position
-from cursor.path import Path
-from cursor.bb import BoundingBox
-from cursor.filter import Filter
-from cursor.sorter import Sorter
-from cursor.data import DataDirHandler
+import copy
+import datetime
+import hashlib
+import operator
+import pickle
+import random
+import time
+import typing
+from functools import reduce
 
 import numpy as np
-from functools import reduce
 import pandas as pd
-import datetime
 import pytz
-import random
-import hashlib
 import wasabi
-import copy
-import typing
-import operator
-import time
-import pickle
+
+from cursor.bb import BoundingBox
+from cursor.data import DataDirHandler
+from cursor.filter import Filter
+from cursor.path import Path
+from cursor.position import Position
+from cursor.sorter import Sorter
 
 log = wasabi.Printer()
 
@@ -152,6 +153,15 @@ class Collection:
         log.good(
             f"PathCollection::clean: reduced path count from {len_before} to {len(self)}"
         )
+
+    def merge(self) -> Path:
+        pa = Path()
+
+        for p in self:
+            for poi in p:
+                pa.add_position(poi)
+
+        return pa
 
     def reverse(self) -> None:
         self.__paths.reverse()
