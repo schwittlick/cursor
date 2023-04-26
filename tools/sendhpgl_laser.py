@@ -76,21 +76,19 @@ def main():
 
     snip = code.replace("\n", "")
     commands = snip.split(";")
-    last_cmd = "PU"
     current_pwm = 0
+
     last_pos = (0, 0)
-    for c in commands:
+
+    for i in range(len(commands) - 1):
+        c = commands[i]
+        next_c = commands[i + 1]
         if c == "PD":
             set_arduino_pwm(serial_arduino, current_pwm)
             serial_plotter.write(f"{c};".encode('utf-8'))
 
-            last_cmd = c
         if c == "PU":
             set_arduino_pwm(serial_arduino, LASER_OFF)
-            if last_cmd == "PA":
-                little_off = (last_pos[0] + 10, last_pos[1] + 10)
-                send_and_wait(serial_plotter, c, little_off)
-            last_cmd = c
         if c.startswith("PA"):
             if DEBUG:
                 log.info(f"{c}")
@@ -99,13 +97,12 @@ def main():
             send_and_wait(serial_plotter, c, po)
             last_pos = po
 
-            if last_cmd == "PU":
+            if next_c == "PU":
                 # time.sleep(0.5)
                 little_off = (last_pos[0] + 10, last_pos[1] + 10)
                 send_and_wait(serial_plotter, c, little_off)
                 last_pos = little_off
 
-            last_cmd = c
         if c.startswith("PWM"):
             parsed_pwm = int(re.findall(r'\d+', c)[0])
             current_pwm = parsed_pwm
@@ -115,7 +112,7 @@ def main():
             serial_plotter.write(f"{c};".encode('utf-8'))
 
 
-def parse_pa(c):
+def parse_pa(c) -> tuple[int, int]:
     pos = c[2:].split(',')
     po = (int(pos[0]), int(pos[1]))
     return po
