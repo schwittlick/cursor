@@ -66,8 +66,8 @@ def main():
     parser.add_argument('arduino_port')
     args = parser.parse_args()
 
-    serial_plotter = Serial(port=args.port, timeout=50)
-    serial_arduino = Serial(port=args.arduino_port, timeout=50)
+    serial_plotter = Serial(port=args.port, timeout=100)
+    serial_arduino = Serial(port=args.arduino_port, timeout=100)
     serial_arduino.flush()
 
     code = read_code(args.file)
@@ -97,13 +97,12 @@ def main():
 
             po = parse_pa(c)
             send_and_wait(serial_plotter, c, po)
+            last_pos = po
 
             if last_cmd == 'PU':
                 little_off = (last_pos[0] + 1, last_pos[1])
                 send_and_wait(serial_plotter, c, little_off)
                 last_pos = little_off
-            else:
-                last_pos = po
 
             last_cmd = 'PA'
         if c.startswith('PWM'):
