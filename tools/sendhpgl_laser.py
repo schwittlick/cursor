@@ -88,14 +88,10 @@ def main():
             if current == 'PA':
                 little_off = (last_pos[0] + 1, last_pos[1])
                 send_and_wait(serial_plotter, c, little_off)
-                pass
             set_arduino_pwm(serial_arduino, LASER_OFF)
             current = c
             # no need to do pen up
             # serial_plotter.write(f"{c};".encode('utf-8'))
-        if c.startswith("SP"):
-            # ignore pen select
-            pass
         if c.startswith('PA'):
             if DEBUG:
                 log.info(f"{c}")
