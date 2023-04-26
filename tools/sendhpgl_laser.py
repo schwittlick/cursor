@@ -55,8 +55,8 @@ def show_progress(pos, total, length=100):
 def set_arduino_pwm(arduino: serial.Serial, pwm: int):
     log.info(f"set arduino pwm: {pwm}")
     arduino.write(f"{pwm}".encode('utf-8'))
-    ret = arduino.read_all()
-    log.info(f"arduino: {ret}")
+    # ret = arduino.read_all()
+    # log.info(f"arduino: {ret}")
 
 
 def main():
@@ -66,7 +66,7 @@ def main():
     parser.add_argument('arduino_port')
     args = parser.parse_args()
 
-    serial = Serial(port=args.port, timeout=50)
+    serial_plotter = Serial(port=args.port, timeout=50)
     serial_arduino = Serial(port=args.arduino_port, timeout=50)
     serial_arduino.flush()
 
@@ -83,16 +83,16 @@ def main():
         if c == "PD":
             set_arduino_pwm(serial_arduino, current_pwm)
             current = c
-            serial.write(f"{c};".encode('utf-8'))
+            serial_plotter.write(f"{c};".encode('utf-8'))
         if c == "PU":
             if current == 'PA':
                 little_off = (last_pos[0] + 1, last_pos[1])
-                send_and_wait(serial, c, little_off)
+                send_and_wait(serial_plotter, c, little_off)
                 pass
             set_arduino_pwm(serial_arduino, LASER_OFF)
             current = c
             # no need to do pen up
-            # serial.write(f"{c};".encode('utf-8'))
+            # serial_plotter.write(f"{c};".encode('utf-8'))
         if c.startswith("SP"):
             # ignore pen select
             pass
@@ -101,7 +101,7 @@ def main():
                 log.info(f"{c}")
 
             po = parse_pa(c)
-            send_and_wait(serial, c, po)
+            send_and_wait(serial_plotter, c, po)
             last_pos = po
 
             current = 'PA'
@@ -111,7 +111,7 @@ def main():
             log.info(f"current_pwm: {parsed_pwm}")
         if c.startswith('VS'):
             log.info(f"{c}")
-            serial.write(f"{c};".encode('utf-8'))
+            serial_plotter.write(f"{c};".encode('utf-8'))
 
 
 def parse_pa(c):
