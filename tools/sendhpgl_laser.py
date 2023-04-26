@@ -66,8 +66,8 @@ def main():
     parser.add_argument('arduino_port')
     args = parser.parse_args()
 
-    serial = Serial(port=args.port, timeout=100)
-    serial_arduino = Serial(port=args.arduino_port, timeout=100)
+    serial = Serial(port=args.port, timeout=50)
+    serial_arduino = Serial(port=args.arduino_port, timeout=50)
     serial_arduino.flush()
 
     code = read_code(args.file)
@@ -86,6 +86,8 @@ def main():
             serial.write(f"{c};".encode('utf-8'))
         if c == "PU":
             if current == 'PA':
+                little_off = (last_pos[0] + 1, last_pos[1])
+                send_and_wait(serial, c, little_off)
                 pass
             set_arduino_pwm(serial_arduino, LASER_OFF)
             current = c
@@ -99,7 +101,7 @@ def main():
                 log.info(f"{c}")
 
             po = parse_pa(c)
-            send_and_wait(serial, c, po, last_pos)
+            send_and_wait(serial, c, po)
             last_pos = po
 
             current = 'PA'
@@ -107,7 +109,7 @@ def main():
             parsed_pwm = int(re.findall(r'\d+', c)[0])
             current_pwm = parsed_pwm
             log.info(f"current_pwm: {parsed_pwm}")
-        if c.startswith('VS') or c.startswith('LT'):
+        if c.startswith('VS'):
             log.info(f"{c}")
             serial.write(f"{c};".encode('utf-8'))
 
@@ -118,14 +120,9 @@ def parse_pa(c):
     return po
 
 
-def send_and_wait(plotter, cmd, position, last_position):
+def send_and_wait(plotter, cmd, position):
     plotter.write(f"PA{position[0]},{position[1]};".encode('utf-8'))
     poll(plotter, position)
-
-    little_off = (position[0] + 1, position[1])
-
-    plotter.write(f"PA{little_off[0]},{little_off[1]};".encode('utf-8'))
-    poll(plotter, little_off)
 
 
 def readit(port):
