@@ -68,6 +68,8 @@ def main():
 
     serial_plotter = Serial(port=args.port, timeout=100)
     serial_arduino = Serial(port=args.arduino_port, timeout=100)
+    arduino_reply = serial_arduino.read_all()
+    log.info(f"arduino startup: {arduino_reply}")
     serial_arduino.flush()
 
     code = read_code(args.file)
