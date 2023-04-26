@@ -76,31 +76,36 @@ def main():
 
     snip = code.replace("\n", "")
     commands = snip.split(";")
-    current = "PU"
+    last_cmd = "PU"
     current_pwm = 0
     last_pos = (0, 0)
     for c in commands:
         if c == "PD":
             set_arduino_pwm(serial_arduino, current_pwm)
-            current = c
             serial_plotter.write(f"{c};".encode('utf-8'))
+
+            last_cmd = c
         if c == "PU":
-            if current == 'PA':
+            if last_cmd == 'PA':
                 little_off = (last_pos[0] + 1, last_pos[1])
                 send_and_wait(serial_plotter, c, little_off)
             set_arduino_pwm(serial_arduino, LASER_OFF)
-            current = c
-            # no need to do pen up
-            # serial_plotter.write(f"{c};".encode('utf-8'))
+            last_cmd = c
         if c.startswith('PA'):
             if DEBUG:
                 log.info(f"{c}")
 
             po = parse_pa(c)
             send_and_wait(serial_plotter, c, po)
-            last_pos = po
 
-            current = 'PA'
+            if last_cmd == 'PU':
+                little_off = (last_pos[0] + 1, last_pos[1])
+                send_and_wait(serial_plotter, c, little_off)
+                last_pos = little_off
+            else:
+                last_pos = po
+
+            last_cmd = 'PA'
         if c.startswith('PWM'):
             parsed_pwm = int(re.findall(r'\d+', c)[0])
             current_pwm = parsed_pwm
