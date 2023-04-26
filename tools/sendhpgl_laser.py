@@ -99,7 +99,7 @@ def main():
                 log.info(f"{c}")
 
             po = parse_pa(c)
-            send_and_wait(serial, po, last_pos)
+            send_and_wait(serial, c, po, last_pos)
             last_pos = po
 
             current = 'PA'
@@ -118,11 +118,14 @@ def parse_pa(c):
     return po
 
 
-def send_and_wait(plotter, position, last_position):
+def send_and_wait(plotter, cmd, position, last_position):
     plotter.write(f"PA{position[0]},{position[1]};".encode('utf-8'))
     poll(plotter, position)
-    plotter.write(f"PA{position[0] + 1},{position[1]};".encode('utf-8'))
-    poll(plotter, position)
+
+    little_off = (position[0] + 1, position[1])
+
+    plotter.write(f"PA{little_off[0]},{little_off[1]};".encode('utf-8'))
+    poll(plotter, little_off)
 
 
 def readit(port):
