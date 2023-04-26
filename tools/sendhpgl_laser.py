@@ -1,18 +1,3 @@
-# Send HP-GL code to 7475A plotter
-# Copyright (C) 2019  Luca Schmid
-# Copyright (C) 2022  Marcel Schwittlick
-import time
-import typing
-from argparse import ArgumentParser
-from time import sleep
-
-import serial
-import wasabi
-from serial import Serial
-
-log = wasabi.Printer()
-
-
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -24,9 +9,24 @@ log = wasabi.Printer()
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+# Send HP-GL code to hpgl plotters
+# Copyright (C) 2019  Luca Schmid
+# Copyright (C) 2022  Marcel Schwittlick
+import re
+import time
+import typing
+from argparse import ArgumentParser
+
+import serial
+import wasabi
+from serial import Serial
+
+log = wasabi.Printer()
+
+DEBUG = True
+
 
 def read_code(path):
-    code = 'IN;'
     with open(path, 'r') as f:
         code = f.read()
     return code
@@ -52,6 +52,13 @@ def show_progress(pos, total, length=100):
         print()
 
 
+def set_arduino_pwm(arduino: serial.Serial, pwm: int):
+    log.info(f"set arduino pwm: {pwm}")
+    arduino.write(f"{pwm}".encode('utf-8'))
+    ret = arduino.read_all()
+    log.info(f"arduino: {ret}")
+
+
 def main():
     parser = ArgumentParser()
     parser.add_argument('port')
@@ -65,23 +72,22 @@ def main():
 
     code = read_code(args.file)
 
-    LASER_OFF = "0"
+    LASER_OFF = 0
 
     snip = code.replace("\n", "")
     commands = snip.split(";")
     current = "PU"
-    current_PWM = 0
+    current_pwm = 0
+    last_pos = (0, 0)
     for c in commands:
         if c == "PD":
-            serial_arduino.write(f"{current_PWM}".encode('utf-8'))
-            ret = serial_arduino.read_all()
-            print(f"received {ret}")
+            set_arduino_pwm(serial_arduino, current_pwm)
             current = c
             serial.write(f"{c};".encode('utf-8'))
         if c == "PU":
-            serial_arduino.write(LASER_OFF.encode('utf-8'))
-            ret = serial_arduino.read_all()
-            print(f"received {ret}")
+            if current == 'PA':
+                pass
+            set_arduino_pwm(serial_arduino, LASER_OFF)
             current = c
             # no need to do pen up
             # serial.write(f"{c};".encode('utf-8'))
@@ -89,26 +95,34 @@ def main():
             # ignore pen select
             pass
         if c.startswith('PA'):
+            if DEBUG:
+                log.info(f"{c}")
 
-            pos = c[2:].split(',')
-            po = (int(pos[0]), int(pos[1]))
-            serial.write(f"{c};".encode('utf-8'))
+            po = parse_pa(c)
+            send_and_wait(serial, po, last_pos)
+            last_pos = po
 
-            if current == 'PU':
-                # sleep because it already
-                # reports back that it arrived
-                time.sleep(1.0)
-
-            succ = poll(serial, po)
-            # log.info(f'poll: {succ}')
+            current = 'PA'
         if c.startswith('PWM'):
-            import re
-            number = int(re.findall(r'\d+', c)[0])
-            current_PWM = number
-            print(number)
+            parsed_pwm = int(re.findall(r'\d+', c)[0])
+            current_pwm = parsed_pwm
+            log.info(f"current_pwm: {parsed_pwm}")
         if c.startswith('VS') or c.startswith('LT'):
-            print(f"{c}")
+            log.info(f"{c}")
             serial.write(f"{c};".encode('utf-8'))
+
+
+def parse_pa(c):
+    pos = c[2:].split(',')
+    po = (int(pos[0]), int(pos[1]))
+    return po
+
+
+def send_and_wait(plotter, position, last_position):
+    plotter.write(f"PA{position[0]},{position[1]};".encode('utf-8'))
+    poll(plotter, position)
+    plotter.write(f"PA{position[0] + 1},{position[1]};".encode('utf-8'))
+    poll(plotter, position)
 
 
 def readit(port):
@@ -120,6 +134,9 @@ def readit(port):
 
 
 def poll(ser: serial.Serial, target_pos: typing.Tuple):
+    if DEBUG:
+        return True
+
     ser.write('OA;'.encode('utf-8'))
     ret = readit(ser).rstrip()
     if len(ret) == 0:
