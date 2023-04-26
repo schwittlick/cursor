@@ -23,7 +23,7 @@ from serial import Serial
 
 log = wasabi.Printer()
 
-DEBUG = True
+DEBUG = False
 
 
 def read_code(path):
@@ -86,12 +86,12 @@ def main():
 
             last_cmd = c
         if c == "PU":
-            if last_cmd == 'PA':
-                little_off = (last_pos[0] + 1, last_pos[1])
-                send_and_wait(serial_plotter, c, little_off)
             set_arduino_pwm(serial_arduino, LASER_OFF)
+            if last_cmd == "PA":
+                little_off = (last_pos[0] + 10, last_pos[1] + 10)
+                send_and_wait(serial_plotter, c, little_off)
             last_cmd = c
-        if c.startswith('PA'):
+        if c.startswith("PA"):
             if DEBUG:
                 log.info(f"{c}")
 
@@ -99,17 +99,18 @@ def main():
             send_and_wait(serial_plotter, c, po)
             last_pos = po
 
-            if last_cmd == 'PU':
-                little_off = (last_pos[0] + 1, last_pos[1])
+            if last_cmd == "PU":
+                # time.sleep(0.5)
+                little_off = (last_pos[0] + 10, last_pos[1] + 10)
                 send_and_wait(serial_plotter, c, little_off)
                 last_pos = little_off
 
-            last_cmd = 'PA'
-        if c.startswith('PWM'):
+            last_cmd = c
+        if c.startswith("PWM"):
             parsed_pwm = int(re.findall(r'\d+', c)[0])
             current_pwm = parsed_pwm
             log.info(f"current_pwm: {parsed_pwm}")
-        if c.startswith('VS'):
+        if c.startswith("VS"):
             log.info(f"{c}")
             serial_plotter.write(f"{c};".encode('utf-8'))
 
@@ -120,9 +121,9 @@ def parse_pa(c):
     return po
 
 
-def send_and_wait(plotter, cmd, position):
-    plotter.write(f"PA{position[0]},{position[1]};".encode('utf-8'))
-    poll(plotter, position)
+def send_and_wait(plotter, cmd, pp):
+    plotter.write(f"PA{pp[0]},{pp[1]};".encode('utf-8'))
+    poll(plotter, pp)
 
 
 def readit(port):
