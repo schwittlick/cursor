@@ -1,24 +1,24 @@
 from __future__ import annotations
 
+import copy
+import os
+import pathlib
+import random
+import typing
+
+import arcade
+import pymsgbox
+import svgwrite
+import wasabi
+from PIL import Image, ImageDraw
 from arcade.experimental.uislider import UISlider
 from arcade.gui import UIManager, UIOnChangeEvent, UIAnchorWidget
 
+from cursor.bb import BoundingBox
+from cursor.collection import Collection
 from cursor.data import DataDirHandler, DateHandler
 from cursor.path import Path
-from cursor.collection import Collection
 from cursor.position import Position
-from cursor.bb import BoundingBox
-
-import svgwrite
-import os
-import typing
-import arcade
-import pathlib
-import pymsgbox
-import random
-import wasabi
-import copy
-from PIL import Image, ImageDraw
 
 log = wasabi.Printer()
 
@@ -217,7 +217,7 @@ class RealtimeRenderer(arcade.Window):
         ]
 
         self.shapes = None
-        self.collection = None
+        self.collection = Collection()
         self.clear_list()
 
         self.cbs = {}
@@ -424,8 +424,6 @@ class HPGLRenderer:
             if p.is_polygon:
                 _hpgl_string += "PM0;\n"
 
-            # change this for laser disabled pen down movement
-            # _hpgl_string += "PU;\n"
             _hpgl_string += "PD;\n"
 
             for line in p.vertices:
@@ -442,7 +440,7 @@ class HPGLRenderer:
         return _hpgl_string
 
     def __add_home(self, hpgl_string):
-        return f"{hpgl_string}PA0,0;SP0;\n"
+        return f"{hpgl_string}PA0,0;\nSP0;\n"
 
     def save(self, filename: str) -> str:
         pathlib.Path(self.__save_path).mkdir(parents=True, exist_ok=True)

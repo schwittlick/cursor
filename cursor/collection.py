@@ -367,8 +367,11 @@ class Collection:
         self.__paths = pp
 
     def clip_shapely(self, bb: BoundingBox) -> None:
+        newpaths = []
         for p in self.__paths:
-            p.clip_shapely(bb)
+            _p = p.clip_shapely(bb)
+            newpaths.extend(_p)
+        self.__paths = newpaths
 
     def calc_travel_distance(self, fac) -> float:
         return reduce(lambda a, b: a + b, [x.distance / fac for x in self.__paths])
