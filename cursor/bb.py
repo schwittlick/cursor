@@ -19,12 +19,30 @@ class BoundingBox:
         return center_x, center_y
 
     def scale(self, fac: float) -> None:
+        self.scale_x(fac)
+        self.scale_y(fac)
+
+    def scale_x(self, fac: float) -> None:
+        prevw = self.w
         self.w = self.w * fac
-        self.h = self.h * fac
-        self.x = self.x + self.w / 2
-        self.y = self.y + self.h / 2
+
+        diff = math.dist([prevw], [self.w])
+        self.x = self.x + diff / 2
         self.x2 = self.x + self.w
+
+    def scale_y(self, fac: float) -> None:
+        prevh = self.h
+        self.h = self.h * fac
+
+        diff = math.dist([prevh], [self.h])
+        self.y = self.y + diff / 2
         self.y2 = self.y + self.h
+
+    def aspect_ratio(self) -> typing.Union[float, math.nan]:
+        if self.w == 0.0 or self.h == 0.0:
+            return math.nan
+
+        return self.h / self.w
 
     def subdiv(self, xpieces: int, ypieces: int) -> typing.List[BoundingBox]:
         bbs = []

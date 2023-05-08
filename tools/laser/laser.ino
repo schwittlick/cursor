@@ -1,9 +1,6 @@
-//sets digital pin 3 to pulse width value
-
-const int outPin = 9;
+const int outPin = 10;
 
 void setup() {
-
   Serial.begin(9600);
   pinMode(outPin, OUTPUT);
   Serial.println("Input required pulse width as percentage!");
@@ -11,15 +8,42 @@ void setup() {
 }
 
 void loop() {
-
-  int mVal; // holds the PWM value as percent
-  
-  if(Serial.available() > 0){
-    mVal = Serial.parseInt();
-    if(mVal < 101){
-      int tVal = (mVal*255)/100;
-      analogWrite(outPin, tVal);
-    }
-    Serial.print("pulse width = "); Serial.print(mVal); Serial.println("%");
+  delay(50);
+  int av = Serial.available();
+  if(av == 1){
+    int value = Serial.read() - '0';
+    analogWrite(outPin, value);
+    Serial.println(value);
   }
+  if (av == 2) {
+    char v1 = Serial.read();
+    char v2 = Serial.read();
+    char bu[3];
+    bu[0] = v1;
+    bu[1] = v2;
+    bu[2] = '\0';
+    int value;
+    value = convert(atoi(bu));
+    analogWrite(outPin, value);
+    Serial.println(value);
+  }
+
+  if(av == 3){
+    char v1 = Serial.read();
+    char v2 = Serial.read();
+    char v3 = Serial.read();
+    char bu[4];
+    bu[0] = v1;
+    bu[1] = v2;
+    bu[2] = v3;
+    bu[3] = '\0';
+    int value;
+    value = convert(atoi(bu));
+    analogWrite(outPin, value);
+    Serial.println(value);
+  }
+}
+
+int convert(int input){
+  return (input*255)/100;
 }
