@@ -16,6 +16,7 @@ from scipy import stats
 from shapely import union_all
 from shapely.geometry import LineString, MultiLineString, JOIN_STYLE, Point
 from shapely.geometry.base import BaseGeometry
+from shapely.ops import clip_by_rect
 
 from cursor.algorithm import ramer_douglas_peucker
 from cursor.algorithm.entropy import calc_entropy
@@ -227,15 +228,11 @@ class Path:
         b = BoundingBox(minx, miny, maxx, maxy)
         return b
 
-    def aspect_ratio(self) -> float:
+    def aspect_ratio(self) -> typing.Union[float, math.nan]:
         if len(self) < 2:
             return math.nan
 
-        _bb = self.bb()
-        if _bb.w == 0.0 or _bb.h == 0.0:
-            return math.nan
-
-        return _bb.h / _bb.w
+        return self.bb().aspect_ratio()
 
     @property
     def distance(self) -> float:
@@ -937,8 +934,6 @@ class Path:
             if len(pa) > 2:
                 pa.simplify(0.01)
                 out.append(pa)
-
-        from shapely.ops import clip_by_rect
 
         line = LineString(self.as_tuple_list())
         result = clip_by_rect(line, bb.x, bb.y, bb.x2, bb.y2)

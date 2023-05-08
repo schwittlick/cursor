@@ -4,6 +4,8 @@
 | DPX3300                        | Marcel  | A1    | Y-Axis <br>broken  | DP25 & Parallel   | HPGL     | HP/RO                     | 8         |
 | HP 7550 Plus                   | Marcel  | A3    | OK (Serial)        | DP25 F & HP-IB    | HPGL     | HP/RO                     | 8         |
 | HP 7550A                       | Marcel  | A3    | OK (Serial)        | DP25 F & HP-IB    | HPGL     | HP/RO                     | 8         |
+| HP 7550A                       | Marcel  | A3    | OK (Serial)        | DP25 F & HP-IB    | HPGL     | HP/RO                     | 8         |
+| HP 7550A                       | Marcel  | A3    | OK (Serial)        | DP25 F & HP-IB    | HPGL     | HP/RO                     | 8         |
 | Graphtec MP2000                | Marcel  | A3    |                    | DP25 M & HP-IB    |          |                           | 8         |
 | Graphtec MP3100                | Marcel  | A3    |                    | DP25 M & HP-IB    |          |                           | 8         |
 | Phoenix Contact CMS-P1-Plotter | Marcel  | A3    |                    | DP15 M / Parallel |          |                           | 4         |
@@ -46,6 +48,7 @@
 | Robotron Reiss K 6418          | Marcel  | ~A3   |                    | Custom            | ???      |                           | 1         |
 | [Mutoh XP-500](mutoh_xp500.md) | Marcel  | ~A0   |                    | DP25 M?           | HPGL2    | Mutoh Pens / Standard HP? | 8         |
 | Océ Graphics G1022             | Marcel  | ~A3   |                    | DP25 M & HP-IB    | ???      | HP/RO                     | 6         |
+| PENMAN                         | Marcel  |       |                    |                   | ???      | HP/RO                     | 3         |
 
 *HP/RO  : Standard pens for HP and Roland machines
 *DP     : D-Sub RS-232-C

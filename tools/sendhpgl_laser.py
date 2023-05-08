@@ -55,8 +55,8 @@ def show_progress(pos, total, length=100):
 def set_arduino_pwm(arduino: serial.Serial, pwm: int):
     log.info(f"set arduino pwm: {pwm}")
     arduino.write(f"{pwm}".encode('utf-8'))
-    # ret = arduino.read_all()
-    # log.info(f"arduino: {ret}")
+    ret = arduino.readline()
+    log.info(f"arduino: {ret}")
 
 
 def main():
@@ -66,11 +66,15 @@ def main():
     parser.add_argument('arduino_port')
     args = parser.parse_args()
 
-    serial_plotter = Serial(port=args.port, timeout=100)
-    serial_arduino = Serial(port=args.arduino_port, timeout=100)
-    arduino_reply = serial_arduino.read_all()
-    log.info(f"arduino startup: {arduino_reply}")
-    serial_arduino.flush()
+    serial_plotter = Serial(port=args.port, timeout=1)
+    serial_arduino = Serial(port=args.arduino_port, timeout=1)
+
+    time.sleep(1)
+    d = serial_arduino.readline()
+    log.info(f"first arduino result: {d}")
+    time.sleep(1)
+
+    set_arduino_pwm(serial_arduino, 0)
 
     code = read_code(args.file)
 
@@ -79,8 +83,6 @@ def main():
     snip = code.replace("\n", "")
     commands = snip.split(";")
     current_pwm = 0
-
-    last_pos = (0, 0)
 
     for i in range(len(commands) - 1):
         c = commands[i]
@@ -97,13 +99,11 @@ def main():
 
             po = parse_pa(c)
             send_and_wait(serial_plotter, c, po)
-            last_pos = po
 
-            if next_c == "PU":
+            if next_c == "PD":
                 # time.sleep(0.5)
-                little_off = (last_pos[0] + 10, last_pos[1] + 10)
+                little_off = (po[0] + 10, po[1] + 10)
                 send_and_wait(serial_plotter, c, little_off)
-                last_pos = little_off
 
         if c.startswith("PWM"):
             parsed_pwm = int(re.findall(r'\d+', c)[0])
