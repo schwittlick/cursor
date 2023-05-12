@@ -43,3 +43,6 @@ data handling
     # remove recording files with <3kb in file size
     cd data/recordings
     find . -name "*.json" -type 'f' -size -3k -delete
+    
+    # share dir in local network via sshfs
+    sshfs marcel@plot470s.local:/home/marcel/share/ ./share
