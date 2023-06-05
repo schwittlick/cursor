@@ -14,7 +14,6 @@ from cursor.collection import Collection
 from cursor.path import Path
 
 import pytest
-import fpdf
 
 
 def test_pathiterator():
@@ -336,46 +335,8 @@ def test_digiplot_renderer():
 
     assert (
             out
-            == "X,0;/Y,0;H;K;X,0;/Y,0;I;K;X,1;/Y,0;I;K;X,2;/Y,0;I;K;X,3;/Y,0;I;K;X,4;/Y,0;I;K;X,2;/Y,"
-               "2;H;K;X,2;/Y,2;I;K;X,2;/Y,3;I;K;X,2;/Y,4;I;K;X,2;/Y,5;I;K;X,2;/Y,6;I;K;X,0;/Y,0;H;K;"
+            == "X,0;/Y,0;H;K;X,0;/Y,0;I;K;X,1;/Y,0;I;K;X,2"
+               ";/Y,0;I;K;X,3;/Y,0;I;K;X,4;/Y,0;I;K;X,2;/Y,"
+               "2;H;K;X,2;/Y,2;I;K;X,2;/Y,3;I;K;X,2;/Y,4;I;K"
+               ";X,2;/Y,5;I;K;X,2;/Y,6;I;K;X,0;/Y,0;H;K;"
     )
-
-
-def disabled_test_pdf_renderer():
-    path = DataDirHandler().test_recordings()
-    loader = Loader(directory=path)
-
-    rec = loader.all_paths()
-
-    rec.fit(
-        Paper.sizes[PaperSize.PORTRAIT_A4],
-        padding_mm=0,
-        cutoff_mm=0,
-    )
-
-    r = JpegRenderer(DataDirHandler().test_images())
-    a = AsciiRenderer(DataDirHandler().test_ascii(), r)
-    a.render(rec, scale=1, thickness=30)
-
-    text = a.output.splitlines()
-
-    pdf = fpdf.FPDF(orientation="L", unit="mm", format="A4")
-
-    fontpath = DataDirHandler().test_data_file("JetBrainsMono-Regular.ttf")
-    pdf.add_font(
-        "JetbrainsMono",
-        "",
-        fontpath,
-        uni=True,
-    )
-    pdf.add_page()
-    pdf.set_margins(0, 0)
-    pdf.set_font("JetbrainsMono", size=14)
-    linecounter = 0
-    for line in text:
-        # pdf.cell(0, 3, txt=line, ln=1, align="L")
-        pdf.text(0, linecounter * 6 + 5, line)
-        linecounter += 1
-
-    out = DataDirHandler().test_data_dir / "simple_demo.pdf"
-    pdf.output(out)
