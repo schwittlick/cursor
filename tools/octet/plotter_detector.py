@@ -4,7 +4,7 @@ import serial
 import wasabi
 
 from cursor.device import MaxSpeed, PlotterHpglNames
-from tools.octet.discovery import discover
+from tools.discovery import discover
 from tools.octet.plotter import Plotter
 
 logger = wasabi.Printer(pretty=True, no_print=False)
