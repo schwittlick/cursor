@@ -26,7 +26,7 @@ jobs:
           name: Run Flake8
           command: |
             mkdir cursor/tests/artifacts
-            flake8 . --count --exit-zero --max-complexity=10 --max-line-length=120 --ignore=E402,W503,E203,E303,E722 --statistics --output-file cursor/tests/artifacts/flake8_report.txt
+            flake8 . --count --exit-zero --max-complexity=10 --max-line-length=120 --ignore=E402,W503,E203,E303,E722,E741 --statistics --output-file cursor/tests/artifacts/flake8_report.txt
       - run:
           name: Run tests
           command: |

@@ -1,6 +1,9 @@
 from HersheyFonts import HersheyFonts
+
+
 def draw_line(x1, y1, x2, y2):
     print(x1, y1)
+
 
 if __name__ == "__main__":
     thefont = HersheyFonts()

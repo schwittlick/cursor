@@ -444,4 +444,3 @@ class Plotter:
         seconds = r.estimated_duration(self.thread.speed)
         logger.info(f"this will take approx {seconds}s.")
         return r.generate_string(), seconds
-
