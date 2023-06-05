@@ -360,7 +360,7 @@ def test_path_offset_shapely():
     new = p.parallel_offset(1)
 
     assert len(new) == 1
-    assert len(new[0]) == 6
+    assert len(new[0]) == 7
 
 
 def test_path_nearest_points():
