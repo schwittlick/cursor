@@ -333,10 +333,9 @@ def test_digiplot_renderer():
     renderer.render(pc)
     out = renderer.save("digi_test01")
 
-    assert (
-            out
+    assert (out
             == "X,0;/Y,0;H;K;X,0;/Y,0;I;K;X,1;/Y,0;I;K;X,2"
                ";/Y,0;I;K;X,3;/Y,0;I;K;X,4;/Y,0;I;K;X,2;/Y,"
                "2;H;K;X,2;/Y,2;I;K;X,2;/Y,3;I;K;X,2;/Y,4;I;K"
                ";X,2;/Y,5;I;K;X,2;/Y,6;I;K;X,0;/Y,0;H;K;"
-    )
+            )
