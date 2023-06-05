@@ -11,7 +11,8 @@
 
 # Send HP-GL code to hpgl plotters
 # Copyright (C) 2019  Luca Schmid
-# Copyright (C) 2022  Marcel Schwittlick
+# Copyright (C) 2023  Marcel Schwittlick
+
 import re
 import time
 import typing
