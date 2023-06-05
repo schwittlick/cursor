@@ -727,6 +727,7 @@ def test_from_tuple_list():
     assert pa[1] == Position(1, 2)
     assert pa[2] == Position(3, 4)
 
+
 def test_intersection_points():
     p1 = Path()
     p1.add(0, 0)

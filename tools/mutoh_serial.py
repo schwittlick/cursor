@@ -105,11 +105,9 @@ def get_data():
             p.pen_select = 1
             p.velocity = 32
 
-        suffix = f"{r.hash}"
-
         pc.fit(Paper.sizes[PaperSize.LANDSCAPE_A3], output_bounds=MinmaxMapping.maps[PlotterType.HP_7595A])
 
-        hpgl_renderer = HPGLRenderer(DataDirHandler().hpgl("composition73_mutoh"))
+        hpgl_renderer = HPGLRenderer(DataDirHandler().hpgl(f"composition73_mutoh_{r.hash}"))
         hpgl_renderer.render(pc)
         data = hpgl_renderer.generate_string()
         return data
