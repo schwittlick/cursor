@@ -1,12 +1,12 @@
 import arcade
 import numpy as np
 
+from cursor import misc
 from cursor.collection import Collection
 from cursor.device import Paper, PaperSize, PlotterType
 from cursor.export import ExportWrapper
 from cursor.position import Position
 from cursor.renderer import RealtimeRenderer
-from data.compositions.composition86 import transform_path
 from tools.spline import catmull_rom_chain, num_segments
 
 np.set_printoptions(precision=4)
@@ -26,6 +26,13 @@ def export_hpgl(rr: RealtimeRenderer = None):
         f"VS42_{c.hash()}",
         keep_aspect_ratio=False,
     )
+
+
+def transform_path(path, bb, out):
+    fn = misc.transformFn((bb.x, bb.y), (bb.x2, bb.y2), out[0], out[1])
+
+    res = list(map(fn, path.vertices))
+    return Path.from_tuple_list(res)
 
 
 if __name__ == "__main__":
