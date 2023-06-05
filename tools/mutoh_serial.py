@@ -9,7 +9,7 @@ from cursor.device import PlotterType, PaperSize, MinmaxMapping, Paper
 from cursor.filter import MaxPointCountFilter, MinPointCountFilter
 from cursor.loader import Loader
 from cursor.renderer import HPGLRenderer
-from tools.octet.discovery import discover
+from tools.discovery import discover
 
 
 # Send HP-GL code to 7475A plotter
