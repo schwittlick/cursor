@@ -14,6 +14,7 @@ from cursor.collection import Collection
 from cursor.path import Path
 
 import pytest
+import fpdf
 
 
 def test_pathiterator():
@@ -334,9 +335,9 @@ def test_digiplot_renderer():
     out = renderer.save("digi_test01")
 
     assert (
-        out
-        == "X,0;/Y,0;H;K;X,0;/Y,0;I;K;X,1;/Y,0;I;K;X,2;/Y,0;I;K;X,3;/Y,0;I;K;X,4;/Y,0;I;K;X,2;/Y,"
-        "2;H;K;X,2;/Y,2;I;K;X,2;/Y,3;I;K;X,2;/Y,4;I;K;X,2;/Y,5;I;K;X,2;/Y,6;I;K;X,0;/Y,0;H;K;"
+            out
+            == "X,0;/Y,0;H;K;X,0;/Y,0;I;K;X,1;/Y,0;I;K;X,2;/Y,0;I;K;X,3;/Y,0;I;K;X,4;/Y,0;I;K;X,2;/Y,"
+               "2;H;K;X,2;/Y,2;I;K;X,2;/Y,3;I;K;X,2;/Y,4;I;K;X,2;/Y,5;I;K;X,2;/Y,6;I;K;X,0;/Y,0;H;K;"
     )
 
 
@@ -357,8 +358,6 @@ def disabled_test_pdf_renderer():
     a.render(rec, scale=1, thickness=30)
 
     text = a.output.splitlines()
-
-    import fpdf
 
     pdf = fpdf.FPDF(orientation="L", unit="mm", format="A4")
 
