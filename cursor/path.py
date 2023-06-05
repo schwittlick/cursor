@@ -417,14 +417,10 @@ class Path:
                     if ok == 0:
                         ok = 0.01
                     lDetDivInv = 1 / ok
-                    intersectionx = (
-                            -((diffLAx * compareB) - (compareA * diffLBx)) * lDetDivInv
-                    )
-                    intersectiony = (
-                            -((diffLAy * compareB) - (compareA * diffLBy)) * lDetDivInv
-                    )
+                    i_x = (-((diffLAx * compareB) - (compareA * diffLBx)) * lDetDivInv)
+                    i_y = (-((diffLAy * compareB) - (compareA * diffLBy)) * lDetDivInv)
 
-                    return True, intersectionx, intersectiony
+                    return True, i_x, i_y
 
         return False, 0.0, 0.0
 
