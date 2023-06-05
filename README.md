@@ -8,8 +8,8 @@
 
 setup
 
-    pyenv install 3.10.10
-    pyenv virtualenv 3.10.10 cursor
+    pyenv install 3.10.11
+    pyenv virtualenv 3.10.11 cursor
     pyenv activate cursor
     pip install -r requirements.txt
     git submodule update --init

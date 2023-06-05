@@ -3,14 +3,12 @@ jobs:
   build:
     working_directory: ~/cursor
     docker:
-      - image: python:3.10.11-alpine
+      - image: python:3.10.11-buster
     steps:
       - checkout
       - run:
           name: Install dependencies
           command: |
-            apt-get update
-            apt-get install gcc
             pip3 install --upgrade pip
             pip3 install -r requirements.txt
             pip3 install -e .
