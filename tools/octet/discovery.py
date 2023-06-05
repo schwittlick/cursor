@@ -34,7 +34,7 @@ def async_discover(serial_port, baudrate: int = 9600, stopbits: typing.Tuple = s
 
 
 def discover(baudrate=9600, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE,
-             xonxoff=False, timeout=0.1) -> list:
+             xonxoff=False, timeout=0.5) -> list:
     ports = list(serial.tools.list_ports.comports())
     data = []
 
