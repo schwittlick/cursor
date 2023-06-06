@@ -53,7 +53,7 @@ class Recorder:
 
     def __save_async(self):
         self.save()
-        self._timer = threading.Timer(60*5, self.__save_async, [])
+        self._timer = threading.Timer(60 * 5, self.__save_async, [])
         self._timer.start()
 
     def on_move(self, x, y):
@@ -116,7 +116,7 @@ class Recorder:
         recs = {"mouse": self._mouse_recordings, "keys": self._keyboard_recodings}
 
         fname_compressed = save_path / (
-            str(self._start_time_stamp) + f"_{self._fn_suffix}.json"
+                str(self._start_time_stamp) + f"_{self._fn_suffix}.json"
         )
 
         log.warn(DateHandler.utc_timestamp())
