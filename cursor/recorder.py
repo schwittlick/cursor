@@ -115,9 +115,8 @@ class Recorder:
 
         recs = {"mouse": self._mouse_recordings, "keys": self._keyboard_recodings}
 
-        fname_compressed = save_path / (str(self._start_time_stamp) +
-                                        f"_{self._fn_suffix}.json"
-                                        )
+        filename = str(self._start_time_stamp) + f"_{self._fn_suffix}.json"
+        fname_compressed = save_path / filename
 
         log.warn(DateHandler.utc_timestamp())
         log.good(f"Saving mouse recordings: {len(self._mouse_recordings)}")
