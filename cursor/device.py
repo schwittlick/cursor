@@ -1,7 +1,8 @@
-from cursor.bb import BoundingBox as BB
-
 from enum import Enum
+
 import wasabi
+
+from cursor.bb import BoundingBox as BB
 
 log = wasabi.Printer()
 
@@ -96,6 +97,7 @@ class PaperSize(Enum):
     SQUARE_25_25 = 19
     LANDSCAPE_A1_HP_7596B = 20
     PORTRAIT_50_100 = 21
+    PHOTO_PAPER_178_240_LANDSCAPE = 22
 
 
 class MinmaxMapping:
@@ -155,6 +157,18 @@ class PlotterName:
         PlotterType.ROLAND_PNC1000_50x100: "roland_pnc1000",
         PlotterType.HP_7595A_A0: "hp7595a_draftmaster_sx_a0",
         PlotterType.HP_7596A: "hp7596a_draftmaster_II_a1",
+    }
+
+
+class PlotterHpglNames:
+    names = {
+        "7475A": PlotterType.HP_7475A_A3,
+        "DXY-1200": PlotterType.ROLAND_DXY1200,
+        "DXY-980": PlotterType.ROLAND_DXY980,
+        "7595A": PlotterType.HP_7595A,
+        "7596A": PlotterType.HP_7596B,
+        "7470A": PlotterType.HP_7470A,
+        "7550A": PlotterType.HP_7550A,
     }
 
 
@@ -265,6 +279,7 @@ class PaperSizeName:
         PaperSize.SQUARE_25_25: "square_25_25",
         PaperSize.LANDSCAPE_A1_HP_7596B: "landscape_a1",
         PaperSize.PORTRAIT_50_100: "portrait_50x100",
+        PaperSize.PHOTO_PAPER_178_240_LANDSCAPE: "photo_paper_178x240",
     }
 
 
@@ -292,4 +307,5 @@ class Paper:
         PaperSize.SQUARE_25_25: (215, 170),
         PaperSize.LANDSCAPE_A1_HP_7596B: (776, 555),
         PaperSize.PORTRAIT_50_100: (460, 960),
+        PaperSize.PHOTO_PAPER_178_240_LANDSCAPE: (240, 178),
     }

@@ -172,7 +172,7 @@ class Exporter:
 
                 jpeg_folder = DataDirHandler().jpg(self.name)
                 jpeg_renderer = JpegRenderer(jpeg_folder)
-                jpeg_renderer.render(pc, scale=4.0)
+                jpeg_renderer.render(pc, scale=8.0)
                 jpeg_renderer.save(f"{fname}")
 
         if source:

@@ -17,7 +17,7 @@ extras_require = {}
 
 setup(
     name="cursor",
-    version="220909",
+    version="230605",
     description="cursor line experiments",
     long_description=long_description,
     author="Marcel Schwittlick",
@@ -29,7 +29,8 @@ setup(
     entry_points={
         "console_scripts": [
             "cursor_recorder = cursor.recorder:main",
-            "composition57 = experiments.composition57:main",
+            "discovery = tools.discovery:discover",
+            "sendhpgl = tools.sendhpgl:main",
         ]
     },
     license="MIT",
@@ -42,6 +43,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.10.11",
     ],
 )

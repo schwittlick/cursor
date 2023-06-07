@@ -1,33 +1,33 @@
 from __future__ import annotations
 
-from cursor.position import Position
-from cursor.path import Path
-from cursor.bb import BoundingBox
-from cursor.filter import Filter
-from cursor.sorter import Sorter
-from cursor.data import DataDirHandler
+import copy
+import datetime
+import hashlib
+import operator
+import pickle
+import random
+import time
+import typing
+from functools import reduce
 
 import numpy as np
-from functools import reduce
 import pandas as pd
-import datetime
 import pytz
-import random
-import hashlib
 import wasabi
-import copy
-import typing
-import operator
-import time
-import pickle
 
+from cursor.bb import BoundingBox
+from cursor.data import DataDirHandler
+from cursor.filter import Filter
+from cursor.path import Path
+from cursor.position import Position
+from cursor.sorter import Sorter
 
 log = wasabi.Printer()
 
 
 class Collection:
     def __init__(
-        self, timestamp: typing.Union[float, None] = None, name: str = "noname"
+            self, timestamp: typing.Union[float, None] = None, name: str = "noname"
     ):
         self.__paths: typing.List[Path] = []
         self.__name = name
@@ -77,7 +77,7 @@ class Collection:
             yield p
 
     def __getitem__(
-        self, item: typing.Union[int, slice]
+            self, item: typing.Union[int, slice]
     ) -> typing.Union[Collection, Path]:
         if isinstance(item, slice):
             start, stop, step = item.indices(len(self))
@@ -121,6 +121,9 @@ class Collection:
             )
             self.__paths.append(p)
 
+    def pop(self, idx: int) -> Path:
+        return self.__paths.pop(idx)
+
     def as_array(self) -> np.array:
         return np.array([p.as_array() for p in self.__paths], dtype=object)
 
@@ -150,6 +153,15 @@ class Collection:
         log.good(
             f"PathCollection::clean: reduced path count from {len_before} to {len(self)}"
         )
+
+    def merge(self) -> Path:
+        pa = Path()
+
+        for p in self:
+            for poi in p:
+                pa.add_position(poi)
+
+        return pa
 
     def reverse(self) -> None:
         self.__paths.reverse()
@@ -191,7 +203,7 @@ class Collection:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
     def sorted(
-        self, pathsorter: Sorter, reference_path: Path = None
+            self, pathsorter: Sorter, reference_path: Path = None
     ) -> typing.List[Path]:
         if isinstance(pathsorter, Sorter):
             return pathsorter.sorted(self.__paths, reference_path)
@@ -355,22 +367,25 @@ class Collection:
         self.__paths = pp
 
     def clip_shapely(self, bb: BoundingBox) -> None:
+        newpaths = []
         for p in self.__paths:
-            p.clip_shapely(bb)
+            _p = p.clip_shapely(bb)
+            newpaths.extend(_p)
+        self.__paths = newpaths
 
     def calc_travel_distance(self, fac) -> float:
         return reduce(lambda a, b: a + b, [x.distance / fac for x in self.__paths])
 
     def fit(
-        self,
-        size=tuple[int, int],
-        xy_factor: tuple[float, float] = (1.0, 1.0),
-        padding_mm: int = None,
-        padding_units: int = None,
-        padding_percent: int = None,
-        output_bounds: BoundingBox = None,
-        cutoff_mm=None,
-        keep_aspect=False,
+            self,
+            size=tuple[int, int],
+            xy_factor: tuple[float, float] = (1.0, 1.0),
+            padding_mm: int = None,
+            padding_units: int = None,
+            padding_percent: int = None,
+            output_bounds: BoundingBox = None,
+            cutoff_mm=None,
+            keep_aspect=False,
     ) -> None:
         """
         fits (scales and centers) a collection of paths into a bounding box. units can be in pixels or mm

@@ -69,12 +69,14 @@ class Plotter:
 
     def set_value1(self, v1: float):
         logger.info(f"v1: {v1}")
-        self.thread.v1_label.text = str(int(v1))
+        if self.thread.v1_label:
+            self.thread.v1_label.text = str(int(v1))
         self.__value1 = v1
 
     def set_value2(self, v2: float):
         logger.info(f"v1: {v2}")
-        self.thread.v2_label.text = str(int(v2))
+        if self.thread.v2_label:
+            self.thread.v2_label.text = str(int(v2))
         self.__value2 = v2
 
     def set_line_distance(self, d):
@@ -169,7 +171,7 @@ class Plotter:
         new_pos_x = misc.map(xy[0], 0, 1, bounds.x, bounds.x2, True)
         new_pos_y = misc.map(xy[1], 0, 1, bounds.y, bounds.y2, True)
         result, feedback = self.send_data(
-            f"SP{self.current_pen};VS{self.thread.speed};PD;PA{new_pos_x},{new_pos_y};")
+            f"SP{self.current_pen};VS{self.thread.speed};PU;PA{new_pos_x},{new_pos_y};")
         # print(f"done pen updown {result} + {feedback}")
 
         return feedback
@@ -428,7 +430,7 @@ class Plotter:
 
     def transform(self, c, dims):
         cbb = c.bb()
-        trans = Plotter.transformFn((cbb.x, cbb.y), (cbb.x2, cbb.y2), (dims.x, dims.y), (dims.x2, dims.y2))
+        trans = misc.transformFn((cbb.x, cbb.y), (cbb.x2, cbb.y2), (dims.x, dims.y), (dims.x2, dims.y2))
         for pa in c:
             for poi in pa.vertices:
                 n_poi = trans(poi.as_tuple())
@@ -442,30 +444,3 @@ class Plotter:
         seconds = r.estimated_duration(self.thread.speed)
         logger.info(f"this will take approx {seconds}s.")
         return r.generate_string(), seconds
-
-    """
-    ty lars wander
-    https://larswander.com/writing/centering-and-scaling/
-    """
-
-    @staticmethod
-    def transformFn(stl, sbr, dtl, dbr):
-        stlx, stly = stl
-        sbrx, sbry = sbr
-        dtlx, dtly = dtl
-        dbrx, dbry = dbr
-
-        sdx, sdy = sbrx - stlx, sbry - stly
-        ddx, ddy = dbrx - dtlx, dbry - dtly
-
-        ry, rx = ddx / sdx, ddy / sdy
-        a = min(rx, ry)
-
-        ox, oy = (ddx - sdx * a) * 0.5 + dtlx, (ddy - sdy * a) * 0.5 + dtly
-        bx, by = -stlx * a + ox, -stly * a + oy
-
-        def calc(inp):
-            x, y = inp[0], inp[1]
-            return x * a + bx, y * a + by
-
-        return calc
