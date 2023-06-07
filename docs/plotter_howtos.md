@@ -1,17 +1,9 @@
-## plotters
 
-    HP Draftmaster SX/HP7595A,
-    HP7475A,
-    Roland DG DXY-980,
-    Roland DG DXY-990,
-    Roland DG DXY-885,
-    Roland DG DXY-1200,
-    Tektronix 4662,
-    Aritma 512,
-    Roland DG DPX3300,
-    Roland DG CAMM-1 PNC-1000,
-    A0 DIY
+great resources:
+https://github.com/beardicus/awesome-plotters#manuals-and-ephemera
 
+pens
+http://plotterstifte-faserschreibfedern.de/
 
 ##### CalComp 1023
 

@@ -1,24 +1,24 @@
 from __future__ import annotations
 
+import copy
+import os
+import pathlib
+import random
+import typing
+
+import arcade
+import pymsgbox
+import svgwrite
+import wasabi
+from PIL import Image, ImageDraw
 from arcade.experimental.uislider import UISlider
 from arcade.gui import UIManager, UIOnChangeEvent, UIAnchorWidget
 
+from cursor.bb import BoundingBox
+from cursor.collection import Collection
 from cursor.data import DataDirHandler, DateHandler
 from cursor.path import Path
-from cursor.collection import Collection
 from cursor.position import Position
-from cursor.bb import BoundingBox
-
-import svgwrite
-import os
-import typing
-import arcade
-import pathlib
-import pymsgbox
-import random
-import wasabi
-import copy
-from PIL import Image, ImageDraw
 
 log = wasabi.Printer()
 
@@ -216,6 +216,8 @@ class RealtimeRenderer(arcade.Window):
             if not color.startswith("__")
         ]
 
+        self.shapes = None
+        self.collection = Collection()
         self.clear_list()
 
         self.cbs = {}
@@ -272,6 +274,7 @@ class RealtimeRenderer(arcade.Window):
 
     def clear_list(self):
         self.shapes = arcade.ShapeElementList()
+        self.collection = Collection()
 
     def add_point(self, po: Position, width: int = 5, color: arcade.color = None):
         if not color:
@@ -293,6 +296,7 @@ class RealtimeRenderer(arcade.Window):
 
         line_strip = arcade.create_line_strip(new_tups, color, line_width)
         self.shapes.append(line_strip)
+        self.collection.add(p)
 
     def add_polygon(self, p: Path, color: arcade.color = None):
         # assert p.is_closed()
@@ -382,6 +386,7 @@ class HPGLRenderer:
         _prev_velocity = 0
         _prev_force = 0
         _prev_pen = 0
+        _prev_pwm = 0
 
         first = True
         for p in self.__paths:
@@ -410,6 +415,11 @@ class HPGLRenderer:
                     _hpgl_string += f"FS{self.__get_pen_force(p.pen_force)};\n"
                     _prev_force = p.pen_force
 
+            if p.laser_pwm:
+                if _prev_pwm != p.laser_pwm:
+                    _hpgl_string += f"PWM{p.laser_pwm};\n"
+                    _prev_pwm = p.laser_pwm
+
             _hpgl_string += f"PA{int(x)},{int(y)};\n"
             if p.is_polygon:
                 _hpgl_string += "PM0;\n"
@@ -430,7 +440,7 @@ class HPGLRenderer:
         return _hpgl_string
 
     def __add_home(self, hpgl_string):
-        return f"{hpgl_string}PA0,0;SP0;\n"
+        return f"{hpgl_string}PA0,0;\nSP0;\n"
 
     def save(self, filename: str) -> str:
         pathlib.Path(self.__save_path).mkdir(parents=True, exist_ok=True)

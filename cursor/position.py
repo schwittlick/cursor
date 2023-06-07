@@ -1,21 +1,21 @@
 from __future__ import annotations
 
-
-from cursor.bb import BoundingBox
+import copy
+import math
+import typing
 
 import numpy as np
-import copy
-import typing
-import math
+
+from cursor.bb import BoundingBox
 
 
 class Position:
     def __init__(
-        self,
-        x: float = 0.0,
-        y: float = 0.0,
-        timestamp: int = 0,
-        color: typing.Tuple[int, int, int] = None,
+            self,
+            x: float = 0.0,
+            y: float = 0.0,
+            timestamp: int = 0,
+            color: typing.Tuple[int, int, int] = None,
     ):
         self._pos = np.array([x, y], dtype=float)
         self.timestamp = timestamp
@@ -55,11 +55,17 @@ class Position:
             copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(self.timestamp)
         )
 
-    def distance(self, t: Position) -> float:
-        return np.linalg.norm(self.as_array() - t.as_array())
+    def distance(self, t: typing.Union[Position, np.ndarray, tuple[float, float]]) -> float:
+        func = np.linalg.norm
+        if isinstance(t, Position):
+            return func(self.as_array() - t.as_array())
+        elif isinstance(t, np.ndarray):
+            return func(self.as_array() - t)
+        elif isinstance(t, tuple):
+            return func(self.as_array() - np.asarray(t))
 
     def rot(
-        self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)
+            self, angle: float, origin: tuple[float, float] = (0.0, 0.0)
     ) -> None:
         ox, oy = origin
 

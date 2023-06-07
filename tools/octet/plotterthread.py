@@ -73,7 +73,8 @@ class PlotterThread(threading.Thread):
 
     def update_thread_count_ui(self):
         s = self.buffer.qsize()
-        self.thread_count.text = "↔️ " + str(s)
+        if self.thread_count:
+            self.thread_count.text = "↔️ " + str(s)
 
     def run(self):
         logger.info(f"Thread for {self.plotter.type} at {self.plotter.serial_port} started")

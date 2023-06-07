@@ -62,10 +62,12 @@ def main():
     # hp 7475 & 7550 512
     # hp 7440 255
 
+    BUFFER_SIZE = 512
+
     show_progress(pos, len(code))
     while pos < len(code):
         avail = check_avail(serial)
-        if avail < 1024:
+        if avail < BUFFER_SIZE:
             sleep(0.01)
             continue
 
