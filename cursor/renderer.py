@@ -4,6 +4,7 @@ import copy
 import os
 import pathlib
 import random
+import sys
 import typing
 
 import arcade
@@ -338,6 +339,7 @@ class RealtimeRenderer(arcade.Window):
     def on_key_press(self, key: int, modifiers: int):
         if key == arcade.key.ESCAPE:
             arcade.exit()
+            sys.exit(0)
         elif key == arcade.key.C:
             self.clear_list()
 
@@ -352,7 +354,7 @@ class RealtimeRenderer(arcade.Window):
 
     def on_mouse_motion(self, x, y, dx, dy):
         if self._on_mouse:
-            self._on_mouse(x, y, dx, dy)
+            self._on_mouse(self, x, y, dx, dy)
 
 
 class HPGLRenderer:
