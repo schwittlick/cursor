@@ -20,6 +20,7 @@
 | HP 7475A                       | Marcel  | A3/A4 |                    | DP25 M            | HPGL     | HP/RO                     | 6         |
 | HP 7475A                       | Marcel  | A3/A4 |                    | HP-IB             | HPGL     | HP/RO                     | 6         |
 | HP 7475A                       | Marcel  | A3/A4 |                    | HP-IB             | HPGL     | HP/RO                     | 6         |
+| HP 7475A                       | Marcel  | A3/A4 |                    | HP-IB             | HPGL     | HP/RO                     | 6         |
 | HP 7044A                       | Marcel  | A4    | Analog Plotter     | Voltage           | -        | Unique pen                | 1         |
 | HP 7550 Plus                   | Marcel  | A3    | OK (Serial)        | DP25 F & HP-IB    | HPGL     | HP/RO                     | 8         |
 | HP 7550A                       | Marcel  | A3    | OK (Serial)        | DP25 F & HP-IB    | HPGL     | HP/RO                     | 8         |
