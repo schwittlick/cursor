@@ -2,7 +2,7 @@ import serial
 import time
 
 if __name__ == '__main__':
-    """ 
+    """
     Used a virtual serial port to connect COM1 <-> COM2
     The PSU is connected via USB, turned on and is COM10
     1. start this script
