@@ -8,25 +8,26 @@ if __name__ == '__main__':
     1. start this script
     2. Connect iPowerControl to COM1
     3. Watch the outputs happen to reverse engineer the protocol
-    
+
     *IDN? -> init
     MEASure:VOLTage? -> return voltage
     MEASure:CURRent? -> current current
     OUTPut? -> is it on?
-    
+
     VOLTage 0.000 -> set voltage
     CURRent 0.000 -> set current
     OUTPut 1 -> set on
     OUTPut 0 -> set off
-    
+
     CURR:LIM? MAX -> get max curr
     CURR:LIM? MIN
     CURR? MIN
     CURR? MAX
-    
+
     VOLTage:LIMit 5.000 -> set volt limit
     CURRent:LIMit 2.000 -> set current limit
     """
+
     serial_ipowercontrol = serial.Serial('COM2', 9600)
     serial_psu = serial.Serial('COM10', 115200)
     while True:
