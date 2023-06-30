@@ -3,6 +3,12 @@ import time
 
 if __name__ == '__main__':
     """ 
+    Used a virtual serial port to connect COM1 <-> COM2
+    The PSU is connected via USB, turned on and is COM10
+    1. start this script
+    2. Connect iPowerControl to COM1
+    3. Watch the outputs happen to reverse engineer the protocol
+    
     *IDN? -> init
     MEASure:VOLTage? -> return voltage
     MEASure:CURRent? -> current current
@@ -34,12 +40,10 @@ if __name__ == '__main__':
             if serial_ipowercontrol.in_waiting > 0:
                 data = serial_ipowercontrol.readline().decode('utf-8').strip()
 
-                # Print data to the console
                 print('Received from iPowerControl:', data)
 
                 serial_psu.write(f"{data}\n".encode('utf-8'))
 
-                # Wait for a small amount of time to avoid overloading the CPU
             time.sleep(0.01)
 
         except KeyboardInterrupt:
@@ -49,6 +53,5 @@ if __name__ == '__main__':
         except Exception as e:
             print("Error:", str(e))
 
-    # Close the serial port
     serial_ipowercontrol.close()
     serial_psu.close()

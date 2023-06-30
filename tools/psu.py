@@ -6,6 +6,10 @@ import serial
 
 
 class PSU:
+    """
+    Control a Kiprim DC310S lab power supply
+    """
+
     STATUS = "*IDN?"
     VOLT = "VOLTage"
     CURRENT = "CURRent"
@@ -31,23 +35,22 @@ class PSU:
         if isinstance(value, float):
             self.__serial.write(f"{prefix} {value:.3}\n".encode())
 
-    def __read(self):
+    def __read(self) -> str:
         return self.__serial.readline().decode()
 
     def open(self) -> bool:
         self.__serial = serial.Serial(self.__port, baudrate=self.__baudrate, timeout=1)
         self.__send(PSU.STATUS)
         status = self.__read()
-        print(status)
         return len(status) > 0
 
     def close(self) -> None:
         self.__serial.close()
 
-    def on(self):
+    def on(self) -> None:
         self.__send(PSU.ONOFF, 1)
 
-    def off(self):
+    def off(self) -> None:
         self.__send(PSU.ONOFF, 0)
 
     def set_voltage_limit(self, volts: float) -> None:
