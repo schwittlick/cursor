@@ -254,8 +254,8 @@ def test_reorder_quadrants2():
     import random
 
     for i in range(100):
-        x = random.randint(0, 100)
-        y = random.randint(0, 100)
+        x = random.uniform(0, 100)
+        y = random.uniform(0, 100)
         p = Path()
         p.add(x, y)
         p.add(x, y)
