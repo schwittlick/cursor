@@ -63,6 +63,16 @@ class Path:
         )
         return rep
 
+    def __eq__(self, other: Path) -> bool:
+        if len(self) != len(other):
+            return False
+
+        for i in range(len(self)):
+            if self.vertices[i] != other[i]:
+                return False
+
+        return True
+
     def __len__(self) -> int:
         return len(self.vertices)
 
