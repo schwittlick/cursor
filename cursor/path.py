@@ -18,13 +18,12 @@ from shapely.geometry import LineString, MultiLineString, JOIN_STYLE, Point
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import clip_by_rect
 
+from cursor import misc
 from cursor.algorithm import ramer_douglas_peucker
 from cursor.algorithm.entropy import calc_entropy
 from cursor.algorithm.frechet import LinearDiscreteFrechet
 from cursor.algorithm.frechet import euclidean
 from cursor.bb import BoundingBox
-from cursor.misc import map
-from cursor.misc import mix
 from cursor.position import Position
 
 log = wasabi.Printer()
@@ -435,9 +434,9 @@ class Path:
 
             pthis = self[idxthis]
             pnew = newpath[idxnew]
-            x_interp = mix(pthis.x, pnew.x, perc)
-            y_interp = mix(pthis.y, pnew.y, perc)
-            time_interp = mix(pthis.timestamp, pnew.timestamp, perc)
+            x_interp = misc.mix(pthis.x, pnew.x, perc)
+            y_interp = misc.mix(pthis.y, pnew.y, perc)
+            time_interp = misc.mix(pthis.timestamp, pnew.timestamp, perc)
 
             path.add(x_interp, y_interp, int(time_interp))
 
@@ -695,7 +694,7 @@ class Path:
 
         return offset_path
 
-    def parallel_offset(self, dist: float) -> typing.List[Path]:
+    def parallel_offset(self, dist: float, join_style=JOIN_STYLE.mitre) -> typing.List[Path]:
         def iter_and_return_path(offset: BaseGeometry) -> Path:
             pa = Path()
             for x, y in offset.coords:
@@ -715,9 +714,9 @@ class Path:
             result = line.parallel_offset(
                 abs(dist),
                 side=side,
-                resolution=256,
-                join_style=JOIN_STYLE.mitre,
-                mitre_limit=1.0,
+                resolution=512,
+                join_style=join_style,
+                mitre_limit=1000.0,
             )
 
             if type(result) is MultiLineString:
@@ -780,7 +779,7 @@ class Path:
 
         weights = [0] * size
         for i in range(size):
-            cur_weight = map(i, 0, size, 1, shape, True)
+            cur_weight = misc.map(i, 0, size, 1, shape, True)
             weights[i] = cur_weight
 
         result = self.copy()
@@ -814,6 +813,21 @@ class Path:
         self.vertices = [
             prev := v for v in self.vertices if v.distance(prev) > dist  # noqa: F841
         ]
+
+    def subset(self, start: int, end: int):
+        if start < 0 or start > len(self) or end < 0 or end > len(self):
+            raise Exception("bounds should be within number of vertices")
+        positions = self._vertices[start:end]
+        pa = Path()
+        for pos in positions:
+            pa.add_position(pos)
+
+        return pa
+
+    def transform(self, bb: BoundingBox, out: BoundingBox):
+        fn = misc.transformFn((bb.x, bb.y), (bb.x2, bb.y2), (out.x, out.y), (out.x2, out.y2))
+        res = list(map(fn, self.vertices))
+        self.vertices = Path.from_tuple_list(res).vertices
 
     def simplify(self, e: float = 1.0) -> None:
         # before = len(self.vertices)
