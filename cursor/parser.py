@@ -13,9 +13,12 @@ log = wasabi.Printer()
 class HPGLParser:
     IN = 'IN'
     SP = 'SP'
-    PA = 'PA'
     LB = 'LB'
     SI = 'SI'
+
+    PA = 'PA'
+    PD = 'PD'
+    PU = 'PU'
 
     def __init__(self, file: pathlib.Path):
         self.file = file
@@ -54,6 +57,10 @@ class HPGLParser:
                     self.__parse_label(glf)
                 elif cmd == HPGLParser.SI:
                     self.__parse_font_size(glf)
+                elif cmd == HPGLParser.PD:
+                    self.__parse_pen_down(glf)
+                elif cmd == HPGLParser.PU:
+                    self.__parse_pen_up(glf)
 
                 if len(cmd) < 2:
                     break
@@ -162,6 +169,15 @@ class HPGLParser:
             s += c
             c = self.__read(glf)
         self.char_abs_height = float(s)
+
+    def __parse_pen_down(self, glf: typing.TextIO):
+        self.pen_down = True
+        self.drawn = False
+
+    def __parse_pen_up(self, glf: typing.TextIO):
+        self.pen_down = False
+        if not self.drawn:
+            self.paths.add(Path.from_tuple_list([(self.cur_x, self.cur_y), (0, 0)]))
 
 
 stick_font = {
