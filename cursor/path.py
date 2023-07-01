@@ -704,7 +704,7 @@ class Path:
 
         return offset_path
 
-    def parallel_offset(self, dist: float, join_style=JOIN_STYLE.mitre) -> typing.List[Path]:
+    def parallel_offset(self, dist: float, join_style=JOIN_STYLE.mitre, mitre_limit=1.0) -> typing.List[Path]:
         def iter_and_return_path(offset: BaseGeometry) -> Path:
             pa = Path()
             for x, y in offset.coords:
@@ -726,7 +726,7 @@ class Path:
                 side=side,
                 resolution=512,
                 join_style=join_style,
-                mitre_limit=1000.0,
+                mitre_limit=mitre_limit,
             )
 
             if type(result) is MultiLineString:
