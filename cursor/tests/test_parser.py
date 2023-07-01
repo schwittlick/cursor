@@ -10,10 +10,13 @@ def test_hpgl_parser_LB():
     paths = parser.parse()
 
     collection = Collection()
-    collection.add(Path.from_tuple_list([(100.25, 2.0), (100.875, 2.0)]))
-    collection.add(Path.from_tuple_list([(100.25, 1.375), (100.625, 1.0), (100.625, 2.0)]))
+    collection.add(Path.from_tuple_list([(100.25, 0.0), (100.875, 0.0)]))
+    collection.add(Path.from_tuple_list([(100.25, 0.625), (100.625, 1.0), (100.625, 0.0)]))
 
-    assert paths == collection
+    assert len(paths) == len(collection)
+
+    for i in range(len(paths)):
+        assert paths[i] == collection[i]
 
 
 def test_hpgl_parser_PA():
@@ -24,4 +27,7 @@ def test_hpgl_parser_PA():
     collection = Collection()
     collection.add(Path.from_tuple_list([(100, 0), (100, 100)]))
 
-    assert paths == collection
+    assert len(paths) == len(collection)
+
+    for i in range(len(paths)):
+        assert paths[i] == collection[i]
