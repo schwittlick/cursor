@@ -73,6 +73,9 @@ class Path:
 
         return True
 
+    def __hash__(self):
+        return hash(repr(self))
+
     def __len__(self) -> int:
         return len(self.vertices)
 
