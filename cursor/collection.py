@@ -316,6 +316,9 @@ class Collection:
         [p.scale(x, y) for p in self]
 
     def rot(self, delta: float) -> None:
+        """
+        in radians
+        """
         [p.rot(delta) for p in self]
 
     def downsample(self, dist: float) -> None:
