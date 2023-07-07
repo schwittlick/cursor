@@ -6,6 +6,7 @@ log = wasabi.Printer()
 
 class Timer:
     def __init__(self):
+        self._time = None
         self.start()
 
     def start(self):
@@ -15,5 +16,5 @@ class Timer:
         t1 = time.perf_counter()
         return t1 - self._time
 
-    def print_elapsed(self, msg):
+    def print_elapsed(self, msg: str = "") -> None:
         log.info(f"{msg}: {round(self.elapsed() * 1000)}ms")
