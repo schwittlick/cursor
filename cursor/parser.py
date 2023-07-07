@@ -20,11 +20,10 @@ class HPGLParser:
     PD = 'PD'
     PU = 'PU'
 
+    DI = 'DI'
+
     def __init__(self, file: pathlib.Path):
         self.file = file
-
-        self.pen_down = False
-        self.drawn = False
 
         self.char_abs_width = 0
         self.char_abs_height = 0
@@ -35,10 +34,7 @@ class HPGLParser:
 
         self.__init()
 
-        self.cur_cr_x = self.cur_x
-        self.cur_cr_y = self.cur_y
-
-    def parse(self):
+    def parse(self) -> Collection:
         with open(self.file.as_posix(), 'r', newline='') as glf:
             while True:
                 c = self.__read(glf)
@@ -61,6 +57,8 @@ class HPGLParser:
                     self.__parse_pen_down(glf)
                 elif cmd == HPGLParser.PU:
                     self.__parse_pen_up(glf)
+                elif cmd == HPGLParser.DI:
+                    self.__parse_direction_absolute(glf)
 
                 if len(cmd) < 2:
                     break
@@ -69,17 +67,21 @@ class HPGLParser:
 
     def __init(self):
         self.pen_down = False
+        self.drawn = False
         self.cur_pen = 0
         self.cur_x = 0
         self.cur_y = 0
         self.cur_cr_x = self.cur_x
         self.cur_cr_y = self.cur_y
 
+        self.run = 1
+        self.rise = 0
+
         self.paths.clear()
 
     def __read(self, f: TextIO) -> str:
         data = f.read(1)
-        # log.info(data)
+        log.info(data)
         return data
 
     def __parse_pen_select(self, glf: typing.TextIO):
@@ -178,6 +180,24 @@ class HPGLParser:
         self.pen_down = False
         if not self.drawn:
             self.paths.add(Path.from_tuple_list([(self.cur_x, self.cur_y), (0, 0)]))
+
+    def __parse_direction_absolute(self, glf: typing.TextIO):
+        s = ''
+        c = self.__read(glf)
+        if c == ';':
+            self.run = 1
+            self.rise = 0
+            return
+        while c != ',':
+            s += c
+            c = self.__read(glf)
+        self.run = float(s)
+        s = ''
+        c = self.__read(glf)
+        while c != ';':
+            s += c
+            c = self.__read(glf)
+        self.rise = float(s)
 
 
 stick_font = {
