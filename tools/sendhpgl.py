@@ -1,6 +1,5 @@
-# Send HP-GL code to 7475A plotter
-# Copyright (C) 2019  Luca Schmid
-# Copyright (C) 2022  Marcel Schwittlick
+# Send HP-GL code to a plotter
+# Copyright (C) 2023  Marcel Schwittlick
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,19 +15,27 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from argparse import ArgumentParser
-from serial import Serial
 from time import sleep
+
+import serial
+import wasabi
+from serial import Serial
+from tqdm import tqdm
+
+log = wasabi.Printer(pretty=True)
 
 ESC = chr(27)
 ESC_TERM = ":"
 
-OUTBUT_BUFFER_SPACE = f"{ESC}.B".encode()
-OUTPUT_EXTENDED_STATUS = f"{ESC}.O".encode()  # info about device satus etc
+OUTBUT_BUFFER_SPACE = f"{ESC}.B"
+OUTPUT_EXTENDED_STATUS = f"{ESC}.O"  # info about device satus etc
 OUTPUT_IDENTIFICATION = f"{ESC}.A"  # immediate return e.g. "7550A,firmwarenr"
 ABORT_GRAPHICS = f"{ESC}.K"  # clears partially parsed cmds and clears buffer
+WAIT = f"{ESC}.L"  # returns io buffer size when its empty. read it and wait for reply before next command
 
 
-def config_memory(io: int = 1024, polygon: int = 1778, char: int = 0, replot: int = 9954, vector: int = 44):
+def config_memory(serial: serial.Serial, io: int = 1024, polygon: int = 1778, char: int = 0, replot: int = 9954,
+                  vector: int = 44):
     max_memory_hp7550 = 12800
 
     assert 2 <= io <= 12752
@@ -36,31 +43,30 @@ def config_memory(io: int = 1024, polygon: int = 1778, char: int = 0, replot: in
     assert 0 <= char <= 12750
     assert 0 <= replot <= 12750
     assert 44 <= vector <= 12794
-    assert sum([io, polygon, char, replot, vector]) < max_memory_hp7550
+    assert sum([io, polygon, char, replot, vector]) <= max_memory_hp7550
 
     buffer_sizes = f"{ESC}.T{io};{polygon};{char};{replot};{vector}{ESC_TERM}"
-    wait = f"{ESC}.L"  # returns io buffer size when its empty. read it and wait for reply several seconds
     logical_buffer_size = f"{ESC}.@{io}{ESC_TERM}"
 
+    serial.write(buffer_sizes.encode())
+    serial.write(WAIT.encode())
+    answer = serial.readline().decode()
 
-def check_avail(serial):
-    serial.write(OUTBUT_BUFFER_SPACE)
-    b = b''
-    n = 0
-    while b != b'\r':
-        if len(b) > 0:
-            n = n * 10 + b[0] - 48
-        b = serial.read()
-    # print(f"avail {n}")
-    return n
+    serial.write(logical_buffer_size.encode())
+    serial.write(WAIT.encode())
+    answer = serial.readline().decode()
 
 
-def show_progress(pos, total, length=100):
-    fill = length * pos // total
-    print('\rProgress: [' + fill * '\u2588' + (length - fill) * '\u2591' + '] ' + str(pos) + ' of ' + str(
-        total) + ' bytes sent', end='\r')
-    if pos == total:
-        print()
+def identify(port: serial.Serial):
+    port.write(OUTPUT_IDENTIFICATION.encode())
+    answer = port.readline().decode()
+    return answer.split(',')[0]
+
+
+def abort(port: serial.Serial):
+    port.write(ABORT_GRAPHICS.encode())
+    port.write(WAIT.encode())
+    answer = port.readline().decode()
 
 
 def main():
@@ -69,32 +75,35 @@ def main():
     parser.add_argument('file')
     args = parser.parse_args()
 
-    serial = Serial(port=args.port, timeout=0)
+    port = Serial(port=args.port, baudrate=9600, timeout=0.5)
 
     code = open(args.file, 'r').read()
     pos = 0
 
-    # draftmasters 1024
-    # hp 7475 & 7550 512
-    # hp 7440 255
+    abort(port)
+    BATCH_SIZE = 128
+    model = identify(port)
+    log.info(f"Detected model {model}")
+    if model == "7550A":
+        config_memory(port, 12752, 4, 0, 0, 44)
 
-    BUFFER_SIZE = 512
+    with tqdm(total=len(code)) as pbar:
+        pbar.update(0)
 
-    show_progress(pos, len(code))
-    while pos < len(code):
-        avail = check_avail(serial)
-        if avail < BUFFER_SIZE:
-            sleep(0.01)
-            continue
+        while pos < len(code):
+            port.write(OUTBUT_BUFFER_SPACE.encode())
+            free_io_memory = int(port.readline().decode())
+            if free_io_memory < BATCH_SIZE:
+                sleep(0.01)
+                continue
 
-        end = pos + avail
-        if len(code) - pos < avail:
-            end = len(code)
+            end = pos + BATCH_SIZE
+            if len(code) - pos < BATCH_SIZE:
+                end = len(code)
+            port.write(code[pos:end].encode('utf-8'))
+            pbar.update(BATCH_SIZE)
 
-        serial.write(code[pos:end].encode('utf-8'))
-        pos = end
-
-        show_progress(pos, len(code))
+            pos = end
 
 
 if __name__ == '__main__':

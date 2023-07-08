@@ -33,8 +33,9 @@ def async_discover(serial_port,
                         timeout=timeout)
     try:
         ser.flush()
+        ser.write(f"{chr(27)}.A".encode())
         ser.write("OI;\n".encode("utf-8"))
-        ret = ser.readline().decode("utf-8")
+        ret = ser.readline().decode("utf-8").split(',')[0]
         model = ret.strip()
         if len(model) > 0:
             ser.close()
@@ -56,7 +57,7 @@ def discover(baudrate=9600,
              bytesize=serial.EIGHTBITS,
              parity=serial.PARITY_NONE,
              xonxoff=False,
-             timeout=0.5) -> list:
+             timeout=1.5) -> list:
     ports = list(serial.tools.list_ports.comports())
     data = []
 
