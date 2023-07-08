@@ -44,22 +44,6 @@ class HPGL:
         """
         self.data += hpgl.data
 
-    def config_memory(self, io: int = 1024, polygon: int = 1778, char: int = 0, replot: int = 9954, vector: int = 44):
-        max_memory_hp7550 = 12800
-
-        assert 2 <= io <= 12752
-        assert 4 <= polygon <= 12754
-        assert 0 <= char <= 12750
-        assert 0 <= replot <= 12750
-        assert 44 <= vector <= 12794
-        assert sum([io, polygon, char, replot, vector]) < max_memory_hp7550
-
-        ESC = chr(27)
-        ESC_TERM = ":"
-        buffer_sizes = f"{ESC}.T{io};{polygon};{char};{replot};{vector}{ESC_TERM}"
-        wait = f"{ESC}.L"  # returns io buffer size when its empty. read it and wait for reply several seconds
-        logical_buffer_size = f"{ESC}.@{io}{ESC_TERM}"
-
     def IN(self) -> None:
         self.data += f"IN;"
 
