@@ -389,31 +389,29 @@ def test_path_dilate():
 
 
 def test_path_reverse():
+    """
+    testing in-place reverse() and reversed()
+    """
     p1 = Path()
-
     p1.add(5, 5111, 10000)
     p1.add(5, 5112, 10000)
     p1.add(6, 5112, 10000)
 
-    assert p1[0].x == 5
-    assert p1[0].y == 5111
+    p_test = Path()
+    p_test.add(5, 5111, 10000)
+    p_test.add(5, 5112, 10000)
+    p_test.add(6, 5112, 10000)
 
-    assert p1[1].x == 5
-    assert p1[1].y == 5112
-
-    assert p1[2].x == 6
-    assert p1[2].y == 5112
+    assert p1 == p_test
 
     p1.reverse()
 
-    assert p1[0].x == 6
-    assert p1[0].y == 5112
+    p_reversed = Path()
+    p_reversed.add(6, 5112, 10000)
+    p_reversed.add(5, 5112, 10000)
+    p_reversed.add(5, 5111, 10000)
 
-    assert p1[1].x == 5
-    assert p1[1].y == 5112
-
-    assert p1[2].x == 5
-    assert p1[2].y == 5111
+    assert p1 == p_reversed
 
     p2 = Path()
 
@@ -423,34 +421,13 @@ def test_path_reverse():
 
     p3 = p2.reversed()
 
-    assert p2[0].x == 5
-    assert p2[0].y == 5111
-
-    assert p2[1].x == 5
-    assert p2[1].y == 5112
-
-    assert p2[2].x == 6
-    assert p2[2].y == 5112
-
-    assert p3[0].x == 6
-    assert p3[0].y == 5112
-
-    assert p3[1].x == 5
-    assert p3[1].y == 5112
-
-    assert p3[2].x == 5
-    assert p3[2].y == 5111
+    assert p2 == p_test
+    assert p3 == p_reversed
 
 
 def test_path_distance():
-    p = Path()
-    p.add(0, 0, 10000)
-    p.add(0, 10, 10000)
-    p.add(10, 10, 10000)
-
-    d = p.distance
-
-    assert d == 20
+    p = Path.from_tuple_list([(0, 0), (0, 10), (10, 10), (-10, 10)])
+    assert p.distance == 40
 
 
 def test_path_layer():
