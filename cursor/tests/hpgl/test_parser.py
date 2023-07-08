@@ -1,6 +1,6 @@
 from cursor.collection import Collection
 from cursor.data import DataDirHandler
-from cursor.parser import HPGLParser
+from cursor.hpgl.parser import HPGLParser
 from cursor.path import Path
 
 
