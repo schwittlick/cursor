@@ -339,7 +339,6 @@ class RealtimeRenderer(arcade.Window):
     def on_key_press(self, key: int, modifiers: int):
         if key == arcade.key.ESCAPE:
             arcade.exit()
-            sys.exit(0)
         elif key == arcade.key.C:
             self.clear_list()
 

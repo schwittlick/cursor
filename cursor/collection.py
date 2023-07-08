@@ -194,7 +194,7 @@ class Collection:
         return self.__paths
 
     def random(self) -> Path:
-        return self.__getitem__(random.randint(0, self.__len__() - 1))
+        return random.choice(self.__paths)
 
     def sort(self, pathsorter: Sorter, reference_path: Path = None) -> None:
         if isinstance(pathsorter, Sorter):
