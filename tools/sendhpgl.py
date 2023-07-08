@@ -19,16 +19,15 @@ from argparse import ArgumentParser
 from serial import Serial
 from time import sleep
 
-
-def read_code(path):
-    code = 'IN;'
-    with open(path, 'r') as f:
-        code = f.read()
-    return code
+ESC = chr(27)
+OUTBUT_BUFFER_SPACE = f"{ESC}.B".encode()
+OUTPUT_EXTENDED_STATUS = f"{ESC}.O".encode()  # info about device satus etc
+OUTPUT_IDENTIFICATION = f"{ESC}.A"  # immediate return e.g. "7550A,firmwarenr"
+ABORT_GRAPHICS = f"{ESC}.K"  # clears partially parsed cmds and clears buffer
 
 
 def check_avail(serial):
-    serial.write(b'\x1B.B')
+    serial.write(OUTBUT_BUFFER_SPACE)
     b = b''
     n = 0
     while b != b'\r':
@@ -55,7 +54,7 @@ def main():
 
     serial = Serial(port=args.port, timeout=0)
 
-    code = read_code(args.file)
+    code = open(args.file, 'r').read()
     pos = 0
 
     # draftmasters 1024
