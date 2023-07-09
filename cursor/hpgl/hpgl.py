@@ -124,8 +124,8 @@ class HPGL:
 
     def DI(self, degree: float) -> None:
         self.degree = degree
-        rise = math.cos(degree)
-        run = math.sin(degree)
+        run = math.cos(degree * (math.pi / 180))
+        rise = math.sin(degree * (math.pi / 180))
         self.data += f"DI{run:.3f},{rise:.3f};"
 
     def DV(self, dir: int = 0):
