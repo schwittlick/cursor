@@ -23,14 +23,15 @@ def rotate(origin, point, angle):
 
 class HPGL:
     def __init__(self):
-        self._terminator = chr(3)
+        self.terminator = chr(3)
         self.plotter_unit = 40
         self.pos = (0, 0)
-        self.char_size = (40, 40)
+        self.char_size_mm = (10, 10)
 
         self.char_spacing = 1.5
         self.line_spacing = 2.0
         self.degree = 0
+        self.direction_vertical = 0
 
         self.data = ""
 
@@ -47,9 +48,9 @@ class HPGL:
     def IN(self) -> None:
         self.data += f"IN;"
 
-        self._terminator = chr(3)
+        self.terminator = chr(3)
         self.pos = (0, 0)
-        self.char_size = (40, 40)
+        self.char_size_mm = (10, 10)
 
         self.char_spacing = 1.5
         self.line_spacing = 2.0
@@ -62,7 +63,7 @@ class HPGL:
         self.data += f"VS{speed};"
 
     def DT(self, c: chr = chr(3)):
-        self._terminator = c
+        self.terminator = c
         self.data += f"DT{c};"
 
     def IW(self, x1: int, y1: int, x2: int, y2: int) -> None:
@@ -73,9 +74,6 @@ class HPGL:
         self.pos = (x, y)
 
     def PD(self, x: int = None, y: int = None) -> None:
-        assert x and y
-        assert not x and not y
-
         if not x or not y:
             self.data += "PD;"
         else:
@@ -83,9 +81,6 @@ class HPGL:
             self.pos = (x, y)
 
     def PU(self, x: int = None, y: int = None) -> None:
-        assert x and y
-        assert not x and not y
-
         if not x or not y:
             self.data += "PU;"
         else:
@@ -108,17 +103,23 @@ class HPGL:
         if len(label) > 150:
             log.warn(f"Label too long: {len(label)} > 150")
 
-        self.data += f"LB{label}{self._terminator}"
+        self.data += f"LB{label}{self.terminator}"
 
         assert chr(10) not in label or chr(13) not in label
         # for now the internal LF/CR commands are not being calculated
-        new_x = len(label) * self.char_size[0] * self.char_spacing
-        new_y = 0
-        self.pos = rotate(self.pos, (new_x, new_y), math.radians(self.degree))
+
+        if not self.direction_vertical:
+            new_x = len(label) * self.char_size_mm[0] * self.plotter_unit * self.char_spacing
+            new_y = 0
+            self.pos = rotate(self.pos, (new_x, new_y), math.radians(self.degree))
+        else:
+            new_x = self.char_size_mm[0] * self.plotter_unit * self.char_spacing
+            new_y = len(label) * self.char_size_mm[0] * self.plotter_unit * self.line_spacing
+            self.pos = rotate(self.pos, (new_x, new_y), math.radians(self.degree))
 
     def SL(self, degree: float) -> None:
-        if degree < -90 or degree > 90:
-            log.warn(f"Slant is too high: {degree} should be within -90 and 90")
+        if degree <= -90 or degree >= 90:
+            raise ValueError(f"Slant is too high: {degree} should be within -90 and 90")
         slant = math.tan(degree * (math.pi / 180))
         self.data += f"SL{slant:.3f};"
 
@@ -134,10 +135,12 @@ class HPGL:
         0: horizontal (default)
         1: vertical
         """
-        assert dir == 0 or dir == 1
+        if dir is not 0 and dir is not 1:
+            raise ValueError("Only use 1 or 0 for horizontal or vertical text alignment")
+        self.direction_vertical = dir
         self.data += f"DV{dir};"
 
-    def SI(self, x: float, y: float) -> None:
+    def SI(self, x_cm: float, y_cm: float) -> None:
         """
         Sets the font size in cm.
 
@@ -145,15 +148,15 @@ class HPGL:
         A3: 0.285, 0.375
         A4: 0.187, 0.269
         """
-        self.char_size = (x * self.plotter_unit, y * self.plotter_unit)
-        self.data += f"SI{x:.3f},{y:.3f};"
+        self.char_size_mm = (x_cm * 10, y_cm * 10)
+        self.data += f"SI{x_cm:.3f},{y_cm:.3f};"
 
     def ES(self, spaces: float = 0, line: float = 0) -> None:
         self.char_spacing = spaces
         self.line_spacing = line
         self.data += f"ES{spaces:.3f},{line:.3f};"
 
-    def LO(self, lo):
+    def LO(self, lo: int = 1):
         """
         Label Origin
         1: left bottom (default)
@@ -167,7 +170,8 @@ class HPGL:
         9: right top
         10-19: half char width/height offset
         """
-        assert lo != 10
+        if lo == 10 or lo <= 0 or lo >= 20:
+            raise ValueError(f"LO; may not be 10 or <=0 or >= 20. Used={lo}")
 
         self.data += f"LO{lo};"
 
