@@ -110,7 +110,7 @@ class HPGL:
 
         self.data += f"LB{label}{self._terminator}"
 
-        assert chr(10) is not in label or chr(13) is not in label
+        assert chr(10) not in label or chr(13) not in label
         # for now the internal LF/CR commands are not being calculated
         new_x = len(label) * self.char_size[0] * self.char_spacing
         new_y = 0
@@ -148,7 +148,7 @@ class HPGL:
         self.char_size = (x * self.plotter_unit, y * self.plotter_unit)
         self.data += f"SI{x:.3f},{y:.3f};"
 
-    def ES(self, spaces: float, line: float) -> None:
+    def ES(self, spaces: float = 0, line: float = 0) -> None:
         self.char_spacing = spaces
         self.line_spacing = line
         self.data += f"ES{spaces:.3f},{line:.3f};"
@@ -184,7 +184,7 @@ class HPGL:
         # without parameter does CR+LF
         pass
 
-    def BL(self:):
+    def BL(self):
         # buffered label
         pass
 

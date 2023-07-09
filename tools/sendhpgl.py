@@ -22,9 +22,13 @@ import wasabi
 from serial import Serial
 from tqdm import tqdm
 
+from cursor.timer import Timer
+
 log = wasabi.Printer(pretty=True)
 
 ESC = chr(27)
+CR = chr(13)
+LF = chr(10)
 ESC_TERM = ":"
 
 OUTBUT_BUFFER_SPACE = f"{ESC}.B"
@@ -32,6 +36,18 @@ OUTPUT_EXTENDED_STATUS = f"{ESC}.O"  # info about device satus etc
 OUTPUT_IDENTIFICATION = f"{ESC}.A"  # immediate return e.g. "7550A,firmwarenr"
 ABORT_GRAPHICS = f"{ESC}.K"  # clears partially parsed cmds and clears buffer
 WAIT = f"{ESC}.L"  # returns io buffer size when its empty. read it and wait for reply before next command
+
+
+def read_until(port: serial.Serial, char: chr = CR, timeout: float = 1.0):
+    timer = Timer()
+    data = ""
+    while round(timer.elapsed() * 1000) < timeout * 1000:
+        by = port.read()
+        if by != char:
+            data += by.decode()
+        else:
+            return data
+    return data
 
 
 def config_memory(serial: serial.Serial, io: int = 1024, polygon: int = 1778, char: int = 0, replot: int = 9954,
@@ -50,6 +66,7 @@ def config_memory(serial: serial.Serial, io: int = 1024, polygon: int = 1778, ch
 
     serial.write(buffer_sizes.encode())
     serial.write(WAIT.encode())
+    # TODO: readline replace with read_until(char'\r', timeout_s=1.0)
     answer = serial.readline().decode()
 
     serial.write(logical_buffer_size.encode())
