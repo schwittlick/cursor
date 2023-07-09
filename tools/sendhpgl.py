@@ -42,9 +42,9 @@ def read_until(port: serial.Serial, char: chr = CR, timeout: float = 1.0):
     timer = Timer()
     data = ""
     while timer.elapsed() < timeout:
-        by = port.read()
-        if by.decode() != char:
-            data += by.decode()
+        by = port.read().decode()
+        if by != char:
+            data += by
         else:
             return data
     return data
