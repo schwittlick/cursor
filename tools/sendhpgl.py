@@ -41,9 +41,9 @@ WAIT = f"{ESC}.L"  # returns io buffer size when its empty. read it and wait for
 def read_until(port: serial.Serial, char: chr = CR, timeout: float = 1.0):
     timer = Timer()
     data = ""
-    while round(timer.elapsed() * 1000) < timeout * 1000:
+    while timer.elapsed() < timeout:
         by = port.read()
-        if by != char:
+        if by.decode() != char:
             data += by.decode()
         else:
             return data
@@ -66,24 +66,24 @@ def config_memory(serial: serial.Serial, io: int = 1024, polygon: int = 1778, ch
 
     serial.write(buffer_sizes.encode())
     serial.write(WAIT.encode())
-    # TODO: readline replace with read_until(char'\r', timeout_s=1.0)
-    answer = serial.readline().decode()
+
+    answer = read_until(serial)
 
     serial.write(logical_buffer_size.encode())
     serial.write(WAIT.encode())
-    answer = serial.readline().decode()
+    answer = read_until(serial)
 
 
 def identify(port: serial.Serial):
     port.write(OUTPUT_IDENTIFICATION.encode())
-    answer = port.readline().decode()
+    answer = read_until(port)
     return answer.split(',')[0]
 
 
 def abort(port: serial.Serial):
     port.write(ABORT_GRAPHICS.encode())
     port.write(WAIT.encode())
-    answer = port.readline().decode()
+    answer = read_until(port)
 
 
 def main():
@@ -97,30 +97,33 @@ def main():
     code = open(args.file, 'r').read()
     pos = 0
 
-    abort(port)
     BATCH_SIZE = 128
     model = identify(port)
     log.info(f"Detected model {model}")
     if model == "7550A":
         config_memory(port, 12752, 4, 0, 0, 44)
+    try:
+        with tqdm(total=len(code)) as pbar:
+            pbar.update(0)
 
-    with tqdm(total=len(code)) as pbar:
-        pbar.update(0)
+            while pos < len(code):
+                port.write(OUTBUT_BUFFER_SPACE.encode())
+                free_io_memory = int(read_until(port))
+                if free_io_memory < BATCH_SIZE:
+                    sleep(0.01)
+                    continue
 
-        while pos < len(code):
-            port.write(OUTBUT_BUFFER_SPACE.encode())
-            free_io_memory = int(port.readline().decode())
-            if free_io_memory < BATCH_SIZE:
-                sleep(0.01)
-                continue
+                end = pos + BATCH_SIZE
+                if len(code) - pos < BATCH_SIZE:
+                    end = len(code)
+                port.write(code[pos:end].encode('utf-8'))
+                pbar.update(BATCH_SIZE)
 
-            end = pos + BATCH_SIZE
-            if len(code) - pos < BATCH_SIZE:
-                end = len(code)
-            port.write(code[pos:end].encode('utf-8'))
-            pbar.update(BATCH_SIZE)
-
-            pos = end
+                pos = end
+    except KeyboardInterrupt as kbi:
+        log.warn(f"Interrupted- aborting.")
+        sleep(0.1)
+        abort(port)
 
 
 if __name__ == '__main__':
