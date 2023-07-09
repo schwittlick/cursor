@@ -14,6 +14,23 @@ import typing
 import serial.tools.list_ports
 import wasabi
 
+from cursor.timer import Timer
+
+CR = chr(13)
+
+
+def read_until(port: serial.Serial, char: chr = CR, timeout: float = 1.0):
+    timer = Timer()
+    data = ""
+    while timer.elapsed() < timeout:
+        by = port.read()
+        if by.decode() != char:
+            data += by.decode()
+        else:
+            return data
+    return data
+
+
 logger = wasabi.Printer(pretty=True, no_print=False)
 
 
@@ -32,10 +49,8 @@ def async_discover(serial_port,
                         xonxoff=xonxoff,
                         timeout=timeout)
     try:
-        ser.flush()
         ser.write(f"{chr(27)}.A".encode())
-        ser.write("OI;\n".encode("utf-8"))
-        ret = ser.readline().decode("utf-8").split(',')[0]
+        ret = read_until(ser).split(',')[0]
         model = ret.strip()
         if len(model) > 0:
             ser.close()
