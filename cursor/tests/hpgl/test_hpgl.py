@@ -6,11 +6,10 @@ from cursor.hpgl.hpgl import HPGL
 def check_default_values(hpgl: HPGL) -> None:
     assert hpgl.plotter_unit == 40
     assert hpgl.pos == (0, 0)
-    assert hpgl.char_size_mm == (10, 10)
+    assert hpgl.char_size_mm == (2.85, 3.75)
     assert hpgl.char_spacing == 1.5
     assert hpgl.line_spacing == 2.0
     assert hpgl.degree == 0
-    assert hpgl.direction_vertical == 0
 
 
 def test_IN():
@@ -137,17 +136,6 @@ def test_DI():
     assert hpgl.data == "DI0.707,-0.707;"
 
 
-def test_DV():
-    hpgl = HPGL()
-    hpgl.DV(1)
-    assert hpgl.data == "DV1;"
-
-    with pytest.raises(ValueError):
-        hpgl.DV(-1)
-    with pytest.raises(ValueError):
-        hpgl.DV(2)
-
-
 def test_SI():
     hpgl = HPGL()
     hpgl.SI(5, 5.1234)
@@ -185,8 +173,8 @@ def test_LB():
 
     assert hpgl.data == f"LBTest{chr(3)}"
 
-    # 4chars * 10mm * 40 plotter units * 1.5 char spacing
-    assert hpgl.pos == (4 * 400 * 1.5, 0)
+    # 4chars * default char size * 40 plotter units * 1.5 char spacing
+    assert hpgl.pos == (4 * 2.85 * 40 * 1.5, 0)
 
 
 def test_LB_SI():
@@ -218,30 +206,4 @@ def test_LB_DI():
 
     # 4chars * 10mm char size * 40 plotter units * 1.5 char spacing
     # rotated by 45°
-    assert hpgl.pos == (1697.0562748477141, 1697.0562748477141)
-
-
-def test_LB_DV():
-    hpgl = HPGL()
-    hpgl.DV(1)
-    hpgl.LB("Test")
-
-    assert hpgl.data == f"DV1;LBTest{chr(3)}"
-
-    # to the right: 1chars * 10mm char size * 40 plotter units * 1.5 char spacing
-    # to the bottom: 4 chars * 10mm char size * 40 plotter units * 2 line spacing
-    assert hpgl.pos == (10 * 40 * 1.5, 4 * 10 * 40 * 2.0)
-
-
-def test_LB_DI_DV():
-    hpgl = HPGL()
-    hpgl.DI(45)
-    hpgl.DV(1)
-    hpgl.LB("Test")
-
-    assert hpgl.data == f"DI0.707,0.707;DV1;LBTest{chr(3)}"
-
-    # to the right: 1chars * 10mm char size * 40 plotter units * 1.5 char spacing
-    # to the bottom: 4 chars * 10mm char size * 40 plotter units * 2 line spacing
-    # rotated by 45°
-    assert hpgl.pos == (10 * 40 * 1.5, 4 * 10 * 40 * 2.0)
+    assert hpgl.pos == (483.66103833159855, 483.66103833159855)

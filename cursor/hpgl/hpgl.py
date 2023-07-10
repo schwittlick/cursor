@@ -26,12 +26,11 @@ class HPGL:
         self.terminator = chr(3)
         self.plotter_unit = 40
         self.pos = (0, 0)
-        self.char_size_mm = (10, 10)
+        self.char_size_mm = (2.85, 3.75)
 
         self.char_spacing = 1.5
         self.line_spacing = 2.0
         self.degree = 0
-        self.direction_vertical = 0
 
         self.data = ""
 
@@ -50,7 +49,7 @@ class HPGL:
 
         self.terminator = chr(3)
         self.pos = (0, 0)
-        self.char_size_mm = (10, 10)
+        self.char_size_mm = (2.85, 3.75)
 
         self.char_spacing = 1.5
         self.line_spacing = 2.0
@@ -74,14 +73,14 @@ class HPGL:
         self.pos = (x, y)
 
     def PD(self, x: int = None, y: int = None) -> None:
-        if not x or not y:
+        if x is None or y is None:
             self.data += "PD;"
         else:
             self.data += f"PD{x},{y};"
             self.pos = (x, y)
 
     def PU(self, x: int = None, y: int = None) -> None:
-        if not x or not y:
+        if x is None or y is None:
             self.data += "PU;"
         else:
             self.data += f"PU{x},{y};"
@@ -108,14 +107,9 @@ class HPGL:
         assert chr(10) not in label or chr(13) not in label
         # for now the internal LF/CR commands are not being calculated
 
-        if not self.direction_vertical:
-            new_x = len(label) * self.char_size_mm[0] * self.plotter_unit * self.char_spacing
-            new_y = 0
-            self.pos = rotate(self.pos, (new_x, new_y), math.radians(self.degree))
-        else:
-            new_x = self.char_size_mm[0] * self.plotter_unit * self.char_spacing
-            new_y = len(label) * self.char_size_mm[0] * self.plotter_unit * self.line_spacing
-            self.pos = rotate(self.pos, (new_x, new_y), math.radians(self.degree))
+        new_x = len(label) * self.char_size_mm[0] * self.plotter_unit * self.char_spacing
+        new_y = 0
+        self.pos = rotate(self.pos, (new_x, new_y), math.radians(self.degree))
 
     def SL(self, degree: float) -> None:
         if degree <= -90 or degree >= 90:
@@ -128,17 +122,6 @@ class HPGL:
         run = math.cos(degree * (math.pi / 180))
         rise = math.sin(degree * (math.pi / 180))
         self.data += f"DI{run:.3f},{rise:.3f};"
-
-    def DV(self, dir: int = 0):
-        """
-        direction vertical
-        0: horizontal (default)
-        1: vertical
-        """
-        if dir is not 0 and dir is not 1:
-            raise ValueError("Only use 1 or 0 for horizontal or vertical text alignment")
-        self.direction_vertical = dir
-        self.data += f"DV{dir};"
 
     def SI(self, x_cm: float, y_cm: float) -> None:
         """
