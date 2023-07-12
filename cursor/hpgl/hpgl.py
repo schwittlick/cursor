@@ -101,6 +101,7 @@ class HPGL:
 
         if len(label) > 150:
             log.warn(f"Label too long: {len(label)} > 150")
+            log.warn(label)
 
         self.data += f"LB{label}{self.terminator}"
 
