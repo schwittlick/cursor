@@ -108,8 +108,8 @@ class HPGL:
         assert chr(10) not in label or chr(13) not in label
         # for now the internal LF/CR commands are not being calculated
 
-        new_x = len(label) * self.char_size_mm[0] * self.plotter_unit * self.char_spacing
-        new_y = 0
+        new_x = self.pos[0] + len(label) * self.char_size_mm[0] * self.plotter_unit * self.char_spacing
+        new_y = self.pos[1]
         self.pos = rotate(self.pos, (new_x, new_y), math.radians(self.degree))
 
     def SL(self, degree: float) -> None:
