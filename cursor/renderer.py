@@ -236,6 +236,8 @@ class RealtimeRenderer(arcade.Window):
         self.manager = UIManager()
         self.manager.enable()
 
+        self.camera = arcade.Camera(width, height)
+
     def set_bg(self, p: pathlib.Path):
         self.background = arcade.load_texture(p)
 
@@ -289,13 +291,7 @@ class RealtimeRenderer(arcade.Window):
         if not color:
             color = random.choice(self.colors)[1]
 
-        # in arcade the coordinate origin is at the bottom left *facepalm*
-        new_tups = []
-        for tup in p.as_tuple_list():
-            new_tup = (tup[0], self.height - tup[1])
-            new_tups.append(new_tup)
-
-        line_strip = arcade.create_line_strip(new_tups, color, line_width)
+        line_strip = arcade.create_line_strip(p.as_tuple_list(), color, line_width)
         self.shapes.append(line_strip)
         self.collection.add(p)
 
@@ -316,6 +312,8 @@ class RealtimeRenderer(arcade.Window):
     def on_draw(self):
         self.clear()
 
+        self.camera.use()
+
         if self.background:
             arcade.draw_lrwh_rectangle_textured(0, 0, self.width, self.height, self.background)
 
@@ -327,7 +325,7 @@ class RealtimeRenderer(arcade.Window):
         super().update(delta_time)
 
         fps = int(arcade.get_fps())
-        caption = f"fps: {fps} shapes: {len(self.shapes)}"
+        caption = f"{self.__title} fps: {fps} shapes: {len(self.shapes)}"
         self.set_caption(caption)
 
         for k, v in self.pressed.items():
