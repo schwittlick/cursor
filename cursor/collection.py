@@ -309,6 +309,11 @@ class Collection:
         maxy = max(all_chained, key=lambda pos: pos.y).y
         return maxx, maxy
 
+    def transform(self, out: BoundingBox):
+        bb = self.bb()
+        for p in self:
+            p.transform(bb, out)
+
     def translate(self, x: float, y: float) -> None:
         [p.translate(x, y) for p in self]
 
