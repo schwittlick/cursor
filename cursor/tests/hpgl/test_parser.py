@@ -4,14 +4,35 @@ from cursor.hpgl.parser import HPGLParser
 from cursor.path import Path
 
 
-def test_hpgl_parser_LB():
-    file = DataDirHandler().test_data_file("file_to_parse.hpgl")
-    parser = HPGLParser()
-    paths = parser.parse(file)
+def test_hpgl_parser_PAPD():
+    paths = HPGLParser().parse("IN;SP1;PA100,0;PD100,100;PU;PA0,0;")
 
     collection = Collection()
-    collection.add(Path.from_tuple_list([(100.25, 0.0), (100.875, 0.0)]))
-    collection.add(Path.from_tuple_list([(100.25, 0.625), (100.625, 1.0), (100.625, 0.0)]))
+    collection.add(Path.from_tuple_list([(100, 0.0), (100, 100.0)]))
+
+    assert len(paths) == len(collection)
+
+    for i in range(len(paths)):
+        assert paths[i] == collection[i]
+
+
+def test_hpgl_parser_LB():
+    paths = HPGLParser().parse("IN;SP1;LBHI")
+
+    collection = Collection()
+    collection.add(Path.from_tuple_list([(100, 0.0), (100, 100.0)]))
+
+    assert len(paths) == len(collection)
+
+    for i in range(len(paths)):
+        assert paths[i] == collection[i]
+
+
+def test_hpgl_parser_DI():
+    paths = HPGLParser().parse("IN;SP1;DI0,1;PA100,0;PD100,100;")
+
+    collection = Collection()
+    collection.add(Path.from_tuple_list([(100, 0.0), (100, 100.0)]))
 
     assert len(paths) == len(collection)
 

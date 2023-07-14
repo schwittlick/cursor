@@ -2,7 +2,7 @@ import math
 import pathlib
 import typing
 from typing import TextIO
-
+import re
 import wasabi
 
 from cursor.collection import Collection
@@ -11,23 +11,35 @@ from cursor.position import Position
 
 log = wasabi.Printer()
 
+IN = 'IN'
+SP = 'SP'
+LB = 'LB'
+SI = 'SI'
+
+PA = 'PA'
+PD = 'PD'
+PU = 'PU'
+
+DI = 'DI'
+
+
+def rotate(origin, point, angle):
+    """
+    Rotate a point counterclockwise by a given angle around a given origin.
+
+    The angle should be given in radians.
+    """
+    ox, oy = origin
+    px, py = point
+
+    qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
+    qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
+    return qx, qy
+
 
 class HPGLParser:
-    IN = 'IN'
-    SP = 'SP'
-    LB = 'LB'
-    SI = 'SI'
-
-    PA = 'PA'
-    PD = 'PD'
-    PU = 'PU'
-
-    DI = 'DI'
 
     def __init__(self):
-        self.char_abs_width = 0
-        self.char_abs_height = 0
-
         self.label_terminator = chr(3)
 
         self.paths = Collection()
@@ -40,184 +52,111 @@ class HPGLParser:
         else:
             hpgl_data = open(hpgl.as_posix(), 'r', newline='').readlines()
             hpgl_data = ''.join(hpgl_data).replace('\n', '')
+            hpgl_data = ''.join(hpgl_data).replace('\r', '')
 
-        queue = []
-        for char in hpgl_data:
-            queue.append(str(char))
+        commands = [x for x in re.split(f";|{self.label_terminator}", hpgl_data) if x]
 
-        while len(queue) > 0:
-            c = queue.pop(0)
+        for cmd in commands:
 
-            while c in [';', ' ', '\r', '\n']:
-                if len(queue) == 0:
-                    break
-                c = queue.pop(0)
-
-            if len(queue) == 0:
-                break
-            cmd = c + queue.pop(0)
-            cmd = str(cmd).upper()
-
-            if cmd == HPGLParser.IN:
+            if cmd.startswith(IN):
                 self.__init()
-            elif cmd == HPGLParser.SP:
-                self.__parse_pen_select(queue)
-            elif cmd == HPGLParser.PA:
-                self.__parse_pen_absolute(queue)
-            elif cmd == HPGLParser.LB:
-                self.__parse_label(queue)
-            elif cmd == HPGLParser.SI:
-                self.__parse_font_size(queue)
-            elif cmd == HPGLParser.PD:
-                self.__parse_pen_down(queue)
-            elif cmd == HPGLParser.PU:
-                self.__parse_pen_up(queue)
-            elif cmd == HPGLParser.DI:
-                self.__parse_direction_absolute(queue)
-
-            if len(cmd) < 2:
-                break
+            elif cmd.startswith(SP):
+                self.__parse_pen_select(cmd)
+            elif cmd.startswith(PA):
+                self.__parse_pen_absolute(cmd)
+            elif cmd.startswith(LB):
+                self.__parse_label(cmd)
+            elif cmd.startswith(SI):
+                self.__parse_font_size(cmd)
+            elif cmd.startswith(PD):
+                self.__parse_pen_down(cmd)
+            elif cmd.startswith(PU):
+                self.__parse_pen_up(cmd)
+            elif cmd.startswith(DI):
+                self.__parse_direction_absolute(cmd)
 
         return self.paths
 
     def __init(self):
         self.pen_down = False
-        self.drawn = False
         self.cur_pen = 0
-        self.cur_x = 0
-        self.cur_y = 0
-        self.cur_cr_x = self.cur_x
-        self.cur_cr_y = self.cur_y
+        self.pos = (0, 0)
+        self.char_size_mm = 2.85, 3.75
 
         self.run = 1
         self.rise = 0
 
         # self.paths.clear()
 
-    def __read(self, f: list) -> str:
-        data = f.pop(0)
-        log.info(data)
-        return data
+    def __parse_pen_select(self, cmd: str):
+        self.cur_pen = int(cmd[2:])
 
-    def __parse_pen_select(self, queue: list):
-        c = queue.pop(0)
-        if c == ';':
+    def __parse_pen_absolute(self, cmd: str):
+        if len(cmd) == 2:
             return
-        self.cur_pen = int(c)
 
-    def __parse_pen_absolute(self, queue: list):
-        c = ''
-        pts = [(self.cur_x, self.cur_y)]
+        pts = [self.pos]
 
-        while c != ';':
-            s = ''
-            c = queue.pop(0)
-            if c == ';':
-                # switch to absolute plotting
-                break
-            while c == '-' or '0' <= c <= '9':
-                s += c
-                c = queue.pop(0)
+        cmd = cmd[2:]
 
-            self.cur_x = int(s)
+        points = cmd.split(',')
+        for i in range(0, len(points), 2):
+            x = float(points[0]) if '.' in points[0] else int(points[0])
+            y = float(points[1]) if '.' in points[1] else int(points[1])
+            self.pos = x, y
 
-            s = ''
-            c = queue.pop(0)
-            while c == '-' or '0' <= c <= '9':
-                s += c
-                c = queue.pop(0)
-
-            self.cur_y = int(s)
-
-            self.cur_cr_x = self.cur_x
-            self.cur_cr_y = self.cur_y
-
-            pts.append((self.cur_x, self.cur_y))
+            pts.append(self.pos)
 
         if self.pen_down:
             path = Path.from_tuple_list(pts)
             path.pen_select = self.cur_pen
             self.paths.add(path)
-            self.drawn = True
 
-    def __parse_label(self, queue: list):
-        c = queue.pop(0)
+    def __parse_label(self, cmd: str):
+        for char in cmd[2:]:
+            if char in stick_font:
+                chr_paths = stick_font[char]
+                for pts in chr_paths:
+                    path = Path()
+                    path.pen_select = self.cur_pen
+                    for p in pts:
+                        pos = Position.from_tuple((
+                            (p[0] / 4) * self.char_size_mm[0] * 40 + self.pos[0],
+                            (p[1] / 8) * self.char_size_mm[1] * 40 + self.pos[1]))
+                        try:
+                            angle = self.rise / self.run
+                        except ZeroDivisionError:
+                            angle = float('inf')
+                        pos.rot(math.atan(angle), self.pos)
+                        path.add_position(pos)
+                    self.paths.add(path)
 
-        while c != self.label_terminator:
-            if c == '\x08':
-                self.cur_x -= self.char_abs_width * 3 / 2
-            elif c == '\r':
-                self.cur_x = self.cur_cr_x
-                self.cur_y = self.cur_cr_y
-            elif c == '\n':
-                self.cur_cr_y -= self.char_abs_height * 2
-                self.cur_x = self.cur_cr_x
-                self.cur_y = self.cur_cr_y
-            elif c < ' ':
-                pass
-            else:
-                _cur_x = self.cur_x
-                _cur_y = self.cur_y
-                if c in stick_font:
-                    chr_paths = stick_font[c]
-                    for pts in chr_paths:
-                        path = Path()
-                        path.pen_select = self.cur_pen
-                        for p in pts:
-                            pos = Position.from_tuple((
-                                p[0] / 4 * self.char_abs_width + self.cur_x,
-                                p[1] / 8 * self.char_abs_width + self.cur_y))
-                            pos.rot(math.atan(self.rise/self.run), (_cur_x, _cur_y))
-                            path.add_position(pos)
-                            self.paths.add(path)
+                degree = 0
+                if self.run == 0.0 and self.rise > 0.0:
+                    degree = 90
+                if self.run == 0.0 and self.rise < 0.0:
+                    degree = -90
 
-                    self.drawn = True
-                    self.cur_x += self.char_abs_width * 3 / 2
-                    if c == self.label_terminator:
-                        break
-                c = queue.pop(0)
+                newpos = self.pos[0] + self.char_size_mm[0] * 40 * 1.5, self.pos[1]
+                self.pos = rotate(self.pos, newpos, math.radians(degree))
 
-    def __parse_font_size(self, queue: list):
-        s = ''
-        c = queue.pop(0)
-        while c != ',':
-            s += c
-            c = queue.pop(0)
-        self.char_abs_width = float(s) * 40
+    def __parse_font_size(self, cmd: str):
+        _size = cmd[2:].split(',')
+        self.char_size_mm = float(_size[0]) * 10, float(_size[1]) * 10
 
-        s = ''
-        c = queue.pop(0)
-        while c != ';':
-            s += c
-            c = queue.pop(0)
-        self.char_abs_height = float(s) * 40
-
-    def __parse_pen_down(self, queue: list):
+    def __parse_pen_down(self, cmd: str):
         self.pen_down = True
-        self.drawn = False
+        self.__parse_pen_absolute(cmd)
 
-    def __parse_pen_up(self, queue: list):
+    def __parse_pen_up(self, cmd: str):
         self.pen_down = False
-        if not self.drawn:
-            self.paths.add(Path.from_tuple_list([(self.cur_x, self.cur_y), (0, 0)]))
 
-    def __parse_direction_absolute(self, queue: list):
-        s = ''
-        c = queue.pop(0)
-        if c == ';':
-            self.run = 1
-            self.rise = 0
-            return
-        while c != ',':
-            s += c
-            c = queue.pop(0)
-        self.run = float(s)
-        s = ''
-        c = queue.pop(0)
-        while c != ';':
-            s += c
-            c = queue.pop(0)
-        self.rise = float(s)
+        self.__parse_pen_absolute(cmd)
+
+    def __parse_direction_absolute(self, cmd: str):
+        _size = cmd[2:].split(',')
+        self.run = float(_size[0])
+        self.rise = float(_size[1])
 
 
 stick_font = {
