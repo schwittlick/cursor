@@ -21,6 +21,7 @@ PD = 'PD'
 PU = 'PU'
 
 DI = 'DI'
+ES = 'ES'
 
 
 def rotate(origin, point, angle):
@@ -53,8 +54,35 @@ class HPGLParser:
             hpgl_data = open(hpgl.as_posix(), 'r', newline='').readlines()
             hpgl_data = ''.join(hpgl_data).replace('\n', '')
             hpgl_data = ''.join(hpgl_data).replace('\r', '')
+            hpgl_data = ''.join(hpgl_data).replace('\\x03', self.label_terminator)
 
-        commands = [x for x in re.split(f";|{self.label_terminator}", hpgl_data) if x]
+        # hpgl_data = "LBTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTSP2;PA9PA13992,40;SP2;LBSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS"
+        # hpgl_data = ''.join(hpgl_data).replace('\\x03', self.label_terminator)
+
+        pre_split = []  # if [1] -> is LB command (dont split again)
+        label_split = [x for x in re.split(f"{self.label_terminator}", hpgl_data) if x]
+        for batch in label_split:
+
+            lb_index = batch.rfind("LB")
+            if lb_index == -1:
+                pre_split.append((batch, False))
+                continue
+            lb_index_left = batch.find("LB")
+            if lb_index_left != lb_index:
+                lb_index = lb_index_left
+            if lb_index > 0:
+                pre_split.append((batch[:lb_index], False))
+            pre_split.append((batch[lb_index:], True))
+
+        commands = []
+        for pre in pre_split:
+            if pre[1]:
+                commands.append(pre[0])
+            else:
+                split_again = [x for x in re.split(";", pre[0]) if x]
+                commands.extend(split_again)
+
+        # commands = [x for x in re.split(f";|{self.label_terminator}", hpgl_data) if x]
 
         for cmd in commands:
 
@@ -74,6 +102,8 @@ class HPGLParser:
                 self.__parse_pen_up(cmd)
             elif cmd.startswith(DI):
                 self.__parse_direction_absolute(cmd)
+            elif cmd.startswith(ES):
+                self.__parse_spacing(cmd)
 
         return self.paths
 
@@ -85,6 +115,8 @@ class HPGLParser:
 
         self.run = 1
         self.rise = 0
+
+        self.spacing = 0, 0
 
         # self.paths.clear()
 
@@ -123,22 +155,27 @@ class HPGLParser:
                         pos = Position.from_tuple((
                             (p[0] / 4) * self.char_size_mm[0] * 40 + self.pos[0],
                             (p[1] / 8) * self.char_size_mm[1] * 40 + self.pos[1]))
-                        try:
-                            angle = self.rise / self.run
-                        except ZeroDivisionError:
-                            angle = float('inf')
-                        pos.rot(math.atan(angle), self.pos)
                         path.add_position(pos)
+                    try:
+                        angle = self.rise / self.run
+                    except ZeroDivisionError:
+                        angle = float('inf')
+                    path.rot(math.atan(angle), self.pos)
                     self.paths.add(path)
+            else:
+                print(char)
 
-                degree = 0
-                if self.run == 0.0 and self.rise > 0.0:
-                    degree = 90
-                if self.run == 0.0 and self.rise < 0.0:
-                    degree = -90
+            if self.run == 0.0 and self.rise > 0.0:
+                degree = 90
+            elif self.run == 0.0 and self.rise < 0.0:
+                degree = -90
+            else:
+                degree = math.degrees(self.rise / self.run)
 
-                newpos = self.pos[0] + self.char_size_mm[0] * 40 * 1.5, self.pos[1]
-                self.pos = rotate(self.pos, newpos, math.radians(degree))
+            spaces_x = (self.char_size_mm[0] * 40 * 1.5) * self.spacing[0]
+            spaces_y = (self.char_size_mm[1] * 40 * 2.0) * self.spacing[1]
+            newpos = self.pos[0] + self.char_size_mm[0] * 40 * 1.5 + spaces_x, self.pos[1] + spaces_y
+            self.pos = rotate(self.pos, newpos, math.radians(degree))
 
     def __parse_font_size(self, cmd: str):
         _size = cmd[2:].split(',')
@@ -158,13 +195,21 @@ class HPGLParser:
         self.run = float(_size[0])
         self.rise = float(_size[1])
 
+    def __parse_spacing(self, cmd: str):
+        _size = cmd[2:].split(',')
+        self.spacing = float(_size[0]), float(_size[1])
+
 
 stick_font = {
     """
-    Hershey font by Alex Forencich
+    Hershey font by Alex Forencich with additions by Marcel Schwittlick
     """
+    ' ': [],
+    ' ': [],
     '!': [[(0.125, 2.75), (0.125, 8.0)], [(0.0, 0.0), (0.0, 0.5), (0.25, 0.5), (0.25, 0.0), (0.0, 0.0)]],
     '"': [[(1.25, 6.5), (1.25, 9.0)], [(2.75, 6.5), (2.75, 9.0)]],
+    '“': [[(1.25, 6.5), (1.25, 9.0)], [(2.75, 6.5), (2.75, 9.0)]],
+    '”': [[(1.25, 6.5), (1.25, 9.0)], [(2.75, 6.5), (2.75, 9.0)]],
     '#': [[(0.5, 0.0), (2.0, 8.0)], [(2.0, 0.0), (3.5, 8.0)], [(0.0, 3.0), (4.0, 3.0)], [(0.0, 5.0), (4.0, 5.0)]],
     '$': [[(2.0, -1.0), (2.0, 9.0)],
           [(0.0, 1.5), (0.25, 0.75), (0.875, 0.25), (3.125, 0.25), (3.75, 0.75), (4.0, 1.5), (4.0, 2.75),
@@ -191,8 +236,12 @@ stick_font = {
     '+': [[(0.0, 4.0), (4.0, 4.0)], [(2.0, 7.0), (2.0, 1.0)]],
     ',': [[(0.0, -1.25), (0.25, -1.0), (0.375, -0.75), (0.375, 0.5), (0.0, 0.5), (0.0, 0.0), (0.375, 0.0)]],
     '-': [[(0.0, 4.0), (4.0, 4.0)]],
+    '—': [[(-1.0, 4.0), (5.0, 4.0)]],
     '.': [[(2.25, 0.0), (2.25, 0.5), (1.875, 0.5), (1.875, 0.0), (2.25, 0.0)]],
     '/': [[(0.0, -1.0), (4.0, 9.0)]],
+    '’': [[(4.0, 6.0), (4.0, 8.0)]],
+    '`': [[(1.0, 9.5), (2.5, 7.5)]],
+    '‘': [[(1.0, 9.5), (2.5, 7.5)]],
     '0': [[(0.0, 3.0), (0.25, 1.75), (0.5, 1.0), (1.0, 0.25), (1.5, 0.0), (2.25, 0.0), (2.75, 0.25), (3.25, 0.975),
            (3.5, 1.75), (3.75, 3.0), (3.75, 5.0), (3.5, 6.25), (3.25, 7.0), (2.75, 7.75), (2.275, 8.0), (1.5, 8.0),
            (1.0, 7.75), (0.5, 7.0), (0.25, 6.25), (0.0, 5.0), (0.0, 3.0)]],
@@ -303,7 +352,6 @@ stick_font = {
     ']': [[(0.0, 9.0), (1.25, 9.0), (1.25, -1.0), (0.0, -1.0)]],
     '^': [[(0.5, 7.5), (1.75, 9.0), (3.0, 7.5)]],
     '_': [[(0.0, -1.5), (6.0, -1.5)]],
-    '`': [[(1.0, 9.5), (2.5, 7.5)]],
     'a': [[(1.0, 3.5), (0.5, 3.25), (0.125, 2.75), (0.0, 2.0), (0.0, 1.5), (0.125, 0.75), (0.5, 0.25), (1.125, 0.0),
            (2.5, 0.0), (3.125, 0.25), (3.375, 0.75), (3.5, 1.5), (3.5, 2.0), (3.375, 2.75), (3.0, 3.25), (2.5, 3.5),
            (1.0, 3.5)],
@@ -439,4 +487,5 @@ stick_font = {
     'ü': [[(0.0, 6.0), (4.0, 6.0), (4.0, 0.0), (0.0, 0.0), (0.0, 6.0)]],
     'ý': [[(0.0, 6.0), (2.0, 3.0), (0.0, 0.0)], [(2.0, 6.0), (4.0, 3.0), (2.0, 0.0)]],
     'þ': [[(2.0, 7.5), (2.0, 2.0)], [(0.0, 4.75), (4.0, 4.75)], [(0.0, 0.75), (4.0, 0.75)]],
+    ' ': [],
 }
