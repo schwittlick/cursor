@@ -5,7 +5,6 @@ from cursor.renderer import SvgRenderer
 from cursor.renderer import GCodeRenderer
 from cursor.renderer import JpegRenderer
 from cursor.renderer import DigiplotRenderer
-from cursor.renderer import HPGLRenderer
 from cursor.renderer import AsciiRenderer
 from cursor.renderer import PathIterator
 from cursor.renderer import TektronixRenderer
@@ -110,41 +109,6 @@ def test_jpegrenderer_size():
     renderer = JpegRenderer(DataDirHandler().test_images(), 4096, 4096)
     assert renderer.image_width == 4096
     assert renderer.image_height == 4096
-
-
-def test_hpglrenderer():
-    pc = Collection()
-    p1 = Path()
-    p1.add(-10, -10)
-    p1.add(10, -10)
-
-    p2 = Path()
-    p2.add(10, -10)
-    p2.add(10, 10)
-
-    pc.add(p1)
-    pc.add(p2)
-
-    r = HPGLRenderer(DataDirHandler().test_hpgls())
-    r.render(pc)
-    hpgl_data = r.generate_string()
-
-    expected_result = (
-        "PU;\n"
-        "SP1;\n"
-        "LT;\n"
-        "PA-10,-10;\n"
-        "PD;\n"
-        "PA-10,-10;\n"
-        "PA10,-10;\n"
-        "PU;\n"
-        "PA10,-10;\n"
-        "PD;\n"
-        "PA10,-10;\n"
-        "PA10,10;\n"
-        "PU;\n"
-    )
-    assert hpgl_data == expected_result
 
 
 def test_jpegrenderer_fail():

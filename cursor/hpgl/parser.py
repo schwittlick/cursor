@@ -56,20 +56,17 @@ class HPGLParser:
             hpgl_data = ''.join(hpgl_data).replace('\r', '')
             hpgl_data = ''.join(hpgl_data).replace('\\x03', self.label_terminator)
 
-        # hpgl_data = "LBTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTSP2;PA9PA13992,40;SP2;LBSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS"
-        # hpgl_data = ''.join(hpgl_data).replace('\\x03', self.label_terminator)
-
-        pre_split = []  # if [1] -> is LB command (dont split again)
+        '''
+        all of this is necessary because within a hpgl text command .e.g. LB1234
+        this needs to be parsed when this should be stable enough to also print hpgl code
+        
+        e.g. LB1234LB
+        this should draw the label 1234LB
+        '''
+        pre_split = []
         label_split = [x for x in re.split(f"{self.label_terminator}", hpgl_data) if x]
         for batch in label_split:
-
-            lb_index = batch.rfind("LB")
-            if lb_index == -1:
-                pre_split.append((batch, False))
-                continue
-            lb_index_left = batch.find("LB")
-            if lb_index_left != lb_index:
-                lb_index = lb_index_left
+            lb_index = batch.find("LB")
             if lb_index > 0:
                 pre_split.append((batch[:lb_index], False))
             pre_split.append((batch[lb_index:], True))
@@ -81,8 +78,6 @@ class HPGLParser:
             else:
                 split_again = [x for x in re.split(";", pre[0]) if x]
                 commands.extend(split_again)
-
-        # commands = [x for x in re.split(f";|{self.label_terminator}", hpgl_data) if x]
 
         for cmd in commands:
 
@@ -174,7 +169,7 @@ class HPGLParser:
 
             spaces_x = (self.char_size_mm[0] * 40 * 1.5) * self.spacing[0]
             spaces_y = (self.char_size_mm[1] * 40 * 2.0) * self.spacing[1]
-            newpos = self.pos[0] + self.char_size_mm[0] * 40 * 1.5 + spaces_x, self.pos[1] + spaces_y
+            newpos = self.pos[0] + self.char_size_mm[0] * 40 * 1.5 + spaces_x, self.pos[1]
             self.pos = rotate(self.pos, newpos, math.radians(degree))
 
     def __parse_font_size(self, cmd: str):
