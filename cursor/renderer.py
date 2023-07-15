@@ -18,6 +18,7 @@ from arcade.gui import UIManager, UIOnChangeEvent, UIAnchorWidget
 from cursor.bb import BoundingBox
 from cursor.collection import Collection
 from cursor.data import DataDirHandler, DateHandler
+from cursor.hpgl.hpgl import HPGL
 from cursor.path import Path
 from cursor.position import Position
 
@@ -193,7 +194,7 @@ class RealtimeRenderer(arcade.Window):
         folder.mkdir(parents=True, exist_ok=True)
         log.good(f"saving {fn.as_posix()}")
         try:
-            arcade.get_image(0, 0, self.width, self.height).save(fn.as_posix(), "PNG")
+            arcade.get_image(0, 0, self.width * 2, self.height * 2).save(fn.as_posix(), "PNG")
         except ValueError:
             pass
         except OSError:
@@ -379,7 +380,7 @@ class HPGLRenderer:
         return s
 
     def generate_string(self):
-        _hpgl_string = ""
+        _hpgl = HPGL()
 
         _prev_line_type = 0
         _prev_velocity = 0
@@ -390,63 +391,62 @@ class HPGLRenderer:
         first = True
         for p in self.__paths:
             if first:
-                _hpgl_string += "PU;\n"
+                _hpgl.PU()
                 first = False
             x = p.start_pos().x
             y = p.start_pos().y
 
             if _prev_pen != p.pen_select:
-                _hpgl_string += f"SP{self.__get_pen_select(p.pen_select)};\n"
+                _hpgl.SP(self.__get_pen_select(p.pen_select))
                 _prev_pen = p.pen_select
 
-            if p.line_type:
-                if _prev_line_type != p.line_type:
-                    _hpgl_string += f"LT{self.__linetype_from_layer(p.line_type)};\n"
-                    _prev_line_type = p.line_type
+            # if p.line_type:
+            #     if _prev_line_type != p.line_type:
+            #         _hpgl_string += f"LT{self.__linetype_from_layer(p.line_type)};"
+            #         _prev_line_type = p.line_type
 
             if p.velocity:
                 if _prev_velocity != p.velocity:
-                    _hpgl_string += f"VS{self.__get_velocity(p.velocity)};\n"
+                    _hpgl.VS(self.__get_velocity(p.velocity))
                     _prev_velocity = p.velocity
 
             if p.pen_force:
                 if _prev_force != p.pen_force:
-                    _hpgl_string += f"FS{self.__get_pen_force(p.pen_force)};\n"
+                    _hpgl.FS(self.__get_pen_force(p.pen_force))
                     _prev_force = p.pen_force
 
             if p.laser_pwm:
                 if _prev_pwm != p.laser_pwm:
-                    _hpgl_string += f"PWM{p.laser_pwm};\n"
+                    _hpgl.custom(f"PWM{p.laser_pwm};")
                     _prev_pwm = p.laser_pwm
 
-            _hpgl_string += f"PA{int(x)},{int(y)};\n"
+            _hpgl.PA(x, y)
             if p.is_polygon:
-                _hpgl_string += "PM0;\n"
+                _hpgl.custom("PM0;")
 
-            _hpgl_string += "PD;\n"
+            _hpgl.PD()
 
             for line in p.vertices:
                 x = line.x
                 y = line.y
-                _hpgl_string += f"PA{int(x)},{int(y)};\n"
+                _hpgl.PA(x, y)
 
-            _hpgl_string += "PU;\n"
+            _hpgl.PU()
 
             if p.is_polygon:
-                _hpgl_string += "PM2;\n"  # switch to PM2; to close and safe
-                _hpgl_string += "FP;\n"
+                _hpgl.custom("PM2;")  # switch to PM2; to close and safe
+                _hpgl.custom("FP;")
 
-        return _hpgl_string
+        _hpgl.PA(0, 0)
+        _hpgl.SP(0)
 
-    def __add_home(self, hpgl_string):
-        return f"{hpgl_string}PA0,0;\nSP0;\n"
+        return _hpgl.data
 
     def save(self, filename: str) -> str:
         pathlib.Path(self.__save_path).mkdir(parents=True, exist_ok=True)
         fname = self.__save_path / (filename + ".hpgl")
 
         _hpgl_string = self.generate_string()
-        _hpgl_string = self.__add_home(_hpgl_string)
 
         with open(fname.as_posix(), "w") as file:
             file.write(_hpgl_string)
@@ -650,7 +650,9 @@ class JpegRenderer:
             end = conn[1]
 
             self.img_draw.line(
-                xy=(start.x * scale, self.image_height - start.y * scale, end.x * scale, self.image_height - end.y * scale),
+                xy=(
+                    start.x * scale, self.image_height - start.y * scale, end.x * scale,
+                    self.image_height - end.y * scale),
                 fill="black",
                 width=thickness,
             )

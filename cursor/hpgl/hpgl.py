@@ -38,11 +38,11 @@ class HPGL:
         with open(fn, "w", encoding='utf-8') as file:
             file.write(self.data)
 
-    def custom(self, hpgl: HPGL) -> None:
+    def custom(self, data: str) -> None:
         """
-        Use with caution, positions positions could be impacted
+        Use with caution, positions  could be impacted
         """
-        self.data += hpgl.data
+        self.data += data
 
     def IN(self) -> None:
         self.data += f"IN;"
@@ -61,6 +61,9 @@ class HPGL:
     def VS(self, speed: int) -> None:
         self.data += f"VS{speed};"
 
+    def FS(self, force: int) -> None:
+        self.data += f"FS{force};"
+
     def DT(self, c: chr = chr(3)):
         self.terminator = c
         self.data += f"DT{c};"
@@ -69,21 +72,21 @@ class HPGL:
         self.data += f"IW{x1},{y1},{x2},{y2};"
 
     def PA(self, x: int, y: int) -> None:
-        self.data += f"PA{x},{y};"
+        self.data += f"PA{int(x)},{int(y)};"
         self.pos = (x, y)
 
     def PD(self, x: int = None, y: int = None) -> None:
         if x is None or y is None:
             self.data += "PD;"
         else:
-            self.data += f"PD{x},{y};"
+            self.data += f"PD{int(x)},{int(y)};"
             self.pos = (x, y)
 
     def PU(self, x: int = None, y: int = None) -> None:
         if x is None or y is None:
             self.data += "PU;"
         else:
-            self.data += f"PU{x},{y};"
+            self.data += f"PU{int(x)},{int(y)};"
             self.pos = (x, y)
 
     # LABEL STUFF
