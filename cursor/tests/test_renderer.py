@@ -102,6 +102,16 @@ def test_jpegrenderer():
     r.save("test1")
 
 
+def test_jpegrenderer_size():
+    renderer = JpegRenderer(DataDirHandler().test_images())
+    assert renderer.image_width == 1920
+    assert renderer.image_height == 1080
+
+    renderer = JpegRenderer(DataDirHandler().test_images(), 4096, 4096)
+    assert renderer.image_width == 4096
+    assert renderer.image_height == 4096
+
+
 def test_hpglrenderer():
     pc = Collection()
     p1 = Path()
