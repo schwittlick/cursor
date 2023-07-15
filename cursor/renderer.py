@@ -620,10 +620,13 @@ class DigiplotRenderer:
 
 
 class JpegRenderer:
-    def __init__(self, folder: pathlib.Path):
+    def __init__(self, folder: pathlib.Path, w: int = 1920, h: int = 1080):
         self.save_path = folder
         self.img = None
         self.img_draw = None
+
+        self.image_width = w
+        self.image_height = h
 
     def render(
             self,
@@ -634,26 +637,10 @@ class JpegRenderer:
     ) -> None:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
-        if len(paths) == 0:
-            log.warn("Not creating image, empty paths")
-            return
+        log.good(f"Creating image with size=({self.image_width}, {self.image_height})")
+        assert self.image_width < 21000 and self.image_height < 21000, "keep resolution lower"
 
-        bb = paths.bb()
-
-        abs_scaled_bb = (
-            abs(bb.x * scale),
-            abs(bb.y * scale),
-            abs(bb.w * scale),
-            abs(bb.h * scale),
-        )
-
-        image_width = int(abs_scaled_bb[0] + abs_scaled_bb[2]) + int(bb.x * scale)
-        image_height = int(abs_scaled_bb[1] + abs_scaled_bb[3]) + int(bb.y * scale)
-
-        log.good(f"Creating image with size=({image_width}, {image_height})")
-        assert image_width < 21000 and image_height < 21000, "keep resolution lower"
-
-        self.img = Image.new("RGB", (image_width, image_height), "white")
+        self.img = Image.new("RGB", (self.image_width, self.image_height), "white")
         self.img_draw = ImageDraw.ImageDraw(self.img)
 
         it = PathIterator(paths)
@@ -662,17 +649,8 @@ class JpegRenderer:
             start = conn[0]
             end = conn[1]
 
-            # offset paths when passed bb starts in negative space
-            if bb.x * scale < 0:
-                start.x += abs_scaled_bb[0]
-                end.x += abs_scaled_bb[0]
-
-            if bb.y * scale < 0:
-                start.y += abs_scaled_bb[1]
-                end.y += abs_scaled_bb[1]
-
             self.img_draw.line(
-                xy=(start.x * scale, start.y * scale, end.x * scale, end.y * scale),
+                xy=(start.x * scale, self.image_height - start.y * scale, end.x * scale, self.image_height - end.y * scale),
                 fill="black",
                 width=thickness,
             )
