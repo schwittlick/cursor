@@ -95,6 +95,18 @@ def test_collection_as_array():
     assert arr[0][0, 1] == 101
 
 
+def test_collection_from_list_of_tuple_lists():
+    tuples = [[(0.0, 150.0), (0.0, 0.0)],
+              [(114.0, 150.0), (114.0, 0.0)],
+              [(0.0, 79.6875), (114.0, 79.6875)]]
+    collection = Collection.from_tuples(tuples)
+
+    assert len(collection) == len(tuples)
+    assert collection[0] == Path.from_tuple_list([(0.0, 150.0), (0.0, 0.0)])
+    assert collection[1] == Path.from_tuple_list([(114.0, 150.0), (114.0, 0.0)])
+    assert collection[2] == Path.from_tuple_list([(0.0, 79.6875), (114.0, 79.6875)])
+
+
 def test_collection_as_dataframe():
     p1 = Path.from_tuple_list([(100, 101), (200, 201), (300, 301)])
     p2 = Path.from_tuple_list([(222, 223), (333, 334), (333, 334), (333, 334)])
@@ -106,7 +118,7 @@ def test_collection_as_dataframe():
     df = pc.as_dataframe()  # concatenated
     assert df.ndim == 2
     assert (
-        df.values.shape[0] == 4
+            df.values.shape[0] == 4
     )  # the maximum numer of points in a path (rest are filled up with nan's)
     assert df.values.shape[1] == 6  # 3 times x, y columns
 

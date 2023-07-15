@@ -56,7 +56,8 @@ class Collection:
             raise Exception("You can only add another Collection or a list of paths")
 
     def __repr__(self) -> str:
-        return f"PathCollection({self.__name}) -> ({len(self)})"
+        tuples = [pa.as_tuple_list() for pa in self]
+        return f"PathCollection({self.__name}) -> ({len(self)})\n{tuples}"
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, Collection):
@@ -101,6 +102,13 @@ class Collection:
         fn = DataDirHandler().pickles() / fname
         with open(fn, "rb") as file:
             return pickle.load(file)
+
+    @staticmethod
+    def from_tuples(tuples: list[list[tuple]]) -> Collection:
+        _collection = Collection()
+        for l in tuples:
+            _collection.add(Path.from_tuple_list(l))
+        return _collection
 
     def add(self, path: typing.Union[BoundingBox, Path, typing.List[Path]]) -> None:
         if isinstance(path, Path):
