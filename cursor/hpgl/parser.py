@@ -113,8 +113,6 @@ class HPGLParser:
 
         self.spacing = 0, 0
 
-        # self.paths.clear()
-
     def __parse_pen_select(self, cmd: str):
         self.cur_pen = int(cmd[2:])
 
