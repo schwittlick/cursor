@@ -1,11 +1,10 @@
 import math
 import pathlib
 import typing
-from typing import TextIO
-import re
 import wasabi
 
 from cursor.collection import Collection
+from cursor.hpgl.tokenize import tokenize
 from cursor.path import Path
 from cursor.position import Position
 
@@ -45,6 +44,10 @@ class HPGLParser:
 
         self.paths = Collection()
 
+        self.func_map = {IN: self.__init, SP: self.__parse_pen_select, PA: self.__parse_pen_absolute,
+                         LB: self.__parse_label, SI: self.__parse_font_size, PD: self.__parse_pen_down,
+                         PU: self.__parse_pen_up, DI: self.__parse_direction_absolute, ES: self.__parse_spacing}
+
         self.__init()
 
     def parse(self, hpgl: typing.Union[pathlib.Path, str]) -> Collection:
@@ -56,53 +59,11 @@ class HPGLParser:
             hpgl_data = ''.join(hpgl_data).replace('\r', '')
             hpgl_data = ''.join(hpgl_data).replace('\\x03', self.label_terminator)
 
-        '''
-        all of this is necessary because within a hpgl text command .e.g. LB1234
-        this needs to be parsed when this should be stable enough to also print hpgl code
-        
-        e.g. LB1234LB
-        this should draw the label 1234LB
-        '''
-        pre_split = []
-        label_split = [x for x in re.split(f"{self.label_terminator}", hpgl_data) if x]
-        for batch in label_split:
-            lb_index = batch.find("LB")
-            if lb_index > 0:
-                pre_split.append((batch[:lb_index], False))
-            pre_split.append((batch[lb_index:], True))
-
-        commands = []
-        for pre in pre_split:
-            if pre[1]:
-                commands.append(pre[0])
-            else:
-                split_again = [x for x in re.split(";", pre[0]) if x]
-                commands.extend(split_again)
-
-        for cmd in commands:
-
-            if cmd.startswith(IN):
-                self.__init()
-            elif cmd.startswith(SP):
-                self.__parse_pen_select(cmd)
-            elif cmd.startswith(PA):
-                self.__parse_pen_absolute(cmd)
-            elif cmd.startswith(LB):
-                self.__parse_label(cmd)
-            elif cmd.startswith(SI):
-                self.__parse_font_size(cmd)
-            elif cmd.startswith(PD):
-                self.__parse_pen_down(cmd)
-            elif cmd.startswith(PU):
-                self.__parse_pen_up(cmd)
-            elif cmd.startswith(DI):
-                self.__parse_direction_absolute(cmd)
-            elif cmd.startswith(ES):
-                self.__parse_spacing(cmd)
+        [self.func_map[cmd[:2]](cmd) for cmd in tokenize(hpgl_data) if cmd[:2] in self.func_map.keys()]
 
         return self.paths
 
-    def __init(self):
+    def __init(self, cmd: str = None):
         self.pen_down = False
         self.cur_pen = 0
         self.pos = (0, 0)
