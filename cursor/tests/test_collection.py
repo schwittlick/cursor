@@ -117,9 +117,7 @@ def test_collection_as_dataframe():
 
     df = pc.as_dataframe()  # concatenated
     assert df.ndim == 2
-    assert (
-            df.values.shape[0] == 4
-    )  # the maximum numer of points in a path (rest are filled up with nan's)
+    assert (df.values.shape[0] == 4)  # the maximum numer of points in a path (rest are filled up with nan's)
     assert df.values.shape[1] == 6  # 3 times x, y columns
 
 

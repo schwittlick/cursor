@@ -67,11 +67,11 @@ def config_memory(serial: serial.Serial, io: int = 1024, polygon: int = 1778, ch
     serial.write(buffer_sizes.encode())
     serial.write(WAIT.encode())
 
-    answer = read_until(serial)
+    read_until(serial)
 
     serial.write(logical_buffer_size.encode())
     serial.write(WAIT.encode())
-    answer = read_until(serial)
+    read_until(serial)
 
 
 def identify(port: serial.Serial):
@@ -83,7 +83,7 @@ def identify(port: serial.Serial):
 def abort(port: serial.Serial):
     port.write(ABORT_GRAPHICS.encode())
     port.write(WAIT.encode())
-    answer = read_until(port)
+    read_until(port)
 
 
 def main():
@@ -120,7 +120,7 @@ def main():
                 pbar.update(BATCH_SIZE)
 
                 pos = end
-    except KeyboardInterrupt as kbi:
+    except KeyboardInterrupt:
         log.warn(f"Interrupted- aborting.")
         sleep(0.1)
         abort(port)
