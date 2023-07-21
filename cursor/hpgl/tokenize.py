@@ -1,6 +1,3 @@
-import re
-
-
 def tokenize(hpgl: str) -> list[str]:
     """
     pass a full hpgl file in one line in here
@@ -15,17 +12,15 @@ def tokenize(hpgl: str) -> list[str]:
 
     commands = []
 
-    split_by_label_terminator = [x for x in re.split(f"{label_terminator}", hpgl) if x]
+    split_by_label_terminator = [x for x in hpgl.split(label_terminator) if x]
     for command_batch in split_by_label_terminator:
         label_index = command_batch.find("LB")
         other_part = command_batch[:label_index]
         label_part = command_batch[label_index:]
         if label_index > 0:
-            commands.extend([x for x in re.split(";", other_part) if x])
-        else:
-            commands.extend([x for x in re.split(";", command_batch) if x])
-
-        if label_index != -1:
+            commands.extend([x for x in other_part.split(";") if x])
             commands.append(label_part)
+        else:
+            commands.extend([x for x in command_batch.split(";") if x])
 
     return commands
