@@ -43,6 +43,18 @@ def read_until(port: serial.Serial, char: chr = CR, timeout: float = 1.0):
     data = ""
     while timer.elapsed() < timeout:
         by = port.read().decode()
+        """
+        Traceback (most recent call last):
+          File "/home/marcel/dev/cursor/tools/sendhpgl.py", line 130, in <module>
+            main()
+          File "/home/marcel/dev/cursor/tools/sendhpgl.py", line 111, in main
+            free_io_memory = int(read_until(port))
+          File "/home/marcel/dev/cursor/tools/sendhpgl.py", line 45, in read_until
+            by = port.read()
+          File "/home/marcel/.pyenv/versions/cursor/lib/python3.9/site-packages/serial/serialposix.py", line 595, in read
+            raise SerialException(
+        serial.serialutil.SerialException: device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+        """
         if by != char:
             data += by
         else:
@@ -106,7 +118,7 @@ def main():
         with tqdm(total=len(code)) as pbar:
             pbar.update(0)
 
-            while pos < len(code):
+            while pos <= len(code):
                 port.write(OUTBUT_BUFFER_SPACE.encode())
                 free_io_memory = int(read_until(port))
                 if free_io_memory < BATCH_SIZE:
