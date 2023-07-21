@@ -4,7 +4,6 @@ import copy
 import os
 import pathlib
 import random
-import sys
 import typing
 
 import arcade
@@ -382,7 +381,7 @@ class HPGLRenderer:
     def generate_string(self):
         _hpgl = HPGL()
 
-        _prev_line_type = 0
+        # _prev_line_type = 0
         _prev_velocity = 0
         _prev_force = 0
         _prev_pen = 0

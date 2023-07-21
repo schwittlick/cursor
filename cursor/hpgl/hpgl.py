@@ -45,7 +45,7 @@ class HPGL:
         self.data += data
 
     def IN(self) -> None:
-        self.data += f"IN;"
+        self.data += "IN;"
 
         self.terminator = chr(3)
         self.pos = (0, 0)
@@ -99,7 +99,7 @@ class HPGL:
         e.g. to make a new line within a LB statement: f"LBline1{chr(13)}{chr(10)}line2{chr(3)}"
         """
         if len(label) == 0:
-            log.warn(f"Empty Label, discarding")
+            log.warn("Empty Label, discarding")
             return
 
         if len(label) > 150:

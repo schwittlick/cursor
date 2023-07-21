@@ -59,7 +59,7 @@ class HPGLParser:
             hpgl_data = ''.join(hpgl_data).replace('\r', '')
             hpgl_data = ''.join(hpgl_data).replace('\\x03', self.label_terminator)
 
-        [self.func_map[cmd[:2]](cmd) for cmd in tokenize(hpgl_data) if cmd[:2] in self.func_map.keys()]
+        [self.func_map[cmd[:2]](cmd) for cmd in tokenize(hpgl_data) if cmd[:2] in self.func_map]
 
         return self.paths
 
@@ -127,7 +127,7 @@ class HPGLParser:
                 degree = math.degrees(self.rise / self.run)
 
             spaces_x = (self.char_size_mm[0] * 40 * 1.5) * self.spacing[0]
-            spaces_y = (self.char_size_mm[1] * 40 * 2.0) * self.spacing[1]
+            # spaces_y = (self.char_size_mm[1] * 40 * 2.0) * self.spacing[1]
             newpos = self.pos[0] + self.char_size_mm[0] * 40 * 1.5 + spaces_x, self.pos[1]
             self.pos = rotate(self.pos, newpos, math.radians(degree))
 
