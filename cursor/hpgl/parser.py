@@ -59,7 +59,12 @@ class HPGLParser:
             hpgl_data = ''.join(hpgl_data).replace('\r', '')
             hpgl_data = ''.join(hpgl_data).replace('\\x03', self.label_terminator)
 
-        [self.func_map[cmd[:2]](cmd) for cmd in tokenize(hpgl_data) if cmd[:2] in self.func_map]
+        tokens = tokenize(hpgl_data)
+        for cmd in tokens:
+            if cmd[:2] in self.func_map:
+                self.func_map[cmd[:2]](cmd)
+            else:
+                print(cmd)
 
         return self.paths
 
