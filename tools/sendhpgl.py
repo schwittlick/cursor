@@ -17,11 +17,11 @@
 from argparse import ArgumentParser
 from time import sleep
 
-import serial
 import wasabi
-from serial import Serial
+from serial import Serial, SerialException
 from tqdm import tqdm
 
+from cursor.hpgl.tokenize import tokenize
 from cursor.timer import Timer
 
 log = wasabi.Printer(pretty=True)
@@ -38,64 +38,89 @@ ABORT_GRAPHICS = f"{ESC}.K"  # clears partially parsed cmds and clears buffer
 WAIT = f"{ESC}.L"  # returns io buffer size when its empty. read it and wait for reply before next command
 
 
-def read_until(port: serial.Serial, char: chr = CR, timeout: float = 1.0):
-    timer = Timer()
-    data = ""
-    while timer.elapsed() < timeout:
-        by = port.read().decode()
-        """
-        Traceback (most recent call last):
-          File "/home/marcel/dev/cursor/tools/sendhpgl.py", line 130, in <module>
-            main()
-          File "/home/marcel/dev/cursor/tools/sendhpgl.py", line 111, in main
-            free_io_memory = int(read_until(port))
-          File "/home/marcel/dev/cursor/tools/sendhpgl.py", line 45, in read_until
-            by = port.read()
-          File "/home/marcel/.pyenv/versions/cursor/lib/python3.9/site-packages/serial/serialposix.py", line 595, in read
-            raise SerialException(
-        serial.serialutil.SerialException: device reports readiness to read but returned no data (device disconnected or multiple access on port?)
-        """
-        if by != char:
-            data += by
-        else:
-            return data
-    return data
+class SerialSender:
+    def __init__(self, serialport: str, hpgl_file: str):
+        self.serial_port_address = serialport
+        self.port = Serial(port=serialport, baudrate=9600, timeout=0.5)
+        self.commands = tokenize(open(hpgl_file, 'r').read())
 
+        model = self.identify()
+        log.info(f"Detected model {model}")
+        if model == "7550A":
+            self.config_memory(12752, 4, 0, 0, 44)
 
-def config_memory(serial: serial.Serial, io: int = 1024, polygon: int = 1778, char: int = 0, replot: int = 9954,
-                  vector: int = 44):
-    max_memory_hp7550 = 12800
+    def config_memory(self, io: int = 1024, polygon: int = 1778, char: int = 0, replot: int = 9954,
+                      vector: int = 44):
+        max_memory_hp7550 = 12800
 
-    assert 2 <= io <= 12752
-    assert 4 <= polygon <= 12754
-    assert 0 <= char <= 12750
-    assert 0 <= replot <= 12750
-    assert 44 <= vector <= 12794
-    assert sum([io, polygon, char, replot, vector]) <= max_memory_hp7550
+        assert 2 <= io <= 12752
+        assert 4 <= polygon <= 12754
+        assert 0 <= char <= 12750
+        assert 0 <= replot <= 12750
+        assert 44 <= vector <= 12794
+        assert sum([io, polygon, char, replot, vector]) <= max_memory_hp7550
 
-    buffer_sizes = f"{ESC}.T{io};{polygon};{char};{replot};{vector}{ESC_TERM}"
-    logical_buffer_size = f"{ESC}.@{io}{ESC_TERM}"
+        buffer_sizes = f"{ESC}.T{io};{polygon};{char};{replot};{vector}{ESC_TERM}"
+        logical_buffer_size = f"{ESC}.@{io}{ESC_TERM}"
 
-    serial.write(buffer_sizes.encode())
-    serial.write(WAIT.encode())
+        self.port.write(buffer_sizes.encode())
+        self.port.write(WAIT.encode())
 
-    read_until(serial)
+        self.read_until()
 
-    serial.write(logical_buffer_size.encode())
-    serial.write(WAIT.encode())
-    read_until(serial)
+        self.port.write(logical_buffer_size.encode())
+        self.port.write(WAIT.encode())
+        self.read_until()
 
+    def identify(self):
+        self.port.write(OUTPUT_IDENTIFICATION.encode())
+        answer = self.read_until(self.port)
+        return answer.split(',')[0]
 
-def identify(port: serial.Serial):
-    port.write(OUTPUT_IDENTIFICATION.encode())
-    answer = read_until(port)
-    return answer.split(',')[0]
+    def abort(self):
+        self.port.write(ABORT_GRAPHICS.encode())
+        self.port.write(WAIT.encode())
+        self.read_until()
 
+    def send(self):
+        try:
+            with tqdm(total=len(self.commands)) as pbar:
+                pbar.update(0)
+                for cmd in self.commands:
+                    self.wait_for_free_io_memory(cmd)
+                    self.port.write(cmd.encode('utf-8'))
+                    pbar.update(1)
+        except KeyboardInterrupt:
+            log.warn(f"Interrupted- aborting.")
+            sleep(0.1)
+            self.abort()
 
-def abort(port: serial.Serial):
-    port.write(ABORT_GRAPHICS.encode())
-    port.write(WAIT.encode())
-    read_until(port)
+    def read_until(self, char: chr = CR, timeout: float = 1.0):
+        timer = Timer()
+        data = ""
+        while timer.elapsed() < timeout:
+            try:
+                by = self.port.read().decode()
+                if by != char:
+                    data += by
+                else:
+                    return data
+            except SerialException as se:
+                self.port.close()
+                self.port = None
+                self.port = Serial(port=self.serial_port_address, baudrate=9600, timeout=0.5)
+                log.warn("Reconnected serial port..")
+                log.warn(f"Because of {se}")
+
+        return data
+
+    def wait_for_free_io_memory(self, cmd: str) -> None:
+        self.port.write(OUTBUT_BUFFER_SPACE.encode())
+        free_io_memory = int(self.read_until())
+        while free_io_memory <= len(cmd):
+            sleep(0.1)
+            self.port.write(OUTBUT_BUFFER_SPACE.encode())
+            free_io_memory = int(self.read_until())
 
 
 def main():
@@ -104,39 +129,13 @@ def main():
     parser.add_argument('file')
     args = parser.parse_args()
 
-    port = Serial(port=args.port, baudrate=9600, timeout=0.5)
-
-    code = open(args.file, 'r').read()
-    pos = 0
-
-    BATCH_SIZE = 128
-    model = identify(port)
-    log.info(f"Detected model {model}")
-    if model == "7550A":
-        config_memory(port, 12752, 4, 0, 0, 44)
-    try:
-        with tqdm(total=len(code)) as pbar:
-            pbar.update(0)
-
-            while pos <= len(code):
-                port.write(OUTBUT_BUFFER_SPACE.encode())
-                free_io_memory = int(read_until(port))
-                if free_io_memory < BATCH_SIZE:
-                    sleep(0.01)
-                    continue
-
-                end = pos + BATCH_SIZE
-                if len(code) - pos < BATCH_SIZE:
-                    end = len(code)
-                port.write(code[pos:end].encode('utf-8'))
-                pbar.update(BATCH_SIZE)
-
-                pos = end
-    except KeyboardInterrupt:
-        log.warn(f"Interrupted- aborting.")
-        sleep(0.1)
-        abort(port)
+    sender = SerialSender(args.port, args.file)
+    sender.send()
 
 
 if __name__ == '__main__':
+    """
+    - pause
+    - everything in try catch so it can be continued in case of crash
+    """
     main()
