@@ -1,4 +1,4 @@
-from cursor.path import Path
+from cursor.path import Path, Property
 from cursor.collection import Collection
 from cursor.bb import BoundingBox
 from cursor.timer import Timer
@@ -464,7 +464,7 @@ def test_pathcollection_reverse():
 
 def test_pathcollection_layer():
     pcol = Collection()
-    p0 = Path(layer="custom")
+    p0 = Path(properties={Property.LAYER: "custom"})
     p0.add(5, 5111)
     p1 = Path()
     p1.add(5, 5111)
@@ -515,19 +515,19 @@ def test_collection_travel_distance():
 
 
 def test_pathcollection_line_types():
-    p1 = Path(line_type=1)
+    p1 = Path(properties={Property.LINETYPE: 1})
     p1.add(0, 0)
 
-    p2 = Path(line_type=2)
+    p2 = Path(properties={Property.LINETYPE: 2})
     p2.add(0, 0)
 
-    p3 = Path(line_type=3)
+    p3 = Path(properties={Property.LINETYPE: 3})
     p3.add(0, 0)
 
-    p4 = Path(line_type=4)
+    p4 = Path(properties={Property.LINETYPE: 4})
     p4.add(0, 0)
 
-    p5 = Path(line_type=4)
+    p5 = Path(properties={Property.LINETYPE: 4})
     p5.add(0, 0)
 
     pc = Collection()
