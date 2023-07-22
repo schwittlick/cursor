@@ -29,8 +29,8 @@ setup(
     entry_points={
         "console_scripts": [
             "cursor_recorder = cursor.recorder:main",
-            "discovery = tools.discovery:discover",
-            "sendhpgl = tools.sendhpgl:main",
+            "discovery = cursor.hpgl.discovery:discover",
+            "sendhpgl = cursor.hpgl.sendhpgl:main",
         ]
     },
     license="MIT",
