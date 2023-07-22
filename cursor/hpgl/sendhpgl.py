@@ -1,19 +1,3 @@
-# Send HP-GL code to a plotter
-# Copyright (C) 2023  Marcel Schwittlick
-
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 from argparse import ArgumentParser
 from time import sleep
 
@@ -21,21 +5,12 @@ import wasabi
 from serial import Serial, SerialException
 from tqdm import tqdm
 
+from cursor.hpgl import ESC_TERM, ESC, ABORT_GRAPHICS, OUTPUT_IDENTIFICATION, WAIT, OUTBUT_BUFFER_SPACE, CR, \
+    read_until_char
 from cursor.hpgl.tokenize import tokenize
 from cursor.timer import Timer
 
 log = wasabi.Printer(pretty=True)
-
-ESC = chr(27)
-CR = chr(13)
-LF = chr(10)
-ESC_TERM = ":"
-
-OUTBUT_BUFFER_SPACE = f"{ESC}.B"
-OUTPUT_EXTENDED_STATUS = f"{ESC}.O"  # info about device satus etc
-OUTPUT_IDENTIFICATION = f"{ESC}.A"  # immediate return e.g. "7550A,firmwarenr"
-ABORT_GRAPHICS = f"{ESC}.K"  # clears partially parsed cmds and clears buffer
-WAIT = f"{ESC}.L"  # returns io buffer size when its empty. read it and wait for reply before next command
 
 
 class SerialSender:
@@ -95,24 +70,17 @@ class SerialSender:
             sleep(0.1)
             self.abort()
 
-    def read_until(self, char: chr = CR, timeout: float = 1.0):
-        timer = Timer()
-        data = ""
-        while timer.elapsed() < timeout:
-            try:
-                by = self.port.read().decode()
-                if by != char:
-                    data += by
-                else:
-                    return data
-            except SerialException as se:
-                self.port.close()
-                self.port = None
-                self.port = Serial(port=self.serial_port_address, baudrate=9600, timeout=0.5)
-                log.warn("Reconnected serial port..")
-                log.warn(f"Because of {se}")
+    def read_until(self, char: chr = CR, timeout: float = 1.0) -> str:
+        try:
+            return read_until_char(self.port, char, timeout)
+        except SerialException as se:
+            self.port.close()
+            self.port = None
+            self.port = Serial(port=self.serial_port_address, baudrate=9600, timeout=0.5)
+            log.warn("Reconnected serial port..")
+            log.warn(f"Because of {se}")
 
-        return data
+        return ""
 
     def wait_for_free_io_memory(self, cmd: str) -> None:
         self.port.write(OUTBUT_BUFFER_SPACE.encode())

@@ -4,6 +4,8 @@ import math
 
 import wasabi
 
+from cursor.hpgl import LB_TERMINATOR
+
 log = wasabi.Printer()
 
 
@@ -23,8 +25,9 @@ def rotate(origin, point, angle):
 
 class HPGL:
     def __init__(self):
-        self.terminator = chr(3)
+        self.terminator = LB_TERMINATOR
         self.plotter_unit = 40
+
         self.pos = (0, 0)
         self.char_size_mm = (2.85, 3.75)
 
@@ -47,7 +50,7 @@ class HPGL:
     def IN(self) -> None:
         self.data += "IN;"
 
-        self.terminator = chr(3)
+        self.terminator = LB_TERMINATOR
         self.pos = (0, 0)
         self.char_size_mm = (2.85, 3.75)
 
