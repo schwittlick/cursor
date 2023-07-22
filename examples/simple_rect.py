@@ -6,12 +6,7 @@ from cursor.device import PlotterType, PaperSize
 if __name__ == "__main__":
     c = Collection()
 
-    p = Path()
-    p.add(0, 0)
-    p.add(1, 0)
-    p.add(1, 1)
-    p.add(0, 1)
-    p.add(0, 0)
+    p = Path.from_tuple_list([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)])
 
     p.velocity = 100
 
@@ -19,9 +14,9 @@ if __name__ == "__main__":
 
     ExportWrapper().ex(
         c,
-        PlotterType.HP_7595A_A0,
-        PaperSize.LANDSCAPE_A0,
-        0,
+        PlotterType.ROLAND_DXY1200,
+        PaperSize.PHOTO_PAPER_240_178_LANDSCAPE,
+        10,
         "simple_rect_example",
         "test",
     )
