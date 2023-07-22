@@ -206,4 +206,4 @@ def test_LB_DI():
 
     # 4chars * 10mm char size * 40 plotter units * 1.5 char spacing
     # rotated by 45°
-    assert numpy.allclose(hpgl.pos, (483.66103833159855, 483.66103833159855))
+    assert numpy.allclose(hpgl.pos, (483.661, 483.661))
