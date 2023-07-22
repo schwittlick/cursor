@@ -6,6 +6,7 @@ import hashlib
 import math
 import sys
 import typing
+from enum import Enum, auto
 
 import numpy as np
 import pandas as pd
@@ -29,30 +30,30 @@ from cursor.position import Position
 log = wasabi.Printer()
 
 
+class Property(Enum):
+    LAYER = auto()
+    LINETYPE = auto()
+    VELOCITY = auto()
+    PEN_FORCE = auto()
+    PEN_SELECT = auto()
+    IS_POLY = auto()
+    PWM = auto()
+
+
 class Path:
     def __init__(
             self,
             vertices: typing.Optional[typing.List[Position]] = None,
-            layer: typing.Optional[str] = "layer1",
-            line_type: typing.Optional[int] = None,
-            pen_velocity: typing.Optional[int] = None,
-            pen_force: typing.Optional[int] = None,
-            pen_select: typing.Optional[int] = None,
-            is_polygon: typing.Optional[bool] = False,
-            laser_pwm: typing.Optional[int] = None
+            properties: typing.Optional[dict] = None
     ):
-        self._layer = layer
-        self._line_type = line_type
-        self._pen_velocity = pen_velocity
-        self._pen_force = pen_force
-        self._pen_select = pen_select
-        self._is_polygon = is_polygon
-        self._laser_pwm = laser_pwm
-
         self._vertices = []
+        self.properties = {Property.LAYER: "layer1"}
 
         if vertices is not None:
             self._vertices = vertices
+
+        if properties is not None:
+            self.properties = properties
 
     def __repr__(self):
         rep = (
@@ -115,68 +116,81 @@ class Path:
         self._vertices = vertices
 
     @property
-    def line_type(self) -> int:
-        """
-        only linetype of 1 and above allowed
-        all other linetypes don't render well
-        """
-        if self._line_type is None:
-            return 1
-        return max(self._line_type, 1)
+    def line_type(self) -> typing.Union[int, None]:
+        if Property.LINETYPE not in self.properties.keys():
+            return None
+
+        return self.properties[Property.LINETYPE]
 
     @line_type.setter
-    def line_type(self, line_type) -> None:
-        if line_type <= 0:
-            self._line_type = 1
-        self._line_type = line_type
+    def line_type(self, line_type: int) -> None:
+        self.properties[Property.LINETYPE] = line_type
 
     @property
-    def layer(self) -> str:
-        return self._layer
+    def layer(self) -> typing.Union[str, None]:
+        if Property.LAYER not in self.properties.keys():
+            return None
+
+        return self.properties[Property.LAYER]
 
     @layer.setter
-    def layer(self, layer) -> None:
-        self._layer = layer
+    def layer(self, layer: str) -> None:
+        self.properties[Property.LAYER] = layer
 
     @property
-    def pen_force(self) -> int:
-        return self._pen_force
+    def pen_force(self) -> typing.Union[int, None]:
+        if Property.PEN_FORCE not in self.properties.keys():
+            return None
+
+        return self.properties[Property.PEN_FORCE]
 
     @pen_force.setter
-    def pen_force(self, pen_force) -> None:
-        self._pen_force = pen_force
+    def pen_force(self, pen_force: int) -> None:
+        self.properties[Property.PEN_FORCE] = pen_force
 
     @property
-    def pen_select(self) -> int:
-        return self._pen_select
+    def pen_select(self) -> typing.Union[int, None]:
+        if Property.PEN_SELECT not in self.properties.keys():
+            return None
+
+        return self.properties[Property.PEN_SELECT]
 
     @pen_select.setter
-    def pen_select(self, pen_select) -> None:
-        self._pen_select = pen_select
+    def pen_select(self, pen_select: int) -> None:
+        self.properties[Property.PEN_SELECT] = pen_select
 
     @property
-    def velocity(self) -> int:
-        return self._pen_velocity
+    def velocity(self) -> typing.Union[int, None]:
+        if Property.VELOCITY not in self.properties.keys():
+            return None
+
+        return self.properties[Property.VELOCITY]
 
     @velocity.setter
-    def velocity(self, pen_velocity) -> None:
-        self._pen_velocity = pen_velocity
+    def velocity(self, pen_velocity: int) -> None:
+        self.properties[Property.VELOCITY] = pen_velocity
 
     @property
-    def laser_pwm(self) -> int:
-        return self._laser_pwm
+    def laser_pwm(self) -> typing.Union[int, None]:
+        if Property.PWM not in self.properties.keys():
+            return None
+
+        return self.properties[Property.PWM]
 
     @laser_pwm.setter
-    def laser_pwm(self, laser_pwm) -> None:
-        self._laser_pwm = laser_pwm
+    def laser_pwm(self, laser_pwm: int) -> None:
+        self.properties[Property.PWM] = laser_pwm
 
     @property
-    def is_polygon(self) -> bool:
-        return self._is_polygon
+    def is_polygon(self) -> typing.Union[bool, None]:
+        if Property.IS_POLY not in self.properties.keys():
+            return None
+
+        return bool(self.properties[Property.IS_POLY])
 
     @is_polygon.setter
-    def is_polygon(self, is_polygon) -> None:
-        self._is_polygon = is_polygon
+    def is_polygon(self, is_polygon: bool) -> None:
+        self.properties[Property.IS_POLY] = is_polygon
 
     def is_closed(self) -> bool:
         assert len(self) > 2
@@ -202,13 +216,7 @@ class Path:
         self.vertices.clear()
 
     def copy(self) -> Path:
-        p = Path(None if self.empty() else copy.deepcopy(self.vertices))
-        p.layer = self.layer
-        p.velocity = self.velocity
-        p.line_type = self.line_type
-        p.pen_select = self.pen_select
-        p.pen_force = self.pen_force
-        p.is_polygon = self.is_polygon
+        p = Path(None if self.empty() else copy.deepcopy(self.vertices), self.properties)
         return p
 
     def reverse(self) -> None:
@@ -217,9 +225,7 @@ class Path:
     def reversed(self) -> Path:
         c = copy.deepcopy(self.vertices)
         c.reverse()
-        return Path(
-            c, layer=self.layer, line_type=self.line_type, pen_velocity=self.velocity
-        )
+        return Path(c, self.properties)
 
     def start_pos(self) -> Position:
         if len(self.vertices) == 0:
@@ -973,3 +979,7 @@ class Path:
             add_if(pa, return_paths)
 
         return return_paths
+
+
+class PropertyPath(Path):
+    pass
