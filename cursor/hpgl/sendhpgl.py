@@ -8,7 +8,6 @@ from tqdm import tqdm
 from cursor.hpgl import ESC_TERM, ESC, ABORT_GRAPHICS, OUTPUT_IDENTIFICATION, WAIT, OUTBUT_BUFFER_SPACE, CR, \
     read_until_char
 from cursor.hpgl.tokenize import tokenize
-from cursor.timer import Timer
 
 log = wasabi.Printer(pretty=True)
 
@@ -66,7 +65,7 @@ class SerialSender:
                     self.port.write(cmd.encode('utf-8'))
                     pbar.update(1)
         except KeyboardInterrupt:
-            log.warn(f"Interrupted- aborting.")
+            log.warn("Interrupted- aborting.")
             sleep(0.1)
             self.abort()
 
