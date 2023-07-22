@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, auto
 
 import wasabi
 
@@ -11,38 +11,39 @@ class PlotterType(Enum):
     def __str__(self):
         return self.name
 
-    ROLAND_DPX3300 = 0
-    DIY_PLOTTER = 1
-    AXIDRAW = 2
-    HP_7475A_A4 = 3
-    HP_7475A_A3 = 4
-    ROLAND_DXY1200 = 5
-    ROLAND_DXY980 = 6
-    HP_7595A = 7
-    ROLAND_PNC1000 = 8
-    ROLAND_DPX3300_A2 = 9
-    ROLAND_DPX3300_A3 = 10
-    HP_7595A_A3 = 11
-    TEKTRONIX_4662 = 12
-    HP_7596B = 13
-    HP_7596B_25_25 = 14
-    HP_7596B_A3 = 15
-    DIGIPLOT_A1 = 16
-    HP_7470A = 17
-    HP_7550A = 18
-    HP_7595A_A2 = 19
-    ROLAND_PNC1000_50x100 = 20
-    HP_7595A_A0 = 21
-    HP_7596A = 22
+    ROLAND_DPX3300 = auto()
+    DIY_PLOTTER = auto()
+    AXIDRAW = auto()
+    HP_7475A_A4 = auto()
+    HP_7475A_A3 = auto()
+    ROLAND_DXY1200 = auto()
+    ROLAND_DXY1200_EXPANDED = auto()
+    ROLAND_DXY980 = auto()
+    HP_7595A = auto()
+    ROLAND_PNC1000 = auto()
+    ROLAND_DPX3300_A2 = auto()
+    ROLAND_DPX3300_A3 = auto()
+    HP_7595A_A3 = auto()
+    TEKTRONIX_4662 = auto()
+    HP_7596B = auto()
+    HP_7596B_25_25 = auto()
+    HP_7596B_A3 = auto()
+    DIGIPLOT_A1 = auto()
+    HP_7470A = auto()
+    HP_7550A = auto()
+    HP_7595A_A2 = auto()
+    ROLAND_PNC1000_50x100 = auto()
+    HP_7595A_A0 = auto()
+    HP_7596A = auto()
 
 
 class ExportFormat(Enum):
-    JPG = 0
-    SVG = 1
-    GCODE = 2
-    HPGL = 3
-    TEK = 4
-    DIGI = 5
+    JPG = auto()
+    SVG = auto()
+    GCODE = auto()
+    HPGL = auto()
+    TEK = auto()
+    DIGI = auto()
 
 
 class ExportFormatMappings:
@@ -75,29 +76,29 @@ class ExportFormatMappings:
 
 
 class PaperSize(Enum):
-    PORTRAIT_36_48 = 0
-    LANDSCAPE_48_36 = 1
-    PORTRAIT_42_56 = 2
-    LANDSCAPE_56_42 = 3
-    PORTRAIT_50_70 = 4
-    LANDSCAPE_70_50 = 5
-    SQUARE_70_70 = 6
-    PORTRAIT_70_100 = 7
-    LANDSCAPE_100_70 = 8
-    LANDSCAPE_A4 = 9
-    PORTRAIT_A4 = 10
-    LANDSCAPE_A1 = 11
-    LANDSCAPE_A0 = 12
-    PORTRAIT_A3 = 13
-    LANDSCAPE_A3 = 14
-    LANDSCAPE_80_50 = 15
-    PORTRAIT_50_80 = 16
-    LANDSCAPE_A2 = 17
-    SQUARE_59_59 = 18
-    SQUARE_25_25 = 19
-    LANDSCAPE_A1_HP_7596B = 20
-    PORTRAIT_50_100 = 21
-    PHOTO_PAPER_178_240_LANDSCAPE = 22
+    PORTRAIT_36_48 = auto()
+    LANDSCAPE_48_36 = auto()
+    PORTRAIT_42_56 = auto()
+    LANDSCAPE_56_42 = auto()
+    PORTRAIT_50_70 = auto()
+    LANDSCAPE_70_50 = auto()
+    SQUARE_70_70 = auto()
+    PORTRAIT_70_100 = auto()
+    LANDSCAPE_100_70 = auto()
+    LANDSCAPE_A4 = auto()
+    PORTRAIT_A4 = auto()
+    LANDSCAPE_A1 = auto()
+    LANDSCAPE_A0 = auto()
+    PORTRAIT_A3 = auto()
+    LANDSCAPE_A3 = auto()
+    LANDSCAPE_80_50 = auto()
+    PORTRAIT_50_80 = auto()
+    LANDSCAPE_A2 = auto()
+    SQUARE_59_59 = auto()
+    SQUARE_25_25 = auto()
+    LANDSCAPE_A1_HP_7596B = auto()
+    PORTRAIT_50_100 = auto()
+    PHOTO_PAPER_240_178_LANDSCAPE = auto()
 
 
 class MinmaxMapping:
@@ -109,7 +110,8 @@ class MinmaxMapping:
         PlotterType.AXIDRAW: BB(0, 0, 0, 0),  # todo: missing real bounds
         PlotterType.HP_7475A_A4: BB(0, 0, 11040, 7721),
         PlotterType.HP_7475A_A3: BB(0, 0, 16158, 11040),
-        PlotterType.ROLAND_DXY1200: BB(0, 0, 16158, 11040),  # todo: missing real bounds
+        PlotterType.ROLAND_DXY1200: BB(0, 0, 16158, 11040),
+        PlotterType.ROLAND_DXY1200_EXPANDED: BB(0, 0, 17272, 11880),
         PlotterType.ROLAND_DXY980: BB(0, 0, 16158, 11040),
         # PlotterType.HP_7595A_A0: BB(-23160, -17602, 23160 + 1160, 17602),
         PlotterType.HP_7595A: BB(-16090, -11684, 16090, 11684),
@@ -279,7 +281,7 @@ class PaperSizeName:
         PaperSize.SQUARE_25_25: "square_25_25",
         PaperSize.LANDSCAPE_A1_HP_7596B: "landscape_a1",
         PaperSize.PORTRAIT_50_100: "portrait_50x100",
-        PaperSize.PHOTO_PAPER_178_240_LANDSCAPE: "photo_paper_178x240",
+        PaperSize.PHOTO_PAPER_240_178_LANDSCAPE: "photo_paper_240x178",
     }
 
 
@@ -307,5 +309,5 @@ class Paper:
         PaperSize.SQUARE_25_25: (215, 170),
         PaperSize.LANDSCAPE_A1_HP_7596B: (776, 555),
         PaperSize.PORTRAIT_50_100: (460, 960),
-        PaperSize.PHOTO_PAPER_178_240_LANDSCAPE: (240, 178),
+        PaperSize.PHOTO_PAPER_240_178_LANDSCAPE: (240, 178),
     }

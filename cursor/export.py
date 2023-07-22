@@ -147,18 +147,18 @@ class Exporter:
             log.fail("Config, Name or Paths is None. Not exporting anything")
             return
 
-        # jpeg fitting roughly
-        self.paths.fit(
-            Paper.sizes[self.cfg.dimension],
-            padding_mm=self.cfg.margin,
-            cutoff_mm=self.cfg.cutoff,
-            keep_aspect=self.keep_aspect_ratio
-        )
-
         module = inspect.getmodule(inspect.stack()[2][0])
         ms = inspect.getsource(module)
 
         if jpg:
+            # jpeg fitting roughly
+            self.paths.fit(
+                Paper.sizes[self.cfg.dimension],
+                padding_mm=self.cfg.margin,
+                cutoff_mm=self.cfg.cutoff,
+                keep_aspect=self.keep_aspect_ratio
+            )
+
             separate_layers = self.paths.get_layers()
             for layer, pc in separate_layers.items():
                 sizename = PaperSizeName.names[self.cfg.dimension]
