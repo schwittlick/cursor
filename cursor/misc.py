@@ -6,6 +6,8 @@ import numpy as np
 import pynput
 import wasabi
 
+from cursor.position import Position
+
 log = wasabi.Printer()
 
 
@@ -225,7 +227,7 @@ def transformFn(stl, sbr, dtl, dbr):
     ox, oy = (ddx - sdx * a) * 0.5 + dtlx, (ddy - sdy * a) * 0.5 + dtly
     bx, by = -stlx * a + ox, -stly * a + oy
 
-    def calc(inp: typing.Tuple[float, float]):
+    def calc(inp: Position):
         x, y = inp.x, inp.y
         return x * a + bx, y * a + by
 
