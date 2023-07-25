@@ -37,7 +37,9 @@ class Property(Enum):
     PEN_FORCE = auto()
     PEN_SELECT = auto()
     IS_POLY = auto()
-    PWM = auto()
+    LASER_PWM = auto()
+    LASER_VOLT = auto()
+    LASER_DELAY = auto()
 
 
 class Path:
@@ -172,14 +174,36 @@ class Path:
 
     @property
     def laser_pwm(self) -> typing.Union[int, None]:
-        if Property.PWM not in self.properties.keys():
+        if Property.LASER_PWM not in self.properties.keys():
             return None
 
-        return self.properties[Property.PWM]
+        return self.properties[Property.LASER_PWM]
 
     @laser_pwm.setter
     def laser_pwm(self, laser_pwm: int) -> None:
-        self.properties[Property.PWM] = laser_pwm
+        self.properties[Property.LASER_PWM] = laser_pwm
+
+    @property
+    def laser_volt(self) -> typing.Union[float, None]:
+        if Property.LASER_VOLT not in self.properties.keys():
+            return None
+
+        return self.properties[Property.LASER_VOLT]
+
+    @laser_volt.setter
+    def laser_volt(self, laser_volt: float) -> None:
+        self.properties[Property.LASER_VOLT] = laser_volt
+
+    @property
+    def laser_delay(self) -> typing.Union[float, None]:
+        if Property.LASER_DELAY not in self.properties.keys():
+            return None
+
+        return self.properties[Property.LASER_DELAY]
+
+    @laser_delay.setter
+    def laser_delay(self, laser_delay: float) -> None:
+        self.properties[Property.LASER_DELAY] = laser_delay
 
     @property
     def is_polygon(self) -> typing.Union[bool, None]:

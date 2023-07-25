@@ -386,6 +386,8 @@ class HPGLRenderer:
         _prev_force = 0
         _prev_pen = 0
         _prev_pwm = 0
+        _prev_volt = 0
+        _prev_delay = 0
 
         first = True
         for p in self.__paths:
@@ -418,6 +420,16 @@ class HPGLRenderer:
                 if _prev_pwm != p.laser_pwm:
                     _hpgl.custom(f"PWM{p.laser_pwm};")
                     _prev_pwm = p.laser_pwm
+
+            if p.laser_volt:
+                if _prev_volt != p.laser_volt:
+                    _hpgl.custom(f"VOLT{p.laser_volt};")
+                    _prev_volt = p.laser_volt
+
+            if p.laser_delay:
+                if _prev_delay != p.laser_delay:
+                    _hpgl.custom(f"DELAY{p.laser_delay};")
+                    _prev_delay = p.laser_delay
 
             _hpgl.PA(x, y)
             if p.is_polygon:

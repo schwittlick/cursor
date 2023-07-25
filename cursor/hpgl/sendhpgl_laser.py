@@ -8,6 +8,7 @@ import re
 
 from cursor.hpgl import read_until_char
 from cursor.hpgl.sendhpgl import SerialSender
+from tools.psu import PSU
 
 log = wasabi.Printer(pretty=True)
 
@@ -15,10 +16,15 @@ DEBUG = True
 
 
 class LaserSerialSender(SerialSender):
-    def __init__(self, serialport: str, serialport_arduino: str, hpgl_data: str):
+    def __init__(self, serialport: str, serialport_arduino: str, serialport_psu, hpgl_data: str):
         super().__init__(serialport, hpgl_data)
 
         self.port_arduino = Serial(serialport_arduino, baudrate=9600, timeout=1)
+        self.psu = PSU(serialport_psu)
+        self.psu.open()
+        self.psu.set_voltage_limit(5)
+        self.psu.set_current_limit(1)
+        self.psu.off()
 
         sleep(1)
         d = self.port_arduino.readline()
@@ -33,6 +39,7 @@ class LaserSerialSender(SerialSender):
                 pbar.update(0)
 
                 current_pwm = 0
+                current_delay = 0
 
                 for i in range(len(self.commands) - 1):
                     cmd = self.commands[i]
@@ -40,9 +47,13 @@ class LaserSerialSender(SerialSender):
 
                     if cmd.startswith("PD"):
                         self.set_arduino_pwm(current_pwm)  # turn on previously configured pwm
+                        self.psu.on()
+                        sleep(current_delay)
+                        current_delay = 0
                         self.plotter.write(f"{cmd};".encode('utf-8'))
                     elif cmd.startswith("PU"):
                         self.set_arduino_pwm(0)  # off when pen up
+                        self.psu.off()
                     elif cmd.startswith("PA"):
                         if DEBUG:
                             log.info(f"{cmd}")
@@ -58,6 +69,13 @@ class LaserSerialSender(SerialSender):
                         parsed_pwm = int(re.findall(r'\d+', cmd)[0])
                         current_pwm = parsed_pwm
                         log.info(f"current_pwm: {parsed_pwm}")
+                    elif cmd.startswith("VOLT"):
+                        volt = float(cmd[4:-1])
+                        self.psu.set_voltage(volt)
+                        pass
+                    elif cmd.startswith("DELAY"):
+                        current_delay = float(cmd[5:-1])
+                        pass
                     elif cmd.startswith("VS"):
                         log.info(f"{cmd}")
                         self.plotter.write(f"{cmd};".encode('utf-8'))
@@ -117,14 +135,16 @@ class LaserSerialSender(SerialSender):
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument('port')
+    parser.add_argument('plotter')
+    parser.add_argument('arduino')
+    parser.add_argument('psu')
     parser.add_argument('file')
     args = parser.parse_args()
 
     text = ''.join(open(args.file, 'r', encoding='utf-8').readlines())
     text = text.replace(" ", '').replace("\n", '').replace("\r", '')
 
-    sender = LaserSerialSender(args.port, text)
+    sender = LaserSerialSender(args.plotter, args.arduino, args.psu, text)
     sender.send()
 
 
