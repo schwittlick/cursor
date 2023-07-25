@@ -1,18 +1,18 @@
+import re
 from argparse import ArgumentParser
 from time import sleep
 
 import wasabi
 from serial import Serial
 from tqdm import tqdm
-import re
 
 from cursor.hpgl import read_until_char
 from cursor.hpgl.sendhpgl import SerialSender
-from tools.psu import PSU
+from cursor.tools.psu import PSU
 
 log = wasabi.Printer(pretty=True)
 
-DEBUG = True
+DEBUG = False
 
 
 class LaserSerialSender(SerialSender):
@@ -23,36 +23,43 @@ class LaserSerialSender(SerialSender):
         self.psu = PSU(serialport_psu)
         self.psu.open()
         self.psu.set_voltage_limit(5)
-        self.psu.set_current_limit(1)
+        self.psu.set_current_limit(0.5)
         self.psu.off()
 
-        sleep(1)
-        d = self.port_arduino.readline()
-        log.info(f"first arduino result: {d}")
-        sleep(1)
+        # no arduino here
+        # sleep(1)
+        # d = self.port_arduino.readline()
+        # log.info(f"first arduino result: {d}")
+        # sleep(1)
 
-        self.set_arduino_pwm(0)
+        # self.set_arduino_pwm(0)
 
     def send(self):
         try:
             with tqdm(total=len(self.commands)) as pbar:
                 pbar.update(0)
-
                 current_pwm = 0
                 current_delay = 0
 
                 for i in range(len(self.commands) - 1):
                     cmd = self.commands[i]
                     next_cmd = self.commands[i + 1]
+                    sleep(0.2)
 
                     if cmd.startswith("PD"):
-                        self.set_arduino_pwm(current_pwm)  # turn on previously configured pwm
+                        # self.set_arduino_pwm(current_pwm)  # turn on previously configured pwm
                         self.psu.on()
+
+                        self.plotter.write(f"{cmd};".encode('utf-8'))
+
                         sleep(current_delay)
                         current_delay = 0
-                        self.plotter.write(f"{cmd};".encode('utf-8'))
+
+                        self.psu.off()
                     elif cmd.startswith("PU"):
-                        self.set_arduino_pwm(0)  # off when pen up
+                        #self.plotter.write(f"{cmd};".encode('utf-8'))
+
+                        # self.set_arduino_pwm(0)  # off when pen up
                         self.psu.off()
                     elif cmd.startswith("PA"):
                         if DEBUG:
@@ -61,6 +68,8 @@ class LaserSerialSender(SerialSender):
                         po = self.parse_pa(cmd)
                         self.send_and_wait(po)
 
+                        # not waiting this time
+                        continue
                         if next_cmd.startswith("PD"):
                             # time.sleep(0.5)
                             little_off = (po[0] + 10, po[1] + 10)
@@ -70,16 +79,22 @@ class LaserSerialSender(SerialSender):
                         current_pwm = parsed_pwm
                         log.info(f"current_pwm: {parsed_pwm}")
                     elif cmd.startswith("VOLT"):
-                        volt = float(cmd[4:-1])
+                        volt = float(cmd[4:])
+                        log.info(f"VOLT: {volt}")
                         self.psu.set_voltage(volt)
-                        pass
+                    elif cmd.startswith("AMP"):
+                        amp = float(cmd[3:])
+                        log.info(f"AMP: {amp}")
+                        self.psu.set_current(amp)
                     elif cmd.startswith("DELAY"):
-                        current_delay = float(cmd[5:-1])
-                        pass
+                        current_delay = float(cmd[5:])
+                        log.info(f"DELAY: {current_delay}")
                     elif cmd.startswith("VS"):
                         log.info(f"{cmd}")
                         self.plotter.write(f"{cmd};".encode('utf-8'))
                     pbar.update(1)
+
+            self.psu.off()
         except KeyboardInterrupt:
             log.warn("Interrupted- aborting.")
             sleep(0.1)
