@@ -67,7 +67,7 @@ class PSU:
 
 
 if __name__ == '__main__':
-    psu = PSU("COM10")
+    psu = PSU("/dev/ttyUSB5")
     psu.open()
     psu.set_voltage_limit(5)
     psu.set_current_limit(1)

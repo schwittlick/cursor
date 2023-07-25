@@ -39,6 +39,7 @@ class Property(Enum):
     IS_POLY = auto()
     LASER_PWM = auto()
     LASER_VOLT = auto()
+    LASER_AMP = auto()
     LASER_DELAY = auto()
 
 
@@ -193,6 +194,17 @@ class Path:
     @laser_volt.setter
     def laser_volt(self, laser_volt: float) -> None:
         self.properties[Property.LASER_VOLT] = laser_volt
+
+    @property
+    def laser_amp(self) -> typing.Union[float, None]:
+        if Property.LASER_AMP not in self.properties.keys():
+            return None
+
+        return self.properties[Property.LASER_AMP]
+
+    @laser_amp.setter
+    def laser_amp(self, laser_amp: float) -> None:
+        self.properties[Property.LASER_AMP] = laser_amp
 
     @property
     def laser_delay(self) -> typing.Union[float, None]:
