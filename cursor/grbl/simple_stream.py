@@ -21,6 +21,13 @@ def send(plotter: serial.Serial, cmd: str) -> tuple[bool, str]:
     return is_ok.startswith("ok"), is_ok
 
 
+def get_position(plotter: serial.Serial) -> tuple[int, int]:
+    plotter.write(f"$\r\n".encode())
+    status = plotter.readline().decode()
+    logger.info(status)
+    return 0, 0
+
+
 def stream_gcode(plotter: serial.Serial, gcode: list[str]) -> None:
     ok, error = home(plotter)
 
@@ -35,6 +42,8 @@ def stream_gcode(plotter: serial.Serial, gcode: list[str]) -> None:
             logger.fail(f"GRBL returned {error}")
             logger.fail(f"While sending {line}")
             break
+        else:
+            pos = get_position(plotter)
 
 
 if __name__ == '__main__':
