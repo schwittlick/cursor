@@ -36,6 +36,10 @@ THE SOFTWARE.
 ---------------------
 """
 
+"""
+jogging:
+$J=X10.0 Y-1.5
+"""
 import serial
 import time
 
