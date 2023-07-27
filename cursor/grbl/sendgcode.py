@@ -58,7 +58,7 @@ class GCODEStreamer:
                         pos = self.current_position()
 
     def current_position(self) -> tuple[float, float, float]:
-        self.plotter.write(f"?".encode())
+        self.plotter.write("?".encode())
         time.sleep(0.1)
         status = self.plotter.readline().decode()
         # logger.info(f"status: {status}")
@@ -86,7 +86,7 @@ if __name__ == '__main__':
     """
     todo: in parallel get current position
     only send new position data when current position has arrived
-    
+
     add PSU to control laser
     essentially GCODE parser?
     """
