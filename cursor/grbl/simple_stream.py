@@ -8,7 +8,11 @@ from argparse import ArgumentParser
 import serial
 import wasabi
 
+from cursor.grbl.parser import parse_xy, parse_z
+
 logger = wasabi.Printer(pretty=True, no_print=False)
+
+HOME = (-4990.0, -10.0, -10.0)
 
 
 def home(s: serial.Serial) -> tuple[bool, str]:
@@ -16,16 +20,26 @@ def home(s: serial.Serial) -> tuple[bool, str]:
 
 
 def send(plotter: serial.Serial, cmd: str) -> tuple[bool, str]:
-    plotter.write(f"{cmd}\r\n".encode())
+    logger.info(f"sending: {cmd}")
+    plotter.write(f"{cmd}\n".encode())
+    time.sleep(0.05)
     is_ok = plotter.readline().decode()
     return is_ok.startswith("ok"), is_ok
 
 
-def get_position(plotter: serial.Serial) -> tuple[int, int]:
-    plotter.write(f"$\r\n".encode())
+def get_position(plotter: serial.Serial) -> tuple[float, float, float]:
+    plotter.write(f"?".encode())
+    time.sleep(0.1)
     status = plotter.readline().decode()
-    logger.info(status)
-    return 0, 0
+    # logger.info(f"status: {status}")
+    try:
+        status_fields = status.split("|")
+        pos = status_fields[1][5:]
+        xyz = pos.split(",")
+        return float(xyz[0]), float(xyz[1]), float(xyz[2])
+    except IndexError as ie:
+        logger.fail(f"Failed to get info from status {status}")
+        return 0, 0, 0
 
 
 def stream_gcode(plotter: serial.Serial, gcode: list[str]) -> None:
@@ -39,11 +53,25 @@ def stream_gcode(plotter: serial.Serial, gcode: list[str]) -> None:
         line = line.strip()
         ok, error = send(plotter, line)
         if not ok:
-            logger.fail(f"GRBL returned {error}")
-            logger.fail(f"While sending {line}")
-            break
+            if not error.startswith("[HLP:"):
+                logger.fail(f"GRBL returned {error}")
+                logger.fail(f"While sending {line}")
+                break
         else:
-            pos = get_position(plotter)
+            if "X" in line and "Y" in line:
+                xy = parse_xy(line)
+                target = HOME[0] + xy[0], HOME[1] + xy[1]
+                pos = get_position(plotter)
+                while target[0] != pos[0] and target[1] != pos[1]:
+                    time.sleep(0.5)
+                    pos = get_position(plotter)
+            elif "Z" in line:
+                z = parse_z(line)
+                target = HOME[2] + z
+                pos = get_position(plotter)
+                while target != pos[2]:
+                    time.sleep(0.5)
+                    pos = get_position(plotter)
 
 
 if __name__ == '__main__':

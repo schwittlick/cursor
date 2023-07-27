@@ -21,6 +21,6 @@ def test_gcode_parser():
 
     c = parser.parse(gcode)
 
-    expected = Collection.from_tuples([[(0, -0), (10, -0), (10, -10), (0, -10), (0, -0)]])
+    expected = Collection.from_tuples([[(0.0, -0.0), (10.0, -0.0), (10.0, -10.0), (0.0, -10.0), (0.0, -0.0)]])
 
     assert c == expected

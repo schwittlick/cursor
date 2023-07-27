@@ -1,15 +1,32 @@
 import logging
 import pathlib
+import re
+import typing
 
 from cursor.collection import Collection
-
-import typing
-import re
-
 from cursor.path import Path
 
 PEN_DOWN = 4.5
 PEN_UP = 0.0
+
+
+def parse_xy(gcode: str) -> typing.Union[tuple[float, float], None]:
+    pattern = r'X(-?\d+\.\d+)\s+Y(-?\d+\.\d+)'
+    matches = re.search(pattern, gcode)
+    if matches:
+        x_value = float(matches.group(1))
+        y_value = float(matches.group(2))
+        return x_value, y_value
+    return None
+
+
+def parse_z(gcode: str) -> typing.Union[float, None]:
+    pattern = r'Z(-?\d+\.\d+)'
+    matches = re.search(pattern, gcode)
+    if matches:
+        z_value = float(matches.group(1))
+        return z_value
+    return None
 
 
 class GCODEParser:
@@ -42,20 +59,15 @@ class GCODEParser:
         for cmd in gcode_cmds:
             if cmd.startswith("G01"):
                 if "X" in cmd and "Y" in cmd:
-                    pattern = r'X(-?\d+\.\d+)\s+Y(-?\d+\.\d+)'
-                    matches = re.search(pattern, cmd)
-                    if matches:
-                        x_value = float(matches.group(1))
-                        y_value = float(matches.group(2))
+                    xy = parse_xy(cmd)
+                    if xy:
                         if current_pen_down:
-                            path.add(x_value, y_value)
+                            path.add(xy[0], xy[1])
                     else:
                         logging.error(f"Couldn't find X/Y values in {cmd}")
                 elif "Z" in cmd:
-                    pattern = r'Z(-?\d+\.\d+)'
-                    matches = re.search(pattern, cmd)
-                    if matches:
-                        z_value = float(matches.group(1))
+                    z_value = parse_z(cmd)
+                    if z_value:
                         current_pen_down = z_value == PEN_DOWN
 
                         if current_pen_down:
