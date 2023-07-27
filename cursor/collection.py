@@ -59,7 +59,7 @@ class Collection:
         tuples = [pa.as_tuple_list() for pa in self]
         return f"PathCollection({self.__name}) -> ({len(self)})\n{tuples}"
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Collection) -> bool:
         if not isinstance(other, Collection):
             return NotImplemented
 
@@ -69,7 +69,13 @@ class Collection:
         if self.timestamp() != other.timestamp():
             return False
 
-        # todo: do more in depth test
+        for i in range(len(self)):
+            v1 = self.__paths[i]
+            v2 = other[i]
+            if v1 == v2:
+                continue
+
+            return False
 
         return True
 
