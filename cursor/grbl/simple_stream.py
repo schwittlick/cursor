@@ -40,27 +40,31 @@ THE SOFTWARE.
 jogging:
 $J=X10.0 Y-1.5
 """
-import serial
 import time
 
+import serial
+
 # Open grbl serial port
-s = serial.Serial('/dev/tty.usbmodem1811', 115200)
+s = serial.Serial('/dev/ttyACM1', 115200, timeout=10)
 
 # Open g-code file
-f = open('grbl.gcode', 'r')
+f = open('/home/marcel/dev/cursor/data/experiments/simple_rect_gcode/gcode/simple.nc', 'r')
 
 # Wake up grbl
-s.write("\r\n\r\n")
+s.write("\r\n\r\n".encode())
 time.sleep(2)  # Wait for grbl to initialize
 s.flushInput()  # Flush startup text in serial input
 
+s.write("$H\r\n".encode())
+is_ok = s.readline()
+print(is_ok)
 # Stream g-code to grbl
 for line in f:
     l = line.strip()  # Strip all EOL characters for consistency
     print('Sending: ' + l)
-    s.write(f"{l}'\n'".encode())  # Send g-code block to grbl
+    s.write(f"{l}\r\n".encode())  # Send g-code block to grbl
     grbl_out = s.readline()  # Wait for grbl response with carriage return
-    print(f' : {grbl_out.strip().decode()}')
+    print(f' : {grbl_out.decode().strip()}')
 
 # Wait here until grbl is finished to close serial port and file.
 input("  Press <Enter> to exit and disable grbl.")
