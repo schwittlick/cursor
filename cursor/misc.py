@@ -1,5 +1,4 @@
 import inspect
-import typing
 
 import cv2
 import numpy as np

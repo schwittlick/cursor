@@ -415,19 +415,15 @@ class HPGLRenderer:
 
             if p.laser_pwm:
                 _hpgl.custom(f"PWM{p.laser_pwm};")
-                _prev_pwm = p.laser_pwm
 
             if p.laser_volt:
                 _hpgl.custom(f"VOLT{p.laser_volt:.3};")
-                _prev_volt = p.laser_volt
 
             if p.laser_delay:
                 _hpgl.custom(f"DELAY{p.laser_delay:.3};")
-                _prev_delay = p.laser_delay
 
             if p.laser_amp:
                 _hpgl.custom(f"AMP{p.laser_amp:.3};")
-                _prev_amp = p.laser_amp
 
             _hpgl.PA(x, y)
             if p.is_polygon:
