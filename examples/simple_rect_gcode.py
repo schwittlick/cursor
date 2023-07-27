@@ -7,7 +7,7 @@ if __name__ == "__main__":
     c = Collection()
 
     p = Path.from_tuple_list([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)])
-    p.scale(10)
+    p.scale(10, 10)
 
     p.velocity = 100
 
