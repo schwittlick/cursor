@@ -1,4 +1,3 @@
-import re
 from argparse import ArgumentParser
 from time import sleep
 
@@ -38,12 +37,12 @@ class LaserSerialSender(SerialSender):
         try:
             with tqdm(total=len(self.commands)) as pbar:
                 pbar.update(0)
-                current_pwm = 0
+                # current_pwm = 0
                 current_delay = 0
 
                 for i in range(len(self.commands) - 1):
                     cmd = self.commands[i]
-                    next_cmd = self.commands[i + 1]
+                    # next_cmd = self.commands[i + 1]
                     sleep(0.2)
 
                     if cmd.startswith("PD"):
@@ -57,27 +56,24 @@ class LaserSerialSender(SerialSender):
 
                         self.psu.off()
                     elif cmd.startswith("PU"):
-                        #self.plotter.write(f"{cmd};".encode('utf-8'))
+                        # self.plotter.write(f"{cmd};".encode('utf-8'))
 
                         # self.set_arduino_pwm(0)  # off when pen up
                         self.psu.off()
                     elif cmd.startswith("PA"):
                         if DEBUG:
-                            log.info(f"{cmd}")
+                            log.info(cmd)
 
                         po = self.parse_pa(cmd)
                         self.send_and_wait(po)
 
                         # not waiting this time
                         continue
-                        if next_cmd.startswith("PD"):
-                            # time.sleep(0.5)
-                            little_off = (po[0] + 10, po[1] + 10)
-                            self.send_and_wait(little_off)
                     elif cmd.startswith("PWM"):
-                        parsed_pwm = int(re.findall(r'\d+', cmd)[0])
-                        current_pwm = parsed_pwm
-                        log.info(f"current_pwm: {parsed_pwm}")
+                        pass
+                        # parsed_pwm = int(re.findall(r'\d+', cmd)[0])
+                        # current_pwm = parsed_pwm
+                        # log.info(f"current_pwm: {parsed_pwm}")
                     elif cmd.startswith("VOLT"):
                         volt = float(cmd[4:])
                         log.info(f"VOLT: {volt}")
