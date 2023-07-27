@@ -1,74 +1,63 @@
-#!/usr/bin/env python
-"""\
-Simple g-code streaming script for grbl
-
-Provided as an illustration of the basic communication interface
-for grbl. When grbl has finished parsing the g-code block, it will
-return an 'ok' or 'error' response. When the planner buffer is full,
-grbl will not send a response until the planner buffer clears space.
-
-G02/03 arcs are special exceptions, where they inject short line
-segments directly into the planner. So there may not be a response
-from grbl for the duration of the arc.
-
----------------------
-The MIT License (MIT)
-
-Copyright (c) 2012 Sungeun K. Jeon
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
----------------------
-"""
-
 """
 jogging:
 $J=X10.0 Y-1.5
 """
 import time
+from argparse import ArgumentParser
 
 import serial
+import wasabi
 
-# Open grbl serial port
-s = serial.Serial('/dev/ttyACM1', 115200, timeout=10)
+logger = wasabi.Printer(pretty=True, no_print=False)
 
-# Open g-code file
-f = open('/home/marcel/dev/cursor/data/experiments/simple_rect_gcode/gcode/simple.nc', 'r')
 
-# Wake up grbl
-s.write("\r\n\r\n".encode())
-time.sleep(2)  # Wait for grbl to initialize
-s.flushInput()  # Flush startup text in serial input
+def home(s: serial.Serial) -> tuple[bool, str]:
+    return send(s, "$H")
 
-s.write("$H\r\n".encode())
-is_ok = s.readline()
-print(is_ok)
-# Stream g-code to grbl
-for line in f:
-    l = line.strip()  # Strip all EOL characters for consistency
-    print('Sending: ' + l)
-    s.write(f"{l}\r\n".encode())  # Send g-code block to grbl
-    grbl_out = s.readline()  # Wait for grbl response with carriage return
-    print(f' : {grbl_out.decode().strip()}')
 
-# Wait here until grbl is finished to close serial port and file.
-input("  Press <Enter> to exit and disable grbl.")
+def send(plotter: serial.Serial, cmd: str) -> tuple[bool, str]:
+    plotter.write(f"{cmd}\r\n".encode())
+    is_ok = plotter.readline().decode()
+    return is_ok.startswith("ok"), is_ok
 
-# Close file and serial port
-f.close()
-s.close()
+
+def stream_gcode(plotter: serial.Serial, gcode: list[str]) -> None:
+    ok, error = home(plotter)
+
+    if not ok:
+        logger.fail("Homing didnt work. Abort")
+        return
+
+    for line in gcode:
+        line = line.strip()
+        ok, error = send(plotter, line)
+        if not ok:
+            logger.fail(f"GRBL returned {error}")
+            logger.fail(f"While sending {line}")
+            break
+
+
+if __name__ == '__main__':
+    """
+    todo: in parallel get current position
+    only send new position data when current position has arrived
+    
+    add PSU to control laser
+    essentially GCODE parser?
+    """
+    parser = ArgumentParser()
+    parser.add_argument('port')
+    parser.add_argument('file')
+    args = parser.parse_args()
+
+    plotter = serial.Serial(args.port, 115200, timeout=10)
+    gcode = open(args.file, 'r').readlines()
+
+    # Wake up grbl
+    plotter.write("\r\n\r\n".encode())
+    time.sleep(2)
+    plotter.flushInput()
+
+    stream_gcode(plotter, gcode)
+
+    plotter.close()

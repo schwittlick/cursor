@@ -11,28 +11,9 @@ from cursor.position import Position
 
 
 def test_pathcollection_minmax():
-    pcol = Collection()
-
-    p1 = Path()
-
-    p1.add(5, 5111)
-    p1.add(10, 11)
-    p1.add(11, 11)
-    p1.add(20, 20)
-    p1.add(30, 31)
-    p1.add(40, 41)
-
-    p2 = Path()
-
-    p2.add(545, 54)
-    p2.add(160, 11)
-    p2.add(11, 171)
-    p2.add(20, 20)
-    p2.add(30, 31)
-    p2.add(940, 941)
-
-    pcol.add(p1)
-    pcol.add(p2)
+    pcol = Collection.from_tuples(
+        [[(5, 5111), (10, 11), (11, 11), (20, 20), (30, 31), (40, 41)],
+         [(545, 54), (160, 11), (11, 171), (20, 20), (30, 31), (940, 941)]])
 
     assert pcol.empty() is False
 
@@ -49,6 +30,20 @@ def test_pathcollection_minmax():
     assert min[1] == 11
     assert max[0] == 940
     assert max[1] == 5111
+
+
+def test_collection_equal():
+    assert Collection.from_tuples([[(5, 5111)]]) == \
+           Collection.from_tuples([[(5, 5111)]])
+
+    assert Collection.from_tuples([[(5, 5111)]]) != \
+           Collection.from_tuples([[(5, 5111), (2, 2)]])
+
+    assert Collection.from_tuples([[(5, 5111)]]) != \
+           Collection.from_tuples([[(5, 5111)], [(5, 5111)]])
+
+    assert Collection(123) == Collection(123)
+    assert Collection(123) != Collection(1234)
 
 
 def test_bb_inside():
