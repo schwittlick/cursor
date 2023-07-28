@@ -9,15 +9,22 @@ import serial
 import wasabi
 
 from cursor.grbl.parser import parse_xy, parse_z
+from cursor.tools.psu import PSU
 
 logger = wasabi.Printer(pretty=True, no_print=False)
 
 
 class GCODEStreamer:
-    def __init__(self, plotter: serial.Serial):
+    def __init__(self, plotter: serial.Serial, psu: PSU):
         self.HOME = (-4990.0, -10.0, -10.0)
 
         self.plotter = plotter
+        self.psu = psu
+
+        self.psu.open()
+        self.psu.set_voltage_limit(5)
+        self.psu.set_current_limit(0.5)
+        self.psu.off()
 
         # Wake up grbl
         self.plotter.write("\r\n\r\n".encode())
@@ -30,6 +37,8 @@ class GCODEStreamer:
         if not ok:
             logger.fail("Homing didnt work. Abort")
             return
+
+        current_delay = 0.0
 
         for line in gcode:
             line = line.strip()
@@ -46,7 +55,7 @@ class GCODEStreamer:
                     target = self.HOME[0] + xy[0], self.HOME[1] + xy[1]
                     pos = self.current_position()
                     while target[0] != pos[0] and target[1] != pos[1]:
-                        time.sleep(0.5)
+                        time.sleep(0.1)
                         pos = self.current_position()
                 # e.g. G01 Z0.0 F1000
                 elif "Z" in line:
@@ -54,8 +63,21 @@ class GCODEStreamer:
                     target = self.HOME[2] + z
                     pos = self.current_position()
                     while target != pos[2]:
-                        time.sleep(0.5)
+                        time.sleep(0.1)
                         pos = self.current_position()
+
+                    # on next finished z movement execute laser
+                    self.psu.on()
+                    time.sleep(current_delay)
+                    current_delay = 0.0
+                    self.psu.off()
+                elif "AMP" in line:
+                    amp = float(line.rstrip()[3:])
+                    self.psu.set_current(amp)
+                    logger.info(f"Set laser amps to {amp}")
+                elif "DELAY" in line:
+                    current_delay = float(line.rstrip()[5:])
+                    logger.info(f"Set laser delay to {current_delay}")
 
     def current_position(self) -> tuple[float, float, float]:
         self.plotter.write("?".encode())
@@ -92,13 +114,15 @@ if __name__ == '__main__':
     """
     parser = ArgumentParser()
     parser.add_argument('port')
+    parser.add_argument('psu_port')
     parser.add_argument('file')
     args = parser.parse_args()
 
     gcode = open(args.file, 'r').readlines()
     plotter = serial.Serial(args.port, 115200, timeout=10)
+    psu = PSU(args.psu_port)
 
-    streamer = GCODEStreamer(plotter)
+    streamer = GCODEStreamer(plotter, psu)
     streamer.stream(gcode)
 
     plotter.close()
