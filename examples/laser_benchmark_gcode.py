@@ -4,7 +4,7 @@ from cursor.collection import Collection
 from cursor.data import DataDirHandler
 from cursor.path import Path
 from cursor.device import PaperSize, Paper
-from cursor.renderer import HPGLRenderer, GCodeRenderer
+from cursor.renderer import GCodeRenderer
 
 if __name__ == "__main__":
     c = Collection()
