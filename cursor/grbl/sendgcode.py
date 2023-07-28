@@ -66,11 +66,12 @@ class GCODEStreamer:
                         time.sleep(0.1)
                         pos = self.current_position()
 
-                    # on next finished z movement execute laser
-                    self.psu.on()
-                    time.sleep(current_delay)
-                    current_delay = 0.0
-                    self.psu.off()
+                    if z != self.HOME[2]:
+                        # on next finished z down, do laser
+                        self.psu.on()
+                        time.sleep(current_delay)
+                        current_delay = 0.0
+                        self.psu.off()
                 elif "AMP" in line:
                     amp = float(line.rstrip()[3:])
                     self.psu.set_current(amp)
