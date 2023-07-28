@@ -42,43 +42,48 @@ class GCODEStreamer:
 
         for line in gcode:
             line = line.strip()
-            ok, error = self.send(line)
-            if not ok:
-                if not error.startswith("[HLP:"):
-                    logger.fail(f"GRBL returned {error}")
-                    logger.fail(f"While sending {line}")
-                    break
+            if "AMP" in line:
+                amp = float(line.rstrip()[3:])
+                self.psu.set_current(amp)
+                logger.info(f"Set laser amps to {amp}")
+            elif "DELAY" in line:
+                current_delay = float(line.rstrip()[5:])
+                logger.info(f"Set laser delay to {current_delay}")
             else:
-                # e.g. G01 X10.00 Y-10.00 F2000
-                if "X" in line and "Y" in line:
-                    xy = parse_xy(line)
-                    target = self.HOME[0] + xy[0], self.HOME[1] + xy[1]
-                    pos = self.current_position()
-                    while target[0] != pos[0] and target[1] != pos[1]:
-                        time.sleep(0.1)
+                ok, error = self.send(line)
+                if not ok:
+                    if not error.startswith("[HLP:"):
+                        logger.fail(f"GRBL returned {error}")
+                        logger.fail(f"While sending {line}")
+                        break
+                else:
+                    # e.g. G01 X10.00 Y-10.00 F2000
+                    if "X" in line and "Y" in line:
+                        xy = parse_xy(line)
+                        target = self.HOME[0] + xy[0], self.HOME[1] + xy[1]
                         pos = self.current_position()
-                # e.g. G01 Z0.0 F1000
-                elif "Z" in line:
-                    z = parse_z(line)
-                    target = self.HOME[2] + z
-                    pos = self.current_position()
-                    while target != pos[2]:
-                        time.sleep(0.1)
+                        while target[0] != pos[0] and target[1] != pos[1]:
+                            time.sleep(0.1)
+                            pos = self.current_position()
+                    # e.g. G01 Z0.0 F1000
+                    elif "Z" in line:
+                        z = parse_z(line)
+                        target = self.HOME[2] + z
                         pos = self.current_position()
+                        while target != pos[2]:
+                            time.sleep(0.1)
+                            pos = self.current_position()
 
-                    if z != self.HOME[2]:
-                        # on next finished z down, do laser
-                        self.psu.on()
-                        time.sleep(current_delay)
-                        current_delay = 0.0
-                        self.psu.off()
-                elif "AMP" in line:
-                    amp = float(line.rstrip()[3:])
-                    self.psu.set_current(amp)
-                    logger.info(f"Set laser amps to {amp}")
-                elif "DELAY" in line:
-                    current_delay = float(line.rstrip()[5:])
-                    logger.info(f"Set laser delay to {current_delay}")
+                        if z == 0.0:
+                            # on next finished z down, do laser
+                            self.psu.off()
+                            logger.info("Laser OFF")
+                            # self.psu.off()
+                        else:
+                            self.psu.on()
+                            logger.info("Laser ON")
+                            time.sleep(current_delay)
+                            current_delay = 0.0
 
     def current_position(self) -> tuple[float, float, float]:
         self.plotter.write("?".encode())
@@ -107,11 +112,8 @@ class GCODEStreamer:
 
 if __name__ == '__main__':
     """
-    todo: in parallel get current position
-    only send new position data when current position has arrived
-
-    add PSU to control laser
-    essentially GCODE parser?
+    todo: fix feed hold situation
+    parse other status commands too (hold)
     """
     parser = ArgumentParser()
     parser.add_argument('port')
