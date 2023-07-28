@@ -18,7 +18,8 @@ def calculate_time(timestamp):
     :param timestamp: given timestamp
     :return: date according to given timestamp
     """
-    return dt.fromtimestamp(timestamp/1000)
+    return dt.fromtimestamp(timestamp / 1000)
+
 
 if __name__ == '__main__':
     headers = ["Open Time", "Open", "High", "Low", "Close", "Volume", "Close Time", "QAV", "NAT", "TBBAV", "TBQAV",
@@ -38,12 +39,12 @@ if __name__ == '__main__':
     data["Close Time"] = close_date
 
     # Visualize the close price history
-    #plt.figure(figsize=(16, 8))
-    #plt.title("Bitcoin Price History")
-    #plt.plot(data["Close Time"], data["Close"])
-    #plt.xlabel("Time", fontsize=14, )
-    #plt.ylabel("USDT", fontsize=14)
-    #plt.show()
+    # plt.figure(figsize=(16, 8))
+    # plt.title("Bitcoin Price History")
+    # plt.plot(data["Close Time"], data["Close"])
+    # plt.xlabel("Time", fontsize=14, )
+    # plt.ylabel("USDT", fontsize=14)
+    # plt.show()
 
     # Create new data with only the "Close" column
     close = data.filter(["Close"])
@@ -62,7 +63,7 @@ if __name__ == '__main__':
     for i in range(60, len(train_data)):
         X_train.append(train_data[i - 60: i, 0])
         y_train.append(train_data[i, 0])
-        #if i <= 60:
+        # if i <= 60:
         #    print(X_train)
         #    print(y_train)
 
@@ -90,7 +91,7 @@ if __name__ == '__main__':
               epochs=3,
               batch_size=100,
               verbose=1)
-    #model.save("btc_hourly_230725.model")
+    # model.save("btc_hourly_230725.model")
     predictions = model.predict(X_test)
     # here put the entire history and predict a next step
     # maybe use daily data only and just get next step

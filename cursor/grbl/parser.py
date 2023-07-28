@@ -60,22 +60,21 @@ class GCODEParser:
             if cmd.startswith("G01"):
                 if "X" in cmd and "Y" in cmd:
                     xy = parse_xy(cmd)
-                    if xy:
+                    if xy is not None:
                         if current_pen_down:
                             path.add(xy[0], xy[1])
                     else:
                         logging.error(f"Couldn't find X/Y values in {cmd}")
                 elif "Z" in cmd:
                     z_value = parse_z(cmd)
-                    if z_value:
+                    if z_value is not None:
                         current_pen_down = z_value == PEN_DOWN
 
-                        if current_pen_down:
-                            path.clear()
-                        else:
+                        if not current_pen_down:
                             if path.empty():
                                 continue
-                            c.add(path)
+                            c.add(path.copy())
+                            path.clear()
                     else:
                         logging.error(f"Couldn't find Z value in {cmd}")
                 else:

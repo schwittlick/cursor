@@ -1,9 +1,6 @@
-import math
-
 import keras
 import numpy as np
 import pandas as pd
-from keras import Sequential
 from matplotlib import pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 
