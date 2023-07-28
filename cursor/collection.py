@@ -66,13 +66,8 @@ class Collection:
         if len(self) != len(other):
             return False
 
-        # if self.timestamp() != other.timestamp():
-        #    return False
-
         for i in range(len(self)):
-            v1 = self.__paths[i]
-            v2 = other[i]
-            if v1 == v2:
+            if self[i] == other[i]:
                 continue
 
             return False

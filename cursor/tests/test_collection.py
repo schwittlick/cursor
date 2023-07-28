@@ -42,8 +42,9 @@ def test_collection_equal():
     assert Collection.from_tuples([[(5, 5111)]]) != \
            Collection.from_tuples([[(5, 5111)], [(5, 5111)]])
 
+    # different timestamps are *not* used for compare
     assert Collection(123) == Collection(123)
-    assert Collection(123) != Collection(1234)
+    assert Collection(123) == Collection(1234)
 
 
 def test_bb_inside():
