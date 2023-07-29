@@ -114,6 +114,15 @@ if __name__ == '__main__':
     """
     todo: fix feed hold situation
     parse other status commands too (hold)
+    
+    in order two draw a real 3d path (x, y, z) the hpgl parser needs to be rewritten
+    also the hpgl parser/sender
+    
+    AMP1.0 -> set amp (send to psu)
+    VOLT1.0 -> set volt (send to psu)
+    LASER1 -> set laser on (send to psu)
+    LASER0 -> turn laser off (send to psu)
+    G01 X10.00 Y-10.00 Z2.00 F2000 -> XYZ pos (send to grbl)
     """
     parser = ArgumentParser()
     parser.add_argument('port')
