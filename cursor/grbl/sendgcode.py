@@ -42,6 +42,8 @@ class GCODEStreamer:
 
         for line in gcode:
             line = line.strip()
+
+            # checking for non-gcode commands
             if "AMP" in line:
                 amp = float(line.rstrip()[3:])
                 self.psu.set_current(amp)
@@ -112,9 +114,6 @@ class GCODEStreamer:
 
 if __name__ == '__main__':
     """
-    todo: fix feed hold situation
-    parse other status commands too (hold)
-    
     in order two draw a real 3d path (x, y, z) the hpgl parser needs to be rewritten
     also the hpgl parser/sender
     

@@ -127,27 +127,22 @@ class GCodeRenderer:
         self.feedrate_z = feedrate_z
         self.invert_y = invert_y
         self.paths = Collection()
-        self.bbs = []
 
     def render(self, paths: Collection) -> None:
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
         self.paths += paths
 
-    def render_bb(self, bb: BoundingBox) -> None:
-        self.bbs.append(bb)
-
     def save(self, filename: str) -> None:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
         fname = self.save_path / (filename + ".nc")
         with open(fname.as_posix(), "w") as file:
-            file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
-            self.__append_to_file(file, 0.0, 0.0)
+            self.__append_to_file(file, 0.0, 0.0, self.z_up)
             for p in self.paths:
                 x = p.start_pos().x
                 y = p.start_pos().y
                 if self.invert_y:
                     y = -y
-                self.__append_to_file(file, x, y)
+                self.__append_to_file(file, x, y, self.z_up)
 
                 if p.laser_volt:
                     file.write(f"VOLT{p.laser_volt:.3}\n")
@@ -158,40 +153,21 @@ class GCodeRenderer:
                 if p.laser_amp:
                     file.write(f"AMP{p.laser_amp:.3}\n")
 
-                file.write(f"G01 Z{self.z_down} F{self.feedrate_z}\n")
-
+                self.__append_to_file(file, 0, 0, self.z_down)
                 for line in p.vertices:
                     x = line.x
                     y = line.y
                     if self.invert_y:
                         y = -y
-                    self.__append_to_file(file, x, y)
+                    self.__append_to_file(file, x, y, self.z_down)
 
-                file.write(f"G01 Z{self.z_up} F{self.feedrate_z}\n")
+                self.__append_to_file(file, x, y, self.z_up)
 
-            for bb in self.bbs:
-                _x = bb.x
-                _y = bb.y
-                if self.invert_y:
-                    _y = -_y
-                _w = bb.x2
-                _h = bb.y2
-                if self.invert_y:
-                    _h = -_h
-                file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
-                self.__append_to_file(file, _x, _y)
-                file.write(f"G01 Z{self.z_down} F{self.feedrate_z}\n")
-                self.__append_to_file(file, _x, _h)
-                self.__append_to_file(file, _w, _h)
-                self.__append_to_file(file, _w, _y)
-                self.__append_to_file(file, _x, _y)
-
-            file.write(f"G01 Z0.0 F{self.feedrate_z}\n")
-            self.__append_to_file(file, 0.0, 0.0)
+            self.__append_to_file(file, 0.0, 0.0, 0.0)
         log.good(f"Finished saving {fname}")
 
-    def __append_to_file(self, file: typing.TextIO, x: float, y: float) -> None:
-        file.write(f"G01 X{x:.2f} Y{y:.2f} F{self.feedrate_xy}\n")
+    def __append_to_file(self, file: typing.TextIO, x: float, y: float, z: float) -> None:
+        file.write(f"G01 X{x:.2f} Y{y:.2f} Z{z:.2f} F{self.feedrate_xy}\n")
 
 
 class RealtimeRenderer(arcade.Window):
