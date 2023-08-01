@@ -15,11 +15,13 @@ class Position:
             x: float = 0.0,
             y: float = 0.0,
             timestamp: int = 0,
-            color: typing.Tuple[int, int, int] = None,
+            properties: typing.Union[None, dict] = None
     ):
+        if properties is None:
+            properties = {}
         self._pos = np.array([x, y], dtype=float)
         self.timestamp = timestamp
-        self.color = color
+        self.properties = properties
 
     @classmethod
     def from_tuple(cls, xy_tuple: typing.Tuple[float, float]) -> Position:
@@ -106,7 +108,7 @@ class Position:
         return self.timestamp > o.timestamp
 
     def __repr__(self):
-        return f"({self.x:.3f}, {self.y:.3f}, {self.timestamp:.3f}, {self.color})"
+        return f"({self.x:.3f}, {self.y:.3f}, {self.timestamp:.3f}, {self.properties})"
 
     def __hash__(self):
         return hash(repr(self))
