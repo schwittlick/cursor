@@ -16,7 +16,7 @@ logger = wasabi.Printer(pretty=True, no_print=False)
 
 class GCODEStreamer:
     def __init__(self, plotter: serial.Serial, psu: PSU):
-        self.HOME = (-4990.0, -10.0, -10.0)
+        self.HOME = (-4990.0, -10.0, 0.0)
 
         self.plotter = plotter
         self.psu = psu
@@ -51,6 +51,12 @@ class GCODEStreamer:
             elif "DELAY" in line:
                 current_delay = float(line.rstrip()[5:])
                 logger.info(f"Set laser delay to {current_delay}")
+            elif "LASERON" in line:
+                logger.info(f"Set laser ON")
+                self.psu.on()
+            elif "LASEROFF" in line:
+                logger.info(f"Set laser ON")
+                self.psu.off()
             else:
                 ok, error = self.send(line)
                 if not ok:
@@ -59,12 +65,12 @@ class GCODEStreamer:
                         logger.fail(f"While sending {line}")
                         break
                 else:
-                    # e.g. G01 X10.00 Y-10.00 F2000
-                    if "X" in line and "Y" in line:
-                        xy = parse_xy(line)
-                        target = self.HOME[0] + xy[0], self.HOME[1] + xy[1]
+                    # e.g. G01 X10.00 Y-10.00 Z4.5 F2000
+                    if "X" in line and "Y" in line and "Z" in line:
+                        xyz = parse_xy(line)
+                        target = self.HOME[0] + xyz[0], self.HOME[1] + xyz[1], self.HOME[2] + xyz[2]
                         pos = self.current_position()
-                        while target[0] != pos[0] and target[1] != pos[1]:
+                        while target[0] != pos[0] and target[1] != pos[1] and target[2] != pos[2]:
                             time.sleep(0.1)
                             pos = self.current_position()
                     # e.g. G01 Z0.0 F1000
@@ -76,14 +82,8 @@ class GCODEStreamer:
                             time.sleep(0.1)
                             pos = self.current_position()
 
-                        if z == 0.0:
-                            # on next finished z down, do laser
-                            self.psu.off()
-                            logger.info("Laser OFF")
-                            # self.psu.off()
-                        else:
-                            self.psu.on()
-                            logger.info("Laser ON")
+                        if z != 0.0:
+                            logger.info(f"Delaying for {current_delay}")
                             time.sleep(current_delay)
                             current_delay = 0.0
 

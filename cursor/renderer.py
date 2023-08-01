@@ -132,42 +132,71 @@ class GCodeRenderer:
         log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
         self.paths += paths
 
+    def g01(self, x: float, y: float, z: float) -> str:
+        return f"G01 X{x:.2f} Y{y:.2f} Z{z:.2f} F{self.feedrate_xy}"
+
+    def generate_instructions(self) -> list[str]:
+        instructions = []
+        instructions.append(self.g01(0, 0, self.z_up))
+        for p in self.paths:
+            x = p.start_pos().x
+            y = p.start_pos().y
+            z = self.z_down
+            if self.invert_y:
+                y = -y
+            instructions.append(self.g01(x, y, self.z_up))
+
+            if p.laser_volt:
+                instructions.append(f"VOLT{p.laser_volt:.3}")
+
+            if p.laser_delay:
+                instructions.append(f"DELAY{p.laser_delay:.3}")
+
+            if p.laser_amp:
+                instructions.append(f"AMP{p.laser_amp:.3}")
+
+            if "z" in self.paths[0].properties:
+                z = self.paths[0].properties["z"]
+
+            instructions.append(self.g01(x, y, z))
+
+            if "laser" in p.properties:
+                instructions.append("LASERON")
+
+            for point in p.vertices:
+                x = point.x
+                y = point.y
+                if self.invert_y:
+                    y = -y
+                z = self.z_down
+
+                if "amp" in point.properties.keys():
+                    amp = point.properties["amp"]
+                    instructions.append(f"AMP{amp:.3}")
+                if "volt" in point.properties.keys():
+                    volt = point.properties["volt"]
+                    instructions.append(f"VOLT{volt:.3}")
+                if "z" in point.properties.keys():
+                    z = point.properties["z"]
+
+                instructions.append(self.g01(x, y, z))
+
+            if "laser" in p.properties:
+                instructions.append("LASEROFF")
+
+            instructions.append(self.g01(x, y, self.z_up))
+
+        return instructions
+
     def save(self, filename: str) -> None:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
         fname = self.save_path / (filename + ".nc")
+        instructions = self.generate_instructions()
+
         with open(fname.as_posix(), "w") as file:
-            self.__append_to_file(file, 0.0, 0.0, self.z_up)
-            for p in self.paths:
-                x = p.start_pos().x
-                y = p.start_pos().y
-                if self.invert_y:
-                    y = -y
-                self.__append_to_file(file, x, y, self.z_up)
-
-                if p.laser_volt:
-                    file.write(f"VOLT{p.laser_volt:.3}\n")
-
-                if p.laser_delay:
-                    file.write(f"DELAY{p.laser_delay:.3}\n")
-
-                if p.laser_amp:
-                    file.write(f"AMP{p.laser_amp:.3}\n")
-
-                self.__append_to_file(file, 0, 0, self.z_down)
-                for line in p.vertices:
-                    x = line.x
-                    y = line.y
-                    if self.invert_y:
-                        y = -y
-                    self.__append_to_file(file, x, y, self.z_down)
-
-                self.__append_to_file(file, x, y, self.z_up)
-
-            self.__append_to_file(file, 0.0, 0.0, 0.0)
+            for instruction in instructions:
+                file.write(f"{instruction}\n")
         log.good(f"Finished saving {fname}")
-
-    def __append_to_file(self, file: typing.TextIO, x: float, y: float, z: float) -> None:
-        file.write(f"G01 X{x:.2f} Y{y:.2f} Z{z:.2f} F{self.feedrate_xy}\n")
 
 
 class RealtimeRenderer(arcade.Window):
@@ -416,9 +445,10 @@ class HPGLRenderer:
 
             _hpgl.PD()
 
-            for line in p.vertices:
-                x = line.x
-                y = line.y
+            for point in p.vertices:
+                x = point.x
+                y = point.y
+
                 _hpgl.PA(x, y)
 
             _hpgl.PU()

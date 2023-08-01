@@ -5,18 +5,20 @@ import typing
 
 from cursor.collection import Collection
 from cursor.path import Path
+from cursor.position import Position
 
 PEN_DOWN = 4.5
 PEN_UP = 0.0
 
 
-def parse_xy(gcode: str) -> typing.Union[tuple[float, float], None]:
-    pattern = r'X(-?\d+\.\d+)\s+Y(-?\d+\.\d+)'
+def parse_xy(gcode: str) -> typing.Union[tuple[float, float, float], None]:
+    pattern = r'X(-?\d+\.\d+)\s+Y(-?\d+\.\d+)\s+Z(-?\d+\.\d+)'
     matches = re.search(pattern, gcode)
     if matches:
         x_value = float(matches.group(1))
         y_value = float(matches.group(2))
-        return x_value, y_value
+        z_value = float(matches.group(3))
+        return x_value, y_value, z_value
     return None
 
 
@@ -58,11 +60,11 @@ class GCODEParser:
 
         for cmd in gcode_cmds:
             if cmd.startswith("G01"):
-                if "X" in cmd and "Y" in cmd:
-                    xy = parse_xy(cmd)
-                    if xy is not None:
+                if "X" in cmd and "Y" in cmd and "Z" in cmd:
+                    xyz = parse_xy(cmd)
+                    if xyz is not None:
                         if current_pen_down:
-                            path.add(xy[0], xy[1])
+                            path.add_position(Position(xyz[0], xyz[1], 0, {"z": xyz[2]}))
                     else:
                         logging.error(f"Couldn't find X/Y values in {cmd}")
                 elif "Z" in cmd:

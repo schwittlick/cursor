@@ -240,10 +240,9 @@ class Path:
             self,
             x: float,
             y: float,
-            timestamp: int = 0,
-            color: typing.Tuple[int, int, int] = None,
+            timestamp: int = 0
     ) -> None:
-        self.vertices.append(Position(x, y, timestamp, color))
+        self.vertices.append(Position(x, y, timestamp))
 
     def add_position(self, pos: Position) -> None:
         self.vertices.append(pos)
@@ -879,7 +878,7 @@ class Path:
 
         return pa
 
-    def transform(self, bb: BoundingBox, out: BoundingBox):
+    def transform(self, bb: BoundingBox, out: BoundingBox) -> None:
         fn = misc.transformFn((bb.x, bb.y), (bb.x2, bb.y2), (out.x, out.y), (out.x2, out.y2))
         res = list(map(fn, self.vertices))
         self.vertices = Path.from_tuple_list(res).vertices

@@ -32,7 +32,7 @@ class MyJsonEncoder(json.JSONEncoder):
                 "x": round(o.x, 4),
                 "y": round(o.y, 4),
                 "ts": round(o.timestamp, 2),
-                "c": o.color if o.color else None,
+                "c": o.properties["color"] if "color" in o.properties.keys() else None,
             }
 
 
@@ -50,7 +50,7 @@ class MyJsonDecoder(json.JSONDecoder):
                     c = None
             else:
                 c = None
-            return Position(dct["x"], dct["y"], dct["ts"], c)
+            return Position(dct["x"], dct["y"], dct["ts"], {"color": c})
         if "w" in dct and "h" in dct:
             s = pyautogui.Size(dct["w"], dct["h"])
             return s
@@ -105,10 +105,10 @@ class JsonCompressor:
 
 class Loader:
     def __init__(
-        self,
-        directory: pathlib.Path = None,
-        limit_files: typing.Union[int, list[str]] = None,
-        load_keys: bool = False,
+            self,
+            directory: pathlib.Path = None,
+            limit_files: typing.Union[int, list[str]] = None,
+            load_keys: bool = False,
     ):
         self._recordings = []
         self._keyboard_recordings = []
@@ -119,10 +119,10 @@ class Loader:
             )
 
     def load_all(
-        self,
-        directory: pathlib.Path,
-        limit_files: typing.Union[int, list[str]] = None,
-        load_keys: bool = False,
+            self,
+            directory: pathlib.Path,
+            limit_files: typing.Union[int, list[str]] = None,
+            load_keys: bool = False,
     ) -> None:
         t = Timer()
         t.start()
