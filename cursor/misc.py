@@ -228,6 +228,6 @@ def transformFn(stl, sbr, dtl, dbr):
 
     def calc(inp: Position):
         x, y = inp.x, inp.y
-        return x * a + bx, y * a + by
+        return Position(x * a + bx, y * a + by, 0, inp.properties)
 
     return calc
