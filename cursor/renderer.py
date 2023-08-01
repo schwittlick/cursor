@@ -163,6 +163,13 @@ class GCodeRenderer:
             if "laser" in p.properties:
                 instructions.append("LASERON")
 
+            if "amp" in p.properties.keys():
+                amp = p.properties["amp"]
+                instructions.append(f"AMP{amp:.3}")
+            if "volt" in p.properties.keys():
+                volt = p.properties["volt"]
+                instructions.append(f"VOLT{volt:.3}")
+
             for point in p.vertices:
                 x = point.x
                 y = point.y
@@ -185,6 +192,7 @@ class GCodeRenderer:
                 instructions.append("LASEROFF")
 
             instructions.append(self.g01(x, y, self.z_up))
+        instructions.append(self.g01(0, 0, self.z_up))
 
         return instructions
 

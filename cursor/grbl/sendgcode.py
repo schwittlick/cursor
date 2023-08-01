@@ -2,21 +2,24 @@
 jogging:
 $J=X10.0 Y-1.5
 """
+import math
 import time
 from argparse import ArgumentParser
 
 import serial
 import wasabi
 
-from cursor.grbl.parser import parse_xy, parse_z
+from cursor.grbl.parser import parse_xy
 from cursor.tools.psu import PSU
 
 logger = wasabi.Printer(pretty=True, no_print=False)
 
+CHECK_FEEDBACK = True
+
 
 class GCODEStreamer:
     def __init__(self, plotter: serial.Serial, psu: PSU):
-        self.HOME = (-4990.0, -10.0, 0.0)
+        self.HOME = (-4990.0, -10.0, -10.0)
 
         self.plotter = plotter
         self.psu = psu
@@ -28,17 +31,19 @@ class GCODEStreamer:
 
         # Wake up grbl
         self.plotter.write("\r\n\r\n".encode())
-        time.sleep(2)
+        time.sleep(1.5)
         self.plotter.flushInput()
 
     def stream(self, gcode: list[str]) -> None:
         ok, error = self.home()
 
         if not ok:
-            logger.fail("Homing didnt work. Abort")
+            logger.fail(f"Homing didnt work: {ok}:{error}. Abort")
             return
 
         current_delay = 0.0
+
+        self.plotter.timeout = 0.5
 
         for line in gcode:
             line = line.strip()
@@ -51,11 +56,14 @@ class GCODEStreamer:
             elif "DELAY" in line:
                 current_delay = float(line.rstrip()[5:])
                 logger.info(f"Set laser delay to {current_delay}")
+            elif "VOLT" in line:
+                volt = float(line.rstrip()[4:])
+                logger.info(f"Set laser volt to {volt}")
             elif "LASERON" in line:
                 logger.info(f"Set laser ON")
                 self.psu.on()
             elif "LASEROFF" in line:
-                logger.info(f"Set laser ON")
+                logger.info(f"Set laser OFF")
                 self.psu.off()
             else:
                 ok, error = self.send(line)
@@ -67,45 +75,57 @@ class GCODEStreamer:
                 else:
                     # e.g. G01 X10.00 Y-10.00 Z4.5 F2000
                     if "X" in line and "Y" in line and "Z" in line:
-                        xyz = parse_xy(line)
-                        target = self.HOME[0] + xyz[0], self.HOME[1] + xyz[1], self.HOME[2] + xyz[2]
-                        pos = self.current_position()
-                        while target[0] != pos[0] and target[1] != pos[1] and target[2] != pos[2]:
-                            time.sleep(0.1)
-                            pos = self.current_position()
-                    # e.g. G01 Z0.0 F1000
-                    elif "Z" in line:
-                        z = parse_z(line)
-                        target = self.HOME[2] + z
-                        pos = self.current_position()
-                        while target != pos[2]:
-                            time.sleep(0.1)
-                            pos = self.current_position()
+                        if CHECK_FEEDBACK:
+                            xyz = parse_xy(line)
+                            target_x = int(self.HOME[0] + xyz[0])
+                            target_y = int(self.HOME[1] + xyz[1])
+                            target_z = int(self.HOME[2] + xyz[2])
+                            pos_x, pos_y, pos_z = self.current_position()
 
-                        if z != 0.0:
-                            logger.info(f"Delaying for {current_delay}")
-                            time.sleep(current_delay)
-                            current_delay = 0.0
+                            #target_x = int(target_x / 10)
+                            #target_y = int(target_y / 10)
+                            #target_z = int(target_z / 10)
+
+                            #pos_x = int(pos_x / 10)
+                            #pos_y = int(pos_y / 10)
+                            #pos_z = int(pos_z / 10)
+
+                            times = 0
+                            while not math.isclose(target_x, pos_x) or \
+                                    not math.isclose(target_y, pos_y) or \
+                                    not math.isclose(target_z, pos_z):
+                                # time.sleep(0.01)
+                                pos_x, pos_y, pos_z = self.current_position()
+                                #pos_x = int(pos_x / 10)
+                                #pos_y = int(pos_y / 10)
+                                #pos_z = int(pos_z / 10)
+                                # logger.info(f"Waiting for arrival at pos")
+                                times += 1
+
+                                if times > 200:
+                                   print("fuck")
 
     def current_position(self) -> tuple[float, float, float]:
         self.plotter.write("?".encode())
-        time.sleep(0.1)
+        time.sleep(0.05)
         status = self.plotter.readline().decode()
-        # logger.info(f"status: {status}")
+        logger.info(f"status: {status}")
         try:
             status_fields = status.split("|")
             pos = status_fields[1][5:]
             xyz = pos.split(",")
-            return float(xyz[0]), float(xyz[1]), float(xyz[2])
+            return int(float(xyz[0])), int(float(xyz[1])), int(float(xyz[2]))
         except IndexError:
             logger.fail(f"Failed to get info from status {status}")
             return 0, 0, 0
 
     def home(self) -> tuple[bool, str]:
-        return self.send("$H")
+        self.plotter.timeout = 30
+        return self.send("$H", 20)
 
-    def send(self, cmd: str) -> tuple[bool, str]:
+    def send(self, cmd: str, timeout: int = 10) -> tuple[bool, str]:
         logger.info(f"sending: {cmd}")
+        #self.plotter.timeout = timeout
         self.plotter.write(f"{cmd}\n".encode())
         time.sleep(0.05)
         is_ok = self.plotter.readline().decode()
@@ -130,7 +150,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     gcode = open(args.file, 'r').readlines()
-    plotter = serial.Serial(args.port, 115200, timeout=10)
+    plotter = serial.Serial(args.port, 115200)
     psu = PSU(args.psu_port)
 
     streamer = GCODEStreamer(plotter, psu)

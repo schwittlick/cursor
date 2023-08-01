@@ -880,8 +880,7 @@ class Path:
 
     def transform(self, bb: BoundingBox, out: BoundingBox) -> None:
         fn = misc.transformFn((bb.x, bb.y), (bb.x2, bb.y2), (out.x, out.y), (out.x2, out.y2))
-        res = list(map(fn, self.vertices))
-        self.vertices = Path.from_tuple_list(res).vertices
+        self.vertices = list(map(fn, self.vertices))
 
     def simplify(self, e: float = 1.0) -> None:
         # before = len(self.vertices)
