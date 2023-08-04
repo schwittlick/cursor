@@ -41,8 +41,6 @@ class GCODEStreamer:
             logger.fail(f"Homing didnt work: {ok}:{error}. Abort")
             return
 
-        current_delay = 0.0
-
         self.plotter.timeout = 0.5
 
         for line in gcode:
@@ -54,16 +52,17 @@ class GCODEStreamer:
                 self.psu.set_current(amp)
                 logger.info(f"Set laser amps to {amp}")
             elif "DELAY" in line:
-                current_delay = float(line.rstrip()[5:])
-                logger.info(f"Set laser delay to {current_delay}")
+                delay = float(line.rstrip()[5:])
+                logger.info(f"Laser delay to {delay}")
+                time.sleep(delay)
             elif "VOLT" in line:
                 volt = float(line.rstrip()[4:])
                 logger.info(f"Set laser volt to {volt}")
             elif "LASERON" in line:
-                logger.info(f"Set laser ON")
+                logger.info(f"Laser ON")
                 self.psu.on()
             elif "LASEROFF" in line:
-                logger.info(f"Set laser OFF")
+                logger.info(f"Laser OFF")
                 self.psu.off()
             else:
                 ok, error = self.send(line)
@@ -82,13 +81,13 @@ class GCODEStreamer:
                             target_z = int(self.HOME[2] + xyz[2])
                             pos_x, pos_y, pos_z = self.current_position()
 
-                            #target_x = int(target_x / 10)
-                            #target_y = int(target_y / 10)
-                            #target_z = int(target_z / 10)
+                            # target_x = int(target_x / 10)
+                            # target_y = int(target_y / 10)
+                            # target_z = int(target_z / 10)
 
-                            #pos_x = int(pos_x / 10)
-                            #pos_y = int(pos_y / 10)
-                            #pos_z = int(pos_z / 10)
+                            # pos_x = int(pos_x / 10)
+                            # pos_y = int(pos_y / 10)
+                            # pos_z = int(pos_z / 10)
 
                             times = 0
                             while not math.isclose(target_x, pos_x) or \
@@ -96,14 +95,14 @@ class GCODEStreamer:
                                     not math.isclose(target_z, pos_z):
                                 # time.sleep(0.01)
                                 pos_x, pos_y, pos_z = self.current_position()
-                                #pos_x = int(pos_x / 10)
-                                #pos_y = int(pos_y / 10)
-                                #pos_z = int(pos_z / 10)
+                                # pos_x = int(pos_x / 10)
+                                # pos_y = int(pos_y / 10)
+                                # pos_z = int(pos_z / 10)
                                 # logger.info(f"Waiting for arrival at pos")
                                 times += 1
 
                                 if times > 200:
-                                   print("fuck")
+                                    print("fuck")
 
     def current_position(self) -> tuple[float, float, float]:
         self.plotter.write("?".encode())
@@ -125,7 +124,7 @@ class GCODEStreamer:
 
     def send(self, cmd: str, timeout: int = 10) -> tuple[bool, str]:
         logger.info(f"sending: {cmd}")
-        #self.plotter.timeout = timeout
+        # self.plotter.timeout = timeout
         self.plotter.write(f"{cmd}\n".encode())
         time.sleep(0.05)
         is_ok = self.plotter.readline().decode()
