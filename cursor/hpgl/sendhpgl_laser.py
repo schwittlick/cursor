@@ -5,7 +5,7 @@ import wasabi
 from serial import Serial
 from tqdm import tqdm
 
-from cursor.hpgl.lib import read_until_char
+from cursor.hpgl import read_until_char
 from cursor.hpgl.sendhpgl import SerialSender
 from cursor.tools.psu import PSU
 
