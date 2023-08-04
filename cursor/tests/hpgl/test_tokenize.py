@@ -1,4 +1,4 @@
-from cursor.hpgl.tokenize import tokenize
+from cursor.hpgl.tokenize import tokenizer
 
 
 def test_tokenize():
@@ -8,7 +8,7 @@ def test_tokenize():
     expected_commands = ['SP1', 'SI1.000,1.000', 'DI0.839,0.545', 'LBT', 'DI1.000,0.000',
                          'SP3', 'LBA', 'IN', 'PU0,0', 'SP4', 'SI1.000,1.000', 'DI0.839,0.545',
                          'LBA', 'SP2', 'PA201,130', 'PD1201,1130', 'LB1234LB']
-    commands = tokenize(string)
+    commands = tokenizer(string)
     assert expected_commands == commands
 
 
@@ -21,5 +21,5 @@ def test_tokenize2():
              "LBLBLBPhotography intersects several areas of responsibility"
 
     expected_commands = ['IN']
-    commands = tokenize(string)
+    commands = tokenizer(string)
     assert expected_commands == commands
