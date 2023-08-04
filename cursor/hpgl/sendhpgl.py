@@ -111,7 +111,7 @@ def main():
 
 
 if __name__ == '__main__':
-    test_filename = "C:\\Users\\schwittlick\\dev\\cursor\\data\\experiments\\holo\\hpgl\\cool_buggy\\hwf.txt.hpgl.hpgl.hpgl"
+    test_filename = "/home/marcel/introspection/hwf.txt.hpgl.hpgl.hpgl"
     test_serialport = "/dev/ttyUSB1"
     text = ''.join(open(test_filename, 'r', encoding='utf-8').readlines())
     # text = text.replace(" ", '').replace("\n", '').replace("\r", '')
