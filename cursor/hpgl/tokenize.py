@@ -24,3 +24,7 @@ def tokenize(hpgl: str) -> list[str]:
             commands.extend([x for x in command_batch.split(";") if x])
 
     return commands
+
+
+if __name__ == '__main__':
+    print("LOL")

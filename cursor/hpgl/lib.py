@@ -7,7 +7,6 @@ CR = chr(13)
 LF = chr(10)
 LB_TERMINATOR = chr(3)
 ESC_TERM = ":"
-
 OUTBUT_BUFFER_SPACE = f"{ESC}.B"
 OUTPUT_EXTENDED_STATUS = f"{ESC}.O"  # info about device satus etc
 OUTPUT_IDENTIFICATION = f"{ESC}.A"  # immediate return e.g. "7550A,firmwarenr"
