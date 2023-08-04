@@ -12,6 +12,10 @@ from cursor.renderer import GCodeRenderer
 
 
 def cursor_sinelines() -> Collection:
+    """
+    get some random cursor lines
+    and trace them with z-values from sine curve
+    """
     recordings = DataDirHandler().recordings()
     _loader = Loader(directory=recordings, limit_files=3)
     paths = _loader.all_paths()
@@ -30,7 +34,7 @@ def cursor_sinelines() -> Collection:
         r1.properties["amp"] = 0.01 * i
         r1.properties["volt"] = 3.3
         out_bb = Paper.sizes[PaperSize.PHOTO_PAPER_240_178_LANDSCAPE]
-        r1.transform(r1.bb(), BoundingBox(10, 10, out_bb[0]-10, out_bb[1]-10))
+        r1.transform(r1.bb(), BoundingBox(10, 10, out_bb[0] - 10, out_bb[1] - 10))
         scale_fac = XYFactors.fac[PlotterType.DIY_PLOTTER]
         r1.scale(scale_fac[0], scale_fac[1])
 
@@ -53,9 +57,9 @@ def sine_values(res, freq, amp) -> list[float]:
 
 def experiment1():
     """
-        we use path for x, y
-        properties will be z values and ampere values
-        """
+    we use path for x, y
+    properties will be z values and ampere values
+    """
     path = Path()
 
     frequency = 2  # the times the sine cycles while going start -> end
