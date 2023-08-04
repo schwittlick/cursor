@@ -90,12 +90,21 @@ class SerialSender:
 
     def wait_for_free_io_memory(self, memory_amount: int) -> None:
         self.plotter.write(OUTBUT_BUFFER_SPACE.encode())
-        free_io_memory = int(self.read_until())
+        free_memory = self.read_until()
+        try:
+            free_io_memory = int(free_memory)
+        except ValueError as ve:
+            log.warn(f"Failed getting info from plotter: {ve}")
+            free_io_memory = 0
+
         while free_io_memory < memory_amount:
             sleep(0.1)
             self.plotter.write(OUTBUT_BUFFER_SPACE.encode())
-            free_io_memory = int(self.read_until())
-
+            try:
+                free_io_memory = int(self.read_until())
+            except ValueError as ve:
+                log.warn(f"Failed getting info from plotter: {ve}")
+                free_io_memory = 0
 
 def main():
     parser = ArgumentParser()

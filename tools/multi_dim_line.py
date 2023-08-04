@@ -12,18 +12,18 @@ from cursor.renderer import GCodeRenderer
 
 
 def grid() -> Collection:
-    width, height = 8, 6
+    width, height = 12, 10
 
     c = Collection()
     for y in range(height):
         for x in range(width):
             p = Path()
-            z = y * 1.0
-            delay = x * 0.4
+            z = y * 0.5
+            delay = 0.5
             p.add_position(Position(x, y, properties={"z": z, "delay": delay}))
             p.add_position(Position(x, y, properties={"z": z}))
             p.properties["laser"] = True
-            p.properties["amp"] = 0.01
+            p.properties["amp"] = x * 0.005
             p.properties["volt"] = 3.3
             c.add(p)
 
@@ -122,9 +122,9 @@ def experiment1():
 
 
 if __name__ == "__main__":
-    c = cursor_sinelines()
-    #c = grid()
+    #c = cursor_sinelines()
+    c = grid()
     gcode_dir = DataDirHandler().gcode("multi-dim")
     gcode_renderer = GCodeRenderer(gcode_dir)
     gcode_renderer.render(c)
-    gcode_renderer.save("sine_paths")
+    gcode_renderer.save("grid")
