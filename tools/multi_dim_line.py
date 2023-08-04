@@ -11,6 +11,29 @@ from cursor.position import Position
 from cursor.renderer import GCodeRenderer
 
 
+def grid() -> Collection:
+    width, height = 8, 6
+
+    c = Collection()
+    for y in range(height):
+        for x in range(width):
+            p = Path()
+            z = y * 1.0
+            delay = x * 0.4
+            p.add_position(Position(x, y, properties={"z": z, "delay": delay}))
+            p.add_position(Position(x, y, properties={"z": z}))
+            p.properties["laser"] = True
+            p.properties["amp"] = 0.01
+            p.properties["volt"] = 3.3
+            c.add(p)
+
+    out_bb = Paper.sizes[PaperSize.PHOTO_PAPER_240_178_LANDSCAPE]
+    c.transform(BoundingBox(10, 10, out_bb[0] - 10, out_bb[1] - 10))
+    scale_fac = XYFactors.fac[PlotterType.DIY_PLOTTER]
+    c.scale(scale_fac[0], scale_fac[1])
+    return c
+
+
 def cursor_sinelines() -> Collection:
     """
     get some random cursor lines
@@ -100,7 +123,8 @@ def experiment1():
 
 if __name__ == "__main__":
     c = cursor_sinelines()
+    #c = grid()
     gcode_dir = DataDirHandler().gcode("multi-dim")
     gcode_renderer = GCodeRenderer(gcode_dir)
     gcode_renderer.render(c)
-    gcode_renderer.save("cursor_sine2")
+    gcode_renderer.save("sine_paths")
