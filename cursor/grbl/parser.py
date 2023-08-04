@@ -83,3 +83,6 @@ class GCODEParser:
                     logging.warning(f"Unknown parameters in cmd: {cmd}")
 
         return c
+
+if __name__ == '__main__':
+    print("lol")

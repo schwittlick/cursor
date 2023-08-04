@@ -5,7 +5,7 @@ import wasabi
 from serial import Serial, SerialException
 from tqdm import tqdm
 
-from cursor.hpgl import ESC_TERM, ESC, ABORT_GRAPHICS, OUTPUT_IDENTIFICATION, WAIT, OUTBUT_BUFFER_SPACE, CR, \
+from cursor.hpgl.lib import ESC, CR, ESC_TERM, OUTBUT_BUFFER_SPACE, OUTPUT_IDENTIFICATION, ABORT_GRAPHICS, WAIT, \
     read_until_char
 from cursor.hpgl.tokenize import tokenize
 
@@ -61,8 +61,14 @@ class SerialSender:
             with tqdm(total=len(self.commands)) as pbar:
                 pbar.update(0)
                 for cmd in self.commands:
-                    self.wait_for_free_io_memory(cmd)
-                    self.plotter.write(f"{cmd};".encode('utf-8'))
+                    self.wait_for_free_io_memory(len(cmd) + 10)
+
+                    if cmd.startswith("LB"):
+                        cmd_to_send = f"{cmd}{ESC}"
+                    else:
+                        cmd_to_send = f"{cmd};"
+
+                    self.plotter.write(cmd_to_send.encode('utf-8'))
                     pbar.update(1)
         except KeyboardInterrupt:
             log.warn("Interrupted- aborting.")
@@ -81,10 +87,10 @@ class SerialSender:
 
         return ""
 
-    def wait_for_free_io_memory(self, cmd: str) -> None:
+    def wait_for_free_io_memory(self, memory_amount: int) -> None:
         self.plotter.write(OUTBUT_BUFFER_SPACE.encode())
         free_io_memory = int(self.read_until())
-        while free_io_memory <= len(cmd):
+        while free_io_memory < memory_amount:
             sleep(0.1)
             self.plotter.write(OUTBUT_BUFFER_SPACE.encode())
             free_io_memory = int(self.read_until())
@@ -97,15 +103,17 @@ def main():
     args = parser.parse_args()
 
     text = ''.join(open(args.file, 'r', encoding='utf-8').readlines())
-    text = text.replace(" ", '').replace("\n", '').replace("\r", '')
+    # text = text.replace(" ", '').replace("\n", '').replace("\r", '')
 
     sender = SerialSender(args.port, text)
     sender.send()
 
 
 if __name__ == '__main__':
-    """
-    - pause
-    - everything in try catch so it can be continued in case of crash
-    """
-    main()
+    test_filename = "/home/marcel/introspection/hwf.txt.hpgl.hpgl.hpgl"
+    test_serialport = "/dev/ttyUSB1"
+    text = ''.join(open(test_filename, 'r', encoding='utf-8').readlines())
+    # text = text.replace(" ", '').replace("\n", '').replace("\r", '')
+
+    sender = SerialSender(test_serialport, text)
+    sender.send()

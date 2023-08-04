@@ -14,7 +14,7 @@ import typing
 import serial.tools.list_ports
 import wasabi
 
-from cursor.hpgl import read_until_char
+from cursor.hpgl.lib import read_until_char
 
 logger = wasabi.Printer(pretty=True, no_print=False)
 
