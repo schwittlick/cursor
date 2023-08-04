@@ -4,7 +4,7 @@ import math
 
 import wasabi
 
-from cursor.hpgl.lib import LB_TERMINATOR
+from cursor.hpgl import LB_TERMINATOR
 
 log = wasabi.Printer()
 

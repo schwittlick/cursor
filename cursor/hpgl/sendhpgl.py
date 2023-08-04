@@ -5,8 +5,8 @@ import wasabi
 from serial import Serial, SerialException
 from tqdm import tqdm
 
-from cursor.hpgl.lib import ESC, CR, ESC_TERM, OUTBUT_BUFFER_SPACE, OUTPUT_IDENTIFICATION, ABORT_GRAPHICS, WAIT, \
-    read_until_char, LB_TERMINATOR
+from cursor.hpgl import ESC, CR, LB_TERMINATOR, ESC_TERM, OUTBUT_BUFFER_SPACE, OUTPUT_IDENTIFICATION, ABORT_GRAPHICS, \
+    WAIT, read_until_char
 from cursor.hpgl.hpgl_tokenize import tokenizer
 
 log = wasabi.Printer(pretty=True)

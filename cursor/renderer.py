@@ -162,7 +162,6 @@ class GCodeRenderer:
 
             if "laser" in p.properties:
                 instructions.append("LASERON")
-
             if "amp" in p.properties.keys():
                 amp = p.properties["amp"]
                 instructions.append(f"AMP{amp:.3}")
@@ -187,6 +186,10 @@ class GCodeRenderer:
                     z = point.properties["z"]
 
                 instructions.append(self.g01(x, y, z))
+
+                if "delay" in point.properties.keys():
+                    delay = point.properties["delay"]
+                    instructions.append(f"DELAY{delay:.2}")
 
             if "laser" in p.properties:
                 instructions.append("LASEROFF")
