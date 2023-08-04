@@ -1,4 +1,4 @@
-def tokenize(hpgl: str) -> list[str]:
+def tokenizer(hpgl: str) -> list[str]:
     """
     pass a full hpgl file in one line in here
 

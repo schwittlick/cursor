@@ -6,8 +6,8 @@ from serial import Serial, SerialException
 from tqdm import tqdm
 
 from cursor.hpgl.lib import ESC, CR, ESC_TERM, OUTBUT_BUFFER_SPACE, OUTPUT_IDENTIFICATION, ABORT_GRAPHICS, WAIT, \
-    read_until_char
-from cursor.hpgl.tokenize import tokenize
+    read_until_char, LB_TERMINATOR
+from cursor.hpgl.hpgl_tokenize import tokenizer
 
 log = wasabi.Printer(pretty=True)
 
@@ -15,8 +15,9 @@ log = wasabi.Printer(pretty=True)
 class SerialSender:
     def __init__(self, serialport: str, hpgl_data: str):
         self.serial_port_address = serialport
+        self.commands = tokenizer(hpgl_data)
+
         self.plotter = Serial(port=serialport, baudrate=9600, timeout=1)
-        self.commands = tokenize(hpgl_data)
 
         model = self.identify()
         log.info(f"Detected model {model}")
@@ -64,7 +65,7 @@ class SerialSender:
                     self.wait_for_free_io_memory(len(cmd) + 10)
 
                     if cmd.startswith("LB"):
-                        cmd_to_send = f"{cmd}{ESC}"
+                        cmd_to_send = f"{cmd}{LB_TERMINATOR}"
                     else:
                         cmd_to_send = f"{cmd};"
 
@@ -110,7 +111,7 @@ def main():
 
 
 if __name__ == '__main__':
-    test_filename = "/home/marcel/introspection/hwf.txt.hpgl.hpgl.hpgl"
+    test_filename = "C:\\Users\\schwittlick\\dev\\cursor\\data\\experiments\\holo\\hpgl\\cool_buggy\\hwf.txt.hpgl.hpgl.hpgl"
     test_serialport = "/dev/ttyUSB1"
     text = ''.join(open(test_filename, 'r', encoding='utf-8').readlines())
     # text = text.replace(" ", '').replace("\n", '').replace("\r", '')

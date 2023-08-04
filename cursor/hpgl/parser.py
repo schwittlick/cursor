@@ -4,7 +4,7 @@ import typing
 import wasabi
 
 from cursor.collection import Collection
-from cursor.hpgl.tokenize import tokenize
+from cursor.hpgl.tokenize import tokenizer
 from cursor.path import Path
 from cursor.position import Position
 
@@ -59,7 +59,7 @@ class HPGLParser:
             hpgl_data = ''.join(hpgl_data).replace('\r', '')
             hpgl_data = ''.join(hpgl_data).replace('\\x03', self.label_terminator)
 
-        tokens = tokenize(hpgl_data)
+        tokens = tokenizer(hpgl_data)
         for cmd in tokens:
             if cmd[:2] in self.func_map:
                 self.func_map[cmd[:2]](cmd)
