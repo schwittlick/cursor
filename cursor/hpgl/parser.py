@@ -4,7 +4,7 @@ import typing
 import wasabi
 
 from cursor.collection import Collection
-from cursor.hpgl.tokenize import tokenizer
+from cursor.hpgl.hpgl_tokenize import tokenizer
 from cursor.path import Path
 from cursor.position import Position
 
