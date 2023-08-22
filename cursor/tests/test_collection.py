@@ -591,32 +591,13 @@ def test_reorder_custom():
 
 
 def test_reorder_quadrants():
-    p0 = Path()
-    p0.add(1, 1)
-    p0.add(1, 1)
+    p0 = Path.from_tuple_list([(1, 1), (1, 1)])
+    p1 = Path.from_tuple_list([(1, 10), (1, 10)])
+    p2 = Path.from_tuple_list([(10, 1), (10, 1)])
+    p3 = Path.from_tuple_list([(5, 5), (5, 5)])
+    p4 = Path.from_tuple_list([(1, 1.1), (1, 1.1)])
 
-    p1 = Path()
-    p1.add(1, 10)
-    p1.add(1, 10)
-
-    p2 = Path()
-    p2.add(10, 1)
-    p2.add(10, 1)
-
-    p3 = Path()
-    p3.add(5, 5)
-    p3.add(5, 5)
-
-    p4 = Path()
-    p4.add(1, 1.1)
-    p4.add(1, 1.1)
-
-    pc = Collection()
-    pc.add(p0)
-    pc.add(p1)
-    pc.add(p2)
-    pc.add(p3)
-    pc.add(p4)
+    pc = Collection.from_path_list([p0, p1, p2, p3, p4])
 
     pc.reorder_quadrants(10, 10)
 
@@ -642,3 +623,21 @@ def test_reorder_quadrants2():
     pc.reorder_quadrants(10, 10)
 
     assert len(pc) == 100
+
+
+def test_sort_tsp():
+    p0 = Path.from_tuple_list([(1, 1), (2, 1), (5, 10)])
+    p1 = Path.from_tuple_list([(1, 10), (1, 5), (5, 2)])
+    p2 = Path.from_tuple_list([(10, 1), (10, 10), (20, 1)])
+    p3 = Path.from_tuple_list([(5, 5), (5, 8), (0, 0)])
+    p4 = Path.from_tuple_list([(1, 5), (1, 2)])
+
+    pc = Collection.from_path_list([p0, p1, p2, p3, p4])
+
+    pc.sort_tsp()
+
+    # assert pc[0] == p1
+    # assert pc[1] == p2
+    # assert pc[2] == p0
+    # assert pc[3] == p4
+    # assert pc[4] == p3
