@@ -99,6 +99,9 @@ class PaperSize(Enum):
     LANDSCAPE_A1_HP_7596B = auto()
     PORTRAIT_50_100 = auto()
     PHOTO_PAPER_240_178_LANDSCAPE = auto()
+    PHOTO_PAPER_250_200_LANDSCAPE = auto()
+    PHOTO_PAPER_400_300_LANDSCAPE = auto()
+    PHOTO_PAPER_600_500_LANDSCAPE = auto()
 
 
 class MinmaxMapping:
@@ -282,6 +285,9 @@ class PaperSizeName:
         PaperSize.LANDSCAPE_A1_HP_7596B: "landscape_a1",
         PaperSize.PORTRAIT_50_100: "portrait_50x100",
         PaperSize.PHOTO_PAPER_240_178_LANDSCAPE: "photo_paper_240x178",
+        PaperSize.PHOTO_PAPER_250_200_LANDSCAPE: "photo_paper_250x200",
+        PaperSize.PHOTO_PAPER_400_300_LANDSCAPE: "photo_paper_400x300",
+        PaperSize.PHOTO_PAPER_600_500_LANDSCAPE: "photo_paper_600x500",
     }
 
 
@@ -310,4 +316,7 @@ class Paper:
         PaperSize.LANDSCAPE_A1_HP_7596B: (776, 555),
         PaperSize.PORTRAIT_50_100: (460, 960),
         PaperSize.PHOTO_PAPER_240_178_LANDSCAPE: (240, 178),
+        PaperSize.PHOTO_PAPER_250_200_LANDSCAPE: (250, 200),
+        PaperSize.PHOTO_PAPER_400_300_LANDSCAPE: (400, 300),
+        PaperSize.PHOTO_PAPER_600_500_LANDSCAPE: (600, 500),
     }

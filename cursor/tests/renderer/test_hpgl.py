@@ -1,7 +1,7 @@
 from cursor.collection import Collection
 from cursor.data import DataDirHandler
 from cursor.path import Path
-from cursor.renderer import HPGLRenderer
+from cursor.renderer.hpgl import HPGLRenderer
 
 
 def test_hpglrenderer():

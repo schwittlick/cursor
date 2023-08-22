@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import datetime
 import hashlib
+import itertools
 import operator
 import pickle
 import random
@@ -13,11 +14,16 @@ from functools import reduce
 import numpy as np
 import pandas as pd
 import pytz
+import shapely
 import wasabi
+from shapely import LineString, Polygon, intersection_all
+from shapely.affinity import affine_transform
+from skimage.transform import estimate_transform
 
 from cursor.bb import BoundingBox
 from cursor.data import DataDirHandler
 from cursor.filter import Filter
+from cursor.misc import apply_matrix
 from cursor.path import Path
 from cursor.position import Position
 from cursor.sorter import Sorter
@@ -37,6 +43,10 @@ class Collection:
             now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
             utc_timestamp = datetime.datetime.timestamp(now)
             self._timestamp = utc_timestamp
+
+    @property
+    def paths(self):
+        return self.__paths
 
     def __len__(self) -> int:
         return len(self.__paths)
@@ -106,10 +116,17 @@ class Collection:
 
     @staticmethod
     def from_tuples(tuples: list[list[tuple]]) -> Collection:
-        _collection = Collection()
-        for l in tuples:
-            _collection.add(Path.from_tuple_list(l))
-        return _collection
+        c = Collection()
+        for tup in tuples:
+            c.add(Path.from_tuple_list(tup))
+        return c
+
+    @staticmethod
+    def from_path_list(paths: list[Path]) -> Collection:
+        c = Collection()
+        for p in paths:
+            c.add(p)
+        return c
 
     def add(self, path: typing.Union[BoundingBox, Path, typing.List[Path]]) -> None:
         if isinstance(path, Path):
@@ -171,6 +188,34 @@ class Collection:
                 pa.add_position(poi)
 
         return pa
+
+    def rotate_into_bb(self, target_bb: BoundingBox) -> Collection:
+        merged_into_path = self.merge()
+        if merged_into_path.is_1_dimensional():
+            log.warn("Didn't rotate, bc path is 1-dimensional.")
+            return self
+
+        line = LineString(merged_into_path.as_tuple_list())
+        rect = line.minimum_rotated_rectangle
+
+        target_poly = Polygon([[0, 0], [target_bb.x2, 0], [target_bb.x2, target_bb.y2], [0, target_bb.y2], [0, 0]])
+
+        src = np.array(rect.exterior.coords)
+        dst = np.array(target_poly.exterior.coords)
+        matrix = estimate_transform('similarity', src, dst).params
+        matrix = np.append(matrix, [[0, 0, 0]], axis=0).flatten()
+
+        coll = Collection()
+        for path in self:
+            tup = apply_matrix(path.as_tuple_list(), matrix)
+            pa = Path()
+            for i, t in enumerate(tup):
+                newpos = Position.from_tuple(t)
+                newpos.properties = path[i].properties
+                pa.add_position(newpos)
+            pa.properties = path.properties
+            coll.add(pa)
+        return coll
 
     def reverse(self) -> None:
         self.__paths.reverse()
@@ -251,6 +296,22 @@ class Collection:
                 types.append(p.line_type)
 
         return types
+
+    def intersections(self) -> list[Position]:
+        permutations = list(itertools.combinations(self.paths, 2))
+        points = []
+
+        for combination in permutations:
+            linestrings = [LineString(combination[0].as_tuple_list()), LineString(combination[1].as_tuple_list())]
+            intersections = intersection_all(linestrings)
+
+            if type(intersections) == shapely.geometry.Point:
+                points.append(Position(intersections.x, intersections.y))
+            if type(intersections) == shapely.geometry.MultiPoint:
+                for point in intersections.geoms:
+                    points.append(Position(point.x, point.y))
+
+        return points
 
     def get_line_types(self):
         types = {}

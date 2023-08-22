@@ -14,10 +14,12 @@ import shapely
 import wasabi
 from scipy import spatial
 from scipy import stats
-from shapely import union_all
+from shapely import union_all, Polygon
+from shapely.affinity import affine_transform
 from shapely.geometry import LineString, MultiLineString, JOIN_STYLE, Point
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import clip_by_rect
+from skimage.transform import estimate_transform
 
 from cursor import misc
 from cursor.algorithm import ramer_douglas_peucker
@@ -25,6 +27,7 @@ from cursor.algorithm.entropy import calc_entropy
 from cursor.algorithm.frechet import LinearDiscreteFrechet
 from cursor.algorithm.frechet import euclidean
 from cursor.bb import BoundingBox
+from cursor.misc import apply_matrix
 from cursor.position import Position
 
 log = wasabi.Printer()
@@ -38,9 +41,11 @@ class Property(Enum):
     PEN_SELECT = auto()
     IS_POLY = auto()
     LASER_PWM = auto()
-    LASER_VOLT = auto()
-    LASER_AMP = auto()
-    LASER_DELAY = auto()
+    LASER_ONOFF = "laser"
+    LASER_VOLT = "volt"
+    LASER_AMP = "amp"
+    LASER_DELAY = "delay"
+    LASER_Z = "z"
 
 
 class Path:
@@ -216,6 +221,17 @@ class Path:
     @laser_delay.setter
     def laser_delay(self, laser_delay: float) -> None:
         self.properties[Property.LASER_DELAY] = laser_delay
+
+    @property
+    def laser_onoff(self) -> typing.Union[bool, None]:
+        if Property.LASER_ONOFF not in self.properties.keys():
+            return None
+
+        return self.properties[Property.LASER_ONOFF]
+
+    @laser_onoff.setter
+    def laser_onoff(self, laser_onoff: bool) -> None:
+        self.properties[Property.LASER_ONOFF] = laser_onoff
 
     @property
     def is_polygon(self) -> typing.Union[bool, None]:
@@ -768,7 +784,7 @@ class Path:
             result = line.parallel_offset(
                 abs(dist),
                 side=side,
-                resolution=512,
+                resolution=64,
                 join_style=join_style,
                 mitre_limit=mitre_limit,
             )
@@ -789,11 +805,11 @@ class Path:
 
         return return_paths
 
-    def intersection_points(self) -> list:
+    def intersection_points(self, grid_size=0.001) -> list:
         ls = LineString(self.as_tuple_list())
         # mls = unary_union(ls, 1)
         ls.normalize()
-        mls = union_all(ls, 0.001)
+        mls = union_all(ls, grid_size)
         t = type(mls)
         linestring = None
         if t == shapely.geometry.multilinestring.MultiLineString:
@@ -867,6 +883,31 @@ class Path:
         self.vertices = [
             prev := v for v in self.vertices if v.distance(prev) > dist  # noqa: F841
         ]
+
+    def resample(self, target_dist: float) -> None:
+        # Calculate the cumulative distances along the line
+        distances = [0.0]
+        for i in range(1, len(self)):
+            dx = self[i].x - self[i - 1].x
+            dy = self[i].y - self[i - 1].y
+            dist = np.sqrt(dx ** 2 + dy ** 2)
+            distances.append(distances[-1] + dist)
+
+        # Calculate number of intervals based on target_distance
+        total_distance = distances[-1]
+        num_intervals = int(total_distance / target_dist)
+
+        # Determine the new distances for interpolation
+        new_distances = [0] + [i * target_dist for i in range(1, num_intervals + 1)]
+        if new_distances[-1] > total_distance:
+            new_distances.pop()
+
+        # Use interpolation to get the new x and y coordinates
+        new_x = np.interp(new_distances, distances, [p.x for p in self])
+        new_y = np.interp(new_distances, distances, [p.y for p in self])
+
+        new_vertices = list(zip(new_x, new_y))
+        self.vertices = Path.from_tuple_list(new_vertices).vertices
 
     def subset(self, start: int, end: int):
         if start < 0 or start > len(self) or end < 0 or end > len(self):
@@ -1014,6 +1055,37 @@ class Path:
 
         return return_paths
 
+    def is_1_dimensional(self) -> bool:
+        """
+        returns whether all x or y coordinates are the same
+        """
 
-class PropertyPath(Path):
-    pass
+        tuple_list = self.as_tuple_list()
+        x_values, y_values = zip(*tuple_list)
+
+        return len(set(x_values)) == 1 or len(set(y_values)) == 1
+
+    def rotate_into_bb(self, target_bb: BoundingBox) -> Path:
+        if self.is_1_dimensional():
+            log.warn("Didn't rotate, bc path is 1-dimensional.")
+            return self
+
+        line = LineString(self.as_tuple_list())
+        rect = line.minimum_rotated_rectangle
+
+        target_poly = Polygon([[0, 0], [target_bb.x2, 0], [target_bb.x2, target_bb.y2], [0, target_bb.y2], [0, 0]])
+
+        src = np.array(rect.exterior.coords)
+        dst = np.array(target_poly.exterior.coords)
+        matrix = estimate_transform('similarity', src, dst).params
+        matrix = np.append(matrix, [[0, 0, 0]], axis=0).flatten()
+
+        tuple_list = apply_matrix(self.as_tuple_list(), matrix)
+
+        pa = Path()
+        for tup in tuple_list:
+            pa.add_position(Position.from_tuple(tup))
+
+        # somehow the matrix application above doesnt scale well
+        pa.transform(pa.bb(), target_bb)
+        return pa
