@@ -7,8 +7,10 @@ import typing
 import arcade
 import pymsgbox
 import wasabi
+from arcade.experimental import RenderTargetTexture
 from arcade.experimental.uislider import UISlider
 from arcade.gui import UIManager, UIOnChangeEvent, UIAnchorWidget
+from arcade.gl.context import Framebuffer
 
 from cursor.collection import Collection
 from cursor.data import DataDirHandler, DateHandler
@@ -16,6 +18,45 @@ from cursor.path import Path
 from cursor.position import Position
 
 log = wasabi.Printer()
+
+
+class Buffer(RenderTargetTexture):
+    def __init__(self, width, height):
+        super().__init__(width, height)
+        self.program = self.ctx.program(
+            vertex_shader="""
+            #version 330
+
+            in vec2 in_vert;
+            in vec2 in_uv;
+            out vec2 uv;
+
+            void main() {
+                gl_Position = vec4(in_vert, 0.0, 1.0);
+                uv = in_uv;
+            }
+            """,
+            fragment_shader="""
+            #version 330
+
+            uniform sampler2D texture0;
+
+            in vec2 uv;
+            out vec4 fragColor;
+
+            void main() {
+                vec4 color = texture(texture0, uv);
+                fragColor = color;
+            }
+            """,
+        )
+
+    def use(self):
+        self._fbo.use()
+
+    def draw(self):
+        self.texture.use(0)
+        self._quad_fs.render(self.program)
 
 
 class RealtimeRenderer(arcade.Window):
@@ -29,7 +70,7 @@ class RealtimeRenderer(arcade.Window):
             if not color.startswith("__")
         ]
 
-        self.shapes = None
+        self.shapes = arcade.ShapeElementList()
         self.collection = Collection()
         self.points = []
         self.clear_list()
