@@ -19,6 +19,7 @@ import wasabi
 from shapely import LineString, Polygon, intersection_all
 from shapely.affinity import affine_transform
 from skimage.transform import estimate_transform
+from scipy import spatial
 
 from cursor.bb import BoundingBox
 from cursor.data import DataDirHandler
@@ -559,6 +560,54 @@ class Collection:
         )
 
         self.translate(diff[0], diff[1])
+
+    def sort_tsp(self) -> None:
+        """
+        only works for paths with one point
+        """
+
+        def calc_pen_up_coordinates(paths: list[Path]) -> np.array[Position]:
+            positions = []
+            for p in paths:
+                positions.append(p.start_pos().as_tuple())
+            return np.array(positions)
+
+        start_positions = np.array([pa.start_pos().as_tuple() for pa in self])
+        end_positions = np.array([pa.end_pos().as_tuple() for pa in self])
+
+        points_coordinate = calc_pen_up_coordinates(self.paths)
+        distance_matrix = spatial.distance.cdist(end_positions, start_positions, metric='euclidean')
+
+        def calc_dist(routine):
+            num_points, = routine.shape
+            return sum(
+                [distance_matrix[routine[i % num_points], routine[(i + 1) % num_points]] for i in range(num_points)])
+
+        def cal_total_distance_between_paths(paths: np.array) -> float:
+            total_distance = 0
+            for i in range(len(paths) - 1):
+                current = self.paths[paths[i]]
+                next = self.paths[paths[i + 1]]
+                dist = current.start_pos().distance(next.start_pos())
+                total_distance += dist
+            return total_distance
+
+        # dist = cal_total_distance_between_paths(self.paths)
+        # print(dist)
+
+        from sko.GA import GA_TSP
+        import matplotlib.pyplot as plt
+
+        ga_tsp = GA_TSP(func=calc_dist, n_dim=len(self.paths), size_pop=50, max_iter=3000,
+                        prob_mut=0.1)
+        best_points, best_distance = ga_tsp.fit()
+        fig, ax = plt.subplots(1, 2)
+        best_points_ = np.concatenate([best_points, [best_points[0]]])
+        best_points_coordinate = calc_pen_up_coordinates(self.paths)[best_points_, :]
+        ax[0].plot(best_points_coordinate[:, 0], best_points_coordinate[:, 1], 'o-r')
+        ax[1].plot(ga_tsp.generation_best_Y)
+        print(f"best distance: {best_distance}")
+        plt.show()
 
     def reorder_quadrants(self, xq: int, yq: int) -> None:
         if xq < 2 and yq < 2:
