@@ -446,6 +446,18 @@ def test_downsample():
     assert len(p1) == 4
 
 
+def test_resample():
+    p1 = Path.from_tuple_list(
+        [(0, 0), (1, 0), (0, 1), (1.1, 1.1)])
+    # using (1.1, 1.1) for the last points in order to not drop the last
+    # point because it would not be included (the last two points distance
+    # would be below 0.5)
+
+    p1.resample(0.5)
+
+    assert len(p1) == 8
+
+
 def test_rdp():
     p = Path.from_tuple_list(
         [(0, 0), (1, 0), (2, 0), (3, 0),

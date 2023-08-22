@@ -1,13 +1,5 @@
 from cursor.collection import Collection
 from cursor.data import DataDirHandler
-from cursor.renderer import (
-    HPGLRenderer,
-    JpegRenderer,
-    GCodeRenderer,
-    TektronixRenderer,
-    DigiplotRenderer,
-    SvgRenderer,
-)
 from cursor.device import (
     PlotterType,
     PaperSize,
@@ -23,6 +15,13 @@ import inspect
 import hashlib
 import wasabi
 import pathlib
+
+from cursor.renderer.digi import DigiplotRenderer
+from cursor.renderer.gcode import GCodeRenderer
+from cursor.renderer.hpgl import HPGLRenderer
+from cursor.renderer.jpg import JpegRenderer
+from cursor.renderer.svg import SvgRenderer
+from cursor.renderer.tektronix import TektronixRenderer
 
 log = wasabi.Printer()
 

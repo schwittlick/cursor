@@ -4,6 +4,8 @@ import cv2
 import numpy as np
 import pynput
 import wasabi
+from shapely import LineString
+from shapely.affinity import affine_transform
 
 from cursor.position import Position
 
@@ -231,3 +233,9 @@ def transformFn(stl, sbr, dtl, dbr):
         return Position(x * a + bx, y * a + by, 0, inp.properties)
 
     return calc
+
+
+def apply_matrix(pa: list[tuple], _ma) -> list[tuple]:
+    l = LineString(pa)
+    xx, yy, = affine_transform(l, _ma).coords.xy
+    return zip(yy, xx)
