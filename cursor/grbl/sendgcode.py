@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 import serial
 from tqdm import tqdm
 
-from cursor.grbl.parser import parse_xy
+from cursor.grbl.parser import parse_xyz
 from cursor.tools.psu import PSU
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
@@ -74,7 +74,7 @@ class GCODEStreamer:
                         # e.g. G01 X10.00 Y-10.00 Z4.5 F2000
                         if "X" in line and "Y" in line and "Z" in line:
                             if CHECK_FEEDBACK:
-                                xyz = parse_xy(line)
+                                xyz = parse_xyz(line)
                                 target_x = int(self.HOME[0] + xyz[0])
                                 target_y = int(self.HOME[1] + xyz[1])
                                 target_z = int(self.HOME[2] + xyz[2])
