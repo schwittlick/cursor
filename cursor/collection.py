@@ -18,7 +18,6 @@ import shapely
 import wasabi
 from matplotlib import pyplot as plt
 from shapely import LineString, Polygon, intersection_all
-from shapely.affinity import affine_transform
 from skimage.transform import estimate_transform
 from scipy import spatial
 from sko.GA import GA_TSP
@@ -308,9 +307,9 @@ class Collection:
             linestrings = [LineString(combination[0].as_tuple_list()), LineString(combination[1].as_tuple_list())]
             intersections = intersection_all(linestrings)
 
-            if type(intersections) == shapely.geometry.Point:
+            if isinstance(intersections, shapely.geometry.Point):
                 points.append(Position(intersections.x, intersections.y))
-            if type(intersections) == shapely.geometry.MultiPoint:
+            if isinstance(intersections, shapely.geometry.MultiPoint):
                 for point in intersections.geoms:
                     points.append(Position(point.x, point.y))
 

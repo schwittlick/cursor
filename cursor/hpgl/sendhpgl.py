@@ -106,6 +106,7 @@ class SerialSender:
                 log.warn(f"Failed getting info from plotter: {ve}")
                 free_io_memory = 0
 
+
 def main():
     parser = ArgumentParser()
     parser.add_argument('port')
