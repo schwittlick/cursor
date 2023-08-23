@@ -94,8 +94,7 @@ def save_laser_dots(rr: RealtimeRenderer):
             p.add_position(Position(_point.x, _point.y, properties={"z": z, "delay": delay}))
             p.add_position(Position(_point.x, _point.y, properties={"z": z}))
             p.properties["laser"] = True
-            p.properties[
-                "amp"] = 0.05  # not much more than 0.02, otherwise too much scattered light, when pen kinda high. using 0.05 anyways
+            p.properties["amp"] = 0.05
             p.properties["volt"] = 3.3
             c.add(p)
 
