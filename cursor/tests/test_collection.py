@@ -629,15 +629,16 @@ def test_sort_tsp():
     p0 = Path.from_tuple_list([(1, 1), (2, 1), (5, 10)])
     p1 = Path.from_tuple_list([(1, 10), (1, 5), (5, 2)])
     p2 = Path.from_tuple_list([(10, 1), (10, 10), (20, 1)])
-    p3 = Path.from_tuple_list([(5, 5), (5, 8), (0, 0)])
-    p4 = Path.from_tuple_list([(1, 5), (1, 2)])
+    p3 = Path.from_tuple_list([(1, 5), (1, 2)])
+    p4 = Path.from_tuple_list([(5, 5), (5, 8), (0, 0)])
 
     pc = Collection.from_path_list([p0, p1, p2, p3, p4])
 
-    pc.sort_tsp()
+    order = pc.sort_tsp(iters=50)
 
-    # assert pc[0] == p1
-    # assert pc[1] == p2
-    # assert pc[2] == p0
-    # assert pc[3] == p4
-    # assert pc[4] == p3
+    assert order == [0, 1, 2, 4, 3]
+    assert pc[0] == p0
+    assert pc[1] == p1
+    assert pc[2] == p2
+    assert pc[3] == p4
+    assert pc[4] == p3
