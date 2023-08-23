@@ -58,10 +58,10 @@ class GCODEStreamer:
                     volt = float(line.rstrip()[4:])
                     logging.debug(f"Set laser volt to {volt}")
                 elif "LASERON" in line:
-                    logging.debug(f"Laser ON")
+                    logging.debug("Laser ON")
                     self.psu.on()
                 elif "LASEROFF" in line:
-                    logging.debug(f"Laser OFF")
+                    logging.debug("Laser OFF")
                     self.psu.off()
                 else:
                     ok, error = self.send(line)
@@ -119,7 +119,7 @@ if __name__ == '__main__':
     """
     in order two draw a real 3d path (x, y, z) the hpgl parser needs to be rewritten
     also the hpgl parser/sender
-    
+
     AMP1.0 -> set amp (send to psu)
     VOLT1.0 -> set volt (send to psu)
     LASER1 -> set laser on (send to psu)

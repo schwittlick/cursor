@@ -1,4 +1,5 @@
 import math
+import random
 
 import arcade
 from shapely.geometry import JOIN_STYLE
@@ -12,25 +13,27 @@ from cursor.filter import MaxPointCountFilter, MinPointCountFilter
 from cursor.loader import Loader
 from cursor.path import Path
 from cursor.position import Position
-from cursor.renderer import GCodeRenderer, RealtimeRenderer
+from cursor.renderer.gcode import GCodeRenderer
+from cursor.renderer.realtime import RealtimeRenderer
 
 recordings = DataDirHandler().recordings()
 _loader = Loader(directory=recordings, limit_files=3)
 paths = _loader.all_paths()
 
-max_filter = MaxPointCountFilter(10)
+max_filter = MaxPointCountFilter(50)
 paths.filter(max_filter)
 
-min_filter = MinPointCountFilter(5)
+min_filter = MinPointCountFilter(15)
 paths.filter(min_filter)
 
 
 def fit_collection_to_photo_paper(coll: Collection) -> Collection:
-    out_bb = Paper.sizes[PaperSize.PHOTO_PAPER_240_178_LANDSCAPE]
-    coll.transform(BoundingBox(10, 10, out_bb[0] - 10, out_bb[1] - 10))
+    rotated = coll.rotate_into_bb(BoundingBox(0, 0, 250, 200))
+    out_bb = Paper.sizes[PaperSize.PHOTO_PAPER_250_200_LANDSCAPE]
+    rotated.transform(BoundingBox(10, 10, out_bb[0] - 10, out_bb[1] - 10))
     scale_fac = XYFactors.fac[PlotterType.DIY_PLOTTER]
-    coll.scale(scale_fac[0], scale_fac[1])
-    return coll
+    rotated.scale(scale_fac[0], scale_fac[1])
+    return rotated
 
 
 def grid() -> Collection:
@@ -49,23 +52,24 @@ def grid() -> Collection:
             p.properties["volt"] = 3.3
             c.add(p)
 
+    rotated = c.rotate_into_bb(BoundingBox(0, 0, 240, 178))
+
     out_bb = Paper.sizes[PaperSize.PHOTO_PAPER_240_178_LANDSCAPE]
-    c.transform(BoundingBox(10, 10, out_bb[0] - 10, out_bb[1] - 10))
+    rotated.transform(BoundingBox(10, 10, out_bb[0] - 10, out_bb[1] - 10))
     scale_fac = XYFactors.fac[PlotterType.DIY_PLOTTER]
-    c.scale(scale_fac[0], scale_fac[1])
-    return c
+    rotated.scale(scale_fac[0], scale_fac[1])
+    return rotated
 
 
-def para_lines(rr: RealtimeRenderer):
+def para_lines(rr: RealtimeRenderer) -> None:
     rr.clear_list()
-    # r = Path.from_tuple_list([(0, 0), (1, 0), (1, 1), (1, 2), (2, 2), (3, 2), (3, 3), (4, 3)])
     r = paths.random()
     r.transform(r.bb(), BoundingBox(0, 0, 1, 1))
 
     c = Collection()
     c.add(r)
 
-    line_count = 20
+    line_count = 10
     dist = 0.1
     for i in range(int(line_count)):
         _pa = r.parallel_offset(-dist * i, JOIN_STYLE.round, 0.00001)
@@ -77,7 +81,6 @@ def para_lines(rr: RealtimeRenderer):
 
     c = fit_collection_to_photo_paper(c)
     rr.add_collection(c, line_width=1)
-    # return c
 
 
 def save_laser_dots(rr: RealtimeRenderer):
@@ -86,13 +89,13 @@ def save_laser_dots(rr: RealtimeRenderer):
     for _path in rr.collection:
         for _point in _path:
             p = Path()
-            z = 4.0  # could be some variance here
-            delay = 0.5  # half a second is fine,  a little longer better
+            z = random.uniform(2, 4)  # 4.0  # could be some variance here
+            delay = 0.6  # half a second is fine,  a little longer better
             p.add_position(Position(_point.x, _point.y, properties={"z": z, "delay": delay}))
             p.add_position(Position(_point.x, _point.y, properties={"z": z}))
             p.properties["laser"] = True
             p.properties[
-                "amp"] = 0.02  # not much more than 0.02, otherwise too much scattered light, when pen kinda high
+                "amp"] = 0.05  # not much more than 0.02, otherwise too much scattered light, when pen kinda high. using 0.05 anyways
             p.properties["volt"] = 3.3
             c.add(p)
 
@@ -192,16 +195,8 @@ def experiment1():
 
 
 if __name__ == "__main__":
-    # c = cursor_sinelines()
-    # c = grid()
-
-    # c = para_lines()
-
-    # bb = c.bb()
-
-    rr = RealtimeRenderer(800, 550, f"para_lines")
+    rr = RealtimeRenderer(700, 550, "para_lines")
     rr.set_bg_color(arcade.color.WHITE)
     rr.add_cb(arcade.key.R, para_lines, False)
     rr.add_cb(arcade.key.S, save_laser_dots, False)
-    # rr.add_collection(c, line_width=2, color=arcade.color.BLACK)
     rr.run()

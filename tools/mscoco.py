@@ -6,7 +6,6 @@ from cursor.path import Path
 from cursor.position import Position
 from cursor.collection import Collection
 from cursor.bb import BoundingBox
-from cursor.renderer import RealtimeRenderer
 
 
 def output_cathegory(coco, cat):
@@ -19,7 +18,7 @@ def output_cathegory(coco, cat):
         annIds = coco.getAnnIds(imgIds=img["id"], catIds=catIds, iscrowd=None)
         anns = coco.loadAnns(annIds)
         for outline in anns:
-            if type(outline["segmentation"]) == list:
+            if isinstance(outline["segmentation"], list):
                 ol = outline["segmentation"]
                 out.append(ol[0])
 
