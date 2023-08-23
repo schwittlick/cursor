@@ -6,6 +6,7 @@ from cursor.path import Path
 from cursor.position import Position
 from cursor.collection import Collection
 from cursor.bb import BoundingBox
+from cursor.renderer.realtime import RealtimeRenderer
 
 
 def output_cathegory(coco, cat):

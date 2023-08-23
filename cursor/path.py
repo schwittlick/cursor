@@ -15,7 +15,6 @@ import wasabi
 from scipy import spatial
 from scipy import stats
 from shapely import union_all, Polygon
-from shapely.affinity import affine_transform
 from shapely.geometry import LineString, MultiLineString, JOIN_STYLE, Point
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import clip_by_rect
