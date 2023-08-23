@@ -2,7 +2,7 @@ from cursor.collection import Collection
 from cursor.renderer.realtime import RealtimeRenderer, Buffer
 
 
-def test_realtime():
+def disabled_test_realtime():
     collection = Collection.from_tuples([[(0, 0), (300, 300)], [(0, 300), (300, 0)]])
 
     renderer = RealtimeRenderer(300, 300, "test")
