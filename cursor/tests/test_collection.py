@@ -639,3 +639,22 @@ def test_sort_tsp():
     assert pc[2] == p2
     assert pc[3] == p4
     assert pc[4] == p3
+
+
+def test_fast_tsp():
+    p0 = Path.from_tuple_list([(1, 1), (2, 1), (5, 10)])
+    p1 = Path.from_tuple_list([(1, 10), (1, 5), (5, 2)])
+    p2 = Path.from_tuple_list([(10, 1), (10, 10), (20, 1)])
+    p3 = Path.from_tuple_list([(1, 5), (1, 2)])
+    p4 = Path.from_tuple_list([(5, 5), (5, 8), (0, 0)])
+
+    pc = Collection.from_path_list([p0, p1, p2, p3, p4])
+
+    order = pc.fast_tsp()
+
+    assert order == [0, 3, 4, 2, 1]
+    assert pc[0] == p0
+    assert pc[1] == p3
+    assert pc[2] == p4
+    assert pc[3] == p2
+    assert pc[4] == p1
