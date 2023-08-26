@@ -26,7 +26,7 @@ def add_random_path(renderer: RealtimeRenderer):
 
 def main():
     r = RealtimeRenderer(1920, 1080, SCREEN_TITLE)
-    r.set_bg_color(arcade.color.WHITE)
+    r.background(arcade.color.WHITE)
     r.add_cb(arcade.key.R, add_random_path, long_press=False)
 
     RealtimeRenderer.run()

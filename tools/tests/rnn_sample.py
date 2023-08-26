@@ -74,7 +74,7 @@ if __name__ == "__main__":
     p2 = transform_path(p2, p2.bb(), ((400, 0), (800, 400)))
 
     rr = RealtimeRenderer(800, 400, "projection")
-    rr.set_bg_color(arcade.color.WHITE)
+    rr.background(arcade.color.WHITE)
     rr.add_path(p)
     rr.add_path(p2)
     rr.run()

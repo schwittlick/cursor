@@ -231,9 +231,6 @@ def test_pathcollection_add2():
 
     assert len(pcol4) == 3
 
-    with pytest.raises(Exception):
-        _ = pcol1 + p1
-
 
 def test_pathcollection_get():
     pcol = Collection()
@@ -250,7 +247,7 @@ def test_pathcollection_get():
     assert p1 == p2
 
     with pytest.raises(IndexError):
-        pcol[1]
+        _ = pcol[1]
 
 
 def test_pathcollection_compare():

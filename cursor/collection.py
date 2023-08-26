@@ -52,19 +52,18 @@ class Collection:
     def __len__(self) -> int:
         return len(self.__paths)
 
-    def __add__(self, other: list | Collection) -> Collection:
-        if isinstance(other, Collection):
-            new_paths = self.__paths + other.get_all()
-            p = Collection()
-            p.__paths.extend(new_paths)
-            return p
-        if isinstance(other, list):
-            new_paths = self.__paths + other
-            p = Collection()
-            p.__paths.extend(new_paths)
-            return p
-        else:
-            raise Exception("You can only add another Collection or a list of paths")
+    def __add__(self, other: list[Path] | Collection) -> Collection:
+        match other:
+            case list():
+                new_paths = self.__paths + other
+                p = Collection()
+                p.__paths.extend(new_paths)
+                return p
+            case Collection():
+                new_paths = self.__paths + other.get_all()
+                p = Collection()
+                p.__paths.extend(new_paths)
+                return p
 
     def __repr__(self) -> str:
         tuples = [pa.as_tuple_list() for pa in self]
@@ -90,16 +89,17 @@ class Collection:
             yield p
 
     def __getitem__(self, item: int | slice) -> Collection | Path:
-        if isinstance(item, slice):
-            start, stop, step = item.indices(len(self))
-            _pc = Collection()
-            _pc.__paths = [self[i] for i in range(start, stop, step)]
-            return _pc
+        match item:
+            case int():
+                if len(self.__paths) < item + 1:
+                    raise IndexError(f"Index {item} too high. Maximum is {len(self.__paths)}")
 
-        if len(self.__paths) < item + 1:
-            raise IndexError(f"Index {item} too high. Maximum is {len(self.__paths)}")
-
-        return self.__paths[item]
+                return self.__paths[item]
+            case slice():
+                start, stop, step = item.indices(len(self))
+                _pc = Collection()
+                _pc.__paths = [self[i] for i in range(start, stop, step)]
+                return _pc
 
     def save_pickle(self, fname: str) -> None:
         fn = DataDirHandler().pickles() / fname
@@ -128,23 +128,22 @@ class Collection:
         return c
 
     def add(self, path: BoundingBox | Path | list[Path]) -> None:
-        if isinstance(path, Path):
-            if path.empty():
-                return
-            self.__paths.append(path)
-        if isinstance(path, list):
-            self.__paths.extend(path)
-        if isinstance(path, BoundingBox):
-            p = Path().from_tuple_list(
-                [
-                    (path.x, path.y),
-                    (path.x, path.y2),
-                    (path.x2, path.y2),
-                    (path.x2, path.y),
-                    (path.x, path.y),
-                ]
-            )
-            self.__paths.append(p)
+        match path:
+            case Path():
+                self.__paths.append(path)
+            case list():
+                self.__paths.extend(path)
+            case BoundingBox():
+                p = Path().from_tuple_list(
+                    [
+                        (path.x, path.y),
+                        (path.x, path.y2),
+                        (path.x2, path.y2),
+                        (path.x2, path.y),
+                        (path.x, path.y),
+                    ]
+                )
+                self.__paths.append(p)
 
     def pop(self, idx: int) -> Path:
         return self.__paths.pop(idx)

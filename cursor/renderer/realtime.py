@@ -131,7 +131,7 @@ class RealtimeRenderer(arcade.Window):
         self.manager.add(ui_slider)
         self.manager.add(ui_label)
 
-    def set_bg_color(self, col: arcade.color = None):
+    def background(self, col: arcade.color = None):
         if col:
             arcade.set_background_color(col)
         else:
@@ -149,7 +149,7 @@ class RealtimeRenderer(arcade.Window):
     def set_on_mouse_cb(self, cb: typing.Callable):
         self._on_mouse = cb
 
-    def add_cb(self, key: arcade.key, cb: typing.Callable, long_press: bool = True):
+    def add_cb(self, key: arcade.key, cb: typing.Callable, long_press: bool = False):
         self.cbs[key] = cb
         self.pressed[key] = False
         self.long_press[key] = long_press

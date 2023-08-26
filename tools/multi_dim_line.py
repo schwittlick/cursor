@@ -195,7 +195,7 @@ def experiment1():
 
 if __name__ == "__main__":
     rr = RealtimeRenderer(700, 550, "para_lines")
-    rr.set_bg_color(arcade.color.WHITE)
+    rr.background(arcade.color.WHITE)
     rr.add_cb(arcade.key.R, para_lines, False)
     rr.add_cb(arcade.key.S, save_laser_dots, False)
     rr.run()
