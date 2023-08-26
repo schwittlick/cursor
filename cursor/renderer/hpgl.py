@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pathlib
-import typing
 
 import wasabi
 
@@ -119,13 +118,13 @@ class HPGLRenderer:
         return _hpgl_string
 
     @staticmethod
-    def __get_pen_select(pen_select: typing.Optional[int] = None) -> int:
+    def __get_pen_select(pen_select: int | None) -> int:
         if pen_select is None:
             return 1
 
         return pen_select
 
-    def __pen_from_layer(self, layer: typing.Optional[str] = None) -> int:
+    def __pen_from_layer(self, layer: str | None = None) -> int:
         if self.__layer_pen_mapping is None:
             return 1
 
@@ -134,7 +133,7 @@ class HPGLRenderer:
 
         return self.__layer_pen_mapping[layer]
 
-    def __linetype_from_layer(self, linetype: typing.Optional[int] = None) -> str:
+    def __linetype_from_layer(self, linetype: int | None = None) -> str:
         _default_linetype = ""
         if self.__line_type_mapping is None:
             return _default_linetype
@@ -145,14 +144,14 @@ class HPGLRenderer:
         return self.__line_type_mapping[linetype]
 
     @staticmethod
-    def __get_velocity(velocity: typing.Optional[int] = None) -> int:
+    def __get_velocity(velocity: int | None = None) -> int:
         if velocity is None:
             return 110
 
         return velocity
 
     @staticmethod
-    def __get_pen_force(pen_force: typing.Optional[int] = None) -> int:
+    def __get_pen_force(pen_force: int | None = None) -> int:
         if pen_force is None:
             return 16
 

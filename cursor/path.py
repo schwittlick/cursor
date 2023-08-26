@@ -50,8 +50,8 @@ class Property(Enum):
 class Path:
     def __init__(
             self,
-            vertices: typing.Optional[typing.List[Position]] = None,
-            properties: typing.Optional[dict] = None
+            vertices: list[Position] | None = None,
+            properties: dict | None = None
     ):
         self._vertices = []
         self.properties = {Property.LAYER: "layer1"}
@@ -94,7 +94,7 @@ class Path:
     def __getitem__(self, item) -> Position:
         return self._vertices[item]
 
-    def as_tuple_list(self) -> typing.List[typing.Tuple[float, float]]:
+    def as_tuple_list(self) -> list[tuple[float, float]]:
         return [v.as_tuple() for v in self.vertices]
 
     def as_array(self) -> np.array:
@@ -106,7 +106,7 @@ class Path:
 
     @classmethod
     def from_tuple_list(
-            cls, tuple_list: typing.List[typing.Tuple[float, float]]
+            cls, tuple_list: list[tuple[float, float]]
     ) -> Path:
         return Path([Position.from_tuple(p) for p in tuple_list])
 
@@ -115,15 +115,15 @@ class Path:
         return hashlib.md5(str(self.vertices).encode("utf-8")).hexdigest()
 
     @property
-    def vertices(self) -> typing.List[Position]:
+    def vertices(self) -> list[Position]:
         return self._vertices
 
     @vertices.setter
-    def vertices(self, vertices: typing.List[Position]) -> None:
+    def vertices(self, vertices: list[Position]) -> None:
         self._vertices = vertices
 
     @property
-    def line_type(self) -> typing.Union[int, None]:
+    def line_type(self) -> int | None:
         if Property.LINETYPE not in self.properties.keys():
             return None
 
@@ -134,7 +134,7 @@ class Path:
         self.properties[Property.LINETYPE] = line_type
 
     @property
-    def layer(self) -> typing.Union[str, None]:
+    def layer(self) -> str | None:
         if Property.LAYER not in self.properties.keys():
             return None
 
@@ -145,7 +145,7 @@ class Path:
         self.properties[Property.LAYER] = layer
 
     @property
-    def pen_force(self) -> typing.Union[int, None]:
+    def pen_force(self) -> int | None:
         if Property.PEN_FORCE not in self.properties.keys():
             return None
 
@@ -156,7 +156,7 @@ class Path:
         self.properties[Property.PEN_FORCE] = pen_force
 
     @property
-    def pen_select(self) -> typing.Union[int, None]:
+    def pen_select(self) -> int | None:
         if Property.PEN_SELECT not in self.properties.keys():
             return None
 
@@ -167,7 +167,7 @@ class Path:
         self.properties[Property.PEN_SELECT] = pen_select
 
     @property
-    def velocity(self) -> typing.Union[int, None]:
+    def velocity(self) -> int | None:
         if Property.VELOCITY not in self.properties.keys():
             return None
 
@@ -178,7 +178,7 @@ class Path:
         self.properties[Property.VELOCITY] = pen_velocity
 
     @property
-    def laser_pwm(self) -> typing.Union[int, None]:
+    def laser_pwm(self) -> int | None:
         if Property.LASER_PWM not in self.properties.keys():
             return None
 
@@ -189,7 +189,7 @@ class Path:
         self.properties[Property.LASER_PWM] = laser_pwm
 
     @property
-    def laser_volt(self) -> typing.Union[float, None]:
+    def laser_volt(self) -> float | None:
         if Property.LASER_VOLT not in self.properties.keys():
             return None
 
@@ -200,7 +200,7 @@ class Path:
         self.properties[Property.LASER_VOLT] = laser_volt
 
     @property
-    def laser_amp(self) -> typing.Union[float, None]:
+    def laser_amp(self) -> float | None:
         if Property.LASER_AMP not in self.properties.keys():
             return None
 
@@ -211,7 +211,7 @@ class Path:
         self.properties[Property.LASER_AMP] = laser_amp
 
     @property
-    def laser_delay(self) -> typing.Union[float, None]:
+    def laser_delay(self) -> float | None:
         if Property.LASER_DELAY not in self.properties.keys():
             return None
 
@@ -222,7 +222,7 @@ class Path:
         self.properties[Property.LASER_DELAY] = laser_delay
 
     @property
-    def laser_onoff(self) -> typing.Union[bool, None]:
+    def laser_onoff(self) -> bool | None:
         if Property.LASER_ONOFF not in self.properties.keys():
             return None
 
@@ -233,7 +233,7 @@ class Path:
         self.properties[Property.LASER_ONOFF] = laser_onoff
 
     @property
-    def is_polygon(self) -> typing.Union[bool, None]:
+    def is_polygon(self) -> bool | None:
         if Property.IS_POLY not in self.properties.keys():
             return None
 
@@ -296,7 +296,7 @@ class Path:
         b = BoundingBox(minx, miny, maxx, maxy)
         return b
 
-    def aspect_ratio(self) -> typing.Union[float, math.nan]:
+    def aspect_ratio(self) -> float | math.nan:
         if len(self) < 2:
             return math.nan
 
@@ -330,7 +330,7 @@ class Path:
         [p.scale(x, y) for p in self.vertices]
 
     def rot(
-            self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)
+            self, angle: float, origin: tuple[float, float] = (0.0, 0.0)
     ) -> None:
         [p.rot(angle, origin) for p in self.vertices]
 
@@ -396,11 +396,7 @@ class Path:
 
         self.translate(bb.x, bb.y)
 
-    def morph(
-            self,
-            start: typing.Union[Position, typing.Tuple[float, float]],
-            end: typing.Union[Position, typing.Tuple[float, float]],
-    ) -> Path:
+    def morph(self, start: Position | tuple[float, float], end: Position | tuple[float, float]) -> Path:
         if isinstance(start, Position) and isinstance(end, Position):
             start = (start.x, start.y)
             end = (end.x, end.y)
@@ -462,7 +458,7 @@ class Path:
 
         return path
 
-    def intersect(self, newpath: Path) -> typing.Tuple[bool, float, float]:
+    def intersect(self, newpath: Path) -> tuple[bool, float, float]:
         for p1 in range(len(newpath) - 1):
             for p2 in range(len(self) - 1):
                 line1Start = newpath[p1]
@@ -511,7 +507,7 @@ class Path:
 
         return path
 
-    def direction_changes(self, mapped: bool = False) -> typing.List[float]:
+    def direction_changes(self, mapped: bool = False) -> list[float]:
         """
         returns a list of radial angles from each point
         mapped: default is output values between -360° and 360°
@@ -643,7 +639,7 @@ class Path:
     def variation_y(self):
         return stats.variation([v.y for v in self.vertices], ddof=1)
 
-    def centeroid(self) -> typing.Tuple[float, float]:
+    def centeroid(self) -> tuple[float, float]:
         arr = self.as_array()
         length = arr.shape[0]
         sum_x = np.sum(arr[:, 0])
@@ -736,7 +732,7 @@ class Path:
 
         return out_path
 
-    def offset(self, offset: float = 1.0) -> typing.Optional[Path]:
+    def offset(self, offset: float = 1.0) -> Path | None:
         """
         copied from https://github.com/markroland/path-helper/blob/main/src/PathHelper.js <3
         """
@@ -763,14 +759,14 @@ class Path:
 
         return offset_path
 
-    def parallel_offset(self, dist: float, join_style=JOIN_STYLE.mitre, mitre_limit=1.0) -> typing.List[Path]:
+    def parallel_offset(self, dist: float, join_style=JOIN_STYLE.mitre, mitre_limit=1.0) -> list[Path]:
         def iter_and_return_path(offset: BaseGeometry) -> Path:
             pa = Path()
             for x, y in offset.coords:
                 pa.add(x, y)
             return pa
 
-        def add_if(pa: Path, out: typing.List[Path]):
+        def add_if(pa: Path, out: list[Path]):
             if len(pa) > 2:
                 pa.simplify(0.01)
                 out.append(pa)
@@ -949,7 +945,7 @@ class Path:
         y = y1 + ua * (y2 - y1)
         return (x, y)
 
-    def clip(self, bb: BoundingBox) -> typing.Optional[typing.List[Path]]:
+    def clip(self, bb: BoundingBox) -> list[Path] | None:
         any_inside = False
         for v in self.vertices:
             if v.inside(bb):
@@ -960,8 +956,8 @@ class Path:
             return
 
         def get_intersection(
-                segment: Path, paths: typing.List[typing.Tuple[float, float, float, float]]
-        ) -> typing.Tuple[float, float]:
+                segment: Path, paths: list[tuple[float, float, float, float]]
+        ) -> tuple[float, float]:
             for p in paths:
                 tup1 = segment[0].as_tuple()
                 tup2 = segment[1].as_tuple()
@@ -1009,7 +1005,7 @@ class Path:
             new_paths.append(current_path)
         return new_paths
 
-    def split_by_color(self) -> typing.List[Path]:
+    def split_by_color(self) -> list[Path]:
         paths_list = []
         current = Path()
         current.add_position(self.vertices[0])
@@ -1026,14 +1022,14 @@ class Path:
         paths_list.append(current)
         return paths_list
 
-    def clip_shapely(self, bb: BoundingBox) -> typing.List[Path]:
+    def clip_shapely(self, bb: BoundingBox) -> list[Path]:
         def iter_and_return_path(offset: BaseGeometry) -> Path:
             pa = Path()
             for x, y in offset.coords:
                 pa.add(x, y)
             return pa
 
-        def add_if(pa: Path, out: typing.List[Path]):
+        def add_if(pa: Path, out: list[Path]):
             if len(pa) > 2:
                 pa.simplify(0.01)
                 out.append(pa)

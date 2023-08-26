@@ -1,6 +1,5 @@
 import math
 import pathlib
-import typing
 import wasabi
 
 from cursor.collection import Collection
@@ -50,7 +49,7 @@ class HPGLParser:
 
         self.__init()
 
-    def parse(self, hpgl: typing.Union[pathlib.Path, str]) -> Collection:
+    def parse(self, hpgl: pathlib.Path | str) -> Collection:
         if type(hpgl) is str:
             hpgl_data = hpgl
         else:

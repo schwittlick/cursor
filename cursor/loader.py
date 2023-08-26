@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from cursor.data import DateHandler
 from cursor.path import Path
 from cursor.position import Position
@@ -5,7 +7,6 @@ from cursor.collection import Collection
 from cursor.timer import Timer
 
 import wasabi
-import typing
 import pathlib
 import json
 import base64
@@ -107,7 +108,7 @@ class Loader:
     def __init__(
             self,
             directory: pathlib.Path = None,
-            limit_files: typing.Union[int, list[str]] = None,
+            limit_files: int | list[str] | None = None,
             load_keys: bool = False,
     ):
         self._recordings = []
@@ -121,7 +122,7 @@ class Loader:
     def load_all(
             self,
             directory: pathlib.Path,
-            limit_files: typing.Union[int, list[str]] = None,
+            limit_files: int | list[str] | None = None,
             load_keys: bool = False,
     ) -> None:
         t = Timer()

@@ -9,7 +9,6 @@ The script will print a list of available plotters, it's serial ports and model 
 """
 
 import threading
-import typing
 
 import serial.tools.list_ports
 import wasabi
@@ -21,8 +20,8 @@ logger = wasabi.Printer(pretty=True, no_print=False)
 
 def async_discover(serial_port,
                    baudrate: int = 9600,
-                   stopbits: typing.Tuple = serial.STOPBITS_ONE,
-                   bytesize: typing.Tuple = serial.EIGHTBITS,
+                   stopbits: tuple = serial.STOPBITS_ONE,
+                   bytesize: tuple = serial.EIGHTBITS,
                    parity: str = serial.PARITY_NONE,
                    xonxoff: bool = False,
                    timeout: float = 5):

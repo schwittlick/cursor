@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import random
 import time
-import typing
 
 import serial
 
@@ -22,7 +23,7 @@ class PSU:
         self.__baudrate = 115200
         self.__port = port
 
-    def __send(self, prefix: str, value: typing.Union[int, float] = None) -> None:
+    def __send(self, prefix: str, value: int | float = None) -> None:
         if not self.__serial.is_open:
             raise Exception("Serial port not connected")
 

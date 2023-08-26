@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 import math
-import typing
 
 import numpy as np
 
@@ -15,7 +14,7 @@ class Position:
             x: float = 0.0,
             y: float = 0.0,
             timestamp: int = 0,
-            properties: typing.Union[None, dict] = None
+            properties: dict | None = None
     ):
         if properties is None:
             properties = {}
@@ -24,7 +23,7 @@ class Position:
         self.properties = properties
 
     @classmethod
-    def from_tuple(cls, xy_tuple: typing.Tuple[float, float]) -> Position:
+    def from_tuple(cls, xy_tuple: tuple[float, float]) -> Position:
         return cls(xy_tuple[0], xy_tuple[1])
 
     @property
@@ -57,7 +56,7 @@ class Position:
             copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(self.timestamp)
         )
 
-    def distance(self, t: typing.Union[Position, np.ndarray, tuple[float, float]]) -> float:
+    def distance(self, t: Position | np.ndarray | tuple[float, float]) -> float:
         func = np.linalg.norm
         if isinstance(t, Position):
             return func(self.as_array() - t.as_array())

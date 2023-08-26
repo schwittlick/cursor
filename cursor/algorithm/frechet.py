@@ -16,7 +16,7 @@ def parallel_function(paths, out_array, idx, reference_path):
     out_array[idx] = ll
 
 
-def frechet_multiprocessing(paths: typing.List, reference_path):
+def frechet_multiprocessing(paths: list, reference_path):
     cpus = 4  # os.cpu_count()
 
     def chunks(a, n):

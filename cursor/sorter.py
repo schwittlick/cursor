@@ -2,7 +2,6 @@ from cursor.algorithm import frechet
 from cursor.path import Path
 from cursor.timer import Timer
 
-import typing
 from enum import Enum, auto
 from operator import itemgetter
 
@@ -42,9 +41,9 @@ class Sorter:
         self.__param = v
 
     def sort(
-        self,
-        paths: typing.List[Path],
-        reference_path: Path = None,
+            self,
+            paths: list[Path],
+            reference_path: Path = None,
     ):
         t = Timer()
         t.start()
@@ -78,8 +77,8 @@ class Sorter:
         elif self.__param is SortParameter.POINT_COUNT:
             paths.sort(key=lambda x: len(x), reverse=self.__reverse)
         elif (
-            self.__param is SortParameter.FRECHET_DISTANCE
-            and reference_path is not None
+                self.__param is SortParameter.FRECHET_DISTANCE
+                and reference_path is not None
         ):
             raise Exception("Can't sort by Frechet Distance in-place. (yet)")
         elif self.__param is SortParameter.VARIATION_X:
@@ -93,9 +92,9 @@ class Sorter:
         t.print_elapsed(f"Sorted via {__class__.__name__} took ")
 
     def sorted(
-        self,
-        paths: typing.List[Path],
-        reference_path: Path = None,
+            self,
+            paths: list[Path],
+            reference_path: Path = None,
     ):
         t = Timer()
         t.start()
@@ -146,8 +145,8 @@ class Sorter:
         elif self.__param is SortParameter.POINT_COUNT:
             sorted_list = sorted(paths, key=lambda x: len(x), reverse=self.__reverse)
         elif (
-            self.__param is SortParameter.FRECHET_DISTANCE
-            and reference_path is not None
+                self.__param is SortParameter.FRECHET_DISTANCE
+                and reference_path is not None
         ):
             use_multiprocessing = False
             # don't use multiprocessing
