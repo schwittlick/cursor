@@ -67,7 +67,7 @@ if __name__ == "__main__":
         c.add(_pa)
 
     rr = RealtimeRenderer(dimensions[0] * 4, dimensions[1] * 4, "spline")
-    rr.set_bg_color(arcade.color.WHITE)
+    rr.background(arcade.color.WHITE)
     rr.add_collection(c, line_width=2, color=arcade.color.GRAY)
 
     rr.add_cb(arcade.key.H, export_hpgl, False)
