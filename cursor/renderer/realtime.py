@@ -71,7 +71,7 @@ class RealtimeRenderer(arcade.Window):
 
         self.shapes = arcade.ShapeElementList()
         self.collection = Collection()
-        self.points = []
+        self._points = []
         self.clear_list()
 
         self.cbs = {}
@@ -85,12 +85,16 @@ class RealtimeRenderer(arcade.Window):
         self.add_cb(arcade.key.F, self.enter_fullscreen, False)
         self.add_cb(arcade.key.G, self.toggle_gui, False)
 
-        self.background = None
+        self._background = None
 
         self.manager = UIManager()
         self.manager.enable()
 
         self.camera = arcade.Camera(width, height)
+
+    @property
+    def points(self) -> list[Position]:
+        return self._points
 
     def screenshot(self, rr: RealtimeRenderer):
         folder = DataDirHandler().jpg(f"{self.title}")
@@ -114,10 +118,10 @@ class RealtimeRenderer(arcade.Window):
         self._draw_gui = not self._draw_gui
 
     def set_bg(self, p: pathlib.Path):
-        self.background = arcade.load_texture(p)
+        self._background = arcade.load_texture(p)
 
     def add_slider(self, cb_func: typing.Callable[[float], None], name: str, value: int, x: int = 50, y: int = 50,
-                   text_color=arcade.color.BLACK):
+                   text_color=arcade.color.GRAY):
         ui_slider = UISlider(x=x, y=y, value=value, width=300, height=30)
         ui_label = UILabel(x=x + 300, y=y, text=f"{name}: {value}", text_color=text_color)
 
@@ -157,12 +161,12 @@ class RealtimeRenderer(arcade.Window):
     def clear_list(self):
         self.shapes = arcade.ShapeElementList()
         self.collection = Collection()
-        self.points.clear()
+        self._points.clear()
 
     def add_point(self, po: Position, width: int = 5, color: arcade.color = None):
         if not color:
             color = random.choice(self.colors)[1]
-        self.points.append(po)
+        self._points.append(po)
         point = arcade.create_ellipse(po.x, po.y, width, width, color)
         self.shapes.append(point)
 
@@ -197,8 +201,8 @@ class RealtimeRenderer(arcade.Window):
 
         self.camera.use()
 
-        if self.background:
-            arcade.draw_lrwh_rectangle_textured(0, 0, self.width, self.height, self.background)
+        if self._background:
+            arcade.draw_lrwh_rectangle_textured(0, 0, self.width, self.height, self._background)
 
         self.shapes.draw()
         if self._draw_gui:

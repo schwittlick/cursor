@@ -4,11 +4,12 @@ import copy
 import typing
 
 from cursor.collection import Collection
+from cursor.path import Path
 from cursor.position import Position
 
 
 class PathIterator:
-    def __init__(self, paths: Collection):
+    def __init__(self, paths: Collection | list[Path]):
         self.paths = paths
 
     def points(self) -> typing.Iterator[Position]:

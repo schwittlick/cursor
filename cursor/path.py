@@ -105,10 +105,16 @@ class Path:
         return pd.DataFrame(arr, columns=["x", "y"])
 
     @classmethod
-    def from_tuple_list(
-            cls, tuple_list: list[tuple[float, float]]
-    ) -> Path:
+    def from_tuple_list(cls, tuple_list: list[tuple[float, float]]
+                        ) -> Path:
         return Path([Position.from_tuple(p) for p in tuple_list])
+
+    @classmethod
+    def from_list(cls, positions: list[Position]) -> Path:
+        _pa = Path()
+        for pa in positions:
+            _pa.add_position(pa)
+        return _pa
 
     @property
     def hash(self) -> str:

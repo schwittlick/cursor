@@ -10,6 +10,7 @@ import random
 import time
 from functools import reduce
 
+import fast_tsp
 import numpy as np
 import pandas as pd
 import pytz
@@ -46,7 +47,7 @@ class Collection:
             self._timestamp = utc_timestamp
 
     @property
-    def paths(self):
+    def paths(self) -> list[Path]:
         return self.__paths
 
     def __len__(self) -> int:
@@ -557,6 +558,31 @@ class Collection:
         )
 
         self.translate(diff[0], diff[1])
+
+    def fast_tsp(self, plot_preview=False):
+        start_positions = np.array([pa.start_pos().as_tuple() for pa in self])
+        end_positions = np.array([pa.end_pos().as_tuple() for pa in self])
+
+        dists = spatial.distance.cdist(end_positions, start_positions, metric='euclidean')
+
+        order = fast_tsp.find_tour(np.int_(dists).tolist(), duration_seconds=10)
+
+        if plot_preview:
+            fig, ax = plt.subplots(1, 1)
+            best_points_coordinate = start_positions[order, :]
+            ax.plot(best_points_coordinate[:, 0], best_points_coordinate[:, 1], '.-r')
+            plt.show()
+
+        final_order = []
+        idx = order.index(0)
+        for i in range(idx, len(order)):
+            final_order.append(order[i])
+        for i in range(0, idx):
+            final_order.append(order[i])
+
+        self.paths[:] = [self.paths[i] for i in final_order]
+
+        return final_order
 
     def sort_tsp(self, iters=3000, population_size=50, mutation_probability=0.1, plot_preview=False) -> list[int]:
         start_positions = np.array([pa.start_pos().as_tuple() for pa in self])
