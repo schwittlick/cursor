@@ -9,7 +9,7 @@ import pymsgbox
 import wasabi
 from arcade.experimental import RenderTargetTexture
 from arcade.experimental.uislider import UISlider
-from arcade.gui import UIManager, UIOnChangeEvent, UIAnchorWidget
+from arcade.gui import UIManager, UIOnChangeEvent, UIAnchorWidget, UILabel
 
 from cursor.collection import Collection
 from cursor.data import DataDirHandler, DateHandler
@@ -116,17 +116,20 @@ class RealtimeRenderer(arcade.Window):
     def set_bg(self, p: pathlib.Path):
         self.background = arcade.load_texture(p)
 
-    def add_slider(self, cb_func: typing.Callable[[float], None], x=50, y=50):
-        ui_slider = UISlider(x=x, y=y, value=50, width=300, height=20)
+    def add_slider(self, cb_func: typing.Callable[[float], None], name: str, value: int, x: int = 50, y: int = 50,
+                   text_color=arcade.color.BLACK):
+        ui_slider = UISlider(x=x, y=y, value=value, width=300, height=30)
+        ui_label = UILabel(x=x + 300, y=y, text=f"{name}: {value}", text_color=text_color)
 
         @ui_slider.event()
         def on_change(event: UIOnChangeEvent):
-            # print(ui_slider.value)
             cb_func(ui_slider.value)
-            # label.text = f"{ui_slider.value:02.0f}"
-            # label.fit_content()
+            ui_label.text = f"{name}: {ui_slider.value:02.0f}"
+            ui_label.fit_content()
 
-        self.manager.add(UIAnchorWidget(child=ui_slider, align_y=y))
+        # self.manager.add(UIAnchorWidget(child=ui_slider, align_y=y))
+        self.manager.add(ui_slider)
+        self.manager.add(ui_label)
 
     def set_bg_color(self, col: arcade.color = None):
         if col:

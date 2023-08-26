@@ -18,7 +18,7 @@ class PathIterator:
 
     def connections(
             self,
-    ) -> typing.Iterator[typing.Tuple[Position, Position]]:
+    ) -> typing.Iterator[tuple[Position, Position]]:
         prev = None
 
         for p in self.paths:

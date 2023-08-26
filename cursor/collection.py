@@ -8,7 +8,6 @@ import operator
 import pickle
 import random
 import time
-import typing
 from functools import reduce
 
 import numpy as np
@@ -35,9 +34,9 @@ log = wasabi.Printer()
 
 class Collection:
     def __init__(
-            self, timestamp: typing.Union[float, None] = None, name: str = "noname"
+            self, timestamp: float | None = None, name: str = "noname"
     ):
-        self.__paths: typing.List[Path] = []
+        self.__paths: list[Path] = []
         self.__name = name
         if timestamp:
             self._timestamp = timestamp
@@ -53,7 +52,7 @@ class Collection:
     def __len__(self) -> int:
         return len(self.__paths)
 
-    def __add__(self, other: typing.Union[list, Collection]) -> Collection:
+    def __add__(self, other: list | Collection) -> Collection:
         if isinstance(other, Collection):
             new_paths = self.__paths + other.get_all()
             p = Collection()
@@ -90,9 +89,7 @@ class Collection:
         for p in self.__paths:
             yield p
 
-    def __getitem__(
-            self, item: typing.Union[int, slice]
-    ) -> typing.Union[Collection, Path]:
+    def __getitem__(self, item: int | slice) -> Collection | Path:
         if isinstance(item, slice):
             start, stop, step = item.indices(len(self))
             _pc = Collection()
@@ -130,7 +127,7 @@ class Collection:
             c.add(p)
         return c
 
-    def add(self, path: typing.Union[BoundingBox, Path, typing.List[Path]]) -> None:
+    def add(self, path: BoundingBox | Path | list[Path]) -> None:
         if isinstance(path, Path):
             if path.empty():
                 return
@@ -246,7 +243,7 @@ class Collection:
         p.__paths.extend(copy.deepcopy(self.__paths))
         return p
 
-    def get_all(self) -> typing.List[Path]:
+    def get_all(self) -> list[Path]:
         return self.__paths
 
     def random(self) -> Path:
@@ -260,7 +257,7 @@ class Collection:
 
     def sorted(
             self, pathsorter: Sorter, reference_path: Path = None
-    ) -> typing.List[Path]:
+    ) -> list[Path]:
         if isinstance(pathsorter, Sorter):
             return pathsorter.sorted(self.__paths, reference_path)
         else:
@@ -291,7 +288,7 @@ class Collection:
                     return False
         return True
 
-    def get_all_line_types(self) -> typing.List[int]:
+    def get_all_line_types(self) -> list[int]:
         types = []
         for p in self:
             if p.line_type not in types:
@@ -331,7 +328,7 @@ class Collection:
 
         return typed_pathcollections
 
-    def layer_names(self) -> typing.List[str]:
+    def layer_names(self) -> list[str]:
         layers = []
         for p in self:
             if p.layer not in layers:
@@ -363,7 +360,7 @@ class Collection:
             log.fail("SHIT")
         return bb
 
-    def min(self) -> typing.Tuple[float, float]:
+    def min(self) -> tuple[float, float]:
         if self.empty():
             return 0, 0
 
@@ -372,7 +369,7 @@ class Collection:
         miny = min(all_chained, key=lambda pos: pos.y).y
         return minx, miny
 
-    def max(self) -> typing.Tuple[float, float]:
+    def max(self) -> tuple[float, float]:
         if self.empty():
             return 0, 0
 

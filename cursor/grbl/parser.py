@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import logging
 import pathlib
 import re
-import typing
 
 from cursor.collection import Collection
 from cursor.path import Path
@@ -11,7 +12,7 @@ PEN_DOWN = 4.5
 PEN_UP = 0.0
 
 
-def parse_xyz(gcode: str) -> typing.Union[tuple[float, float, float], None]:
+def parse_xyz(gcode: str) -> tuple[float, float, float] | None:
     pattern = r'X(-?\d+\.\d+)\s+Y(-?\d+\.\d+)\s+Z(-?\d+\.\d+)'
     matches = re.search(pattern, gcode)
     if matches:
@@ -22,7 +23,7 @@ def parse_xyz(gcode: str) -> typing.Union[tuple[float, float, float], None]:
     return None
 
 
-def parse_xy(gcode: str) -> typing.Union[tuple[float, float], None]:
+def parse_xy(gcode: str) -> tuple[float, float] | None:
     pattern = r'X(-?\d+\.\d+)\s+Y(-?\d+\.\d+)'
     matches = re.search(pattern, gcode)
     if matches:
@@ -32,7 +33,7 @@ def parse_xy(gcode: str) -> typing.Union[tuple[float, float], None]:
     return None
 
 
-def parse_z(gcode: str) -> typing.Union[float, None]:
+def parse_z(gcode: str) -> float | None:
     pattern = r'Z(-?\d+\.\d+)'
     matches = re.search(pattern, gcode)
     if matches:
@@ -57,7 +58,7 @@ class GCODEParser:
         """
         self.paths = Collection()
 
-    def parse(self, gcode: typing.Union[pathlib.Path, list[str]]) -> Collection:
+    def parse(self, gcode: pathlib.Path | list[str]) -> Collection:
         if type(gcode) is list:
             gcode_cmds = gcode
         else:
