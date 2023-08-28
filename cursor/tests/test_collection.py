@@ -207,7 +207,7 @@ def test_pathcollection_add():
 
     pcol.add(p1)
 
-    assert pcol.empty() is True
+    assert not pcol.empty()
 
 
 def test_pathcollection_add2():
