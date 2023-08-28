@@ -58,12 +58,25 @@ class Position:
 
     def distance(self, t: Position | np.ndarray | tuple[float, float]) -> float:
         func = np.linalg.norm
-        if isinstance(t, Position):
-            return func(self.as_array() - t.as_array())
-        elif isinstance(t, np.ndarray):
-            return func(self.as_array() - t)
-        elif isinstance(t, tuple):
-            return func(self.as_array() - np.asarray(t))
+        match t:
+            case Position():
+                return func(self.as_array() - t.as_array())
+            case np.ndarray():
+                return func(self.as_array() - t)
+            case tuple():
+                return func(self.as_array() - np.asarray(t))
+
+    def distance_squared(self, t: Position | np.ndarray | tuple[float, float]) -> float:
+        def squared_euclidean_distance(p1: Position, p2: Position) -> float:
+            dx = p1.x - p2.x
+            dy = p1.y - p2.y
+            return dx * dx + dy * dy
+
+        match t:
+            case Position():
+                return squared_euclidean_distance(self, t)
+            case tuple():
+                return squared_euclidean_distance(self, Position.from_tuple(t))
 
     def rot(
             self, angle: float, origin: tuple[float, float] = (0.0, 0.0)

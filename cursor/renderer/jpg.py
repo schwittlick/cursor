@@ -1,8 +1,7 @@
 from __future__ import annotations
 
+import logging
 import pathlib
-
-import wasabi
 from PIL import Image, ImageDraw
 
 from cursor.bb import BoundingBox
@@ -10,8 +9,6 @@ from cursor.collection import Collection
 from cursor.path import Path
 from cursor.position import Position
 from cursor.renderer import PathIterator
-
-log = wasabi.Printer()
 
 
 class JpegRenderer:
@@ -49,7 +46,7 @@ class JpegRenderer:
         if paths:
             self.add(paths)
 
-        log.good(f"Creating image with size=({self.image_width}, {self.image_height})")
+        logging.info(f"Creating image with size=({self.image_width}, {self.image_height})")
         assert self.image_width < 21000 and self.image_height < 21000, "keep resolution lower"
 
         self.img = Image.new("RGB", (self.image_width, self.image_height), "white")
@@ -81,7 +78,8 @@ class JpegRenderer:
         fname = self.save_path / (filename + ".jpg")
         self.img = self.img.rotate(90, expand=True)
         self.img.save(fname, "JPEG")
-        log.good(f"Finished saving {fname}")
+
+        logging.info(f"Finished saving {fname}")
 
     def image(self) -> Image:
         return self.img

@@ -3,13 +3,15 @@ import inspect
 import cv2
 import numpy as np
 import pynput
-import wasabi
+import logging
+from datetime import datetime
+
 from shapely import LineString
 from shapely.affinity import affine_transform
 
 from cursor.position import Position
 
-log = wasabi.Printer()
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 
 
 def mix(begin: float, end: float, perc: float):
@@ -207,13 +209,16 @@ def current_source(frame):
     return inspect.getsource(inspect.getmodule(frame))
 
 
-"""
-ty lars wander
-https://larswander.com/writing/centering-and-scaling/
-"""
+def timestamp(format: str = "%Y%m%d_%H%M%S") -> str:
+    now = datetime.now()
+    return now.strftime(format)
 
 
 def transformFn(stl, sbr, dtl, dbr):
+    """
+    ty lars wander
+    https://larswander.com/writing/centering-and-scaling/
+    """
     stlx, stly = stl
     sbrx, sbry = sbr
     dtlx, dtly = dtl
