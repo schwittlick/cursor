@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
+
 from PIL import Image, ImageDraw
 
 from cursor.bb import BoundingBox
@@ -35,19 +36,24 @@ class JpegRenderer:
                 self.positions.append(input)
 
     def render(
-            self,
-            paths: Collection | list[Path] | Path | None = None,
-            scale: float = 1.0,
-            frame: bool = False,
-            thickness: int = 1,
+        self,
+        paths: Collection | list[Path] | Path | None = None,
+        scale: float = 1.0,
+        frame: bool = False,
+        thickness: int = 1,
+        color: str = "black",
     ) -> None:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
         if paths:
             self.add(paths)
 
-        logging.info(f"Creating image with size=({self.image_width}, {self.image_height})")
-        assert self.image_width < 21000 and self.image_height < 21000, "keep resolution lower"
+        logging.info(
+            f"Creating image with size=({self.image_width}, {self.image_height})"
+        )
+        assert (
+            self.image_width < 21000 and self.image_height < 21000
+        ), "keep resolution lower"
 
         self.img = Image.new("RGB", (self.image_width, self.image_height), "white")
         self.img_draw = ImageDraw.ImageDraw(self.img)
@@ -59,17 +65,18 @@ class JpegRenderer:
             end = conn[1]
 
             self.img_draw.line(
-                xy=(
-                    start.x * scale, self.image_height - start.y * scale, end.x * scale,
-                    self.image_height - end.y * scale),
-                fill="black",
+                xy=(start.x * scale, start.y * scale, end.x * scale, end.y * scale),
+                fill=color,
                 width=thickness,
             )
 
         for point in self.positions:
             rad = point.properties["radius"]
-            self.img_draw.ellipse(xy=[(point.x - rad, point.y - rad), (point.x + rad, point.y + rad)],
-                                  fill="black", width=rad)
+            self.img_draw.ellipse(
+                xy=[(point.x - rad, point.y - rad), (point.x + rad, point.y + rad)],
+                fill="black",
+                width=rad,
+            )
 
         if frame:
             self.render_frame()
