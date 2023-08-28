@@ -18,7 +18,7 @@ def add_random_path(renderer: RealtimeRenderer):
     p1 = all_paths.random()
     p1.transform(p1.bb(), BoundingBox(0, 0, 1920, 1080))
 
-    p2 = p1.rotate_into_bb(BoundingBox(0, 0, 1920, 1080))
+    p2 = p1.rotated_into_bb(BoundingBox(0, 0, 1920, 1080))
 
     renderer.add_path(p1, line_width=5, color=arcade.color.BLACK)
     renderer.add_path(p2, line_width=5, color=arcade.color.RED)
