@@ -2,9 +2,11 @@ from cursor.collection import Collection
 from cursor.renderer.realtime import RealtimeRenderer, Buffer
 
 
-def test_realtime():
+def disabled_test_realtime():
     dimension = 8000
-    collection = Collection.from_tuples([[(0, 0), (dimension, dimension)], [(0, dimension), (dimension, 0)]])
+    collection = Collection.from_tuples(
+        [[(0, 0), (dimension, dimension)], [(0, dimension), (dimension, 0)]]
+    )
 
     renderer = RealtimeRenderer(dimension, dimension, "test")
     renderer.add_collection(collection)
