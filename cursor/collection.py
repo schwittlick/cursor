@@ -4,10 +4,12 @@ import copy
 import datetime
 import hashlib
 import itertools
+import math
 import operator
 import pickle
 import random
 import time
+import logging
 from functools import reduce
 
 import fast_tsp
@@ -15,7 +17,6 @@ import numpy as np
 import pandas as pd
 import pytz
 import shapely
-import wasabi
 from matplotlib import pyplot as plt
 from shapely import LineString, Polygon, intersection_all
 from skimage.transform import estimate_transform
@@ -29,8 +30,9 @@ from cursor.misc import apply_matrix
 from cursor.path import Path
 from cursor.position import Position
 from cursor.sorter import Sorter
+from cursor.timer import Timer
 
-log = wasabi.Printer()
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 
 
 class Collection:
@@ -106,7 +108,7 @@ class Collection:
         fn = DataDirHandler().pickles() / fname
         file_to_store = open(fn.as_posix(), "wb")
         pickle.dump(self, file_to_store)
-        log.info(f"Saved {fn.as_posix()}")
+        logging.info(f"Saved {fn.as_posix()}")
 
     @staticmethod
     def from_pickle(fname: str) -> Collection:
@@ -175,7 +177,7 @@ class Collection:
         len_before = len(self)
         self.__paths = [path for path in self.__paths if len(path) > 1]
 
-        log.good(
+        logging.debug(
             f"PathCollection::clean: reduced path count from {len_before} to {len(self)}"
         )
 
@@ -188,11 +190,11 @@ class Collection:
 
         return pa
 
-    def rotate_into_bb(self, target_bb: BoundingBox) -> Collection:
+    def rotate_into_bb(self, target_bb: BoundingBox) -> None:
         merged_into_path = self.merge()
         if merged_into_path.is_1_dimensional():
-            log.warn("Didn't rotate, bc path is 1-dimensional.")
-            return self
+            logging.warning("Didn't rotate, bc path is 1-dimensional.")
+            return
 
         line = LineString(merged_into_path.as_tuple_list())
         rect = line.minimum_rotated_rectangle
@@ -201,20 +203,13 @@ class Collection:
 
         src = np.array(rect.exterior.coords)
         dst = np.array(target_poly.exterior.coords)
-        matrix = estimate_transform('similarity', src, dst).params
+        matrix = estimate_transform('euclidean', src, dst).params
         matrix = np.append(matrix, [[0, 0, 0]], axis=0).flatten()
 
-        coll = Collection()
         for path in self:
             tup = apply_matrix(path.as_tuple_list(), matrix)
-            pa = Path()
             for i, t in enumerate(tup):
-                newpos = Position.from_tuple(t)
-                newpos.properties = path[i].properties
-                pa.add_position(newpos)
-            pa.properties = path.properties
-            coll.add(pa)
-        return coll
+                path.vertices[i] = Position.from_tuple(t)
 
     def reverse(self) -> None:
         self.__paths.reverse()
@@ -248,6 +243,9 @@ class Collection:
 
     def random(self) -> Path:
         return random.choice(self.__paths)
+
+    def random_pop(self) -> Path:
+        return self.paths.pop(int(random.randint(0, len(self) - 1)))
 
     def sort(self, pathsorter: Sorter, reference_path: Path = None) -> None:
         if isinstance(pathsorter, Sorter):
@@ -357,7 +355,7 @@ class Collection:
         ma = self.max()
         bb = BoundingBox(mi[0], mi[1], ma[0], ma[1])
         if bb.x is np.nan or bb.y is np.nan or bb.x2 is np.nan or bb.y2 is np.nan:
-            log.fail("SHIT")
+            logging.error("SHIT")
         return bb
 
     def min(self) -> tuple[float, float]:
@@ -404,7 +402,7 @@ class Collection:
         for p in self:
             p.simplify(e)
 
-        log.info(f"C::simplify from {count} to {self.point_count()} points.")
+        logging.debug(f"C::simplify from {count} to {self.point_count()} points.")
 
     def split_by_color(self):
         new_paths = []
@@ -412,9 +410,6 @@ class Collection:
             new_paths.extend(p.split_by_color())
 
         self.__paths = new_paths
-
-    def log(self, str) -> None:
-        log.good(f"{self.__class__.__name__}: {str}")
 
     def move_to_origin(self):
         """
@@ -470,7 +465,8 @@ class Collection:
         _bb = self.bb()
 
         # move into positive area
-        if _bb.x != 0.0 and _bb.y != 0.0:
+
+        if not math.isclose(_bb.x, 0.0) and not math.isclose(_bb.y, 0.0):
             self.move_to_origin()
 
         _bb = self.bb()
@@ -516,11 +512,15 @@ class Collection:
             else:
                 yscale = xscale
 
-        log.info(f"{self.__class__.__name__}: fit: scaled by {xscale:.2f} {yscale:.2f}")
+        logging.debug(f"fit: scaled by {xscale:.2f} {yscale:.2f}")
         self.scale(xscale, yscale)
+
+        _bb = self.bb()
 
         # centering
         self.move_to_center(width, height, output_bounds)
+
+        _bb = self.bb()
 
         if cutoff_mm is not None:
             cuttoff_margin_diff = padding_mm - cutoff_mm
@@ -553,13 +553,12 @@ class Collection:
             output_bounds_center.y - paths_center[1],
         )
 
-        log.info(
-            f"{self.__class__.__name__}: fit: translated by {diff[0]:.2f} {diff[1]:.2f}"
-        )
+        logging.debug(f"fit: translated by {diff[0]:.2f} {diff[1]:.2f}")
 
         self.translate(diff[0], diff[1])
 
     def fast_tsp(self, plot_preview=False):
+        timer = Timer()
         start_positions = np.array([pa.start_pos().as_tuple() for pa in self])
         end_positions = np.array([pa.end_pos().as_tuple() for pa in self])
 
@@ -581,6 +580,8 @@ class Collection:
             final_order.append(order[i])
 
         self.paths[:] = [self.paths[i] for i in final_order]
+
+        timer.print_elapsed("fast_tsp:")
 
         return final_order
 
@@ -682,7 +683,7 @@ class Collection:
         ss = dict(sorted(best.items(), key=lambda item: item[1]))
 
         elapsed = time.time() - start_benchmark
-        log.info(
+        logging.debug(
             f"reorder_quadrants with x={xq} y={yq} took {round(elapsed * 1000)}ms."
         )
 

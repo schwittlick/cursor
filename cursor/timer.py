@@ -1,7 +1,7 @@
 import time
-import wasabi
+import logging
 
-log = wasabi.Printer()
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
 
 class Timer:
@@ -17,4 +17,4 @@ class Timer:
         return t1 - self._time
 
     def print_elapsed(self, msg: str = "") -> None:
-        log.info(f"{msg}: {round(self.elapsed() * 1000)}ms")
+        logging.info(f"{msg}: {round(self.elapsed() * 1000)}ms")

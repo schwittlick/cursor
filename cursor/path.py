@@ -28,6 +28,7 @@ from cursor.algorithm.frechet import euclidean
 from cursor.bb import BoundingBox
 from cursor.misc import apply_matrix
 from cursor.position import Position
+from cursor.timer import Timer
 
 log = wasabi.Printer()
 
@@ -885,7 +886,9 @@ class Path:
             prev := v for v in self.vertices if v.distance(prev) > dist  # noqa: F841
         ]
 
-    def resample(self, target_dist: float) -> None:
+    def resampled(self, target_dist: float) -> Path:
+        timer = Timer()
+        point_count = len(self)
         # Calculate the cumulative distances along the line
         distances = [0.0]
         for i in range(1, len(self)):
@@ -908,7 +911,12 @@ class Path:
         new_y = np.interp(new_distances, distances, [p.y for p in self])
 
         new_vertices = list(zip(new_x, new_y))
-        self.vertices = Path.from_tuple_list(new_vertices).vertices
+        timer.print_elapsed(f"resample ({point_count})")
+
+        return Path.from_tuple_list(new_vertices)
+
+    def resample(self, target_dist: float) -> None:
+        self.vertices = self.resampled(target_dist).vertices
 
     def subset(self, start: int, end: int):
         if start < 0 or start > len(self) or end < 0 or end > len(self):
@@ -1066,7 +1074,7 @@ class Path:
 
         return len(set(x_values)) == 1 or len(set(y_values)) == 1
 
-    def rotate_into_bb(self, target_bb: BoundingBox) -> Path:
+    def rotated_into_bb(self, target_bb: BoundingBox) -> Path:
         if self.is_1_dimensional():
             log.warn("Didn't rotate, bc path is 1-dimensional.")
             return self
@@ -1090,3 +1098,7 @@ class Path:
         # somehow the matrix application above doesnt scale well
         pa.transform(pa.bb(), target_bb)
         return pa
+
+    def rotate_into_bb(self, target_bb: BoundingBox) -> None:
+        self.vertices = self.rotated_into_bb(target_bb).vertices
+        self.properties = self.rotated_into_bb(target_bb).properties
