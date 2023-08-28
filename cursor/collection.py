@@ -32,13 +32,11 @@ from cursor.position import Position
 from cursor.sorter import Sorter
 from cursor.timer import Timer
 
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
+logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.DEBUG)
 
 
 class Collection:
-    def __init__(
-            self, timestamp: float | None = None, name: str = "noname"
-    ):
+    def __init__(self, timestamp: float | None = None, name: str = "noname"):
         self.__paths: list[Path] = []
         self.__name = name
         if timestamp:
@@ -95,7 +93,9 @@ class Collection:
         match item:
             case int():
                 if len(self.__paths) < item + 1:
-                    raise IndexError(f"Index {item} too high. Maximum is {len(self.__paths)}")
+                    raise IndexError(
+                        f"Index {item} too high. Maximum is {len(self.__paths)}"
+                    )
 
                 return self.__paths[item]
             case slice():
@@ -199,11 +199,19 @@ class Collection:
         line = LineString(merged_into_path.as_tuple_list())
         rect = line.minimum_rotated_rectangle
 
-        target_poly = Polygon([[0, 0], [target_bb.x2, 0], [target_bb.x2, target_bb.y2], [0, target_bb.y2], [0, 0]])
+        target_poly = Polygon(
+            [
+                [0, 0],
+                [target_bb.x2, 0],
+                [target_bb.x2, target_bb.y2],
+                [0, target_bb.y2],
+                [0, 0],
+            ]
+        )
 
         src = np.array(rect.exterior.coords)
         dst = np.array(target_poly.exterior.coords)
-        matrix = estimate_transform('euclidean', src, dst).params
+        matrix = estimate_transform("euclidean", src, dst).params
         matrix = np.append(matrix, [[0, 0, 0]], axis=0).flatten()
 
         for path in self:
@@ -253,9 +261,7 @@ class Collection:
         else:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
-    def sorted(
-            self, pathsorter: Sorter, reference_path: Path = None
-    ) -> list[Path]:
+    def sorted(self, pathsorter: Sorter, reference_path: Path = None) -> list[Path]:
         if isinstance(pathsorter, Sorter):
             return pathsorter.sorted(self.__paths, reference_path)
         else:
@@ -269,7 +275,6 @@ class Collection:
 
     def filtered(self, pathfilter: Filter) -> Collection:
         if isinstance(pathfilter, Filter):
-
             pc = Collection()
             pc.__paths = pathfilter.filtered(self.__paths)
             return pc
@@ -299,7 +304,10 @@ class Collection:
         points = []
 
         for combination in permutations:
-            linestrings = [LineString(combination[0].as_tuple_list()), LineString(combination[1].as_tuple_list())]
+            linestrings = [
+                LineString(combination[0].as_tuple_list()),
+                LineString(combination[1].as_tuple_list()),
+            ]
             intersections = intersection_all(linestrings)
 
             if isinstance(intersections, shapely.geometry.Point):
@@ -449,15 +457,15 @@ class Collection:
         return reduce(lambda a, b: a + b, [x.distance / fac for x in self.__paths])
 
     def fit(
-            self,
-            size=tuple[int, int],
-            xy_factor: tuple[float, float] = (1.0, 1.0),
-            padding_mm: int = None,
-            padding_units: int = None,
-            padding_percent: int = None,
-            output_bounds: BoundingBox = None,
-            cutoff_mm=None,
-            keep_aspect=False,
+        self,
+        size=tuple[int, int],
+        xy_factor: tuple[float, float] = (1.0, 1.0),
+        padding_mm: int = None,
+        padding_units: int = None,
+        padding_percent: int = None,
+        output_bounds: BoundingBox = None,
+        cutoff_mm=None,
+        keep_aspect=False,
     ) -> None:
         """
         fits (scales and centers) a collection of paths into a bounding box. units can be in pixels or mm
@@ -557,19 +565,21 @@ class Collection:
 
         self.translate(diff[0], diff[1])
 
-    def fast_tsp(self, plot_preview=False):
+    def fast_tsp(self, plot_preview=False) -> list[int]:
         timer = Timer()
         start_positions = np.array([pa.start_pos().as_tuple() for pa in self])
         end_positions = np.array([pa.end_pos().as_tuple() for pa in self])
 
-        dists = spatial.distance.cdist(end_positions, start_positions, metric='euclidean')
+        dists = spatial.distance.cdist(
+            end_positions, start_positions, metric="euclidean"
+        )
 
         order = fast_tsp.find_tour(np.int_(dists).tolist(), duration_seconds=10)
 
         if plot_preview:
             fig, ax = plt.subplots(1, 1)
             best_points_coordinate = start_positions[order, :]
-            ax.plot(best_points_coordinate[:, 0], best_points_coordinate[:, 1], '.-r')
+            ax.plot(best_points_coordinate[:, 0], best_points_coordinate[:, 1], ".-r")
             plt.show()
 
         final_order = []
@@ -585,26 +595,47 @@ class Collection:
 
         return final_order
 
-    def sort_tsp(self, iters=3000, population_size=50, mutation_probability=0.1, plot_preview=False) -> list[int]:
+    def sort_tsp(
+        self,
+        iters=3000,
+        population_size=50,
+        mutation_probability=0.1,
+        plot_preview=False,
+    ) -> list[int]:
         start_positions = np.array([pa.start_pos().as_tuple() for pa in self])
         end_positions = np.array([pa.end_pos().as_tuple() for pa in self])
 
-        distance_matrix = spatial.distance.cdist(end_positions, start_positions, metric='euclidean')
+        distance_matrix = spatial.distance.cdist(
+            end_positions, start_positions, metric="euclidean"
+        )
 
         def calc_dist(routine):
-            num_points, = routine.shape
+            (num_points,) = routine.shape
             return sum(
-                [distance_matrix[routine[i % num_points], routine[(i + 1) % num_points]] for i in range(num_points)])
+                [
+                    distance_matrix[
+                        routine[i % num_points], routine[(i + 1) % num_points]
+                    ]
+                    for i in range(num_points)
+                ]
+            )
 
-        ga_tsp = GA_TSP(func=calc_dist, n_dim=len(self.paths), size_pop=population_size, max_iter=iters,
-                        prob_mut=mutation_probability)
+        ga_tsp = GA_TSP(
+            func=calc_dist,
+            n_dim=len(self.paths),
+            size_pop=population_size,
+            max_iter=iters,
+            prob_mut=mutation_probability,
+        )
         best_points, best_distance = ga_tsp.fit()
 
         if plot_preview:
             fig, ax = plt.subplots(1, 2)
             best_points_ = np.concatenate([best_points, [best_points[0]]])
             best_points_coordinate = start_positions[best_points_, :]
-            ax[0].plot(best_points_coordinate[:, 0], best_points_coordinate[:, 1], 'o-r')
+            ax[0].plot(
+                best_points_coordinate[:, 0], best_points_coordinate[:, 1], "o-r"
+            )
             ax[1].plot(ga_tsp.generation_best_Y)
             plt.show()
 
