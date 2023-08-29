@@ -120,10 +120,12 @@ class RealtimeRenderer(arcade.Window):
     def set_bg(self, p: pathlib.Path):
         self._background = arcade.load_texture(p)
 
-    def add_slider(self, cb_func: typing.Callable[[float], None], name: str, value: int, x: int = 50, y: int = 50,
+    def add_slider(self, cb_func: typing.Callable[[float], None], name: str, value: int, min_value: int, max_value: int,
+                   x: int = 50, y: int = 50,
+                   w=300, h=30,
                    text_color=arcade.color.GRAY):
-        ui_slider = UISlider(x=x, y=y, value=value, width=300, height=30)
-        ui_label = UILabel(x=x + 300, y=y, text=f"{name}: {value}", text_color=text_color)
+        ui_slider = UISlider(x=x, y=y, value=value, min_value=min_value, max_value=max_value, width=w, height=h)
+        ui_label = UILabel(x=x + w, y=y, text=f"{name}: {value}", text_color=text_color)
 
         @ui_slider.event()
         def on_change(event: UIOnChangeEvent):
