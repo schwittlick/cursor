@@ -11,12 +11,7 @@ Function Commit-And-Push
     $currentBranch = & git symbolic-ref --short HEAD
     $location = (Get-Location).Path.Split('\')[-1]
     Write-Host "Commited" $currentBranch "in" $location
-    git add .\cursor
-    git add .\scripts
-    git add .\examples
-    git add .\docs
-    git add .\firmware
-    git add .\tools
+    git add .
     git commit -m "$commitMessage"
     git push origin $currentBranch
 }
@@ -24,6 +19,15 @@ Function Commit-And-Push
 # Main script logic
 
 Commit-And-Push $commitMessage
+
+git add .\cursor
+git add .\scripts
+git add .\examples
+git add .\docs
+git add .\firmware
+git add .\tools
+git commit -m "$commitMessage"
+git push origin $currentBranch
 
 Set-Location .\data\compositions
 Commit-And-Push $commitMessage
