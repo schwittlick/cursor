@@ -211,7 +211,7 @@ class Collection:
 
         src = np.array(rect.exterior.coords)
         dst = np.array(target_poly.exterior.coords)
-        matrix = estimate_transform("euclidean", src, dst).params
+        matrix = estimate_transform("similarity", src, dst).params
         matrix = np.append(matrix, [[0, 0, 0]], axis=0).flatten()
 
         for path in self:

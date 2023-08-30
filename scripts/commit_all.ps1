@@ -1,37 +1,43 @@
-# Function to handle committing and pushing for each repository
-Function Commit-And-Push {
+param (
+    [Parameter(Position = 0, Mandatory = $true)]
+    [string]$commitMessage
+)
+
+Function Commit-And-Push
+{
     Param (
         [string]$commitMessage
     )
-    git add .
+    $currentBranch = & git symbolic-ref --short HEAD
+    $location = (Get-Location).Path.Split('\')[-1]
+    Write-Host "Commited" $currentBranch "in" $location
+    git add .\cursor
+    git add .\scripts
+    git add .\examples
+    git add .\docs
+    git add .\firmware
+    git add .\tools
     git commit -m "$commitMessage"
-    git push origin master
+    git push origin $currentBranch
 }
 
-# Commit changes in the main repository
-Write-Host "Committing main repository..."
-Commit-And-Push "Your main repository commit message here"
+# Main script logic
 
-# Commit changes in the first submodule
-Write-Host "Committing first submodule..."
-Set-Location .\submodule1_directory
-Commit-And-Push "Your first submodule commit message here"
-Set-Location ..
+Commit-And-Push $commitMessage
 
-# Commit changes in the second submodule
-Write-Host "Committing second submodule..."
-Set-Location .\submodule2_directory
-Commit-And-Push "Your second submodule commit message here"
-Set-Location ..
+Set-Location .\data\compositions
+Commit-And-Push $commitMessage
+Set-Location ..\..
 
-# Commit changes in the third submodule
-Write-Host "Committing third submodule..."
-Set-Location .\submodule3_directory
-Commit-And-Push "Your third submodule commit message here"
-Set-Location ..
+Set-Location .\data\recordings
+Commit-And-Push $commitMessage
+Set-Location ..\..
 
-# Commit updated submodules to the main repository
-Write-Host "Committing updated submodules to main repository..."
-Commit-And-Push "Updated submodules"
+# Commit the updated submodules to the main repository
+$currentBranch = & git symbolic-ref --short HEAD
+git add .\data\compositions
+git add .\data\recordings
+git commit -m "Updated submodules with commit: $commitMessage"
+git push origin $currentBranch
 
-Write-Host "All commits and pushes done!"
+Write-Host "Updated submodules with commit: $commitMessage"
