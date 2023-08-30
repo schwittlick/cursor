@@ -15,6 +15,7 @@ Function Commit-And-Push
     git commit -m "$commitMessage"
     git push origin $currentBranch
 }
+$currentBranch = & git symbolic-ref --short HEAD
 
 git add .\cursor
 git add .\scripts
@@ -34,7 +35,6 @@ Commit-And-Push $commitMessage
 Set-Location ..\..
 
 # Commit the updated submodules to the main repository
-$currentBranch = & git symbolic-ref --short HEAD
 git add .\data\compositions
 git add .\data\recordings
 git commit -m "Updated submodules with commit: $commitMessage"
