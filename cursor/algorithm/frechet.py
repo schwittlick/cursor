@@ -5,7 +5,6 @@ from numba import jit, types, int32, int64
 from numba import typed
 from timeit import default_timer as timer
 from multiprocessing import Process, Manager
-import typing
 
 
 def parallel_function(paths, out_array, idx, reference_path):

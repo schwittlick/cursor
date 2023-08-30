@@ -9,7 +9,7 @@ import pymsgbox
 import wasabi
 from arcade.experimental import RenderTargetTexture
 from arcade.experimental.uislider import UISlider
-from arcade.gui import UIManager, UIOnChangeEvent, UIAnchorWidget, UILabel
+from arcade.gui import UIManager, UIOnChangeEvent, UILabel
 
 from cursor.collection import Collection
 from cursor.data import DataDirHandler, DateHandler
