@@ -48,13 +48,7 @@ class JpegRenderer:
         if paths:
             self.add(paths)
 
-        logging.info(
-            f"Creating image with size=({self.image_width}, {self.image_height})"
-        )
-        assert (
-                self.image_width < 21000 and self.image_height < 21000
-        ), "keep resolution lower"
-
+        logging.info(f"Creating image with size=({self.image_width}, {self.image_height})")
         self.img = Image.new("RGB", (int(self.image_width * scale), int(self.image_height * scale)), "white")
         self.img_draw = ImageDraw.ImageDraw(self.img)
 
