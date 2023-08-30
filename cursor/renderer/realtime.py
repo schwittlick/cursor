@@ -60,7 +60,9 @@ class Buffer(RenderTargetTexture):
 
 class RealtimeRenderer(arcade.Window):
     def __init__(self, width, height, title):
-        super().__init__(width=width, height=height, title=title, antialiasing=True, samples=16)
+        super().__init__(
+            width=width, height=height, title=title, antialiasing=True, samples=16
+        )
         arcade.set_background_color(arcade.color.GRAY)
         self.__title = title
         self.colors = [
@@ -120,11 +122,28 @@ class RealtimeRenderer(arcade.Window):
     def set_bg(self, p: pathlib.Path):
         self._background = arcade.load_texture(p)
 
-    def add_slider(self, cb_func: typing.Callable[[float], None], name: str, value: int, min_value: int, max_value: int,
-                   x: int = 50, y: int = 50,
-                   w=300, h=30,
-                   text_color=arcade.color.GRAY):
-        ui_slider = UISlider(x=x, y=y, value=value, min_value=min_value, max_value=max_value, width=w, height=h)
+    def add_slider(
+        self,
+        cb_func: typing.Callable[[float], None],
+        name: str,
+        value: int,
+        min_value: int,
+        max_value: int,
+        x: int = 50,
+        y: int = 50,
+        w: int = 500,
+        h: int = 30,
+        text_color=arcade.color.GRAY,
+    ):
+        ui_slider = UISlider(
+            x=x,
+            y=y,
+            value=value,
+            min_value=min_value,
+            max_value=max_value,
+            width=w,
+            height=h,
+        )
         ui_label = UILabel(x=x + w, y=y, text=f"{name}: {value}", text_color=text_color)
 
         @ui_slider.event()
@@ -192,7 +211,7 @@ class RealtimeRenderer(arcade.Window):
         self.shapes.append(arcade.create_polygon(p.as_tuple_list(), color))
 
     def add_collection(
-            self, c: Collection, line_width: float = 5, color: arcade.color = None
+        self, c: Collection, line_width: float = 5, color: arcade.color = None
     ):
         if not color:
             color = random.choice(self.colors)[1]
@@ -204,7 +223,9 @@ class RealtimeRenderer(arcade.Window):
         self.camera.use()
 
         if self._background:
-            arcade.draw_lrwh_rectangle_textured(0, 0, self.width, self.height, self._background)
+            arcade.draw_lrwh_rectangle_textured(
+                0, 0, self.width, self.height, self._background
+            )
 
         self.shapes.draw()
         if self._draw_gui:
