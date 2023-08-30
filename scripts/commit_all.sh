@@ -1,38 +1,48 @@
 #!/bin/bash
 
-# Function to handle committing and pushing for each repository
+# Function for commit and push
 commit_and_push() {
+  local commitMessage="$1"
+  local currentBranch=$(git symbolic-ref --short HEAD)
+  local location=$(basename "$PWD")
+  echo "Commited $currentBranch in $location"
   git add .
-  git commit -m "$1"
-  git push origin master
+  git commit -m "$commitMessage"
+  git push origin "$currentBranch"
 }
 
-# Commit changes in the main repository
-echo "Committing main repository..."
-commit_and_push "Your main repository commit message here"
+# Check for commit message
+if [ -z "$1" ]; then
+  echo "Commit message is required"
+  exit 1
+fi
 
-# Commit changes in the first submodule
-echo "Committing first submodule..."
-cd submodule1_directory
-commit_and_push "Your first submodule commit message here"
-cd ..
+commitMessage="$1"
 
-# Commit changes in the second submodule
-echo "Committing second submodule..."
-cd submodule2_directory
-commit_and_push "Your second submodule commit message here"
-cd ..
+# Commit specified folders in the main repository
+currentBranch=$(git symbolic-ref --short HEAD)
+git add ./cursor ./scripts ./examples ./docs ./firmware ./tools
+git commit -m "$commitMessage"
+git push origin "$currentBranch"
 
-# Commit changes in the third submodule
-echo "Committing third submodule..."
-cd submodule3_directory
-commit_and_push "Your third submodule commit message here"
-cd ..
+# Change directory and commit changes
+cd ./data/compositions || {
+  echo "Directory ./data/compositions does not exist"
+  exit 1
+}
+commit_and_push "$commitMessage"
+cd ../..
 
-# Commit updated submodules to the main repository
-echo "Committing updated submodules to main repository..."
-git add .
-git commit -m "Updated submodules"
-git push origin master
+cd ./data/recordings || {
+  echo "Directory ./data/recordings does not exist"
+  exit 1
+}
+commit_and_push "$commitMessage"
+cd ../..
 
-echo "All commits and pushes done!"
+# Commit the updated submodules to the main repository
+git add ./data/compositions ./data/recordings
+git commit -m "Updated submodules with commit: $commitMessage"
+git push origin "$currentBranch"
+
+echo "Updated submodules with commit: $commitMessage"
