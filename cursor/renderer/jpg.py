@@ -36,12 +36,12 @@ class JpegRenderer:
                 self.positions.append(input)
 
     def render(
-        self,
-        paths: Collection | list[Path] | Path | None = None,
-        scale: float = 1.0,
-        frame: bool = False,
-        thickness: int = 1,
-        color: str = "black",
+            self,
+            paths: Collection | list[Path] | Path | None = None,
+            scale: float = 1.0,
+            frame: bool = False,
+            thickness: int = 1,
+            color: str = "black",
     ) -> None:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
@@ -52,10 +52,10 @@ class JpegRenderer:
             f"Creating image with size=({self.image_width}, {self.image_height})"
         )
         assert (
-            self.image_width < 21000 and self.image_height < 21000
+                self.image_width < 21000 and self.image_height < 21000
         ), "keep resolution lower"
 
-        self.img = Image.new("RGB", (self.image_width, self.image_height), "white")
+        self.img = Image.new("RGB", (int(self.image_width * scale), int(self.image_height * scale)), "white")
         self.img_draw = ImageDraw.ImageDraw(self.img)
 
         it = PathIterator(self.paths)
@@ -73,7 +73,8 @@ class JpegRenderer:
         for point in self.positions:
             rad = point.properties["radius"]
             self.img_draw.ellipse(
-                xy=[(point.x - rad, point.y - rad), (point.x + rad, point.y + rad)],
+                xy=[((point.x - rad) * scale, (point.y - rad) * scale),
+                    ((point.x + rad) * scale, (point.y + rad) * scale)],
                 fill="black",
                 width=rad,
             )
