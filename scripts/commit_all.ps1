@@ -16,10 +16,6 @@ Function Commit-And-Push
     git push origin $currentBranch
 }
 
-# Main script logic
-
-Commit-And-Push $commitMessage
-
 git add .\cursor
 git add .\scripts
 git add .\examples
