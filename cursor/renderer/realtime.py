@@ -71,6 +71,8 @@ class RealtimeRenderer(arcade.Window):
             if not color.startswith("__")
         ]
 
+        self.frame_count = 0
+
         self.shapes = arcade.ShapeElementList()
         self.collection = Collection()
         self._points = []
@@ -230,6 +232,8 @@ class RealtimeRenderer(arcade.Window):
         self.shapes.draw()
         if self._draw_gui:
             self.manager.draw()
+
+        self.frame_count += 1
 
     def on_update(self, delta_time: float):
         super().update(delta_time)
