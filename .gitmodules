@@ -1,12 +1,15 @@
 [submodule "data/recordings"]
 	path = data/recordings
 	url = git@github.com:schwittlick/cursor-recordings.git
+	branch = release
 [submodule "data/experiments"]
 	path = data/experiments
 	url = git@github.com:schwittlick/cursor-data.git
+	branch = release
 [submodule "data/compositions"]
 	path = data/compositions
 	url = git@github.com:schwittlick/compositions.git
+	branch = main
 [submodule "deps/sdf"]
 	path = deps/sdf
 	url = git@github.com:schwittlick/sdf.git
