@@ -48,7 +48,7 @@ class JpegRenderer:
         if paths:
             self.add(paths)
 
-        logging.info(f"Creating image with size=({self.image_width}, {self.image_height})")
+        logging.info(f"Creating image with size=({self.image_width * scale}, {self.image_height * scale})")
         self.img = Image.new("RGB", (int(self.image_width * scale), int(self.image_height * scale)), "white")
         self.img_draw = ImageDraw.ImageDraw(self.img)
 
@@ -66,10 +66,11 @@ class JpegRenderer:
 
         for point in self.positions:
             rad = point.properties["radius"]
+            color = point.properties["color"]
             self.img_draw.ellipse(
                 xy=[((point.x - rad) * scale, (point.y - rad) * scale),
                     ((point.x + rad) * scale, (point.y + rad) * scale)],
-                fill="black",
+                fill=color,
                 width=rad,
             )
 
