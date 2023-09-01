@@ -18,6 +18,8 @@ class JpegRenderer:
         self.img: Image = None
         self.img_draw: ImageDraw = None
 
+        self.background = "white"
+
         self.image_width: int = w
         self.image_height: int = h
 
@@ -49,7 +51,7 @@ class JpegRenderer:
             self.add(paths)
 
         logging.info(f"Creating image with size=({self.image_width * scale}, {self.image_height * scale})")
-        self.img = Image.new("RGB", (int(self.image_width * scale), int(self.image_height * scale)), "white")
+        self.img = Image.new("RGB", (int(self.image_width * scale), int(self.image_height * scale)), self.background)
         self.img_draw = ImageDraw.ImageDraw(self.img)
 
         it = PathIterator(self.paths)
@@ -79,10 +81,12 @@ class JpegRenderer:
 
     def save(self, filename: str) -> None:
         fname = self.save_path / (filename + ".jpg")
-        self.img = self.img.rotate(90, expand=True)
         self.img.save(fname, "JPEG")
 
         logging.info(f"Finished saving {fname}")
+
+    def rotate(self, degree: float = 90) -> None:
+        self.img = self.img.rotate(degree, expand=True)
 
     def image(self) -> Image:
         return self.img
