@@ -42,7 +42,7 @@ cd ../..
 
 # Commit the updated submodules to the main repository
 git add ./data/compositions ./data/recordings
-git commit -m "Updated submodules with commit: $commitMessage"
+git commit -m "$commitMessage"
 git push origin "$currentBranch"
 
 echo "Updated submodules with commit: $commitMessage"
