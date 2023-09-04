@@ -92,8 +92,18 @@ class Position:
     def translate(self, x: float, y: float) -> None:
         self._pos += x, y
 
+    def translated(self, x: float, y: float) -> Position:
+        _p = self.copy()
+        _p.translate(x, y)
+        return _p
+
     def scale(self, x: float, y: float) -> None:
         self._pos *= x, y
+
+    def scaled(self, x: float, y: float) -> Position:
+        _p = self.copy()
+        _p.scale(x, y)
+        return _p
 
     def inside(self, bb: BoundingBox) -> bool:
         return bb.x <= self.x <= bb.x2 and bb.y <= self.y <= bb.y2
