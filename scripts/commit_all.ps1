@@ -37,7 +37,7 @@ Set-Location ..\..
 # Commit the updated submodules to the main repository
 git add .\data\compositions
 git add .\data\recordings
-git commit -m "Updated submodules with commit: $commitMessage"
+git commit -m "$commitMessage"
 git push origin $currentBranch
 
 Write-Host "Updated submodules with commit: $commitMessage"
