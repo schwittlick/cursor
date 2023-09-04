@@ -23,7 +23,6 @@ commitMessage="$1"
 currentBranch=$(git symbolic-ref --short HEAD)
 git add ./cursor ./scripts ./examples ./docs ./firmware ./tools
 git commit -m "$commitMessage"
-git push origin "$currentBranch"
 
 # Change directory and commit changes
 cd ./data/compositions || {
