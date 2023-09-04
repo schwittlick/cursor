@@ -24,7 +24,6 @@ git add .\docs
 git add .\firmware
 git add .\tools
 git commit -m "$commitMessage"
-git push origin $currentBranch
 
 Set-Location .\data\compositions
 Commit-And-Push $commitMessage
