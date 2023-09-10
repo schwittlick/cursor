@@ -65,7 +65,7 @@ class TektronixRenderer:
             x = int(p.start_pos().x)
             y = int(p.start_pos().y)
             output_string += self._coords_to_bytes(x, y)  # move, pen-up
-            for line in p.vertices:
+            for line in p.generate:
                 x = int(line.x)
                 y = int(line.y)
                 output_string += self._coords_to_bytes(x, y)  # draw, pen-down
