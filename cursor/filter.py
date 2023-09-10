@@ -175,7 +175,7 @@ class DistanceBetweenPointsFilter(Filter):
                 d = p1.distance(p2)
                 if self.min_distance <= d <= self.max_distance:
                     verts.append(p2)
-            pa.vertices = verts
+            pa.generate = verts
             pa.clean()
 
         len_after = len(paths)

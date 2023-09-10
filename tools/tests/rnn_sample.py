@@ -12,7 +12,7 @@ from cursor.renderer import RealtimeRenderer
 def transform_path(path, bb, out):
     fn = misc.transformFn((bb.x, bb.y), (bb.x2, bb.y2), out[0], out[1])
 
-    res = list(map(fn, path.vertices))
+    res = list(map(fn, path.generate))
     return Path.from_tuple_list(res)
 
 

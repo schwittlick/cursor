@@ -378,6 +378,13 @@ class Path:
             self.translate(0.0, -abs(_bb.y))
 
     def fit(self, bb: BoundingBox, padding: float, keep_aspect: bool = False) -> None:
+        """
+        padding is in % of bounding box scale. weird.
+        putting an assert here just in case
+        this should be in absolute values
+        """
+        assert padding < 1
+
         self.move_to_origin()
         _bb = self.bb()
 
@@ -387,8 +394,12 @@ class Path:
         _h = _bb.h
         if _h == 0.0:
             _h = 0.001
-        xscale = (bb.w / _w) * padding
-        yscale = (bb.h / _h) * padding
+
+        xscale = (bb.w / _w)
+        yscale = (bb.h / _h)
+        if not math.isclose(padding, 0.0):
+            xscale *= padding
+            yscale *= padding
 
         if keep_aspect:
             if xscale > yscale:
@@ -887,8 +898,6 @@ class Path:
         ]
 
     def resampled(self, target_dist: float) -> Path:
-        timer = Timer()
-        point_count = len(self)
         # Calculate the cumulative distances along the line
         distances = [0.0]
         for i in range(1, len(self)):
@@ -902,7 +911,7 @@ class Path:
         num_intervals = int(total_distance / target_dist)
 
         # Determine the new distances for interpolation
-        new_distances = [0] + [i * target_dist for i in range(1, num_intervals + 1)]
+        new_distances = [0.0] + [i * target_dist for i in range(1, num_intervals + 1)]
         if new_distances[-1] > total_distance:
             new_distances.pop()
 
@@ -911,7 +920,6 @@ class Path:
         new_y = np.interp(new_distances, distances, [p.y for p in self])
 
         new_vertices = list(zip(new_x, new_y))
-        timer.print_elapsed(f"resample ({point_count})")
 
         return Path.from_tuple_list(new_vertices)
 

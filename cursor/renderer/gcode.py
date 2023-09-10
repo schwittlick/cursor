@@ -59,7 +59,7 @@ class GCodeRenderer:
                 volt = p.properties["volt"]
                 instructions.append(f"VOLT{volt:.3}")
 
-            for point in p.vertices:
+            for point in p.generate:
                 x = point.x
                 y = point.y
                 if self.invert_y:
