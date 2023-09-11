@@ -96,10 +96,10 @@ class RealtimeRenderer(arcade.Window):
 
         self.camera = arcade.Camera(width, height)
 
-        bloom = self.bloom()
-        self.bloom_color_attachment = bloom[0]
-        self.bloom_screen = bloom[1]
-        self.bloom_postprocessing = bloom[2]
+        # bloom = self.bloom()
+        # self.bloom_color_attachment = bloom[0]
+        # self.bloom_screen = bloom[1]
+        # self.bloom_postprocessing = bloom[2]
 
     def bloom(self):
         bloom_color_attachment = self.ctx.texture((self.width, self.height))
@@ -150,17 +150,17 @@ class RealtimeRenderer(arcade.Window):
         self._background = arcade.load_texture(p)
 
     def add_slider(
-        self,
-        cb_func: typing.Callable[[float], None],
-        name: str,
-        value: int,
-        min_value: int,
-        max_value: int,
-        x: int = 50,
-        y: int = 50,
-        w: int = 500,
-        h: int = 30,
-        text_color=arcade.color.GRAY,
+            self,
+            cb_func: typing.Callable[[float], None],
+            name: str,
+            value: int,
+            min_value: int,
+            max_value: int,
+            x: int = 50,
+            y: int = 50,
+            w: int = 500,
+            h: int = 30,
+            text_color=arcade.color.GRAY,
     ):
         ui_slider = UISlider(
             x=x,
@@ -238,7 +238,7 @@ class RealtimeRenderer(arcade.Window):
         self.shapes.append(arcade.create_polygon(p.as_tuple_list(), color))
 
     def add_collection(
-        self, c: Collection, line_width: float = 5, color: arcade.color = None
+            self, c: Collection, line_width: float = 5, color: arcade.color = None
     ):
         if not color:
             color = random.choice(self.colors)[1]
@@ -254,8 +254,8 @@ class RealtimeRenderer(arcade.Window):
                 0, 0, self.width, self.height, self._background
             )
 
-        self.bloom_screen.use()
-        self.bloom_screen.clear((0, 0, 0, 0))
+        # self.bloom_screen.use()
+        # self.bloom_screen.clear((0, 0, 0, 0))
 
         self.shapes.draw()
 

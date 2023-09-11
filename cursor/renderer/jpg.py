@@ -18,7 +18,7 @@ class JpegRenderer:
         self.img: Image = None
         self.img_draw: ImageDraw = None
 
-        self.background = "white"
+        self.background = (255, 255, 255)
 
         self.image_width: int = w
         self.image_height: int = h
@@ -37,27 +37,42 @@ class JpegRenderer:
             case Position():
                 self.positions.append(input)
 
+    def render_image(self, size: tuple[int, int], points: list[Position], scale: float) -> Image:
+        img: Image = Image.new("RGBA", size, (self.background[0], self.background[1], self.background[2], 0))
+        img_draw = ImageDraw.ImageDraw(img)
+
+        for point in points:
+            rad = point.properties["radius"]
+            color = point.properties["color"]
+            img_draw.ellipse(
+                xy=[
+                    ((point.x - rad) * scale, (point.y - rad) * scale),
+                    ((point.x + rad) * scale, (point.y + rad) * scale),
+                ],
+                fill=color,
+                width=rad,
+            )
+        return img
+
     def render(
-        self,
-        paths: Collection | list[Path] | Path | None = None,
-        scale: float = 1.0,
-        frame: bool = False,
-        thickness: int = 1,
-        color: str = "black",
+            self,
+            paths: Collection | list[Path] | Path | None = None,
+            scale: float = 1.0,
+            frame: bool = False,
+            thickness: int = 1,
+            color: str = "black",
     ) -> None:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
         if paths:
             self.add(paths)
 
+        w = int(self.image_width * scale)
+        h = int(self.image_height * scale)
         logging.info(
-            f"Creating image with size=({self.image_width * scale}, {self.image_height * scale})"
+            f"Creating image with size=({w}, {h})"
         )
-        self.img: Image = Image.new(
-            "RGB",
-            (int(self.image_width * scale), int(self.image_height * scale)),
-            self.background,
-        )
+        self.img: Image = Image.new("RGB", (w, h), self.background)
         self.img_draw = ImageDraw.ImageDraw(self.img)
 
         it = PathIterator(self.paths)
@@ -72,23 +87,31 @@ class JpegRenderer:
                 width=thickness,
             )
 
-        counter = 0
+        do_blur = {}
+        dont_blur = []
+
         for point in self.positions:
-            counter += 1
-            if counter == 50:
-                # let's create an api for this
-                self.img = self.img.filter(ImageFilter.GaussianBlur(radius=50))
-                self.img_draw = ImageDraw.ImageDraw(self.img)
-            rad = point.properties["radius"]
-            color = point.properties["color"]
-            self.img_draw.ellipse(
-                xy=[
-                    ((point.x - rad) * scale, (point.y - rad) * scale),
-                    ((point.x + rad) * scale, (point.y + rad) * scale),
-                ],
-                fill=color,
-                width=rad,
-            )
+            if "blur" in point.properties.keys():
+                rad = point.properties["radius"]
+                if rad not in do_blur.keys():
+                    do_blur[point.properties["radius"]] = []
+                point.properties["radius"] = rad * 0.9
+                do_blur[rad].append(point)
+            else:
+                dont_blur.append(point)
+
+        if len(do_blur) > 0:
+            _blurred = []
+            for k, v in do_blur.items():
+                _blurred.append(self.render_image((w, h), v, scale).filter(ImageFilter.GaussianBlur(radius=k)))
+
+            base = _blurred[0]
+            for image in _blurred[1:]:
+                base = Image.alpha_composite(base, image)
+            _not_blurred = self.render_image((w, h), dont_blur, scale)  # .filter(ImageFilter.GaussianBlur(radius=2))
+            self.img = Image.alpha_composite(_not_blurred, base).convert("RGB")
+        else:
+            self.img = self.render_image((w, h), dont_blur, scale).convert("RGB")
 
         if frame:
             self.render_frame()
