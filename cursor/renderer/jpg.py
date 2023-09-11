@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 
 from cursor.bb import BoundingBox
 from cursor.collection import Collection
@@ -38,20 +38,26 @@ class JpegRenderer:
                 self.positions.append(input)
 
     def render(
-            self,
-            paths: Collection | list[Path] | Path | None = None,
-            scale: float = 1.0,
-            frame: bool = False,
-            thickness: int = 1,
-            color: str = "black",
+        self,
+        paths: Collection | list[Path] | Path | None = None,
+        scale: float = 1.0,
+        frame: bool = False,
+        thickness: int = 1,
+        color: str = "black",
     ) -> None:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
         if paths:
             self.add(paths)
 
-        logging.info(f"Creating image with size=({self.image_width * scale}, {self.image_height * scale})")
-        self.img = Image.new("RGB", (int(self.image_width * scale), int(self.image_height * scale)), self.background)
+        logging.info(
+            f"Creating image with size=({self.image_width * scale}, {self.image_height * scale})"
+        )
+        self.img: Image = Image.new(
+            "RGB",
+            (int(self.image_width * scale), int(self.image_height * scale)),
+            self.background,
+        )
         self.img_draw = ImageDraw.ImageDraw(self.img)
 
         it = PathIterator(self.paths)
@@ -66,12 +72,20 @@ class JpegRenderer:
                 width=thickness,
             )
 
+        counter = 0
         for point in self.positions:
+            counter += 1
+            if counter == 50:
+                # let's create an api for this
+                self.img = self.img.filter(ImageFilter.GaussianBlur(radius=50))
+                self.img_draw = ImageDraw.ImageDraw(self.img)
             rad = point.properties["radius"]
             color = point.properties["color"]
             self.img_draw.ellipse(
-                xy=[((point.x - rad) * scale, (point.y - rad) * scale),
-                    ((point.x + rad) * scale, (point.y + rad) * scale)],
+                xy=[
+                    ((point.x - rad) * scale, (point.y - rad) * scale),
+                    ((point.x + rad) * scale, (point.y + rad) * scale),
+                ],
                 fill=color,
                 width=rad,
             )
