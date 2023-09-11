@@ -7,7 +7,7 @@ import typing
 import arcade
 import pymsgbox
 import wasabi
-from arcade.experimental import RenderTargetTexture
+from arcade.experimental import RenderTargetTexture, postprocessing
 from arcade.experimental.uislider import UISlider
 from arcade.gui import UIManager, UIOnChangeEvent, UILabel
 
@@ -95,6 +95,31 @@ class RealtimeRenderer(arcade.Window):
         self.manager.enable()
 
         self.camera = arcade.Camera(width, height)
+
+        bloom = self.bloom()
+        self.bloom_color_attachment = bloom[0]
+        self.bloom_screen = bloom[1]
+        self.bloom_postprocessing = bloom[2]
+
+    def bloom(self):
+        bloom_color_attachment = self.ctx.texture((self.width, self.height))
+        bloom_screen = self.ctx.framebuffer(color_attachments=[bloom_color_attachment])
+
+        kernel_size = 1
+        sigma = 5
+        mu = 0
+        step = 0
+        # Control the intensity
+        multiplier = 1
+
+        # Create a post-processor to create a bloom
+        return (
+            bloom_color_attachment,
+            bloom_screen,
+            postprocessing.BloomEffect(
+                (self.width, self.height), kernel_size, sigma, mu, multiplier, step
+            ),
+        )
 
     @property
     def points(self) -> list[Position]:
@@ -229,7 +254,13 @@ class RealtimeRenderer(arcade.Window):
                 0, 0, self.width, self.height, self._background
             )
 
+        self.bloom_screen.use()
+        self.bloom_screen.clear((0, 0, 0, 0))
+
         self.shapes.draw()
+
+        # todo: add list of shaders that can be added/removed at runtime
+        # self.bloom_postprocessing.render(self.bloom_color_attachment, self)
         if self._draw_gui:
             self.manager.draw()
 

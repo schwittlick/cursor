@@ -1,24 +1,17 @@
+import arcade
+from arcade.experimental import postprocessing
+
 from cursor.collection import Collection
+from cursor.position import Position
 from cursor.renderer.realtime import RealtimeRenderer, Buffer
 
 
 def disabled_test_realtime():
-    dimension = 8000
-    collection = Collection.from_tuples(
-        [[(0, 0), (dimension, dimension)], [(0, dimension), (dimension, 0)]]
-    )
+    dimension = 2000
 
     renderer = RealtimeRenderer(dimension, dimension, "test")
-    renderer.add_collection(collection)
-
-    buffer = Buffer(dimension, dimension)
-
-    buffer.clear()
-    buffer.use()
-    renderer.shapes.draw()
-
-    renderer.clear()
-    renderer.use()
-    buffer.draw()
+    renderer.add_point(
+        Position.from_tuple((1000, 1000)), width=200, color=arcade.color.WHITE
+    )
 
     renderer.run()
