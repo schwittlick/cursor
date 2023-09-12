@@ -103,7 +103,7 @@ class JpegRenderer:
         if len(do_blur) > 0:
             _blurred = []
             for k, v in do_blur.items():
-                _blurred.append(self.render_image((w, h), v, scale).filter(ImageFilter.GaussianBlur(radius=k)))
+                _blurred.append(self.render_image((w, h), v, scale).filter(ImageFilter.GaussianBlur(radius=k / 2)))
 
             base = _blurred[0]
             for image in _blurred[1:]:
