@@ -273,8 +273,7 @@ class Path:
         self.vertices.clear()
 
     def copy(self) -> Path:
-        p = Path(None if self.empty() else copy.deepcopy(self.vertices), self.properties)
-        return p
+        return Path(None if self.empty() else copy.deepcopy(self.vertices), self.properties)
 
     def reverse(self) -> None:
         self.vertices.reverse()
