@@ -43,12 +43,15 @@ class GCodeRenderer:
             z = self.z_down
             if self.invert_y:
                 y = -y
-            instructions.append(self.g01(x, y, self.z_up))
+
+            if "skip_up" not in p.properties.keys():
+                # dont skip pen up move if property was set
+                instructions.append(self.g01(x, y, self.z_up))
 
             if "z" in self.paths[0].properties:
                 z = self.paths[0].properties["z"]
 
-            instructions.append(self.g01(x, y, z))
+            #instructions.append(self.g01(x, y, z))
 
             if "laser" in p.properties:
                 instructions.append("LASERON")
@@ -59,7 +62,7 @@ class GCodeRenderer:
                 volt = p.properties["volt"]
                 instructions.append(f"VOLT{volt:.3}")
 
-            for point in p.generate:
+            for point in p.vertices:
                 x = point.x
                 y = point.y
                 if self.invert_y:
@@ -91,6 +94,9 @@ class GCodeRenderer:
             if p.laser_onoff:
                 instructions.append("LASEROFF")
 
+            if "skip_up" in p.properties.keys():
+                # skip pen up move if property was set
+                continue
             instructions.append(self.g01(x, y, self.z_up))
         instructions.append(self.g01(0, 0, self.z_up))
 

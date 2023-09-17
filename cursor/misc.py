@@ -209,7 +209,7 @@ def current_source(frame):
     return inspect.getsource(inspect.getmodule(frame))
 
 
-def timestamp(format: str = "%Y%m%d_%H%M%S") -> str:
+def timestamp(format: str = "%y%m%d_%H%M%S") -> str:
     now = datetime.now()
     return now.strftime(format)
 
