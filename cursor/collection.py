@@ -6,6 +6,7 @@ import hashlib
 import itertools
 import math
 import operator
+import pathlib
 import pickle
 import random
 import time
@@ -104,11 +105,11 @@ class Collection:
                 _pc.__paths = [self[i] for i in range(start, stop, step)]
                 return _pc
 
-    def save_pickle(self, fname: str) -> None:
-        fn = DataDirHandler().pickles() / fname
-        file_to_store = open(fn.as_posix(), "wb")
+    def save_pickle(self, fname: pathlib.Path) -> None:
+        pathlib.Path(fname.parent).mkdir(parents=True, exist_ok=True)
+        file_to_store = open(fname.as_posix(), "wb")
         pickle.dump(self, file_to_store)
-        logging.info(f"Saved {fn.as_posix()}")
+        logging.info(f"Saved {fname.as_posix()}")
 
     @staticmethod
     def from_pickle(fname: str) -> Collection:

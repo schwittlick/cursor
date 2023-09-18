@@ -100,21 +100,21 @@ def generate_perlin_noise_2d(shape, res):
     return np.sqrt(2) * ((1 - t[:, :, 1]) * n0 + t[:, :, 1] * n1)
 
 
-def map(value, inputMin, inputMax, outputMin, outputMax, clamp=True):
-    outVal = (value - inputMin) / (inputMax - inputMin) * (outputMax - outputMin) + outputMin
+def map(value, in_min, in_max, out_min, out_max, clamp=True):
+    out = (value - in_min) / (in_max - in_min) * (out_max - out_min) + out_min
 
     if clamp:
-        if outputMax < outputMin:
-            if outVal < outputMax:
-                outVal = outputMax
-            elif outVal > outputMin:
-                outVal = outputMin
+        if out_max < out_min:
+            if out < out_max:
+                out = out_max
+            elif out > out_min:
+                out = out_min
     else:
-        if outVal > outputMax:
-            outVal = outputMax
-        elif outVal < outputMin:
-            outVal = outputMin
-    return outVal
+        if out > out_max:
+            out = out_max
+        elif out < out_min:
+            out = out_min
+    return out
 
 
 class ditherModule(object):
