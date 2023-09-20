@@ -28,7 +28,6 @@ from cursor.algorithm.frechet import euclidean
 from cursor.bb import BoundingBox
 from cursor.misc import apply_matrix
 from cursor.position import Position
-from cursor.timer import Timer
 
 log = wasabi.Printer()
 
