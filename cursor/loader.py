@@ -32,7 +32,7 @@ class MyJsonEncoder(json.JSONEncoder):
                     "x": round(o.x, 4),
                     "y": round(o.y, 4),
                     "ts": round(o.timestamp, 2),
-                    "c": o.properties["color"] if "color" in o.properties.keys() else None,
+                    # "c": o.properties["color"] if "color" in o.properties.keys() else None,
                 }
 
 

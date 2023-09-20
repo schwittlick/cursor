@@ -47,6 +47,8 @@ class Collection:
             utc_timestamp = datetime.datetime.timestamp(now)
             self._timestamp = utc_timestamp
 
+        self.properties: dict = {}
+
     @property
     def paths(self) -> list[Path]:
         return self.__paths
@@ -458,15 +460,15 @@ class Collection:
         return reduce(lambda a, b: a + b, [x.distance / fac for x in self.__paths])
 
     def fit(
-        self,
-        size=tuple[int, int],
-        xy_factor: tuple[float, float] = (1.0, 1.0),
-        padding_mm: int = None,
-        padding_units: int = None,
-        padding_percent: int = None,
-        output_bounds: BoundingBox = None,
-        cutoff_mm=None,
-        keep_aspect=False,
+            self,
+            size=tuple[int, int],
+            xy_factor: tuple[float, float] = (1.0, 1.0),
+            padding_mm: int = None,
+            padding_units: int = None,
+            padding_percent: int = None,
+            output_bounds: BoundingBox = None,
+            cutoff_mm=None,
+            keep_aspect=False,
     ) -> None:
         """
         fits (scales and centers) a collection of paths into a bounding box. units can be in pixels or mm
@@ -597,11 +599,11 @@ class Collection:
         return final_order
 
     def sort_tsp(
-        self,
-        iters=3000,
-        population_size=50,
-        mutation_probability=0.1,
-        plot_preview=False,
+            self,
+            iters=3000,
+            population_size=50,
+            mutation_probability=0.1,
+            plot_preview=False,
     ) -> list[int]:
         start_positions = np.array([pa.start_pos().as_tuple() for pa in self])
         end_positions = np.array([pa.end_pos().as_tuple() for pa in self])
