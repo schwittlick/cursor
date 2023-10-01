@@ -119,6 +119,7 @@ class HPGLParser:
                     except ZeroDivisionError:
                         angle = float('inf')
                     path.rot(math.atan(angle), self.pos)
+                    path.properties["label"] = self.cur_pen
                     self.paths.add(path)
             else:
                 print(char)

@@ -37,7 +37,7 @@ class JpegRenderer:
             case Position():
                 self.positions.append(input)
 
-    def render_image(self, size: tuple[int, int], points: list[Position], scale: float) -> Image:
+    def render_points(self, size: tuple[int, int], points: list[Position], scale: float) -> Image:
         img: Image = Image.new("RGBA", size, (self.background[0], self.background[1], self.background[2], 0))
         img_draw = ImageDraw.ImageDraw(img)
 
@@ -77,9 +77,15 @@ class JpegRenderer:
 
         it = PathIterator(self.paths)
 
+        # here we need to be path-aware and make a list of points from a path
+        # in order to color it in one style
         for conn in it.connections():
             start = conn[0]
             end = conn[1]
+
+            colors = ["red", "green", "blue", "yellow", "teal", "brown"]
+            color_index = start.properties["label"]
+            color = colors[color_index - 1]
 
             self.img_draw.line(
                 xy=(start.x * scale, start.y * scale, end.x * scale, end.y * scale),
@@ -95,7 +101,7 @@ class JpegRenderer:
                 rad = point.properties["radius"]
                 if rad not in do_blur.keys():
                     do_blur[point.properties["radius"]] = []
-                #point.properties["radius"] = rad * 0.9
+                # point.properties["radius"] = rad * 0.9
                 do_blur[rad].append(point)
             else:
                 dont_blur.append(point)
@@ -104,16 +110,17 @@ class JpegRenderer:
             _blurred = []
             for k, v in do_blur.items():
                 _k = k / 4 * scale
-                _blurred.append(self.render_image((w, h), v, scale).filter(ImageFilter.GaussianBlur(radius=_k / 2)))
+                _blurred.append(self.render_points((w, h), v, scale).filter(ImageFilter.GaussianBlur(radius=_k / 2)))
 
             base = _blurred[0]
             for image in _blurred[1:]:
                 base = Image.alpha_composite(base, image)
-            _not_blurred = self.render_image((w, h), dont_blur, scale)  # .filter(ImageFilter.GaussianBlur(radius=2))
+            _not_blurred = self.render_points((w, h), dont_blur, scale)  # .filter(ImageFilter.GaussianBlur(radius=2))
             _not_blurred = Image.alpha_composite(self.img, _not_blurred)
             self.img = Image.alpha_composite(_not_blurred, base).convert("RGB")
         else:
-            self.img = self.render_image((w, h), dont_blur, scale).convert("RGB")
+            img_out = self.render_points((w, h), dont_blur, scale)
+            self.img = Image.alpha_composite(img_out, self.img).convert("RGB")
 
         if frame:
             self.render_frame()
