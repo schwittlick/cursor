@@ -1,12 +1,11 @@
 from __future__ import annotations
 
+import logging
 import math
 
 import wasabi
 
 from cursor.hpgl import LB_TERMINATOR
-
-log = wasabi.Printer()
 
 
 def rotate(origin, point, angle):
@@ -38,6 +37,7 @@ class HPGL:
         self.data = ""
 
     def save(self, fn):
+        logging.info(f"Saving {fn}")
         with open(fn, "w", encoding='utf-8') as file:
             file.write(self.data)
 
@@ -102,11 +102,11 @@ class HPGL:
         e.g. to make a new line within a LB statement: f"LBline1{chr(13)}{chr(10)}line2{chr(3)}"
         """
         if len(label) == 0:
-            log.warn("Empty Label, discarding")
+            logging.warning("Empty Label, discarding")
 
         if len(label) > 150:
-            log.warn(f"Label too long: {len(label)} > 150")
-            log.warn(label)
+            logging.warning(f"Label too long: {len(label)} > 150")
+            logging.warning(label)
 
         self.data += f"LB{label}{self.terminator}"
 
