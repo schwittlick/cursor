@@ -79,6 +79,10 @@ class JpegRenderer:
 
         # here we need to be path-aware and make a list of points from a path
         # in order to color it in one style
+
+        #     points = [(100, 100), (150, 200), (200, 50), (400, 400)]
+        #     draw = ImageDraw.Draw(image)
+        #     draw.line(points, width=15, fill="green", joint="curve")
         for conn in it.connections():
             start = conn[0]
             end = conn[1]
