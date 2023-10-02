@@ -170,8 +170,9 @@ class Exporter:
                 )
 
                 jpeg_folder = DataDirHandler().jpg(self.name)
-                jpeg_renderer = JpegRenderer(jpeg_folder)
-                jpeg_renderer.render(pc, scale=8.0)
+                jpeg_renderer = JpegRenderer(jpeg_folder, w=1920 * 8, h=1080 * 8)
+                jpeg_renderer.add(pc)
+                jpeg_renderer.render(scale=8.0)
                 jpeg_renderer.save(f"{fname}")
 
         if source:
@@ -264,7 +265,8 @@ def save_wrapper(pc, projname, fname):
     jpeg_folder = DataDirHandler().jpg(projname)
     jpeg_renderer = JpegRenderer(jpeg_folder)
 
-    jpeg_renderer.render(pc, scale=1.0)
+    jpeg_renderer.add(pc)
+    jpeg_renderer.render(scale=1.0)
     jpeg_renderer.save(fname)
 
     svg_folder = DataDirHandler().svg(projname)
@@ -276,9 +278,9 @@ def save_wrapper(pc, projname, fname):
 
 def save_wrapper_jpeg(pc, projname, fname, scale=4.0, thickness=3):
     folder = DataDirHandler().jpg(projname)
-    jpeg_renderer = JpegRenderer(folder)
-
-    jpeg_renderer.render(pc, scale=scale, thickness=thickness)
+    jpeg_renderer = JpegRenderer(folder, w=int(1920 * scale), h=int(1080 * scale))
+    jpeg_renderer.add(pc)
+    jpeg_renderer.render(scale=scale)
     jpeg_renderer.save(fname)
 
 

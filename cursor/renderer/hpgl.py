@@ -87,7 +87,7 @@ class HPGLRenderer:
 
             _hpgl.PD()
 
-            for point in p.generate:
+            for point in p.vertices:
                 x = point.x
                 y = point.y
 
