@@ -41,7 +41,7 @@ class DigiplotRenderer:
             output_string += self._coord_string(x, y)
             output_string += self.PEN_UP
             output_string += self.GO_ABSOLUTE
-            for line in p.generate:
+            for line in p.vertices:
                 x = int(line.x)
                 y = int(line.y)
                 output_string += self._coord_string(x, y)
