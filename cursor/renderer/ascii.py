@@ -31,11 +31,10 @@ class AsciiRenderer:
     def render(
             self,
             paths: Collection,
-            scale: float = 1.0,
-            frame: bool = False,
-            thickness: int = 1,
+            scale: float = 1.0
     ):
-        self.jpeg_renderer.render(paths, scale, frame, thickness)
+        self.jpeg_renderer.add(paths)
+        self.jpeg_renderer.render(scale)
 
         im = self.jpeg_renderer.img
 

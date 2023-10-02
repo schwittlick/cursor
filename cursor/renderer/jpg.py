@@ -9,7 +9,6 @@ from cursor.bb import BoundingBox
 from cursor.collection import Collection
 from cursor.path import Path, Property
 from cursor.position import Position
-from cursor.renderer import PathIterator
 
 
 class JpegRenderer:

@@ -1,5 +1,3 @@
-import pytest
-
 from cursor.data import DataDirHandler
 from cursor.device import PaperSize, Paper
 from cursor.loader import Loader

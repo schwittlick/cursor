@@ -115,6 +115,3 @@ class DataDirHandler:
 
     def file(self, fname: str) -> pathlib.Path:
         return self.data_dir / fname
-
-    def pickles(self) -> pathlib.Path:
-        return self.data_dir / "pickles"

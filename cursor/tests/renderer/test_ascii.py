@@ -19,5 +19,5 @@ def test_ascii_renderer():
 
     r = JpegRenderer(DataDirHandler().test_images())
     a = AsciiRenderer(DataDirHandler().test_ascii(), r)
-    a.render(rec, scale=1, thickness=30)
+    a.render(rec, scale=1)
     a.save("test1")

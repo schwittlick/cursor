@@ -1,9 +1,6 @@
 import arcade
-from arcade.experimental import postprocessing
-
-from cursor.collection import Collection
 from cursor.position import Position
-from cursor.renderer.realtime import RealtimeRenderer, Buffer
+from cursor.renderer.realtime import RealtimeRenderer
 
 
 def disabled_test_realtime():

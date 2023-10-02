@@ -3,8 +3,6 @@ from __future__ import annotations
 import logging
 import math
 
-import wasabi
-
 from cursor.hpgl import LB_TERMINATOR
 
 
