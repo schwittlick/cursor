@@ -51,7 +51,7 @@ class GCodeRenderer:
             if "z" in self.paths[0].properties:
                 z = self.paths[0].properties["z"]
 
-            #instructions.append(self.g01(x, y, z))
+            # instructions.append(self.g01(x, y, z))
 
             if "laser" in p.properties:
                 instructions.append("LASERON")
