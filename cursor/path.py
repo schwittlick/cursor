@@ -45,6 +45,9 @@ class Property(Enum):
     LASER_AMP = "amp"
     LASER_DELAY = "delay"
     LASER_Z = "z"
+    # below used for jpeg renderer
+    COLOR = "color"
+    WIDTH = "width"
 
 
 class Path:
@@ -54,13 +57,18 @@ class Path:
             properties: dict | None = None
     ):
         self._vertices = []
-        self.properties = {Property.LAYER: "layer1"}
+        self.properties = {Property.LAYER: "layer1", Property.COLOR: (0, 0, 0), Property.WIDTH: 1}
 
         if vertices is not None:
             self._vertices = vertices
 
         if properties is not None:
             self.properties = properties
+
+            if Property.COLOR not in self.properties.keys():
+                self.properties[Property.COLOR] = (0, 0, 0)
+            if Property.WIDTH not in self.properties.keys():
+                self.properties[Property.WIDTH] = 1
 
     def __repr__(self):
         rep = (

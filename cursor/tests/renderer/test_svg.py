@@ -1,5 +1,8 @@
+import pytest
+
 from cursor.collection import Collection
 from cursor.data import DataDirHandler
+from cursor.loader import Loader
 from cursor.path import Path
 from cursor.renderer.svg import SvgRenderer
 
