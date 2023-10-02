@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFilter
 
 from cursor.bb import BoundingBox
 from cursor.collection import Collection
-from cursor.path import Path
+from cursor.path import Path, Property
 from cursor.position import Position
 from cursor.renderer import PathIterator
 
@@ -15,121 +15,56 @@ from cursor.renderer import PathIterator
 class JpegRenderer:
     def __init__(self, folder: pathlib.Path, w: int = 1920, h: int = 1080):
         self.save_path: pathlib.Path = folder
-        self.img: Image = None
-        self.img_draw: ImageDraw = None
 
-        self.background = (255, 255, 255)
-
-        self.image_width: int = w
-        self.image_height: int = h
+        logging.info(
+            f"Creating image with size=({w}, {h})"
+        )
+        self._background = (0, 0, 0)
+        self.img: Image = Image.new("RGBA", (w, h), self._background)
+        self.img_draw = ImageDraw.ImageDraw(self.img)
 
         self.paths: list[Path] = []
         self.positions: list[Position] = []
 
-    def add(self, input: Collection | list[Path] | Path | Position):
+    def background(self, color: tuple[int, int, int]):
+        self._background = color
+        self.img_draw.rectangle((0, 0, self.img.width, self.img.height), fill=self._background)
+
+    def add(self, input: Collection | Path | Position | list[Collection] | list[Path] | list[Position]):
         match input:
-            case Path():
-                self.paths.append(input)
             case Collection():
                 self.paths.extend(input.paths)
-            case list():
-                self.paths.extend(input)
             case Position():
                 self.positions.append(input)
+            case Path():
+                self.paths.append(input)
+            case list():
+                if all(isinstance(item, Path) for item in input):
+                    self.paths.extend(input)
+                if all(isinstance(item, Position) for item in input):
+                    self.positions.extend(input)
+                if all(isinstance(item, Collection) for item in input):
+                    for collection in input:
+                        self.paths.extend(collection.paths)
 
-    def render_points(self, size: tuple[int, int], points: list[Position], scale: float) -> Image:
-        img: Image = Image.new("RGBA", size, (self.background[0], self.background[1], self.background[2], 0))
-        img_draw = ImageDraw.ImageDraw(img)
-
-        for point in points:
-            rad = point.properties["radius"]
-            color = point.properties["color"]
-            img_draw.ellipse(
-                xy=[
-                    ((point.x - rad) * scale, (point.y - rad) * scale),
-                    ((point.x + rad) * scale, (point.y + rad) * scale),
-                ],
-                fill=color,
-                width=rad,
-            )
-        return img
-
-    def render(
-            self,
-            paths: Collection | list[Path] | Path | None = None,
-            scale: float = 1.0,
-            frame: bool = False,
-            thickness: int = 1,
-            color: str = "black",
-    ) -> None:
-        pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
-
-        if paths:
-            self.add(paths)
-
-        w = int(self.image_width * scale)
-        h = int(self.image_height * scale)
-        logging.info(
-            f"Creating image with size=({w}, {h})"
-        )
-        self.img: Image = Image.new("RGBA", (w, h), self.background)
-        self.img_draw = ImageDraw.ImageDraw(self.img)
-
-        it = PathIterator(self.paths)
-
-        # here we need to be path-aware and make a list of points from a path
-        # in order to color it in one style
-
-        #     points = [(100, 100), (150, 200), (200, 50), (400, 400)]
-        #     draw = ImageDraw.Draw(image)
-        #     draw.line(points, width=15, fill="green", joint="curve")
-        for conn in it.connections():
-            start = conn[0]
-            end = conn[1]
-
-            colors = ["red", "green", "blue", "yellow", "teal", "brown"]
-            color_index = start.properties["label"]
-            color = colors[color_index - 1]
-
-            self.img_draw.line(
-                xy=(start.x * scale, start.y * scale, end.x * scale, end.y * scale),
-                fill=color,
-                width=thickness,
-            )
-
-        do_blur = {}
-        dont_blur = []
-
-        for point in self.positions:
-            if "blur" in point.properties.keys():
-                rad = point.properties["radius"]
-                if rad not in do_blur.keys():
-                    do_blur[point.properties["radius"]] = []
-                # point.properties["radius"] = rad * 0.9
-                do_blur[rad].append(point)
-            else:
-                dont_blur.append(point)
-
-        if len(do_blur) > 0:
-            _blurred = []
-            for k, v in do_blur.items():
-                _k = k / 4 * scale
-                _blurred.append(self.render_points((w, h), v, scale).filter(ImageFilter.GaussianBlur(radius=_k / 2)))
-
-            base = _blurred[0]
-            for image in _blurred[1:]:
-                base = Image.alpha_composite(base, image)
-            _not_blurred = self.render_points((w, h), dont_blur, scale)  # .filter(ImageFilter.GaussianBlur(radius=2))
-            _not_blurred = Image.alpha_composite(self.img, _not_blurred)
-            self.img = Image.alpha_composite(_not_blurred, base).convert("RGB")
-        else:
-            img_out = self.render_points((w, h), dont_blur, scale)
-            self.img = Image.alpha_composite(img_out, self.img).convert("RGB")
+    def render(self, scale: float = 1.0, frame: bool = False) -> None:
+        self.render_all_paths(scale=scale)
+        self.render_all_points(scale=scale)
 
         if frame:
             self.render_frame()
 
+    def render_all_paths(self, scale: float = 1.0):
+        for path in self.paths:
+            path.scale(scale, scale)
+            points = path.as_tuple_list()
+            color = path.properties[Property.COLOR]
+            width = path.properties[Property.WIDTH]
+            self.img_draw.line(points, fill=color, width=width, joint="curve")
+
     def save(self, filename: str) -> None:
+        pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
+
         fname = self.save_path / (filename + ".jpg")
         self.img.save(fname, "JPEG")
 
@@ -154,3 +89,50 @@ class JpegRenderer:
         self.img_draw.line(xy=(0, 0, 0, h), fill="black", width=2)
         self.img_draw.line(xy=(w - 2, 0, w - 2, h), fill="black", width=2)
         self.img_draw.line(xy=(0, h - 2, w, h - 2), fill="black", width=2)
+
+    def render_points(self, points: list[Position], scale: float) -> Image:
+        img: Image = Image.new("RGBA", (self.img.width, self.img.height),
+                               (self._background[0], self._background[1], self._background[2], 0))
+        img_draw = ImageDraw.ImageDraw(img)
+
+        for point in points:
+            rad = point.properties["radius"]
+            color = point.properties["color"]
+            img_draw.ellipse(
+                xy=[
+                    ((point.x - rad) * scale, (point.y - rad) * scale),
+                    ((point.x + rad) * scale, (point.y + rad) * scale),
+                ],
+                fill=color,
+                width=rad,
+            )
+        return img
+
+    def render_all_points(self, scale: float = 1.0):
+        do_blur = {}
+        dont_blur = []
+
+        for point in self.positions:
+            if "blur" in point.properties.keys():
+                rad = point.properties["radius"]
+                if rad not in do_blur.keys():
+                    do_blur[point.properties["radius"]] = []
+                do_blur[rad].append(point)
+            else:
+                dont_blur.append(point)
+
+        if len(do_blur) > 0:
+            _blurred = []
+            for k, v in do_blur.items():
+                _k = k / 4 * scale
+                _blurred.append(self.render_points(v, scale).filter(ImageFilter.GaussianBlur(radius=_k / 2)))
+
+            base = _blurred[0]
+            for image in _blurred[1:]:
+                base = Image.alpha_composite(base, image)
+            _not_blurred = self.render_points(dont_blur, scale)
+            _not_blurred = Image.alpha_composite(self.img, _not_blurred)
+            self.img = Image.alpha_composite(_not_blurred, base).convert("RGB")
+        else:
+            img_out = self.render_points(dont_blur, scale)
+            self.img = Image.alpha_composite(img_out, self.img).convert("RGB")
