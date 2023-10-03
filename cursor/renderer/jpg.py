@@ -53,14 +53,6 @@ class JpegRenderer:
         if frame:
             self.render_frame()
 
-    def render_all_paths(self, scale: float = 1.0):
-        for path in self.paths:
-            path.scale(scale, scale)
-            points = path.as_tuple_list()
-            color = path.properties[Property.COLOR]
-            width = path.properties[Property.WIDTH]
-            self.img_draw.line(points, fill=color, width=width, joint="curve")
-
     def save(self, filename: str) -> None:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
@@ -89,6 +81,14 @@ class JpegRenderer:
         self.img_draw.line(xy=(w - 2, 0, w - 2, h), fill="black", width=2)
         self.img_draw.line(xy=(0, h - 2, w, h - 2), fill="black", width=2)
 
+    def render_all_paths(self, scale: float = 1.0):
+        for path in self.paths:
+            path.scale(scale, scale)
+            points = path.as_tuple_list()
+            color = path.properties[Property.COLOR]
+            width = path.properties[Property.WIDTH]
+            self.img_draw.line(points, fill=color, width=width, joint="curve")
+
     def render_points(self, points: list[Position], scale: float) -> Image:
         img: Image = Image.new("RGBA", (self.img.width, self.img.height),
                                (self._background[0], self._background[1], self._background[2], 0))
@@ -97,14 +97,25 @@ class JpegRenderer:
         for point in points:
             rad = point.properties["radius"]
             color = point.properties["color"]
-            img_draw.ellipse(
-                xy=[
-                    ((point.x - rad) * scale, (point.y - rad) * scale),
-                    ((point.x + rad) * scale, (point.y + rad) * scale),
-                ],
-                fill=color,
-                width=rad,
-            )
+
+            if "outline" in point.properties.keys():
+                outline = point.properties["outline"]
+                img_draw.ellipse(
+                    xy=[
+                        ((point.x - rad) * scale, (point.y - rad) * scale),
+                        ((point.x + rad) * scale, (point.y + rad) * scale),
+                    ],
+                    fill=color,
+                    outline=outline,
+                    width=int(rad),
+                )
+            else:
+                img_draw.ellipse(
+                    xy=[
+                        ((point.x - rad) * scale, (point.y - rad) * scale),
+                        ((point.x + rad) * scale, (point.y + rad) * scale),
+                    ],
+                    fill=color)
         return img
 
     def render_all_points(self, scale: float = 1.0):
