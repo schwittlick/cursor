@@ -39,7 +39,7 @@ logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.DEBUG)
 class Collection:
     def __init__(self, timestamp: float | None = None, name: str = "noname"):
         self.__paths: list[Path] = []
-        self.__name = name
+        self.name = name
         if timestamp:
             self._timestamp = timestamp
         else:
@@ -71,7 +71,7 @@ class Collection:
 
     def __repr__(self) -> str:
         tuples = [pa.as_tuple_list() for pa in self]
-        return f"PathCollection({self.__name}) -> ({len(self)})\n{tuples}"
+        return f"PathCollection({self.name}) -> ({len(self)})\n{tuples}"
 
     def __eq__(self, other: Collection) -> bool:
         if not isinstance(other, Collection):
