@@ -144,5 +144,6 @@ class JpegRenderer:
             _not_blurred = Image.alpha_composite(self.img, _not_blurred)
             self.img = Image.alpha_composite(_not_blurred, base).convert("RGB")
         else:
-            img_out = self.render_points(dont_blur, scale)
-            self.img = Image.alpha_composite(img_out, self.img).convert("RGB")
+            # TODO: FIX HERE
+            self.img = self.render_points(dont_blur, scale).convert("RGB")
+            #self.img = Image.alpha_composite(img_out, self.img).convert("RGB")
