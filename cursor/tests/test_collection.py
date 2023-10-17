@@ -1,4 +1,4 @@
-from cursor.path import Path
+from cursor.path import Path, Property
 from cursor.collection import Collection
 from cursor.bb import BoundingBox
 from cursor.timer import Timer
@@ -11,28 +11,9 @@ from cursor.position import Position
 
 
 def test_pathcollection_minmax():
-    pcol = Collection()
-
-    p1 = Path()
-
-    p1.add(5, 5111)
-    p1.add(10, 11)
-    p1.add(11, 11)
-    p1.add(20, 20)
-    p1.add(30, 31)
-    p1.add(40, 41)
-
-    p2 = Path()
-
-    p2.add(545, 54)
-    p2.add(160, 11)
-    p2.add(11, 171)
-    p2.add(20, 20)
-    p2.add(30, 31)
-    p2.add(940, 941)
-
-    pcol.add(p1)
-    pcol.add(p2)
+    pcol = Collection.from_tuples(
+        [[(5, 5111), (10, 11), (11, 11), (20, 20), (30, 31), (40, 41)],
+         [(545, 54), (160, 11), (11, 171), (20, 20), (30, 31), (940, 941)]])
 
     assert pcol.empty() is False
 
@@ -49,6 +30,21 @@ def test_pathcollection_minmax():
     assert min[1] == 11
     assert max[0] == 940
     assert max[1] == 5111
+
+
+def test_collection_equal():
+    assert Collection.from_tuples([[(5, 5111)]]) == \
+           Collection.from_tuples([[(5, 5111)]])
+
+    assert Collection.from_tuples([[(5, 5111)]]) != \
+           Collection.from_tuples([[(5, 5111), (2, 2)]])
+
+    assert Collection.from_tuples([[(5, 5111)]]) != \
+           Collection.from_tuples([[(5, 5111)], [(5, 5111)]])
+
+    # different timestamps are *not* used for compare
+    assert Collection(123) == Collection(123)
+    assert Collection(123) == Collection(1234)
 
 
 def test_bb_inside():
@@ -95,6 +91,18 @@ def test_collection_as_array():
     assert arr[0][0, 1] == 101
 
 
+def test_collection_from_list_of_tuple_lists():
+    tuples = [[(0.0, 150.0), (0.0, 0.0)],
+              [(114.0, 150.0), (114.0, 0.0)],
+              [(0.0, 79.6875), (114.0, 79.6875)]]
+    collection = Collection.from_tuples(tuples)
+
+    assert len(collection) == len(tuples)
+    assert collection[0] == Path.from_tuple_list([(0.0, 150.0), (0.0, 0.0)])
+    assert collection[1] == Path.from_tuple_list([(114.0, 150.0), (114.0, 0.0)])
+    assert collection[2] == Path.from_tuple_list([(0.0, 79.6875), (114.0, 79.6875)])
+
+
 def test_collection_as_dataframe():
     p1 = Path.from_tuple_list([(100, 101), (200, 201), (300, 301)])
     p2 = Path.from_tuple_list([(222, 223), (333, 334), (333, 334), (333, 334)])
@@ -105,9 +113,7 @@ def test_collection_as_dataframe():
 
     df = pc.as_dataframe()  # concatenated
     assert df.ndim == 2
-    assert (
-        df.values.shape[0] == 4
-    )  # the maximum numer of points in a path (rest are filled up with nan's)
+    assert (df.values.shape[0] == 4)  # the maximum numer of points in a path (rest are filled up with nan's)
     assert df.values.shape[1] == 6  # 3 times x, y columns
 
 
@@ -201,7 +207,7 @@ def test_pathcollection_add():
 
     pcol.add(p1)
 
-    assert pcol.empty() is True
+    assert not pcol.empty()
 
 
 def test_pathcollection_add2():
@@ -225,9 +231,6 @@ def test_pathcollection_add2():
 
     assert len(pcol4) == 3
 
-    with pytest.raises(Exception):
-        _ = pcol1 + p1
-
 
 def test_pathcollection_get():
     pcol = Collection()
@@ -244,7 +247,7 @@ def test_pathcollection_get():
     assert p1 == p2
 
     with pytest.raises(IndexError):
-        pcol[1]
+        _ = pcol[1]
 
 
 def test_pathcollection_compare():
@@ -454,7 +457,7 @@ def test_pathcollection_reverse():
 
 def test_pathcollection_layer():
     pcol = Collection()
-    p0 = Path(layer="custom")
+    p0 = Path(properties={Property.LAYER: "custom"})
     p0.add(5, 5111)
     p1 = Path()
     p1.add(5, 5111)
@@ -505,19 +508,19 @@ def test_collection_travel_distance():
 
 
 def test_pathcollection_line_types():
-    p1 = Path(line_type=1)
+    p1 = Path(properties={Property.LINETYPE: 1})
     p1.add(0, 0)
 
-    p2 = Path(line_type=2)
+    p2 = Path(properties={Property.LINETYPE: 2})
     p2.add(0, 0)
 
-    p3 = Path(line_type=3)
+    p3 = Path(properties={Property.LINETYPE: 3})
     p3.add(0, 0)
 
-    p4 = Path(line_type=4)
+    p4 = Path(properties={Property.LINETYPE: 4})
     p4.add(0, 0)
 
-    p5 = Path(line_type=4)
+    p5 = Path(properties={Property.LINETYPE: 4})
     p5.add(0, 0)
 
     pc = Collection()
@@ -529,3 +532,129 @@ def test_pathcollection_line_types():
 
     line_types = pc.get_all_line_types()
     assert line_types == [1, 2, 3, 4]
+
+
+def test_reorder_custom():
+    p0 = Path()
+    p0.add(0, 0)
+    p0.add(1, 0)
+    p0.add(2, 0)
+    p0.add(3, 0)
+    p0.add(4, 0)
+
+    p1 = Path()
+    p1.add(2, 2)
+    p1.add(2, 3)
+    p1.add(2, 4)
+    p1.add(2, 5)
+    p1.add(2, 6)
+
+    p2 = Path()
+    p2.add(20, 20)
+    p2.add(25, 20)
+    p2.add(27, 20)
+    p2.add(30, 20)
+    p2.add(40, 20)
+
+    p3 = Path()
+    p3.add(50, 50)
+    p3.add(50, 60)
+    p3.add(50, 70)
+    p3.add(50, 80)
+    p3.add(50, 90)
+    p3.add(100, 100)
+
+    p4 = Path()
+    p4.add(1, 0)
+    p4.add(3, 3)
+    p4.add(4, 4)
+    p4.add(5, 5)
+    p4.add(1, 0)
+
+    pc = Collection()
+    pc.add(p0)
+    pc.add(p1)
+    pc.add(p2)
+    pc.add(p3)
+    pc.add(p4)
+
+    pc.reorder_quadrants(3, 3)
+
+    assert pc[0] == p0
+    assert pc[1] == p1
+    assert pc[2] == p2
+    assert pc[3] == p4
+    assert pc[4] == p3
+
+
+def test_reorder_quadrants():
+    p0 = Path.from_tuple_list([(1, 1), (1, 1)])
+    p1 = Path.from_tuple_list([(1, 10), (1, 10)])
+    p2 = Path.from_tuple_list([(10, 1), (10, 1)])
+    p3 = Path.from_tuple_list([(5, 5), (5, 5)])
+    p4 = Path.from_tuple_list([(1, 1.1), (1, 1.1)])
+
+    pc = Collection.from_path_list([p0, p1, p2, p3, p4])
+
+    pc.reorder_quadrants(10, 10)
+
+    assert pc[0] == p1
+    assert pc[1] == p2
+    assert pc[2] == p0
+    assert pc[3] == p4
+    assert pc[4] == p3
+
+
+def test_reorder_quadrants2():
+    pc = Collection()
+    import random
+
+    for i in range(100):
+        x = random.uniform(0, 100)
+        y = random.uniform(0, 100)
+        p = Path()
+        p.add(x, y)
+        p.add(x, y)
+        pc.add(p)
+
+    pc.reorder_quadrants(10, 10)
+
+    assert len(pc) == 100
+
+
+def test_sort_tsp():
+    p0 = Path.from_tuple_list([(1, 1), (2, 1), (5, 10)])
+    p1 = Path.from_tuple_list([(1, 10), (1, 5), (5, 2)])
+    p2 = Path.from_tuple_list([(10, 1), (10, 10), (20, 1)])
+    p3 = Path.from_tuple_list([(1, 5), (1, 2)])
+    p4 = Path.from_tuple_list([(5, 5), (5, 8), (0, 0)])
+
+    pc = Collection.from_path_list([p0, p1, p2, p3, p4])
+
+    order = pc.sort_tsp(iters=50)
+
+    assert order == [0, 1, 2, 4, 3]
+    assert pc[0] == p0
+    assert pc[1] == p1
+    assert pc[2] == p2
+    assert pc[3] == p4
+    assert pc[4] == p3
+
+
+def test_fast_tsp():
+    p0 = Path.from_tuple_list([(1, 1), (2, 1), (5, 10)])
+    p1 = Path.from_tuple_list([(1, 10), (1, 5), (5, 2)])
+    p2 = Path.from_tuple_list([(10, 1), (10, 10), (20, 1)])
+    p3 = Path.from_tuple_list([(1, 5), (1, 2)])
+    p4 = Path.from_tuple_list([(5, 5), (5, 8), (0, 0)])
+
+    pc = Collection.from_path_list([p0, p1, p2, p3, p4])
+
+    order = pc.fast_tsp()
+
+    assert order == [0, 3, 4, 2, 1]
+    assert pc[0] == p0
+    assert pc[1] == p3
+    assert pc[2] == p4
+    assert pc[3] == p2
+    assert pc[4] == p1

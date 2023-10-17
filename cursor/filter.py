@@ -4,7 +4,6 @@ import sys
 import wasabi
 import copy
 
-
 log = wasabi.Printer()
 
 
@@ -13,7 +12,9 @@ class Filter:
         raise NotImplementedError("Not implemented in base class")
 
     def filtered(self, paths):
-        raise NotImplementedError("Not implemented in base class")
+        copied_paths = copy.deepcopy(paths)
+        self.filter(copied_paths)
+        return copied_paths
 
 
 class EntropyMinFilter(Filter):
@@ -37,11 +38,6 @@ class EntropyMinFilter(Filter):
             f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
         )
 
-    def filtered(self, paths):
-        copied_paths = copy.deepcopy(paths)
-        self.filter(copied_paths)
-        return copied_paths
-
 
 class EntropyMaxFilter(Filter):
     def __init__(self, max_x_entropy, max_y_entropy):
@@ -63,11 +59,6 @@ class EntropyMaxFilter(Filter):
         log.good(
             f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
         )
-
-    def filtered(self, paths):
-        copied_paths = copy.deepcopy(paths)
-        self.filter(copied_paths)
-        return copied_paths
 
 
 class DirectionChangeEntropyFilter(Filter):
@@ -91,11 +82,6 @@ class DirectionChangeEntropyFilter(Filter):
         log.good(
             f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
         )
-
-    def filtered(self, paths):
-        copied_paths = copy.deepcopy(paths)
-        self.filter(copied_paths)
-        return copied_paths
 
 
 class BoundingBoxFilter(Filter):
@@ -124,11 +110,6 @@ class MinPointCountFilter(Filter):
         log.good(
             f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
         )
-
-    def filtered(self, paths):
-        copied_paths = copy.deepcopy(paths)
-        self.filter(copied_paths)
-        return copied_paths
 
 
 class MaxPointCountFilter(Filter):
@@ -194,7 +175,7 @@ class DistanceBetweenPointsFilter(Filter):
                 d = p1.distance(p2)
                 if self.min_distance <= d <= self.max_distance:
                     verts.append(p2)
-            pa.vertices = verts
+            pa.generate = verts
             pa.clean()
 
         len_after = len(paths)

@@ -423,7 +423,7 @@ class Plotter:
         c = self.transform(c, MinmaxMapping.maps[self.type])
 
         for pa in c:
-            for poi in pa.vertices:
+            for poi in pa.generate:
                 poi.x = (poi.x * scale) + offset[0]
                 poi.y = (poi.y * scale) + offset[1]
         return c
@@ -432,7 +432,7 @@ class Plotter:
         cbb = c.bb()
         trans = misc.transformFn((cbb.x, cbb.y), (cbb.x2, cbb.y2), (dims.x, dims.y), (dims.x2, dims.y2))
         for pa in c:
-            for poi in pa.vertices:
+            for poi in pa.generate:
                 n_poi = trans(poi.as_tuple())
                 poi.x = n_poi[0]
                 poi.y = n_poi[1]

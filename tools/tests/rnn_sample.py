@@ -2,7 +2,6 @@ import arcade
 import tensorflow as tf
 
 from cursor import misc
-from cursor.bb import BoundingBox
 from cursor.data import DataDirHandler
 from cursor.filter import MinPointCountFilter, MaxPointCountFilter
 from cursor.loader import Loader
@@ -13,11 +12,11 @@ from cursor.renderer import RealtimeRenderer
 def transform_path(path, bb, out):
     fn = misc.transformFn((bb.x, bb.y), (bb.x2, bb.y2), out[0], out[1])
 
-    res = list(map(fn, path.vertices))
+    res = list(map(fn, path.generate))
     return Path.from_tuple_list(res)
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     p = DataDirHandler().recordings()
     ll = Loader(directory=p, limit_files=10)
     c = ll.all_paths()
@@ -43,7 +42,6 @@ if __name__ == "__main__":
     p2 = c.random()
     print(len(p2))
 
-
     # Assuming you have loaded the trained model from a .h5 file
     model = tf.keras.models.load_model('trained_model4.h5')
 
@@ -66,18 +64,17 @@ if __name__ == "__main__":
 
     print(generated_sequences)
 
-
     points = [inverted_mapping[idx] for idx in generated_sequences]
     print(points)
 
     p = Path.from_tuple_list(points)
-    #p.fit(BoundingBox(0, 0, 400, 400), padding=10)
+    # p.fit(BoundingBox(0, 0, 400, 400), padding=10)
     p = transform_path(p, p.bb(), ((0, 0), (400, 400)))
 
-    p2 = transform_path(p2, p2.bb(), ((400, 0),(800, 400)))
+    p2 = transform_path(p2, p2.bb(), ((400, 0), (800, 400)))
 
     rr = RealtimeRenderer(800, 400, "projection")
-    rr.set_bg_color(arcade.color.WHITE)
+    rr.background(arcade.color.WHITE)
     rr.add_path(p)
     rr.add_path(p2)
     rr.run()

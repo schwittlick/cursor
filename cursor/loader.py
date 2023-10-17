@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from cursor.data import DateHandler
 from cursor.path import Path
 from cursor.position import Position
@@ -5,7 +7,6 @@ from cursor.collection import Collection
 from cursor.timer import Timer
 
 import wasabi
-import typing
 import pathlib
 import json
 import base64
@@ -17,23 +18,22 @@ log = wasabi.Printer()
 
 
 class MyJsonEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, Collection):
-            return {
-                "paths": o.get_all(),
-                "timestamp": o.timestamp(),
-            }
-
-        if isinstance(o, Path):
-            return o.vertices
-
-        if isinstance(o, Position):
-            return {
-                "x": round(o.x, 4),
-                "y": round(o.y, 4),
-                "ts": round(o.timestamp, 2),
-                "c": o.color if o.color else None,
-            }
+    def default(self, o: Position | Path | Collection) -> dict | list[Position]:
+        match o:
+            case Collection():
+                return {
+                    "paths": o.get_all(),
+                    "timestamp": o.timestamp(),
+                }
+            case Path():
+                return o.vertices
+            case Position():
+                return {
+                    "x": round(o.x, 4),
+                    "y": round(o.y, 4),
+                    "ts": round(o.timestamp, 2),
+                    # "c": o.properties["color"] if "color" in o.properties.keys() else None,
+                }
 
 
 class MyJsonDecoder(json.JSONDecoder):
@@ -41,7 +41,7 @@ class MyJsonDecoder(json.JSONDecoder):
         json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
 
     # @profile
-    def object_hook(self, dct):
+    def object_hook(self, dct: dict) -> dict | Position | Collection:
         if "x" in dct:
             if "c" in dct:
                 if dct["c"] is not None:
@@ -50,7 +50,7 @@ class MyJsonDecoder(json.JSONDecoder):
                     c = None
             else:
                 c = None
-            return Position(dct["x"], dct["y"], dct["ts"], c)
+            return Position(dct["x"], dct["y"], dct["ts"], {"color": c})
         if "w" in dct and "h" in dct:
             s = pyautogui.Size(dct["w"], dct["h"])
             return s
@@ -66,7 +66,7 @@ class MyJsonDecoder(json.JSONDecoder):
 class JsonCompressor:
     ZIPJSON_KEY = "base64(zip(o))"
 
-    def json_zip(self, j):
+    def json_zip(self, j: dict) -> dict:
         dumped = json.dumps(j, cls=MyJsonEncoder)
         dumped_encoded = dumped.encode("utf-8")
         compressed = zlib.compress(dumped_encoded)
@@ -75,7 +75,7 @@ class JsonCompressor:
         return encoded
 
     # @profile
-    def json_unzip(self, j, insist=True):
+    def json_unzip(self, j: dict, insist: bool = True) -> dict:
         try:
             assert j[self.ZIPJSON_KEY]
             assert set(j.keys()) == {self.ZIPJSON_KEY}
@@ -105,10 +105,10 @@ class JsonCompressor:
 
 class Loader:
     def __init__(
-        self,
-        directory: pathlib.Path = None,
-        limit_files: typing.Union[int, list[str]] = None,
-        load_keys: bool = False,
+            self,
+            directory: pathlib.Path = None,
+            limit_files: int | list[str] | None = None,
+            load_keys: bool = False,
     ):
         self._recordings = []
         self._keyboard_recordings = []
@@ -119,10 +119,10 @@ class Loader:
             )
 
     def load_all(
-        self,
-        directory: pathlib.Path,
-        limit_files: typing.Union[int, list[str]] = None,
-        load_keys: bool = False,
+            self,
+            directory: pathlib.Path,
+            limit_files: int | list[str] | None = None,
+            load_keys: bool = False,
     ) -> None:
         t = Timer()
         t.start()

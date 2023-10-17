@@ -1,13 +1,5 @@
 from cursor.collection import Collection
 from cursor.data import DataDirHandler
-from cursor.renderer import (
-    HPGLRenderer,
-    JpegRenderer,
-    GCodeRenderer,
-    TektronixRenderer,
-    DigiplotRenderer,
-    SvgRenderer,
-)
 from cursor.device import (
     PlotterType,
     PaperSize,
@@ -23,6 +15,13 @@ import inspect
 import hashlib
 import wasabi
 import pathlib
+
+from cursor.renderer.digi import DigiplotRenderer
+from cursor.renderer.gcode import GCodeRenderer
+from cursor.renderer.hpgl import HPGLRenderer
+from cursor.renderer.jpg import JpegRenderer
+from cursor.renderer.svg import SvgRenderer
+from cursor.renderer.tektronix import TektronixRenderer
 
 log = wasabi.Printer()
 
@@ -147,18 +146,18 @@ class Exporter:
             log.fail("Config, Name or Paths is None. Not exporting anything")
             return
 
-        # jpeg fitting roughly
-        self.paths.fit(
-            Paper.sizes[self.cfg.dimension],
-            padding_mm=self.cfg.margin,
-            cutoff_mm=self.cfg.cutoff,
-            keep_aspect=self.keep_aspect_ratio
-        )
-
         module = inspect.getmodule(inspect.stack()[2][0])
         ms = inspect.getsource(module)
 
         if jpg:
+            # jpeg fitting roughly
+            self.paths.fit(
+                Paper.sizes[self.cfg.dimension],
+                padding_mm=self.cfg.margin,
+                cutoff_mm=self.cfg.cutoff,
+                keep_aspect=self.keep_aspect_ratio
+            )
+
             separate_layers = self.paths.get_layers()
             for layer, pc in separate_layers.items():
                 sizename = PaperSizeName.names[self.cfg.dimension]
@@ -171,8 +170,9 @@ class Exporter:
                 )
 
                 jpeg_folder = DataDirHandler().jpg(self.name)
-                jpeg_renderer = JpegRenderer(jpeg_folder)
-                jpeg_renderer.render(pc, scale=8.0)
+                jpeg_renderer = JpegRenderer(jpeg_folder, w=1920 * 8, h=1080 * 8)
+                jpeg_renderer.add(pc)
+                jpeg_renderer.render(scale=8.0)
                 jpeg_renderer.save(f"{fname}")
 
         if source:
@@ -265,7 +265,8 @@ def save_wrapper(pc, projname, fname):
     jpeg_folder = DataDirHandler().jpg(projname)
     jpeg_renderer = JpegRenderer(jpeg_folder)
 
-    jpeg_renderer.render(pc, scale=1.0)
+    jpeg_renderer.add(pc)
+    jpeg_renderer.render(scale=1.0)
     jpeg_renderer.save(fname)
 
     svg_folder = DataDirHandler().svg(projname)
@@ -277,9 +278,9 @@ def save_wrapper(pc, projname, fname):
 
 def save_wrapper_jpeg(pc, projname, fname, scale=4.0, thickness=3):
     folder = DataDirHandler().jpg(projname)
-    jpeg_renderer = JpegRenderer(folder)
-
-    jpeg_renderer.render(pc, scale=scale, thickness=thickness)
+    jpeg_renderer = JpegRenderer(folder, w=int(1920 * scale), h=int(1080 * scale))
+    jpeg_renderer.add(pc)
+    jpeg_renderer.render(scale=scale)
     jpeg_renderer.save(fname)
 
 

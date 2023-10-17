@@ -27,14 +27,14 @@ if __name__ == "__main__":
     # Assign unique indices to points in the vocabulary
     index_mapping = {point: idx for idx, point in enumerate(vocab)}
 
-    #print(index_mapping)
+    # print(index_mapping)
 
     encoded_sequences = []
     for sequence in lines:
         encoded_sequence = [index_mapping[point] for point in sequence]
         encoded_sequences.append(encoded_sequence)
 
-    #print(encoded_sequences)
+    # print(encoded_sequences)
 
     max_length = max(len(seq) for seq in encoded_sequences)
     print(max_length)

@@ -49,7 +49,7 @@ def on_mouse(rr: RealtimeRenderer, x, y, dx, dy):
 
 if __name__ == "__main__":
     rr = RealtimeRenderer(800, 400, "projection")
-    rr.set_bg_color(arcade.color.WHITE)
+    rr.background(arcade.color.WHITE)
     rr.set_on_mouse_cb(on_mouse)
 
     rr.run()

@@ -3,34 +3,43 @@ from __future__ import annotations
 import copy
 import datetime
 import hashlib
+import itertools
+import math
 import operator
+import pathlib
 import pickle
 import random
 import time
-import typing
+import logging
 from functools import reduce
 
+import fast_tsp
 import numpy as np
 import pandas as pd
 import pytz
-import wasabi
+import shapely
+from matplotlib import pyplot as plt
+from shapely import LineString, Polygon, intersection_all
+from skimage.transform import estimate_transform
+from scipy import spatial
+from sko.GA import GA_TSP
 
 from cursor.bb import BoundingBox
 from cursor.data import DataDirHandler
 from cursor.filter import Filter
+from cursor.misc import apply_matrix
 from cursor.path import Path
 from cursor.position import Position
 from cursor.sorter import Sorter
+from cursor.timer import Timer
 
-log = wasabi.Printer()
+logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.DEBUG)
 
 
 class Collection:
-    def __init__(
-            self, timestamp: typing.Union[float, None] = None, name: str = "noname"
-    ):
-        self.__paths: typing.List[Path] = []
-        self.__name = name
+    def __init__(self, timestamp: float | None = None, name: str = "noname"):
+        self.__paths: list[Path] = []
+        self.name = name
         if timestamp:
             self._timestamp = timestamp
         else:
@@ -38,37 +47,44 @@ class Collection:
             utc_timestamp = datetime.datetime.timestamp(now)
             self._timestamp = utc_timestamp
 
+        self.properties: dict = {}
+
+    @property
+    def paths(self) -> list[Path]:
+        return self.__paths
+
     def __len__(self) -> int:
         return len(self.__paths)
 
-    def __add__(self, other: typing.Union[list, Collection]) -> Collection:
-        if isinstance(other, Collection):
-            new_paths = self.__paths + other.get_all()
-            p = Collection()
-            p.__paths.extend(new_paths)
-            return p
-        if isinstance(other, list):
-            new_paths = self.__paths + other
-            p = Collection()
-            p.__paths.extend(new_paths)
-            return p
-        else:
-            raise Exception("You can only add another Collection or a list of paths")
+    def __add__(self, other: list[Path] | Collection) -> Collection:
+        match other:
+            case list():
+                new_paths = self.__paths + other
+                p = Collection()
+                p.__paths.extend(new_paths)
+                return p
+            case Collection():
+                new_paths = self.__paths + other.get_all()
+                p = Collection()
+                p.__paths.extend(new_paths)
+                return p
 
     def __repr__(self) -> str:
-        return f"PathCollection({self.__name}) -> ({len(self)})"
+        tuples = [pa.as_tuple_list() for pa in self]
+        return f"PathCollection({self.name}) -> ({len(self)})\n{tuples}"
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Collection) -> bool:
         if not isinstance(other, Collection):
             return NotImplemented
 
         if len(self) != len(other):
             return False
 
-        if self.timestamp() != other.timestamp():
-            return False
+        for i in range(len(self)):
+            if self[i] == other[i]:
+                continue
 
-        # todo: do more in depth test
+            return False
 
         return True
 
@@ -76,25 +92,26 @@ class Collection:
         for p in self.__paths:
             yield p
 
-    def __getitem__(
-            self, item: typing.Union[int, slice]
-    ) -> typing.Union[Collection, Path]:
-        if isinstance(item, slice):
-            start, stop, step = item.indices(len(self))
-            _pc = Collection()
-            _pc.__paths = [self[i] for i in range(start, stop, step)]
-            return _pc
+    def __getitem__(self, item: int | slice) -> Collection | Path:
+        match item:
+            case int():
+                if len(self.__paths) < item + 1:
+                    raise IndexError(
+                        f"Index {item} too high. Maximum is {len(self.__paths)}"
+                    )
 
-        if len(self.__paths) < item + 1:
-            raise IndexError(f"Index {item} too high. Maximum is {len(self.__paths)}")
+                return self.__paths[item]
+            case slice():
+                start, stop, step = item.indices(len(self))
+                _pc = Collection()
+                _pc.__paths = [self[i] for i in range(start, stop, step)]
+                return _pc
 
-        return self.__paths[item]
-
-    def save_pickle(self, fname: str) -> None:
-        fn = DataDirHandler().pickles() / fname
-        file_to_store = open(fn.as_posix(), "wb")
+    def save_pickle(self, fname: pathlib.Path) -> None:
+        pathlib.Path(fname.parent).mkdir(parents=True, exist_ok=True)
+        file_to_store = open(fname.as_posix(), "wb")
         pickle.dump(self, file_to_store)
-        log.info(f"Saved {fn.as_posix()}")
+        logging.info(f"Saved {fname.as_posix()}")
 
     @staticmethod
     def from_pickle(fname: str) -> Collection:
@@ -102,24 +119,37 @@ class Collection:
         with open(fn, "rb") as file:
             return pickle.load(file)
 
-    def add(self, path: typing.Union[BoundingBox, Path, typing.List[Path]]) -> None:
-        if isinstance(path, Path):
-            if path.empty():
-                return
-            self.__paths.append(path)
-        if isinstance(path, list):
-            self.__paths.extend(path)
-        if isinstance(path, BoundingBox):
-            p = Path().from_tuple_list(
-                [
-                    (path.x, path.y),
-                    (path.x, path.y2),
-                    (path.x2, path.y2),
-                    (path.x2, path.y),
-                    (path.x, path.y),
-                ]
-            )
-            self.__paths.append(p)
+    @staticmethod
+    def from_tuples(tuples: list[list[tuple]]) -> Collection:
+        c = Collection()
+        for tup in tuples:
+            c.add(Path.from_tuple_list(tup))
+        return c
+
+    @staticmethod
+    def from_path_list(paths: list[Path]) -> Collection:
+        c = Collection()
+        for p in paths:
+            c.add(p)
+        return c
+
+    def add(self, path: BoundingBox | Path | list[Path]) -> None:
+        match path:
+            case Path():
+                self.__paths.append(path)
+            case list():
+                self.__paths.extend(path)
+            case BoundingBox():
+                p = Path().from_tuple_list(
+                    [
+                        (path.x, path.y),
+                        (path.x, path.y2),
+                        (path.x2, path.y2),
+                        (path.x2, path.y),
+                        (path.x, path.y),
+                    ]
+                )
+                self.__paths.append(p)
 
     def pop(self, idx: int) -> Path:
         return self.__paths.pop(idx)
@@ -150,7 +180,7 @@ class Collection:
         len_before = len(self)
         self.__paths = [path for path in self.__paths if len(path) > 1]
 
-        log.good(
+        logging.debug(
             f"PathCollection::clean: reduced path count from {len_before} to {len(self)}"
         )
 
@@ -162,6 +192,35 @@ class Collection:
                 pa.add_position(poi)
 
         return pa
+
+    def rotate_into_bb(self, target_bb: BoundingBox) -> None:
+        merged_into_path = self.merge()
+        if merged_into_path.is_1_dimensional():
+            logging.warning("Didn't rotate, bc path is 1-dimensional.")
+            return
+
+        line = LineString(merged_into_path.as_tuple_list())
+        rect = line.minimum_rotated_rectangle
+
+        target_poly = Polygon(
+            [
+                [0, 0],
+                [target_bb.x2, 0],
+                [target_bb.x2, target_bb.y2],
+                [0, target_bb.y2],
+                [0, 0],
+            ]
+        )
+
+        src = np.array(rect.exterior.coords)
+        dst = np.array(target_poly.exterior.coords)
+        matrix = estimate_transform("similarity", src, dst).params
+        matrix = np.append(matrix, [[0, 0, 0]], axis=0).flatten()
+
+        for path in self:
+            tup = apply_matrix(path.as_tuple_list(), matrix)
+            for i, t in enumerate(tup):
+                path.vertices[i] = Position.from_tuple(t)
 
     def reverse(self) -> None:
         self.__paths.reverse()
@@ -190,11 +249,14 @@ class Collection:
         p.__paths.extend(copy.deepcopy(self.__paths))
         return p
 
-    def get_all(self) -> typing.List[Path]:
+    def get_all(self) -> list[Path]:
         return self.__paths
 
     def random(self) -> Path:
         return random.choice(self.__paths)
+
+    def random_pop(self) -> Path:
+        return self.paths.pop(int(random.randint(0, len(self) - 1)))
 
     def sort(self, pathsorter: Sorter, reference_path: Path = None) -> None:
         if isinstance(pathsorter, Sorter):
@@ -202,9 +264,7 @@ class Collection:
         else:
             raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
-    def sorted(
-            self, pathsorter: Sorter, reference_path: Path = None
-    ) -> typing.List[Path]:
+    def sorted(self, pathsorter: Sorter, reference_path: Path = None) -> list[Path]:
         if isinstance(pathsorter, Sorter):
             return pathsorter.sorted(self.__paths, reference_path)
         else:
@@ -218,7 +278,6 @@ class Collection:
 
     def filtered(self, pathfilter: Filter) -> Collection:
         if isinstance(pathfilter, Filter):
-
             pc = Collection()
             pc.__paths = pathfilter.filtered(self.__paths)
             return pc
@@ -235,13 +294,32 @@ class Collection:
                     return False
         return True
 
-    def get_all_line_types(self) -> typing.List[int]:
+    def get_all_line_types(self) -> list[int]:
         types = []
         for p in self:
             if p.line_type not in types:
                 types.append(p.line_type)
 
         return types
+
+    def intersections(self) -> list[Position]:
+        permutations = list(itertools.combinations(self.paths, 2))
+        points = []
+
+        for combination in permutations:
+            linestrings = [
+                LineString(combination[0].as_tuple_list()),
+                LineString(combination[1].as_tuple_list()),
+            ]
+            intersections = intersection_all(linestrings)
+
+            if isinstance(intersections, shapely.geometry.Point):
+                points.append(Position(intersections.x, intersections.y))
+            if isinstance(intersections, shapely.geometry.MultiPoint):
+                for point in intersections.geoms:
+                    points.append(Position(point.x, point.y))
+
+        return points
 
     def get_line_types(self):
         types = {}
@@ -259,7 +337,7 @@ class Collection:
 
         return typed_pathcollections
 
-    def layer_names(self) -> typing.List[str]:
+    def layer_names(self) -> list[str]:
         layers = []
         for p in self:
             if p.layer not in layers:
@@ -288,10 +366,10 @@ class Collection:
         ma = self.max()
         bb = BoundingBox(mi[0], mi[1], ma[0], ma[1])
         if bb.x is np.nan or bb.y is np.nan or bb.x2 is np.nan or bb.y2 is np.nan:
-            log.fail("SHIT")
+            logging.error("SHIT")
         return bb
 
-    def min(self) -> typing.Tuple[float, float]:
+    def min(self) -> tuple[float, float]:
         if self.empty():
             return 0, 0
 
@@ -300,7 +378,7 @@ class Collection:
         miny = min(all_chained, key=lambda pos: pos.y).y
         return minx, miny
 
-    def max(self) -> typing.Tuple[float, float]:
+    def max(self) -> tuple[float, float]:
         if self.empty():
             return 0, 0
 
@@ -308,6 +386,11 @@ class Collection:
         maxx = max(all_chained, key=lambda pos: pos.x).x
         maxy = max(all_chained, key=lambda pos: pos.y).y
         return maxx, maxy
+
+    def transform(self, out: BoundingBox):
+        bb = self.bb()
+        for p in self:
+            p.transform(bb, out)
 
     def translate(self, x: float, y: float) -> None:
         [p.translate(x, y) for p in self]
@@ -330,7 +413,7 @@ class Collection:
         for p in self:
             p.simplify(e)
 
-        log.info(f"C::simplify from {count} to {self.point_count()} points.")
+        logging.debug(f"C::simplify from {count} to {self.point_count()} points.")
 
     def split_by_color(self):
         new_paths = []
@@ -338,9 +421,6 @@ class Collection:
             new_paths.extend(p.split_by_color())
 
         self.__paths = new_paths
-
-    def log(self, str) -> None:
-        log.good(f"{self.__class__.__name__}: {str}")
 
     def move_to_origin(self):
         """
@@ -396,7 +476,8 @@ class Collection:
         _bb = self.bb()
 
         # move into positive area
-        if _bb.x != 0.0 and _bb.y != 0.0:
+
+        if not math.isclose(_bb.x, 0.0) and not math.isclose(_bb.y, 0.0):
             self.move_to_origin()
 
         _bb = self.bb()
@@ -442,11 +523,15 @@ class Collection:
             else:
                 yscale = xscale
 
-        log.info(f"{self.__class__.__name__}: fit: scaled by {xscale:.2f} {yscale:.2f}")
+        logging.debug(f"fit: scaled by {xscale:.2f} {yscale:.2f}")
         self.scale(xscale, yscale)
+
+        _bb = self.bb()
 
         # centering
         self.move_to_center(width, height, output_bounds)
+
+        _bb = self.bb()
 
         if cutoff_mm is not None:
             cuttoff_margin_diff = padding_mm - cutoff_mm
@@ -479,11 +564,94 @@ class Collection:
             output_bounds_center.y - paths_center[1],
         )
 
-        log.info(
-            f"{self.__class__.__name__}: fit: translated by {diff[0]:.2f} {diff[1]:.2f}"
-        )
+        logging.debug(f"fit: translated by {diff[0]:.2f} {diff[1]:.2f}")
 
         self.translate(diff[0], diff[1])
+
+    def fast_tsp(self, plot_preview=False) -> list[int]:
+        timer = Timer()
+        start_positions = np.array([pa.start_pos().as_tuple() for pa in self])
+        end_positions = np.array([pa.end_pos().as_tuple() for pa in self])
+
+        dists = spatial.distance.cdist(
+            end_positions, start_positions, metric="euclidean"
+        )
+
+        order = fast_tsp.find_tour(np.int_(dists).tolist(), duration_seconds=10)
+
+        if plot_preview:
+            fig, ax = plt.subplots(1, 1)
+            best_points_coordinate = start_positions[order, :]
+            ax.plot(best_points_coordinate[:, 0], best_points_coordinate[:, 1], ".-r")
+            plt.show()
+
+        final_order = []
+        idx = order.index(0)
+        for i in range(idx, len(order)):
+            final_order.append(order[i])
+        for i in range(0, idx):
+            final_order.append(order[i])
+
+        self.paths[:] = [self.paths[i] for i in final_order]
+
+        timer.print_elapsed("fast_tsp:")
+
+        return final_order
+
+    def sort_tsp(
+            self,
+            iters=3000,
+            population_size=50,
+            mutation_probability=0.1,
+            plot_preview=False,
+    ) -> list[int]:
+        start_positions = np.array([pa.start_pos().as_tuple() for pa in self])
+        end_positions = np.array([pa.end_pos().as_tuple() for pa in self])
+
+        distance_matrix = spatial.distance.cdist(
+            end_positions, start_positions, metric="euclidean"
+        )
+
+        def calc_dist(routine):
+            (num_points,) = routine.shape
+            return sum(
+                [
+                    distance_matrix[
+                        routine[i % num_points], routine[(i + 1) % num_points]
+                    ]
+                    for i in range(num_points)
+                ]
+            )
+
+        ga_tsp = GA_TSP(
+            func=calc_dist,
+            n_dim=len(self.paths),
+            size_pop=population_size,
+            max_iter=iters,
+            prob_mut=mutation_probability,
+        )
+        best_points, best_distance = ga_tsp.fit()
+
+        if plot_preview:
+            fig, ax = plt.subplots(1, 2)
+            best_points_ = np.concatenate([best_points, [best_points[0]]])
+            best_points_coordinate = start_positions[best_points_, :]
+            ax[0].plot(
+                best_points_coordinate[:, 0], best_points_coordinate[:, 1], "o-r"
+            )
+            ax[1].plot(ga_tsp.generation_best_Y)
+            plt.show()
+
+        final_order = []
+        idx = np.where(best_points == 0)[0][0]
+        for i in range(idx, len(best_points)):
+            final_order.append(best_points[i])
+        for i in range(0, idx):
+            final_order.append(best_points[i])
+
+        self.paths[:] = [self.paths[i] for i in final_order]
+
+        return final_order
 
     def reorder_quadrants(self, xq: int, yq: int) -> None:
         if xq < 2 and yq < 2:
@@ -549,7 +717,7 @@ class Collection:
         ss = dict(sorted(best.items(), key=lambda item: item[1]))
 
         elapsed = time.time() - start_benchmark
-        log.info(
+        logging.debug(
             f"reorder_quadrants with x={xq} y={yq} took {round(elapsed * 1000)}ms."
         )
 
