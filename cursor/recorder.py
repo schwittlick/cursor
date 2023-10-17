@@ -43,7 +43,6 @@ class Recorder:
         )
         self.key_listener.start()
 
-        log.good("Setting up 5min auto-save")
         self.__save_async()
 
         log.good("Started cursor recorder")
@@ -53,7 +52,8 @@ class Recorder:
 
     def __save_async(self):
         self.save()
-        self._timer = threading.Timer(60 * 5, self.__save_async, [])
+        log.good("Setting up 5min auto-save")
+        self._timer = threading.Timer(60 * 30, self.__save_async, [])
         self._timer.start()
 
     def on_move(self, x, y):

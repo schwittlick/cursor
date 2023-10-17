@@ -56,7 +56,7 @@ def render(rr: RealtimeRenderer):
 
 if __name__ == "__main__":
     rr = RealtimeRenderer(1600, 1600, "projection")
-    rr.set_bg_color(arcade.color.WHITE)
+    rr.background(arcade.color.WHITE)
 
     rr.add_cb(arcade.key.N, render)
     rr.run()

@@ -1,12 +1,17 @@
 import inspect
-import typing
 
 import cv2
 import numpy as np
 import pynput
-import wasabi
+import logging
+from datetime import datetime
 
-log = wasabi.Printer()
+from shapely import LineString
+from shapely.affinity import affine_transform
+
+from cursor.position import Position
+
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 
 
 def mix(begin: float, end: float, perc: float):
@@ -95,21 +100,21 @@ def generate_perlin_noise_2d(shape, res):
     return np.sqrt(2) * ((1 - t[:, :, 1]) * n0 + t[:, :, 1] * n1)
 
 
-def map(value, inputMin, inputMax, outputMin, outputMax, clamp=True):
-    outVal = (value - inputMin) / (inputMax - inputMin) * (outputMax - outputMin) + outputMin
+def map(value, in_min, in_max, out_min, out_max, clamp=True):
+    out = (value - in_min) / (in_max - in_min) * (out_max - out_min) + out_min
 
     if clamp:
-        if outputMax < outputMin:
-            if outVal < outputMax:
-                outVal = outputMax
-            elif outVal > outputMin:
-                outVal = outputMin
+        if out_max < out_min:
+            if out < out_max:
+                out = out_max
+            elif out > out_min:
+                out = out_min
     else:
-        if outVal > outputMax:
-            outVal = outputMax
-        elif outVal < outputMin:
-            outVal = outputMin
-    return outVal
+        if out > out_max:
+            out = out_max
+        elif out < out_min:
+            out = out_min
+    return out
 
 
 class ditherModule(object):
@@ -204,13 +209,16 @@ def current_source(frame):
     return inspect.getsource(inspect.getmodule(frame))
 
 
-"""
-ty lars wander
-https://larswander.com/writing/centering-and-scaling/
-"""
+def timestamp(format: str = "%y%m%d_%H%M%S") -> str:
+    now = datetime.now()
+    return now.strftime(format)
 
 
 def transformFn(stl, sbr, dtl, dbr):
+    """
+    ty lars wander
+    https://larswander.com/writing/centering-and-scaling/
+    """
     stlx, stly = stl
     sbrx, sbry = sbr
     dtlx, dtly = dtl
@@ -225,8 +233,14 @@ def transformFn(stl, sbr, dtl, dbr):
     ox, oy = (ddx - sdx * a) * 0.5 + dtlx, (ddy - sdy * a) * 0.5 + dtly
     bx, by = -stlx * a + ox, -stly * a + oy
 
-    def calc(inp: typing.Tuple[float, float]):
+    def calc(inp: Position):
         x, y = inp.x, inp.y
-        return x * a + bx, y * a + by
+        return Position(x * a + bx, y * a + by, 0, inp.properties)
 
     return calc
+
+
+def apply_matrix(pa: list[tuple], _ma) -> list[tuple]:
+    l = LineString(pa)
+    xx, yy, = affine_transform(l, _ma).coords.xy
+    return zip(yy, xx)

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 import math
-import typing
 
 import numpy as np
 
@@ -15,14 +14,16 @@ class Position:
             x: float = 0.0,
             y: float = 0.0,
             timestamp: int = 0,
-            color: typing.Tuple[int, int, int] = None,
+            properties: dict | None = None
     ):
+        if properties is None:
+            properties = {}
         self._pos = np.array([x, y], dtype=float)
         self.timestamp = timestamp
-        self.color = color
+        self.properties = properties
 
     @classmethod
-    def from_tuple(cls, xy_tuple: typing.Tuple[float, float]) -> Position:
+    def from_tuple(cls, xy_tuple: tuple[float, float]) -> Position:
         return cls(xy_tuple[0], xy_tuple[1])
 
     @property
@@ -55,14 +56,27 @@ class Position:
             copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(self.timestamp)
         )
 
-    def distance(self, t: typing.Union[Position, np.ndarray, tuple[float, float]]) -> float:
+    def distance(self, t: Position | np.ndarray | tuple[float, float]) -> float:
         func = np.linalg.norm
-        if isinstance(t, Position):
-            return func(self.as_array() - t.as_array())
-        elif isinstance(t, np.ndarray):
-            return func(self.as_array() - t)
-        elif isinstance(t, tuple):
-            return func(self.as_array() - np.asarray(t))
+        match t:
+            case Position():
+                return func(self.as_array() - t.as_array())
+            case np.ndarray():
+                return func(self.as_array() - t)
+            case tuple():
+                return func(self.as_array() - np.asarray(t))
+
+    def distance_squared(self, t: Position | np.ndarray | tuple[float, float]) -> float:
+        def squared_euclidean_distance(p1: Position, p2: Position) -> float:
+            dx = p1.x - p2.x
+            dy = p1.y - p2.y
+            return dx * dx + dy * dy
+
+        match t:
+            case Position():
+                return squared_euclidean_distance(self, t)
+            case tuple():
+                return squared_euclidean_distance(self, Position.from_tuple(t))
 
     def rot(
             self, angle: float, origin: tuple[float, float] = (0.0, 0.0)
@@ -78,8 +92,18 @@ class Position:
     def translate(self, x: float, y: float) -> None:
         self._pos += x, y
 
+    def translated(self, x: float, y: float) -> Position:
+        _p = self.copy()
+        _p.translate(x, y)
+        return _p
+
     def scale(self, x: float, y: float) -> None:
         self._pos *= x, y
+
+    def scaled(self, x: float, y: float) -> Position:
+        _p = self.copy()
+        _p.scale(x, y)
+        return _p
 
     def inside(self, bb: BoundingBox) -> bool:
         return bb.x <= self.x <= bb.x2 and bb.y <= self.y <= bb.y2
@@ -106,7 +130,7 @@ class Position:
         return self.timestamp > o.timestamp
 
     def __repr__(self):
-        return f"({self.x:.3f}, {self.y:.3f}, {self.timestamp:.3f}, {self.color})"
+        return f"({self.x:.3f}, {self.y:.3f}, {self.timestamp:.3f}, {self.properties})"
 
     def __hash__(self):
         return hash(repr(self))

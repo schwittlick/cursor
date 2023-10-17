@@ -6,6 +6,7 @@ import hashlib
 import math
 import sys
 import typing
+from enum import Enum, auto
 
 import numpy as np
 import pandas as pd
@@ -13,10 +14,11 @@ import shapely
 import wasabi
 from scipy import spatial
 from scipy import stats
-from shapely import union_all
+from shapely import union_all, Polygon
 from shapely.geometry import LineString, MultiLineString, JOIN_STYLE, Point
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import clip_by_rect
+from skimage.transform import estimate_transform
 
 from cursor import misc
 from cursor.algorithm import ramer_douglas_peucker
@@ -24,35 +26,49 @@ from cursor.algorithm.entropy import calc_entropy
 from cursor.algorithm.frechet import LinearDiscreteFrechet
 from cursor.algorithm.frechet import euclidean
 from cursor.bb import BoundingBox
+from cursor.misc import apply_matrix
 from cursor.position import Position
 
 log = wasabi.Printer()
 
 
+class Property(Enum):
+    LAYER = auto()
+    LINETYPE = auto()
+    VELOCITY = auto()
+    PEN_FORCE = auto()
+    PEN_SELECT = auto()
+    IS_POLY = auto()
+    LASER_PWM = auto()
+    LASER_ONOFF = "laser"
+    LASER_VOLT = "volt"
+    LASER_AMP = "amp"
+    LASER_DELAY = "delay"
+    LASER_Z = "z"
+    # below used for jpeg renderer
+    COLOR = "color"
+    WIDTH = "width"
+
+
 class Path:
     def __init__(
             self,
-            vertices: typing.Optional[typing.List[Position]] = None,
-            layer: typing.Optional[str] = "layer1",
-            line_type: typing.Optional[int] = None,
-            pen_velocity: typing.Optional[int] = None,
-            pen_force: typing.Optional[int] = None,
-            pen_select: typing.Optional[int] = None,
-            is_polygon: typing.Optional[bool] = False,
-            laser_pwm: typing.Optional[int] = None
+            vertices: list[Position] | None = None,
+            properties: dict | None = None
     ):
-        self._layer = layer
-        self._line_type = line_type
-        self._pen_velocity = pen_velocity
-        self._pen_force = pen_force
-        self._pen_select = pen_select
-        self._is_polygon = is_polygon
-        self._laser_pwm = laser_pwm
-
         self._vertices = []
+        self.properties = {Property.LAYER: "layer1", Property.COLOR: (0, 0, 0), Property.WIDTH: 1}
 
         if vertices is not None:
             self._vertices = vertices
+
+        if properties is not None:
+            self.properties = properties
+
+            if Property.COLOR not in self.properties.keys():
+                self.properties[Property.COLOR] = (0, 0, 0)
+            if Property.WIDTH not in self.properties.keys():
+                self.properties[Property.WIDTH] = 1
 
     def __repr__(self):
         rep = (
@@ -86,7 +102,7 @@ class Path:
     def __getitem__(self, item) -> Position:
         return self._vertices[item]
 
-    def as_tuple_list(self) -> typing.List[typing.Tuple[float, float]]:
+    def as_tuple_list(self) -> list[tuple[float, float]]:
         return [v.as_tuple() for v in self.vertices]
 
     def as_array(self) -> np.array:
@@ -97,86 +113,149 @@ class Path:
         return pd.DataFrame(arr, columns=["x", "y"])
 
     @classmethod
-    def from_tuple_list(
-            cls, tuple_list: typing.List[typing.Tuple[float, float]]
-    ) -> Path:
+    def from_tuple_list(cls, tuple_list: list[tuple[float, float]]
+                        ) -> Path:
         return Path([Position.from_tuple(p) for p in tuple_list])
+
+    @classmethod
+    def from_list(cls, positions: list[Position]) -> Path:
+        _pa = Path()
+        for pa in positions:
+            _pa.add_position(pa)
+        return _pa
 
     @property
     def hash(self) -> str:
         return hashlib.md5(str(self.vertices).encode("utf-8")).hexdigest()
 
     @property
-    def vertices(self) -> typing.List[Position]:
+    def vertices(self) -> list[Position]:
         return self._vertices
 
     @vertices.setter
-    def vertices(self, vertices: typing.List[Position]) -> None:
+    def vertices(self, vertices: list[Position]) -> None:
         self._vertices = vertices
 
     @property
-    def line_type(self) -> int:
-        """
-        only linetype of 1 and above allowed
-        all other linetypes don't render well
-        """
-        if self._line_type is None:
-            return 1
-        return max(self._line_type, 1)
+    def line_type(self) -> int | None:
+        if Property.LINETYPE not in self.properties.keys():
+            return None
+
+        return self.properties[Property.LINETYPE]
 
     @line_type.setter
-    def line_type(self, line_type) -> None:
-        if line_type <= 0:
-            self._line_type = 1
-        self._line_type = line_type
+    def line_type(self, line_type: int) -> None:
+        self.properties[Property.LINETYPE] = line_type
 
     @property
-    def layer(self) -> str:
-        return self._layer
+    def layer(self) -> str | None:
+        if Property.LAYER not in self.properties.keys():
+            return None
+
+        return self.properties[Property.LAYER]
 
     @layer.setter
-    def layer(self, layer) -> None:
-        self._layer = layer
+    def layer(self, layer: str) -> None:
+        self.properties[Property.LAYER] = layer
 
     @property
-    def pen_force(self) -> int:
-        return self._pen_force
+    def pen_force(self) -> int | None:
+        if Property.PEN_FORCE not in self.properties.keys():
+            return None
+
+        return self.properties[Property.PEN_FORCE]
 
     @pen_force.setter
-    def pen_force(self, pen_force) -> None:
-        self._pen_force = pen_force
+    def pen_force(self, pen_force: int) -> None:
+        self.properties[Property.PEN_FORCE] = pen_force
 
     @property
-    def pen_select(self) -> int:
-        return self._pen_select
+    def pen_select(self) -> int | None:
+        if Property.PEN_SELECT not in self.properties.keys():
+            return None
+
+        return self.properties[Property.PEN_SELECT]
 
     @pen_select.setter
-    def pen_select(self, pen_select) -> None:
-        self._pen_select = pen_select
+    def pen_select(self, pen_select: int) -> None:
+        self.properties[Property.PEN_SELECT] = pen_select
 
     @property
-    def velocity(self) -> int:
-        return self._pen_velocity
+    def velocity(self) -> int | None:
+        if Property.VELOCITY not in self.properties.keys():
+            return None
+
+        return self.properties[Property.VELOCITY]
 
     @velocity.setter
-    def velocity(self, pen_velocity) -> None:
-        self._pen_velocity = pen_velocity
+    def velocity(self, pen_velocity: int) -> None:
+        self.properties[Property.VELOCITY] = pen_velocity
 
     @property
-    def laser_pwm(self) -> int:
-        return self._laser_pwm
+    def laser_pwm(self) -> int | None:
+        if Property.LASER_PWM not in self.properties.keys():
+            return None
+
+        return self.properties[Property.LASER_PWM]
 
     @laser_pwm.setter
-    def laser_pwm(self, laser_pwm) -> None:
-        self._laser_pwm = laser_pwm
+    def laser_pwm(self, laser_pwm: int) -> None:
+        self.properties[Property.LASER_PWM] = laser_pwm
 
     @property
-    def is_polygon(self) -> bool:
-        return self._is_polygon
+    def laser_volt(self) -> float | None:
+        if Property.LASER_VOLT not in self.properties.keys():
+            return None
+
+        return self.properties[Property.LASER_VOLT]
+
+    @laser_volt.setter
+    def laser_volt(self, laser_volt: float) -> None:
+        self.properties[Property.LASER_VOLT] = laser_volt
+
+    @property
+    def laser_amp(self) -> float | None:
+        if Property.LASER_AMP not in self.properties.keys():
+            return None
+
+        return self.properties[Property.LASER_AMP]
+
+    @laser_amp.setter
+    def laser_amp(self, laser_amp: float) -> None:
+        self.properties[Property.LASER_AMP] = laser_amp
+
+    @property
+    def laser_delay(self) -> float | None:
+        if Property.LASER_DELAY not in self.properties.keys():
+            return None
+
+        return self.properties[Property.LASER_DELAY]
+
+    @laser_delay.setter
+    def laser_delay(self, laser_delay: float) -> None:
+        self.properties[Property.LASER_DELAY] = laser_delay
+
+    @property
+    def laser_onoff(self) -> bool | None:
+        if Property.LASER_ONOFF not in self.properties.keys():
+            return None
+
+        return self.properties[Property.LASER_ONOFF]
+
+    @laser_onoff.setter
+    def laser_onoff(self, laser_onoff: bool) -> None:
+        self.properties[Property.LASER_ONOFF] = laser_onoff
+
+    @property
+    def is_polygon(self) -> bool | None:
+        if Property.IS_POLY not in self.properties.keys():
+            return None
+
+        return bool(self.properties[Property.IS_POLY])
 
     @is_polygon.setter
-    def is_polygon(self, is_polygon) -> None:
-        self._is_polygon = is_polygon
+    def is_polygon(self, is_polygon: bool) -> None:
+        self.properties[Property.IS_POLY] = is_polygon
 
     def is_closed(self) -> bool:
         assert len(self) > 2
@@ -190,10 +269,9 @@ class Path:
             self,
             x: float,
             y: float,
-            timestamp: int = 0,
-            color: typing.Tuple[int, int, int] = None,
+            timestamp: int = 0
     ) -> None:
-        self.vertices.append(Position(x, y, timestamp, color))
+        self.vertices.append(Position(x, y, timestamp))
 
     def add_position(self, pos: Position) -> None:
         self.vertices.append(pos)
@@ -202,14 +280,7 @@ class Path:
         self.vertices.clear()
 
     def copy(self) -> Path:
-        p = Path(None if self.empty() else copy.deepcopy(self.vertices))
-        p.layer = self.layer
-        p.velocity = self.velocity
-        p.line_type = self.line_type
-        p.pen_select = self.pen_select
-        p.pen_force = self.pen_force
-        p.is_polygon = self.is_polygon
-        return p
+        return Path(None if self.empty() else copy.deepcopy(self.vertices), self.properties)
 
     def reverse(self) -> None:
         self.vertices.reverse()
@@ -217,9 +288,7 @@ class Path:
     def reversed(self) -> Path:
         c = copy.deepcopy(self.vertices)
         c.reverse()
-        return Path(
-            c, layer=self.layer, line_type=self.line_type, pen_velocity=self.velocity
-        )
+        return Path(c, self.properties)
 
     def start_pos(self) -> Position:
         if len(self.vertices) == 0:
@@ -240,7 +309,7 @@ class Path:
         b = BoundingBox(minx, miny, maxx, maxy)
         return b
 
-    def aspect_ratio(self) -> typing.Union[float, math.nan]:
+    def aspect_ratio(self) -> float | math.nan:
         if len(self) < 2:
             return math.nan
 
@@ -274,7 +343,7 @@ class Path:
         [p.scale(x, y) for p in self.vertices]
 
     def rot(
-            self, angle: float, origin: typing.Tuple[float, float] = (0.0, 0.0)
+            self, angle: float, origin: tuple[float, float] = (0.0, 0.0)
     ) -> None:
         [p.rot(angle, origin) for p in self.vertices]
 
@@ -315,6 +384,13 @@ class Path:
             self.translate(0.0, -abs(_bb.y))
 
     def fit(self, bb: BoundingBox, padding: float, keep_aspect: bool = False) -> None:
+        """
+        padding is in % of bounding box scale. weird.
+        putting an assert here just in case
+        this should be in absolute values
+        """
+        assert padding < 1
+
         self.move_to_origin()
         _bb = self.bb()
 
@@ -324,8 +400,12 @@ class Path:
         _h = _bb.h
         if _h == 0.0:
             _h = 0.001
-        xscale = (bb.w / _w) * padding
-        yscale = (bb.h / _h) * padding
+
+        xscale = (bb.w / _w)
+        yscale = (bb.h / _h)
+        if not math.isclose(padding, 0.0):
+            xscale *= padding
+            yscale *= padding
 
         if keep_aspect:
             if xscale > yscale:
@@ -340,11 +420,7 @@ class Path:
 
         self.translate(bb.x, bb.y)
 
-    def morph(
-            self,
-            start: typing.Union[Position, typing.Tuple[float, float]],
-            end: typing.Union[Position, typing.Tuple[float, float]],
-    ) -> Path:
+    def morph(self, start: Position | tuple[float, float], end: Position | tuple[float, float]) -> Path:
         if isinstance(start, Position) and isinstance(end, Position):
             start = (start.x, start.y)
             end = (end.x, end.y)
@@ -406,7 +482,7 @@ class Path:
 
         return path
 
-    def intersect(self, newpath: Path) -> typing.Tuple[bool, float, float]:
+    def intersect(self, newpath: Path) -> tuple[bool, float, float]:
         for p1 in range(len(newpath) - 1):
             for p2 in range(len(self) - 1):
                 line1Start = newpath[p1]
@@ -455,7 +531,7 @@ class Path:
 
         return path
 
-    def direction_changes(self, mapped: bool = False) -> typing.List[float]:
+    def direction_changes(self, mapped: bool = False) -> list[float]:
         """
         returns a list of radial angles from each point
         mapped: default is output values between -360° and 360°
@@ -587,7 +663,7 @@ class Path:
     def variation_y(self):
         return stats.variation([v.y for v in self.vertices], ddof=1)
 
-    def centeroid(self) -> typing.Tuple[float, float]:
+    def centeroid(self) -> tuple[float, float]:
         arr = self.as_array()
         length = arr.shape[0]
         sum_x = np.sum(arr[:, 0])
@@ -680,7 +756,7 @@ class Path:
 
         return out_path
 
-    def offset(self, offset: float = 1.0) -> typing.Optional[Path]:
+    def offset(self, offset: float = 1.0) -> Path | None:
         """
         copied from https://github.com/markroland/path-helper/blob/main/src/PathHelper.js <3
         """
@@ -707,14 +783,14 @@ class Path:
 
         return offset_path
 
-    def parallel_offset(self, dist: float, join_style=JOIN_STYLE.mitre, mitre_limit=1.0) -> typing.List[Path]:
+    def parallel_offset(self, dist: float, join_style=JOIN_STYLE.mitre, mitre_limit=1.0) -> list[Path]:
         def iter_and_return_path(offset: BaseGeometry) -> Path:
             pa = Path()
             for x, y in offset.coords:
                 pa.add(x, y)
             return pa
 
-        def add_if(pa: Path, out: typing.List[Path]):
+        def add_if(pa: Path, out: list[Path]):
             if len(pa) > 2:
                 pa.simplify(0.01)
                 out.append(pa)
@@ -727,7 +803,7 @@ class Path:
             result = line.parallel_offset(
                 abs(dist),
                 side=side,
-                resolution=512,
+                resolution=64,
                 join_style=join_style,
                 mitre_limit=mitre_limit,
             )
@@ -748,11 +824,11 @@ class Path:
 
         return return_paths
 
-    def intersection_points(self) -> list:
+    def intersection_points(self, grid_size=0.001) -> list:
         ls = LineString(self.as_tuple_list())
         # mls = unary_union(ls, 1)
         ls.normalize()
-        mls = union_all(ls, 0.001)
+        mls = union_all(ls, grid_size)
         t = type(mls)
         linestring = None
         if t == shapely.geometry.multilinestring.MultiLineString:
@@ -827,6 +903,35 @@ class Path:
             prev := v for v in self.vertices if v.distance(prev) > dist  # noqa: F841
         ]
 
+    def resampled(self, target_dist: float) -> Path:
+        # Calculate the cumulative distances along the line
+        distances = [0.0]
+        for i in range(1, len(self)):
+            dx = self[i].x - self[i - 1].x
+            dy = self[i].y - self[i - 1].y
+            dist = np.sqrt(dx ** 2 + dy ** 2)
+            distances.append(distances[-1] + dist)
+
+        # Calculate number of intervals based on target_distance
+        total_distance = distances[-1]
+        num_intervals = int(total_distance / target_dist)
+
+        # Determine the new distances for interpolation
+        new_distances = [0.0] + [i * target_dist for i in range(1, num_intervals + 1)]
+        if new_distances[-1] > total_distance:
+            new_distances.pop()
+
+        # Use interpolation to get the new x and y coordinates
+        new_x = np.interp(new_distances, distances, [p.x for p in self])
+        new_y = np.interp(new_distances, distances, [p.y for p in self])
+
+        new_vertices = list(zip(new_x, new_y))
+
+        return Path.from_tuple_list(new_vertices)
+
+    def resample(self, target_dist: float) -> None:
+        self.vertices = self.resampled(target_dist).vertices
+
     def subset(self, start: int, end: int):
         if start < 0 or start > len(self) or end < 0 or end > len(self):
             raise Exception("bounds should be within number of vertices")
@@ -837,10 +942,9 @@ class Path:
 
         return pa
 
-    def transform(self, bb: BoundingBox, out: BoundingBox):
+    def transform(self, bb: BoundingBox, out: BoundingBox) -> None:
         fn = misc.transformFn((bb.x, bb.y), (bb.x2, bb.y2), (out.x, out.y), (out.x2, out.y2))
-        res = list(map(fn, self.vertices))
-        self.vertices = Path.from_tuple_list(res).vertices
+        self.vertices = list(map(fn, self.vertices))
 
     def simplify(self, e: float = 1.0) -> None:
         # before = len(self.vertices)
@@ -869,7 +973,7 @@ class Path:
         y = y1 + ua * (y2 - y1)
         return (x, y)
 
-    def clip(self, bb: BoundingBox) -> typing.Optional[typing.List[Path]]:
+    def clip(self, bb: BoundingBox) -> list[Path] | None:
         any_inside = False
         for v in self.vertices:
             if v.inside(bb):
@@ -880,8 +984,8 @@ class Path:
             return
 
         def get_intersection(
-                segment: Path, paths: typing.List[typing.Tuple[float, float, float, float]]
-        ) -> typing.Tuple[float, float]:
+                segment: Path, paths: list[tuple[float, float, float, float]]
+        ) -> tuple[float, float]:
             for p in paths:
                 tup1 = segment[0].as_tuple()
                 tup2 = segment[1].as_tuple()
@@ -929,7 +1033,7 @@ class Path:
             new_paths.append(current_path)
         return new_paths
 
-    def split_by_color(self) -> typing.List[Path]:
+    def split_by_color(self) -> list[Path]:
         paths_list = []
         current = Path()
         current.add_position(self.vertices[0])
@@ -946,14 +1050,14 @@ class Path:
         paths_list.append(current)
         return paths_list
 
-    def clip_shapely(self, bb: BoundingBox) -> typing.List[Path]:
+    def clip_shapely(self, bb: BoundingBox) -> list[Path]:
         def iter_and_return_path(offset: BaseGeometry) -> Path:
             pa = Path()
             for x, y in offset.coords:
                 pa.add(x, y)
             return pa
 
-        def add_if(pa: Path, out: typing.List[Path]):
+        def add_if(pa: Path, out: list[Path]):
             if len(pa) > 2:
                 pa.simplify(0.01)
                 out.append(pa)
@@ -973,3 +1077,42 @@ class Path:
             add_if(pa, return_paths)
 
         return return_paths
+
+    def is_1_dimensional(self) -> bool:
+        """
+        returns whether all x or y coordinates are the same
+        """
+
+        tuple_list = self.as_tuple_list()
+        x_values, y_values = zip(*tuple_list)
+
+        return len(set(x_values)) == 1 or len(set(y_values)) == 1
+
+    def rotated_into_bb(self, target_bb: BoundingBox) -> Path:
+        if self.is_1_dimensional():
+            log.warn("Didn't rotate, bc path is 1-dimensional.")
+            return self
+
+        line = LineString(self.as_tuple_list())
+        rect = line.minimum_rotated_rectangle
+
+        target_poly = Polygon([[0, 0], [target_bb.x2, 0], [target_bb.x2, target_bb.y2], [0, target_bb.y2], [0, 0]])
+
+        src = np.array(rect.exterior.coords)
+        dst = np.array(target_poly.exterior.coords)
+        matrix = estimate_transform('similarity', src, dst).params
+        matrix = np.append(matrix, [[0, 0, 0]], axis=0).flatten()
+
+        tuple_list = apply_matrix(self.as_tuple_list(), matrix)
+
+        pa = Path()
+        for tup in tuple_list:
+            pa.add_position(Position.from_tuple(tup))
+
+        # somehow the matrix application above doesnt scale well
+        pa.transform(pa.bb(), target_bb)
+        return pa
+
+    def rotate_into_bb(self, target_bb: BoundingBox) -> None:
+        self.vertices = self.rotated_into_bb(target_bb).vertices
+        self.properties = self.rotated_into_bb(target_bb).properties

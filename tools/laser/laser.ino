@@ -1,4 +1,4 @@
-const int outPin = 10;
+const int outPin = 3;
 
 void setup() {
   Serial.begin(9600);
@@ -10,6 +10,10 @@ void setup() {
 void loop() {
   delay(50);
   int av = Serial.available();
+  if(av != 0){
+      Serial.println(av);
+  }
+
   if(av == 1){
     int value = Serial.read() - '0';
     analogWrite(outPin, value);

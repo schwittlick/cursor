@@ -36,7 +36,7 @@ def add_two(r: RealtimeRenderer):
 
 def add_ten(r: RealtimeRenderer):
     r.clear_list()
-    r.set_bg_color(random.choice(r.colors))
+    r.background(random.choice(r.colors))
     p = Path()
 
     for i in range(15):

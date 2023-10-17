@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import math
-import typing
 
 
 class BoundingBox:
@@ -13,7 +12,7 @@ class BoundingBox:
         self.w = math.dist([self.x], [self.x2])
         self.h = math.dist([self.y], [self.y2])
 
-    def center(self) -> typing.Tuple[float, float]:
+    def center(self) -> tuple[float, float]:
         center_x = (self.w / 2.0) + self.x
         center_y = (self.h / 2.0) + self.y
         return center_x, center_y
@@ -38,13 +37,13 @@ class BoundingBox:
         self.y = self.y + diff / 2
         self.y2 = self.y + self.h
 
-    def aspect_ratio(self) -> typing.Union[float, math.nan]:
+    def aspect_ratio(self) -> float | math.nan:
         if self.w == 0.0 or self.h == 0.0:
             return math.nan
 
         return self.h / self.w
 
-    def subdiv(self, xpieces: int, ypieces: int) -> typing.List[BoundingBox]:
+    def subdiv(self, xpieces: int, ypieces: int) -> list[BoundingBox]:
         bbs = []
         for x in range(xpieces):
             for y in range(ypieces):
@@ -57,7 +56,7 @@ class BoundingBox:
 
         return bbs
 
-    def paths(self) -> typing.List[typing.Tuple[float, float, float, float]]:
+    def paths(self) -> list[tuple[float, float, float, float]]:
         # returns a list of lines, x1, y1, x2, y2
         paths = []
         paths.append((self.x, self.y, self.x2, self.y))

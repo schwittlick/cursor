@@ -1,10 +1,9 @@
 from __future__ import annotations
 
+import logging
 import math
 
-import wasabi
-
-log = wasabi.Printer()
+from cursor.hpgl import LB_TERMINATOR
 
 
 def rotate(origin, point, angle):
@@ -23,8 +22,9 @@ def rotate(origin, point, angle):
 
 class HPGL:
     def __init__(self):
-        self.terminator = chr(3)
+        self.terminator = LB_TERMINATOR
         self.plotter_unit = 40
+
         self.pos = (0, 0)
         self.char_size_mm = (2.85, 3.75)
 
@@ -35,19 +35,20 @@ class HPGL:
         self.data = ""
 
     def save(self, fn):
+        logging.info(f"Saving {fn}")
         with open(fn, "w", encoding='utf-8') as file:
             file.write(self.data)
 
-    def custom(self, hpgl: HPGL) -> None:
+    def custom(self, data: str) -> None:
         """
-        Use with caution, positions positions could be impacted
+        Use with caution, positions  could be impacted
         """
-        self.data += hpgl.data
+        self.data += data
 
     def IN(self) -> None:
-        self.data += f"IN;"
+        self.data += "IN;"
 
-        self.terminator = chr(3)
+        self.terminator = LB_TERMINATOR
         self.pos = (0, 0)
         self.char_size_mm = (2.85, 3.75)
 
@@ -61,6 +62,9 @@ class HPGL:
     def VS(self, speed: int) -> None:
         self.data += f"VS{speed};"
 
+    def FS(self, force: int) -> None:
+        self.data += f"FS{force};"
+
     def DT(self, c: chr = chr(3)):
         self.terminator = c
         self.data += f"DT{c};"
@@ -69,21 +73,21 @@ class HPGL:
         self.data += f"IW{x1},{y1},{x2},{y2};"
 
     def PA(self, x: int, y: int) -> None:
-        self.data += f"PA{x},{y};"
+        self.data += f"PA{int(x)},{int(y)};"
         self.pos = (x, y)
 
     def PD(self, x: int = None, y: int = None) -> None:
         if x is None or y is None:
             self.data += "PD;"
         else:
-            self.data += f"PD{x},{y};"
+            self.data += f"PD{int(x)},{int(y)};"
             self.pos = (x, y)
 
     def PU(self, x: int = None, y: int = None) -> None:
         if x is None or y is None:
             self.data += "PU;"
         else:
-            self.data += f"PU{x},{y};"
+            self.data += f"PU{int(x)},{int(y)};"
             self.pos = (x, y)
 
     # LABEL STUFF
@@ -96,19 +100,19 @@ class HPGL:
         e.g. to make a new line within a LB statement: f"LBline1{chr(13)}{chr(10)}line2{chr(3)}"
         """
         if len(label) == 0:
-            log.warn(f"Empty Label, discarding")
-            return
+            logging.warning("Empty Label, discarding")
 
         if len(label) > 150:
-            log.warn(f"Label too long: {len(label)} > 150")
+            logging.warning(f"Label too long: {len(label)} > 150")
+            logging.warning(label)
 
         self.data += f"LB{label}{self.terminator}"
 
         assert chr(10) not in label or chr(13) not in label
         # for now the internal LF/CR commands are not being calculated
 
-        new_x = len(label) * self.char_size_mm[0] * self.plotter_unit * self.char_spacing
-        new_y = 0
+        new_x = self.pos[0] + len(label) * self.char_size_mm[0] * self.plotter_unit * self.char_spacing
+        new_y = self.pos[1]
         self.pos = rotate(self.pos, (new_x, new_y), math.radians(self.degree))
 
     def SL(self, degree: float) -> None:

@@ -47,6 +47,9 @@ class DataDirHandler:
     def hpgl(self, subfolder: str) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "hpgl"
 
+    def pickle(self, subfolder: str) -> pathlib.Path:
+        return self.data_dir / "experiments" / subfolder / "pickle"
+
     def source(self, subfolder: str) -> pathlib.Path:
         return self.data_dir / "experiments" / subfolder / "source"
 
@@ -64,6 +67,9 @@ class DataDirHandler:
 
     def hpgls(self) -> pathlib.Path:
         return self.data_dir / "hpgl"
+
+    def pickles(self) -> pathlib.Path:
+        return self.data_dir / "pickle"
 
     def ascii(self) -> pathlib.Path:
         return self.data_dir / "ascii"
@@ -109,6 +115,3 @@ class DataDirHandler:
 
     def file(self, fname: str) -> pathlib.Path:
         return self.data_dir / fname
-
-    def pickles(self) -> pathlib.Path:
-        return self.data_dir / "pickles"
