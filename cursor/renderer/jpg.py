@@ -122,6 +122,7 @@ class JpegRenderer:
         do_blur = {}
         dont_blur = []
 
+        # separate points by blur radius
         for point in self.positions:
             if "blur" in point.properties.keys():
                 rad = point.properties["radius"]
@@ -133,9 +134,12 @@ class JpegRenderer:
 
         if len(do_blur) > 0:
             _blurred = []
+            # blur each "layer" with its own radius and compose all afterwards
+            # this is kinda memory heavy but it's necessary
             for k, v in do_blur.items():
                 _k = k / 4 * scale
-                _blurred.append(self.render_points(v, scale).filter(ImageFilter.GaussianBlur(radius=_k / 2)))
+                blur_filter = ImageFilter.GaussianBlur(radius=_k / 2)
+                _blurred.append(self.render_points(v, scale).filter(blur_filter))
 
             base = _blurred[0]
             for image in _blurred[1:]:
@@ -144,6 +148,5 @@ class JpegRenderer:
             _not_blurred = Image.alpha_composite(self.img, _not_blurred)
             self.img = Image.alpha_composite(_not_blurred, base).convert("RGB")
         else:
-            # TODO: FIX HERE
-            self.img = self.render_points(dont_blur, scale).convert("RGB")
-            #self.img = Image.alpha_composite(img_out, self.img).convert("RGB")
+            img_out = self.render_points(dont_blur, scale)
+            self.img = Image.alpha_composite(self.img, img_out).convert("RGB")
