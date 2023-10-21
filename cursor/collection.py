@@ -117,7 +117,8 @@ class Collection:
     def from_pickle(fname: str) -> Collection:
         fn = DataDirHandler().pickles() / fname
         with open(fn, "rb") as file:
-            return pickle.load(file)
+            collection = pickle.load(file)
+            return collection
 
     @staticmethod
     def from_tuples(tuples: list[list[tuple]]) -> Collection:
