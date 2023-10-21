@@ -3,6 +3,7 @@ from __future__ import annotations
 import collections
 import copy
 import hashlib
+import logging
 import math
 import sys
 import typing
@@ -558,6 +559,12 @@ class Path:
         return angles
 
     @property
+    def duration(self) -> int:
+        start = self.start_pos().timestamp
+        end = self.end_pos().timestamp
+        return end - start
+
+    @property
     def entropy_x(self) -> float:
         return calc_entropy([v.x for v in self.vertices])
 
@@ -571,10 +578,22 @@ class Path:
 
     @property
     def differential_entropy_x(self) -> float:
-        return stats.differential_entropy(
-            [v.x for v in self.vertices],
-            window_length=max(int(len(self.vertices) * 0.1), 1),
-        )
+        try:
+            de = stats.differential_entropy(
+                [v.x for v in self.vertices],
+                window_length=None,
+            )
+            if math.isclose(de, -math.inf):
+                pass
+                # logging.warning(f"Infinite differential entropy.. {self}")
+                # logging.warning(f"{self.vertices}")
+            return de
+
+        except ValueError as ve:
+            # logging.error(f"Failed : {ve}")
+            # logging.error(f"At path {self}")
+            # logging.error(f"{self.vertices}")
+            return -math.inf
 
     @property
     def differential_entropy_y(self) -> float:
