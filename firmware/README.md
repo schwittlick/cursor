@@ -1,0 +1,1 @@
+This is the grbl firmware and config for the A0 custom drawing machine.
