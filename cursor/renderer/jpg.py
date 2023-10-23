@@ -56,8 +56,8 @@ class JpegRenderer:
     def save(self, filename: str) -> None:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
-        fname = self.save_path / (filename + ".jpg")
-        self.img.save(fname, "JPEG")
+        fname = self.save_path / (filename + ".png")
+        self.img.save(fname, "png")
 
         logging.info(f"Finished saving {fname}")
 
