@@ -50,7 +50,8 @@ if __name__ == "__main__":
     for path in cleaned_paths:
         # if math.isclose(path.differential_entropy_x, -math.inf):
         # if len(path) > 600:
-        if path.variation_y > -1 and not math.isclose(path.variation_y, math.inf) and path.variation_y < 3:
+        # if path.variation_y > -1 and not math.isclose(path.variation_y, math.inf) and path.variation_y < 3:
+        if path.duration < 30:
             variation_x.add(path)
             # logging.info(f"{path.differential_entropy_y}")
             # logging.info(f"{path}")
@@ -61,12 +62,14 @@ if __name__ == "__main__":
     # s = Sorter(param=SortParameter.POINT_COUNT, reverse=True)
     # cleaned_paths.sort(s)
 
-    save(not_welcome_data, "variation_y_below_minus_1_or_inf")
+    logging.info(f"Not welcome: {len(not_welcome_data)}")
 
-    entropies_differential = np.array([path.variation_y for path in variation_x])
+    save(not_welcome_data, "duration_more_than_30s")
+
+    entropies_differential = np.array([path.duration for path in variation_x])
 
     logging.info(f"Total {len(entropies_differential)} paths")
 
     plt.hist(entropies_differential, bins=100)
-    plt.gca().xaxis.set_major_locator(plt.MultipleLocator(0.5))
+    plt.gca().xaxis.set_major_locator(plt.MultipleLocator(1))
     plt.show()
