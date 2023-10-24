@@ -71,6 +71,9 @@ def convert_pynput_btn_to_key(btn):
     if btn == pynput.keyboard.Key.ctrl_r:
         return "CTRL_R"
 
+    if btn == pynput.keyboard.Key.tab:
+        return "TAB"
+
     return None
 
 

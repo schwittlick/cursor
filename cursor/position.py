@@ -18,6 +18,8 @@ class Position:
     ):
         if properties is None:
             properties = {}
+        else:
+            pass
         self._pos = np.array([x, y], dtype=float)
         self.timestamp = timestamp
         self.properties = properties

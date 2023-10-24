@@ -15,6 +15,7 @@ import sys
 from PIL import Image
 
 from cursor.position import Position
+from cursor.properties import Property
 
 log = wasabi.Printer()
 
@@ -52,7 +53,7 @@ class Recorder:
 
     def __save_async(self):
         self.save()
-        log.good("Setting up 5min auto-save")
+        log.good("Setting up 30min auto-save")
         self._timer = threading.Timer(60 * 30, self.__save_async, [])
         self._timer.start()
 
@@ -67,9 +68,9 @@ class Recorder:
             _c = (0, 0, 0)
         except:
             _c = (0, 0, 0)
-            log.fail(f"Could not get color at cursor position {_x}x{_y}. Saving (0, 0, 0)")
+            # log.fail(f"Could not get color at cursor position {_x}x{_y}. Saving (0, 0, 0)")
         _t = int(DateHandler.utc_timestamp())
-        _p = Position(_x, _y, _t, _c)
+        _p = Position(_x, _y, _t, {Property.COLOR: _c})
         self._current_line.add_position(_p)
 
     def on_click(self, x, y, button, pressed):
@@ -89,11 +90,10 @@ class Recorder:
         except AttributeError as ae:
             key = convert_pynput_btn_to_key(btn)
             if key is None:
-                log.fail(f"Couldn't save key because of {ae}")
+                # log.fail(f"Couldn't save key because of {ae}")
                 return
 
         t = (key, DateHandler.utc_timestamp(), 1)
-        log.good(t)
         self._keyboard_recodings.append(t)
 
     def on_release(self, btn):
@@ -106,7 +106,6 @@ class Recorder:
                 return
 
         t = (key, DateHandler.utc_timestamp(), 0)
-        log.good(t)
         self._keyboard_recodings.append(t)
 
     def save(self):

@@ -3,11 +3,9 @@ from __future__ import annotations
 import collections
 import copy
 import hashlib
-import logging
 import math
 import sys
 import typing
-from enum import Enum, auto
 
 import numpy as np
 import pandas as pd
@@ -28,27 +26,10 @@ from cursor.algorithm.frechet import LinearDiscreteFrechet
 from cursor.algorithm.frechet import euclidean
 from cursor.bb import BoundingBox
 from cursor.misc import apply_matrix
+from cursor.properties import Property
 from cursor.position import Position
 
 log = wasabi.Printer()
-
-
-class Property(Enum):
-    LAYER = auto()
-    LINETYPE = auto()
-    VELOCITY = auto()
-    PEN_FORCE = auto()
-    PEN_SELECT = auto()
-    IS_POLY = auto()
-    LASER_PWM = auto()
-    LASER_ONOFF = "laser"
-    LASER_VOLT = "volt"
-    LASER_AMP = "amp"
-    LASER_DELAY = "delay"
-    LASER_Z = "z"
-    # below used for jpeg renderer
-    COLOR = "color"
-    WIDTH = "width"
 
 
 class Path:

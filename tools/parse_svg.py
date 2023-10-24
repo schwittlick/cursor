@@ -2,17 +2,16 @@ from cursor.data import DataDirHandler
 from cursor.data import DateHandler
 from cursor.device import PlotterType, PaperSize
 from cursor.export import ExportWrapper
+from cursor.renderer.realtime import RealtimeRenderer
 from cursor.sorter import SortParameter, Sorter
 from cursor.path import Path
 from cursor.collection import Collection
-from cursor.renderer import RealtimeRenderer
 
 import arcade
 import random
 import pymsgbox
 import wasabi
 import xml.etree.ElementTree as ET
-
 
 log = wasabi.Printer()
 
@@ -62,8 +61,8 @@ def main():
     def screenshot(renderer: RealtimeRenderer):
         suffix = pymsgbox.prompt("suffix", default="")
         fn = (
-            DataDirHandler().jpg("svg2hpgl")
-            / f"{DateHandler().utc_timestamp()}_{suffix}.png"
+                DataDirHandler().jpg("svg2hpgl")
+                / f"{DateHandler().utc_timestamp()}_{suffix}.png"
         )
         arcade.get_image().save(fn, "PNG")
         log.info(f"saved {fn}")

@@ -7,7 +7,8 @@ from PIL import Image, ImageDraw, ImageFilter
 
 from cursor.bb import BoundingBox
 from cursor.collection import Collection
-from cursor.path import Path, Property
+from cursor.path import Path
+from cursor.properties import Property
 from cursor.position import Position
 
 
