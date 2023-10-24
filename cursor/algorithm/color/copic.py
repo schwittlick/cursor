@@ -1,17 +1,12 @@
+import random
+
+import colour
 import numpy as np
 
 from cursor.algorithm.color.color_enums import ColorCode
 
 
-class CopicColor:
-    def __init__(self, code: ColorCode, name: str, rgb: tuple[float, float, float]):
-        self.code = code
-        self.name = name
-        self.rgb = rgb
-
-    def as_srgb(self) -> tuple[float, float, float]:
-        return self.rgb[0] / 255, self.rgb[1] / 255, self.rgb[2] / 255
-
+class Color:
     @staticmethod
     def linear_srgb_to_oklab(c: tuple[float, float, float]) -> tuple[float, float, float]:
         l = 0.4122214708 * c[0] + 0.5363325363 * c[1] + 0.0514459929 * c[2]
@@ -39,6 +34,37 @@ class CopicColor:
         return +4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s, \
                -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s, \
                -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s
+
+    @staticmethod
+    def lerp(v0: tuple[float, float, float], v1: tuple[float, float, float], percentage: float):
+        x = (1 - percentage) * v0[0] + percentage * v1[0]
+        y = (1 - percentage) * v0[1] + percentage * v1[1]
+        z = (1 - percentage) * v0[2] + percentage * v1[2]
+        return (x, y, z)
+
+    @staticmethod
+    def interpolate(c1_srgb: tuple[float, float, float], c2_srgb: tuple[float, float, float], perc: float,
+                    oklab: bool = True) -> tuple[float, float, float]:
+        if oklab:
+            c1_oklab = Color.linear_srgb_to_oklab(c1_srgb)
+            c2_oklab = Color.linear_srgb_to_oklab(c2_srgb)
+            interpolated = Color.lerp(c1_oklab, c2_oklab, perc)
+            interpolated = Color.oklab_to_linear_srgb(interpolated)
+
+        else:
+            interpolated = Color.lerp(c1_srgb, c2_srgb, perc)
+
+        return interpolated
+
+
+class CopicColor:
+    def __init__(self, code: ColorCode, name: str, rgb: tuple[float, float, float]):
+        self.code = code
+        self.name = name
+        self.rgb = rgb
+
+    def as_srgb(self) -> tuple[float, float, float]:
+        return self.rgb[0] / 255, self.rgb[1] / 255, self.rgb[2] / 255
 
 
 class Copic:
@@ -75,5 +101,32 @@ class Copic:
         self.colors[ColorCode.YG01] = CopicColor(ColorCode.YG01, 'Green Bice', (226, 235, 178))
         self.colors[ColorCode.G07] = CopicColor(ColorCode.G07, 'Nile Green', (123, 197, 118))
 
-    def color(self, code: ColorCode):
+    def color(self, code: ColorCode) -> CopicColor:
         return self.colors[code]
+
+    def random(self) -> CopicColor:
+        return random.choice(list(self.colors.values()))
+
+    def most_similar(self, c1_rgb: tuple[int, int, int]) -> CopicColor:
+        """
+        put in a color in RGB (0-255)
+        will return the most similar color of the available Copic colors
+        the similarity is calculated in CIE 1931 color space
+        """
+        color_srgb = c1_rgb[0] / 255, c1_rgb[1] / 255, c1_rgb[2] / 255
+
+        color_to_compare_cie = colour.sRGB_to_XYZ(color_srgb)
+
+        deltas = {}
+        for copic_color_code, copic_color in Copic().colors.items():
+            copic_color_srgb = copic_color.as_srgb()
+            copic_color_cie = colour.sRGB_to_XYZ(copic_color_srgb)
+
+            delta = colour.delta_E(color_to_compare_cie, copic_color_cie)
+
+            deltas[copic_color_code] = delta
+
+        sorted_deltas = dict(sorted(deltas.items(), key=lambda item: item[1]))
+
+        first_key = list(sorted_deltas.keys())[0]
+        return Copic().colors[first_key]

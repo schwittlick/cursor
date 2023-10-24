@@ -1,4 +1,5 @@
-from cursor.path import Path, Property
+from cursor.path import Path
+from cursor.properties import Property
 from cursor.collection import Collection
 from cursor.bb import BoundingBox
 from cursor.timer import Timer

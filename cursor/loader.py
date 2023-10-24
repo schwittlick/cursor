@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from cursor.data import DateHandler
 from cursor.path import Path
+from cursor.properties import Property
 from cursor.position import Position
 from cursor.collection import Collection
 from cursor.timer import Timer
@@ -32,7 +33,7 @@ class MyJsonEncoder(json.JSONEncoder):
                     "x": round(o.x, 4),
                     "y": round(o.y, 4),
                     "ts": round(o.timestamp, 2),
-                    # "c": o.properties["color"] if "color" in o.properties.keys() else None,
+                    "c": o.properties[Property.COLOR] if Property.COLOR in o.properties.keys() else None,
                 }
 
 
@@ -50,7 +51,7 @@ class MyJsonDecoder(json.JSONDecoder):
                     c = None
             else:
                 c = None
-            return Position(dct["x"], dct["y"], dct["ts"], {"color": c})
+            return Position(dct["x"], dct["y"], dct["ts"], {Property.COLOR: c})
         if "w" in dct and "h" in dct:
             s = pyautogui.Size(dct["w"], dct["h"])
             return s
