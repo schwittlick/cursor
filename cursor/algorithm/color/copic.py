@@ -63,6 +63,9 @@ class CopicColor:
         self.name = name
         self.rgb = rgb
 
+    def __repr__(self):
+        return f"{self.code.name}: {self.name}"
+
     def as_srgb(self) -> tuple[float, float, float]:
         return self.rgb[0] / 255, self.rgb[1] / 255, self.rgb[2] / 255
 
