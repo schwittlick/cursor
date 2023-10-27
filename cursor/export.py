@@ -317,7 +317,7 @@ class ExportWrapper:
         exp.layer_pen_mapping = hpgl_pen_layer_mapping
         exp.linetype_mapping = hpgl_linetype_mapping
         exp.keep_aspect_ratio = keep_aspect_ratio
-        exp.run(True, False)
+        exp.run(False, False)
         if export_reversed:
             exp.paths.reverse()
             exp.suffix = exp.suffix + "_reversed_"
