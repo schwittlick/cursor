@@ -3,6 +3,7 @@ from enum import Enum, auto
 
 class ColorCode(Enum):
     B110 = auto()  # actually without B, but cant use enum without char
+    B000 = auto()  # actually doesnt axist, this is white
 
     R17 = auto()
     R29 = auto()

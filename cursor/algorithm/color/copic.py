@@ -90,6 +90,7 @@ class Copic:
         self.colors[ColorCode.G17] = CopicColor(ColorCode.G17, 'Forest Green', (20, 179, 125))
         self.colors[ColorCode.Y17] = CopicColor(ColorCode.Y17, 'Golden Yellow', (255, 228, 85))
         self.colors[ColorCode.B110] = CopicColor(ColorCode.B110, 'Special Black', (3, 7, 8))
+        self.colors[ColorCode.B000] = CopicColor(ColorCode.B000, 'White / Nothing', (255, 255, 255))
         self.colors[ColorCode.RV13] = CopicColor(ColorCode.RV13, 'Tender Pink', (249, 201, 215))
         self.colors[ColorCode.E37] = CopicColor(ColorCode.E37, 'Sepia', (204, 145, 89))
         self.colors[ColorCode.YG67] = CopicColor(ColorCode.YG67, 'Moss', (129, 191, 140))
@@ -125,6 +126,12 @@ class Copic:
             copic_color_srgb = copic_color.as_srgb()
             copic_color_cie = colour.sRGB_to_XYZ(copic_color_srgb)
 
+            # color difference in CIE2000 (Color Difference Formula)
+            # Designed to quantify the perceptual difference between two colors.
+            # Offers more consistent and accurate results, particularly for large color differences and in
+            # problematic regions of previous formulas (e.g., blues). ncorporates corrections for lightness,
+            # chroma, and hue differences, as well as terms to account for interactions between these color
+            # attributes. Used in various industries for quality control and to ensure color consistency.
             delta = colour.delta_E(color_to_compare_cie, copic_color_cie)
 
             deltas[copic_color_code] = delta
