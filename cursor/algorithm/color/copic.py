@@ -70,6 +70,37 @@ class CopicColor:
         return self.rgb[0] / 255, self.rgb[1] / 255, self.rgb[2] / 255
 
 
+class CopicPhotograph:
+    def __init__(self):
+        self.colors = {}
+        self.colors[ColorCode.Y06] = CopicColor(ColorCode.Y06, 'Yellow', (216, 216, 75))
+        self.colors[ColorCode.YG21] = CopicColor(ColorCode.YG21, 'Anise', (197, 203, 139))
+        self.colors[ColorCode.Y13] = CopicColor(ColorCode.Y13, 'Lemon Yellow', (216, 209, 113))
+        self.colors[ColorCode.Y17] = CopicColor(ColorCode.Y17, 'Golden Yellow', (211, 176, 0))
+
+        self.colors[ColorCode.YR24] = CopicColor(ColorCode.YR24, 'Pale Sepia', (80, 52, 10))
+        self.colors[ColorCode.E37] = CopicColor(ColorCode.E37, 'Sepia', (114, 69, 2))
+
+        self.colors[ColorCode.RV13] = CopicColor(ColorCode.RV13, 'Tender Pink', (220, 146, 174))
+        self.colors[ColorCode.RV09] = CopicColor(ColorCode.RV09, 'Fuchsia', (55, 15, 107))
+        self.colors[ColorCode.R17] = CopicColor(ColorCode.R17, 'Lipstick Orange', (130, 45, 14))
+        self.colors[ColorCode.YR07] = CopicColor(ColorCode.YR07, 'Cadmium Orange', (184, 108, 0))
+        self.colors[ColorCode.R29] = CopicColor(ColorCode.R29, 'Lipstick Red', (130, 0, 28))
+
+        self.colors[ColorCode.G02] = CopicColor(ColorCode.G02, 'Spectrum Green', (145, 204, 165))
+        self.colors[ColorCode.G14] = CopicColor(ColorCode.G14, 'Apple Green', (150, 193, 87))
+        self.colors[ColorCode.G07] = CopicColor(ColorCode.G07, 'Nile Green', (34, 92, 2))
+        self.colors[ColorCode.YG67] = CopicColor(ColorCode.YG67, 'Moss', (89, 115, 34))
+        self.colors[ColorCode.G29] = CopicColor(ColorCode.G29, 'Pine Tree Green', (94, 121, 42))
+        self.colors[ColorCode.BG18] = CopicColor(ColorCode.BG18, 'Teal Blue', (90, 148, 156))
+
+        self.colors[ColorCode.B12] = CopicColor(ColorCode.B12, 'Ice Blue', (0, 65, 157))
+        self.colors[ColorCode.B24] = CopicColor(ColorCode.B24, 'Sky', (81, 136, 161))
+        self.colors[ColorCode.B39] = CopicColor(ColorCode.B39, 'Prussian Blue', (0, 21, 96))
+
+        self.colors[ColorCode.B110] = CopicColor(ColorCode.B110, 'Special Black', (8, 7, 10))
+
+
 class Copic:
     def __init__(self):
         self.colors = {}
