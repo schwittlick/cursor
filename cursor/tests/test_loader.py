@@ -1,5 +1,6 @@
 from cursor.loader import Loader
 from cursor.data import DataDirHandler
+from cursor.properties import Property
 
 import pytest
 
@@ -50,7 +51,7 @@ def test_loader_color_recording():
     assert len(ll.all_paths()) == 7
     for pa in ll.all_paths():
         for p in pa:
-            assert p.properties["color"] is not None
+            assert p.properties[Property.COLOR] is not None
 
 
 def test_loader_limit_files():
