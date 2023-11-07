@@ -611,9 +611,7 @@ class Path:
             prev := v for v in self.vertices if v.x is not np.nan and v.y is not np.nan
         ]  # noqa: F841
         self.vertices = [
-            prev := v
-            for v in self.vertices
-            if not math.isnan(v.x) and not math.isnan(v.y)
+            prev := v for v in self.vertices if not math.isnan(v.x) and not math.isnan(v.y)
         ]  # noqa: F841
 
     def limit(self) -> None:

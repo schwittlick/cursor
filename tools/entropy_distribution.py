@@ -1,5 +1,4 @@
 import logging
-import math
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,7 +6,6 @@ import matplotlib.pyplot as plt
 from cursor.collection import Collection
 from cursor.data import DataDirHandler
 from cursor.loader import Loader
-from cursor.sorter import SortParameter, Sorter
 from cursor.timer import Timer
 
 
