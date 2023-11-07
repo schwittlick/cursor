@@ -10,7 +10,6 @@ import typing
 import numpy as np
 import pandas as pd
 import shapely
-import wasabi
 from scipy import spatial
 from scipy import stats
 from shapely import union_all, Polygon
@@ -29,17 +28,19 @@ from cursor.misc import apply_matrix
 from cursor.properties import Property
 from cursor.position import Position
 
-log = wasabi.Printer()
+import logging
 
 
 class Path:
     def __init__(
-            self,
-            vertices: list[Position] | None = None,
-            properties: dict | None = None
+        self, vertices: list[Position] | None = None, properties: dict | None = None
     ):
         self._vertices = []
-        self.properties = {Property.LAYER: "layer1", Property.COLOR: (0, 0, 0), Property.WIDTH: 1}
+        self.properties = {
+            Property.LAYER: "layer1",
+            Property.COLOR: (0, 0, 0),
+            Property.WIDTH: 1,
+        }
 
         if vertices is not None:
             self._vertices = vertices
@@ -95,8 +96,7 @@ class Path:
         return pd.DataFrame(arr, columns=["x", "y"])
 
     @classmethod
-    def from_tuple_list(cls, tuple_list: list[tuple[float, float]]
-                        ) -> Path:
+    def from_tuple_list(cls, tuple_list: list[tuple[float, float]]) -> Path:
         return Path([Position.from_tuple(p) for p in tuple_list])
 
     @classmethod
@@ -247,12 +247,7 @@ class Path:
         y = math.isclose(start.y, end.y)
         return x and y
 
-    def add(
-            self,
-            x: float,
-            y: float,
-            timestamp: int = 0
-    ) -> None:
+    def add(self, x: float, y: float, timestamp: int = 0) -> None:
         self.vertices.append(Position(x, y, timestamp))
 
     def add_position(self, pos: Position) -> None:
@@ -262,7 +257,9 @@ class Path:
         self.vertices.clear()
 
     def copy(self) -> Path:
-        return Path(None if self.empty() else copy.deepcopy(self.vertices), self.properties)
+        return Path(
+            None if self.empty() else copy.deepcopy(self.vertices), self.properties
+        )
 
     def reverse(self) -> None:
         self.vertices.reverse()
@@ -324,9 +321,7 @@ class Path:
     def scale(self, x: float, y: float) -> None:
         [p.scale(x, y) for p in self.vertices]
 
-    def rot(
-            self, angle: float, origin: tuple[float, float] = (0.0, 0.0)
-    ) -> None:
+    def rot(self, angle: float, origin: tuple[float, float] = (0.0, 0.0)) -> None:
         [p.rot(angle, origin) for p in self.vertices]
 
     def nearest_points(self, pos: Position) -> Position:
@@ -383,8 +378,8 @@ class Path:
         if _h == 0.0:
             _h = 0.001
 
-        xscale = (bb.w / _w)
-        yscale = (bb.h / _h)
+        xscale = bb.w / _w
+        yscale = bb.h / _h
         if not math.isclose(padding, 0.0):
             xscale *= padding
             yscale *= padding
@@ -402,7 +397,9 @@ class Path:
 
         self.translate(bb.x, bb.y)
 
-    def morph(self, start: Position | tuple[float, float], end: Position | tuple[float, float]) -> Path:
+    def morph(
+        self, start: Position | tuple[float, float], end: Position | tuple[float, float]
+    ) -> Path:
         if isinstance(start, Position) and isinstance(end, Position):
             start = (start.x, start.y)
             end = (end.x, end.y)
@@ -444,14 +441,14 @@ class Path:
                 )
             )
         except RuntimeWarning as w:
-            log.fail(w)
+            logging.error(w)
 
         # acos can't properly calculate angle more than 180°.
         # solution taken from here:
         # http://www.gamedev.net/topic/556500-angle-between-vectors/
         if (
-                current_start_to_end[0] * new_start_to_end[1]
-                < current_start_to_end[1] * new_start_to_end[0]
+            current_start_to_end[0] * new_start_to_end[1]
+            < current_start_to_end[1] * new_start_to_end[0]
         ):
             angle = 2 * math.pi - angle
 
@@ -479,16 +476,16 @@ class Path:
                 compareA = diffLAx * line1Start.y - diffLAy * line1Start.x
                 compareB = diffLBx * line2Start.y - diffLBy * line2Start.x
                 if ((diffLAx * line2Start.y - diffLAy * line2Start.x) < compareA) ^ (
-                        (diffLAx * line2End.y - diffLAy * line2End.x) < compareA
+                    (diffLAx * line2End.y - diffLAy * line2End.x) < compareA
                 ) and ((diffLBx * line1Start.y - diffLBy * line1Start.x) < compareB) ^ (
-                        (diffLBx * line1End.y - diffLBy * line1End.x) < compareB
+                    (diffLBx * line1End.y - diffLBy * line1End.x) < compareB
                 ):
                     ok = (diffLAx * diffLBy) - (diffLAy * diffLBx)
                     if ok == 0:
                         ok = 0.01
                     lDetDivInv = 1 / ok
-                    i_x = (-((diffLAx * compareB) - (compareA * diffLBx)) * lDetDivInv)
-                    i_y = (-((diffLAy * compareB) - (compareA * diffLBy)) * lDetDivInv)
+                    i_x = -((diffLAx * compareB) - (compareA * diffLBx)) * lDetDivInv
+                    i_y = -((diffLAy * compareB) - (compareA * diffLBy)) * lDetDivInv
 
                     return True, i_x, i_y
 
@@ -571,7 +568,7 @@ class Path:
             return de
 
         except ValueError as ve:
-            # logging.error(f"Failed : {ve}")
+            logging.error(f"Failed differential entropy x: {ve}")
             # logging.error(f"At path {self}")
             # logging.error(f"{self.vertices}")
             return -math.inf
@@ -596,7 +593,7 @@ class Path:
                 min_distance = dist
                 closest = self.vertices.index(paa)
         assert min_distance != sys.float_info.max
-        log.info(f"mindist: {min_distance}")
+        logging.info(f"mindist: {min_distance}")
         return closest
 
     def clean(self) -> None:
@@ -604,10 +601,20 @@ class Path:
         removes consecutive duplicates
         """
         prev = Position()
-        self.vertices = [prev := v for v in self.vertices if prev.x != v.x or prev.y != v.y]  # noqa: F841
-        self.vertices = [prev := v for v in self.vertices if v.x is not None and v.y is not None]  # noqa: F841
-        self.vertices = [prev := v for v in self.vertices if v.x is not np.nan and v.y is not np.nan]  # noqa: F841
-        self.vertices = [prev := v for v in self.vertices if not math.isnan(v.x) and not math.isnan(v.y)]  # noqa: F841
+        self.vertices = [
+            prev := v for v in self.vertices if prev.x != v.x or prev.y != v.y
+        ]  # noqa: F841
+        self.vertices = [
+            prev := v for v in self.vertices if v.x is not None and v.y is not None
+        ]  # noqa: F841
+        self.vertices = [
+            prev := v for v in self.vertices if v.x is not np.nan and v.y is not np.nan
+        ]  # noqa: F841
+        self.vertices = [
+            prev := v
+            for v in self.vertices
+            if not math.isnan(v.x) and not math.isnan(v.y)
+        ]  # noqa: F841
 
     def limit(self) -> None:
         """
@@ -721,11 +728,11 @@ class Path:
         return [new_a, new_b]
 
     def _offset_angle(
-            self,
-            p1: Position,
-            p2: Position,
-            p3: Position,
-            offset: float,
+        self,
+        p1: Position,
+        p2: Position,
+        p3: Position,
+        offset: float,
     ) -> Path:
         a = p2.distance(p3)
         b = p1.distance(p2)
@@ -783,7 +790,9 @@ class Path:
 
         return offset_path
 
-    def parallel_offset(self, dist: float, join_style=JOIN_STYLE.mitre, mitre_limit=1.0) -> list[Path]:
+    def parallel_offset(
+        self, dist: float, join_style=JOIN_STYLE.mitre, mitre_limit=1.0
+    ) -> list[Path]:
         def iter_and_return_path(offset: BaseGeometry) -> Path:
             pa = Path()
             for x, y in offset.coords:
@@ -909,7 +918,7 @@ class Path:
         for i in range(1, len(self)):
             dx = self[i].x - self[i - 1].x
             dy = self[i].y - self[i - 1].y
-            dist = np.sqrt(dx ** 2 + dy ** 2)
+            dist = np.sqrt(dx**2 + dy**2)
             distances.append(distances[-1] + dist)
 
         # Calculate number of intervals based on target_distance
@@ -943,7 +952,9 @@ class Path:
         return pa
 
     def transform(self, bb: BoundingBox, out: BoundingBox) -> None:
-        fn = misc.transformFn((bb.x, bb.y), (bb.x2, bb.y2), (out.x, out.y), (out.x2, out.y2))
+        fn = misc.transformFn(
+            (bb.x, bb.y), (bb.x2, bb.y2), (out.x, out.y), (out.x2, out.y2)
+        )
         self.vertices = list(map(fn, self.vertices))
 
     def simplify(self, e: float = 1.0) -> None:
@@ -984,7 +995,7 @@ class Path:
             return
 
         def get_intersection(
-                segment: Path, paths: list[tuple[float, float, float, float]]
+            segment: Path, paths: list[tuple[float, float, float, float]]
         ) -> tuple[float, float]:
             for p in paths:
                 tup1 = segment[0].as_tuple()
@@ -1090,17 +1101,25 @@ class Path:
 
     def rotated_into_bb(self, target_bb: BoundingBox) -> Path:
         if self.is_1_dimensional():
-            log.warn("Didn't rotate, bc path is 1-dimensional.")
+            logging.warn("Didn't rotate, bc path is 1-dimensional.")
             return self
 
         line = LineString(self.as_tuple_list())
         rect = line.minimum_rotated_rectangle
 
-        target_poly = Polygon([[0, 0], [target_bb.x2, 0], [target_bb.x2, target_bb.y2], [0, target_bb.y2], [0, 0]])
+        target_poly = Polygon(
+            [
+                [0, 0],
+                [target_bb.x2, 0],
+                [target_bb.x2, target_bb.y2],
+                [0, target_bb.y2],
+                [0, 0],
+            ]
+        )
 
         src = np.array(rect.exterior.coords)
         dst = np.array(target_poly.exterior.coords)
-        matrix = estimate_transform('similarity', src, dst).params
+        matrix = estimate_transform("similarity", src, dst).params
         matrix = np.append(matrix, [[0, 0, 0]], axis=0).flatten()
 
         tuple_list = apply_matrix(self.as_tuple_list(), matrix)

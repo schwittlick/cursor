@@ -1,4 +1,4 @@
-from cursor.algorithm.color.copic import Copic, CopicColor, Color
+from cursor.algorithm.color.copic import Copic, Color
 from cursor.algorithm.color.color_enums import ColorCode
 from cursor.algorithm.color.spectral import spectral_mix
 

@@ -228,9 +228,6 @@ def test_differential_entropy():
     sx1 = p1.differential_entropy_x
     sy1 = p1.differential_entropy_y
 
-    print(sx1)
-    print(sy1)
-
     assert math.isclose(sx1, -0.42138186975)
     assert math.isclose(sy1, -0.02733247453)
 
