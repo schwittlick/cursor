@@ -4,6 +4,8 @@ from cursor.data import DataDirHandler
 from cursor.loader import Loader
 from cursor.properties import Property
 
+import logging
+
 
 def load_single_with_color():
     dir = DataDirHandler().recordings()

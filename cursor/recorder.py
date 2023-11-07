@@ -87,10 +87,9 @@ class Recorder:
     def on_press(self, btn):
         try:
             key = btn.char
-        except AttributeError as ae:
+        except AttributeError:
             key = convert_pynput_btn_to_key(btn)
             if key is None:
-                # log.fail(f"Couldn't save key because of {ae}")
                 return
 
         t = (key, DateHandler.utc_timestamp(), 1)
