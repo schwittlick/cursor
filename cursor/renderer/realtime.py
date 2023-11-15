@@ -61,7 +61,7 @@ class Buffer(RenderTargetTexture):
 class RealtimeRenderer(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(
-            width=width, height=height, title=title, antialiasing=True, samples=16
+            width=width, height=height, title=title, antialiasing=True, samples=16, gl_version=(4, 5)
         )
         arcade.set_background_color(arcade.color.GRAY)
         self.__title = title

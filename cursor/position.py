@@ -20,7 +20,7 @@ class Position:
             properties = {}
         else:
             pass
-        self._pos = np.array([x, y], dtype=float)
+        self._pos = np.array([x, y], dtype=np.float32)
         self.timestamp = timestamp
         self.properties = properties
 

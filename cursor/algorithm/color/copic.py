@@ -9,7 +9,7 @@ from cursor.algorithm.color.color_enums import ColorCode
 class Color:
     @staticmethod
     def linear_srgb_to_oklab(
-        c: tuple[float, float, float]
+            c: tuple[float, float, float]
     ) -> tuple[float, float, float]:
         l = 0.4122214708 * c[0] + 0.5363325363 * c[1] + 0.0514459929 * c[2]
         m = 0.2119034982 * c[0] + 0.6806995451 * c[1] + 0.1073969566 * c[2]
@@ -27,7 +27,7 @@ class Color:
 
     @staticmethod
     def oklab_to_linear_srgb(
-        c: tuple[float, float, float]
+            c: tuple[float, float, float]
     ) -> tuple[float, float, float]:
         l_ = c[0] + 0.3963377774 * c[1] + 0.2158037573 * c[2]
         m_ = c[0] - 0.1055613458 * c[1] - 0.0638541728 * c[2]
@@ -45,9 +45,9 @@ class Color:
 
     @staticmethod
     def lerp(
-        v0: tuple[float, float, float],
-        v1: tuple[float, float, float],
-        percentage: float,
+            v0: tuple[float, float, float],
+            v1: tuple[float, float, float],
+            percentage: float,
     ):
         x = (1 - percentage) * v0[0] + percentage * v1[0]
         y = (1 - percentage) * v0[1] + percentage * v1[1]
@@ -56,10 +56,10 @@ class Color:
 
     @staticmethod
     def interpolate(
-        c1_srgb: tuple[float, float, float],
-        c2_srgb: tuple[float, float, float],
-        perc: float,
-        oklab: bool = True,
+            c1_srgb: tuple[float, float, float],
+            c2_srgb: tuple[float, float, float],
+            perc: float,
+            oklab: bool = True,
     ) -> tuple[float, float, float]:
         if oklab:
             c1_oklab = Color.linear_srgb_to_oklab(c1_srgb)
@@ -89,64 +89,51 @@ class CopicColor:
 class CopicPhotograph:
     def __init__(self):
         self.colors = {}
-        self.colors[ColorCode.Y06] = CopicColor(ColorCode.Y06, "Yellow", (216, 216, 75))
-        self.colors[ColorCode.YG21] = CopicColor(
-            ColorCode.YG21, "Anise", (197, 203, 139)
-        )
-        self.colors[ColorCode.Y13] = CopicColor(
-            ColorCode.Y13, "Lemon Yellow", (216, 209, 113)
-        )
-        self.colors[ColorCode.Y17] = CopicColor(
-            ColorCode.Y17, "Golden Yellow", (211, 176, 0)
-        )
 
-        self.colors[ColorCode.YR24] = CopicColor(
-            ColorCode.YR24, "Pale Sepia", (80, 52, 10)
-        )
-        self.colors[ColorCode.E37] = CopicColor(ColorCode.E37, "Sepia", (114, 69, 2))
+        self.colors[ColorCode.Y06] = CopicColor(ColorCode.Y06, 'Yellow', (251, 238, 130))
+        self.colors[ColorCode.YG21] = CopicColor(ColorCode.YG21, 'Anise', (227, 227, 170))
+        self.colors[ColorCode.Y13] = CopicColor(ColorCode.Y13, 'Lemon Yellow', (248, 232, 153))
+        self.colors[ColorCode.Y17] = CopicColor(ColorCode.Y17, 'Golden Yellow', (250, 189, 109))
 
-        self.colors[ColorCode.RV13] = CopicColor(
-            ColorCode.RV13, "Tender Pink", (220, 146, 174)
-        )
-        self.colors[ColorCode.RV09] = CopicColor(
-            ColorCode.RV09, "Fuchsia", (55, 15, 107)
-        )
-        self.colors[ColorCode.R17] = CopicColor(
-            ColorCode.R17, "Lipstick Orange", (130, 45, 14)
-        )
-        self.colors[ColorCode.YR07] = CopicColor(
-            ColorCode.YR07, "Cadmium Orange", (184, 108, 0)
-        )
-        self.colors[ColorCode.R29] = CopicColor(
-            ColorCode.R29, "Lipstick Red", (130, 0, 28)
-        )
+        self.colors[ColorCode.YR24] = CopicColor(ColorCode.YR24, 'Pale Sepia', (166, 124, 104))
+        self.colors[ColorCode.E37] = CopicColor(ColorCode.E37, 'Sepia', (192, 112, 85))
+        self.colors[ColorCode.E39] = CopicColor(ColorCode.E39, 'Leather', (182, 99, 81))
 
-        self.colors[ColorCode.G02] = CopicColor(
-            ColorCode.G02, "Spectrum Green", (145, 204, 165)
-        )
-        self.colors[ColorCode.G14] = CopicColor(
-            ColorCode.G14, "Apple Green", (150, 193, 87)
-        )
-        self.colors[ColorCode.G07] = CopicColor(
-            ColorCode.G07, "Nile Green", (34, 92, 2)
-        )
-        self.colors[ColorCode.YG67] = CopicColor(ColorCode.YG67, "Moss", (89, 115, 34))
-        self.colors[ColorCode.G29] = CopicColor(
-            ColorCode.G29, "Pine Tree Green", (94, 121, 42)
-        )
-        self.colors[ColorCode.BG18] = CopicColor(
-            ColorCode.BG18, "Teal Blue", (90, 148, 156)
-        )
+        self.colors[ColorCode.RV13] = CopicColor(ColorCode.RV13, 'Tender Pink', (242, 185, 202))
+        self.colors[ColorCode.RV09] = CopicColor(ColorCode.RV09, 'Fuchsia', (118, 96, 154))
+        self.colors[ColorCode.R17] = CopicColor(ColorCode.R17, 'Lipstick Orange', (198, 77, 108))
+        self.colors[ColorCode.YR07] = CopicColor(ColorCode.YR07, 'Cadmium Orange', (224, 99, 105))
+        self.colors[ColorCode.R29] = CopicColor(ColorCode.R29, 'Lipstick Red', (222, 57, 108))
 
-        self.colors[ColorCode.B12] = CopicColor(ColorCode.B12, "Ice Blue", (0, 65, 157))
-        self.colors[ColorCode.B24] = CopicColor(ColorCode.B24, "Sky", (81, 136, 161))
-        self.colors[ColorCode.B39] = CopicColor(
-            ColorCode.B39, "Prussian Blue", (0, 21, 96)
-        )
+        self.colors[ColorCode.V12] = CopicColor(ColorCode.V12, 'Pale Lilac', (222, 204, 222))
 
-        self.colors[ColorCode.B110] = CopicColor(
-            ColorCode.B110, "Special Black", (8, 7, 10)
-        )
+        self.colors[ColorCode.G02] = CopicColor(ColorCode.G02, 'Spectrum Green', (155, 222, 175))
+        self.colors[ColorCode.G14] = CopicColor(ColorCode.G14, 'Apple Green', (181, 221, 124))
+        self.colors[ColorCode.G07] = CopicColor(ColorCode.G07, 'Nile Green', (92, 147, 92))
+        self.colors[ColorCode.YG67] = CopicColor(ColorCode.YG67, 'Moss', (140, 164, 108))
+        self.colors[ColorCode.G29] = CopicColor(ColorCode.G29, 'Pine Tree Green', (84, 125, 101))
+        self.colors[ColorCode.G17] = CopicColor(ColorCode.G17, 'Forest Green', (60, 169, 116))
+        self.colors[ColorCode.BG18] = CopicColor(ColorCode.BG18, 'Teal Blue', (121, 182, 181))
+
+        self.colors[ColorCode.B12] = CopicColor(ColorCode.B12, 'Ice Blue', (73, 116, 182))
+        self.colors[ColorCode.B24] = CopicColor(ColorCode.B24, 'Sky', (106, 180, 192))
+        self.colors[ColorCode.B39] = CopicColor(ColorCode.B39, 'Prussian Blue', (71, 110, 160))
+
+        self.colors[ColorCode.B110] = CopicColor(ColorCode.B110, 'Special Black', (75, 67, 74))
+
+        self.colors[ColorCode.E97] = CopicColor(ColorCode.E97, 'Deep Orange', (246, 170, 116))
+        self.colors[ColorCode.G40] = CopicColor(ColorCode.G40, 'Dim Green', (246, 246, 224))
+        self.colors[ColorCode.YG01] = CopicColor(ColorCode.YG01, 'Green Bice', (223, 240, 89))
+        self.colors[ColorCode.R20] = CopicColor(ColorCode.R20, 'Blush', (245, 198, 202))
+        self.colors[ColorCode.YR04] = CopicColor(ColorCode.YR04, 'Chrome Orange', (248, 127, 87))
+        self.colors[ColorCode.YR02] = CopicColor(ColorCode.YR02, 'Light Orange', (242, 145, 155))
+
+        self.colors[ColorCode.E04] = CopicColor(ColorCode.E04, 'Lipstick Rose', (211, 150, 167))
+        self.colors[ColorCode.G03] = CopicColor(ColorCode.G03, 'Maedow Green', (137, 218, 148))
+        self.colors[ColorCode.BG09] = CopicColor(ColorCode.BG09, 'Blue Green', (41, 167, 168))
+        self.colors[ColorCode.BG13] = CopicColor(ColorCode.BG13, 'Mint Green', (116, 217, 203))
+        self.colors[ColorCode.BG15] = CopicColor(ColorCode.BG15, 'Aqua', (85, 212, 192))
+        self.colors[ColorCode.G85] = CopicColor(ColorCode.G85, 'Verdigris', (165, 175, 134))
 
 
 class Copic:
