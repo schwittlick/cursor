@@ -120,6 +120,10 @@ def map(value, in_min, in_max, out_min, out_max, clamp=True):
     return out
 
 
+def clamp(n, smallest, largest):
+    return max(smallest, min(n, largest))
+
+
 def lerp(a: float, b: float, t: float) -> float:
     """Linear interpolate on the scale given by a to b, using t as the point on that scale.
     Examples

@@ -24,7 +24,7 @@ from cursor.algorithm.entropy import calc_entropy
 from cursor.algorithm.frechet import LinearDiscreteFrechet
 from cursor.algorithm.frechet import euclidean
 from cursor.bb import BoundingBox
-from cursor.misc import apply_matrix
+from cursor.misc import apply_matrix, clamp
 from cursor.properties import Property
 from cursor.position import Position
 
@@ -33,7 +33,7 @@ import logging
 
 class Path:
     def __init__(
-        self, vertices: list[Position] | None = None, properties: dict | None = None
+            self, vertices: list[Position] | None = None, properties: dict | None = None
     ):
         self._vertices = []
         self.properties = {
@@ -55,9 +55,7 @@ class Path:
 
     def __repr__(self):
         rep = (
-            f"verts: {len(self.vertices)} shannx: {self.entropy_x} shanny: {self.entropy_y} "
-            f"shannchan: {self.entropy_direction_changes} layer: {self.layer} "
-            f"type: {self.line_type} velocity: {self.velocity} "
+            f"vertices: {len(self.vertices)} "
             f"bb: {self.bb()}"
         )
         return rep
@@ -398,7 +396,7 @@ class Path:
         self.translate(bb.x, bb.y)
 
     def morph(
-        self, start: Position | tuple[float, float], end: Position | tuple[float, float]
+            self, start: Position | tuple[float, float], end: Position | tuple[float, float]
     ) -> Path:
         if isinstance(start, Position) and isinstance(end, Position):
             start = (start.x, start.y)
@@ -447,8 +445,8 @@ class Path:
         # solution taken from here:
         # http://www.gamedev.net/topic/556500-angle-between-vectors/
         if (
-            current_start_to_end[0] * new_start_to_end[1]
-            < current_start_to_end[1] * new_start_to_end[0]
+                current_start_to_end[0] * new_start_to_end[1]
+                < current_start_to_end[1] * new_start_to_end[0]
         ):
             angle = 2 * math.pi - angle
 
@@ -476,9 +474,9 @@ class Path:
                 compareA = diffLAx * line1Start.y - diffLAy * line1Start.x
                 compareB = diffLBx * line2Start.y - diffLBy * line2Start.x
                 if ((diffLAx * line2Start.y - diffLAy * line2Start.x) < compareA) ^ (
-                    (diffLAx * line2End.y - diffLAy * line2End.x) < compareA
+                        (diffLAx * line2End.y - diffLAy * line2End.x) < compareA
                 ) and ((diffLBx * line1Start.y - diffLBy * line1Start.x) < compareB) ^ (
-                    (diffLBx * line1End.y - diffLBy * line1End.x) < compareB
+                        (diffLBx * line1End.y - diffLBy * line1End.x) < compareB
                 ):
                     ok = (diffLAx * diffLBy) - (diffLAy * diffLBx)
                     if ok == 0:
@@ -729,11 +727,11 @@ class Path:
         return [new_a, new_b]
 
     def _offset_angle(
-        self,
-        p1: Position,
-        p2: Position,
-        p3: Position,
-        offset: float,
+            self,
+            p1: Position,
+            p2: Position,
+            p3: Position,
+            offset: float,
     ) -> Path:
         a = p2.distance(p3)
         b = p1.distance(p2)
@@ -791,19 +789,37 @@ class Path:
 
         return offset_path
 
-    def parallel_offset(
-        self, dist: float, join_style=JOIN_STYLE.mitre, mitre_limit=1.0
-    ) -> list[Path]:
-        def iter_and_return_path(offset: BaseGeometry) -> Path:
-            pa = Path()
-            for x, y in offset.coords:
-                pa.add(x, y)
-            return pa
+    def iter_and_return_path(self, offset: BaseGeometry) -> Path:
+        pa = Path()
+        for x, y in offset.coords:
+            pa.add(x, y)
+        return pa
 
-        def add_if(pa: Path, out: list[Path]):
-            if len(pa) > 2:
-                pa.simplify(0.01)
-                out.append(pa)
+    def add_if(self, pa: Path, out: list[Path]):
+        if len(pa) > 2:
+            pa.simplify(0.01)
+            out.append(pa)
+
+    def curve_offset(self, dist: float, join_style=JOIN_STYLE.mitre, mitre_limit=1.0):
+        return_paths = []
+
+        line = LineString(self.as_tuple_list())
+        result = line.offset_curve(dist, 16, join_style, mitre_limit)
+
+        if type(result) is MultiLineString:
+            for poi in result.geoms:
+                pa = self.iter_and_return_path(poi)
+                self.add_if(pa, return_paths)
+
+        elif type(result) is LineString:
+            pa = self.iter_and_return_path(result)
+            self.add_if(pa, return_paths)
+
+        return return_paths
+
+    def parallel_offset(
+            self, dist: float, join_style=JOIN_STYLE.mitre, mitre_limit=1.0
+    ) -> list[Path]:
 
         return_paths = []
 
@@ -820,12 +836,12 @@ class Path:
 
             if type(result) is MultiLineString:
                 for poi in result.geoms:
-                    pa = iter_and_return_path(poi)
-                    add_if(pa, return_paths)
+                    pa = self.iter_and_return_path(poi)
+                    self.add_if(pa, return_paths)
 
             elif type(result) is LineString:
-                pa = iter_and_return_path(result)
-                add_if(pa, return_paths)
+                pa = self.iter_and_return_path(result)
+                self.add_if(pa, return_paths)
 
             else:
                 print(f"nothing matched for type {type(result)}")
@@ -867,14 +883,10 @@ class Path:
         #    log.warn(f"{te}")
         #    return []
 
-    @staticmethod
-    def clamp(n, smallest, largest):
-        return max(smallest, min(n, largest))
-
     def smooth(self, size: int, shape: int) -> None:
         n = len(self)
-        size = Path.clamp(size, 0, n)
-        shape = Path.clamp(shape, 0, 1)
+        size = clamp(size, 0, n)
+        shape = clamp(shape, 0, 1)
 
         weights = [0] * size
         for i in range(size):
@@ -919,7 +931,7 @@ class Path:
         for i in range(1, len(self)):
             dx = self[i].x - self[i - 1].x
             dy = self[i].y - self[i - 1].y
-            dist = np.sqrt(dx**2 + dy**2)
+            dist = np.sqrt(dx ** 2 + dy ** 2)
             distances.append(distances[-1] + dist)
 
         # Calculate number of intervals based on target_distance
@@ -996,7 +1008,7 @@ class Path:
             return
 
         def get_intersection(
-            segment: Path, paths: list[tuple[float, float, float, float]]
+                segment: Path, paths: list[tuple[float, float, float, float]]
         ) -> tuple[float, float]:
             for p in paths:
                 tup1 = segment[0].as_tuple()
