@@ -569,7 +569,7 @@ class Collection:
 
         self.translate(diff[0], diff[1])
 
-    def fast_tsp(self, plot_preview=False) -> list[int]:
+    def fast_tsp(self, plot_preview: bool = False, duration_seconds: int = 5) -> list[int]:
         timer = Timer()
         start_positions = np.array([pa.start_pos().as_tuple() for pa in self])
         end_positions = np.array([pa.end_pos().as_tuple() for pa in self])
@@ -578,7 +578,7 @@ class Collection:
             end_positions, start_positions, metric="euclidean"
         )
 
-        order = fast_tsp.find_tour(np.int_(dists).tolist(), duration_seconds=10)
+        order = fast_tsp.find_tour(np.int_(dists).tolist(), duration_seconds=duration_seconds)
 
         if plot_preview:
             fig, ax = plt.subplots(1, 1)

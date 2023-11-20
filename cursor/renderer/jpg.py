@@ -60,7 +60,8 @@ class JpegRenderer:
         fname = self.save_path / (filename + ".png")
         self.img.save(fname, "png")
 
-        logging.info(f"Finished saving {fname}")
+        logging.info(f"Finished saving {fname.name}")
+        logging.info(f"in {self.save_path}")
 
     def rotate(self, degree: float = 90) -> None:
         self.img = self.img.rotate(degree, expand=True)
@@ -96,8 +97,8 @@ class JpegRenderer:
         img_draw = ImageDraw.ImageDraw(img)
 
         for point in points:
-            rad = point.properties["radius"]
-            color = point.properties["color"]
+            rad = point.properties[Property.RADIUS]
+            color = point.properties[Property.COLOR]
 
             if "outline" in point.properties.keys():
                 outline = point.properties["outline"]

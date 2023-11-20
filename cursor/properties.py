@@ -19,3 +19,4 @@ class Property(Enum):
     # below used for jpeg renderer
     COLOR = "color"
     WIDTH = "width"
+    RADIUS = "radius"

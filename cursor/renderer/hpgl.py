@@ -2,12 +2,10 @@ from __future__ import annotations
 
 import pathlib
 
-import wasabi
+import logging
 
 from cursor.collection import Collection
 from cursor.hpgl.hpgl import HPGL
-
-log = wasabi.Printer()
 
 
 class HPGLRenderer:
@@ -24,7 +22,7 @@ class HPGLRenderer:
 
     def render(self, paths: Collection) -> None:
         self.__paths += paths
-        log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
+        logging.info(f"{__class__.__name__}: rendered {len(paths)} paths")
 
     def estimated_duration(self, speed) -> int:
         s = 0
@@ -113,7 +111,8 @@ class HPGLRenderer:
         with open(fname.as_posix(), "w") as file:
             file.write(_hpgl_string)
 
-        log.good(f"Finished saving {fname}")
+        logging.info(f"Finished saving {fname.name}")
+        logging.info(f"in {self.__save_path}")
 
         return _hpgl_string
 
