@@ -66,4 +66,4 @@ class BoundingBox:
         return paths
 
     def __repr__(self) -> str:
-        return f"BB(x={self.x}, y={self.y}, x2={self.x2}, y2={self.y2}, w={self.w}, h={self.h})"
+        return f"BB(x={self.x:.2f}, y={self.y:.2f}, x2={self.x2:.2f}, y2={self.y2:.2f}, w={self.w:.2f}, h={self.h:.2f})"
