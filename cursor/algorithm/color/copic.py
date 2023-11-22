@@ -119,7 +119,7 @@ class CopicPhotograph:
         self.colors[ColorCode.B24] = CopicColor(ColorCode.B24, 'Sky', (106, 180, 192))
         self.colors[ColorCode.B39] = CopicColor(ColorCode.B39, 'Prussian Blue', (71, 110, 160))
 
-        self.colors[ColorCode.B110] = CopicColor(ColorCode.B110, 'Special Black', (75, 67, 74))
+        self.colors[ColorCode._110] = CopicColor(ColorCode._110, 'Special Black', (75, 67, 74))
 
         self.colors[ColorCode.E97] = CopicColor(ColorCode.E97, 'Deep Orange', (246, 170, 116))
         self.colors[ColorCode.G40] = CopicColor(ColorCode.G40, 'Dim Green', (246, 246, 224))
@@ -140,8 +140,8 @@ class Copic:
     def __init__(self):
         self.colors = {}
 
-        self.colors[ColorCode.B110] = CopicColor(ColorCode.B110, "Special Black", (3, 7, 8))
-        self.colors[ColorCode.B000] = CopicColor(ColorCode.B000, "White / Nothing", (255, 255, 255))
+        self.colors[ColorCode._110] = CopicColor(ColorCode._110, "Special Black", (3, 7, 8))
+        self.colors[ColorCode._000] = CopicColor(ColorCode._000, "White / Nothing", (255, 255, 255))
 
         self.colors[ColorCode.B12] = CopicColor(ColorCode.B12, "Ice Blue", (200, 230, 240))
         self.colors[ColorCode.B14] = CopicColor(ColorCode.B14, "Light Blue", (113, 207, 235))

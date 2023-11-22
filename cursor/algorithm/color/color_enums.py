@@ -2,8 +2,94 @@ from enum import Enum, auto
 
 
 class ColorCode(Enum):
-    B110 = auto()  # actually without B, but cant use enum without char
-    B000 = auto()  # actually doesnt axist, this is white
+    _110 = auto()  # actually without B, but cant use enum without char
+    _000 = auto()  # actually doesnt axist, this is white
+
+    # ordered
+    # b
+    B00 = auto()
+    B02 = auto()
+    B05 = auto()
+    B18 = auto()
+    B34 = auto()
+
+    # bg
+    BG01 = auto()
+    BG02 = auto()
+    BG07 = auto()
+    BG57 = auto()
+    BG72 = auto()
+
+    # g
+    G12 = auto()
+    G24 = auto()
+    G44 = auto()
+    G46 = auto()
+    G99 = auto()
+
+    # YG
+    YG05 = auto()
+    YG11 = auto()
+    YG25 = auto()
+    YG45 = auto()
+    YG91 = auto()
+
+    # y
+    Y02 = auto()
+    Y11 = auto()
+    Y18 = auto()
+    Y35 = auto()
+    Y38 = auto()
+
+    # yr
+    YR01 = auto()
+    YR12 = auto()
+    YR18 = auto()
+    YR23 = auto()
+    YR68 = auto()
+
+    # e (earth)
+    E01 = auto()
+    E11 = auto()
+    E17 = auto()
+    E23 = auto()
+    E53 = auto()
+    E87 = auto()
+
+    # r
+    R08 = auto()
+    R12 = auto()
+    R35 = auto()
+    R39 = auto()
+    R83 = auto()
+
+    # rv
+    RV06 = auto()
+    RV11 = auto()
+    RV19 = auto()
+    RV29 = auto()
+    RV63 = auto()
+
+    # v
+    V09 = auto()
+    V15 = auto()
+    V20 = auto()
+    V91 = auto()
+    V99 = auto()
+
+    # bv
+    BV04 = auto()
+    BV11 = auto()
+    BV20 = auto()
+    BV31 = auto()
+    BV34 = auto()
+
+    # flourescent
+    FBG2 = auto()
+    FY1 = auto()
+    FYR1 = auto()
+    FYG1 = auto()
+    FV2 = auto()
 
     # blues
     B12 = auto()

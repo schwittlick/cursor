@@ -17,5 +17,5 @@ if __name__ == "__main__":
 
     hpgl_folder = DataDirHandler().hpgl("example_raw_hpgl")
     hpgl_renderer = HPGLRenderer(hpgl_folder)
-    hpgl_renderer.render(pc)
+    hpgl_renderer.add(pc)
     hpgl_str = hpgl_renderer.save("example_raw_hpgl")

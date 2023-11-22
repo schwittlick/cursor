@@ -211,7 +211,7 @@ class Exporter:
             hpgl_renderer = HPGLRenderer(
                 hpgl_folder, line_type_mapping=self.linetype_mapping
             )
-            hpgl_renderer.render(self.paths)
+            hpgl_renderer.add(self.paths)
             hpgl_renderer.save(f"{fname}")
         if self.layer_pen_mapping is not None:
             if format is ExportFormat.HPGL:
@@ -220,7 +220,7 @@ class Exporter:
                 hpgl_renderer = HPGLRenderer(
                     hpgl_folder, layer_pen_mapping=self.layer_pen_mapping
                 )
-                hpgl_renderer.render(self.paths)
+                hpgl_renderer.add(self.paths)
                 hpgl_renderer.save(f"{fname}")
         else:
             separate_layers = self.paths.get_layers()
@@ -228,7 +228,7 @@ class Exporter:
                 if format is ExportFormat.HPGL:
                     hpgl_folder = DataDirHandler().hpgl(self.name)
                     hpgl_renderer = HPGLRenderer(hpgl_folder)
-                    hpgl_renderer.render(pc)
+                    hpgl_renderer.add(pc)
                     hpgl_renderer.save(f"{fname}_{layer}")
 
                 if format is ExportFormat.SVG:

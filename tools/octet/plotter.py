@@ -440,7 +440,7 @@ class Plotter:
 
     def render(self, c: Collection):
         r = HPGLRenderer(pathlib.Path(""))
-        r.render(c)
+        r.add(c)
         seconds = r.estimated_duration(self.thread.speed)
         logger.info(f"this will take approx {seconds}s.")
         return r.generate_string(), seconds

@@ -108,7 +108,7 @@ def get_data():
         pc.fit(Paper.sizes[PaperSize.LANDSCAPE_A3], output_bounds=MinmaxMapping.maps[PlotterType.HP_7595A])
 
         hpgl_renderer = HPGLRenderer(DataDirHandler().hpgl(f"composition73_mutoh_{r.hash}"))
-        hpgl_renderer.render(pc)
+        hpgl_renderer.add(pc)
         data = hpgl_renderer.generate_string()
         return data
 
