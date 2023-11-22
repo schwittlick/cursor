@@ -18,7 +18,7 @@ def test_hpglrenderer():
     pc.add(p2)
 
     r = HPGLRenderer(DataDirHandler().test_hpgls())
-    r.render(pc)
+    r.add(pc)
     hpgl_data = r.generate_string()
 
     expected_result = "PU;SP1;PA-10,-10;PD;PA-10,-10;PA10,-10;PU;PA10,-10;PD;PA10,-10;PA10,10;PU;PA0,0;SP0;"

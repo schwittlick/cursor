@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import pathlib
 import typing
 
 from cursor.collection import Collection
@@ -36,3 +37,32 @@ class PathIterator:
                 prev = copy.deepcopy(point)
 
                 yield start, end
+
+
+class BaseRenderer:
+    def __init__(self, folder: pathlib.Path):
+        self.save_path: pathlib.Path = folder
+
+        self.paths: list[Path] = []
+        self.positions: list[Position] = []
+
+    def clear(self) -> None:
+        self.paths.clear()
+        self.positions.clear()
+
+    def add(self, input: Collection | Path | Position | list[Collection] | list[Path] | list[Position]):
+        match input:
+            case Collection():
+                self.paths.extend(input.paths)
+            case Position():
+                self.positions.append(input)
+            case Path():
+                self.paths.append(input)
+            case list():
+                if all(isinstance(item, Path) for item in input):
+                    self.paths.extend(input)
+                if all(isinstance(item, Position) for item in input):
+                    self.positions.extend(input)
+                if all(isinstance(item, Collection) for item in input):
+                    for collection in input:
+                        self.paths.extend(collection.paths)

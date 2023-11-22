@@ -6,27 +6,20 @@ import logging
 
 from cursor.collection import Collection
 from cursor.hpgl.hpgl import HPGL
+from cursor.renderer import BaseRenderer
 
 
-class HPGLRenderer:
-    def __init__(
-            self,
-            folder: pathlib.Path,
-            layer_pen_mapping: dict = None,
-            line_type_mapping: dict = None,
-    ) -> None:
+class HPGLRenderer(BaseRenderer):
+    def __init__(self, folder: pathlib.Path, layer_pen_mapping: dict = None, line_type_mapping: dict = None) -> None:
+        super().__init__(folder)
+
         self.__save_path = folder
-        self.__paths = Collection()
         self.__layer_pen_mapping = layer_pen_mapping
         self.__line_type_mapping = line_type_mapping
 
-    def render(self, paths: Collection) -> None:
-        self.__paths += paths
-        logging.info(f"{__class__.__name__}: rendered {len(paths)} paths")
-
     def estimated_duration(self, speed) -> int:
         s = 0
-        for p in self.__paths:
+        for p in self.paths:
             mm = p.distance / 400  # for hp plotters its 40
             seconds = mm / speed * 10
             s += seconds
@@ -41,7 +34,7 @@ class HPGLRenderer:
         _prev_pen = 0
 
         first = True
-        for p in self.__paths:
+        for p in self.paths:
             if first:
                 _hpgl.PU()
                 first = False

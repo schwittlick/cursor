@@ -35,5 +35,5 @@ if __name__ == "__main__":
     c.transform(BoundingBox(10, 10, out_bb[0] - 10, out_bb[1] - 10))
     c.scale(40, 40)
 
-    hpgl_renderer.render(c)
+    hpgl_renderer.add(c)
     hpgl_renderer.save("rect_dpx1200")
