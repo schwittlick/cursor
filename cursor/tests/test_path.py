@@ -402,9 +402,9 @@ def test_angles_posneg():
         [(0, 1), (1, 1), (1, 0), (1, 1)])
 
     changes = p.direction_changes(mapped=False)
-    assert changes[0] == 45.0
-    assert changes[1] == 45.0
-    assert changes[2] == -45.0
+    assert math.isclose(changes[0], 45.0, abs_tol=0.00001)
+    assert math.isclose(changes[1], 45.0, abs_tol=0.00001)
+    assert math.isclose(changes[2], -45.0, abs_tol=0.00001)
 
 
 def disabled_test_similarity():
