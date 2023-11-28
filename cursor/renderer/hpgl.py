@@ -4,7 +4,6 @@ import pathlib
 
 import logging
 
-from cursor.collection import Collection
 from cursor.hpgl.hpgl import HPGL
 from cursor.renderer import BaseRenderer
 
