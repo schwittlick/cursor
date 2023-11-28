@@ -1,14 +1,9 @@
-from __future__ import annotations
-
 import pathlib
-
 import svgwrite
-import wasabi
+import logging
 
 from cursor.properties import Property
-from cursor.renderer import PathIterator, BaseRenderer
-
-log = wasabi.Printer()
+from cursor.renderer import BaseRenderer
 
 
 class SvgRenderer(BaseRenderer):
@@ -16,19 +11,9 @@ class SvgRenderer(BaseRenderer):
         super().__init__(folder)
         self.dwg = svgwrite.Drawing("", profile="tiny", size=(w, h))
 
-    def render(self, scale: float = 1.0, frame: bool = False) -> None:
+    def render(self, scale: float = 1.0) -> None:
         self.render_all_paths(scale=scale)
-        # self.render_all_points(scale=scale)
-
-        # it = PathIterator(self.paths)
-        # for conn in it.connections():
-        #    line = self.dwg.line(
-        #        conn[0].as_tuple(),
-        #        conn[1].as_tuple(),
-        #        stroke_width=0.5,
-        #        stroke="black",
-        #    )
-        #    self.dwg.add(line)
+        self.render_all_points(scale=scale)
 
     def render_all_paths(self, scale: float = 1.0):
         for path in self.paths:
@@ -36,13 +21,24 @@ class SvgRenderer(BaseRenderer):
             points = path.as_tuple_list()
             color = path.properties[Property.COLOR]
             width = path.properties[Property.WIDTH]
-            int_points = [tuple(map(str, p)) for p in points]
-            self.dwg.add(self.dwg.polyline(int_points, stroke_width=width, stroke=f"rgb{color}"))
+            str_points = [tuple(map(str, p)) for p in points]
+            self.dwg.add(self.dwg.polyline(str_points, stroke_width=width, stroke=f"rgb{color}"))
+
+    def render_all_points(self, scale: float = 1.0):
+        for point in self.positions:
+            point.scale(scale, scale)
+            color = point.properties[Property.COLOR]
+            width = point.properties[Property.WIDTH]
+            str_point = tuple(map(str, point.as_tuple()))
+
+            self.dwg.add(self.dwg.circle(str_point, r=width, stroke_width=width, stroke=f"rgb{color}"))
 
     def save(self, filename: str) -> None:
-        self.dwg.filename = (self.save_path / (filename + ".svg")).as_posix()
+        fname = self.save_path / (filename + ".svg")
+        self.dwg.filename = fname.as_posix()
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
 
         self.dwg.save(pretty=True)
 
-        log.good(f"Finished saving {self.dwg.filename}")
+        logging.info(f"Finished saving {fname.name}")
+        logging.info(f"in {self.save_path}")
