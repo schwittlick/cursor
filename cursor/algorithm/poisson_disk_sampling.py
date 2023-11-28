@@ -3,11 +3,11 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MultipleLocator
 
 """
-Implementation of the fast Poisson Disk Sampling algorithm of 
-Bridson (2007) adapted to support spatially varying sampling radii. 
+Implementation of the fast Poisson Disk Sampling algorithm of
+Bridson (2007) adapted to support spatially varying sampling radii.
 
 Adrian Bittner, 2021
-Published under MIT license. 
+Published under MIT license.
 """
 
 
@@ -95,7 +95,7 @@ def poissonDiskSampling(radius, k=30, radiusType='default'):
                 # There is a conflict. Do NOT create a new particle at this position!
                 continue
 
-        if success == False:
+        if not success:
             # No new particle could be associated to the currently active particle.
             # Remove current particle from the active queue!
             del queue[idx]
@@ -189,7 +189,7 @@ def plotSampling(particleCoordinates, rad, name="uniformDensity5000"):
 
 if __name__ == "__main__":
     """
-    This file presents various examples on the usage of this software package and the generated Poisson Disk Samplings. 
+    This file presents various examples on the usage of this software package and the generated Poisson Disk Samplings.
     """
 
     # Create the Radius Array

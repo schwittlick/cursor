@@ -1,8 +1,6 @@
 import numpy as np
-from PIL import Image, ImageOps
+from PIL import Image
 import numpy
-
-from cursor.data import DataDirHandler
 
 
 class BrailleTranslator:
