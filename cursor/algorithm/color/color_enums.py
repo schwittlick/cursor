@@ -8,10 +8,33 @@ class ColorCode(Enum):
     # ordered
     # b
     B00 = auto()
+    B000 = auto()
+    B0000 = auto()
+    B01 = auto()
     B02 = auto()
+    B04 = auto()
     B05 = auto()
+    B06 = auto()
+    B16 = auto()
     B18 = auto()
+    B21 = auto()
+    B26 = auto()
+    B28 = auto()
     B34 = auto()
+    B37 = auto()
+    B41 = auto()
+    B45 = auto()
+    B52 = auto()
+    B60 = auto()
+    B63 = auto()
+    B66 = auto()
+    B69 = auto()
+    B79 = auto()
+    B91 = auto()
+    B93 = auto()
+    B95 = auto()
+    B97 = auto()
+    B99 = auto()
 
     # bg
     BG01 = auto()
@@ -23,7 +46,7 @@ class ColorCode(Enum):
     # g
     G12 = auto()
     G24 = auto()
-    G44 = auto()
+    G43 = auto()
     G46 = auto()
     G99 = auto()
 
@@ -90,6 +113,8 @@ class ColorCode(Enum):
     FYR1 = auto()
     FYG1 = auto()
     FV2 = auto()
+
+
 
     # blues
     B12 = auto()
