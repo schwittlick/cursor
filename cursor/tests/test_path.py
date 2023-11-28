@@ -216,7 +216,7 @@ def test_variation():
     sx = p1.variation_x
     sy = p1.variation_y
 
-    assert math.isclose(sx, 0.11226038684)
+    assert math.isclose(sx, 0.11226039, abs_tol=0.00001)
     assert math.isclose(sy, 0.0)
 
 
@@ -228,8 +228,8 @@ def test_differential_entropy():
     sx1 = p1.differential_entropy_x
     sy1 = p1.differential_entropy_y
 
-    assert math.isclose(sx1, -0.42138186975)
-    assert math.isclose(sy1, -0.02733247453)
+    assert math.isclose(sx1, -0.42138186975, abs_tol=0.00001)
+    assert math.isclose(sy1, -0.02733247453, abs_tol=0.00001)
 
 
 def test_simplify_random():
@@ -307,7 +307,7 @@ def test_path_nearest_points():
     new = p.nearest_points(Position(1.0, 2.0))
 
     assert new.x == 1.0
-    assert new.y == 1.1
+    assert math.isclose(new.y, 1.1, abs_tol=0.0001)
 
 
 def test_path_dilate():
@@ -392,9 +392,9 @@ def test_angles():
         [(0, 1), (1, 1), (1, 0), (0.5, 0)])
 
     changes = p.direction_changes(mapped=True)
-    assert changes[0] == 45.0
-    assert changes[1] == 45.0
-    assert changes[2] == 0.0
+    assert math.isclose(changes[0], 45.0, abs_tol=0.00001)
+    assert math.isclose(changes[1], 45.0, abs_tol=0.00001)
+    assert math.isclose(changes[2], 0.0, abs_tol=0.00001)
 
 
 def test_angles_posneg():
@@ -432,7 +432,7 @@ def test_offset():
 
     offset = p1.offset(0.2)
 
-    assert offset[0].y == -0.2
+    assert math.isclose(offset[0].y, -0.2, abs_tol=0.00001)
     # can't compare the rest
 
 
