@@ -12,9 +12,9 @@ def test_from_image():
     loaded = Image.open(im)
     loaded = loaded.resize((50, 60))
     loaded = loaded.convert('1')
-    out = bt.toBraille(loaded, "ascii")[1:]
+    out = bt.to_braille(loaded, "ascii")[1:]
 
-    img = bt.fromBraille(out)
+    img = bt.from_braille(out)
 
     in_array = np.asarray(loaded)
     out_array = np.asarray(img)
@@ -45,7 +45,7 @@ def test_split_into_bits():
 def test_from_braille():
     bt = BrailleTranslator()
 
-    img = bt.fromBraille(["0=1", "ABC", "D(F"])
+    img = bt.from_braille(["0=1", "ABC", "D(F"])
     data = np.asarray(img)
     data_to_compare = np.array(
         [[False, False, True, True, False, False],

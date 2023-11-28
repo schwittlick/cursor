@@ -1,6 +1,5 @@
 import numpy as np
 from PIL import Image
-import numpy
 
 
 class BrailleTranslator:
@@ -9,6 +8,13 @@ class BrailleTranslator:
         self.unicode_mapping = "⠀⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿"
 
         self.extend_page = "DPL500;"
+
+    @staticmethod
+    def split_into_bits(number) -> list[list[int]]:
+        # Using bit manipulation to extract each bit from the integer
+        # Only using 6 bits, we don't need more. Also reverted
+        bits = [(number >> i) & 1 for i in range(5, -1, -1)][::-1]
+        return [bits[:3], bits[3:]]
 
     def get_index(self, char: str) -> int:
         assert char.upper() in self.ascii_mapping
@@ -32,12 +38,12 @@ class BrailleTranslator:
         # like that we end up with an index in the mapping string
         return int(''.join([str(int(j)) for i in matrix for j in i])[::-1], 2)
 
-    def toBraille(self, image: Image, mode="ascii") -> list[str]:
+    def to_braille(self, image: Image, mode="ascii") -> list[str]:
         assert image.width % 2 == 0
         assert image.height % 3 == 0
         out = ["1"]
 
-        data = numpy.asarray(image)
+        data = np.asarray(image)
 
         for y in range(0, data.shape[0], 3):
             line = ""
@@ -58,14 +64,7 @@ class BrailleTranslator:
             out.append(line)
         return out
 
-    @staticmethod
-    def split_into_bits(number) -> list[list[int]]:
-        # Using bit manipulation to extract each bit from the integer
-        # Only using 6 bits, we dont need more. Also reverted
-        bits = [(number >> i) & 1 for i in range(5, -1, -1)][::-1]
-        return [bits[:3], bits[3:]]
-
-    def fromBraille(self, data: list[str]) -> Image:
+    def from_braille(self, data: list[str]) -> Image:
         w = len(data[0]) * 2
         h = len(data) * 3
 
