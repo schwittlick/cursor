@@ -6,6 +6,7 @@ from cursor.renderer import BaseRenderer
 
 from fpdf import FPDF
 
+
 class PdfRenderer(BaseRenderer):
     def __init__(self, folder: pathlib.Path):
         super().__init__(folder)
@@ -17,13 +18,13 @@ class PdfRenderer(BaseRenderer):
 
     def reset(self, orientation: str = "Portrait", w: int = 210, h: int = 297):
         self.pdf = FPDF(orientation=orientation, unit="mm", format=(w, h))
-        self.pdf.add_page()
         self.pdf.set_author("Marcel Schwittlick")
         self.pdf.set_margins(self.margin_x, self.margin_y)
 
     def render(self, scale: float = 1.0) -> None:
         self.render_all_paths(scale=scale)
         self.render_all_points(scale=scale)
+        self.clear()
 
     def save(self, filename: str) -> None:
         pathlib.Path(self.save_path).mkdir(parents=True, exist_ok=True)
@@ -34,6 +35,14 @@ class PdfRenderer(BaseRenderer):
         logging.info(f"Finished saving {fname.name}")
         logging.info(f"in {self.save_path}")
 
+    def background(self, r: int, g: int, b: int) -> None:
+        self.pdf.set_fill_color(r, g, b)
+        self.pdf.rect(0, 0, self.pdf.w, self.pdf.h, "F")
+
+    def render_page_nr(self, r: int, g: int, b: int) -> None:
+        self.pdf.set_fill_color(r, g, b)
+        self.pdf.text(self.pdf.w / 2, self.pdf.h * 0.98, str(self.pdf.page_no()))
+
     def render_all_paths(self, scale: float = 1.0) -> None:
         for path in self.paths:
             path.scale(scale, scale)
@@ -41,12 +50,7 @@ class PdfRenderer(BaseRenderer):
             width = path.properties[Property.WIDTH]
             self.pdf.set_line_width(width)
             self.pdf.set_draw_color(r, g, b)
-
             self.pdf.polyline(path.as_tuple_list())
-            # for idx in range(1, len(path)):
-            #    begin = path[idx - 1]
-            #    end = path[idx]
-            #    self.pdf.line(begin.x, begin.y, end.x, end.y)
 
     def render_all_points(self, scale: float = 1.0) -> None:
         for point in self.positions:
