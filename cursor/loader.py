@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import numpy as np
+
 from cursor.data import DateHandler
 from cursor.path import Path
 from cursor.properties import Property
@@ -29,12 +31,19 @@ class MyJsonEncoder(json.JSONEncoder):
             case Path():
                 return o.vertices
             case Position():
-                return {
+                d = {
                     "x": round(o.x, 4),
-                    "y": round(o.y, 4),
-                    "ts": round(o.timestamp, 2),
-                    "c": o.properties[Property.COLOR] if Property.COLOR in o.properties.keys() else None,
+                    "y": round(o.y, 4)
                 }
+
+                if o.timestamp:
+                    d["ts"] = round(o.timestamp, 2)
+
+                if Property.COLOR in o.properties.keys():
+                    color = o.properties[Property.COLOR]
+                    if color:
+                        d["c"] = color
+                return d
 
 
 class MyJsonDecoder(json.JSONDecoder):
