@@ -39,6 +39,9 @@ class PdfRenderer(BaseRenderer):
         self.pdf.set_fill_color(r, g, b)
         self.pdf.rect(0, 0, self.pdf.w, self.pdf.h, "F")
 
+    def circle(self, x: float, y: float, r: float) -> None:
+        self.pdf.circle(x=x - r, y=y - r, r=r * 2)
+
     def render_page_nr(self, r: int, g: int, b: int) -> None:
         self.pdf.set_fill_color(r, g, b)
         self.pdf.text(self.pdf.w / 2, self.pdf.h * 0.98, str(self.pdf.page_no()))
