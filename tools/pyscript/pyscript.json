@@ -1,0 +1,11 @@
+{
+  "packages": [
+    "arrr",
+    "numpy",
+    "scikit-image==0.21.0",
+    "shapely==2.0.1"
+  ],
+  "files": {
+    "../spline.py": "./spline.py"
+  }
+}

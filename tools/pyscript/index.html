@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>🦜 Polyglot - Piratical PyScript</title>
+    <script type="module" src="https://pyscript.net/releases/2023.12.1/core.js"></script>
+    <script src="./mini-coi.js" scope="./"></script>
+</head>
+
+<body>
+<h1>Polyglot 🦜 💬 🇬🇧 ➡️ 🏴‍☠️</h1>
+<p>Translate English into Pirate speak...</p>
+<label for="english">what</label><input type="text" id="english" placeholder="Type English here..."/>
+<button py-click="translate_english">Translate</button>
+<div id="output"></div>
+<script type="py" src="main.py" config="pyscript.json"></script>
+<div style="width:1000px;">
+
+</div>
+</body>
+
+</html>
