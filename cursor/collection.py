@@ -27,7 +27,7 @@ from sko.GA import GA_TSP
 from cursor.bb import BoundingBox
 from cursor.data import DataDirHandler
 from cursor.filter import Filter
-from cursor.misc import apply_matrix
+from cursor.misc import apply_matrix, calc_distance
 from cursor.path import Path
 from cursor.position import Position
 from cursor.sorter import Sorter
@@ -571,20 +571,27 @@ class Collection:
 
     def fast_tsp(self, plot_preview: bool = False, duration_seconds: int = 5) -> list[int]:
         timer = Timer()
-        start_positions = np.array([pa.start_pos().as_tuple() for pa in self])
-        end_positions = np.array([pa.end_pos().as_tuple() for pa in self])
+        start_positions = np.array([tuple(map(int, pa.start_pos().as_tuple())) for pa in self])
+        end_positions = np.array([tuple(map(int, pa.end_pos().as_tuple())) for pa in self])
 
-        dists = spatial.distance.cdist(
-            end_positions, start_positions, metric="euclidean"
-        )
+        timer.print_elapsed("calculating distances:")
 
-        order = fast_tsp.find_tour(np.int_(dists).tolist(), duration_seconds=duration_seconds)
+        # dists = spatial.distance.cdist(
+        #  end_positions, start_positions, metric="euclidean"
+        # )
+
+        dists = calc_distance(end_positions, start_positions)
+
+        timer.print_elapsed("done. starting fast_tsp:")
+        order = fast_tsp.find_tour(dists, duration_seconds=duration_seconds)
 
         if plot_preview:
             fig, ax = plt.subplots(1, 1)
             best_points_coordinate = start_positions[order, :]
             ax.plot(best_points_coordinate[:, 0], best_points_coordinate[:, 1], ".-r")
             plt.show()
+
+        timer.print_elapsed("done.. reordering")
 
         final_order = []
         idx = order.index(0)

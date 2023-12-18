@@ -69,16 +69,17 @@ class Position:
                 return func(self.as_array() - np.asarray(t))
 
     def distance_squared(self, t: Position | np.ndarray | tuple[float, float]) -> float:
-        def squared_euclidean_distance(p1: Position, p2: Position) -> float:
-            dx = p1.x - p2.x
-            dy = p1.y - p2.y
-            return dx * dx + dy * dy
+        def squared_euclidean_distance(p1: tuple, p2: tuple) -> float:
+            # dx = p1.x - p2.x
+            # dy = p1.y - p2.y
+            # return dx * dx + dy * dy
+            return sum((i - j) ** 2 for i, j in zip(p1, p2))
 
         match t:
             case Position():
-                return squared_euclidean_distance(self, t)
+                return squared_euclidean_distance(self.as_tuple(), t.as_tuple())
             case tuple():
-                return squared_euclidean_distance(self, Position.from_tuple(t))
+                return squared_euclidean_distance(self.as_tuple(), t)
 
     def rot(
             self, angle: float, origin: tuple[float, float] = (0.0, 0.0)
