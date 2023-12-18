@@ -1,3 +1,5 @@
+import math
+
 from cursor.position import Position
 
 import pytest
@@ -62,3 +64,17 @@ def test_timedpos_comparison():
     b = False
     with pytest.raises(NotImplementedError):
         r = b == t1
+
+
+def test_distance():
+    t1 = Position(0, 0)
+    t2 = Position(1, 1)
+
+    assert math.isclose(t1.distance(t2), 1.4142135, abs_tol=0.00001)
+
+
+def test_distance_squared():
+    t1 = Position(0, 0)
+    t2 = Position(1, 1)
+
+    assert t1.distance_squared(t2) == 2.0
