@@ -1082,9 +1082,9 @@ class Path:
             return pa
 
         def add_if(pa: Path, out: list[Path]):
-            if len(pa) > 2:
-                pa.simplify(0.01)
-                out.append(pa)
+            #if len(pa) > 2:
+                #pa.simplify(0.01)
+            out.append(pa)
 
         line = LineString(self.as_tuple_list())
         result = clip_by_rect(line, bb.x, bb.y, bb.x2, bb.y2)

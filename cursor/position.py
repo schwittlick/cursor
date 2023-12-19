@@ -28,6 +28,10 @@ class Position:
     def from_tuple(cls, xy_tuple: tuple[float, float]) -> Position:
         return cls(xy_tuple[0], xy_tuple[1])
 
+    @classmethod
+    def from_array(cls, arr: np.array) -> Position:
+        return cls(arr[0], arr[1])
+
     @property
     def x(self) -> float:
         return self._pos[0]
@@ -111,32 +115,38 @@ class Position:
     def inside(self, bb: BoundingBox) -> bool:
         return bb.x <= self.x <= bb.x2 and bb.y <= self.y <= bb.y2
 
-    def __eq__(self, o):
+    def __eq__(self, o: Position) -> bool:
         """
         compare equality by comparing all fields
         """
-        if not isinstance(o, Position):
-            raise NotImplementedError
 
         return self.x == o.x and self.y == o.y and self.timestamp == o.timestamp
 
-    def __lt__(self, o):
+    def __lt__(self, o: Position) -> bool:
         """
         compare by timestamp
         """
         return self.timestamp < o.timestamp
 
-    def __gt__(self, o):
+    def __gt__(self, o: Position) -> bool:
         """
         compare by timestamp
         """
         return self.timestamp > o.timestamp
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"({self.x:.3f}, {self.y:.3f}, {self.timestamp:.3f}, {self.properties})"
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(repr(self))
 
-    def __mul__(self, other: Position):
-        return self.as_array() * other.as_array()
+    def __mul__(self, o: Position) -> np.array:
+        return self.as_array() * o.as_array()
+
+    def __sub__(self, o: Position) -> Position:
+        subtracted = np.subtract(o.as_array(), self.as_array())
+        return Position.from_array(subtracted)
+
+    def __add__(self, o: Position) -> Position:
+        added = np.add(o.as_array(), self.as_array())
+        return Position.from_array(added)
