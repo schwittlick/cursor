@@ -132,7 +132,7 @@ class MinmaxMapping:
         PlotterType.HP_7596B_25_25: BB(-4310, -3444, 4310 + 800, 3444),
         PlotterType.DIGIPLOT_A1: BB(0, 0, 33600, 23700),
         PlotterType.HP_7470A: BB(0, 0, 10900, 7650),
-        PlotterType.HP_7550A: BB(0, 0, 15970, 10870),
+        PlotterType.HP_7550A: BB(0, 0, 15970, 10870) - BB(0, 0, 320, 0),  # subtracting 8 mm of extra space from bottom
         PlotterType.HP_7595A_A2: BB(-11684, -7729 - 960, 11684, 7729),
     }
 

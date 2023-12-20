@@ -24,7 +24,7 @@ from cursor.algorithm.entropy import calc_entropy
 from cursor.algorithm.frechet import LinearDiscreteFrechet
 from cursor.algorithm.frechet import euclidean
 from cursor.bb import BoundingBox
-from cursor.misc import apply_matrix, clamp
+from cursor.misc import apply_matrix, clamp, line_intersection
 from cursor.properties import Property
 from cursor.position import Position
 
@@ -1082,8 +1082,8 @@ class Path:
             return pa
 
         def add_if(pa: Path, out: list[Path]):
-            #if len(pa) > 2:
-                #pa.simplify(0.01)
+            # if len(pa) > 2:
+            # pa.simplify(0.01)
             out.append(pa)
 
         line = LineString(self.as_tuple_list())
@@ -1111,6 +1111,46 @@ class Path:
         x_values, y_values = zip(*tuple_list)
 
         return len(set(x_values)) == 1 or len(set(y_values)) == 1
+
+    def is_functional(self, res: float = 0.1) -> list[list[Position]]:
+        f_direction_vector = self.end_pos() - self.start_pos()
+        f_perp_vector = Position(-f_direction_vector.y, f_direction_vector.x)
+
+        # normalize perpendicular direction vector
+        mag = math.sqrt((f_perp_vector.x * f_perp_vector.x) + (f_perp_vector.y * f_perp_vector.y))
+        ray_dir = Position(f_perp_vector.x / mag, f_perp_vector.y / mag)
+
+        perc = 0.0
+        all_intersections = []
+        while perc <= 1.0:
+            """
+            This is iterating via slices through a line
+            percentage is the slice between [0, 1]
+            """
+            lerped_x = misc.lerp(self.start_pos().x, self.end_pos().x, perc)
+            lerped_y = misc.lerp(self.start_pos().y, self.end_pos().y, perc)
+            ray_origin = Position(lerped_x, lerped_y)
+
+            intersections = []
+
+            # iterate through all paths, check for intersections at current slice
+            for p in range(len(self) - 1):
+                start = self[p]
+                end = self[p + 1]
+
+                intersection = line_intersection(
+                    ray_origin.as_array(), ray_dir.as_array(),
+                    start.as_array(), end.as_array())
+
+                if intersection:
+                    intersections.append(Position.from_array(intersection))
+
+            perc += res
+            all_intersections.append(intersections)
+
+        # if any of the lists within this returned list have a length > 1
+        # means there were two intersections with the slice and the path is not functional
+        return all_intersections
 
     def rotated_into_bb(self, target_bb: BoundingBox) -> Path:
         if self.is_1_dimensional():
