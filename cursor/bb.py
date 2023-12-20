@@ -67,3 +67,6 @@ class BoundingBox:
 
     def __repr__(self) -> str:
         return f"BB(x={self.x:.2f}, y={self.y:.2f}, x2={self.x2:.2f}, y2={self.y2:.2f}, w={self.w:.2f}, h={self.h:.2f})"
+
+    def __sub__(self, o: BoundingBox) -> BoundingBox:
+        return BoundingBox(self.x - o.x, self.y - o.y, self.x2 - o.x2, self.y2 - o.y2)

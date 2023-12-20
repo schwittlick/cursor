@@ -295,3 +295,24 @@ def apply_matrix(pa: list[tuple], _ma) -> list[tuple]:
     l = LineString(pa)
     xx, yy, = affine_transform(l, _ma).coords.xy
     return zip(yy, xx)
+
+
+def line_intersection(ray_origin: np.array, ray_direction: np.array, segment_start: np.array, segment_end: np.array):
+    # Calculate differences
+    d_se = segment_end - segment_start
+    d_ro_s_s = ray_origin - segment_start
+    perp_product = np.cross(d_se, ray_direction)
+
+    # Check if ray and segment are parallel
+    if np.allclose(perp_product, 0):
+        return None
+
+    t = np.cross(d_ro_s_s, ray_direction) / perp_product
+
+    # Check if intersection is within segment bounds
+    if 0 <= t <= 1:
+        # Calculate intersection point
+        intersection = segment_start + t * d_se
+        return intersection.tolist()
+
+    return None
