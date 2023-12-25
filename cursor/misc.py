@@ -303,10 +303,6 @@ def line_intersection(ray_origin: np.array, ray_direction: np.array, segment_sta
     d_ro_s_s = ray_origin - segment_start
     perp_product = np.cross(d_se, ray_direction)
 
-    # Check if ray and segment are parallel
-    if np.allclose(perp_product, 0):
-        return None
-
     t = np.cross(d_ro_s_s, ray_direction) / perp_product
 
     # Check if intersection is within segment bounds
@@ -315,4 +311,5 @@ def line_intersection(ray_origin: np.array, ray_direction: np.array, segment_sta
         intersection = segment_start + t * d_se
         return intersection.tolist()
 
+    # ray and line are parallel
     return None
