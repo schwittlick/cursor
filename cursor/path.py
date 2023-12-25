@@ -1112,7 +1112,7 @@ class Path:
 
         return len(set(x_values)) == 1 or len(set(y_values)) == 1
 
-    def is_functional(self, res: float = 0.1) -> list[list[Position]]:
+    def is_functional(self, res: float = 0.1) -> tuple[bool, list[list[Position]]]:
         f_direction_vector = self.end_pos() - self.start_pos()
         f_perp_vector = Position(-f_direction_vector.y, f_direction_vector.x)
 
@@ -1150,7 +1150,9 @@ class Path:
 
         # if any of the lists within this returned list have a length > 1
         # means there were two intersections with the slice and the path is not functional
-        return all_intersections
+
+        is_functional = not any(len(e) > 1 for e in all_intersections)
+        return is_functional, all_intersections
 
     def rotated_into_bb(self, target_bb: BoundingBox) -> Path:
         if self.is_1_dimensional():
