@@ -507,6 +507,9 @@ def test_collection_travel_distance():
     dist = c.calc_travel_distance(40)
     assert dist == 0.5
 
+    dist = Collection().calc_travel_distance(40)
+    assert dist == 0.0
+
 
 def test_pathcollection_line_types():
     p1 = Path(properties={Property.LINETYPE: 1})

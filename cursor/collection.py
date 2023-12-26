@@ -458,6 +458,8 @@ class Collection:
         self.__paths = newpaths
 
     def calc_travel_distance(self, fac) -> float:
+        if len(self) == 0:
+            return 0.0
         return reduce(lambda a, b: a + b, [x.distance / fac for x in self.__paths])
 
     def fit(
