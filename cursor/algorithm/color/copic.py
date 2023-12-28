@@ -3,11 +3,11 @@ import random
 import pathlib
 import colour
 
-from cursor.algorithm.color.copic_pen_enum import CopicPen
+from cursor.algorithm.color.copic_pen_enum import CopicColorCode
 
 
 class CopicColor:
-    def __init__(self, code: CopicPen, name: str, rgb: tuple[float, float, float]):
+    def __init__(self, code: CopicColorCode, name: str, rgb: tuple[float, float, float]):
         self.code = code
         self.name = name
         self.rgb = rgb
@@ -23,7 +23,7 @@ class Copic:
     def __init__(self):
         self.available_colors = self.__parse_data()
 
-    def __parse_data(self) -> dict[CopicPen, CopicColor]:
+    def __parse_data(self) -> dict[CopicColorCode, CopicColor]:
         """
         parses all copic color information from a json data file
         only colors that are added to the ColorCode enum class are indexed
@@ -36,7 +36,7 @@ class Copic:
             copic_data = json.loads(all_data)
             for element in copic_data:
                 try:
-                    id = CopicPen[element["id"]]
+                    id = CopicColorCode[element["id"]]
                     rgb = str(element['rgb']).split(',')
                     rgb_tup = int(rgb[0]), int(rgb[1]), int(rgb[2])
                     copic_data_final[id] = CopicColor(id, element['name'], rgb_tup)
@@ -45,7 +45,7 @@ class Copic:
                     pass
         return copic_data_final
 
-    def color(self, code: CopicPen) -> CopicColor:
+    def color(self, code: CopicColorCode) -> CopicColor:
         return self.available_colors[code]
 
     def random(self) -> CopicColor:
@@ -69,7 +69,7 @@ class Copic:
             # color difference in CIE2000 (Color Difference Formula)
             # Designed to quantify the perceptual difference between two colors.
             # Offers more consistent and accurate results, particularly for large color differences and in
-            # problematic regions of previous formulas (e.g., blues). ncorporates corrections for lightness,
+            # problematic regions of previous formulas (e.g., blues). incorporates corrections for lightness,
             # chroma, and hue differences, as well as terms to account for interactions between these color
             # attributes. Used in various industries for quality control and to ensure color consistency.
             delta = colour.delta_E(color_to_compare_cie, copic_color_cie)

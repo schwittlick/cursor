@@ -1,12 +1,12 @@
 from cursor.algorithm.color.copic import Copic
-from cursor.algorithm.color.copic_pen_enum import CopicPen
+from cursor.algorithm.color.copic_pen_enum import CopicColorCode
 from cursor.algorithm.color.interpolation import ColorMath
 from cursor.algorithm.color.spectral import spectral_mix
 
 
 def test_simple_mix_spectral():
-    c1 = Copic().color(CopicPen.B23)
-    c2 = Copic().color(CopicPen.G17)
+    c1 = Copic().color(CopicColorCode.B23)
+    c2 = Copic().color(CopicColorCode.G17)
 
     mixed = spectral_mix(c1.rgb, c2.rgb, 0.5)
 
@@ -21,8 +21,8 @@ def lerp(v0, v1, t):
 
 
 def test_simple_mix_oklab():
-    c1 = Copic().color(CopicPen.B23)
-    c2 = Copic().color(CopicPen.G17)
+    c1 = Copic().color(CopicColorCode.B23)
+    c2 = Copic().color(CopicColorCode.G17)
 
     print(c1.rgb)
     print(c2.rgb)
