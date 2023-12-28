@@ -24,9 +24,8 @@ class KDTree:
         """
 
         if dist_sq_func is None:
-            def dist_sq_func():
-                return lambda a, b: sum((x - b[i]) ** 2
-                                        for i, x in enumerate(a))
+            dist_sq_func = lambda a, b: sum((x - b[i]) ** 2
+                                            for i, x in enumerate(a))
 
         def make(points, i=0):
             if len(points) > 1:
