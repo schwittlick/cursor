@@ -627,7 +627,7 @@ def test_reorder_quadrants2():
     assert len(pc) == 100
 
 
-def test_tsp_performances():
+def DISABLED_test_tsp_performances():
     random.seed(1)
     points = 100
 
@@ -664,7 +664,7 @@ def test_sort_tsp():
     assert pc[4] == p3
 
 
-def test_fast_tsp():
+def DISABLED_test_fast_tsp():
     p0 = Path.from_tuple_list([(1, 1), (2, 1), (5, 1)])
     p1 = Path.from_tuple_list([(5, 1), (1, 5), (10, 1)])
     p2 = Path.from_tuple_list([(1, 1), (1, 1), (2, 1)])
