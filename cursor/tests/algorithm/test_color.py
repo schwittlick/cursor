@@ -6,9 +6,9 @@ from cursor.algorithm.color.spectral import spectral_mix
 
 def test_simple_mix_spectral():
     c1 = Copic().color(CopicColorCode.B23)
-    c2 = Copic().color(CopicColorCode.G17)
+    c2 = Copic().color(CopicColorCode.Y06)
 
-    mixed = spectral_mix(c1.rgb, c2.rgb, 0.5)
+    mixed = spectral_mix(c1.as_rgb(), c2.as_rgb(), 0.5)
 
     print(mixed)
 
@@ -22,10 +22,10 @@ def lerp(v0, v1, t):
 
 def test_simple_mix_oklab():
     c1 = Copic().color(CopicColorCode.B23)
-    c2 = Copic().color(CopicColorCode.G17)
+    c2 = Copic().color(CopicColorCode.Y06)
 
-    print(c1.rgb)
-    print(c2.rgb)
+    print(c1.as_rgb())
+    print(c2.as_rgb())
 
     c1_srgb = c1.as_srgb()
     c2_srgb = c2.as_srgb()
