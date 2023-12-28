@@ -654,7 +654,6 @@ def test_sort_tsp():
 
     pc = Collection.from_path_list([p0, p1, p2, p3, p4])
 
-    profile.runctx("pc.sort_tsp(iters=50)", globals(), locals())
     order = pc.sort_tsp(iters=50)
 
     assert order == [0, 1, 2, 4, 3]
