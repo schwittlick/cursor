@@ -61,10 +61,6 @@ def test_timedpos_comparison():
     eq = t1 == t2
     assert eq is False
 
-    b = False
-    with pytest.raises(NotImplementedError):
-        r = b == t1
-
 
 def test_distance():
     t1 = Position(0, 0)

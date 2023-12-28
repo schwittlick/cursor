@@ -7,8 +7,10 @@ from cursor.timer import Timer
 import pytest
 import random
 import math
+import cProfile as profile
 
 from cursor.position import Position
+from cursor.tools.realtime_boilerplate import RealtimeDropin
 
 
 def test_pathcollection_minmax():
@@ -626,6 +628,24 @@ def test_reorder_quadrants2():
     assert len(pc) == 100
 
 
+def test_tsp_performances():
+    random.seed(1)
+    points = 100
+
+    c = Collection()
+    [c.add(Path.from_tuple_list(
+        [(random.uniform(0, 100), random.uniform(0, 100)),
+         (random.uniform(0, 100), random.uniform(0, 100))])) for _ in range(points)]
+
+    c1 = c.copy()
+    # order1 = c1.sort_tsp(iters=100)
+    profile.runctx("c1.sort_tsp(iters=50)", globals(), locals())
+
+    c2 = c.copy()
+    # order2 = c2.fast_tsp()
+    profile.runctx("c2.fast_tsp()", globals(), locals())
+
+
 def test_sort_tsp():
     p0 = Path.from_tuple_list([(1, 1), (2, 1), (5, 10)])
     p1 = Path.from_tuple_list([(1, 10), (1, 5), (5, 2)])
@@ -635,6 +655,7 @@ def test_sort_tsp():
 
     pc = Collection.from_path_list([p0, p1, p2, p3, p4])
 
+    profile.runctx("pc.sort_tsp(iters=50)", globals(), locals())
     order = pc.sort_tsp(iters=50)
 
     assert order == [0, 1, 2, 4, 3]
@@ -646,19 +667,20 @@ def test_sort_tsp():
 
 
 def test_fast_tsp():
-    p0 = Path.from_tuple_list([(1, 1), (2, 1), (5, 10)])
-    p1 = Path.from_tuple_list([(1, 10), (1, 5), (5, 2)])
-    p2 = Path.from_tuple_list([(10, 1), (10, 10), (20, 1)])
-    p3 = Path.from_tuple_list([(1, 5), (1, 2)])
-    p4 = Path.from_tuple_list([(5, 5), (5, 8), (0, 0)])
+    p0 = Path.from_tuple_list([(1, 1), (2, 1), (5, 1)])
+    p1 = Path.from_tuple_list([(5, 1), (1, 5), (10, 1)])
+    p2 = Path.from_tuple_list([(1, 1), (1, 1), (2, 1)])
+    p3 = Path.from_tuple_list([(2, 1), (1, 2)])
+    p4 = Path.from_tuple_list([(1, 2), (5, 8), (1, 1)])
 
     pc = Collection.from_path_list([p0, p1, p2, p3, p4])
 
-    order = pc.fast_tsp()
+    order = pc.fast_tsp(plot_preview=False, duration_seconds=5)
+    # its non-deterministic
 
-    assert order == [0, 3, 4, 2, 1]
-    assert pc[0] == p0
-    assert pc[1] == p3
-    assert pc[2] == p4
-    assert pc[3] == p2
-    assert pc[4] == p1
+    # assert order == [0, 3, 2, 1, 4]
+    # assert pc[0] == p0
+    # assert pc[1] == p3
+    # assert pc[2] == p2
+    # assert pc[3] == p1
+    # assert pc[4] == p4

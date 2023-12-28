@@ -313,3 +313,27 @@ def line_intersection(ray_origin: np.array, ray_direction: np.array, segment_sta
 
     # ray and line are parallel
     return None
+
+
+def split_list_into_chunks(lst, n):
+    """Split a list into n chunks of approximately equal size."""
+    # Calculate the size of each chunk
+    chunk_size = len(lst) // n
+    # If the list can't be divided exactly into n chunks,
+    # calculate the number of larger chunks that will have one extra element
+    larger_chunks = len(lst) - n * chunk_size
+
+    chunks = []
+    start = 0
+    for i in range(n):
+        # The first 'larger_chunks' will have 'chunk_size + 1' elements
+        if i < larger_chunks:
+            end = start + chunk_size + 1
+        else:
+            end = start + chunk_size
+        # Append the chunk to the list of chunks
+        chunks.append(lst[start:end])
+        # Update the start for the next chunk
+        start = end
+
+    return chunks
