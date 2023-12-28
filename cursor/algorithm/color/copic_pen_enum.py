@@ -1,7 +1,7 @@
 from enum import Enum, auto
 
 
-class CopicPen(Enum):
+class CopicColorCode(Enum):
     _110 = auto()  # actually without B, but cant use enum without char
     _000 = auto()  # actually doesnt axist, this is white
 
