@@ -37,3 +37,11 @@ def test_line_intersect():
     assert is_functional1 is is_func1
     assert not is_functional2
     assert is_functional2 is is_func2
+
+
+def test_lerp():
+    lerped = misc.lerp(0, 100, 1.05)
+    assert lerped == 105
+
+    inv_lerped = misc.inv_lerp(0, 100, 105)
+    assert inv_lerped == 1.05
