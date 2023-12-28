@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import numpy as np
-
 from cursor.data import DateHandler
 from cursor.path import Path
 from cursor.properties import Property

@@ -2,8 +2,6 @@ import math
 
 from cursor.position import Position
 
-import pytest
-
 
 def test_timedpos_simple():
     t = Position(1, 2, 100)

@@ -10,7 +10,6 @@ import math
 import cProfile as profile
 
 from cursor.position import Position
-from cursor.tools.realtime_boilerplate import RealtimeDropin
 
 
 def test_pathcollection_minmax():
@@ -675,7 +674,7 @@ def test_fast_tsp():
 
     pc = Collection.from_path_list([p0, p1, p2, p3, p4])
 
-    order = pc.fast_tsp(plot_preview=False, duration_seconds=5)
+    pc.fast_tsp(plot_preview=False, duration_seconds=5)
     # its non-deterministic
 
     # assert order == [0, 3, 2, 1, 4]
