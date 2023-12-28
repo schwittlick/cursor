@@ -40,7 +40,7 @@ class Copic:
                     rgb = str(element['rgb']).split(',')
                     rgb_tup = int(rgb[0]), int(rgb[1]), int(rgb[2])
                     copic_data_final[id] = CopicColor(id, element['name'], rgb_tup)
-                except KeyError as ke:
+                except KeyError:
                     # only adding colors that have been turned into a pen
                     pass
         return copic_data_final

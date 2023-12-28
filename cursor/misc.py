@@ -20,8 +20,9 @@ def calc_distance(vec_1, vec_2):
     res = np.empty((vec_1.shape[0], vec_2.shape[0]), dtype=vec_1.dtype)
     for i in nb.prange(vec_1.shape[0]):
         for j in range(vec_2.shape[0]):
-            res[i, j] = np.sqrt((vec_1[i, 0] - vec_2[j, 0]) ** 2 + (vec_1[i, 1] - vec_2[j, 1]) ** 2 + (
-                    vec_1[i, 2] - vec_2[j, 2]) ** 2)
+            res[i, j] = np.sqrt((vec_1[i, 0] - vec_2[j, 0])
+                                ** 2 + (vec_1[i, 1] - vec_2[j, 1])
+                                ** 2 + (vec_1[i, 2] - vec_2[j, 2]) ** 2)
 
     return res
 

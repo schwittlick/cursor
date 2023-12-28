@@ -4,8 +4,6 @@ from cursor.path import Path
 
 import numpy as np
 
-import cProfile
-
 
 def test_line_intersect_parallel():
     ray_origin = np.array((0, 0))
