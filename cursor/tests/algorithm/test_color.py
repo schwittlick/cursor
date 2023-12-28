@@ -1,11 +1,12 @@
-from cursor.algorithm.color.copic import Copic, Color
-from cursor.algorithm.color.color_enums import ColorCode
+from cursor.algorithm.color.copic import Copic
+from cursor.algorithm.color.copic_pen_enum import CopicPen
+from cursor.algorithm.color.interpolation import ColorMath
 from cursor.algorithm.color.spectral import spectral_mix
 
 
 def test_simple_mix_spectral():
-    c1 = Copic().color(ColorCode.B23)
-    c2 = Copic().color(ColorCode.G17)
+    c1 = Copic().color(CopicPen.B23)
+    c2 = Copic().color(CopicPen.G17)
 
     mixed = spectral_mix(c1.rgb, c2.rgb, 0.5)
 
@@ -20,8 +21,8 @@ def lerp(v0, v1, t):
 
 
 def test_simple_mix_oklab():
-    c1 = Copic().color(ColorCode.B23)
-    c2 = Copic().color(ColorCode.G17)
+    c1 = Copic().color(CopicPen.B23)
+    c2 = Copic().color(CopicPen.G17)
 
     print(c1.rgb)
     print(c2.rgb)
@@ -32,8 +33,8 @@ def test_simple_mix_oklab():
     print(c1_srgb)
     print(c2_srgb)
 
-    c1_oklab = Color.linear_srgb_to_oklab(c1_srgb)
-    c2_oklab = Color.linear_srgb_to_oklab(c2_srgb)
+    c1_oklab = ColorMath.linear_srgb_to_oklab(c1_srgb)
+    c2_oklab = ColorMath.linear_srgb_to_oklab(c2_srgb)
 
     print(c1_oklab)
     print(c2_oklab)
@@ -41,5 +42,5 @@ def test_simple_mix_oklab():
     interpolated_oklab = lerp(c1_oklab, c2_oklab, 0.5)
     print(interpolated_oklab)
 
-    interpolated_srgb = Color.oklab_to_linear_srgb(interpolated_oklab)
+    interpolated_srgb = ColorMath.oklab_to_linear_srgb(interpolated_oklab)
     print(interpolated_srgb)

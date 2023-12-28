@@ -1,7 +1,7 @@
 from enum import Enum, auto
 
 
-class ColorCode(Enum):
+class CopicPen(Enum):
     _110 = auto()  # actually without B, but cant use enum without char
     _000 = auto()  # actually doesnt axist, this is white
 
@@ -36,14 +36,32 @@ class ColorCode(Enum):
     R00 = auto()
     R01 = auto()
     R02 = auto()
+    R05 = auto()
     R08 = auto()
+    R11 = auto()
     R12 = auto()
+    R14 = auto()
     R17 = auto()
     R20 = auto()
+    R21 = auto()
+    R22 = auto()
+    R24 = auto()
+    R27 = auto()
     R29 = auto()
+    R30 = auto()
+    R32 = auto()
     R35 = auto()
+    R37 = auto()
     R39 = auto()
+    R43 = auto()
+    R46 = auto()
+    R56 = auto()
+    R59 = auto()
+    R81 = auto()
     R83 = auto()
+    R85 = auto()
+    R89 = auto()
+    FRV1 = auto()
 
     # Yellow-Red
     YR01 = auto()
@@ -57,12 +75,22 @@ class ColorCode(Enum):
     YR68 = auto()
 
     # Yellow
+    Y00 = auto()
     Y02 = auto()
+    Y04 = auto()
     Y06 = auto()
+    Y08 = auto()
     Y11 = auto()
     Y13 = auto()
+    Y15 = auto()
     Y17 = auto()
     Y18 = auto()
+    Y19 = auto()
+    Y21 = auto()
+    Y23 = auto()
+    Y26 = auto()
+    Y28 = auto()
+    Y32 = auto()
     Y35 = auto()
     Y38 = auto()
 
@@ -75,21 +103,31 @@ class ColorCode(Enum):
     YG45 = auto()
     YG67 = auto()
     YG91 = auto()
+    FYG2 = auto()
 
     # Green
+    G00 = auto()
     G02 = auto()
     G03 = auto()
+    G05 = auto()
     G07 = auto()
+    G09 = auto()
     G12 = auto()
     G14 = auto()
+    G16 = auto()
     G17 = auto()
+    G19 = auto()
     G20 = auto()
+    G21 = auto()
     G24 = auto()
+    G28 = auto()
     G29 = auto()
     G40 = auto()
     G43 = auto()
     G46 = auto()
+    G82 = auto()
     G85 = auto()
+    G94 = auto()
     G99 = auto()
 
     # Blue-Green
@@ -123,6 +161,7 @@ class ColorCode(Enum):
     B26 = auto()
     B28 = auto()
     B29 = auto()
+    B32 = auto()
     B34 = auto()
     B37 = auto()
     B39 = auto()
@@ -139,6 +178,7 @@ class ColorCode(Enum):
     B95 = auto()
     B97 = auto()
     B99 = auto()
+    FB2 = auto()
 
     # Earth
     E01 = auto()
