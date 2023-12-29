@@ -489,6 +489,24 @@ class Path:
 
         return False, 0.0, 0.0
 
+    def intersect_all(self, newpath: Path) -> list[Position]:
+        intersection_points = []
+
+        for p1 in range(len(newpath) - 1):
+            for p2 in range(len(self) - 1):
+                line1Start = newpath[p1]
+                line1End = newpath[p1 + 1]
+                line2Start = self[p2]
+                line2End = self[p2 + 1]
+
+                intersection = Path.intersect_segment(line1Start.as_tuple(), line1End.as_tuple(),
+                                                      line2Start.as_tuple(), line2End.as_tuple())
+
+                if intersection:
+                    intersection_points.append(Position.from_tuple(intersection))
+
+        return intersection_points
+
     def interp(self, newpath: Path, perc: float) -> Path:
         path = Path()
 
@@ -978,7 +996,7 @@ class Path:
         # log.info(f"Path::simplify({e}) reduced points {before} -> {len(self.vertices)}")
 
     @staticmethod
-    def intersect_segment(p1, p2, p3, p4):
+    def intersect_segment(p1: tuple, p2: tuple, p3: tuple, p4: tuple):
         # https://gist.github.com/kylemcdonald/6132fc1c29fd3767691442ba4bc84018
         x1, y1 = p1
         x2, y2 = p2
@@ -1131,7 +1149,7 @@ class Path:
             lerped_y = misc.lerp(self.start_pos().y, self.end_pos().y, perc)
             ray_origin = Position(lerped_x, lerped_y)
 
-            intersections = []
+            intersections = set()
 
             # iterate through all paths, check for intersections at current slice
             for p in range(len(self) - 1):
@@ -1143,9 +1161,57 @@ class Path:
                     start.as_array(), end.as_array())
 
                 if intersection:
-                    intersections.append(Position.from_array(intersection))
+                    intersections.add(Position.from_array(intersection))
 
             perc += res
+            all_intersections.append(list(intersections))
+
+        # if any of the lists within this returned list have a length > 1
+        # means there were two intersections with the slice and the path is not functional
+
+        is_functional = not any(len(e) > 1 for e in all_intersections)
+        return is_functional, all_intersections
+
+    def is_functional_fixed(self, n_sample_points: int = 20):
+        """
+        the previous implementation has the bug that it doesnt detect a curved path
+        new idea: take n random points on the path instead of lerped x,y pos at an interval
+        """
+        f_direction_vector = self.end_pos() - self.start_pos()
+        f_perp_vector = Position(-f_direction_vector.y, f_direction_vector.x)
+
+        # normalize perpendicular direction vector
+        mag = math.sqrt((f_perp_vector.x * f_perp_vector.x) + (f_perp_vector.y * f_perp_vector.y))
+        ray_dir = Position(f_perp_vector.x / mag, f_perp_vector.y / mag)
+
+        # no need to over-sample
+        if len(self) < n_sample_points:
+            n_sample_points = len(self)
+
+        all_intersections = []
+        #logging.info(f"sample_points: {n_sample_points}")
+        for i in range(n_sample_points):
+            """
+            This is iterating via slices through a line
+            percentage is the slice between [0, 1]
+            """
+            idx = int(misc.map(i, 0, n_sample_points, 0, len(self)))
+            ray_origin = self[idx]
+
+            intersections = set()
+
+            # iterate through all paths, check for intersections at current slice
+            for p in range(len(self) - 1):
+                start = self[p]
+                end = self[p + 1]
+
+                intersection = line_intersection(
+                    ray_origin.as_array(), ray_dir.as_array(),
+                    start.as_array(), end.as_array())
+
+                if intersection:
+                    intersections.add(Position.from_array(intersection))
+
             all_intersections.append(intersections)
 
         # if any of the lists within this returned list have a length > 1
