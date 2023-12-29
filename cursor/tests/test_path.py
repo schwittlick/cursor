@@ -387,6 +387,14 @@ def test_path_intersection3():
     assert inter[0] is False
 
 
+def test_intersection_all():
+    random.seed(1)
+    p1 = Path.from_tuple_list([(random.uniform(-10, 10), random.uniform(-10, 10)) for _ in range(2)])
+    p2 = Path.from_tuple_list([(random.uniform(-10, 10), random.uniform(-10, 10)) for _ in range(2)])
+    intersections = p1.intersect_all(p2)
+    assert len(intersections) == 28
+
+
 def test_angles():
     p = Path.from_tuple_list(
         [(0, 1), (1, 1), (1, 0), (0.5, 0)])
