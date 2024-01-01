@@ -172,6 +172,17 @@ class Path:
         self.properties[Property.VELOCITY] = pen_velocity
 
     @property
+    def color(self) -> tuple[int, ...] | None:
+        if Property.COLOR not in self.properties.keys():
+            return None
+
+        return self.properties[Property.COLOR]
+
+    @color.setter
+    def color(self, color: tuple[int, ...]) -> None:
+        self.properties[Property.COLOR] = color
+
+    @property
     def laser_pwm(self) -> int | None:
         if Property.LASER_PWM not in self.properties.keys():
             return None
