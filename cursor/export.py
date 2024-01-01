@@ -197,8 +197,19 @@ class Exporter:
             keep_aspect=self.keep_aspect_ratio
         )
 
-        distance_mm = int(self.paths.calc_travel_distance(XYFactors.fac[self.cfg.type][0]))
+        unit_to_mm_factor = XYFactors.fac[self.cfg.type][0]
+        distance_mm = int(self.paths.calc_travel_distance(unit_to_mm_factor))
+
+        # here we need to add pen-up travel distance
+        sum_dist_pen_up = 0
+        for path_index in range(len(self.paths) - 1):
+            end_p1 = self.paths[path_index].end_pos()
+            start_p2 = self.paths[path_index + 1].start_pos()
+            dist_pen_up = end_p1.distance(start_p2)
+            sum_dist_pen_up += (dist_pen_up / unit_to_mm_factor)
+
         log.info(f"Total pen-down distance: {distance_mm / 1000}meters")
+        log.info(f"Total pen-up distance: {int(sum_dist_pen_up / 1000)}meters")
 
         sizename = PaperSizeName.names[self.cfg.dimension]
         machinename = PlotterName.names[self.cfg.type]
