@@ -57,7 +57,8 @@ class Copic:
              CCC.FRV1])
 
         pens.extend(
-            [CCC.G00, CCC.G02, CCC.G03, CCC.G05, CCC.G07, CCC.G14, CCC.G17, CCC.G29, CCC.G85])
+            [CCC.G00, CCC.G02, CCC.G03, CCC.G05, CCC.G07, CCC.G09, CCC.G12, CCC.G14, CCC.G16, CCC.G17,
+             CCC.G19, CCC.G20, CCC.G21, CCC.G24, CCC.G28, CCC.G29, CCC.G43, CCC.G46, CCC.G82, CCC.G85])
 
         return pens
 
