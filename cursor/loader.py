@@ -7,15 +7,14 @@ from cursor.position import Position
 from cursor.collection import Collection
 from cursor.timer import Timer
 
-import wasabi
 import pathlib
 import json
 import base64
 import zlib
 import pyautogui
 from functools import reduce
-
-log = wasabi.Printer()
+from tqdm import tqdm
+import logging
 
 
 class MyJsonEncoder(json.JSONEncoder):
@@ -118,6 +117,8 @@ class Loader:
             limit_files: int | list[str] | None = None,
             load_keys: bool = False,
     ):
+        self.verbose = False
+
         self._recordings = []
         self._keyboard_recordings = []
 
@@ -149,9 +150,13 @@ class Loader:
             # all_json_files = [k for k in all_json_files if k.stem in limit_files]
             all_json_files = fin
 
-        for file in all_json_files:
-            full_path = directory / file
-            self.load_file(full_path, load_keys)
+        logging.info(f"Loading {len(all_json_files)} recording files...")
+        with tqdm(total=len(all_json_files)) as pbar:
+            pbar.update(0)
+            for file in all_json_files:
+                full_path = directory / file
+                self.load_file(full_path, load_keys)
+                pbar.update(1)
 
         absolut_path_count = sum(len(pc) for pc in self._recordings)
 
@@ -159,13 +164,13 @@ class Loader:
             # pc.limit()
             pc.clean()
 
-        log.info(
+        logging.info(
             f"Loaded {absolut_path_count} paths from {len(self._recordings)} recordings"
         )
-        log.info(
+        logging.info(
             f"Loaded {len(self._keyboard_recordings)} keys from {len(all_json_files)} recordings"
         )
-        log.info(f"This took {round(t.elapsed() * 1000)}ms.")
+        logging.info(f"This took {round(t.elapsed() * 1000)}ms.")
 
     def load_file(self, path: pathlib.Path, load_keys: bool = False) -> None:
         assert "_" in path.stem
@@ -173,7 +178,9 @@ class Loader:
         idx = path.stem.index("_")
         _fn = path.stem[:idx]
         ts = DateHandler.get_timestamp_from_utc(float(_fn))
-        log.info(f"Loading {path.stem}.json > {ts}")
+
+        if self.verbose:
+            logging.info(f"Loading {path.stem}.json > {ts}")
 
         new_keys = []
         with open(path.as_posix()) as json_file:
@@ -189,8 +196,9 @@ class Loader:
                     new_keys.append(tuple(keys))
 
         self._keyboard_recordings.extend(new_keys)
-        log.good(f"Loaded {len(self._recordings[-1])} paths")
-        log.good(f"Loaded {len(new_keys)} keys")
+        if self.verbose:
+            logging.info(f"Loaded {len(self._recordings[-1])} paths")
+            logging.info(f"Loaded {len(new_keys)} keys")
 
     @staticmethod
     def is_file_and_json(path: pathlib.Path) -> bool:
