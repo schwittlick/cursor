@@ -1,7 +1,7 @@
+import logging
 from argparse import ArgumentParser
 from time import sleep
 
-import wasabi
 from serial import Serial, SerialException
 from tqdm import tqdm
 
@@ -9,7 +9,47 @@ from cursor.hpgl import ESC, CR, LB_TERMINATOR, ESC_TERM, OUTBUT_BUFFER_SPACE, O
     WAIT, read_until_char
 from cursor.hpgl.hpgl_tokenize import tokenizer
 
-log = wasabi.Printer(pretty=True)
+
+class DraftMasterMemoryConfig:
+    def __init__(self):
+        self.physical_io_buffer = 2, 25518
+        self.polygon_buffer = 4, 25520
+        self.char_buffer = 0, 25516
+        self.vector_buffer = 66, 25582
+        self.pen_sort_buffer = 12, 24528
+
+        self.max_sum = 25600
+
+    def memory_alloc_cmd(self, io: int = 1024, polygon: int = 3072, char: int = 0, vector: int = 3000,
+                         pen_sort: int = 18504) -> tuple[str, str]:
+        assert self.physical_io_buffer[0] <= io <= self.physical_io_buffer[1]
+        assert self.polygon_buffer[0] <= polygon <= self.polygon_buffer[1]
+        assert self.char_buffer[0] <= char <= self.char_buffer[1]
+        assert self.vector_buffer[0] <= vector <= self.vector_buffer[1]
+        assert self.pen_sort_buffer[0] <= pen_sort <= self.pen_sort_buffer[1]
+        assert sum([io, polygon, char, vector, pen_sort]) <= self.max_sum
+
+        memory_config = f"{ESC}.T{io};{polygon};{char};{vector};{pen_sort}{ESC_TERM}"
+
+        io_conditions = 3
+        # io_conditions specifies an integer equivalent value that controls the states of bits 0 through 4
+        # of the configuration byte. When using an RS-232-C interface, these bits control hardware handshake,
+        # communications protocol, monitor modes 1 and 2, and block I/O error checking. When using HP-IB
+        # interface, this parameter is ignored.
+        # Check chapter 15-28 Device-Control Instructions of HP Draftmaster Programmers Reference
+        plotter_config = f"{ESC}.@{io};{io_conditions}{ESC_TERM}"
+
+        return memory_config, plotter_config
+
+
+class HP7550AMemoryConfig:
+    physical_io_buffer = 2, 12752
+    polygon_buffer = 4, 12754
+    char_buffer = 0, 12750
+    replot_buffer = 0, 12750
+    vector_buffer = 44, 12794
+
+    max_sum = 12800
 
 
 class SerialSender:
@@ -20,9 +60,16 @@ class SerialSender:
         self.plotter = Serial(port=serialport, baudrate=9600, timeout=1)
 
         model = self.identify()
-        log.info(f"Detected model {model}")
+        logging.info(f"Detected model {model}")
         if model == "7550A":
             self.config_memory(12752, 4, 0, 0, 44)
+        if model == "7595A":  # whats the other plotter 7596A, right?
+            dm = DraftMasterMemoryConfig()
+            memory_config, plotter_config = dm.memory_alloc_cmd(25518, 4, 0, 66, 12)
+            logging.info(f"Applying custom config to {model}")
+            logging.info(memory_config)
+            logging.info(plotter_config)
+            self.apply_config(memory_config, plotter_config)
 
     def config_memory(self, io: int = 1024, polygon: int = 1778, char: int = 0, replot: int = 9954,
                       vector: int = 44):
@@ -47,6 +94,16 @@ class SerialSender:
         self.plotter.write(WAIT.encode())
         self.read_until()
 
+    def apply_config(self, memory_config: str, plotter_config: str):
+        self.plotter.write(memory_config.encode())
+        self.plotter.write(WAIT.encode())
+
+        self.read_until()
+
+        self.plotter.write(plotter_config.encode())
+        self.plotter.write(WAIT.encode())
+        self.read_until()
+
     def identify(self):
         self.plotter.write(OUTPUT_IDENTIFICATION.encode())
         answer = self.read_until(self.plotter)
@@ -57,22 +114,32 @@ class SerialSender:
         self.plotter.write(WAIT.encode())
         self.read_until()
 
+    def concat_commands(self, cmd_list: list[str]) -> str:
+        concatenated = ''
+        for cmd in cmd_list:
+            if cmd.startswith("LB"):
+                concatenated += f"{cmd}{LB_TERMINATOR}"
+            else:
+                concatenated += f"{cmd};"
+        return concatenated
+
     def send(self):
+        command_batch = 20
+        # the amount of commands that are being sent to the plotter
+        # in one batch. this speeds up drawing. take care to not send too
+        # long commands that exceed the maximum buffer size
         try:
             with tqdm(total=len(self.commands)) as pbar:
                 pbar.update(0)
-                for cmd in self.commands:
-                    self.wait_for_free_io_memory(len(cmd) + 10)
+                for i in range(0, len(self.commands), command_batch):
+                    batched_commands = self.commands[i:i + command_batch]
+                    cmds = self.concat_commands(batched_commands)
+                    self.wait_for_free_io_memory(len(cmds) + 10)
 
-                    if cmd.startswith("LB"):
-                        cmd_to_send = f"{cmd}{LB_TERMINATOR}"
-                    else:
-                        cmd_to_send = f"{cmd};"
-
-                    self.plotter.write(cmd_to_send.encode('utf-8'))
-                    pbar.update(1)
+                    self.plotter.write(cmds.encode('utf-8'))
+                    pbar.update(command_batch)
         except KeyboardInterrupt:
-            log.warn("Interrupted- aborting.")
+            logging.warning("Interrupted- aborting.")
             sleep(0.1)
             self.abort()
 
@@ -83,8 +150,8 @@ class SerialSender:
             self.plotter.close()
             self.plotter = None
             self.plotter = Serial(port=self.serial_port_address, baudrate=9600, timeout=0.5)
-            log.warn("Reconnected serial port..")
-            log.warn(f"Because of {se}")
+            logging.warning("Reconnected serial port..")
+            logging.warning(f"Because of {se}")
 
         return ""
 
@@ -94,16 +161,17 @@ class SerialSender:
         try:
             free_io_memory = int(free_memory)
         except ValueError as ve:
-            log.warn(f"Failed getting info from plotter: {ve}")
+            logging.warning(f"Failed getting info from plotter: {ve}")
             free_io_memory = 0
 
         while free_io_memory < memory_amount:
-            sleep(0.1)
+            sleep(0.05)
             self.plotter.write(OUTBUT_BUFFER_SPACE.encode())
+            logging.info(f"Waiting for free memory..")
             try:
                 free_io_memory = int(self.read_until())
             except ValueError as ve:
-                log.warn(f"Failed getting info from plotter: {ve}")
+                logging.warning(f"Failed getting info from plotter: {ve}")
                 free_io_memory = 0
 
 

@@ -8,17 +8,18 @@ The script will print a list of available plotters, it's serial ports and model 
 
 """
 
+import subprocess
 import threading
 
 import serial.tools.list_ports
 import wasabi
 
-from cursor.hpgl import read_until_char
+from cursor.hpgl import read_until_char, OUTPUT_IDENTIFICATION
 
 logger = wasabi.Printer(pretty=True, no_print=False)
 
 
-def async_discover(serial_port,
+def async_discover(serial_port: str,
                    baudrate: int = 9600,
                    stopbits: tuple = serial.STOPBITS_ONE,
                    bytesize: tuple = serial.EIGHTBITS,
@@ -33,7 +34,7 @@ def async_discover(serial_port,
                         xonxoff=xonxoff,
                         timeout=timeout)
     try:
-        ser.write(f"{chr(27)}.A".encode())
+        ser.write(f"{OUTPUT_IDENTIFICATION}".encode())
         ret = read_until_char(ser).split(',')[0]
         model = ret.strip()
         if len(model) > 0:
@@ -60,12 +61,18 @@ def discover(baudrate=9600,
     ports = list(serial.tools.list_ports.comports())
     data = []
 
+    # check if port is already open from another application
+    # better do that instead of troubling the sendhpgl communication protocol
+    # >> lsof /dev/ttyUSB0
+    # returns nothing when the port is not used by another application
+    ports = [port.device for port in ports if not len(subprocess.getoutput(f'lsof {port.device}')) > 0]
+
     threads = []
 
     for port in ports:
         thread = threading.Thread(
             target=lambda: data.append(
-                async_discover(port.device,
+                async_discover(port,
                                baudrate,
                                stopbits=stopbits,
                                bytesize=bytesize,

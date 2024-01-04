@@ -22,5 +22,6 @@ def read_until_char(port: serial.Serial, char: chr = CR, timeout: float = 1.0):
         if by.decode() != char:
             data += by.decode()
         else:
+            # logging.info(f"read_until_char took {timer.elapsed()}")
             return data
     return data
