@@ -36,6 +36,7 @@ class PlotterType(Enum):
     HP_7595A_A0 = auto()
     HP_7596A = auto()
     HP_7570A = auto()
+    HP_7596A_100x70cm = auto()
 
 
 class ExportFormat(Enum):
@@ -73,6 +74,7 @@ class ExportFormatMappings:
         PlotterType.HP_7595A_A0: ExportFormat.HPGL,
         PlotterType.HP_7596A: ExportFormat.HPGL,
         PlotterType.HP_7570A: ExportFormat.HPGL,
+        PlotterType.HP_7596A_100x70cm: ExportFormat.HPGL,
 
     }
 
@@ -137,10 +139,13 @@ class MinmaxMapping:
         PlotterType.HP_7550A: BB(0, 0, 15970, 10870) - BB(0, 0, 320, 0),  # subtracting 8 mm of extra space from bottom
         PlotterType.HP_7595A_A2: BB(-11684, -7729 - 960, 11684, 7729),
         PlotterType.HP_7570A: BB(-16134, -11663, 16134, 11663),
+        PlotterType.HP_7596A_100x70cm: BB(-19230, -13791, 19230, 13791),
     }
 
 
 class PlotterName:
+    # please create configurations like this
+    # https://djipco.github.io/hpgl/hpgl.js.html
     names = {
         PlotterType.ROLAND_DPX3300: "dpx3300",
         PlotterType.ROLAND_DPX3300_A2: "dpx3300_a2",
@@ -166,6 +171,7 @@ class PlotterName:
         PlotterType.HP_7595A_A0: "hp7595a_draftmaster_sx_a0",
         PlotterType.HP_7596A: "hp7596a_draftmaster_II_a1",
         PlotterType.HP_7570A: "hp7570a_draftpro",
+        PlotterType.HP_7596A_100x70cm: "hp7596a_draftmaster_II_100x70cm",
     }
 
 
@@ -208,6 +214,7 @@ class XYFactors:
         PlotterType.HP_7595A_A0: (39.9, 40.04),
         PlotterType.HP_7596A: (40.0, 40.0),
         PlotterType.HP_7570A: (40.0, 40.0),
+        PlotterType.HP_7596A_100x70cm: (40.0, 40.0),
     }
 
 
@@ -237,10 +244,12 @@ class MaxSpeed:
         PlotterType.HP_7595A_A0: 110,
         PlotterType.HP_7596A: 110,
         PlotterType.HP_7570A: 80,
+        PlotterType.HP_7596A_100x70cm: 110,
     }
 
 
 class BufferSize:
+    # Default buffer sizes. Can be changed
     fac = {
         PlotterType.ROLAND_DPX3300: 0,  # 0 = not tested
         PlotterType.ROLAND_DPX3300_A2: 0,
@@ -265,6 +274,7 @@ class BufferSize:
         PlotterType.ROLAND_PNC1000_50x100: 0,
         PlotterType.HP_7595A_A0: 1024,
         PlotterType.HP_7570A: 512,
+        PlotterType.HP_7596A_100x70cm: 1024,
     }
 
 
