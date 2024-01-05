@@ -183,6 +183,17 @@ class Path:
         self.properties[Property.COLOR] = color
 
     @property
+    def width(self) -> float | None:
+        if Property.WIDTH not in self.properties.keys():
+            return None
+
+        return self.properties[Property.WIDTH]
+
+    @width.setter
+    def width(self, width: float) -> None:
+        self.properties[Property.WIDTH] = width
+
+    @property
     def laser_pwm(self) -> int | None:
         if Property.LASER_PWM not in self.properties.keys():
             return None
