@@ -2,8 +2,9 @@ import json
 import random
 import pathlib
 import colour
+import logging
 
-from cursor.algorithm.color.copic_pen_enum import CopicColorCode as CCC
+from cursor.algorithm.color.copic_pen_enum import CopicColorCode as CCC, CopicColorCode
 
 
 class Color:
@@ -29,11 +30,17 @@ class Color:
 
 
 class Copic:
-    def __init__(self):
-        self.available_colors_pens = self.init_available_pens()
-        self.available_colors = self.__parse_data()
+    _instance = None
 
-    def init_available_pens(self) -> list[CCC]:
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(Copic, cls).__new__(cls)
+            cls.available_colors_pens = Copic.init_available_pens()
+            cls.available_colors = cls.__parse_data(cls)
+        return cls._instance
+
+    @staticmethod
+    def init_available_pens() -> list[CCC]:
         pens = []
         pens.extend([CCC._110])
         pens.extend(
@@ -58,7 +65,9 @@ class Copic:
 
         pens.extend(
             [CCC.G00, CCC.G02, CCC.G03, CCC.G05, CCC.G07, CCC.G09, CCC.G12, CCC.G14, CCC.G16, CCC.G17,
-             CCC.G19, CCC.G20, CCC.G21, CCC.G24, CCC.G28, CCC.G29, CCC.G43, CCC.G46, CCC.G82, CCC.G85])
+             CCC.G19, CCC.G20, CCC.G21, CCC.G24, CCC.G28, CCC.G29, CCC.G40, CCC.G43, CCC.G46, CCC.G82,
+             CCC.G85, CCC.G94, CCC.G99,
+             CCC.FG])
 
         return pens
 
@@ -68,6 +77,8 @@ class Copic:
         only colors that are added to the ColorCode enum class are indexed
         these are the colors that have a representation as a pen in the lab
         """
+
+        logging.info(f"Loading Copic data..")
         copic_data_final = {}
         here = pathlib.Path(__file__).parent
         with open(here / "data" / "data_copic.json", 'r') as copic_data_file:
@@ -75,7 +86,11 @@ class Copic:
             copic_data = json.loads(all_data)
             for element in copic_data:
                 try:
-                    id = CCC[element["id"]]
+                    id_str = element["id"]
+
+                    if id_str == "110":
+                        id_str = "_110"  # can't use an enum starting with a number in python
+                    id = CCC[id_str]
 
                     if id not in self.available_colors_pens:
                         continue
@@ -86,6 +101,7 @@ class Copic:
                 except KeyError:
                     # only adding colors that have been turned into a pen
                     pass
+        logging.info(".. done")
         return copic_data_final
 
     def color(self, code: CCC) -> Color:
@@ -93,6 +109,9 @@ class Copic:
 
     def random(self) -> Color:
         return random.choice(list(self.available_colors.values()))
+
+    def blues(self):
+        return [c for c in self.available_colors_pens if c.name.startswith("B")]
 
     def most_similar(self, c1_rgb: tuple[float, float, float]) -> Color:
         """
@@ -103,7 +122,7 @@ class Copic:
         color_to_compare_cie = colour.sRGB_to_XYZ(c1_rgb)
 
         deltas = {}
-        for copic_color_code, copic_color in Copic().available_colors.items():
+        for copic_color_code, copic_color in self.available_colors.items():
             copic_color_cie = colour.sRGB_to_XYZ(copic_color.as_srgb())
 
             # color difference in CIE2000 (Color Difference Formula)
@@ -119,4 +138,4 @@ class Copic:
         sorted_deltas = dict(sorted(deltas.items(), key=lambda item: item[1]))
 
         first_key = list(sorted_deltas.keys())[0]
-        return Copic().available_colors[first_key]
+        return self.available_colors[first_key]
