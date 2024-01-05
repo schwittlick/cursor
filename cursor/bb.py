@@ -43,6 +43,9 @@ class BoundingBox:
 
         return self.h / self.w
 
+    def area(self) -> float:
+        return self.w * self.h
+
     def subdiv(self, xpieces: int, ypieces: int) -> list[BoundingBox]:
         bbs = []
         for x in range(xpieces):
