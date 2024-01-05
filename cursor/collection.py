@@ -578,7 +578,7 @@ class Collection:
         end_positions_float = np.array([pa.end_pos().as_tuple() for pa in self])
 
         dists = spatial.distance.cdist(
-         end_positions_float, start_positions_float, metric="euclidean"
+            end_positions_float, start_positions_float, metric="euclidean"
         )
         int_dists_from_floats = dists.astype(int)
 
