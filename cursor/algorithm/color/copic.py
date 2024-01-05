@@ -4,7 +4,7 @@ import pathlib
 import colour
 import logging
 
-from cursor.algorithm.color.copic_pen_enum import CopicColorCode as CCC, CopicColorCode
+from cursor.algorithm.color.copic_pen_enum import CopicColorCode as CCC
 
 
 class Color:
@@ -78,7 +78,7 @@ class Copic:
         these are the colors that have a representation as a pen in the lab
         """
 
-        logging.info(f"Loading Copic data..")
+        logging.info("Loading Copic data..")
         copic_data_final = {}
         here = pathlib.Path(__file__).parent
         with open(here / "data" / "data_copic.json", 'r') as copic_data_file:

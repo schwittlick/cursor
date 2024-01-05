@@ -1211,7 +1211,7 @@ class Path:
             n_sample_points = len(self)
 
         all_intersections = []
-        #logging.info(f"sample_points: {n_sample_points}")
+        # logging.info(f"sample_points: {n_sample_points}")
         for i in range(n_sample_points):
             """
             This is iterating via slices through a line
