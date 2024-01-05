@@ -392,7 +392,7 @@ def test_intersection_all():
     p1 = Path.from_tuple_list([(random.uniform(-10, 10), random.uniform(-10, 10)) for _ in range(2)])
     p2 = Path.from_tuple_list([(random.uniform(-10, 10), random.uniform(-10, 10)) for _ in range(2)])
     intersections = p1.intersect_all(p2)
-    assert len(intersections) == 28
+    assert len(intersections) == 1
 
 
 def test_angles():

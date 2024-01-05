@@ -4,7 +4,6 @@ import cv2
 import numpy as np
 import numba as nb
 import pynput
-from math import sqrt
 import logging
 from datetime import datetime
 
@@ -14,20 +13,6 @@ from shapely.affinity import affine_transform
 from cursor.position import Position
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
-
-
-@nb.njit(fastmath=True, parallel=True)
-def distance_numba(arr_coordinates):
-    # https://stackoverflow.com/questions/74078854/how-can-i-speed-up-a-det-distance-function-in-python-with-numba
-    arr_distances = np.empty((len(arr_coordinates), len(arr_coordinates)), dtype=arr_coordinates.dtype)
-    for i in range(len(arr_coordinates)):
-        coordinate = arr_coordinates[i]
-        for j in range(len(arr_coordinates)):
-            other_coordinate = arr_coordinates[j]
-            distance = sqrt(((other_coordinate[0] - coordinate[0]) ** 2 + (
-                    other_coordinate[1] - coordinate[1]) ** 2))  # √[(x₂ - x₁)² + (y₂ - y₁)²]
-            arr_distances[i, j] = distance
-    return arr_distances
 
 
 @nb.njit(fastmath=True, parallel=True)

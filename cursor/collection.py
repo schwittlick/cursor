@@ -27,7 +27,7 @@ from sko.GA import GA_TSP
 from cursor.bb import BoundingBox
 from cursor.data import DataDirHandler
 from cursor.filter import Filter
-from cursor.misc import apply_matrix, calc_distance, distance_numba
+from cursor.misc import apply_matrix
 from cursor.path import Path
 from cursor.position import Position
 from cursor.sorter import Sorter
@@ -573,35 +573,27 @@ class Collection:
 
     def fast_tsp(self, plot_preview: bool = False, duration_seconds: int = 5) -> list[int]:
         timer = Timer()
-        start_positions = np.array([tuple(map(int, pa.start_pos().as_tuple())) for pa in self])
-        end_positions = np.array([tuple(map(int, pa.end_pos().as_tuple())) for pa in self])
-
-        # dists = spatial.distance.cdist(
-        #  end_positions, start_positions, metric="euclidean"
-        # )
-
 
         start_positions_float = np.array([pa.start_pos().as_tuple() for pa in self])
         end_positions_float = np.array([pa.end_pos().as_tuple() for pa in self])
-        #dists = calc_distance(start_positions_float, end_positions_float)
-        dists = distance_numba(start_positions_float)
+
+        dists = spatial.distance.cdist(
+         end_positions_float, start_positions_float, metric="euclidean"
+        )
         int_dists_from_floats = dists.astype(int)
 
-        #distance_matrix = spatial.distance.cdist(
-        #    end_positions, start_positions, metric="euclidean"
-        #)
-        #int_dists = distance_matrix.astype(int)
-
-        timer.print_elapsed("calculating distances:")
-        #order = fast_tsp.find_tour(int_dists, duration_seconds=duration_seconds)
+        timer.print_elapsed("tsp: cdist")
+        timer.start()
         order = fast_tsp.find_tour(int_dists_from_floats, duration_seconds=duration_seconds)
+        timer.print_elapsed("tsp: find_tour")
 
         if plot_preview:
             fig, ax = plt.subplots(1, 1)
-            best_points_coordinate = start_positions[order, :]
+            best_points_coordinate = start_positions_float[order, :]
             ax.plot(best_points_coordinate[:, 0], best_points_coordinate[:, 1], ".-r")
             plt.show()
 
+        timer.start()
         final_order = []
         idx = order.index(0)
         for i in range(idx, len(order)):
@@ -610,8 +602,7 @@ class Collection:
             final_order.append(order[i])
 
         self.paths[:] = [self.paths[i] for i in final_order]
-
-        timer.print_elapsed("calc tsp took:")
+        timer.print_elapsed("tsp: reorder")
 
         return final_order
 

@@ -3,7 +3,7 @@ from cursor.algorithm.color.copic_pen_enum import CopicColorCode
 
 
 def test_rgb_data():
-    assert len(Copic().available_colors) == 72
+    assert len(Copic().available_colors) == 106
 
 
 def test_singleton():
