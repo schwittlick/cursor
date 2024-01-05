@@ -12,6 +12,21 @@ import cProfile as profile
 from cursor.position import Position
 
 
+def test_copy():
+    collection = Collection(name="test123")
+    collection.add(Path.from_tuple_list([(0, 0), (13, 37)]))
+
+    assert collection.paths == [Path.from_tuple_list([(0, 0), (13, 37)])]
+    assert collection.properties == {}
+    assert collection.name == "test123"
+
+    collection_copy = collection.copy()
+
+    assert collection_copy.paths == [Path.from_tuple_list([(0, 0), (13, 37)])]
+    assert collection_copy.properties == {}
+    assert collection_copy.name == "test123"
+
+
 def test_pathcollection_minmax():
     pcol = Collection.from_tuples(
         [[(5, 5111), (10, 11), (11, 11), (20, 20), (30, 31), (40, 41)],
