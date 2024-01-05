@@ -1,5 +1,8 @@
 import numpy as np
 
+from cursor import misc
+from cursor.algorithm.color.copic import Color, Copic
+
 
 class ColorMath:
     @staticmethod
@@ -66,3 +69,20 @@ class ColorMath:
             interpolated = ColorMath.lerp(c1_srgb, c2_srgb, perc)
 
         return interpolated
+
+    @staticmethod
+    def calc_gradient(c1: Color, c2: Color, steps: int = 100, oklab: bool = True, clamp_to_copic: bool = True) -> list[
+        Color]:
+        gradient_colors = []
+
+        for step in range(steps):
+            perc = misc.inv_lerp(0, steps, step)
+            srgb_interpolated = ColorMath.interpolate(c1.as_srgb(), c2.as_srgb(), perc, oklab)
+            if clamp_to_copic:
+                interpolated_color = Copic().most_similar(srgb_interpolated)
+            else:
+                interpolated_color = Color(srgb_interpolated)
+
+            gradient_colors.append(interpolated_color)
+
+        return gradient_colors
