@@ -178,9 +178,11 @@ class Exporter:
                 )
 
                 jpeg_folder = DataDirHandler().jpg(self.name)
-                jpeg_renderer = JpegRenderer(jpeg_folder, w=1920 * 8, h=1080 * 8)
+                w, h = Paper.sizes[self.cfg.dimension]
+                scale = 2
+                jpeg_renderer = JpegRenderer(jpeg_folder, w=w * scale, h=h * scale)
                 jpeg_renderer.add(pc)
-                jpeg_renderer.render(scale=8.0)
+                jpeg_renderer.render(scale=scale)
                 jpeg_renderer.save(f"{fname}")
 
         if source:
