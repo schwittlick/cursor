@@ -125,9 +125,10 @@ class RealtimeRenderer(arcade.Window):
     def points(self) -> list[Position]:
         return self._points
 
-    def screenshot(self, rr: RealtimeRenderer):
+    def screenshot(self, rr: RealtimeRenderer, suffix: str = None):
         folder = DataDirHandler().jpg(f"{self.title}")
-        suffix = pymsgbox.prompt("suffix", default="")
+        if not suffix:
+            suffix = pymsgbox.prompt("suffix", default="")
         fn = folder / f"{DateHandler().utc_timestamp()}_{suffix}.png"
         folder.mkdir(parents=True, exist_ok=True)
         log.good(f"saving {fn.as_posix()}")
