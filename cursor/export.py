@@ -1,3 +1,6 @@
+import random
+import string
+
 from cursor.collection import Collection
 from cursor.data import DataDirHandler
 from cursor.device import (
@@ -147,8 +150,13 @@ class Exporter:
             return
 
         module = inspect.getmodule(inspect.stack()[2][0])
-        ms = inspect.getsource(module)
-
+        if module:
+            ms = inspect.getsource(module)
+        else:
+            # this is being called from a ipython notebook
+            # generating a random string to be hashed below.
+            # this is very hacky :(
+            ms = ''.join(random.choice(string.ascii_lowercase) for i in range(10))
         if jpg:
             # jpeg fitting roughly
             self.paths.fit(
@@ -170,9 +178,11 @@ class Exporter:
                 )
 
                 jpeg_folder = DataDirHandler().jpg(self.name)
-                jpeg_renderer = JpegRenderer(jpeg_folder, w=1920 * 8, h=1080 * 8)
+                w, h = Paper.sizes[self.cfg.dimension]
+                scale = 2
+                jpeg_renderer = JpegRenderer(jpeg_folder, w=w * scale, h=h * scale)
                 jpeg_renderer.add(pc)
-                jpeg_renderer.render(scale=8.0)
+                jpeg_renderer.render(scale=scale)
                 jpeg_renderer.save(f"{fname}")
 
         if source:

@@ -12,10 +12,28 @@ import cProfile as profile
 from cursor.position import Position
 
 
+def test_copy():
+    collection = Collection(name="test123")
+    collection.add(Path.from_tuple_list([(0, 0), (13, 37)]))
+
+    assert collection.paths == [Path.from_tuple_list([(0, 0), (13, 37)])]
+    assert collection.properties == {}
+    assert collection.name == "test123"
+
+    collection_copy = collection.copy()
+
+    assert collection_copy.paths == [Path.from_tuple_list([(0, 0), (13, 37)])]
+    assert collection_copy.properties == {}
+    assert collection_copy.name == "test123"
+
+
 def test_pathcollection_minmax():
     pcol = Collection.from_tuples(
-        [[(5, 5111), (10, 11), (11, 11), (20, 20), (30, 31), (40, 41)],
-         [(545, 54), (160, 11), (11, 171), (20, 20), (30, 31), (940, 941)]])
+        [
+            [(5, 5111), (10, 11), (11, 11), (20, 20), (30, 31), (40, 41)],
+            [(545, 54), (160, 11), (11, 171), (20, 20), (30, 31), (940, 941)],
+        ]
+    )
 
     assert pcol.empty() is False
 
@@ -35,14 +53,17 @@ def test_pathcollection_minmax():
 
 
 def test_collection_equal():
-    assert Collection.from_tuples([[(5, 5111)]]) == \
-           Collection.from_tuples([[(5, 5111)]])
+    assert Collection.from_tuples([[(5, 5111)]]) == Collection.from_tuples(
+        [[(5, 5111)]]
+    )
 
-    assert Collection.from_tuples([[(5, 5111)]]) != \
-           Collection.from_tuples([[(5, 5111), (2, 2)]])
+    assert Collection.from_tuples([[(5, 5111)]]) != Collection.from_tuples(
+        [[(5, 5111), (2, 2)]]
+    )
 
-    assert Collection.from_tuples([[(5, 5111)]]) != \
-           Collection.from_tuples([[(5, 5111)], [(5, 5111)]])
+    assert Collection.from_tuples([[(5, 5111)]]) != Collection.from_tuples(
+        [[(5, 5111)], [(5, 5111)]]
+    )
 
     # different timestamps are *not* used for compare
     assert Collection(123) == Collection(123)
@@ -94,9 +115,11 @@ def test_collection_as_array():
 
 
 def test_collection_from_list_of_tuple_lists():
-    tuples = [[(0.0, 150.0), (0.0, 0.0)],
-              [(114.0, 150.0), (114.0, 0.0)],
-              [(0.0, 79.6875), (114.0, 79.6875)]]
+    tuples = [
+        [(0.0, 150.0), (0.0, 0.0)],
+        [(114.0, 150.0), (114.0, 0.0)],
+        [(0.0, 79.6875), (114.0, 79.6875)],
+    ]
     collection = Collection.from_tuples(tuples)
 
     assert len(collection) == len(tuples)
@@ -115,7 +138,9 @@ def test_collection_as_dataframe():
 
     df = pc.as_dataframe()  # concatenated
     assert df.ndim == 2
-    assert (df.values.shape[0] == 4)  # the maximum numer of points in a path (rest are filled up with nan's)
+    assert (
+        df.values.shape[0] == 4
+    )  # the maximum numer of points in a path (rest are filled up with nan's)
     assert df.values.shape[1] == 6  # 3 times x, y columns
 
 
@@ -632,9 +657,17 @@ def DISABLED_test_tsp_performances():
     points = 100
 
     c = Collection()
-    [c.add(Path.from_tuple_list(
-        [(random.uniform(0, 100), random.uniform(0, 100)),
-         (random.uniform(0, 100), random.uniform(0, 100))])) for _ in range(points)]
+    [
+        c.add(
+            Path.from_tuple_list(
+                [
+                    (random.uniform(0, 100), random.uniform(0, 100)),
+                    (random.uniform(0, 100), random.uniform(0, 100)),
+                ]
+            )
+        )
+        for _ in range(points)
+    ]
 
     c1 = c.copy()
     # order1 = c1.sort_tsp(iters=100)
@@ -664,7 +697,7 @@ def test_sort_tsp():
     assert pc[4] == p3
 
 
-def DISABLED_test_fast_tsp():
+def test_fast_tsp():
     p0 = Path.from_tuple_list([(1, 1), (2, 1), (5, 1)])
     p1 = Path.from_tuple_list([(5, 1), (1, 5), (10, 1)])
     p2 = Path.from_tuple_list([(1, 1), (1, 1), (2, 1)])
@@ -673,12 +706,12 @@ def DISABLED_test_fast_tsp():
 
     pc = Collection.from_path_list([p0, p1, p2, p3, p4])
 
-    pc.fast_tsp(plot_preview=False, duration_seconds=5)
+    order = pc.fast_tsp(plot_preview=False, duration_seconds=5)
     # its non-deterministic
 
-    # assert order == [0, 3, 2, 1, 4]
-    # assert pc[0] == p0
-    # assert pc[1] == p3
-    # assert pc[2] == p2
-    # assert pc[3] == p1
-    # assert pc[4] == p4
+    assert order == [0, 2, 4, 3, 1]
+    assert pc[0] == p0
+    assert pc[1] == p2
+    assert pc[2] == p4
+    assert pc[3] == p3
+    assert pc[4] == p1

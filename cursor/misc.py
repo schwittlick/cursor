@@ -17,7 +17,7 @@ logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 
 @nb.njit(fastmath=True, parallel=True)
 def calc_distance(vec_1, vec_2):
-    res = np.empty((vec_1.shape[0], vec_2.shape[0]), dtype=vec_1.dtype)
+    res = np.empty((vec_1.shape[0], vec_2.shape[0]), dtype=np.float64)
     for i in nb.prange(vec_1.shape[0]):
         for j in range(vec_2.shape[0]):
             res[i, j] = np.sqrt((vec_1[i, 0] - vec_2[j, 0])
@@ -338,3 +338,8 @@ def split_list_into_chunks(lst, n):
         start = end
 
     return chunks
+
+
+def split_list_into_chunks_of_size(lst: list, chunksize: int) -> list[list]:
+    for i in range(0, len(lst), chunksize):
+        yield lst[i:i + chunksize]
