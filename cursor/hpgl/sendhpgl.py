@@ -43,13 +43,28 @@ class DraftMasterMemoryConfig:
 
 
 class HP7550AMemoryConfig:
-    physical_io_buffer = 2, 12752
-    polygon_buffer = 4, 12754
-    char_buffer = 0, 12750
-    replot_buffer = 0, 12750
-    vector_buffer = 44, 12794
+    def __init__(self):
+        self.physical_io_buffer = 2, 12752
+        self.polygon_buffer = 4, 12754
+        self.char_buffer = 0, 12750
+        self.replot_buffer = 0, 12750
+        self.vector_buffer = 44, 12794
 
-    max_sum = 12800
+        self.max_sum = 12800
+
+    def memory_alloc_cmd(self, io: int = 1024, polygon: int = 1778, char: int = 0, replot: int = 9954,
+                         vector: int = 44) -> tuple[str, str]:
+        assert self.physical_io_buffer[0] <= io <= self.physical_io_buffer[1]
+        assert self.polygon_buffer[0] <= polygon <= self.polygon_buffer[1]
+        assert self.char_buffer[0] <= char <= self.char_buffer[1]
+        assert self.replot_buffer[0] <= replot <= self.replot_buffer[1]
+        assert self.vector_buffer[0] <= vector <= self.vector_buffer[1]
+        assert sum([io, polygon, char, replot, vector]) <= self.max_sum
+
+        buffer_sizes = f"{ESC}.T{io};{polygon};{char};{replot};{vector}{ESC_TERM}"
+        logical_buffer_size = f"{ESC}.@{io}{ESC_TERM}"
+
+        return buffer_sizes, logical_buffer_size
 
 
 class SerialSender:
@@ -62,37 +77,19 @@ class SerialSender:
         model = self.identify()
         logging.info(f"Detected model {model}")
         if model == "7550A":
-            self.config_memory(12752, 4, 0, 0, 44)
-        if model == "7595A":  # whats the other plotter 7596A, right?
+            dm = HP7550AMemoryConfig()
+            memory_config, plotter_config = dm.memory_alloc_cmd(12752, 4, 0, 0, 44)
+            logging.info(f"Applying custom config to {model}")
+            logging.info(memory_config)
+            logging.info(plotter_config)
+            self.apply_config(memory_config, plotter_config)
+        if model in ["7595A", "7596A"]:
             dm = DraftMasterMemoryConfig()
             memory_config, plotter_config = dm.memory_alloc_cmd(25518, 4, 0, 66, 12)
             logging.info(f"Applying custom config to {model}")
             logging.info(memory_config)
             logging.info(plotter_config)
             self.apply_config(memory_config, plotter_config)
-
-    def config_memory(self, io: int = 1024, polygon: int = 1778, char: int = 0, replot: int = 9954,
-                      vector: int = 44):
-        max_memory_hp7550 = 12800
-
-        assert 2 <= io <= 12752
-        assert 4 <= polygon <= 12754
-        assert 0 <= char <= 12750
-        assert 0 <= replot <= 12750
-        assert 44 <= vector <= 12794
-        assert sum([io, polygon, char, replot, vector]) <= max_memory_hp7550
-
-        buffer_sizes = f"{ESC}.T{io};{polygon};{char};{replot};{vector}{ESC_TERM}"
-        logical_buffer_size = f"{ESC}.@{io}{ESC_TERM}"
-
-        self.plotter.write(buffer_sizes.encode())
-        self.plotter.write(WAIT.encode())
-
-        self.read_until()
-
-        self.plotter.write(logical_buffer_size.encode())
-        self.plotter.write(WAIT.encode())
-        self.read_until()
 
     def apply_config(self, memory_config: str, plotter_config: str):
         self.plotter.write(memory_config.encode())
