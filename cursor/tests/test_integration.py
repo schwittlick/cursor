@@ -15,11 +15,12 @@ def test_exporter():
     p.add(0, 0)
     pc.add(p)
 
-    ExportWrapper().ex(
+    wrapper = ExportWrapper(
         pc,
         device.PlotterType.HP_7595A_A2,
         device.PaperSize.LANDSCAPE_A2,
         30,
         "simple_rect_example",
-        "simple_rect",
-    )
+        "simple_rect", )
+    wrapper.fit()
+    wrapper.ex()

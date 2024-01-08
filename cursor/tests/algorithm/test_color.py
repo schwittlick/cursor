@@ -44,3 +44,20 @@ def test_simple_mix_oklab():
 
     interpolated_srgb = ColorMath.oklab_to_linear_srgb(interpolated_oklab)
     print(interpolated_srgb)
+
+
+def test_gradient():
+    c1 = Copic().color(CopicColorCode.B23)
+    c2 = Copic().color(CopicColorCode.Y06)
+
+    for i in range(10):
+
+        gradient = ColorMath.calc_gradient(c1, c2, 50, True)
+        gradient_unique = [v for i, v in enumerate(gradient) if i == 0 or v != gradient[i - 1]]
+        # print(gradient)
+        # print(gradient_unique)
+        print(len(gradient_unique))
+        print(c1)
+        print(c2)
+        c1 = Copic().random()
+        c2 = Copic().random()

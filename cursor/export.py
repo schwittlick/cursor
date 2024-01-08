@@ -25,6 +25,7 @@ from cursor.renderer.hpgl import HPGLRenderer
 from cursor.renderer.jpg import JpegRenderer
 from cursor.renderer.svg import SvgRenderer
 from cursor.renderer.tektronix import TektronixRenderer
+from cursor.timer import Timer
 
 log = wasabi.Printer()
 
@@ -208,15 +209,6 @@ class Exporter:
             with open(source_folder / fname, "w") as file:
                 file.write(ms)
 
-        self.paths.fit(
-            Paper.sizes[self.cfg.dimension],
-            xy_factor=XYFactors.fac[self.cfg.type],
-            padding_mm=self.cfg.margin,
-            output_bounds=MinmaxMapping.maps[self.cfg.type],
-            cutoff_mm=self.cfg.cutoff,
-            keep_aspect=self.keep_aspect_ratio
-        )
-
         unit_to_mm_factor = XYFactors.fac[self.cfg.type][0]
         distance_mm = int(self.paths.calc_travel_distance(unit_to_mm_factor))
 
@@ -358,11 +350,15 @@ class ExportWrapper:
         self.exp.keep_aspect_ratio = keep_aspect_ratio
 
     def fit(self):
+        timer = Timer()
         self.exp.fit()
+        timer.print_elapsed("ExportWrapper: fit()")
 
     def ex(self):
+        timer = Timer()
         self.exp.run(False, False)
         if self.export_reversed:
             self.exp.paths.reverse()
             self.exp.suffix = self.exp.suffix + "_reversed_"
             self.exp.run(True, True)
+        timer.print_elapsed("ExportWrapper: ex()")

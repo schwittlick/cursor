@@ -21,12 +21,14 @@ def test_simple_export():
     pc.add(p)
     pc.add(p2)
 
-    ExportWrapper().ex(
+    wrapper = ExportWrapper(
         pc,
         PlotterType.HP_7470A,
         PaperSize.LANDSCAPE_A4,
         25,
         "test",
         "111",
-        keep_aspect_ratio=False,
-    )
+        keep_aspect_ratio=False, )
+
+    wrapper.fit()
+    wrapper.ex()
