@@ -35,7 +35,7 @@ class Path:
     def __init__(
             self, vertices: list[Position] | None = None, properties: dict | None = None
     ):
-        self._vertices = []
+        self._vertices: list[Position] = []
         self.properties = {
             Property.LAYER: "layer1",
             Property.COLOR: (0, 0, 0),
@@ -308,9 +308,9 @@ class Path:
         b = BoundingBox(minx, miny, maxx, maxy)
         return b
 
-    def aspect_ratio(self) -> float | math.nan:
+    def aspect_ratio(self) -> float | np.inf:
         if len(self) < 2:
-            return math.nan
+            return 0.0
 
         return self.bb().aspect_ratio()
 
@@ -592,31 +592,33 @@ class Path:
     def entropy_direction_changes(self) -> float:
         return calc_entropy(self.direction_changes())
 
-    @property
-    def differential_entropy_x(self) -> float:
+    def __differential_entropy_wrap(self, values: list[float]) -> float:
+        window_length = None  # max(int(len(values) * 0.1), 1)
+        if len(values) < 5:
+            logging.error(f"Can't compute window_length for such small list of values..")
         try:
             de = stats.differential_entropy(
-                [v.x for v in self.vertices],
-                window_length=None,
+                values,
+                window_length=window_length,
             )
-            if math.isclose(de, -math.inf):
-                pass
+            if np.isinf(de):
                 # logging.warning(f"Infinite differential entropy.. {self}")
                 # logging.warning(f"{self.vertices}")
+                return 100.0
             return de
 
         except ValueError as ve:
-            logging.error(f"Failed differential entropy x: {ve}")
-            # logging.error(f"At path {self}")
-            # logging.error(f"{self.vertices}")
-            return -math.inf
+            logging.error(f"Failed differential entropy: {ve}")
+            logging.error(f"At path {self} for vertices {self.vertices}")
+            return 0.0
+
+    @property
+    def differential_entropy_x(self) -> float:
+        return self.__differential_entropy_wrap([v.x for v in self.vertices])
 
     @property
     def differential_entropy_y(self) -> float:
-        return stats.differential_entropy(
-            [v.y for v in self.vertices],
-            window_length=max(int(len(self.vertices) * 0.1), 1),
-        )
+        return self.__differential_entropy_wrap([v.y for v in self.vertices])
 
     def empty(self) -> bool:
         return len(self.vertices) < 1
@@ -702,12 +704,22 @@ class Path:
         return fdfs.distance(self.as_array(), _path.as_array())
 
     @property
-    def variation_x(self):
-        return stats.variation([v.x for v in self.vertices], ddof=1)
+    def variation_x(self) -> float:
+        variation_x = stats.variation([v.x for v in self.vertices], ddof=1)
+        if np.isnan(variation_x):
+            return 0.0
+        if np.isinf(variation_x):
+            return 100.0
+        return float(variation_x)
 
     @property
-    def variation_y(self):
-        return stats.variation([v.y for v in self.vertices], ddof=1)
+    def variation_y(self) -> float:
+        variation_y = stats.variation([v.y for v in self.vertices], ddof=1)
+        if np.isnan(variation_y):
+            return 0.0
+        if np.isinf(variation_y):
+            return 100.0
+        return float(variation_y)
 
     def centeroid(self) -> tuple[float, float]:
         arr = self.as_array()

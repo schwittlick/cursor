@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import math
+import numpy as np
 
 
 class BoundingBox:
@@ -9,8 +9,8 @@ class BoundingBox:
         self.y = y
         self.x2 = x2
         self.y2 = y2
-        self.w = math.dist([self.x], [self.x2])
-        self.h = math.dist([self.y], [self.y2])
+        self.w = np.linalg.norm(self.x - self.x2)
+        self.h = np.linalg.norm(self.y - self.y2)
 
     def center(self) -> tuple[float, float]:
         center_x = (self.w / 2.0) + self.x
@@ -25,7 +25,7 @@ class BoundingBox:
         prevw = self.w
         self.w = self.w * fac
 
-        diff = math.dist([prevw], [self.w])
+        diff = np.linalg.norm(prevw - self.w)
         self.x = self.x + diff / 2
         self.x2 = self.x + self.w
 
@@ -33,13 +33,15 @@ class BoundingBox:
         prevh = self.h
         self.h = self.h * fac
 
-        diff = math.dist([prevh], [self.h])
+        diff = np.linalg.norm(prevh - self.h)
         self.y = self.y + diff / 2
         self.y2 = self.y + self.h
 
-    def aspect_ratio(self) -> float | math.nan:
-        if self.w == 0.0 or self.h == 0.0:
-            return math.nan
+    def aspect_ratio(self) -> float | np.inf:
+        if self.w == 0.0:
+            return np.inf
+        elif self.h == 0.0:
+            return -np.inf
 
         return self.h / self.w
 

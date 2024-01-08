@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pathlib
-
+from tqdm import tqdm
 import logging
 
 from cursor.hpgl.hpgl import HPGL
@@ -33,61 +33,65 @@ class HPGLRenderer(BaseRenderer):
         _prev_pen = 0
 
         first = True
-        for p in self.paths:
-            if first:
-                _hpgl.PU()
-                first = False
-            x = p.start_pos().x
-            y = p.start_pos().y
+        with tqdm(total=len(self.paths)) as pbar:
+            pbar.update(0)
+            for p in self.paths:
+                if first:
+                    _hpgl.PU()
+                    first = False
+                x = p.start_pos().x
+                y = p.start_pos().y
 
-            if _prev_pen != p.pen_select:
-                _hpgl.SP(self.__get_pen_select(p.pen_select))
-                _prev_pen = p.pen_select
+                if _prev_pen != p.pen_select:
+                    _hpgl.SP(self.__get_pen_select(p.pen_select))
+                    _prev_pen = p.pen_select
 
-            # if p.line_type:
-            #     if _prev_line_type != p.line_type:
-            #         _hpgl_string += f"LT{self.__linetype_from_layer(p.line_type)};"
-            #         _prev_line_type = p.line_type
+                # if p.line_type:
+                #     if _prev_line_type != p.line_type:
+                #         _hpgl_string += f"LT{self.__linetype_from_layer(p.line_type)};"
+                #         _prev_line_type = p.line_type
 
-            if p.velocity:
-                if _prev_velocity != p.velocity:
-                    _hpgl.VS(self.__get_velocity(p.velocity))
-                    _prev_velocity = p.velocity
+                if p.velocity:
+                    if _prev_velocity != p.velocity:
+                        _hpgl.VS(self.__get_velocity(p.velocity))
+                        _prev_velocity = p.velocity
 
-            if p.pen_force:
-                if _prev_force != p.pen_force:
-                    _hpgl.FS(self.__get_pen_force(p.pen_force))
-                    _prev_force = p.pen_force
+                if p.pen_force:
+                    if _prev_force != p.pen_force:
+                        _hpgl.FS(self.__get_pen_force(p.pen_force))
+                        _prev_force = p.pen_force
 
-            if p.laser_pwm:
-                _hpgl.custom(f"PWM{p.laser_pwm};")
+                if p.laser_pwm:
+                    _hpgl.custom(f"PWM{p.laser_pwm};")
 
-            if p.laser_volt:
-                _hpgl.custom(f"VOLT{p.laser_volt:.3};")
+                if p.laser_volt:
+                    _hpgl.custom(f"VOLT{p.laser_volt:.3};")
 
-            if p.laser_delay:
-                _hpgl.custom(f"DELAY{p.laser_delay:.3};")
+                if p.laser_delay:
+                    _hpgl.custom(f"DELAY{p.laser_delay:.3};")
 
-            if p.laser_amp:
-                _hpgl.custom(f"AMP{p.laser_amp:.3};")
-
-            _hpgl.PA(x, y)
-            if p.is_polygon:
-                _hpgl.custom("PM0;")
-
-            _hpgl.PD()
-
-            for point in p.vertices:
-                x = point.x
-                y = point.y
+                if p.laser_amp:
+                    _hpgl.custom(f"AMP{p.laser_amp:.3};")
 
                 _hpgl.PA(x, y)
+                if p.is_polygon:
+                    _hpgl.custom("PM0;")
 
-            _hpgl.PU()
+                _hpgl.PD()
 
-            if p.is_polygon:
-                _hpgl.custom("PM2;")  # switch to PM2; to close and safe
-                _hpgl.custom("FP;")
+                for point in p.vertices:
+                    x = point.x
+                    y = point.y
+
+                    _hpgl.PA(x, y)
+
+                _hpgl.PU()
+
+                if p.is_polygon:
+                    _hpgl.custom("PM2;")  # switch to PM2; to close and safe
+                    _hpgl.custom("FP;")
+
+                pbar.update(1)
 
         _hpgl.PA(0, 0)
         _hpgl.SP(0)

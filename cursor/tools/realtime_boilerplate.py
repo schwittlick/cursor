@@ -51,15 +51,16 @@ class Boilerplate(RealtimeRenderer):
 
         c.rot(math.pi / 2)
 
-        ExportWrapper().ex(
+        wrapper = ExportWrapper(
             c,
             PlotterType.HP_7550A,
             PaperSize.LANDSCAPE_A3,
             25,
             f"{self.title}",
             "version123",
-            keep_aspect_ratio=False,
-        )
+            keep_aspect_ratio=False)
+        wrapper.fit()
+        wrapper.ex()
 
     def on_update(self, delta_time: float):
         super().on_update(delta_time)

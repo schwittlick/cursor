@@ -341,5 +341,6 @@ def split_list_into_chunks(lst, n):
 
 
 def split_list_into_chunks_of_size(lst: list, chunksize: int) -> list[list]:
+    """ Splits list into chunks, where each chunk has certain size. Last chunk will contain remaining """
     for i in range(0, len(lst), chunksize):
         yield lst[i:i + chunksize]

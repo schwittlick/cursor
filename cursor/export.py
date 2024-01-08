@@ -25,6 +25,7 @@ from cursor.renderer.hpgl import HPGLRenderer
 from cursor.renderer.jpg import JpegRenderer
 from cursor.renderer.svg import SvgRenderer
 from cursor.renderer.tektronix import TektronixRenderer
+from cursor.timer import Timer
 
 log = wasabi.Printer()
 
@@ -144,6 +145,16 @@ class Exporter:
     def keep_aspect_ratio(self, kar: bool) -> None:
         self.__keep_aspect_ratio = kar
 
+    def fit(self):
+        self.paths.fit(
+            Paper.sizes[self.cfg.dimension],
+            xy_factor=XYFactors.fac[self.cfg.type],
+            padding_mm=self.cfg.margin,
+            output_bounds=MinmaxMapping.maps[self.cfg.type],
+            cutoff_mm=self.cfg.cutoff,
+            keep_aspect=self.keep_aspect_ratio
+        )
+
     def run(self, jpg: bool = False, source: bool = False) -> None:
         if self.cfg is None or self.paths is None or self.name is None:
             log.fail("Config, Name or Paths is None. Not exporting anything")
@@ -197,15 +208,6 @@ class Exporter:
             log.good(f"Saved source to {source_folder / fname}")
             with open(source_folder / fname, "w") as file:
                 file.write(ms)
-
-        self.paths.fit(
-            Paper.sizes[self.cfg.dimension],
-            xy_factor=XYFactors.fac[self.cfg.type],
-            padding_mm=self.cfg.margin,
-            output_bounds=MinmaxMapping.maps[self.cfg.type],
-            cutoff_mm=self.cfg.cutoff,
-            keep_aspect=self.keep_aspect_ratio
-        )
 
         unit_to_mm_factor = XYFactors.fac[self.cfg.type][0]
         distance_mm = int(self.paths.calc_travel_distance(unit_to_mm_factor))
@@ -306,40 +308,57 @@ def save_wrapper_jpeg(pc, projname, fname, scale=4.0, thickness=3):
 
 
 class ExportWrapper:
-    def ex(
-            self,
-            paths: Collection,
-            ptype: PlotterType,
-            psize: PaperSize,
-            margin: int,
-            name: str = "output_name",
-            suffix: str = "",
-            cutoff: int = None,
-            gcode_speed: int = None,
-            hpgl_pen_layer_mapping=None,
-            hpgl_linetype_mapping=None,
-            export_reversed=None,
-            keep_aspect_ratio=False,
-    ):
-        config = Config()
-        config.type = ptype
-        config.dimension = psize
-        config.margin = margin
-        config.cutoff = cutoff
+    def __init__(self, paths: Collection,
+                 ptype: PlotterType,
+                 psize: PaperSize,
+                 margin: int,
+                 name: str = "output_name",
+                 suffix: str = "",
+                 cutoff: int = None,
+                 gcode_speed: int = None,
+                 hpgl_pen_layer_mapping=None,
+                 hpgl_linetype_mapping=None,
+                 export_reversed=None,
+                 keep_aspect_ratio=False, ):
+        self.paths = paths
+        self.ptype = ptype
+        self.psize = psize
+        self.margin = margin
+        self.name = name
+        self.suffix = suffix
+        self.cutoff = cutoff
+        self.gcode_speed = gcode_speed
+        self.hpgl_pen_layer_mapping = hpgl_pen_layer_mapping
+        self.hpgl_linetype_mapping = hpgl_linetype_mapping
+        self.export_reversed = export_reversed
+        self.keep_aspect_ratio = keep_aspect_ratio
 
-        # paths.clean()
+        self.config = Config()
+        self.config.type = ptype
+        self.config.dimension = psize
+        self.config.margin = margin
+        self.config.cutoff = cutoff
 
-        exp = Exporter()
-        exp.cfg = config
-        exp.paths = paths
-        exp.name = name
-        exp.suffix = str(suffix)
-        exp.gcode_speed = gcode_speed
-        exp.layer_pen_mapping = hpgl_pen_layer_mapping
-        exp.linetype_mapping = hpgl_linetype_mapping
-        exp.keep_aspect_ratio = keep_aspect_ratio
-        exp.run(False, False)
-        if export_reversed:
-            exp.paths.reverse()
-            exp.suffix = exp.suffix + "_reversed_"
-            exp.run(True, True)
+        self.exp = Exporter()
+        self.exp.cfg = self.config
+        self.exp.paths = paths
+        self.exp.name = name
+        self.exp.suffix = str(suffix)
+        self.exp.gcode_speed = gcode_speed
+        self.exp.layer_pen_mapping = hpgl_pen_layer_mapping
+        self.exp.linetype_mapping = hpgl_linetype_mapping
+        self.exp.keep_aspect_ratio = keep_aspect_ratio
+
+    def fit(self):
+        timer = Timer()
+        self.exp.fit()
+        timer.print_elapsed("ExportWrapper: fit()")
+
+    def ex(self):
+        timer = Timer()
+        self.exp.run(False, False)
+        if self.export_reversed:
+            self.exp.paths.reverse()
+            self.exp.suffix = self.exp.suffix + "_reversed_"
+            self.exp.run(True, True)
+        timer.print_elapsed("ExportWrapper: ex()")
