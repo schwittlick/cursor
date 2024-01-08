@@ -35,8 +35,8 @@ class Copic:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(Copic, cls).__new__(cls)
-            cls.available_colors_pens = Copic.init_available_pens()
-            cls.available_colors = cls.__parse_data(cls)
+            cls.available_colors_pens: list[CCC] = Copic.init_available_pens()
+            cls.available_colors: dict[CCC, Color] = cls.__parse_data(cls)
         return cls._instance
 
     @staticmethod
@@ -68,6 +68,10 @@ class Copic:
              CCC.G19, CCC.G20, CCC.G21, CCC.G24, CCC.G28, CCC.G29, CCC.G40, CCC.G43, CCC.G46, CCC.G82,
              CCC.G85, CCC.G94, CCC.G99,
              CCC.FG])
+
+        # loose pens yet
+        pens.extend(
+            [CCC.YG21, CCC.YR02])
 
         return pens
 
