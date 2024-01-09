@@ -46,7 +46,7 @@ def main():
             r.index += 1
 
     def export(rr: RealtimeRenderer):
-        ExportWrapper().ex(
+        wrapper = ExportWrapper(
             c,
             PlotterType.ROLAND_DPX3300,
             PaperSize.LANDSCAPE_A1,
@@ -54,6 +54,8 @@ def main():
             "svg2hpgl",
             f"{rr.title}",
         )
+        wrapper.fit()
+        wrapper.ex()
 
     def save_pickle(rr: RealtimeRenderer):
         c.save_pickle(f"{rr.title}.pickle")
