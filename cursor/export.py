@@ -1,5 +1,6 @@
 import random
 import string
+import logging
 
 from cursor.collection import Collection
 from cursor.data import DataDirHandler
@@ -27,97 +28,33 @@ from cursor.renderer.svg import SvgRenderer
 from cursor.renderer.tektronix import TektronixRenderer
 from cursor.timer import Timer
 
-log = wasabi.Printer()
 
-
-class Config:
+class ExportConfig:
     def __init__(
         self,
         type: PlotterType | None = None,
         dim: PaperSize | None = None,
         margin: int | None = None,
         cutoff: int | None = None,
+        export_source: bool = False,
     ):
         self.type: PlotterType = type
-        self.dimensions = dim
+        self.dimension = dim
         self.margin = margin
         self.cutoff = cutoff
+        self.export_source = export_source
 
 
 class Exporter:
     def __init__(self):
-        self.__paths = None
-        self.__cfg = None
-        self.__name = None
-        self.__suffix = None
-        self.__gcode_speed = None
-        self.__layer_pen_mapping = None
-        self.__linetype_mapping = None
-        self.__keep_aspect_ratio = None
-
-    @property
-    def paths(self) -> Collection:
-        return self.__paths
-
-    @paths.setter
-    def paths(self, t: Collection) -> None:
-        self.__paths = t
-
-    @property
-    def cfg(self) -> Config:
-        return self.__cfg
-
-    @cfg.setter
-    def cfg(self, t: Config) -> None:
-        self.__cfg = t
-
-    @property
-    def name(self) -> str:
-        return self.__name
-
-    @name.setter
-    def name(self, t: str) -> None:
-        self.__name = t
-
-    @property
-    def suffix(self) -> str:
-        return self.__suffix
-
-    @suffix.setter
-    def suffix(self, t: str) -> None:
-        self.__suffix = t
-
-    @property
-    def gcode_speed(self) -> int:
-        return self.__gcode_speed
-
-    @gcode_speed.setter
-    def gcode_speed(self, t: int) -> None:
-        self.__gcode_speed = t
-
-    @property
-    def layer_pen_mapping(self) -> dict:
-        return self.__layer_pen_mapping
-
-    @layer_pen_mapping.setter
-    def layer_pen_mapping(self, m: dict) -> None:
-        self.__layer_pen_mapping = m
-
-    @property
-    def linetype_mapping(self) -> dict:
-        return self.__linetype_mapping
-
-    @linetype_mapping.setter
-    def linetype_mapping(self, m: dict) -> None:
-        self.__linetype_mapping = m
-
-    @property
-    def keep_aspect_ratio(self) -> bool:
-        return self.__keep_aspect_ratio
-
-    @keep_aspect_ratio.setter
-    def keep_aspect_ratio(self, kar: bool) -> None:
-        self.__keep_aspect_ratio = kar
+        self.paths = None
+        self.cfg = None
+        self.name = None
+        self.suffix = None
+        self.gcode_speed = None
+        self.layer_pen_mapping = None
+        self.linetype_mapping = None
+        self.keep_aspect_ratio = None
 
     def fit(self):
         self.paths.fit(
@@ -129,12 +66,15 @@ class Exporter:
             keep_aspect=self.keep_aspect_ratio,
         )
 
-    def run(self, jpg: bool = False, source: bool = False) -> None:
-        if self.cfg is None or self.paths is None or self.name is None:
-            log.fail("Config, Name or Paths is None. Not exporting anything")
-            return
+    @staticmethod
+    def _file_content_of_caller():
+        """
+        The content of the source code of the calling file (a e.g. composition)
+        is hashed and used to distinguish files later on. this is used as a unique identifier
 
-        module = inspect.getmodule(inspect.stack()[2][0])
+        """
+        stack = inspect.stack()
+        module = inspect.getmodule(stack[3][0])
         if module:
             ms = inspect.getsource(module)
         else:
@@ -142,6 +82,14 @@ class Exporter:
             # generating a random string to be hashed below.
             # this is very hacky :(
             ms = "".join(random.choice(string.ascii_lowercase) for i in range(10))
+        return ms
+
+    def run(self, jpg: bool = False) -> None:
+        if self.cfg is None or self.paths is None or self.name is None:
+            logging.error("Config, Name or Paths is None. Not exporting anything")
+            return
+
+        ms = self._file_content_of_caller()
         if jpg:
             # jpeg fitting roughly
             self.paths.fit(
@@ -170,7 +118,7 @@ class Exporter:
                 jpeg_renderer.render(scale=scale)
                 jpeg_renderer.save(f"{fname}")
 
-        if source:
+        if self.cfg.export_source:
             source_folder = DataDirHandler().source(self.name)
             sizename = PaperSizeName.names[self.cfg.dimension]
             machinename = PlotterName.names[self.cfg.type]
@@ -179,7 +127,7 @@ class Exporter:
             fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}_" f"{hash}.py"
 
             pathlib.Path(source_folder).mkdir(parents=True, exist_ok=True)
-            log.good(f"Saved source to {source_folder / fname}")
+            logging.info(f"Saved source to {source_folder / fname}")
             with open(source_folder / fname, "w") as file:
                 file.write(ms)
 
@@ -194,8 +142,8 @@ class Exporter:
             dist_pen_up = end_p1.distance(start_p2)
             sum_dist_pen_up += dist_pen_up / unit_to_mm_factor
 
-        log.info(f"Total pen-down distance: {distance_mm / 1000}meters")
-        log.info(f"Total pen-up distance: {int(sum_dist_pen_up / 1000)}meters")
+        logging.info(f"Total pen-down distance: {distance_mm / 1000}meters")
+        logging.info(f"Total pen-up distance: {int(sum_dist_pen_up / 1000)}meters")
 
         sizename = PaperSizeName.names[self.cfg.dimension]
         machinename = PlotterName.names[self.cfg.type]
@@ -310,7 +258,7 @@ class ExportWrapper:
         self.export_reversed = export_reversed
         self.keep_aspect_ratio = keep_aspect_ratio
 
-        self.config = Config(ptype, psize, margin, cutoff)
+        self.config = ExportConfig(ptype, psize, margin, cutoff, False)
 
         self.exp = Exporter()
         self.exp.cfg = self.config
@@ -329,9 +277,9 @@ class ExportWrapper:
 
     def ex(self):
         timer = Timer()
-        self.exp.run(False, False)
+        self.exp.run(False)
         if self.export_reversed:
             self.exp.paths.reverse()
             self.exp.suffix = self.exp.suffix + "_reversed_"
-            self.exp.run(True, True)
+            self.exp.run(True)
         timer.print_elapsed("ExportWrapper: ex()")
