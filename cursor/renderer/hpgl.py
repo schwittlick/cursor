@@ -9,7 +9,12 @@ from cursor.renderer import BaseRenderer
 
 
 class HPGLRenderer(BaseRenderer):
-    def __init__(self, folder: pathlib.Path, layer_pen_mapping: dict = None, line_type_mapping: dict = None) -> None:
+    def __init__(
+        self,
+        folder: pathlib.Path,
+        layer_pen_mapping: dict = None,
+        line_type_mapping: dict = None,
+    ) -> None:
         super().__init__(folder)
 
         self.__save_path = folder
@@ -32,34 +37,36 @@ class HPGLRenderer(BaseRenderer):
         _prev_force = 0
         _prev_pen = 0
 
-        first = True
+        _hpgl.PU()
+
         with tqdm(total=len(self.paths)) as pbar:
             pbar.update(0)
             for p in self.paths:
-                if first:
-                    _hpgl.PU()
-                    first = False
                 x = p.start_pos().x
                 y = p.start_pos().y
 
-                if _prev_pen != p.pen_select:
-                    _hpgl.SP(self.__get_pen_select(p.pen_select))
-                    _prev_pen = p.pen_select
+                _ps = p.pen_select
+                if _prev_pen != _ps:
+                    if _ps:
+                        _hpgl.SP(_ps)
+                        _prev_pen = _ps
 
                 # if p.line_type:
                 #     if _prev_line_type != p.line_type:
                 #         _hpgl_string += f"LT{self.__linetype_from_layer(p.line_type)};"
                 #         _prev_line_type = p.line_type
 
-                if p.velocity:
-                    if _prev_velocity != p.velocity:
-                        _hpgl.VS(self.__get_velocity(p.velocity))
-                        _prev_velocity = p.velocity
+                _v = p.velocity
+                if _prev_velocity != _v:
+                    if _v:
+                        _hpgl.VS(_v)
+                        _prev_velocity = _v
 
-                if p.pen_force:
-                    if _prev_force != p.pen_force:
-                        _hpgl.FS(self.__get_pen_force(p.pen_force))
-                        _prev_force = p.pen_force
+                _fs = p.pen_force
+                if _fs:
+                    if _prev_force != _fs:
+                        _hpgl.FS(_fs)
+                        _prev_force = _fs
 
                 if p.laser_pwm:
                     _hpgl.custom(f"PWM{p.laser_pwm};")
@@ -73,7 +80,7 @@ class HPGLRenderer(BaseRenderer):
                 if p.laser_amp:
                     _hpgl.custom(f"AMP{p.laser_amp:.3};")
 
-                _hpgl.PA(x, y)
+                _hpgl.PA(int(x), int(y))
                 if p.is_polygon:
                     _hpgl.custom("PM0;")
 
@@ -83,7 +90,7 @@ class HPGLRenderer(BaseRenderer):
                     x = point.x
                     y = point.y
 
-                    _hpgl.PA(x, y)
+                    _hpgl.PA(int(x), int(y))
 
                 _hpgl.PU()
 
