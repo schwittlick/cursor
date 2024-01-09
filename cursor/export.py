@@ -31,43 +31,17 @@ log = wasabi.Printer()
 
 
 class Config:
-    def __init__(self):
-        self.__type = None
-        self.__dimensions = None
-        self.__margin = None
-        self.__cutoff = None
-
-    @property
-    def type(self) -> PlotterType:
-        return self.__type
-
-    @type.setter
-    def type(self, t: PlotterType) -> None:
-        self.__type = t
-
-    @property
-    def dimension(self) -> PaperSize:
-        return self.__dimensions
-
-    @dimension.setter
-    def dimension(self, t: PaperSize):
-        self.__dimensions = t
-
-    @property
-    def margin(self) -> int:
-        return self.__margin
-
-    @margin.setter
-    def margin(self, t: int):
-        self.__margin = t
-
-    @property
-    def cutoff(self) -> int:
-        return self.__cutoff
-
-    @cutoff.setter
-    def cutoff(self, t: int):
-        self.__cutoff = t
+    def __init__(
+        self,
+        type: PlotterType | None = None,
+        dim: PaperSize | None = None,
+        margin: int | None = None,
+        cutoff: int | None = None,
+    ):
+        self.type: PlotterType = type
+        self.dimensions = dim
+        self.margin = margin
+        self.cutoff = cutoff
 
 
 class Exporter:
@@ -152,7 +126,7 @@ class Exporter:
             padding_mm=self.cfg.margin,
             output_bounds=MinmaxMapping.maps[self.cfg.type],
             cutoff_mm=self.cfg.cutoff,
-            keep_aspect=self.keep_aspect_ratio
+            keep_aspect=self.keep_aspect_ratio,
         )
 
     def run(self, jpg: bool = False, source: bool = False) -> None:
@@ -167,14 +141,14 @@ class Exporter:
             # this is being called from a ipython notebook
             # generating a random string to be hashed below.
             # this is very hacky :(
-            ms = ''.join(random.choice(string.ascii_lowercase) for i in range(10))
+            ms = "".join(random.choice(string.ascii_lowercase) for i in range(10))
         if jpg:
             # jpeg fitting roughly
             self.paths.fit(
                 Paper.sizes[self.cfg.dimension],
                 padding_mm=self.cfg.margin,
                 cutoff_mm=self.cfg.cutoff,
-                keep_aspect=self.keep_aspect_ratio
+                keep_aspect=self.keep_aspect_ratio,
             )
 
             separate_layers = self.paths.get_layers()
@@ -182,7 +156,7 @@ class Exporter:
                 sizename = PaperSizeName.names[self.cfg.dimension]
                 machinename = PlotterName.names[self.cfg.type]
                 h = hashlib.sha256(ms.encode("utf-8")).hexdigest()
-                hash = h[:4] + h[len(h) - 4:]
+                hash = h[:4] + h[len(h) - 4 :]
                 fname = (
                     f"{self.name}_{self.suffix}_{sizename}_{machinename}_{layer}_"
                     f"{hash}"
@@ -201,7 +175,7 @@ class Exporter:
             sizename = PaperSizeName.names[self.cfg.dimension]
             machinename = PlotterName.names[self.cfg.type]
             h = hashlib.sha256(ms.encode("utf-8")).hexdigest()
-            hash = h[:4] + h[len(h) - 4:]
+            hash = h[:4] + h[len(h) - 4 :]
             fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}_" f"{hash}.py"
 
             pathlib.Path(source_folder).mkdir(parents=True, exist_ok=True)
@@ -218,7 +192,7 @@ class Exporter:
             end_p1 = self.paths[path_index].end_pos()
             start_p2 = self.paths[path_index + 1].start_pos()
             dist_pen_up = end_p1.distance(start_p2)
-            sum_dist_pen_up += (dist_pen_up / unit_to_mm_factor)
+            sum_dist_pen_up += dist_pen_up / unit_to_mm_factor
 
         log.info(f"Total pen-down distance: {distance_mm / 1000}meters")
         log.info(f"Total pen-up distance: {int(sum_dist_pen_up / 1000)}meters")
@@ -226,7 +200,7 @@ class Exporter:
         sizename = PaperSizeName.names[self.cfg.dimension]
         machinename = PlotterName.names[self.cfg.type]
         h = hashlib.sha256(ms.encode("utf-8")).hexdigest()
-        hash = h[:4] + h[len(h) - 4:]
+        hash = h[:4] + h[len(h) - 4 :]
         fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}_{hash}"
         format = ExportFormatMappings.maps[self.cfg.type]
         if self.linetype_mapping and format is ExportFormat.HPGL:
@@ -308,18 +282,21 @@ def save_wrapper_jpeg(pc, projname, fname, scale=4.0, thickness=3):
 
 
 class ExportWrapper:
-    def __init__(self, paths: Collection,
-                 ptype: PlotterType,
-                 psize: PaperSize,
-                 margin: int,
-                 name: str = "output_name",
-                 suffix: str = "",
-                 cutoff: int = None,
-                 gcode_speed: int = None,
-                 hpgl_pen_layer_mapping=None,
-                 hpgl_linetype_mapping=None,
-                 export_reversed=None,
-                 keep_aspect_ratio=False, ):
+    def __init__(
+        self,
+        paths: Collection,
+        ptype: PlotterType,
+        psize: PaperSize,
+        margin: int,
+        name: str = "output_name",
+        suffix: str = "",
+        cutoff: int = None,
+        gcode_speed: int = None,
+        hpgl_pen_layer_mapping=None,
+        hpgl_linetype_mapping=None,
+        export_reversed=None,
+        keep_aspect_ratio=False,
+    ):
         self.paths = paths
         self.ptype = ptype
         self.psize = psize
@@ -333,11 +310,7 @@ class ExportWrapper:
         self.export_reversed = export_reversed
         self.keep_aspect_ratio = keep_aspect_ratio
 
-        self.config = Config()
-        self.config.type = ptype
-        self.config.dimension = psize
-        self.config.margin = margin
-        self.config.cutoff = cutoff
+        self.config = Config(ptype, psize, margin, cutoff)
 
         self.exp = Exporter()
         self.exp.cfg = self.config
