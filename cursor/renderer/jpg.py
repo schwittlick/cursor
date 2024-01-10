@@ -61,7 +61,7 @@ class JpegRenderer(BaseRenderer):
         self.img_draw.line(xy=(0, h - 2, w, h - 2), fill="black", width=2)
 
     def render_all_paths(self, scale: float = 1.0):
-        for path in self.paths:
+        for path in self.collection:
             path.scale(scale, scale)
             points = path.as_tuple_list()
             self.img_draw.line(points, fill=path.color, width=path.width, joint="curve")

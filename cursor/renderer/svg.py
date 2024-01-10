@@ -16,7 +16,7 @@ class SvgRenderer(BaseRenderer):
         self.render_all_points(scale=scale)
 
     def render_all_paths(self, scale: float = 1.0):
-        for path in self.paths:
+        for path in self.collection:
             path.scale(scale, scale)
             points = path.as_tuple_list()
             color = path.properties[Property.COLOR]

@@ -43,26 +43,26 @@ class BaseRenderer:
     def __init__(self, folder: pathlib.Path):
         self.save_path: pathlib.Path = folder
 
-        self.paths: list[Path] = []
+        self.collection: Collection = Collection()
         self.positions: list[Position] = []
 
     def clear(self) -> None:
-        self.paths.clear()
+        self.collection.clear()
         self.positions.clear()
 
     def add(self, input: Collection | Path | Position | list[Collection] | list[Path] | list[Position]):
         match input:
             case Collection():
-                self.paths.extend(input.paths)
+                self.collection.paths.extend(input.paths)
             case Position():
                 self.positions.append(input)
             case Path():
-                self.paths.append(input)
+                self.collection.add(input)
             case list():
                 if all(isinstance(item, Path) for item in input):
-                    self.paths.extend(input)
+                    self.collection.add(input)
                 if all(isinstance(item, Position) for item in input):
                     self.positions.extend(input)
                 if all(isinstance(item, Collection) for item in input):
                     for collection in input:
-                        self.paths.extend(collection.paths)
+                        self.collection += collection
