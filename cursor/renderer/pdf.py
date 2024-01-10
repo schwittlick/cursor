@@ -47,7 +47,7 @@ class PdfRenderer(BaseRenderer):
         self.pdf.text(self.pdf.w / 2, self.pdf.h * 0.98, str(self.pdf.page_no()))
 
     def render_all_paths(self, scale: float = 1.0) -> None:
-        for path in self.paths:
+        for path in self.collection:
             path.scale(scale, scale)
             r, g, b = path.properties[Property.COLOR]
             width = path.properties[Property.WIDTH]

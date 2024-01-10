@@ -4,30 +4,48 @@ import pathlib
 from tqdm import tqdm
 import logging
 
+from cursor.collection import Collection
 from cursor.hpgl.hpgl import HPGL
 from cursor.renderer import BaseRenderer
+from cursor.timer import Timer
 
 
 class HPGLRenderer(BaseRenderer):
     def __init__(
-        self,
-        folder: pathlib.Path,
-        layer_pen_mapping: dict = None,
-        line_type_mapping: dict = None,
+            self, folder: pathlib.Path
     ) -> None:
         super().__init__(folder)
 
         self.__save_path = folder
-        self.__layer_pen_mapping = layer_pen_mapping
-        self.__line_type_mapping = line_type_mapping
 
     def estimated_duration(self, speed) -> int:
         s = 0
-        for p in self.paths:
+        for p in self.collection:
             mm = p.distance / 400  # for hp plotters its 40
             seconds = mm / speed * 10
             s += seconds
         return s
+
+    def optimize(self):
+        """
+        split by pen select and TSP on separated collections
+        """
+
+        timer = Timer()
+        collections_split_by_pen = [Collection() for _ in range(8)]
+
+        for pa in self.collection:
+            collections_split_by_pen[pa.pen_select - 1].add(pa.copy())
+
+        optimized = Collection()
+
+        for c in collections_split_by_pen:
+            if len(c) > 1:
+                c.fast_tsp(False, 5)
+            optimized += c
+
+        timer.print_elapsed(f"Optimizing done")
+        self.collection = optimized
 
     def generate_string(self):
         _hpgl = HPGL()
@@ -39,9 +57,9 @@ class HPGLRenderer(BaseRenderer):
 
         _hpgl.PU()
 
-        with tqdm(total=len(self.paths)) as pbar:
+        with tqdm(total=len(self.collection)) as pbar:
             pbar.update(0)
-            for p in self.paths:
+            for p in self.collection:
                 x = p.start_pos().x
                 y = p.start_pos().y
 
@@ -50,11 +68,6 @@ class HPGLRenderer(BaseRenderer):
                     if _ps:
                         _hpgl.SP(_ps)
                         _prev_pen = _ps
-
-                # if p.line_type:
-                #     if _prev_line_type != p.line_type:
-                #         _hpgl_string += f"LT{self.__linetype_from_layer(p.line_type)};"
-                #         _prev_line_type = p.line_type
 
                 _v = p.velocity
                 if _prev_velocity != _v:
@@ -125,25 +138,6 @@ class HPGLRenderer(BaseRenderer):
             return 1
 
         return pen_select
-
-    def __pen_from_layer(self, layer: str | None = None) -> int:
-        if self.__layer_pen_mapping is None:
-            return 1
-
-        if layer not in self.__layer_pen_mapping.keys():
-            return 1
-
-        return self.__layer_pen_mapping[layer]
-
-    def __linetype_from_layer(self, linetype: int | None = None) -> str:
-        _default_linetype = ""
-        if self.__line_type_mapping is None:
-            return _default_linetype
-
-        if linetype not in self.__line_type_mapping.keys():
-            return _default_linetype
-
-        return self.__line_type_mapping[linetype]
 
     @staticmethod
     def __get_velocity(velocity: int | None = None) -> int:
