@@ -1,7 +1,12 @@
 from cursor.collection import Collection
 from cursor.device import PlotterType, PaperSize
-from cursor.export import ExportWrapper
+from cursor.export import ExportWrapper, Exporter
 from cursor.path import Path
+
+
+def test_filename():
+    fn = Exporter._file_content_of_caller()
+    print(fn)
 
 
 def test_simple_export():
@@ -28,7 +33,8 @@ def test_simple_export():
         25,
         "test",
         "111",
-        keep_aspect_ratio=False, )
+        keep_aspect_ratio=False,
+    )
 
     wrapper.fit()
     wrapper.ex()
