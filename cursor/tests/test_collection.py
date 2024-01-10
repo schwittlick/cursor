@@ -530,10 +530,10 @@ def test_collection_limit():
 def test_collection_travel_distance():
     c = Collection()
     c.add(Path([Position(0, 0), Position(10, 0), Position(10, 10)]))
-    dist = c.calc_travel_distance(40)
+    dist = c.calc_pen_down_distance(40)
     assert dist == 0.5
 
-    dist = Collection().calc_travel_distance(40)
+    dist = Collection().calc_pen_down_distance(40)
     assert dist == 0.0
 
 

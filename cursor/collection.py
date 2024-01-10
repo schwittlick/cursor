@@ -338,18 +338,15 @@ class Collection:
 
         return typed_pathcollections
 
+    def set_layer(self, layer_name: str) -> None:
+        for pa in self:
+            pa.layer = layer_name
+
     def layer_names(self) -> list[str]:
-        layers = []
-        for p in self:
-            if p.layer not in layers:
-                layers.append(p.layer)
+        return list(set([p.layer for p in self]))
 
-        return layers
-
-    def get_layers(self):
-        layers = {}
-        for layer in self.layer_names():
-            layers[layer] = []
+    def get_layers(self) -> dict[str, Collection]:
+        layers = {key: [] for key in self.layer_names()}
 
         for p in self:
             layers[p.layer].append(p)
@@ -388,10 +385,19 @@ class Collection:
         maxy = max(all_chained, key=lambda pos: pos.y).y
         return maxx, maxy
 
-    def transform(self, out: BoundingBox):
+    def transform(self, out: BoundingBox) -> None:
         bb = self.bb()
         for p in self:
             p.transform(bb, out)
+
+    def transformed(self, out: BoundingBox) -> Collection:
+        bb = self.bb()
+        _coll = Collection()
+        _coll.properties = self.properties
+        for p in self:
+            _coll.add(p.transformed(bb, out))
+
+        return _coll
 
     def translate(self, x: float, y: float) -> None:
         [p.translate(x, y) for p in self]
@@ -457,10 +463,19 @@ class Collection:
             newpaths.extend(_p)
         self.__paths = newpaths
 
-    def calc_travel_distance(self, fac) -> float:
+    def calc_pen_down_distance(self, fac) -> float:
         if len(self) == 0:
             return 0.0
         return reduce(lambda a, b: a + b, [x.distance / fac for x in self.__paths])
+
+    def calc_pen_up_distance(self, fac) -> float:
+        sum_dist_pen_up = 0
+        for path_index in range(len(self.paths) - 1):
+            end_p1 = self.paths[path_index].end_pos()
+            start_p2 = self.paths[path_index + 1].start_pos()
+            dist_pen_up = end_p1.distance(start_p2)
+            sum_dist_pen_up += dist_pen_up / fac
+        return sum_dist_pen_up
 
     def fit(
             self,
