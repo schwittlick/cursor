@@ -14,5 +14,5 @@ if __name__ == "__main__":
             )
         )
     collection.fast_tsp(plot_preview=True, duration_seconds=1)
-    travel = collection.calc_travel_distance(40)
+    travel = collection.calc_pen_down_distance(40)
     logging.info(f"Total dist: {travel}")
