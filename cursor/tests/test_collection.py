@@ -139,7 +139,7 @@ def test_collection_as_dataframe():
     df = pc.as_dataframe()  # concatenated
     assert df.ndim == 2
     assert (
-        df.values.shape[0] == 4
+            df.values.shape[0] == 4
     )  # the maximum numer of points in a path (rest are filled up with nan's)
     assert df.values.shape[1] == 6  # 3 times x, y columns
 
@@ -371,7 +371,7 @@ def test_pathcollection_fit1():
 
     pcol.add(p0)
 
-    pcol.fit((50, 50), padding_units=10)
+    pcol.fit(BoundingBox(0, 0, 50, 50), padding_units=10)
 
     assert pcol.bb().x == 10
     assert pcol.bb().y == 10
@@ -390,7 +390,7 @@ def test_pathcollection_fit2():
 
     pcol.translate(random.randint(-1000, 1000), random.randint(-1000, 1000))
 
-    pcol.fit((50, 50), padding_units=10)
+    pcol.fit(BoundingBox(0, 0, 50, 50), padding_units=10)
 
     assert pcol.bb().x == 10
     assert pcol.bb().y == 10
@@ -409,7 +409,7 @@ def test_pathcollection_fit3():
 
     pcol.translate(random.randint(-1000, 1000), random.randint(-1000, 1000))
 
-    pcol.fit((50, 50), padding_units=10)
+    pcol.fit(BoundingBox(0, 0, 50, 50), padding_units=10)
 
     assert pcol.bb().x == 10
     assert pcol.bb().y == 10
@@ -428,13 +428,13 @@ def test_pathcollection_fit4():
 
     pcol.translate(random.randint(-1000, 1000), random.randint(-1000, 1000))
 
-    pcol.fit((50, 50), padding_units=10)
+    pcol.fit(BoundingBox(0, 0, 50, 50), padding_units=10)
 
     pcol.translate(random.randint(-1000, 1000), random.randint(-1000, 1000))
 
-    pcol.fit((50, 50), padding_units=10)
-    pcol.fit((50, 50), padding_units=10)
-    pcol.fit((50, 50), padding_units=10)
+    pcol.fit(BoundingBox(0, 0, 50, 50), padding_units=10)
+    pcol.fit(BoundingBox(0, 0, 50, 50), padding_units=10)
+    pcol.fit(BoundingBox(0, 0, 50, 50), padding_units=10)
 
     assert pcol.bb().x == 10
     assert pcol.bb().y == 10
@@ -455,7 +455,7 @@ def test_pathcollection_fit5():
     p1.add(100, 100)
     pcol.add(p1)
 
-    pcol.fit((100, 100), xy_factor=(1, 1), padding_mm=0, cutoff_mm=10)
+    pcol.fit(BoundingBox(0, 0, 100, 100), xy_factor=(1, 1), padding_mm=0, cutoff_mm=10)
 
     assert len(pcol) == 1
 

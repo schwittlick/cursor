@@ -1,6 +1,7 @@
 import arcade.color
 import random
 
+from cursor.bb import BoundingBox
 from cursor.collection import Collection
 from cursor.path import Path
 from cursor.renderer import RealtimeRenderer
@@ -27,7 +28,7 @@ def add_two(r: RealtimeRenderer):
         c.add(new[0])
     if len(even_more_new) > 0:
         c.add(even_more_new[0])
-    c.fit((1920, 1080), padding_mm=100, keep_aspect=True)
+    c.fit(BoundingBox(0, 0, 1920, 1080), padding_mm=100, keep_aspect=True)
 
     r.add_path(c[0], 10, arcade.color.CHERRY)
     for _c in c[1:]:
@@ -53,7 +54,7 @@ def add_ten(r: RealtimeRenderer):
         for n in new_neg:
             c.add(n)
 
-    c.fit((1920, 1080), padding_mm=100, keep_aspect=True)
+    c.fit(BoundingBox(0, 0, 1920, 1080), padding_mm=100, keep_aspect=True)
 
     r.add_path(c[0], 10, arcade.color.BLACK)
     for _c in c[2:]:

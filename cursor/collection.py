@@ -479,12 +479,11 @@ class Collection:
 
     def fit(
             self,
-            size=tuple[int, int],
+            output_bounds: BoundingBox = None,
             xy_factor: tuple[float, float] = (1.0, 1.0),
             padding_mm: int = None,
             padding_units: int = None,
             padding_percent: int = None,
-            output_bounds: BoundingBox = None,
             cutoff_mm=None,
             keep_aspect=False,
     ) -> None:
@@ -500,8 +499,8 @@ class Collection:
 
         _bb = self.bb()
 
-        width = size[0]
-        height = size[1]
+        width = output_bounds.w
+        height = output_bounds.h
 
         padding_x = 0
         padding_y = 0
@@ -509,11 +508,6 @@ class Collection:
         if padding_mm is not None and padding_units is None and padding_percent is None:
             padding_x = padding_mm * xy_factor[0]
             padding_y = padding_mm * xy_factor[1]
-
-            # multiply both tuples
-            _size = tuple(_ * r for _, r in zip(size, xy_factor))
-            width = _size[0]
-            height = _size[1]
 
         if padding_mm is None and padding_units is not None and padding_percent is None:
             padding_x = padding_units

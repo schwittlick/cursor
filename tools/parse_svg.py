@@ -48,7 +48,7 @@ def main():
     def export(rr: RealtimeRenderer):
         wrapper = ExportWrapper(
             c,
-            PlotterType.ROLAND_DPX3300,
+            PlotterType.ROLAND_DPX3300_A1,
             PaperSize.LANDSCAPE_A1,
             30,
             "svg2hpgl",

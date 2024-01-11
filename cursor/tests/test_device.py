@@ -17,13 +17,13 @@ def test_simple_export():
     pc.add(p)
 
     cfg = export.ExportConfig()
-    cfg.type = device.PlotterType.ROLAND_DPX3300
+    cfg.type = device.PlotterType.ROLAND_DPX3300_A1
     cfg.dimension = device.PaperSize.LANDSCAPE_A1
     cfg.margin = 90
 
     exp = export.Exporter()
     exp.cfg = cfg
-    exp.paths = pc
+    exp.collection = pc
     exp.name = "composition59"
     exp.suffix = "test_full_spiral_test"
     exp.run(True)

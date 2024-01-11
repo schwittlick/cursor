@@ -53,7 +53,7 @@ class Boilerplate(RealtimeRenderer):
 
         wrapper = ExportWrapper(
             c,
-            PlotterType.HP_7550A,
+            PlotterType.HP_7550A_A3,
             PaperSize.LANDSCAPE_A3,
             25,
             f"{self.title}",

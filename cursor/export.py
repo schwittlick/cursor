@@ -33,7 +33,6 @@ class ExportConfig:
     def __init__(
             self,
             type: PlotterType | None = None,
-            dim: PaperSize | None = None,
             margin: int | None = None,
             cutoff: int | None = None,
             export_source: bool = False,
@@ -41,7 +40,6 @@ class ExportConfig:
             optimize_hpgl_by_tsp: bool = True
     ):
         self.type: PlotterType = type
-        self.dimension = dim
         self.margin = margin
         self.cutoff = cutoff
         self.export_source = export_source
@@ -50,8 +48,8 @@ class ExportConfig:
 
 
 class Exporter:
-    def __init__(self, paths: Collection):
-        self.paths: Collection = paths
+    def __init__(self, collection: Collection):
+        self.collection = collection
         self.cfg = None
         self.name = None
         self.suffix = None
@@ -59,11 +57,10 @@ class Exporter:
         self.keep_aspect_ratio = None
 
     def fit(self):
-        self.paths.fit(
-            Paper.sizes[self.cfg.dimension],
+        self.collection.fit(
+            output_bounds=MinmaxMapping.maps[self.cfg.type],
             xy_factor=XYFactors.fac[self.cfg.type],
             padding_mm=self.cfg.margin,
-            output_bounds=MinmaxMapping.maps[self.cfg.type],
             cutoff_mm=self.cfg.cutoff,
             keep_aspect=self.keep_aspect_ratio,
         )
@@ -95,26 +92,25 @@ class Exporter:
         return ms
 
     def run(self) -> None:
-        if self.cfg is None or self.paths is None or self.name is None:
+        if self.cfg is None or self.collection is None or self.name is None:
             logging.error("Config, Name or Paths is None. Not exporting anything")
             return
 
         ms = self._file_content_of_caller()
         if self.cfg.export_jpg_preview:
 
-            separate_layers = self.paths.get_layers()
+            separate_layers = self.collection.get_layers()
             for layer, pc in separate_layers.items():
-                sizename = PaperSizeName.names[self.cfg.dimension]
                 machinename = PlotterName.names[self.cfg.type]
                 h = hashlib.sha256(ms.encode("utf-8")).hexdigest()
                 hash = h[:4] + h[len(h) - 4:]
                 fname = (
-                    f"{self.name}_{self.suffix}_{sizename}_{machinename}_{layer}_"
+                    f"{self.name}_{self.suffix}_{machinename}_{layer}_"
                     f"{hash}"
                 )
 
                 jpeg_folder = DataDirHandler().jpg(self.name)
-                bb = self.paths.bb()
+                bb = self.collection.bb()
                 bb.scale(0.1)
                 transformed = pc.transformed(BoundingBox(0, 0, bb.w, bb.h))
                 # in case the BB is negative
@@ -125,27 +121,25 @@ class Exporter:
 
         if self.cfg.export_source:
             source_folder = DataDirHandler().source(self.name)
-            sizename = PaperSizeName.names[self.cfg.dimension]
             machinename = PlotterName.names[self.cfg.type]
             h = hashlib.sha256(ms.encode("utf-8")).hexdigest()
             hash = h[:4] + h[len(h) - 4:]
-            fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}_" f"{hash}.py"
+            fname = f"{self.name}_{self.suffix}_{machinename}_" f"{hash}.py"
 
             pathlib.Path(source_folder).mkdir(parents=True, exist_ok=True)
             logging.info(f"Saved source to {source_folder / fname}")
             with open(source_folder / fname, "w") as file:
                 file.write(ms)
 
-        self.print_pen_move_distances(self.paths)
+        self.print_pen_move_distances(self.collection)
 
-        sizename = PaperSizeName.names[self.cfg.dimension]
         machinename = PlotterName.names[self.cfg.type]
         h = hashlib.sha256(ms.encode("utf-8")).hexdigest()
         hash = h[:4] + h[len(h) - 4:]
-        fname = f"{self.name}_{self.suffix}_{sizename}_{machinename}_{hash}"
+        fname = f"{self.name}_{self.suffix}_{machinename}_{hash}"
         format = ExportFormatMappings.maps[self.cfg.type]
 
-        separate_layers = self.paths.get_layers()
+        separate_layers = self.collection.get_layers()
         for layer, pc in separate_layers.items():
             if format is ExportFormat.HPGL:
                 hpgl_folder = DataDirHandler().hpgl(self.name)
@@ -193,7 +187,6 @@ class ExportWrapper:
             self,
             paths: Collection,
             ptype: PlotterType,
-            psize: PaperSize,
             margin: int,
             name: str = "output_name",
             suffix: str = "",
@@ -205,7 +198,6 @@ class ExportWrapper:
     ):
         self.paths = paths
         self.ptype = ptype
-        self.psize = psize
         self.margin = margin
         self.name = name
         self.suffix = suffix
@@ -214,7 +206,7 @@ class ExportWrapper:
         self.export_reversed = export_reversed
         self.keep_aspect_ratio = keep_aspect_ratio
 
-        self.config = ExportConfig(ptype, psize, margin, cutoff, False, export_jpg_preview)
+        self.config = ExportConfig(ptype, margin, cutoff, False, export_jpg_preview)
 
         self.exp = Exporter(paths)
         self.exp.cfg = self.config
@@ -232,7 +224,7 @@ class ExportWrapper:
         timer = Timer()
         self.exp.run()
         if self.export_reversed:
-            self.exp.paths.reverse()
+            self.exp.collection.reverse()
             self.exp.suffix = self.exp.suffix + "_reversed_"
             self.exp.run()
         timer.print_elapsed("ExportWrapper: ex()")
