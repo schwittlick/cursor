@@ -93,6 +93,7 @@ class SerialSender:
 
     def apply_config(self, memory_config: str, plotter_config: str):
         self.plotter.write(memory_config.encode())
+
         self.plotter.write(WAIT.encode())
 
         self.read_until()
@@ -138,6 +139,7 @@ class SerialSender:
                     pbar.update(command_batch)
         except KeyboardInterrupt:
             logging.warning("Interrupted- aborting.")
+
             sleep(0.1)
             self.abort()
 

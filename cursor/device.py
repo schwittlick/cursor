@@ -75,7 +75,6 @@ class ExportFormatMappings:
         PlotterType.HP_7596A: ExportFormat.HPGL,
         PlotterType.HP_7570A: ExportFormat.HPGL,
         PlotterType.HP_7596A_100x70cm: ExportFormat.HPGL,
-
     }
 
 

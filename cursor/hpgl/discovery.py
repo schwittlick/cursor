@@ -85,6 +85,7 @@ def discover(
                     parity=parity,
                     xonxoff=xonxoff,
                     timeout=timeout)))
+
         threads.append(thread)
         thread.start()
 
