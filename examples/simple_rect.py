@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     ExportWrapper().ex(
         c,
-        PlotterType.ROLAND_DXY1200,
+        PlotterType.ROLAND_DXY1200_A3,
         PaperSize.PHOTO_PAPER_240_178_LANDSCAPE,
         10,
         "simple_rect_example",

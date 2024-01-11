@@ -29,7 +29,6 @@ def test_simple_export():
     wrapper = ExportWrapper(
         pc,
         PlotterType.HP_7470A_A4,
-        PaperSize.LANDSCAPE_A4,
         25,
         "test",
         "111",

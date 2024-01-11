@@ -18,7 +18,6 @@ def test_exporter():
     wrapper = ExportWrapper(
         pc,
         device.PlotterType.HP_7595A_A2,
-        device.PaperSize.LANDSCAPE_A2,
         30,
         "simple_rect_example",
         "simple_rect", )

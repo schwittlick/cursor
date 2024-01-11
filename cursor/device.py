@@ -16,8 +16,8 @@ class PlotterType(Enum):
     AXIDRAW = auto()
     HP_7475A_A4 = auto()
     HP_7475A_A3 = auto()
-    ROLAND_DXY1200 = auto()
-    ROLAND_DXY1200_EXPANDED = auto()
+    ROLAND_DXY1200_A3 = auto()
+    ROLAND_DXY1200_A3_EXPANDED = auto()
     ROLAND_DXY980 = auto()
     HP_7595A_A1 = auto()
     ROLAND_PNC1000 = auto()
@@ -57,7 +57,7 @@ class ExportFormatMappings:
         PlotterType.AXIDRAW: ExportFormat.SVG,
         PlotterType.HP_7475A_A3: ExportFormat.HPGL,
         PlotterType.HP_7475A_A4: ExportFormat.HPGL,
-        PlotterType.ROLAND_DXY1200: ExportFormat.HPGL,
+        PlotterType.ROLAND_DXY1200_A3: ExportFormat.HPGL,
         PlotterType.ROLAND_DXY980: ExportFormat.HPGL,
         PlotterType.HP_7595A_A1: ExportFormat.HPGL,
         PlotterType.ROLAND_PNC1000: ExportFormat.HPGL,
@@ -112,33 +112,42 @@ class MinmaxMapping:
         PlotterType.ROLAND_DPX3300_A1: BB(-16920, -11180, 16340, 11180),
         PlotterType.ROLAND_DPX3300_A2: BB(-16920, -11180, 5440, 4629),
         PlotterType.ROLAND_DPX3300_A3: BB(-16920, -11180, -1112, -3276),
-        PlotterType.DIY_PLOTTER: BB(0, 0, 3350, -1715),
-        PlotterType.AXIDRAW: BB(0, 0, 0, 0),  # todo: missing real bounds
+
+        PlotterType.HP_7550A_A3: BB(0, 0, 15970, 10870) - BB(0, 0, 320, 0),
+        # subtracting 8 mm of extra space from bottom
+
         PlotterType.HP_7475A_A4: BB(0, 0, 11040, 7721),
         PlotterType.HP_7475A_A3: BB(0, 0, 16158, 11040),
-        PlotterType.ROLAND_DXY1200: BB(0, 0, 16158, 11040),
-        PlotterType.ROLAND_DXY1200_EXPANDED: BB(0, 0, 17272, 11880),
+
+        PlotterType.HP_7470A_A4: BB(0, 0, 10900, 7650),
+
+        PlotterType.HP_7595A_A0: BB(-21760, -15400, 22880, 15480),
+        PlotterType.HP_7595A_A1: BB(-16090, -11684, 16090, 11684),
+        PlotterType.HP_7595A_A2: BB(-11684, -7729 - 960, 11684, 7729),
+        PlotterType.HP_7595A_A3: BB(-7728, -5752, 7728 + 960, 5752),
+
+        PlotterType.HP_7596A_A1: BB(-16100, -11600, 16100, 11600),
+
+        PlotterType.HP_7596A_100x70cm: BB(-19230, -13791, 19230, 13791),
+        PlotterType.HP_7596B_A3: BB(-6800, -5250, 6800, 5250),
+        PlotterType.HP_7596B_25_25: BB(-4310, -3444, 4310 + 800, 3444),
+        PlotterType.HP_7596B_A1: BB(-15500, -11100, 15500 + 22 * 40, 11100),
+
+        PlotterType.DIY_PLOTTER: BB(0, 0, 3350, -1715),
+        PlotterType.AXIDRAW: BB(0, 0, 0, 0),  # todo: missing real bounds
+
+        PlotterType.ROLAND_DXY1200_A3: BB(0, 0, 16158, 11040),
+        PlotterType.ROLAND_DXY1200_A3_EXPANDED: BB(0, 0, 17272, 11880),
         PlotterType.ROLAND_DXY980: BB(0, 0, 16158, 11040),
         # PlotterType.HP_7595A_A0: BB(-23160, -17602, 23160 + 1160, 17602),
-        PlotterType.HP_7595A_A1: BB(-16090, -11684, 16090, 11684),
         # HP_7595A: minimum 35mm padding
         PlotterType.ROLAND_PNC1000: BB(0, 0, 18800, 40000),  # actually unlimited y
         PlotterType.ROLAND_PNC1000_50x100: BB(260, 560, 18700, 39000),  # for 50x100cm paper centered
-        PlotterType.HP_7595A_A3: BB(-7728, -5752, 7728 + 960, 5752),
-        PlotterType.HP_7595A_A0: BB(-21760, -15400, 22880, 15480),
         PlotterType.TEKTRONIX_4662: BB(0, 0, 4095, 2731),
         # tekronix: 10x15 inches (25.4 x 38.1 cm)
-        PlotterType.HP_7596B_A1: BB(-15500, -11100, 15500 + 22 * 40, 11100),
-        PlotterType.HP_7596A_A1: BB(-16100, -11600, 16100, 11600),
 
-        PlotterType.HP_7596B_A3: BB(-6800, -5250, 6800, 5250),
-        PlotterType.HP_7596B_25_25: BB(-4310, -3444, 4310 + 800, 3444),
         PlotterType.DIGIPLOT_A1: BB(0, 0, 33600, 23700),
-        PlotterType.HP_7470A_A4: BB(0, 0, 10900, 7650),
-        PlotterType.HP_7550A_A3: BB(0, 0, 15970, 10870) - BB(0, 0, 320, 0),
-        # subtracting 8 mm of extra space from bottom
-        PlotterType.HP_7595A_A2: BB(-11684, -7729 - 960, 11684, 7729),
-        PlotterType.HP_7596A_100x70cm: BB(-19230, -13791, 19230, 13791),
+
         PlotterType.HP_7570A_A1: BB(-16134, -11663, 16134, 11663),
     }
 
@@ -154,7 +163,7 @@ class PlotterName:
         PlotterType.DIY_PLOTTER: "custom",
         PlotterType.HP_7475A_A3: "hp7475a_a3",
         PlotterType.HP_7475A_A4: "hp7475a_a4",
-        PlotterType.ROLAND_DXY1200: "dxy1200",
+        PlotterType.ROLAND_DXY1200_A3: "dxy1200",
         PlotterType.ROLAND_DXY980: "dxy980",
         PlotterType.HP_7595A_A1: "hp7595a_draftmaster_sx",
         PlotterType.ROLAND_PNC1000: "roland_camm1",
@@ -178,7 +187,7 @@ class PlotterName:
 class PlotterHpglNames:
     names = {
         "7475A": PlotterType.HP_7475A_A3,
-        "DXY-1200": PlotterType.ROLAND_DXY1200,
+        "DXY-1200": PlotterType.ROLAND_DXY1200_A3,
         "DXY-980": PlotterType.ROLAND_DXY980,
         "7595A": PlotterType.HP_7595A_A1,
         "7596A": PlotterType.HP_7596B_A1,
@@ -197,7 +206,7 @@ class XYFactors:
         PlotterType.AXIDRAW: (3.704, 3.704),
         PlotterType.HP_7475A_A3: (40, 40),
         PlotterType.HP_7475A_A4: (40, 40),
-        PlotterType.ROLAND_DXY1200: (40, 40),
+        PlotterType.ROLAND_DXY1200_A3: (40, 40),
         PlotterType.ROLAND_DXY980: (40, 40),
         PlotterType.HP_7595A_A1: (40, 40),
         PlotterType.ROLAND_PNC1000: (40, 40),
@@ -227,7 +236,7 @@ class MaxSpeed:
         PlotterType.AXIDRAW: 1,
         PlotterType.HP_7475A_A3: 40,
         PlotterType.HP_7475A_A4: 40,
-        PlotterType.ROLAND_DXY1200: 40,
+        PlotterType.ROLAND_DXY1200_A3: 40,
         PlotterType.ROLAND_DXY980: 40,
         PlotterType.HP_7595A_A1: 110,
         PlotterType.ROLAND_PNC1000: 40,
@@ -258,7 +267,7 @@ class BufferSize:
         PlotterType.AXIDRAW: 1,
         PlotterType.HP_7475A_A3: 512,
         PlotterType.HP_7475A_A4: 512,
-        PlotterType.ROLAND_DXY1200: 0,
+        PlotterType.ROLAND_DXY1200_A3: 0,
         PlotterType.ROLAND_DXY980: 0,
         PlotterType.HP_7595A_A1: 1024,
         PlotterType.ROLAND_PNC1000: 0,

@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     ExportWrapper().ex(
         c,
-        PlotterType.ROLAND_DXY1200,
+        PlotterType.ROLAND_DXY1200_A3,
         PaperSize.LANDSCAPE_A4,
         30,
         "laser_test",

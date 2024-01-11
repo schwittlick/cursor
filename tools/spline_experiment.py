@@ -19,7 +19,7 @@ dimensions = Paper.sizes[PaperSize.LANDSCAPE_A4]
 def export_hpgl(rr: RealtimeRenderer = None):
     ExportWrapper().ex(
         rr.collection,
-        PlotterType.ROLAND_DXY1200,
+        PlotterType.ROLAND_DXY1200_A3,
         PaperSize.LANDSCAPE_A4,
         20,
         "spline_test",
