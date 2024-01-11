@@ -12,6 +12,7 @@ OUTPUT_EXTENDED_STATUS = f"{ESC}.O"  # info about device satus etc
 OUTPUT_IDENTIFICATION = f"{ESC}.A"  # immediate return e.g. "7550A,firmwarenr"
 ABORT_GRAPHICS = f"{ESC}.K"  # clears partially parsed cmds and clears buffer
 WAIT = f"{ESC}.L"  # returns io buffer size when its empty. read it and wait for reply before next command
+OUTPUT_DIMENSIONS = "OH;"
 
 
 def read_until_char(port: serial.Serial, char: chr = CR, timeout: float = 1.0):

@@ -125,6 +125,7 @@ class SerialSender:
         # the amount of commands that are being sent to the plotter
         # in one batch. this speeds up drawing. take care to not send too
         # long commands that exceed the maximum buffer size
+        logging.info(f"Sending with batch_count: {command_batch}")
         try:
             with tqdm(total=len(self.commands)) as pbar:
                 pbar.update(0)

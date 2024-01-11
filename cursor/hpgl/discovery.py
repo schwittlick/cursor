@@ -8,38 +8,42 @@ The script will print a list of available plotters, it's serial ports and model 
 
 """
 
+import logging
 import subprocess
 import threading
 
 import serial.tools.list_ports
-import wasabi
 
-from cursor.hpgl import read_until_char, OUTPUT_IDENTIFICATION
-
-logger = wasabi.Printer(pretty=True, no_print=False)
+from cursor.hpgl import read_until_char, OUTPUT_IDENTIFICATION, OUTPUT_DIMENSIONS
 
 
-def async_discover(serial_port: str,
-                   baudrate: int = 9600,
-                   stopbits: tuple = serial.STOPBITS_ONE,
-                   bytesize: tuple = serial.EIGHTBITS,
-                   parity: str = serial.PARITY_NONE,
-                   xonxoff: bool = False,
-                   timeout: float = 5):
-    ser = serial.Serial(port=serial_port,
-                        baudrate=baudrate,
-                        stopbits=stopbits,
-                        bytesize=bytesize,
-                        parity=parity,
-                        xonxoff=xonxoff,
-                        timeout=timeout)
+def async_discover(
+        serial_port: str,
+        baudrate: int = 9600,
+        stopbits: tuple = serial.STOPBITS_ONE,
+        bytesize: tuple = serial.EIGHTBITS,
+        parity: str = serial.PARITY_NONE,
+        xonxoff: bool = False,
+        timeout: float = 5):
+    ser = serial.Serial(
+        port=serial_port,
+        baudrate=baudrate,
+        stopbits=stopbits,
+        bytesize=bytesize,
+        parity=parity,
+        xonxoff=xonxoff,
+        timeout=timeout)
     try:
         ser.write(f"{OUTPUT_IDENTIFICATION}".encode())
         ret = read_until_char(ser).split(',')[0]
         model = ret.strip()
         if len(model) > 0:
+            ser.write(f"{OUTPUT_DIMENSIONS}".encode())
+            ret = read_until_char(ser)
+            space = ret.strip()
+
             ser.close()
-            logger.info(f"Discovery {serial_port} -> {model}")
+            logging.info(f"Discovery {serial_port} -> {model} (OH: {space})")
 
             return serial_port, model
         ser.close()
@@ -52,12 +56,13 @@ def async_discover(serial_port: str,
         return None
 
 
-def discover(baudrate=9600,
-             stopbits=serial.STOPBITS_ONE,
-             bytesize=serial.EIGHTBITS,
-             parity=serial.PARITY_NONE,
-             xonxoff=False,
-             timeout=1.5) -> list:
+def discover(
+        baudrate=9600,
+        stopbits=serial.STOPBITS_ONE,
+        bytesize=serial.EIGHTBITS,
+        parity=serial.PARITY_NONE,
+        xonxoff=False,
+        timeout=1.5) -> list:
     ports = list(serial.tools.list_ports.comports())
     data = []
 
@@ -72,13 +77,14 @@ def discover(baudrate=9600,
     for port in ports:
         thread = threading.Thread(
             target=lambda: data.append(
-                async_discover(port,
-                               baudrate,
-                               stopbits=stopbits,
-                               bytesize=bytesize,
-                               parity=parity,
-                               xonxoff=xonxoff,
-                               timeout=timeout)))
+                async_discover(
+                    port,
+                    baudrate,
+                    stopbits=stopbits,
+                    bytesize=bytesize,
+                    parity=parity,
+                    xonxoff=xonxoff,
+                    timeout=timeout)))
         threads.append(thread)
         thread.start()
 
