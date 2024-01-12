@@ -12,30 +12,43 @@ class PlotterType(Enum):
         return self.name
 
     ROLAND_DPX3300_A1 = auto()
-    DIY_PLOTTER = auto()
-    AXIDRAW = auto()
+    ROLAND_DPX3300_A2 = auto()
+    ROLAND_DPX3300_A3 = auto()
+
+    HP_7550A_A3 = auto()
+
     HP_7475A_A4 = auto()
     HP_7475A_A3 = auto()
+
+    HP_7470A_A4 = auto()
+
+    HP_DM_RX_PLUS_A0 = auto()
+    HP_DM_RX_PLUS_100x70cm = auto()
+    HP_DM_RX_PLUS_A1 = auto()
+    HP_DM_RX_PLUS_A2 = auto()
+    HP_DM_RX_PLUS_A3 = auto()
+
+    HP_DM_II_A1 = auto()
+    HP_DM_II_A3 = auto()
+
+    HP_DM_SX_A1 = auto()
+    HP_DM_SX_A3 = auto()
+
+    MUTOH_XP500_100x70cm = auto()
+    MUTOH_XP500_A1 = auto()
+    MUTOH_XP500_A2 = auto()
+    MUTOH_XP500_A3 = auto()
+
+    DIY_PLOTTER = auto()
+    AXIDRAW = auto()
+
     ROLAND_DXY1200_A3 = auto()
     ROLAND_DXY1200_A3_EXPANDED = auto()
     ROLAND_DXY980 = auto()
-    HP_DM_RX_PLUS_A1 = auto()
     ROLAND_PNC1000 = auto()
-    ROLAND_DPX3300_A2 = auto()
-    ROLAND_DPX3300_A3 = auto()
-    HP_DM_RX_PLUS_A3 = auto()
     TEKTRONIX_4662 = auto()
-    HP_DM_II_A1 = auto()
-    HP_DM_II_A3 = auto()
     DIGIPLOT_A1 = auto()
-    HP_7470A_A4 = auto()
-    HP_7550A_A3 = auto()
-    HP_DM_RX_PLUS_A2 = auto()
     ROLAND_PNC1000_50x100 = auto()
-    HP_DM_RX_PLUS_A0 = auto()
-    HP_DM_RX_PLUS_100x70cm = auto()
-    HP_DM_SX_A1 = auto()
-    HP_DM_SX_A3 = auto()
     HP_7570A_A1 = auto()
 
 
@@ -72,6 +85,11 @@ class ExportFormatMappings:
 
         PlotterType.HP_DM_II_A1: ExportFormat.HPGL,
         PlotterType.HP_DM_II_A3: ExportFormat.HPGL,
+
+        PlotterType.MUTOH_XP500_100x70cm: ExportFormat.HPGL,
+        PlotterType.MUTOH_XP500_A1: ExportFormat.HPGL,
+        PlotterType.MUTOH_XP500_A2: ExportFormat.HPGL,
+        PlotterType.MUTOH_XP500_A3: ExportFormat.HPGL,
 
         PlotterType.DIY_PLOTTER: ExportFormat.GCODE,
         PlotterType.AXIDRAW: ExportFormat.SVG,
@@ -143,6 +161,11 @@ class MinmaxMapping:
         PlotterType.HP_DM_II_A1: BB(-16080, -11660, 16080, 11660),
         PlotterType.HP_DM_II_A3: BB(-7656, -5740, 7656, 5740),
 
+        PlotterType.MUTOH_XP500_100x70cm: BB(-19370, -13728, 19370, 13728),
+        PlotterType.MUTOH_XP500_A1: BB(-16200, -11645, 16200, 11645),
+        PlotterType.MUTOH_XP500_A2: BB(-11284, -8149, 11285, 8149),
+        PlotterType.MUTOH_XP500_A3: BB(-7815, -5716, 7815, 5716),
+
         PlotterType.DIY_PLOTTER: BB(0, 0, 3350, -1715),
         PlotterType.AXIDRAW: BB(0, 0, 0, 0),  # todo: missing real bounds
 
@@ -189,6 +212,11 @@ class PlotterName:
         PlotterType.HP_DM_SX_A1: "hpdm_sx_a1",
         PlotterType.HP_DM_SX_A3: "hpdm_sx_a3",
 
+        PlotterType.MUTOH_XP500_100x70cm: "mutoh_xp500_100x70cm",
+        PlotterType.MUTOH_XP500_A1: "mutoh_xp500_a1",
+        PlotterType.MUTOH_XP500_A2: "mutoh_xp500_a2",
+        PlotterType.MUTOH_XP500_A3: "mutoh_xp500_a3",
+
         PlotterType.AXIDRAW: "axidraw",
         PlotterType.DIY_PLOTTER: "custom",
         PlotterType.ROLAND_DXY1200_A3: "dxy1200",
@@ -208,7 +236,8 @@ class PlotterHpglNames:
         "DPX-3300": [PlotterType.ROLAND_DPX3300_A1, PlotterType.ROLAND_DPX3300_A2, PlotterType.ROLAND_DPX3300_A3],
         "7550A": [PlotterType.HP_7550A_A3],
         "7475A": [PlotterType.HP_7475A_A3, PlotterType.HP_7475A_A4],
-        "7595A": [PlotterType.HP_DM_SX_A1, PlotterType.HP_DM_SX_A3],
+        "7595A": [PlotterType.HP_DM_SX_A1, PlotterType.HP_DM_SX_A3, PlotterType.MUTOH_XP500_100x70cm,
+                  PlotterType.MUTOH_XP500_A1, PlotterType.MUTOH_XP500_A2, PlotterType.MUTOH_XP500_A3],
         "7596A": [PlotterType.HP_DM_II_A1, PlotterType.HP_DM_II_A3, PlotterType.HP_DM_RX_PLUS_A0,
                   PlotterType.HP_DM_RX_PLUS_100x70cm, PlotterType.HP_DM_RX_PLUS_A1, PlotterType.HP_DM_RX_PLUS_A2,
                   PlotterType.HP_DM_RX_PLUS_A3],
@@ -248,6 +277,10 @@ class XYFactors:
         PlotterType.HP_DM_SX_A1: (40.0, 40.0),
         PlotterType.HP_DM_SX_A3: (40.0, 40.0),
         PlotterType.HP_7570A_A1: (40.0, 40.0),
+        PlotterType.MUTOH_XP500_100x70cm: (40.0, 40.0),
+        PlotterType.MUTOH_XP500_A1: (40.0, 40.0),
+        PlotterType.MUTOH_XP500_A2: (40.0, 40.0),
+        PlotterType.MUTOH_XP500_A3: (40.0, 40.0),
     }
 
 
@@ -277,6 +310,10 @@ class MaxSpeed:
         PlotterType.HP_DM_RX_PLUS_100x70cm: 110,
         PlotterType.HP_DM_SX_A1: 110,
         PlotterType.HP_DM_SX_A3: 110,
+        PlotterType.MUTOH_XP500_100x70cm: 110,
+        PlotterType.MUTOH_XP500_A1: 110,
+        PlotterType.MUTOH_XP500_A2: 110,
+        PlotterType.MUTOH_XP500_A3: 110,
         PlotterType.HP_7570A_A1: 80,
     }
 
@@ -308,6 +345,10 @@ class BufferSize:
         PlotterType.HP_DM_RX_PLUS_100x70cm: 1024,
         PlotterType.HP_7570A_A1: 512,
         PlotterType.HP_DM_SX_A1: 1024,
+        PlotterType.MUTOH_XP500_100x70cm: 1024,
+        PlotterType.MUTOH_XP500_A1: 1024,
+        PlotterType.MUTOH_XP500_A2: 1024,
+        PlotterType.MUTOH_XP500_A3: 1024,
     }
 
 
