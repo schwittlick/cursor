@@ -16,11 +16,13 @@ def attempt_detect(model, ip: str, tcp_port: int, serial_port: str, baud: int, t
     p.open_serial()
 
     p_names = PlotterHpglNames.names
-    if model in p_names.keys():
-        p_type = p_names[model]
-        p.type = p_type
-        p.thread.speed = MaxSpeed.fac[p_type]
-        return p
+    for plotter_configs in p_names.keys():
+        if model in plotter_configs:
+            p_type = plotter_configs[model][
+                0]  # a little shortcut here. the 0th index is not necessarily the plotter config we think this is. Could have differnt paper size
+            p.type = p_type
+            p.thread.speed = MaxSpeed.fac[p_type]
+            return p
 
     return None
 

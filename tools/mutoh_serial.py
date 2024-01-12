@@ -105,7 +105,7 @@ def get_data():
             p.pen_select = 1
             p.velocity = 32
 
-        pc.fit(output_bounds=MinmaxMapping.maps[PlotterType.HP_7595A_A1])
+        pc.fit(output_bounds=MinmaxMapping.maps[PlotterType.HP_DM_RX_PLUS_A1])
 
         hpgl_renderer = HPGLRenderer(DataDirHandler().hpgl(f"composition73_mutoh_{r.hash}"))
         hpgl_renderer.add(pc)
