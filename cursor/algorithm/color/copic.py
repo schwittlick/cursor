@@ -1,8 +1,9 @@
 import json
-import random
-import pathlib
-import colour
 import logging
+import pathlib
+import random
+
+import colour
 
 from cursor.algorithm.color.copic_pen_enum import CopicColorCode as CCC
 
@@ -42,7 +43,6 @@ class Copic:
     @staticmethod
     def init_available_pens() -> list[CCC]:
         pens = []
-        pens.extend([CCC._110])
         pens.extend(
             [CCC.B0000, CCC.B000, CCC.B00, CCC.B01, CCC.B02, CCC.B04, CCC.B05,
              CCC.B06, CCC.B12, CCC.B14, CCC.B16, CCC.B18, CCC.B21, CCC.B23, CCC.B24,
@@ -69,9 +69,33 @@ class Copic:
              CCC.G85, CCC.G94, CCC.G99,
              CCC.FG])
 
-        # loose pens yet
         pens.extend(
-            [CCC.YG21, CCC.YR02])
+            [CCC.V09, CCC.V12, CCC.V15, CCC.V17, CCC.V20, CCC.V91, CCC.V99,
+             CCC.FV])
+
+        pens.extend(
+            [CCC.RV06, CCC.RV09, CCC.RV11, CCC.RV13, CCC.RV19, CCC.RV29, CCC.RV63, CCC.RV93])
+
+        pens.extend(
+            [CCC.BG01, CCC.BG02, CCC.BG07, CCC.BG09, CCC.BG13, CCC.BG15, CCC.BG18, CCC.BG57, CCC.BG72,
+             CCC.FBG2])
+
+        pens.extend(
+            [CCC.BV0000, CCC.BV04, CCC.BV11, CCC.BV20, CCC.BV31, CCC.BV34])
+
+        pens.extend(
+            [CCC.YR01, CCC.YR02, CCC.YR04, CCC.YR07, CCC.YR18, CCC.YR23, CCC.YR24, CCC.YR68,
+             CCC.FYR])
+
+        pens.extend(
+            [CCC.YG01, CCC.YG05, CCC.YG11, CCC.YG21, CCC.YG25, CCC.YG45, CCC.YG67, CCC.YG91,
+             CCC.FYG])
+
+        pens.extend(
+            [CCC.E01, CCC.E04, CCC.E11, CCC.E17, CCC.E23, CCC.E37, CCC.E39, CCC.E53, CCC.E87, CCC.E97])
+
+        pens.extend(
+            [CCC.T9, CCC.W9, CCC.N3, CCC._110])
 
         return pens
 

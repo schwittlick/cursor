@@ -21,6 +21,7 @@ class CopicColorCode(Enum):
     V20 = auto()
     V91 = auto()
     V99 = auto()
+    FV = auto()
 
     # Red-Violet
     RV06 = auto()
@@ -196,9 +197,8 @@ class CopicColorCode(Enum):
     # Flourescent
     FBG2 = auto()
     FY1 = auto()
-    FYR1 = auto()
-    FYG1 = auto()
-    FV2 = auto()
+    FYR = auto()
+    FYG = auto()
 
     # Grays (C T N W)
     N3 = auto()
