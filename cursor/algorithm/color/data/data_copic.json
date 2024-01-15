@@ -1473,7 +1473,7 @@
   },
   {
     "id": "FY1",
-    "name": "Fluorescent Yellow Orange",
+    "name": "Fluorescent Yellow",
     "hex": "fff697",
     "rgbv": [
       "255",
@@ -1483,12 +1483,8 @@
     "rgb": "255,246,151"
   },
   {
-    "id": "FY1",
-    "name": "Fluorescent Yellow"
-  },
-  {
     "id": "FV",
-    "name": "Fluorescent Dull Violet",
+    "name": "Fluorescent Violet",
     "hex": "7f74b6",
     "rgbv": [
       "127",
@@ -1498,16 +1494,48 @@
     "rgb": "127,116,182"
   },
   {
-    "id": "FYG",
-    "name": "Fluorescent Dull Yellow Green"
+    "id": "FYG1",
+    "name": "Fluorescent Yellow Green",
+    "hex": "D7E3A2",
+    "rgbv": [
+      "215",
+      "227",
+      "162"
+    ],
+    "rgb": "215,227,162"
+  },
+  {
+    "id": "FYG2",
+    "name": "Fluorescent Green",
+    "hex": "A3CB23",
+    "rgbv": [
+      "163",
+      "203",
+      "35"
+    ],
+    "rgb": "163,203,35"
   },
   {
     "id": "FBG2",
-    "name": "Fluorescent Dull Blue Green"
+    "name": "Fluorescent Dull Blue Green",
+    "hex": "71C9E8",
+    "rgbv": [
+      "113",
+      "201",
+      "232"
+    ],
+    "rgb": "113,201,232"
   },
   {
     "id": "FB2",
-    "name": "Fluorescent Dull Blue"
+    "name": "Fluorescent Dull Blue",
+    "hex": "0089CE",
+    "rgbv": [
+      "0",
+      "137",
+      "206"
+    ],
+    "rgb": "0,137,206"
   },
   {
     "id": "E0000",

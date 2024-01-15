@@ -32,6 +32,7 @@ class CopicColorCode(Enum):
     RV29 = auto()
     RV63 = auto()
     RV93 = auto()
+    FRV1 = auto()
 
     # Red
     R00 = auto()
@@ -62,7 +63,6 @@ class CopicColorCode(Enum):
     R83 = auto()
     R85 = auto()
     R89 = auto()
-    FRV1 = auto()
 
     # Yellow-Red
     YR01 = auto()
@@ -74,6 +74,7 @@ class CopicColorCode(Enum):
     YR23 = auto()
     YR24 = auto()
     YR68 = auto()
+    FYR = auto()
 
     # Yellow
     Y00 = auto()
@@ -94,6 +95,7 @@ class CopicColorCode(Enum):
     Y32 = auto()
     Y35 = auto()
     Y38 = auto()
+    FY1 = auto()
 
     # Yellow-Green
     YG01 = auto()
@@ -104,7 +106,7 @@ class CopicColorCode(Enum):
     YG45 = auto()
     YG67 = auto()
     YG91 = auto()
-    FYG2 = auto()
+    FYG1 = auto()
 
     # Green
     G00 = auto()
@@ -130,7 +132,7 @@ class CopicColorCode(Enum):
     G85 = auto()
     G94 = auto()
     G99 = auto()
-    FG = auto()
+    FYG2 = auto()
 
     # Blue-Green
     BG01 = auto()
@@ -143,6 +145,7 @@ class CopicColorCode(Enum):
     BG18 = auto()
     BG57 = auto()
     BG72 = auto()
+    FBG2 = auto()
 
     # Blue
     B00 = auto()
@@ -195,10 +198,6 @@ class CopicColorCode(Enum):
     E97 = auto()
 
     # Flourescent
-    FBG2 = auto()
-    FY1 = auto()
-    FYR = auto()
-    FYG = auto()
 
     # Grays (C T N W)
     N3 = auto()

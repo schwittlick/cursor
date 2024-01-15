@@ -60,21 +60,21 @@ class Copic:
             [CCC.R00, CCC.R01, CCC.R02, CCC.R05, CCC.R08, CCC.R11, CCC.R12, CCC.R14, CCC.R17,
              CCC.R20, CCC.R21, CCC.R22, CCC.R24, CCC.R27, CCC.R29, CCC.R30, CCC.R32, CCC.R35,
              CCC.R37, CCC.R39, CCC.R43, CCC.R46, CCC.R56, CCC.R59, CCC.R81, CCC.R83, CCC.R85,
-             CCC.R89,
-             CCC.FRV1])
+             CCC.R89])
 
         pens.extend(
             [CCC.G00, CCC.G02, CCC.G03, CCC.G05, CCC.G07, CCC.G09, CCC.G12, CCC.G14, CCC.G16, CCC.G17,
              CCC.G19, CCC.G20, CCC.G21, CCC.G24, CCC.G28, CCC.G29, CCC.G40, CCC.G43, CCC.G46, CCC.G82,
              CCC.G85, CCC.G94, CCC.G99,
-             CCC.FG])
+             CCC.FYG2])
 
         pens.extend(
             [CCC.V09, CCC.V12, CCC.V15, CCC.V17, CCC.V20, CCC.V91, CCC.V99,
              CCC.FV])
 
         pens.extend(
-            [CCC.RV06, CCC.RV09, CCC.RV11, CCC.RV13, CCC.RV19, CCC.RV29, CCC.RV63, CCC.RV93])
+            [CCC.RV06, CCC.RV09, CCC.RV11, CCC.RV13, CCC.RV19, CCC.RV29, CCC.RV63, CCC.RV93,
+             CCC.FRV1])
 
         pens.extend(
             [CCC.BG01, CCC.BG02, CCC.BG07, CCC.BG09, CCC.BG13, CCC.BG15, CCC.BG18, CCC.BG57, CCC.BG72,
@@ -89,7 +89,7 @@ class Copic:
 
         pens.extend(
             [CCC.YG01, CCC.YG05, CCC.YG11, CCC.YG21, CCC.YG25, CCC.YG45, CCC.YG67, CCC.YG91,
-             CCC.FYG])
+             CCC.FYG1])
 
         pens.extend(
             [CCC.E01, CCC.E04, CCC.E11, CCC.E17, CCC.E23, CCC.E37, CCC.E39, CCC.E53, CCC.E87, CCC.E97])
