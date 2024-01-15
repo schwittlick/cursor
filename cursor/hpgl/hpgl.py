@@ -47,7 +47,7 @@ class HPGL:
         """
         Use with caution, positions  could be impacted
         """
-        self.data.append(data)
+        self.__data.append(data)
 
     def IN(self) -> None:
         self.__data.append("IN;")

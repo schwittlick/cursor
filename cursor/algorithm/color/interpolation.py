@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 from tqdm import tqdm
 
@@ -81,6 +83,7 @@ class ColorMath:
     ) -> list[Color]:
         gradient_colors = []
 
+        logging.info(f"Calculating gradient")
         with tqdm(total=steps) as pbar:
             for step in range(steps):
                 pbar.update(1)

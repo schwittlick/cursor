@@ -2,6 +2,7 @@ import random
 import string
 import logging
 
+from cursor.algorithm.color.copic import Copic
 from cursor.bb import BoundingBox
 from cursor.collection import Collection
 from cursor.data import DataDirHandler
@@ -37,7 +38,7 @@ class ExportConfig:
             cutoff: int | None = None,
             export_source: bool = False,
             export_jpeg_preview: bool = False,
-            optimize_hpgl_by_tsp: bool = True
+            optimize_hpgl_by_tsp: bool = True,
     ):
         self.type: PlotterType = type
         self.margin = margin
@@ -140,15 +141,32 @@ class Exporter:
         format = ExportFormatMappings.maps[self.cfg.type]
 
         separate_layers = self.collection.get_layers()
+
+        # if "pen_mapping" in self.collection.properties.keys():
+        #    pen_mapping_list = self.collection.properties["pen_mapping"]
+        #    for layer_id in range(len(pen_mapping_list)):
+        #        pen_mapping = pen_mapping_list[layer_id]
+
+        # for pen in pen_mapping:
+        #    metadata.write(f"Pen {pen[0]} -> {Copic().color(pen[1])}\n")
+
         for layer, pc in separate_layers.items():
             if format is ExportFormat.HPGL:
                 hpgl_folder = DataDirHandler().hpgl(self.name)
                 hpgl_renderer = HPGLRenderer(hpgl_folder)
                 hpgl_renderer.add(pc)
-                self.print_pen_move_distances(hpgl_renderer.collection)
-                hpgl_renderer.optimize()
-                self.print_pen_move_distances(hpgl_renderer.collection)
+                if self.cfg.optimize_hpgl_by_tsp:
+                    self.print_pen_move_distances(hpgl_renderer.collection)
+                    hpgl_renderer.optimize()
+                    self.print_pen_move_distances(hpgl_renderer.collection)
                 hpgl_renderer.save(f"{fname}_{layer}")
+
+                if "pen_mapping" in self.collection.properties.keys():
+                    pen_mapping = self.collection.properties["pen_mapping"][layer]
+                    with open(hpgl_folder / f"{fname}_{layer}.txt",
+                              "w") as metadata:
+                        for pen_idx, color in pen_mapping.items():
+                            metadata.write(f"Pen {pen_idx} -> {Copic().color(color)}\n")
 
             if format is ExportFormat.SVG:
                 svg_dir = DataDirHandler().svg(self.name)
@@ -206,7 +224,7 @@ class ExportWrapper:
         self.export_reversed = export_reversed
         self.keep_aspect_ratio = keep_aspect_ratio
 
-        self.config = ExportConfig(ptype, margin, cutoff, False, export_jpg_preview)
+        self.config = ExportConfig(ptype, margin, cutoff, False, export_jpg_preview, False)
 
         self.exp = Exporter(paths)
         self.exp.cfg = self.config
