@@ -10,7 +10,7 @@ import argparse  # process input arguments
 def argparser():
     parser = argparse.ArgumentParser(
         description="""
-            A demonstration program showing a live camera image feed 
+            A demonstration program showing a live camera image feed
             alongside the intensity component of the Fourier transform
             of the camera image.\n
             Required: A python 2.7 installation (tested on Enthought Canopy),
@@ -276,11 +276,11 @@ class live_FT2(object):
                 ]
 
         # running average of contrast
-        ##circshift contrast matrix up
+        # circshift contrast matrix up
         contrast = contrast[
             np.arange(1, np.size(contrast, 0) + 1) % np.size(contrast, 0), :
         ]
-        ##replace bottom values with new values for minimum and maximum
+        # replace bottom values with new values for minimum and maximum
         contrast[-1, :] = [np.min(Intensity), np.max(Intensity)]
 
         # openCV draw

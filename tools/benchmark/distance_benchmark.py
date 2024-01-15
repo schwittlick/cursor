@@ -35,14 +35,14 @@ if __name__ == "__main__":
 
     timer = Timer()
     dists = distance_numba(start_positions_float)
-    #logging.info(dists)
+    # logging.info(dists)
     timer.print_elapsed("distance_numba")
 
     timer.start()
     distance_matrix = spatial.distance.cdist(
         end_positions_float, start_positions_float, metric="euclidean"
     )
-    #int_dists = distance_matrix.astype(int)
+    # int_dists = distance_matrix.astype(int)
     timer.print_elapsed("scipy.cdist")
 
     timer.start()

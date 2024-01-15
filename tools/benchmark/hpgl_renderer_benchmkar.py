@@ -5,8 +5,8 @@ from cursor.path import Path
 
 import random
 
-import cProfile as profile
-import pstats
+# import cProfile as profile
+# import pstats
 
 from cursor.renderer.hpgl import HPGLRenderer
 
