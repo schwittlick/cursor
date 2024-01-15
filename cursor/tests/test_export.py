@@ -1,5 +1,5 @@
 from cursor.collection import Collection
-from cursor.device import PlotterType, PaperSize
+from cursor.device import PlotterType
 from cursor.export import ExportWrapper, Exporter
 from cursor.path import Path
 

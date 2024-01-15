@@ -14,7 +14,7 @@ def argparser():
             alongside the intensity component of the Fourier transform
             of the camera image.\n
             Required: A python 2.7 installation (tested on Enthought Canopy),
-            with: 
+            with:
                 - OpenCV (for camera reading)
                 - numpy, TkAgg, matplotlib, scipy, argparse
             Cobbled together by Brian R. Pauw.
@@ -249,7 +249,8 @@ class live_FT2(object):
         else:
             Intensity = np.abs(np.fft.fftshift(np.fft.fft2(im))) ** 2
 
-        # OpenCV option, http://docs.opencv.org/trunk/doc/py_tutorials/py_imgproc/py_transforms/py_fourier_transform/py_fourier_transform.html#fourier-transform
+        # OpenCV option, http://docs.opencv.org/trunk/doc/py_tutorials/py_imgproc/py_transforms/py_fourier_transform/
+        # py_fourier_transform.html#fourier-transform
         # dft = cv2.dft( np.float32(im), flags = cv2.DFT_COMPLEX_OUTPUT)
         # dft = np.fft.fftshift(dft)
         # Intensity = cv2.magnitude(dft[:, :, 0], dft[:, :, 1])
@@ -270,7 +271,7 @@ class live_FT2(object):
                 ]
             else:
                 h, w, c = np.shape(Intensity)
-                Intensity[int(h / 2 - 1) : int(h / 2 + 1), :, :] = Intensity[ int(h / 2 + 1) : int(h / 2 + 3), :, : ]
+                Intensity[int(h / 2 - 1) : int(h / 2 + 1), :, :] = Intensity[int(h / 2 + 1) : int(h / 2 + 3), :, :]
                 Intensity[:, int(w / 2 - 1) : int(w / 2 + 1), :] = Intensity[
                     :, int(w / 2 + 1) : int(w / 2 + 3), :
                 ]
