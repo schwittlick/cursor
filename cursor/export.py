@@ -8,9 +8,6 @@ from cursor.collection import Collection
 from cursor.data import DataDirHandler
 from cursor.device import (
     PlotterType,
-    PaperSize,
-    Paper,
-    PaperSizeName,
     PlotterName,
     MinmaxMapping,
     XYFactors,

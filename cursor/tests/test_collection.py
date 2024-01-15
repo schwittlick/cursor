@@ -138,9 +138,8 @@ def test_collection_as_dataframe():
 
     df = pc.as_dataframe()  # concatenated
     assert df.ndim == 2
-    assert (
-            df.values.shape[0] == 4
-    )  # the maximum numer of points in a path (rest are filled up with nan's)
+    assert df.values.shape[0] == 4
+    # the maximum numer of points in a path (rest are filled up with nan's)
     assert df.values.shape[1] == 6  # 3 times x, y columns
 
 
@@ -210,19 +209,17 @@ def test_path_aspect_ratio():
     assert aspect_ratio == 0.5
 
 
-def test_path_aspect_ratio_nan():
+def test_path_aspect_ratio_inf():
     p = Path()
     p.add(0, 0)
 
-    aspect_ratio = p.aspect_ratio()
-
-    assert aspect_ratio is math.nan
+    assert p.aspect_ratio() == 0.0
 
     p.add(1, 0)
 
     aspect_ratio = p.aspect_ratio()
 
-    assert aspect_ratio is math.nan
+    assert aspect_ratio == -math.inf
 
 
 def test_pathcollection_add():

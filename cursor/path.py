@@ -595,7 +595,7 @@ class Path:
     def __differential_entropy_wrap(self, values: list[float]) -> float:
         window_length = None  # max(int(len(values) * 0.1), 1)
         if len(values) < 5:
-            logging.error(f"Can't compute window_length for such small list of values..")
+            logging.error("Can't compute window_length for such small list of values..")
         try:
             de = stats.differential_entropy(
                 values,

@@ -44,7 +44,7 @@ class HPGLRenderer(BaseRenderer):
                 c.fast_tsp(False, 5)
             optimized += c
 
-        timer.print_elapsed(f"Optimizing done")
+        timer.print_elapsed("Optimizing done")
         self.collection = optimized
 
     def generate_string(self):

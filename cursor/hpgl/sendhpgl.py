@@ -167,7 +167,7 @@ class SerialSender:
         while free_io_memory < memory_amount:
             sleep(0.05)
             self.plotter.write(OUTBUT_BUFFER_SPACE.encode())
-            logging.info(f"Waiting for free memory..")
+            # logging.info(f"Waiting for free memory..")
             try:
                 free_io_memory = int(self.read_until())
             except ValueError as ve:

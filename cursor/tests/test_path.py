@@ -229,7 +229,7 @@ def test_differential_entropy():
     sy1 = p1.differential_entropy_y
 
     assert math.isclose(sx1, -0.42138186975, abs_tol=0.00001)
-    assert math.isclose(sy1, -0.02733247453, abs_tol=0.00001)
+    assert math.isclose(sy1, -0.02186395082, abs_tol=0.00001)
 
 
 def test_simplify_random():

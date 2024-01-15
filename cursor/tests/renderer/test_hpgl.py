@@ -5,21 +5,24 @@ from cursor.renderer.hpgl import HPGLRenderer
 
 
 def test_hpglrenderer():
-    pc = Collection()
-    p1 = Path()
-    p1.add(-10, -10)
-    p1.add(10, -10)
-
-    p2 = Path()
-    p2.add(10, -10)
-    p2.add(10, 10)
-
-    pc.add(p1)
-    pc.add(p2)
+    pc = Collection.from_tuples([[(-10, -10), (10, -10)], [(10, -10), (10, 10)]])
 
     r = HPGLRenderer(DataDirHandler().test_hpgls())
     r.add(pc)
     hpgl_data = r.generate_string()
 
-    expected_result = "PU;SP1;PA-10,-10;PD;PA-10,-10;PA10,-10;PU;PA10,-10;PD;PA10,-10;PA10,10;PU;PA0,0;SP0;"
+    expected_result = "PU;PA-10,-10;PD;PA-10,-10;PA10,-10;PU;PA10,-10;PD;PA10,-10;PA10,10;PU;PA0,0;SP0;"
+    assert hpgl_data == expected_result
+
+
+def test_hpglrenderer_pen_select():
+    pc = Collection.from_tuples([[(-10, -10), (10, -10)], [(10, -10), (10, 10)]])
+    pc[0].pen_select = 1
+    pc[1].pen_select = 2
+
+    r = HPGLRenderer(DataDirHandler().test_hpgls())
+    r.add(pc)
+    hpgl_data = r.generate_string()
+
+    expected_result = "PU;SP1;PA-10,-10;PD;PA-10,-10;PA10,-10;PU;SP2;PA10,-10;PD;PA10,-10;PA10,10;PU;PA0,0;SP0;"
     assert hpgl_data == expected_result
