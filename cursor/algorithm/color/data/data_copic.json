@@ -1461,7 +1461,7 @@
     "rgb": "245,163,199"
   },
   {
-    "id": "FYR1",
+    "id": "FYR",
     "name": "Fluorescent Orange",
     "hex": "fecc99",
     "rgbv": [
@@ -1483,11 +1483,11 @@
     "rgb": "255,246,151"
   },
   {
-    "id": "FYG1",
+    "id": "FY1",
     "name": "Fluorescent Yellow"
   },
   {
-    "id": "FV2",
+    "id": "FV",
     "name": "Fluorescent Dull Violet",
     "hex": "7f74b6",
     "rgbv": [
@@ -1498,7 +1498,7 @@
     "rgb": "127,116,182"
   },
   {
-    "id": "FYG2",
+    "id": "FYG",
     "name": "Fluorescent Dull Yellow Green"
   },
   {
