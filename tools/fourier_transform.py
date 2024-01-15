@@ -200,7 +200,7 @@ class live_FT2(object):
         while Nr <= self.numShots:
             a = time.time()
             Nr += 1
-            contrast = self.camimage_ft()
+            self.camimage_ft()
             print("framerate = {} fps \r".format(1.0 / (time.time() - a)))
         # stop camera
         self.vc.release()
