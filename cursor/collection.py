@@ -31,7 +31,6 @@ from cursor.misc import apply_matrix
 from cursor.path import Path
 from cursor.position import Position
 from cursor.sorter import Sorter
-from cursor.timer import Timer
 from cursor.tools.decorator_helpers import timing
 
 logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.DEBUG)
