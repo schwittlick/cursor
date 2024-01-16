@@ -32,6 +32,7 @@ from cursor.path import Path
 from cursor.position import Position
 from cursor.sorter import Sorter
 from cursor.timer import Timer
+from cursor.tools.decorator_helpers import timing
 
 logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.DEBUG)
 
@@ -580,9 +581,8 @@ class Collection:
 
         self.translate(diff[0], diff[1])
 
+    @timing
     def fast_tsp(self, plot_preview: bool = False, duration_seconds: int = 5) -> list[int]:
-        timer = Timer()
-
         start_positions_float = np.array([pa.start_pos().as_tuple() for pa in self])
         end_positions_float = np.array([pa.end_pos().as_tuple() for pa in self])
 
@@ -591,10 +591,7 @@ class Collection:
         )
         int_dists_from_floats = dists.astype(int)
 
-        timer.print_elapsed("tsp: cdist")
-        timer.start()
         order = fast_tsp.find_tour(int_dists_from_floats, duration_seconds=duration_seconds)
-        timer.print_elapsed("tsp: find_tour")
 
         if plot_preview:
             fig, ax = plt.subplots(1, 1)
@@ -602,7 +599,6 @@ class Collection:
             ax.plot(best_points_coordinate[:, 0], best_points_coordinate[:, 1], ".-r")
             plt.show()
 
-        timer.start()
         final_order = []
         idx = order.index(0)
         for i in range(idx, len(order)):
@@ -611,7 +607,6 @@ class Collection:
             final_order.append(order[i])
 
         self.paths[:] = [self.paths[i] for i in final_order]
-        timer.print_elapsed("tsp: reorder")
 
         return final_order
 
