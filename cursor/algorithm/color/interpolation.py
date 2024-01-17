@@ -85,7 +85,7 @@ class ColorMath:
 
         logging.info("Calculating gradient")
         with tqdm(total=steps) as pbar:
-            for step in range(steps):
+            for step in range(steps + 1):
                 pbar.update(1)
                 perc = misc.inv_lerp(0, steps, step)
                 srgb_interpolated = ColorMath.interpolate(

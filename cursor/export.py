@@ -209,7 +209,8 @@ class ExportWrapper:
             gcode_speed: int = None,
             export_reversed=None,
             keep_aspect_ratio=False,
-            export_jpg_preview=False
+            export_jpg_preview=False,
+            optimize=False
     ):
         self.paths = paths
         self.ptype = ptype
@@ -221,7 +222,7 @@ class ExportWrapper:
         self.export_reversed = export_reversed
         self.keep_aspect_ratio = keep_aspect_ratio
 
-        self.config = ExportConfig(ptype, margin, cutoff, False, export_jpg_preview, False)
+        self.config = ExportConfig(ptype, margin, cutoff, False, export_jpg_preview, optimize)
 
         self.exp = Exporter(paths)
         self.exp.cfg = self.config
