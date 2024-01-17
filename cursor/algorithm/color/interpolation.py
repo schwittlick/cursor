@@ -92,7 +92,8 @@ class ColorMath:
                     c1.as_srgb(), c2.as_srgb(), perc, oklab
                 )
                 if clamp_to_copic:
-                    interpolated_color = Copic().most_similar(srgb_interpolated)
+                    # interpolated_color = Copic().most_similar(srgb_interpolated)
+                    interpolated_color = Copic().most_similar_rgb_kdtree(srgb_interpolated)
                 else:
                     interpolated_color = Color(srgb_interpolated)
 

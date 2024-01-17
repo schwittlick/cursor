@@ -5,8 +5,8 @@ from cursor.algorithm.color.spectral import spectral_mix
 
 
 def test_simple_mix_spectral():
-    c1 = Copic().color(CopicColorCode.B23)
-    c2 = Copic().color(CopicColorCode.Y06)
+    c1 = Copic().color_by_code(CopicColorCode.B23)
+    c2 = Copic().color_by_code(CopicColorCode.Y06)
 
     mixed = spectral_mix(c1.as_rgb(), c2.as_rgb(), 0.5)
 
@@ -21,8 +21,8 @@ def lerp(v0, v1, t):
 
 
 def test_simple_mix_oklab():
-    c1 = Copic().color(CopicColorCode.B23)
-    c2 = Copic().color(CopicColorCode.Y06)
+    c1 = Copic().color_by_code(CopicColorCode.B23)
+    c2 = Copic().color_by_code(CopicColorCode.Y06)
 
     print(c1.as_rgb())
     print(c2.as_rgb())
@@ -47,8 +47,8 @@ def test_simple_mix_oklab():
 
 
 def test_gradient():
-    c1 = Copic().color(CopicColorCode.B23)
-    c2 = Copic().color(CopicColorCode.Y06)
+    c1 = Copic().color_by_code(CopicColorCode.B23)
+    c2 = Copic().color_by_code(CopicColorCode.Y06)
 
     for i in range(10):
 

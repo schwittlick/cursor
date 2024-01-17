@@ -163,7 +163,7 @@ class Exporter:
                     with open(hpgl_folder / f"{fname}_{layer}.txt",
                               "w") as metadata:
                         for pen_idx, color in pen_mapping.items():
-                            metadata.write(f"Pen {pen_idx} -> {Copic().color(color)}\n")
+                            metadata.write(f"Pen {pen_idx} -> {Copic().color_by_code(color)}\n")
 
             if format is ExportFormat.SVG:
                 svg_dir = DataDirHandler().svg(self.name)
