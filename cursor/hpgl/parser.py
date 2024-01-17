@@ -53,7 +53,7 @@ class HPGLParser:
         if type(hpgl) is str:
             hpgl_data = hpgl
         else:
-            hpgl_data = open(hpgl.as_posix(), 'r', newline='').readlines()
+            hpgl_data = open(hpgl.as_posix(), 'r', newline='', encoding='utf-8').readlines()
             hpgl_data = ''.join(hpgl_data).replace('\n', '')
             hpgl_data = ''.join(hpgl_data).replace('\r', '')
             hpgl_data = ''.join(hpgl_data).replace('\\x03', self.label_terminator)
