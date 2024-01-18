@@ -40,7 +40,7 @@ class PdfRenderer(BaseRenderer):
         self.pdf.rect(0, 0, self.pdf.w, self.pdf.h, "F")
 
     def circle(self, x: float, y: float, r: float) -> None:
-        self.pdf.circle(x=x - r, y=y - r, r=r * 2)
+        self.pdf.circle(x=x - r, y=y - r, r=r * 2, style="F")
 
     def render_page_nr(self, r: int, g: int, b: int) -> None:
         self.pdf.set_fill_color(r, g, b)
