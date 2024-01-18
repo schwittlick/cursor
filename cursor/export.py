@@ -22,6 +22,7 @@ from cursor.renderer.digi import DigiplotRenderer
 from cursor.renderer.gcode import GCodeRenderer
 from cursor.renderer.hpgl import HPGLRenderer
 from cursor.renderer.jpg import JpegRenderer
+from cursor.renderer.pdf import PdfRenderer
 from cursor.renderer.svg import SvgRenderer
 from cursor.renderer.tektronix import TektronixRenderer
 from cursor.timer import Timer
@@ -139,15 +140,11 @@ class Exporter:
 
         separate_layers = self.collection.get_layers()
 
-        # if "pen_mapping" in self.collection.properties.keys():
-        #    pen_mapping_list = self.collection.properties["pen_mapping"]
-        #    for layer_id in range(len(pen_mapping_list)):
-        #        pen_mapping = pen_mapping_list[layer_id]
-
-        # for pen in pen_mapping:
-        #    metadata.write(f"Pen {pen[0]} -> {Copic().color(pen[1])}\n")
+        if "pen_mapping" in self.collection.properties.keys():
+            self.export_copic_color_mapping(fname, separate_layers)
 
         for layer, pc in separate_layers.items():
+
             if format is ExportFormat.HPGL:
                 hpgl_folder = DataDirHandler().hpgl(self.name)
                 hpgl_renderer = HPGLRenderer(hpgl_folder)
@@ -157,13 +154,6 @@ class Exporter:
                     hpgl_renderer.optimize()
                     self.print_pen_move_distances(hpgl_renderer.collection)
                 hpgl_renderer.save(f"{fname}_{layer}")
-
-                if "pen_mapping" in self.collection.properties.keys():
-                    pen_mapping = self.collection.properties["pen_mapping"][layer]
-                    with open(hpgl_folder / f"{fname}_{layer}.txt",
-                              "w") as metadata:
-                        for pen_idx, color in pen_mapping.items():
-                            metadata.write(f"Pen {pen_idx} -> {Copic().color_by_code(color)}\n")
 
             if format is ExportFormat.SVG:
                 svg_dir = DataDirHandler().svg(self.name)
@@ -195,6 +185,41 @@ class Exporter:
                 digi_renderer = DigiplotRenderer(digi_folder)
                 digi_renderer.render(pc)
                 digi_renderer.save(f"{layer}_{fname}")
+
+    def export_copic_color_mapping(self, fname: str, layers: dict[str, Collection]) -> None:
+        """
+        rudimentarily save an pdf file with the copic/pen mappings
+        """
+        pdf_dir = DataDirHandler().pdf(self.name)
+        pdf_renderer = PdfRenderer(pdf_dir)
+        pdf_renderer.pdf.add_page()
+        pdf_renderer.pdf.set_font("Arial", size=10)
+        y = 10
+        x = 10
+        layer_counter = 0
+        format = ExportFormatMappings.maps[self.cfg.type]
+
+        for layer, pc in layers.items():
+            if format is ExportFormat.HPGL:
+                pdf_renderer.pdf.set_fill_color(0, 0, 0)
+                pdf_renderer.pdf.text(x, y, f"layer {layer}")
+                y += 5
+                pen_mapping = self.collection.properties["pen_mapping"][layer]
+
+                for pen_idx, color in pen_mapping.items():
+                    c = Copic().color_by_code(color)
+                    pdf_renderer.pdf.set_fill_color(0, 0, 0)
+                    pdf_renderer.pdf.text(x, y, f"Pen {pen_idx} -> {c}")
+
+                    pdf_renderer.pdf.set_fill_color(c.as_rgb()[0], c.as_rgb()[1], c.as_rgb()[2])
+                    pdf_renderer.circle(x + 60, y - 1, 2)
+                    y += 5
+
+            layer_counter += 1
+            if layer_counter % 6 == 0:
+                x += 65
+                y = 10
+        pdf_renderer.save(fname)
 
 
 class ExportWrapper:
