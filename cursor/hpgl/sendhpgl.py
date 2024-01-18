@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 from cursor.hpgl import ESC, CR, LB_TERMINATOR, ESC_TERM, OUTBUT_BUFFER_SPACE, OUTPUT_IDENTIFICATION, ABORT_GRAPHICS, \
     WAIT, read_until_char
+from cursor.hpgl.analyze import HPGLAnalyzer
 from cursor.hpgl.hpgl_tokenize import tokenizer
 
 
@@ -180,6 +181,9 @@ def main():
     parser.add_argument('port')
     parser.add_argument('file')
     args = parser.parse_args()
+
+    analyzer = HPGLAnalyzer()
+    analyzer.analyze(args.file)
 
     text = ''.join(open(args.file, 'r', encoding='utf-8').readlines())
     # text = text.replace(" ", '').replace("\n", '').replace("\r", '')
