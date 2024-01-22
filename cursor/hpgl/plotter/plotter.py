@@ -3,7 +3,7 @@ import logging
 from serial import Serial, SerialException
 
 from cursor.hpgl import read_until_char, CR, OUTPUT_IDENTIFICATION, WAIT, ABORT_GRAPHICS, OUTBUT_BUFFER_SPACE, \
-    OUTPUT_POSITION
+    OUTPUT_POSITION, OUTPUT_DIMENSIONS
 from cursor.hpgl.plotter.memory_config import HP7550AMemoryConfig, DraftMasterMemoryConfig
 from cursor.position import Position
 
@@ -32,20 +32,20 @@ class HPGLPlotter:
             self.apply_config(memory_config, plotter_config)
 
     def write(self, data):
-        self.serial.write(data)
+        self.serial.write(data.encode())
 
     def abort(self):
-        self.write(ABORT_GRAPHICS.encode())
-        self.write(WAIT.encode())
+        self.write(ABORT_GRAPHICS)
+        self.write(WAIT)
         self.read_until()
 
     def identify(self):
-        self.write(OUTPUT_IDENTIFICATION.encode())
+        self.write(OUTPUT_IDENTIFICATION)
         answer = self.read_until()
         return answer.split(',')[0]
 
     def free_memory(self):
-        self.write(OUTBUT_BUFFER_SPACE.encode())
+        self.write(OUTBUT_BUFFER_SPACE)
         free_memory = self.read_until()
         try:
             free_io_memory = int(free_memory)
@@ -56,8 +56,11 @@ class HPGLPlotter:
         return free_io_memory
 
     def get_position(self) -> Position:
-        self.write(f"{OUTPUT_POSITION}")
-        answer = self.read_until().rstrip()
+        self.write(OUTPUT_POSITION)
+        answer = self.read_until()
+        #logging.info(answer)
+        if len(answer) == 0:
+            return Position(0, 0)
         current_pos = answer.split(',')
         return Position(int(current_pos[0]), int(current_pos[1]))
 
@@ -77,11 +80,11 @@ class HPGLPlotter:
         return ""
 
     def apply_config(self, memory_config: str, plotter_config: str):
-        self.write(memory_config.encode())
-        self.write(WAIT.encode())
+        self.write(memory_config)
+        self.write(WAIT)
 
         self.read_until()
 
-        self.write(plotter_config.encode())
-        self.write(WAIT.encode())
+        self.write(plotter_config)
+        self.write(WAIT)
         self.read_until()

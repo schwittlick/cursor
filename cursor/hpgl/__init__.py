@@ -1,3 +1,5 @@
+import logging
+
 import serial
 
 from cursor.timer import Timer
