@@ -2,8 +2,10 @@ import logging
 
 from serial import Serial, SerialException
 
-from cursor.hpgl import read_until_char, CR, OUTPUT_IDENTIFICATION, WAIT, ABORT_GRAPHICS, OUTBUT_BUFFER_SPACE
+from cursor.hpgl import read_until_char, CR, OUTPUT_IDENTIFICATION, WAIT, ABORT_GRAPHICS, OUTBUT_BUFFER_SPACE, \
+    OUTPUT_POSITION
 from cursor.hpgl.plotter.memory_config import HP7550AMemoryConfig, DraftMasterMemoryConfig
+from cursor.position import Position
 
 
 class HPGLPlotter:
@@ -52,6 +54,12 @@ class HPGLPlotter:
             free_io_memory = 0
 
         return free_io_memory
+
+    def get_position(self) -> Position:
+        self.write(f"{OUTPUT_POSITION}")
+        answer = self.read_until().rstrip()
+        current_pos = answer.split(',')
+        return Position(int(current_pos[0]), int(current_pos[1]))
 
     def reopen(self):
         self.serial.close()

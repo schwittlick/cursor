@@ -47,7 +47,8 @@ class HPGLRenderer(BaseRenderer):
         timer.print_elapsed("Optimizing done")
         self.collection = optimized
 
-    def generate_string(self):
+    @staticmethod
+    def generate_string(collection: Collection) -> str:
         _hpgl = HPGL()
 
         # _prev_line_type = 0
@@ -57,9 +58,9 @@ class HPGLRenderer(BaseRenderer):
 
         _hpgl.PU()
 
-        with tqdm(total=len(self.collection)) as pbar:
+        with tqdm(total=len(collection)) as pbar:
             pbar.update(0)
-            for p in self.collection:
+            for p in collection:
                 x = p.start_pos().x
                 y = p.start_pos().y
 
@@ -122,7 +123,7 @@ class HPGLRenderer(BaseRenderer):
         pathlib.Path(self.__save_path).mkdir(parents=True, exist_ok=True)
         fname = self.__save_path / (filename + ".hpgl")
 
-        _hpgl_string = self.generate_string()
+        _hpgl_string = HPGLRenderer.generate_string(self.collection)
 
         with open(fname.as_posix(), "w") as file:
             file.write(_hpgl_string)

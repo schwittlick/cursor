@@ -17,6 +17,10 @@ def calc_number_of_dots(collection: Collection) -> int:
     return number_of_points
 
 
+def calc_time_to_plot_seconds(collection: Collection) -> int:
+    pass
+
+
 class Pen(Enum):
     PEN1 = 1
     PEN2 = 2
@@ -42,17 +46,19 @@ class PenData:
 
     def __eq__(self, other):
         return (
-            self.pen_down_in_meter == other.pen_down_in_meter
-            and self.pen_up_in_meter == other.pen_up_in_meter
-            and self.number_of_dots == other.number_of_dots
+                self.pen_down_in_meter == other.pen_down_in_meter
+                and self.pen_up_in_meter == other.pen_up_in_meter
+                and self.number_of_dots == other.number_of_dots
         )
 
 
 class HPGLAnalyzeData:
-    def __init__(self):
-        self.total_pen_up = 0
-        self.total_pen_down = 0
-        self.total_number_of_dots = 0
+    def __init__(self, total_pen_up: int = 0, total_pen_down: int = 0, total_number_of_dots: int = 0,
+                 total_time_to_plot: int = 0):
+        self.total_pen_up = total_pen_up
+        self.total_pen_down = total_pen_down
+        self.total_number_of_dots = total_number_of_dots
+        self.total_time_to_plot = total_time_to_plot
 
         self.data_per_pen = {
             Pen.PEN1: PenData(),
@@ -67,8 +73,21 @@ class HPGLAnalyzeData:
 
     def __str__(self) -> str:
         return (
-            f"Total pen-up {self.total_pen_up}m pen-down {self.total_pen_down}m dots "
-            f"{self.total_number_of_dots} per_pen {self.data_per_pen}"
+            f"Total pen-up {self.total_pen_up}m pen-down {self.total_pen_down}m "
+            f"dots {self.total_number_of_dots} per_pen {self.data_per_pen} "
+            f"time {self.total_time_to_plot}s"
+        )
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __eq__(self, other):
+        return (
+                self.total_pen_up == other.total_pen_up
+                and self.total_pen_down == other.total_pen_down
+                and self.total_number_of_dots == other.total_number_of_dots
+                and self.total_time_to_plot == other.total_time_to_plot
+                and self.data_per_pen == other.data_per_pen
         )
 
 
@@ -76,40 +95,43 @@ class HPGLAnalyzer:
     def __init__(self):
         pass
 
-    def analyze(self, hpgl_path: pathlib.Path) -> HPGLAnalyzeData:
-        hpgl_file_path = pathlib.Path(hpgl_path)
-
-        parser = HPGLParser()
-        parsed = parser.parse(hpgl_file_path)
-
+    def analyze_collection(self, collection: Collection) -> HPGLAnalyzeData:
         # detect format somehow?
         # does BB fit into A1, A3 etc?
 
-        total_pen_up = int(parsed.calc_pen_up_distance(40) / 1000)
-        total_pen_down = int(parsed.calc_pen_down_distance(40) / 1000)
-        number_of_points = calc_number_of_dots(parsed)
+        total_pen_up = int(collection.calc_pen_up_distance(40) / 1000)
+        total_pen_down = int(collection.calc_pen_down_distance(40) / 1000)
+        number_of_points = calc_number_of_dots(collection)
 
         data = HPGLAnalyzeData()
         data.total_pen_up = total_pen_up
         data.total_pen_down = total_pen_down
         data.total_number_of_dots = number_of_points
+        data.total_time_to_plot = (collection.calc_pen_up_distance(40) / 100) / 80
+        for pa in collection:
+            velocity = pa.velocity if pa.velocity else 1.0  # this here assumes a hp7550a
+            data.total_time_to_plot += ((pa.distance / 40) / 100) / velocity
 
         split_by_pens = {key + 1: Collection() for key in range(8)}
-        [split_by_pens[path.pen_select].add(path) for path in parsed]
+        [split_by_pens[path.pen_select].add(path) for path in collection]
 
         for key, val in split_by_pens.items():
             total_pen_up = int(val.calc_pen_up_distance(40) / 1000)
             total_pen_down = int(val.calc_pen_down_distance(40) / 1000)
             numer_of_dots = calc_number_of_dots(val)
-            # logging.info(
-            #    f"Pen {key}: pen-up {total_pen_up}m: pen-down {total_pen_down}m: dots: {numer_of_dots}"
-            # )
 
             data.data_per_pen[Pen(key)] = PenData(
                 total_pen_down, total_pen_up, numer_of_dots
             )
 
         return data
+
+    def analyze(self, hpgl_path: pathlib.Path) -> HPGLAnalyzeData:
+        hpgl_file_path = pathlib.Path(hpgl_path)
+
+        parser = HPGLParser()
+        parsed = parser.parse(hpgl_file_path)
+        return self.analyze_collection(parsed)
 
 
 if __name__ == "__main__":

@@ -10,19 +10,20 @@ from cursor.hpgl.hpgl_tokenize import tokenizer
 from cursor.hpgl.plotter.plotter import HPGLPlotter
 
 
+def concat_commands(cmd_list: list[str]) -> str:
+    concatenated = ''
+    for cmd in cmd_list:
+        if cmd.startswith("LB"):
+            concatenated += f"{cmd}{LB_TERMINATOR}"
+        else:
+            concatenated += f"{cmd};"
+    return concatenated
+
+
 class SerialSender:
     def __init__(self, serialport: str, hpgl_data: str):
         self.commands = tokenizer(hpgl_data)
         self.plotter = HPGLPlotter(serialport)
-
-    def concat_commands(self, cmd_list: list[str]) -> str:
-        concatenated = ''
-        for cmd in cmd_list:
-            if cmd.startswith("LB"):
-                concatenated += f"{cmd}{LB_TERMINATOR}"
-            else:
-                concatenated += f"{cmd};"
-        return concatenated
 
     def send(self):
         command_batch = 20
@@ -35,7 +36,7 @@ class SerialSender:
                 pbar.update(0)
                 for i in range(0, len(self.commands), command_batch):
                     batched_commands = self.commands[i:i + command_batch]
-                    cmds = self.concat_commands(batched_commands)
+                    cmds = concat_commands(batched_commands)
                     self.wait_for_free_io_memory(len(cmds) + 10)
 
                     self.plotter.write(cmds.encode('utf-8'))

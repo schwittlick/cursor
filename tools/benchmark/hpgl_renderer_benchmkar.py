@@ -21,11 +21,8 @@ if __name__ == "__main__":
         pa.pen_force = int(random.uniform(1, 8))
         collection.add(pa)
 
-    renderer = HPGLRenderer(pathlib.Path())
-    renderer.add(collection)
-
     # profile.runctx("renderer.generate_string()", globals(), locals(), filename="profile_results")
     # stats = pstats.Stats("profile_results")
     # stats.sort_stats("time").print_stats()
-    hpgl_str = renderer.generate_string()  # 575ms
+    hpgl_str = HPGLRenderer.generate_string(collection)  # 575ms
     # logging.info(hpgl_str)
