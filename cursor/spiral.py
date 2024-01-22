@@ -1,5 +1,30 @@
 import math
 
+from cursor.collection import Collection
+from cursor.path import Path
+from cursor.tools.realtime_boilerplate import RealtimeDropin
+
+
+class WobblyFunction:
+    def __init__(self):
+        pass
+
+    def generate(self, length: int) -> Collection:
+        collection = Collection()
+
+        path = Path()
+        for i in range(length):
+            path.add(i, self.val2((i / length) * math.pi, 0) )
+
+        collection.add(path)
+        return collection
+
+    def val(self, x, t):
+        return math.sin(3 * x + 3 * t + 5)
+
+    def val2(self, x, t):
+        return math.sin(2*x+3*t+5) + math.sin(3*x+2*t+4)
+
 
 class Spiral:
     def __init__(self):
@@ -37,3 +62,9 @@ class Spiral:
         self.maxx = 1888
 
         return self.custom(pp)
+
+
+if __name__ == '__main__':
+    wob = WobblyFunction()
+    c = wob.generate(100)
+    RealtimeDropin(c)
