@@ -22,6 +22,10 @@ def concat_commands(cmd_list: list[str]) -> str:
 
 class SerialSender:
     def __init__(self, serialport: str, hpgl_data: str):
+        # parser = HPGLParser()
+        # collection = parser.parse(hpgl_data)
+        # collection.sort(Sorter(param=SortParameter.PEN_SELECT, reverse=False))
+        # now the problem is the scaling, we don't know the export parameters
         self.commands = tokenizer(hpgl_data)
         self.plotter = HPGLPlotter(serialport)
 
@@ -39,7 +43,7 @@ class SerialSender:
                     cmds = concat_commands(batched_commands)
                     self.wait_for_free_io_memory(len(cmds) + 10)
 
-                    self.plotter.write(cmds.encode('utf-8'))
+                    self.plotter.write(cmds)
                     pbar.update(command_batch)
         except KeyboardInterrupt:
             logging.warning("Interrupted- aborting.")

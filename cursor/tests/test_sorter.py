@@ -1,12 +1,11 @@
-from cursor.sorter import Sorter
-from cursor.sorter import SortParameter
+import random
 
+from cursor.collection import Collection
 from cursor.data import DataDirHandler
 from cursor.loader import Loader
 from cursor.path import Path
-from cursor.collection import Collection
-
-import random
+from cursor.sorter import SortParameter
+from cursor.sorter import Sorter
 
 
 def test_sort_simple():
@@ -85,6 +84,23 @@ def test_entropy_sort2():
         print(c[i].hash)
 
     print(1)
+
+
+def test_sorter_pen_select():
+    collection = Collection()
+
+    for i in range(100):
+        path = Path.from_tuple_list([(0, 0), (1, 0)])
+        path.pen_select = random.randint(1, 8)
+        collection.add(path)
+
+    s = Sorter(param=SortParameter.PEN_SELECT, reverse=False)
+    collection.sort(s)
+
+    prev_pen_select = 0
+    for path in collection:
+        assert path.pen_select >= prev_pen_select
+        prev_pen_select = path.pen_select
 
 
 def test_sorter_performance():

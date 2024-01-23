@@ -1,9 +1,9 @@
-from cursor.algorithm import frechet
-from cursor.path import Path
-from cursor.timer import Timer
-
 from enum import Enum, auto
 from operator import itemgetter
+
+from cursor.algorithm import frechet
+from cursor.path import Path
+from cursor.tools.decorator_helpers import timing
 
 
 # noinspection PyArgumentList
@@ -40,13 +40,12 @@ class Sorter:
     def param(self, v):
         self.__param = v
 
+    @timing
     def sort(
             self,
             paths: list[Path],
             reference_path: Path = None,
     ):
-        t = Timer()
-        t.start()
         if self.__param is SortParameter.ENTROPY_X:
             paths.sort(key=lambda x: x.entropy_x, reverse=self.__reverse)
         elif self.__param is SortParameter.ENTROPY_Y:
@@ -89,15 +88,13 @@ class Sorter:
             raise Exception(
                 f"Unknown parameter {self.__param} for {__class__.__name__}"
             )
-        t.print_elapsed(f"Sorted via {__class__.__name__} took ")
 
+    @timing
     def sorted(
             self,
             paths: list[Path],
             reference_path: Path = None,
     ):
-        t = Timer()
-        t.start()
         if self.__param is SortParameter.ENTROPY_X:
             sorted_list = sorted(
                 paths, key=lambda x: x.entropy_x, reverse=self.__reverse
@@ -173,5 +170,4 @@ class Sorter:
             )
         else:
             raise Exception(f"Wrong param {self.__param} for {__class__.__name__}")
-        t.print_elapsed(f"Sorted via {__class__.__name__} took")
         return sorted_list
