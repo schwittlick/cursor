@@ -1,13 +1,12 @@
 import math
 import pathlib
-import wasabi
+import logging
 
 from cursor.collection import Collection
 from cursor.hpgl.hpgl_tokenize import tokenizer
 from cursor.path import Path
 from cursor.position import Position
-
-log = wasabi.Printer()
+from cursor.tools.decorator_helpers import timing
 
 IN = 'IN'
 SP = 'SP'
@@ -49,6 +48,7 @@ class HPGLParser:
 
         self.__init()
 
+    @timing
     def parse(self, hpgl: pathlib.Path | str) -> Collection:
         if type(hpgl) is str:
             hpgl_data = hpgl
@@ -63,7 +63,7 @@ class HPGLParser:
             if cmd[:2] in self.func_map:
                 self.func_map[cmd[:2]](cmd)
             else:
-                print(cmd)
+                logging.warning(f"Unknown function: {cmd}")
 
         return self.paths
 
@@ -122,7 +122,7 @@ class HPGLParser:
                     path.properties["label"] = self.cur_pen
                     self.paths.add(path)
             else:
-                print(char)
+                logging.warning(f"Char not in stick-font: {char} (ord:{ord(char)})")
 
             if self.run == 0.0 and self.rise > 0.0:
                 degree = 90

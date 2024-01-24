@@ -105,6 +105,7 @@ class HPGL:
         """
         if len(label) == 0:
             logging.warning("Empty Label, discarding")
+            return
 
         if len(label) > 150:
             logging.warning(f"Label too long: {len(label)} > 150")

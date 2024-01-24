@@ -16,7 +16,7 @@ def timing(func: typing.Callable) -> typing.Callable:
         full_path = pathlib.Path(code_obj.co_filename)
         # will print e.g.: INFO: cursor/collection.py:584:fast_tsp(): 1231ms
         ff = f"{full_path.parent.name}/{full_path.name}:{code_obj.co_firstlineno}:{func_name}()"
-        logging.debug(f"{ff}: {round(timer.elapsed() * 1000)}ms")
+        logging.info(f"{ff}: {round(timer.elapsed() * 1000)}ms")
         return result
 
     return wrapper
