@@ -144,6 +144,10 @@ class DistanceFilter(Filter):
 
 
 class AspectRatioFilter(Filter):
+    """
+    Before using an AspectRatioFilter, all paths should be "normalized" in a certain way
+    e.g. morphed from 0,0 to 1,0 and then the aspect ratio will be more expressive
+    """
     def __init__(self, min_as, max_as=sys.maxsize):
         self.min_as = min_as
         self.max_as = max_as
