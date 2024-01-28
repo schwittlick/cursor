@@ -7,7 +7,7 @@ from enum import Enum
 import rtmidi
 from rtmidi.midiutil import open_midiinput
 
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 
 
 class MidiqueKnob(Enum):
@@ -104,14 +104,14 @@ class MidiThread(threading.Thread):
 
                 # the messages with a non-zero deltatime are the ones sent with
                 # the first part of the message. quiete reliably
-                if deltatime > 0.0:
+                if deltatime > 0.01:
                     prev_msg = message
                     continue
 
                 if not prev_msg:
                     continue
 
-                knob_id = message[1]
+                knob_id = MidiqueKnob(message[1])
                 logging.info(f"knob: {knob_id}")
 
                 # converting 10 bit midi signal that was split over two signals
@@ -137,12 +137,14 @@ class Midique:
         self.cbs = {}
 
     def connect(self, buttonid: MidiqueKnob, cb: typing.Callable) -> None:
+        logging.info(f"Connected {buttonid} to {cb}")
         self.cbs[buttonid] = cb
 
     def stop(self) -> None:
         self.thread.stop()
 
     def listen(self) -> None:
+        logging.info("Starting to listen Midique.")
         self.thread = MidiThread()
         self.thread.cbs = self.cbs
         self.thread.start()

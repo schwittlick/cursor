@@ -62,6 +62,9 @@ class HPGLPlotter:
         if len(answer) == 0:
             return Position(0, 0)
         current_pos = answer.split(',')
+        if len(current_pos) < 2:
+            # should throw an exception and handle at caller
+            return Position()
         return Position(int(current_pos[0]), int(current_pos[1]))
 
     def reopen(self):
