@@ -12,8 +12,6 @@ from shapely.affinity import affine_transform
 
 from cursor.position import Position
 
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
-
 
 @nb.njit(fastmath=True, parallel=True)
 def calc_distance(vec_1, vec_2):

@@ -1,8 +1,6 @@
 import time
 import logging
 
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
-
 
 class Timer:
     def __init__(self):

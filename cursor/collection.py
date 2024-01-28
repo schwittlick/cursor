@@ -33,8 +33,6 @@ from cursor.position import Position
 from cursor.sorter import Sorter
 from cursor.tools.decorator_helpers import timing
 
-logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.DEBUG)
-
 
 class Collection:
     def __init__(self, timestamp: float | None = None, name: str = "noname"):

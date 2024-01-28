@@ -3,7 +3,7 @@ import logging
 from serial import Serial, SerialException
 
 from cursor.hpgl import read_until_char, CR, OUTPUT_IDENTIFICATION, WAIT, ABORT_GRAPHICS, OUTBUT_BUFFER_SPACE, \
-    OUTPUT_POSITION, OUTPUT_DIMENSIONS
+    OUTPUT_POSITION
 from cursor.hpgl.plotter.memory_config import HP7550AMemoryConfig, DraftMasterMemoryConfig
 from cursor.position import Position
 
@@ -58,7 +58,7 @@ class HPGLPlotter:
     def get_position(self) -> Position:
         self.write(OUTPUT_POSITION)
         answer = self.read_until()
-        #logging.info(answer)
+        # logging.info(answer)
         if len(answer) == 0:
             return Position(0, 0)
         current_pos = answer.split(',')

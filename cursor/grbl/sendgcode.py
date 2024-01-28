@@ -9,8 +9,6 @@ from tqdm import tqdm
 from cursor.grbl.parser import parse_xyz
 from cursor.tools.psu import PSU
 
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
-
 CHECK_FEEDBACK = True
 
 
