@@ -18,14 +18,20 @@ OUTPUT_DIMENSIONS = "OH;"
 OUTPUT_POSITION = "OA;"
 
 
-def read_until_char(port: serial.Serial, char: chr = CR, timeout: float = 1.0):
+def read_until_char(port: serial.Serial, char: chr = CR, timeout: float = 1.0) -> str:
     timer = Timer()
     data = ""
     while timer.elapsed() < timeout:
         by = port.read()
-        if by.decode() != char:
-            data += by.decode()
-        else:
-            # logging.info(f"read_until_char took {timer.elapsed()}")
-            return data
+        try:
+            if by.decode() != char:
+                data += by.decode()
+            else:
+                # logging.info(f"read_until_char took {timer.elapsed()}")
+                return data
+        except UnicodeDecodeError as ude:
+            logging.warning(port)
+            logging.warning(ude)
+            logging.warning(f"Couldn't decode {by}. Skipping and returning empty string")
+            return ""
     return data

@@ -100,7 +100,7 @@ class MidiThread(threading.Thread):
 
             if midi_message:
                 message, deltatime = midi_message
-                logging.debug(f"{message} - {deltatime}")
+                logging.info(f"{message} - {deltatime}")
 
                 # the messages with a non-zero deltatime are the ones sent with
                 # the first part of the message. quiete reliably
@@ -112,6 +112,7 @@ class MidiThread(threading.Thread):
                     continue
 
                 knob_id = MidiqueKnob(message[1])
+                # TODO: BUG BIG HERE WHEN MOVING TWO SLIDERS AT SAME TIME
                 logging.info(f"knob: {knob_id}")
 
                 # converting 10 bit midi signal that was split over two signals
