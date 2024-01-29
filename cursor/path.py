@@ -30,6 +30,8 @@ from cursor.position import Position
 
 import logging
 
+from cursor.tools.decorator_helpers import timing
+
 
 class Path:
     def __init__(
@@ -1161,6 +1163,11 @@ class Path:
             pa = iter_and_return_path(result)
             add_if(pa, return_paths)
 
+        # we've been copying stuff before, this
+        # would have been lost
+        for pa in return_paths:
+            pa.properties = self.properties
+
         return return_paths
 
     def is_1_dimensional(self) -> bool:
@@ -1173,6 +1180,7 @@ class Path:
 
         return len(set(x_values)) == 1 or len(set(y_values)) == 1
 
+    @timing
     def is_functional(self, res: float = 0.1) -> tuple[bool, list[list[Position]]]:
         f_direction_vector = self.end_pos() - self.start_pos()
         f_perp_vector = Position(-f_direction_vector.y, f_direction_vector.x)
@@ -1192,7 +1200,7 @@ class Path:
             lerped_y = misc.lerp(self.start_pos().y, self.end_pos().y, perc)
             ray_origin = Position(lerped_x, lerped_y)
 
-            intersections = set()
+            intersections: set[Position] = set()
 
             # iterate through all paths, check for intersections at current slice
             for p in range(len(self) - 1):
@@ -1215,21 +1223,25 @@ class Path:
         is_functional = not any(len(e) > 1 for e in all_intersections)
         return is_functional, all_intersections
 
-    def is_functional_fixed(self, n_sample_points: int = 20):
+    def is_functional_fixed(self, n_sample_points: int | None = None):
         """
         the previous implementation has the bug that it doesnt detect a curved path
         new idea: take n random points on the path instead of lerped x,y pos at an interval
         """
+
+        if not n_sample_points:
+            n_sample_points = len(self)
+
+        # no need to over-sample
+        if len(self) < n_sample_points:
+            n_sample_points = len(self)
+
         f_direction_vector = self.end_pos() - self.start_pos()
         f_perp_vector = Position(-f_direction_vector.y, f_direction_vector.x)
 
         # normalize perpendicular direction vector
         mag = math.sqrt((f_perp_vector.x * f_perp_vector.x) + (f_perp_vector.y * f_perp_vector.y))
         ray_dir = Position(f_perp_vector.x / mag, f_perp_vector.y / mag)
-
-        # no need to over-sample
-        if len(self) < n_sample_points:
-            n_sample_points = len(self)
 
         all_intersections = []
         # logging.info(f"sample_points: {n_sample_points}")

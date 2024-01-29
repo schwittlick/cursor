@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import copy
 import math
-
+from decimal import *
 import numpy as np
 
 from cursor.bb import BoundingBox
+
+getcontext().prec = 4
 
 
 class Position:
@@ -20,7 +22,7 @@ class Position:
             properties = {}
         else:
             pass
-        self._pos = np.array([x, y], dtype=float)
+        self._pos = np.array([Decimal(x), Decimal(y)], dtype=Decimal)
         self.timestamp = timestamp
         self.properties = properties
 
@@ -34,7 +36,7 @@ class Position:
 
     @property
     def x(self) -> float:
-        return self._pos[0]
+        return float(self._pos[0])
 
     @x.setter
     def x(self, v: float) -> None:
@@ -42,7 +44,7 @@ class Position:
 
     @property
     def y(self) -> float:
-        return self._pos[1]
+        return float(self._pos[1])
 
     @y.setter
     def y(self, v: float) -> None:
@@ -52,7 +54,7 @@ class Position:
         return tuple(self._pos)
 
     def as_array(self) -> np.array:
-        return self._pos
+        return self._pos.astype(float)
 
     def time(self) -> int:
         return self.timestamp

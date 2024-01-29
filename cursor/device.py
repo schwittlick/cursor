@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum, auto
 
 import wasabi
@@ -5,6 +7,12 @@ import wasabi
 from cursor.bb import BoundingBox as BB
 
 log = wasabi.Printer()
+
+
+class PlotterConfig:
+    def __init__(self, type: PlotterType):
+        self.type = type
+        self.bb = MinmaxMapping.maps[type]
 
 
 class PlotterType(Enum):

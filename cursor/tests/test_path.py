@@ -584,3 +584,15 @@ def test_move_to_origin():
     p.move_to_origin()
 
     assert p.as_tuple_list() == [(0, 0), (0, 9), (0, 19)]
+
+
+def test_functional():
+    path = Path.from_tuple_list([(0, 0), (1, 0), (2, 1), (3, -1), (4, 0), (5, 0)])
+    is_functional, intersections = path.is_functional(0.1)
+    assert is_functional
+
+
+def test_functional_fixed():
+    path = Path.from_tuple_list([(0, 0), (1, 0), (2, 1), (3, -1), (4, 0), (5, 0)])
+    is_functional, intersections = path.is_functional_fixed()
+    assert is_functional
