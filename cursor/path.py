@@ -310,6 +310,13 @@ class Path:
         b = BoundingBox(minx, miny, maxx, maxy)
         return b
 
+    def oriented_bb(self) -> list[tuple]:
+        # returns a list of 5 points that make the four pounts of a rectangle.
+        # the first and last point are equal
+        line = LineString(self.as_tuple_list())
+        rect = list(line.minimum_rotated_rectangle.exterior.coords)
+        return rect
+
     def aspect_ratio(self) -> float | np.inf:
         if len(self) < 2:
             return 0.0
@@ -1309,5 +1316,5 @@ class Path:
         return pa
 
     def rotate_into_bb(self, target_bb: BoundingBox) -> None:
-        self.vertices = self.rotated_into_bb(target_bb).vertices
-        self.properties = self.rotated_into_bb(target_bb).properties
+        _rotated = self.rotated_into_bb(target_bb)
+        self.vertices = _rotated.vertices

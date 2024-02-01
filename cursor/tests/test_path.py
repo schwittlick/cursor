@@ -115,6 +115,15 @@ def test_path_bb2():
     assert bb.y2 == 200
 
 
+def test_path_oriented_bb():
+    p = Path.from_tuple_list(
+        [(1, 1), (100, 100),
+         (100, 101), (3, 3)])
+    bb = p.oriented_bb()
+    # this test is so lazy..
+    assert len(bb) == 5
+
+
 def test_path_morph():
     p = Path.from_tuple_list(
         [(19, 34), (10, 10), (600, 10)])
