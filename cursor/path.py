@@ -106,6 +106,7 @@ class Path:
             _pa.add_position(pa)
         return _pa
 
+
     @property
     def hash(self) -> str:
         return hashlib.md5(str(self.vertices).encode("utf-8")).hexdigest()
