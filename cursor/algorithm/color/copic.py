@@ -216,6 +216,8 @@ def init_available_pens() -> list[CCC]:
          ]
     )
 
-    pens.extend([CCC.T9, CCC.W9, CCC.N3, CCC._110])
+    pens.extend([CCC.W1, CCC.W2, CCC.W3, CCC.W4, CCC.W5, CCC.W6, CCC.W8, CCC.W9, CCC.W10])
+
+    pens.extend([CCC.T9, CCC.N3, CCC._110])
 
     return pens

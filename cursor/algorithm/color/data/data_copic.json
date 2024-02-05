@@ -2531,7 +2531,7 @@
     "rgb": "243,243,235"
   },
   {
-    "id": "W-1",
+    "id": "W1",
     "name": "Warm Gray No.1",
     "hex": "e7e7df",
     "rgbv": [
@@ -2542,7 +2542,7 @@
     "rgb": "231,231,223"
   },
   {
-    "id": "W-2",
+    "id": "W2",
     "name": "Warm Gray No.2",
     "hex": "ddddd5",
     "rgbv": [
@@ -2553,7 +2553,7 @@
     "rgb": "221,221,213"
   },
   {
-    "id": "W-3",
+    "id": "W3",
     "name": "Warm Gray No.3",
     "hex": "d2d2ca",
     "rgbv": [
@@ -2564,7 +2564,7 @@
     "rgb": "210,210,202"
   },
   {
-    "id": "W-4",
+    "id": "W4",
     "name": "Warm Gray No.4",
     "hex": "bcbdb7",
     "rgbv": [
@@ -2575,7 +2575,7 @@
     "rgb": "188,189,183"
   },
   {
-    "id": "W-5",
+    "id": "W5",
     "name": "Warm Gray No.5",
     "hex": "a8a9a4",
     "rgbv": [
@@ -2586,7 +2586,7 @@
     "rgb": "168,169,164"
   },
   {
-    "id": "W-6",
+    "id": "W6",
     "name": "Warm Gray No.6",
     "hex": "94958f",
     "rgbv": [
@@ -2597,7 +2597,7 @@
     "rgb": "148,149,143"
   },
   {
-    "id": "W-7",
+    "id": "W7",
     "name": "Warm Gray No.7",
     "hex": "777873",
     "rgbv": [
@@ -2608,7 +2608,7 @@
     "rgb": "119,120,115"
   },
   {
-    "id": "W-8",
+    "id": "W8",
     "name": "Warm Gray No.8",
     "hex": "63645f",
     "rgbv": [
@@ -2620,7 +2620,7 @@
     "textColor":"white"
   },
   {
-    "id": "W-9",
+    "id": "W9",
     "name": "Warm Gray No.9",
     "hex": "4c4d48",
     "rgbv": [
@@ -2632,7 +2632,7 @@
     "textColor":"white"
   },
   {
-    "id": "W-10",
+    "id": "W10",
     "name": "Warm Gray No.10",
     "hex": "302f2b",
     "rgbv": [

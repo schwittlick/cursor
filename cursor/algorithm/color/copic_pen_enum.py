@@ -199,7 +199,18 @@ class CopicColorCode(Enum):
 
     # Flourescent
 
-    # Grays (C T N W)
+    # Grays (C T N)
     N3 = auto()
-    W9 = auto()
     T9 = auto()
+
+    # Warm Gray
+    W1 = auto()
+    W2 = auto()
+    W3 = auto()
+    W4 = auto()
+    W5 = auto()
+    W6 = auto()
+    W8 = auto()
+    W9 = auto()
+    W10 = auto()
+
