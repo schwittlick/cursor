@@ -350,6 +350,12 @@ class Path:
     def scale(self, x: float, y: float) -> None:
         [p.scale(x, y) for p in self.vertices]
 
+    def scaled(self, x: float, y: float) -> Path:
+        _path = Path()
+        _path.properties = self.properties
+        _path.vertices = [p.scaled(x, y) for p in self.vertices]
+        return _path
+
     def rot(self, angle: float, origin: tuple[float, float] = (0.0, 0.0)) -> None:
         [p.rot(angle, origin) for p in self.vertices]
 

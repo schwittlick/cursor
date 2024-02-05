@@ -51,7 +51,7 @@ class Position:
         self._pos[1] = v
 
     def as_tuple(self) -> tuple[float, float]:
-        return tuple(self._pos)
+        return self.x, self.y
 
     def as_array(self) -> np.array:
         return self._pos.astype(float)
