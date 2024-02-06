@@ -1,13 +1,93 @@
+import json
+import random
+
 import h5py
 
+from cursor.collection import Collection
 from cursor.path import Path
 import numpy as np
 
 from cursor.position import Position
+from cursor.properties import Property
+from cursor.tools.decorator_helpers import timing
 
 filename = "test_path.h5"
 
 
+def generate_test_path(length: int) -> Path:
+    path = Path.from_list(
+        [
+            Position(
+                random.uniform(-10, 10),
+                random.uniform(-10, 10),
+                random.randint(0, 10),
+                {
+                    Property.COLOR: (
+                        random.uniform(0, 255),
+                        random.uniform(0, 255),
+                        random.uniform(0, 255),
+                    )
+                },
+            )
+            for _ in range(length)
+        ]
+    )
+    path.properties = {Property.COLOR: (0.1, 0.2, 0.3), Property.LASER_AMP: 3.0}
+    return path
+
+
+def generate_test_collection(length_collection: int, length_paths: int) -> Collection:
+    return Collection.from_path_list(
+        [generate_test_path(length_paths) for _ in range(length_collection)]
+    )
+
+
+def dataset_from_collection(collection: Collection):
+    path_datatype = [
+        ("positions", float, 2),
+        ("timestamp", int),
+        ("properties", "S75"),  # S50 means string apparently?
+    ]
+    ds_arr = np.recarray(
+        len(collection),
+        dtype=[
+            ("paths", path_datatype),
+            ("timestamp", int),
+            ("name", "S50"),
+            ("properties", "S75"),
+        ],
+    )
+    ds_arr["paths"] = collection.as_array()
+    ds_arr["timestamp"] = collection.timestamp()
+    ds_arr["name"] = collection.name
+    ds_arr["properties"] = json.dumps(collection.properties)
+    return ds_arr
+
+
+def dataset_from_path(path):
+    ds_arr = np.recarray(
+        len(path),
+        dtype=[
+            ("positions", float, 2),
+            ("timestamp", int),
+            ("properties", "S75"),  # S50 means string apparently?
+        ],
+    )
+
+    ds_arr["positions"] = path.as_array()
+    ds_arr["timestamp"] = np.asarray([p.timestamp for p in path.vertices])
+    ds_arr["properties"] = np.asarray([json.dumps(p.properties) for p in path.vertices])
+    return ds_arr
+
+
+def path_from_dataset(dataset_positions, dataset_properties) -> Path:
+    asarray = np.array(dataset_positions)
+    parsed = from_array(asarray)
+    parsed.properties = dict(json.loads(dataset_properties[0][0]))
+    return parsed
+
+
+@timing
 def save_test_file():
     """
     Main problem is saving up the properties/metadata per Path and per Position
@@ -16,35 +96,35 @@ def save_test_file():
 
     And when one needs these properties, one can just pickle the objects
     """
-    path = Path.from_tuple_list([(0, 0), (10, 0), (10, 10), (0, 10), (0, 0)])
-    ds_dtype = [
-        ("positions", float, 2),
-        ("properties", "S50"),  # S50 means string apparently?
-    ]
 
-    ds_arr = np.recarray(len(path), dtype=ds_dtype)
-    ds_arr["positions"] = path.as_array()
-    ds_arr["properties"] = np.asarray("ok")
+    path = generate_test_path(100)
+    collection = generate_test_collection(10, 100)
+    ds_arr_prop = np.recarray(1, dtype=[("properties", "S80")])
+    json_string = json.dumps(path.properties)
+
+    ds_arr_prop["properties"] = np.asarray(json_string)
     # property is a value saved for each position
     with h5py.File(filename, "w") as h5f:
-        dset = h5f.create_dataset("positions", data=ds_arr, maxshape=(None))
+        h5f.create_dataset(
+            "positions", data=dataset_from_path(path)
+        )  # positions & position-properties
+        h5f.create_dataset("properties", data=ds_arr_prop)  # path-global properties
+
+    return path
 
 
 def from_array(arr: np.array) -> Path:
-    return Path.from_list([Position.from_array(a[0]) for a in arr])
+    return Path.from_list([Position(a[0][0], a[0][1], a[1], a[2]) for a in arr])
 
 
+@timing
 def load_test_file():
     f = h5py.File(filename, "r")
-    dset = f["positions"]
-    asarray = np.array(dset)
-    for a in asarray:
-        print(a)
-    parsed = from_array(asarray)
-
-    print(parsed)
+    parsed_path = path_from_dataset(f["positions"], f["properties"])
+    return parsed_path
 
 
 if __name__ == "__main__":
-    save_test_file()
-    load_test_file()
+    saved_path = save_test_file()
+    loaded_path = load_test_file()
+    assert saved_path == loaded_path
