@@ -1,7 +1,4 @@
 import serial
-import logging
-
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
 if __name__ == "__main__":
     port = "/dev/ttyUSB4"
@@ -10,7 +7,7 @@ if __name__ == "__main__":
     s = serial.Serial(
         port,
         baud,
-        timeout=1,
+        timeout=8,
         parity=serial.PARITY_NONE,
         bytesize=serial.EIGHTBITS,
         stopbits=serial.STOPBITS_ONE,
@@ -18,10 +15,11 @@ if __name__ == "__main__":
     )
     print(s.is_open)
 
-    file = "data/a4_full.vim"
+    esc = chr(27)
+    stx = chr(2)
+    ext = chr(3)
+    eot = chr(4)
 
-    with open(file, "r") as vim:
-        lines = vim.readlines()
-        for line in lines:
-            logging.info(line)
-            s.write(line.encode())
+    s.write(f"1===============================================================".encode())
+    ret = s.readline()
+    print(ret)
