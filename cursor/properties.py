@@ -3,14 +3,14 @@ from __future__ import annotations
 from enum import Enum, auto
 
 
-class Property(Enum):
-    LAYER = auto()
-    LINETYPE = auto()
-    VELOCITY = auto()
-    PEN_FORCE = auto()
-    PEN_SELECT = auto()
-    IS_POLY = auto()
-    LASER_PWM = auto()
+class Property(str, Enum):
+    LAYER = "layer"
+    LINETYPE = "linetype"
+    VELOCITY = "velocity"
+    PEN_FORCE = "penforce"
+    PEN_SELECT = "penselect"
+    IS_POLY = "ispoly"
+    LASER_PWM = "pwm"
     LASER_ONOFF = "laser"
     LASER_VOLT = "volt"
     LASER_AMP = "amp"
