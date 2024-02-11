@@ -1,10 +1,11 @@
-import serial
 import logging
+
+import serial
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
 if __name__ == "__main__":
-    port = "/dev/ttyUSB4"
+    port = "/dev/ttyUSB3"
     baud = 9600
     response = ""
     s = serial.Serial(
@@ -18,7 +19,7 @@ if __name__ == "__main__":
     )
     print(s.is_open)
 
-    file = "data/a4_full.vim"
+    file = "data/cursor_cover_test2.vim"
 
     with open(file, "r") as vim:
         lines = vim.readlines()
