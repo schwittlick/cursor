@@ -403,6 +403,13 @@ class Collection:
     def scale(self, x: float, y: float) -> None:
         [p.scale(x, y) for p in self]
 
+    def scaled(self, x: float, y: float) -> Collection:
+        _coll = Collection()
+        _coll.properties = self.properties
+        for p in self:
+            _coll.add(p.scaled(x, y))
+        return _coll
+
     def rot(self, delta: float) -> None:
         """
         in radians

@@ -5,7 +5,7 @@ import arcade.color
 
 from cursor.bb import BoundingBox
 from cursor.collection import Collection
-from cursor.device import PaperSize, PlotterType
+from cursor.device import PlotterType
 from cursor.export import ExportWrapper
 from cursor.path import Path
 from cursor.renderer.realtime import RealtimeRenderer
@@ -13,7 +13,7 @@ from cursor.renderer.realtime import RealtimeRenderer
 
 class RealtimeDropin(RealtimeRenderer):
     def __init__(self, collection: Collection):
-        out = BoundingBox(0, 0, 1920, 1080)
+        out = BoundingBox(0, 0, int(collection.bb().w), int(collection.bb().h))
         super().__init__(int(out.w), int(out.h), "temp")
         self.background(arcade.color.WHITE)
 
@@ -54,7 +54,6 @@ class Boilerplate(RealtimeRenderer):
         wrapper = ExportWrapper(
             c,
             PlotterType.HP_7550A_A3,
-            PaperSize.LANDSCAPE_A3,
             25,
             f"{self.title}",
             "version123",

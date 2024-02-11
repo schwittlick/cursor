@@ -40,7 +40,7 @@ class Position:
 
     @x.setter
     def x(self, v: float) -> None:
-        self._pos[0] = v
+        self._pos[0] = Decimal(v)
 
     @property
     def y(self) -> float:
@@ -48,7 +48,7 @@ class Position:
 
     @y.setter
     def y(self, v: float) -> None:
-        self._pos[1] = v
+        self._pos[1] = Decimal(v)
 
     def as_tuple(self) -> tuple[float, float]:
         return self.x, self.y
@@ -99,7 +99,7 @@ class Position:
         self.y = qy
 
     def translate(self, x: float, y: float) -> None:
-        self._pos += x, y
+        self._pos += Decimal(x), Decimal(y)
 
     def translated(self, x: float, y: float) -> Position:
         _p = self.copy()
@@ -107,7 +107,8 @@ class Position:
         return _p
 
     def scale(self, x: float, y: float) -> None:
-        self._pos *= x, y
+        self._pos = np.multiply(self._pos, [Decimal(x), Decimal(y)])
+        #self._pos *=
 
     def scaled(self, x: float, y: float) -> Position:
         _p = self.copy()

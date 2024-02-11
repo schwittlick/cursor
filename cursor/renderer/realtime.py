@@ -3,10 +3,10 @@ from __future__ import annotations
 import pathlib
 import random
 import typing
+import logging
 
 import arcade
 import pymsgbox
-import wasabi
 from arcade.experimental import RenderTargetTexture, postprocessing
 from arcade.experimental.uislider import UISlider
 from arcade.gui import UIManager, UIOnChangeEvent, UILabel
@@ -16,7 +16,7 @@ from cursor.data import DataDirHandler, DateHandler
 from cursor.path import Path
 from cursor.position import Position
 
-log = wasabi.Printer()
+arcade.enable_timings(100)
 
 
 class Buffer(RenderTargetTexture):
@@ -132,13 +132,13 @@ class RealtimeRenderer(arcade.Window):
             suffix = pymsgbox.prompt("suffix", default="")
         fn = folder / f"{DateHandler().utc_timestamp()}_{suffix}.png"
         folder.mkdir(parents=True, exist_ok=True)
-        log.good(f"saving {fn.as_posix()}")
+        logging.info(f"saving {fn.as_posix()}")
         try:
             arcade.get_image(0, 0, self.width, self.height).save(fn.as_posix(), "PNG")
         except ValueError as ve:
-            log.fail(f"Couldn't get image {ve}")
+            logging.error(f"Couldn't get image {ve}")
         except OSError as oe:
-            log.fail(f"Couldn't get image {oe}")
+            logging.error(f"Couldn't get image {oe}")
         finally:
             pass
 
@@ -193,7 +193,6 @@ class RealtimeRenderer(arcade.Window):
 
     @staticmethod
     def run():
-        arcade.enable_timings(100)
         arcade.run()
 
     @property
@@ -223,6 +222,8 @@ class RealtimeRenderer(arcade.Window):
     def add_path(self, p: Path, line_width: float = 5, color: arcade.color = None):
         if not color:
             color = random.choice(self.colors)[1]
+
+        _line_width = p.width if p.width else line_width
 
         line_strip = arcade.create_line_strip(p.as_tuple_list(), color, line_width)
         self.shapes.append(line_strip)
