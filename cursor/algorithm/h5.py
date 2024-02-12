@@ -10,7 +10,7 @@ from cursor.timer import timing
 
 """
 These functions save/load path/collection data from/to H5 files
-It should be faster for loading, but it's binary. Not sure if it's a good trade off 
+It should be faster for loading, but it's binary. Not sure if it's a good trade off
 for the current files saved as json. we need a benchmark
 """
 
