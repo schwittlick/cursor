@@ -108,7 +108,6 @@ class Position:
 
     def scale(self, x: float, y: float) -> None:
         self._pos = np.multiply(self._pos, [Decimal(x), Decimal(y)])
-        #self._pos *=
 
     def scaled(self, x: float, y: float) -> Position:
         _p = self.copy()
