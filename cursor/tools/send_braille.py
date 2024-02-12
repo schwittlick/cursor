@@ -1,8 +1,9 @@
 import logging
+import pathlib
+from tkinter import filedialog
+import tkinter as tk
 
 import serial
-
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
 if __name__ == "__main__":
     port = "/dev/ttyUSB3"
@@ -17,11 +18,16 @@ if __name__ == "__main__":
         stopbits=serial.STOPBITS_ONE,
         xonxoff=True
     )
-    print(s.is_open)
 
-    file = "data/cursor_cover_test2.vim"
+    root = tk.Tk()
+    root.withdraw()
 
-    with open(file, "r") as vim:
+    file_path = filedialog.askopenfilename()
+    path = pathlib.Path(file_path)
+
+    logging.info(f"Loaded {path.as_posix()}")
+
+    with open(path.as_posix(), "r") as vim:
         lines = vim.readlines()
         for line in lines:
             logging.info(line)

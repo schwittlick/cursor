@@ -29,8 +29,9 @@ setup(
     entry_points={
         "console_scripts": [
             "cursor_recorder = cursor.recorder:main",
-            "discovery = cursor.hpgl.discovery:discover",
-            "sendhpgl = cursor.hpgl.sendhpgl:main",
+            "discovery = cursor.tools.discovery:discover",
+            "sendhpgl = cursor.tools.sendhpgl:main",
+            "braille_convert = cursor.tools.braille_converter:main",
         ]
     },
     license="MIT",
