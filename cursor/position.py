@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 import math
-from decimal import *
+from decimal import Decimal, getcontext
 import numpy as np
 
 from cursor.bb import BoundingBox

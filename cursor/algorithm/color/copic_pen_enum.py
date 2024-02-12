@@ -213,4 +213,3 @@ class CopicColorCode(Enum):
     W8 = auto()
     W9 = auto()
     W10 = auto()
-

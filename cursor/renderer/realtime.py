@@ -223,9 +223,11 @@ class RealtimeRenderer(arcade.Window):
         if not color:
             color = random.choice(self.colors)[1]
 
+        # if line as width property, use it, if not, use the one from function params
         _line_width = p.width if p.width else line_width
+        _color = p.color if p.color else color
 
-        line_strip = arcade.create_line_strip(p.as_tuple_list(), color, line_width)
+        line_strip = arcade.create_line_strip(p.as_tuple_list(), _color, _line_width)
         self.shapes.append(line_strip)
 
         if self.render_points:

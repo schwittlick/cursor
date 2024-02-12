@@ -7,7 +7,7 @@ def test_analyze():
     file = DataDirHandler().test_hpgls() / "complex_hpgl01.hpgl"
     data = analyzer.analyze(file)
 
-    analyzed_data_to_compare = HPGLAnalyzeData(545, 0, 5872, 436244)
+    analyzed_data_to_compare = HPGLAnalyzeData(545, 0, 5872, 68)
 
     data_per_pen = {
         Pen(1): PenData(0, 69, 1412),

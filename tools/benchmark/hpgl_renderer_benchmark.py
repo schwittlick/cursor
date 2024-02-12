@@ -1,5 +1,3 @@
-import pathlib
-
 from cursor.collection import Collection
 from cursor.path import Path
 

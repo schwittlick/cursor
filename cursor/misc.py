@@ -4,7 +4,6 @@ import cv2
 import numpy as np
 import numba as nb
 import pynput
-import logging
 from datetime import datetime
 
 from shapely import LineString

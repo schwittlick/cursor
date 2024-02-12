@@ -6,6 +6,10 @@ import tkinter as tk
 import serial
 
 if __name__ == "__main__":
+    """
+    There is no way to "detect" a Index Everest V2.
+    It does not respond on any input..
+    """
     port = "/dev/ttyUSB3"
     baud = 9600
     response = ""
@@ -16,7 +20,7 @@ if __name__ == "__main__":
         parity=serial.PARITY_NONE,
         bytesize=serial.EIGHTBITS,
         stopbits=serial.STOPBITS_ONE,
-        xonxoff=True
+        xonxoff=True,
     )
 
     root = tk.Tk()

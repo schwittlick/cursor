@@ -14,7 +14,7 @@ class WobblyFunction:
 
         path = Path()
         for i in range(length):
-            path.add(i, self.val2((i / length) * math.pi, 0) )
+            path.add(i, self.val2((i / length) * math.pi, 0))
 
         collection.add(path)
         return collection
@@ -23,7 +23,7 @@ class WobblyFunction:
         return math.sin(3 * x + 3 * t + 5)
 
     def val2(self, x, t):
-        return math.sin(2*x+3*t+5) + math.sin(3*x+2*t+4)
+        return math.sin(2 * x + 3 * t + 5) + math.sin(3 * x + 2 * t + 4)
 
 
 class Spiral:
@@ -64,7 +64,7 @@ class Spiral:
         return self.custom(pp)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     wob = WobblyFunction()
     c = wob.generate(100)
     RealtimeDropin(c)
