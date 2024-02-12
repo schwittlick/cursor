@@ -114,8 +114,8 @@ class HPGLRenderer(BaseRenderer):
 
                 pbar.update(1)
 
-        #_hpgl.PA(0, 0)
-        #_hpgl.SP(0)
+        _hpgl.PA(0, 0)
+        _hpgl.SP(0)
 
         return _hpgl.data
 

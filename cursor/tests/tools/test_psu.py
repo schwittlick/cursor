@@ -1,7 +1,7 @@
 import random
 import time
 
-from cursor.device.psu import PSU
+from cursor.devices.psu import PSU
 
 
 def DISABLED_test_psu():
