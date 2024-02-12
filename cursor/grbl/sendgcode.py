@@ -7,7 +7,7 @@ import serial
 from tqdm import tqdm
 
 from cursor.grbl.parser import parse_xyz
-from cursor.tools.psu import PSU
+from cursor.device.psu import PSU
 
 CHECK_FEEDBACK = True
 

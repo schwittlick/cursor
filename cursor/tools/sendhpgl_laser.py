@@ -6,8 +6,8 @@ from serial import Serial
 from tqdm import tqdm
 
 from cursor.hpgl import read_until_char
-from cursor.hpgl.sendhpgl import SerialSender
-from cursor.tools.psu import PSU
+from cursor.tools.sendhpgl import SerialSender
+from cursor.device.psu import PSU
 
 log = wasabi.Printer(pretty=True)
 
