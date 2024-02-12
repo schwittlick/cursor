@@ -122,7 +122,14 @@ class Position:
         compare equality by comparing all fields
         """
 
-        return self.x == o.x and self.y == o.y and self.timestamp == o.timestamp
+        if self.x != o.x:
+            return False
+        if self.y != o.y:
+            return False
+        if self.timestamp != o.timestamp:
+            return False
+
+        return True
 
     def __lt__(self, o: Position) -> bool:
         """

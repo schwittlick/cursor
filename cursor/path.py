@@ -30,7 +30,7 @@ from cursor.position import Position
 
 import logging
 
-from cursor.tools.decorator_helpers import timing
+from cursor.timer import timing
 
 
 class Path:

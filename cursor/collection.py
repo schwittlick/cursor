@@ -31,7 +31,7 @@ from cursor.misc import apply_matrix
 from cursor.path import Path
 from cursor.position import Position
 from cursor.sorter import Sorter
-from cursor.tools.decorator_helpers import timing
+from cursor.timer import timing
 
 
 class Collection:
@@ -69,7 +69,7 @@ class Collection:
 
     def __repr__(self) -> str:
         tuples = [pa.as_tuple_list() for pa in self]
-        return f"PathCollection({self.name}) -> ({len(self)})\n{tuples}"
+        return f"Collection({self.name}) -> ({len(self)})\n{tuples}"
 
     def __eq__(self, other: Collection) -> bool:
         if not isinstance(other, Collection):

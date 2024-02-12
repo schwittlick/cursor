@@ -6,7 +6,7 @@ from cursor.collection import Collection
 from cursor.hpgl.hpgl_tokenize import tokenizer
 from cursor.path import Path
 from cursor.position import Position
-from cursor.tools.decorator_helpers import timing
+from cursor.timer import timing
 
 IN = 'IN'
 SP = 'SP'

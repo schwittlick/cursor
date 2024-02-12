@@ -3,7 +3,7 @@ from operator import itemgetter
 
 from cursor.algorithm import frechet
 from cursor.path import Path
-from cursor.tools.decorator_helpers import timing
+from cursor.timer import timing
 
 
 # noinspection PyArgumentList

@@ -7,7 +7,7 @@ import colour
 
 from cursor.algorithm.color.copic_pen_enum import CopicColorCode as CCC
 from cursor.algorithm.kd import KDTree
-from cursor.tools.decorator_helpers import timing
+from cursor.timer import timing
 
 
 class Color:
