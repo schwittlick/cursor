@@ -19,6 +19,7 @@ Line per page 41
 Print line per page 37
 Actually printable (20mm margin all around) 75
 chars per line 63
+bitmap should have dimensions: 126 (2x63) x 225 (3x75)
 
 **297x420mm (a3)**
 

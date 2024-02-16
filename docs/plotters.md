@@ -13,6 +13,7 @@
 | [Graphtec MP2000](graphtech.md) | Marcel  | A3    |                               | DP25 M & HP-IB    |          |                      | 8         |
 | Graphtec MP3100                 | Marcel  | A3    |                               | DP25 M & HP-IB    |          |                      | 8         |
 | [HP 7470A](hp7470a.md)          | Marcel  | A4    | OK                            | DP25 M            | HPGL     |                      | 2         |
+| [HP 7470A](hp7470a.md)          | Marcel  | A4    | NOT CHECKED                   | DP25 M            | HPGL     |                      | 2         |
 | HP 7475A                        | Marcel  | A3/A4 |                               | DP25 M            | HPGL     | HP/RO                | 6         |
 | HP 7475A                        | Marcel  | A3/A4 |                               | DP25 M            | HPGL     | HP/RO                | 6         |
 | HP 7475A                        | Marcel  | A3/A4 |                               | DP25 M            | HPGL     | HP/RO                | 6         |
