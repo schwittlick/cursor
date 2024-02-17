@@ -1,6 +1,26 @@
 from enum import Enum, auto
 
 
+class CopicColorGroup(Enum):
+    BLACK = auto()
+    BV = auto()
+    V = auto()
+    RV = auto()
+    R = auto()
+    YR = auto()
+    Y = auto()
+    YG = auto()
+    G = auto()
+    BG = auto()
+    B = auto()
+    E = auto()
+
+    # grays
+    W = auto()
+    T = auto()
+    N = auto()
+
+
 class CopicColorCode(Enum):
     _110 = auto()
     _000 = auto()  # actually doesnt exist, this is white

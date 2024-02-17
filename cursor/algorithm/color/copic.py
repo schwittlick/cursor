@@ -6,6 +6,7 @@ import random
 import colour
 
 from cursor.algorithm.color.copic_pen_enum import CopicColorCode as CCC
+from cursor.algorithm.color.copic_pen_enum import CopicColorGroup as CCG
 from cursor.algorithm.kd import KDTree
 from cursor.timer import timing
 
@@ -41,9 +42,12 @@ class Copic:
     rgb_kdtree = None
 
     def __new__(cls):
+        """
+        Singleton so all this is never parsed twice
+        """
         if cls._instance is None:
             cls._instance = super(Copic, cls).__new__(cls)
-            cls.available_colors_pens: list[CCC] = init_available_pens()
+            cls.available_colors_pens: dict[CCG, list[CCC]] = init_available_pens()
             cls.available_colors, cls.available_colors_rgb_index = cls.__parse_data(cls)
 
         return cls._instance
@@ -72,14 +76,13 @@ class Copic:
                         )
                     id = CCC[id_str]
 
-                    if id not in self.available_colors_pens:
-                        continue
-
-                    rgb = str(element["rgb"]).split(",")
-                    rgb_tup = int(rgb[0]) / 255, int(rgb[1]) / 255, int(rgb[2]) / 255
-                    color = Color(rgb_tup, id, element["name"])
-                    copic_data_final[id] = color
-                    copic_data_srgb_index_final[color.as_srgb()] = color
+                    for ccg, ccc in self.available_colors_pens.items():
+                        if id in ccc:
+                            rgb = str(element["rgb"]).split(",")
+                            rgb_tup = int(rgb[0]) / 255, int(rgb[1]) / 255, int(rgb[2]) / 255
+                            color = Color(rgb_tup, id, element["name"])
+                            copic_data_final[id] = color
+                            copic_data_srgb_index_final[color.as_srgb()] = color
                 except KeyError:
                     # only adding colors that have been turned into a pen
                     pass
@@ -97,8 +100,11 @@ class Copic:
     def random(self) -> Color:
         return random.choice(list(self.available_colors.values()))
 
-    def blues(self):
-        return [c for c in self.available_colors_pens if c.name.startswith("B")]
+    def get_group(self, ccg: CCG) -> list[CCC]:
+        """
+        Returns a list of Copic colors from the passed in color group enum
+        """
+        return self.available_colors_pens[ccg]
 
     @timing
     def most_similar_rgb_kdtree(self, c1_rgbs: tuple[float, float, float]) -> Color:
@@ -148,76 +154,82 @@ class Copic:
         return self.available_colors[first_key]
 
 
-def init_available_pens() -> list[CCC]:
-    pens = []
-    pens.extend(
-        [CCC.B0000, CCC.B000, CCC.B00, CCC.B01, CCC.B02, CCC.B04, CCC.B05, CCC.B06, CCC.B12, CCC.B14, CCC.B16,
-         CCC.B18, CCC.B21, CCC.B23, CCC.B24, CCC.B26, CCC.B28, CCC.B29, CCC.B32, CCC.B34, CCC.B37, CCC.B39,
-         CCC.B41, CCC.B45, CCC.B52, CCC.B60, CCC.B63, CCC.B66, CCC.B69, CCC.B79, CCC.B91, CCC.B93, CCC.B95,
-         CCC.B97, CCC.B99,
-         CCC.FB2,
-         ]
-    )
+def init_available_pens() -> dict[CCG, list[CCC]]:
+    pens: dict[CCG, list[CCC]] = {}
 
-    pens.extend(
-        [CCC.Y00, CCC.Y02, CCC.Y04, CCC.Y06, CCC.Y08, CCC.Y11, CCC.Y13, CCC.Y15, CCC.Y17, CCC.Y18, CCC.Y19,
-         CCC.Y21, CCC.Y23, CCC.Y28, CCC.Y32, CCC.Y35, CCC.Y38,
-         CCC.FY1,
-         ]
-    )
+    pens[CCG.BLACK] = [
+        CCC._110
+    ]
 
-    pens.extend(
-        [CCC.R00, CCC.R01, CCC.R02, CCC.R05, CCC.R08, CCC.R11, CCC.R12, CCC.R14, CCC.R17, CCC.R20, CCC.R21,
-         CCC.R22, CCC.R24, CCC.R27, CCC.R29, CCC.R30, CCC.R32, CCC.R35, CCC.R37, CCC.R39, CCC.R43, CCC.R46,
-         CCC.R56, CCC.R59, CCC.R81, CCC.R83, CCC.R85, CCC.R89,
-         ]
-    )
+    pens[CCG.BV] = [
+        CCC.BV0000, CCC.BV04, CCC.BV11, CCC.BV20, CCC.BV31, CCC.BV34
+    ]
 
-    pens.extend(
-        [CCC.G00, CCC.G02, CCC.G03, CCC.G05, CCC.G07, CCC.G09, CCC.G12, CCC.G14, CCC.G16, CCC.G17, CCC.G19,
-         CCC.G20, CCC.G21, CCC.G24, CCC.G28, CCC.G29, CCC.G40, CCC.G43, CCC.G46, CCC.G82, CCC.G85, CCC.G94,
-         CCC.G99,
-         CCC.FYG2,
-         ]
-    )
+    pens[CCG.V] = [
+        CCC.V09, CCC.V12, CCC.V15, CCC.V17, CCC.V20, CCC.V91, CCC.V99, CCC.FV
+    ]
 
-    pens.extend(
-        [CCC.V09, CCC.V12, CCC.V15, CCC.V17, CCC.V20, CCC.V91, CCC.V99, CCC.FV]
-    )
+    pens[CCG.RV] = [
+        CCC.RV06, CCC.RV09, CCC.RV11, CCC.RV13, CCC.RV19, CCC.RV29, CCC.RV63, CCC.RV93,
+        CCC.FRV1,
+    ]
 
-    pens.extend(
-        [CCC.RV06, CCC.RV09, CCC.RV11, CCC.RV13, CCC.RV19, CCC.RV29, CCC.RV63, CCC.RV93,
-         CCC.FRV1,
-         ]
-    )
+    pens[CCG.R] = [
+        CCC.R00, CCC.R01, CCC.R02, CCC.R05, CCC.R08, CCC.R11, CCC.R12, CCC.R14, CCC.R17, CCC.R20, CCC.R21,
+        CCC.R22, CCC.R24, CCC.R27, CCC.R29, CCC.R30, CCC.R32, CCC.R35, CCC.R37, CCC.R39, CCC.R43, CCC.R46,
+        CCC.R56, CCC.R59, CCC.R81, CCC.R83, CCC.R85, CCC.R89,
+    ]
 
-    pens.extend(
-        [CCC.BG01, CCC.BG02, CCC.BG07, CCC.BG09, CCC.BG13, CCC.BG15, CCC.BG18, CCC.BG57, CCC.BG72,
-         CCC.FBG2,
-         ]
-    )
+    pens[CCG.YR] = [
+        CCC.YR01, CCC.YR02, CCC.YR04, CCC.YR07, CCC.YR18, CCC.YR23, CCC.YR24, CCC.YR68,
+        CCC.FYR,
+    ]
 
-    pens.extend([CCC.BV0000, CCC.BV04, CCC.BV11, CCC.BV20, CCC.BV31, CCC.BV34])
+    pens[CCG.Y] = [
+        CCC.Y00, CCC.Y02, CCC.Y04, CCC.Y06, CCC.Y08, CCC.Y11, CCC.Y13, CCC.Y15, CCC.Y17, CCC.Y18, CCC.Y19,
+        CCC.Y21, CCC.Y23, CCC.Y28, CCC.Y32, CCC.Y35, CCC.Y38,
+        CCC.FY1,
+    ]
 
-    pens.extend(
-        [CCC.YR01, CCC.YR02, CCC.YR04, CCC.YR07, CCC.YR18, CCC.YR23, CCC.YR24, CCC.YR68,
-         CCC.FYR,
-         ]
-    )
+    pens[CCG.YG] = [
+        CCC.YG01, CCC.YG05, CCC.YG11, CCC.YG21, CCC.YG25, CCC.YG45, CCC.YG67, CCC.YG91,
+        CCC.FYG1,
+    ]
 
-    pens.extend(
-        [CCC.YG01, CCC.YG05, CCC.YG11, CCC.YG21, CCC.YG25, CCC.YG45, CCC.YG67, CCC.YG91,
-         CCC.FYG1,
-         ]
-    )
+    pens[CCG.G] = [
+        CCC.G00, CCC.G02, CCC.G03, CCC.G05, CCC.G07, CCC.G09, CCC.G12, CCC.G14, CCC.G16, CCC.G17, CCC.G19,
+        CCC.G20, CCC.G21, CCC.G24, CCC.G28, CCC.G29, CCC.G40, CCC.G43, CCC.G46, CCC.G82, CCC.G85, CCC.G94,
+        CCC.G99,
+        CCC.FYG2,
+    ]
 
-    pens.extend(
-        [CCC.E01, CCC.E04, CCC.E11, CCC.E17, CCC.E23, CCC.E37, CCC.E39, CCC.E53, CCC.E87, CCC.E97,
-         ]
-    )
+    pens[CCG.BG] = [
+        CCC.BG01, CCC.BG02, CCC.BG07, CCC.BG09, CCC.BG13, CCC.BG15, CCC.BG18, CCC.BG57, CCC.BG72,
+        CCC.FBG2,
+    ]
 
-    pens.extend([CCC.W1, CCC.W2, CCC.W3, CCC.W4, CCC.W5, CCC.W6, CCC.W8, CCC.W9, CCC.W10])
+    pens[CCG.B] = [
+        CCC.B0000, CCC.B000, CCC.B00, CCC.B01, CCC.B02, CCC.B04, CCC.B05, CCC.B06, CCC.B12, CCC.B14, CCC.B16,
+        CCC.B18, CCC.B21, CCC.B23, CCC.B24, CCC.B26, CCC.B28, CCC.B29, CCC.B32, CCC.B34, CCC.B37, CCC.B39,
+        CCC.B41, CCC.B45, CCC.B52, CCC.B60, CCC.B63, CCC.B66, CCC.B69, CCC.B79, CCC.B91, CCC.B93, CCC.B95,
+        CCC.B97, CCC.B99,
+        CCC.FB2,
+    ]
 
-    pens.extend([CCC.T9, CCC.N3, CCC._110])
+    pens[CCG.E] = [
+        CCC.E01, CCC.E04, CCC.E11, CCC.E17, CCC.E23, CCC.E37, CCC.E39, CCC.E53, CCC.E87, CCC.E97,
+    ]
+
+    pens[CCG.W] = [
+        CCC.W1, CCC.W2, CCC.W3, CCC.W4, CCC.W5, CCC.W6, CCC.W8, CCC.W9, CCC.W10
+    ]
+
+    pens[CCG.T] = [
+        CCC.T9
+    ]
+
+    pens[CCG.N] = [
+        CCC.N3
+    ]
 
     return pens
