@@ -18,13 +18,14 @@ from cursor.hpgl import read_until_char, OUTPUT_IDENTIFICATION, OUTPUT_DIMENSION
 
 
 def async_discover(
-        serial_port: str,
-        baudrate: int = 9600,
-        stopbits: tuple = serial.STOPBITS_ONE,
-        bytesize: tuple = serial.EIGHTBITS,
-        parity: str = serial.PARITY_NONE,
-        xonxoff: bool = False,
-        timeout: float = 5):
+    serial_port: str,
+    baudrate: int = 9600,
+    stopbits: tuple = serial.STOPBITS_ONE,
+    bytesize: tuple = serial.EIGHTBITS,
+    parity: str = serial.PARITY_NONE,
+    xonxoff: bool = False,
+    timeout: float = 5,
+) -> tuple[str, str] | None:
     ser = serial.Serial(
         port=serial_port,
         baudrate=baudrate,
@@ -32,10 +33,11 @@ def async_discover(
         bytesize=bytesize,
         parity=parity,
         xonxoff=xonxoff,
-        timeout=timeout)
+        timeout=timeout,
+    )
     try:
         ser.write(f"{OUTPUT_IDENTIFICATION}".encode())
-        ret = read_until_char(ser).split(',')[0]
+        ret = read_until_char(ser).split(",")[0]
         model = ret.strip()
         if len(model) > 0:
             ser.write(f"{OUTPUT_DIMENSIONS}".encode())
@@ -59,12 +61,13 @@ def async_discover(
 
 
 def discover(
-        baudrate=9600,
-        stopbits=serial.STOPBITS_ONE,
-        bytesize=serial.EIGHTBITS,
-        parity=serial.PARITY_NONE,
-        xonxoff=False,
-        timeout=1.5) -> list:
+    baudrate=9600,
+    stopbits=serial.STOPBITS_ONE,
+    bytesize=serial.EIGHTBITS,
+    parity=serial.PARITY_NONE,
+    xonxoff=False,
+    timeout=1.5,
+) -> set[tuple[str, str]]:
     ports = list(serial.tools.list_ports.comports())
     data = []
 
@@ -72,7 +75,11 @@ def discover(
     # better do that instead of troubling the sendhpgl communication protocol
     # >> lsof /dev/ttyUSB0
     # returns nothing when the port is not used by another application
-    ports = [port.device for port in ports if not len(subprocess.getoutput(f'lsof {port.device}')) > 0]
+    ports = [
+        port.device
+        for port in ports
+        if not len(subprocess.getoutput(f"lsof {port.device}")) > 0
+    ]
 
     threads = []
 
@@ -86,7 +93,10 @@ def discover(
                     bytesize=bytesize,
                     parity=parity,
                     xonxoff=xonxoff,
-                    timeout=timeout)))
+                    timeout=timeout,
+                )
+            )
+        )
 
         threads.append(thread)
         thread.start()
@@ -94,10 +104,10 @@ def discover(
     for thread in threads:
         thread.join()
 
-    data = list(filter(lambda x: x is not None, data))
+    data = set(list(filter(lambda x: x is not None, data)))
 
     return data
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     discover()
