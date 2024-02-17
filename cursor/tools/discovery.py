@@ -41,6 +41,8 @@ def async_discover(
             ser.write(f"{OUTPUT_DIMENSIONS}".encode())
             ret = read_until_char(ser)
             space = ret.strip()
+            # TODO: Machine e.g. 7470A does not return output dimensions..
+            # With this current logic the machine is not detected..
 
             ser.close()
             logging.info(f"Discovery {serial_port} -> {model} (OH: {space})")
