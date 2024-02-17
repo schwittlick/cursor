@@ -59,13 +59,13 @@ class Collection:
             case list():
                 new_paths = self.__paths + other
                 p = Collection()
-                p.__paths.extend(new_paths)
+                p.paths.extend(new_paths)
                 return p
             case Collection():
-                new_paths = self.__paths + other.get_all()
-                p = Collection()
-                p.__paths.extend(new_paths)
-                return p
+                new_paths = self.paths + other.get_all()
+                c = Collection()
+                c.paths.extend(new_paths)
+                return c
 
     def __repr__(self) -> str:
         tuples = [pa.as_tuple_list() for pa in self]
@@ -132,7 +132,7 @@ class Collection:
             c.add(p)
         return c
 
-    def add(self, path: BoundingBox | Path | list[Path]) -> None:
+    def add(self, path: BoundingBox | Path | list[Path] | Collection) -> None:
         match path:
             case Path():
                 self.__paths.append(path)
@@ -149,6 +149,8 @@ class Collection:
                     ]
                 )
                 self.__paths.append(p)
+            case Collection():
+                self.__paths.extend(path.paths)
 
     def pop(self, idx: int) -> Path:
         return self.__paths.pop(idx)

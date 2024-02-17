@@ -256,6 +256,26 @@ def test_pathcollection_add2():
     assert len(pcol4) == 3
 
 
+def test_collection_add3():
+    # adding collection to collection
+
+    c1 = Collection()
+    p1 = Path()
+    p1.add(5, 5111)
+    p1.add(10, 11)
+    c1.add(p1)
+
+    c2 = Collection()
+    p2 = Path()
+    p2.add(545, 54)
+    p2.add(160, 11)
+    c2.add(p2)
+
+    assert len(c1) == 1
+    c1.add(c2)
+    assert len(c1) == 2
+
+
 def test_pathcollection_get():
     pcol = Collection()
 
