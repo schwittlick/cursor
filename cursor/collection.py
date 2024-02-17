@@ -247,7 +247,8 @@ class Collection:
 
     def copy(self) -> Collection:
         p = Collection(name=self.name)
-        p.__paths.extend(copy.deepcopy(self.__paths))
+        p.__paths = copy.deepcopy(self.__paths)
+        p.properties = copy.deepcopy(self.properties)
         return p
 
     def get_all(self) -> list[Path]:

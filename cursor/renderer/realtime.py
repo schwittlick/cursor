@@ -64,6 +64,7 @@ class RealtimeRenderer(arcade.Window):
             width=int(width), height=int(height), title=title, antialiasing=True, samples=16, gl_version=(4, 5),
             resizable=resizable
         )
+        logging.info(f"RealtimeRenderer started {self.width}x{self.height}")
         arcade.set_background_color(arcade.color.GRAY)
         self.__title = title
         self.colors = [

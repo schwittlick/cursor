@@ -66,6 +66,9 @@ class Path:
         if len(self) != len(other):
             return False
 
+        if self.properties != other.properties:
+            return False
+
         for i in range(len(self)):
             if self.vertices[i] != other[i]:
                 return False
@@ -280,7 +283,7 @@ class Path:
 
     def copy(self) -> Path:
         return Path(
-            None if self.empty() else copy.deepcopy(self.vertices), self.properties
+            None if self.empty() else copy.deepcopy(self.vertices), copy.deepcopy(self.properties)
         )
 
     def reverse(self) -> None:

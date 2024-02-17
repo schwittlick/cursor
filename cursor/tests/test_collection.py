@@ -13,16 +13,21 @@ from cursor.position import Position
 
 
 def test_copy():
+    path = Path.from_tuple_list([(0, 0), (13, 37)])
+    path.width = 123
     collection = Collection(name="test123")
-    collection.add(Path.from_tuple_list([(0, 0), (13, 37)]))
+    collection.add(path)
 
-    assert collection.paths == [Path.from_tuple_list([(0, 0), (13, 37)])]
+    path_to_compare = Path.from_tuple_list([(0, 0), (13, 37)])
+    path_to_compare.width = 123
+
+    assert collection.paths == [path_to_compare]
     assert collection.properties == {}
     assert collection.name == "test123"
 
     collection_copy = collection.copy()
 
-    assert collection_copy.paths == [Path.from_tuple_list([(0, 0), (13, 37)])]
+    assert collection_copy.paths == [path_to_compare]
     assert collection_copy.properties == {}
     assert collection_copy.name == "test123"
 

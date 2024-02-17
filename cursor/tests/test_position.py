@@ -1,6 +1,7 @@
 import math
 
 from cursor.position import Position
+from cursor.properties import Property
 
 
 def test_timedpos_simple():
@@ -12,6 +13,7 @@ def test_timedpos_simple():
 
 def test_timedposition_copy():
     t1 = Position(0, 0, 0)
+    t1.properties[Property.COLOR] = (0, 1, 0)
 
     t2 = t1.copy()
 

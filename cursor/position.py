@@ -7,6 +7,7 @@ import numpy as np
 
 from cursor.bb import BoundingBox
 
+# determines the precision of the Decimals
 getcontext().prec = 4
 
 
@@ -61,7 +62,7 @@ class Position:
 
     def copy(self) -> Position:
         return type(self)(
-            copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(self.timestamp)
+            copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(self.timestamp), copy.deepcopy(self.properties)
         )
 
     def distance(self, t: Position | np.ndarray | tuple[float, float]) -> float:
@@ -127,6 +128,8 @@ class Position:
         if self.y != o.y:
             return False
         if self.timestamp != o.timestamp:
+            return False
+        if self.properties != o.properties:
             return False
 
         return True
