@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 import pathlib
@@ -13,14 +15,21 @@ from cursor.timer import timing
 
 class Color:
     def __init__(
-            self, rgb: tuple[float, float, float], code: CCC = None, name: str = "NoName"
+            self, rgb: tuple[float, float, float], code: CCC = None, group: CCG = None, name: str = "NoName"
     ):
         self.code = code
+        self.group = group
         self.name = name
         self.__rgb = rgb
 
     def is_copic(self) -> bool:
         return True if self.code else False
+
+    def as_srgb(self) -> tuple[float, ...]:
+        return self.__rgb
+
+    def as_rgb(self) -> tuple[int, ...]:
+        return tuple(int(v * 255) for v in self.__rgb)
 
     def __repr__(self):
         if self.code:
@@ -28,11 +37,14 @@ class Color:
         else:
             return f"{self.__rgb}"
 
-    def as_srgb(self) -> tuple[float, ...]:
-        return self.__rgb
+    def __eq__(self, other: Color):
+        return self.code == other.code
 
-    def as_rgb(self) -> tuple[int, ...]:
-        return tuple(int(v * 255) for v in self.__rgb)
+    def __lt__(self, other: Color):
+        return self.code.value < other.code.value
+
+    def __hash__(self):
+        return hash(str(self.__rgb))
 
 
 class Copic:
@@ -80,7 +92,7 @@ class Copic:
                         if id in ccc:
                             rgb = str(element["rgb"]).split(",")
                             rgb_tup = int(rgb[0]) / 255, int(rgb[1]) / 255, int(rgb[2]) / 255
-                            color = Color(rgb_tup, id, element["name"])
+                            color = Color(rgb_tup, id, ccg, element["name"])
                             copic_data_final[id] = color
                             copic_data_srgb_index_final[color.as_srgb()] = color
                 except KeyError:
@@ -100,13 +112,12 @@ class Copic:
     def random(self) -> Color:
         return random.choice(list(self.available_colors.values()))
 
-    def get_group(self, ccg: CCG) -> list[CCC]:
+    def get_colors_by_group(self, ccg: CCG) -> list[CCC]:
         """
         Returns a list of Copic colors from the passed in color group enum
         """
         return self.available_colors_pens[ccg]
 
-    @timing
     def most_similar_rgb_kdtree(self, c1_rgbs: tuple[float, float, float]) -> Color:
         """
         Simply create a kd-tree here and add all rgb values of available copic colors

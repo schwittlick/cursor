@@ -145,7 +145,7 @@ def lerp(a: float, b: float, t: float) -> float:
 
 
 def inv_lerp(a: float, b: float, v: float) -> float:
-    """Inverse Linar Interpolation, get the fraction between a and b on which v resides.
+    """Inverse Linear Interpolation, get the fraction between a and b on which v resides.
     Examples
     --------
         0.5 == inv_lerp(0, 100, 50)

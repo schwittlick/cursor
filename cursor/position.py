@@ -8,7 +8,7 @@ import numpy as np
 from cursor.bb import BoundingBox
 
 # determines the precision of the Decimals
-getcontext().prec = 4
+getcontext().prec = 5
 
 
 class Position:

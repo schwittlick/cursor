@@ -1,4 +1,4 @@
-from enum import Enum, auto
+from enum import Enum, auto, IntEnum
 
 
 class CopicColorGroup(Enum):
@@ -21,7 +21,7 @@ class CopicColorGroup(Enum):
     N = auto()
 
 
-class CopicColorCode(Enum):
+class CopicColorCode(IntEnum):
     _110 = auto()
     _000 = auto()  # actually doesnt exist, this is white
 
