@@ -3,6 +3,7 @@
 | [Roland DPX3300](dpx3300.md)    | Marcel  | A1    | OK                            | *DP25 & Parallel  | HPGL     | *HP/RO               | 8         |
 | Roland DPX3300                  | Marcel  | A1    | Y-Axis <br>broken             | DP25 & Parallel   | HPGL     | HP/RO                | 8         |
 | Roland DXY 980                  | Marcel  | A3    |                               | DP25 M & HP-IB    | HPGL     | HP/RO                | 8         |
+| Roland DXY 980                  | Marcel  | A3    | Pen holder broken             | DP25 M & HP-IB    | HPGL     | HP/RO                | 8         |
 | Roland DXY 885                  | Marcel  | A3    |                               | DP25 M & HP-IB    | HPGL     | HP/RO                | 8         |
 | Roland DXY 1200                 | Marcel  | A3    | OK                            | DP25 M & HP-IB    | HPGL     | HP/RO                | 8         |
 | Roland DXY 1200                 | Marcel  | A3    |                               | DP25 M & HP-IB    | HPGL     | HP/RO                | 8         |
