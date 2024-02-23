@@ -14,17 +14,17 @@ import threading
 
 import serial.tools.list_ports
 
-from cursor.hpgl import read_until_char, OUTPUT_IDENTIFICATION, OUTPUT_DIMENSIONS
+from cursor.hpgl import read_until_char, OUTPUT_DIMENSIONS, MODEL_IDENTIFICATION
 
 
 def async_discover(
-    serial_port: str,
-    baudrate: int = 9600,
-    stopbits: tuple = serial.STOPBITS_ONE,
-    bytesize: tuple = serial.EIGHTBITS,
-    parity: str = serial.PARITY_NONE,
-    xonxoff: bool = False,
-    timeout: float = 5,
+        serial_port: str,
+        baudrate: int = 9600,
+        stopbits: tuple = serial.STOPBITS_ONE,
+        bytesize: tuple = serial.EIGHTBITS,
+        parity: str = serial.PARITY_NONE,
+        xonxoff: bool = False,
+        timeout: float = 5,
 ) -> tuple[str, str] | None:
     ser = serial.Serial(
         port=serial_port,
@@ -36,15 +36,20 @@ def async_discover(
         timeout=timeout,
     )
     try:
-        ser.write(f"{OUTPUT_IDENTIFICATION}".encode())
-        ret = read_until_char(ser).split(",")[0]
+        ser.write(f"{MODEL_IDENTIFICATION}".encode())
+        """
+        Using another command like @OUTPUT_IDENTIFICATION is not possible, because models
+        like the HP7470A do not respond to this command. Using the classic HPGL command OI; 
+        @MODEL_IDENTIFICATION should work for all models. There might be only one difference that
+        the machines only respond to OI; when they are finished setting up. In the case of a HP7550
+        the machine will not reply it's model before the paper is loaded.
+        """
+        ret = read_until_char(ser)
         model = ret.strip()
         if len(model) > 0:
             ser.write(f"{OUTPUT_DIMENSIONS}".encode())
             ret = read_until_char(ser)
             space = ret.strip()
-            # TODO: Machine e.g. 7470A does not return output dimensions..
-            # With this current logic the machine is not detected..
 
             ser.close()
             logging.info(f"Discovery {serial_port} -> {model} (OH: {space})")
@@ -61,12 +66,12 @@ def async_discover(
 
 
 def discover(
-    baudrate=9600,
-    stopbits=serial.STOPBITS_ONE,
-    bytesize=serial.EIGHTBITS,
-    parity=serial.PARITY_NONE,
-    xonxoff=False,
-    timeout=1.5,
+        baudrate=9600,
+        stopbits=serial.STOPBITS_ONE,
+        bytesize=serial.EIGHTBITS,
+        parity=serial.PARITY_NONE,
+        xonxoff=False,
+        timeout=1.5,
 ) -> set[tuple[str, str]]:
     ports = list(serial.tools.list_ports.comports())
     data = []
