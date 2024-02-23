@@ -1,0 +1,124 @@
+- name: Roland DPX 3300
+  shortname: dpx3300
+  data_format: hpgl
+  hpgl_name: DPX-3300
+  bounding_boxes:
+    - size: a1
+      bb:
+        - -16920 # x1
+        - -11180 # y1
+        - 16340 # x2
+        - 11180 # y2
+    - size: a2
+      bb:
+        - -16920
+        - -11180
+        - 5440
+        - 4629
+    - size: a3
+      bb:
+        - -16920
+        - -11180
+        - -1112
+        - -3276
+  units_per_cm:
+    - 40
+    - 40
+  max_speed: 40
+  default_buffer_size: 512 # TODO: test this
+- name: HP 7550
+  shortname: hp7550
+  data_format: hpgl
+  hpgl_name: 7550A
+  bounding_boxes:
+    - size: a3 # todo: A4 missing
+      bb:
+        - 0
+        - 0
+        - 15970
+        - 10870
+  units_per_cm:
+    - 40
+    - 40
+  max_speed: 80
+  default_buffer_size: 512
+- name: HP 7574A
+  shortname: hp7474a
+  data_format: hpgl
+  hpgl_name: 7475A
+  bounding_boxes:
+    - size: a4
+      bb:
+        - 0
+        - 0
+        - 11040
+        - 7721
+    - size: a3
+      bb:
+        - 0
+        - 0
+        - 16158
+        - 11040
+  units_per_cm:
+    - 40
+    - 40
+  max_speed: 40
+  default_buffer_size: 512 # todo: is this correct
+- name: HP 7470A
+  shortname: hp7470a
+  data_format: hpgl
+  hpgl_name: 7470A
+  bounding_boxes:
+    - size: a4
+      bb:
+        - 0
+        - 0
+        - 10900
+        - 7650
+  units_per_cm:
+    - 40
+    - 40
+  max_speed: 40
+  default_buffer_size: 256
+- name: HP DraftMaster RX Plus
+  shortname: hpdm_rx_plus
+  data_format: hpgl
+  hpgl_name: 7596A
+  bounding_boxes:
+    - size: a0
+      bb:
+        - -21760
+        - -15400
+        - 22880
+        - 15480
+    - size: 100x70
+      bb:
+        - -19230
+        - -13791
+        - 19230
+        - 13791
+    - size: a1
+      bb:
+        - -16090
+        - -11684
+        - 16090
+        - 11684
+    - size: a2
+      bb:
+        - -10740
+        - -8230
+        - 10740
+        - 8230
+    - size: a3 # TODO: a4 missing
+      bb:
+        - -7302
+        - -5820
+        - 7302
+        - 5820
+  units_per_cm:
+    - 40
+    - 40
+  max_speed: 110
+  default_buffer_size: 1024
+
+
