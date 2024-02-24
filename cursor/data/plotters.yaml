@@ -91,7 +91,7 @@
         - -15400
         - 22880
         - 15480
-    - size: 100x70
+    - size: 1000x700
       bb:
         - -19230
         - -13791
@@ -121,6 +121,46 @@
         - -5820
         - 7302
         - 5820
+  units_per_cm:
+    - 40
+    - 40
+  max_speed: 110
+  default_buffer_size: 1024
+- name: Mutoh XP 500
+  shortname: mutoh_xp500
+  data_format: hpgl
+  hpgl_name: 7595A
+  bounding_boxes:
+    - size: 1000x700
+      bb:
+        - -19370
+        - -13728
+        - 19370
+        - 13728
+    - size: 500x297
+      bb:
+        - -9452
+        - -5722
+        - 9452
+        - 5722
+    - size: a1
+      bb:
+        - -16200
+        - -11645
+        - 16200
+        - 11645
+    - size: a2
+      bb:
+        - -11284
+        - -8149
+        - 11284
+        - 8149
+    - size: a3 # TODO: a4 missing
+      bb:
+        - -7815
+        - -5716
+        - 7815
+        - 5716
   units_per_cm:
     - 40
     - 40

@@ -48,17 +48,18 @@ class Path:
             self._vertices = vertices
 
         if properties is not None:
-            self.properties = properties
+            self.properties.update(properties)
 
             if Property.COLOR not in self.properties.keys():
-                self.properties[Property.COLOR] = (0, 0, 0)
+                self.color = (0, 0, 0)
             if Property.WIDTH not in self.properties.keys():
-                self.properties[Property.WIDTH] = 1
+                self.width = 1
 
     def __repr__(self):
         rep = (
             f"vertices: {len(self.vertices)} "
             f"bb: {self.bb()}"
+            f"properties: {self.properties}"
         )
         return rep
 
@@ -1140,11 +1141,13 @@ class Path:
         paths_list = []
         current = Path()
         current.add_position(self.vertices[0])
-        for v in self.vertices:
+        for v in self.vertices[1:]:
             if current[-1].color == v.color:
                 current.add_position(v)
             else:
-                current.add(v.x, v.y, v.timestamp, current[-1].color)
+                pos = Position(v.x, v.y, v.timestamp)
+                pos.color = current[-1].color
+                current.add_position(pos)
                 paths_list.append(current)
                 current = Path()
                 current.add_position(v)

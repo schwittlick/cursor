@@ -6,6 +6,7 @@ from decimal import Decimal, getcontext
 import numpy as np
 
 from cursor.bb import BoundingBox
+from cursor.properties import Property
 
 # determines the precision of the Decimals
 getcontext().prec = 5
@@ -39,6 +40,9 @@ class Position:
     def x(self) -> float:
         return float(self._pos[0])
 
+    def pos(self) -> tuple[Decimal, Decimal]:
+        return self._pos[0], self._pos[1]
+
     @x.setter
     def x(self, v: float) -> None:
         self._pos[0] = Decimal(v)
@@ -50,6 +54,17 @@ class Position:
     @y.setter
     def y(self, v: float) -> None:
         self._pos[1] = Decimal(v)
+
+    @property
+    def color(self) -> tuple[int, ...] | None:
+        if Property.COLOR not in self.properties.keys():
+            return None
+
+        return self.properties[Property.COLOR]
+
+    @color.setter
+    def color(self, color: tuple[int, ...]) -> None:
+        self.properties[Property.COLOR] = color
 
     def as_tuple(self) -> tuple[float, float]:
         return self.x, self.y
@@ -123,9 +138,12 @@ class Position:
         compare equality by comparing all fields
         """
 
-        if self.x != o.x:
-            return False
-        if self.y != o.y:
+        prec = 4
+        x1 = round(self.x, prec)
+        x2 = round(o.x, prec)
+        y1 = round(self.y, prec)
+        y2 = round(o.y, prec)
+        if x1 != x2 or y1 != y2:
             return False
         if self.timestamp != o.timestamp:
             return False

@@ -33,4 +33,4 @@ if __name__ == "__main__":
 
         discovered = discovered_new
 
-        logging.info(f"Checking serial")
+        logging.info("Checking serial")

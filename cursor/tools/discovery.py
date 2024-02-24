@@ -39,7 +39,7 @@ def async_discover(
         ser.write(f"{MODEL_IDENTIFICATION}".encode())
         """
         Using another command like @OUTPUT_IDENTIFICATION is not possible, because models
-        like the HP7470A do not respond to this command. Using the classic HPGL command OI; 
+        like the HP7470A do not respond to this command. Using the classic HPGL command OI;
         @MODEL_IDENTIFICATION should work for all models. There might be only one difference that
         the machines only respond to OI; when they are finished setting up. In the case of a HP7550
         the machine will not reply it's model before the paper is loaded.

@@ -6,6 +6,8 @@ import random
 import pytest
 import math
 
+from cursor.properties import Property
+
 
 def test_path_empty_start():
     p = Path()
@@ -605,3 +607,32 @@ def test_functional_fixed():
     path = Path.from_tuple_list([(0, 0), (1, 0), (2, 1), (3, -1), (4, 0), (5, 0)])
     is_functional, intersections = path.is_functional_fixed()
     assert is_functional
+
+
+def test_split_by_color():
+    pos1 = Position(0, 0, 0, {Property.COLOR: (1, 2, 3)})
+    pos2 = Position(1, 0, 0, {Property.COLOR: (1, 2, 3)})
+    pos3 = Position(2, 1, 0, {Property.COLOR: (100, 200, 300)})
+    pos4 = Position(3, -1, 0, {Property.COLOR: (1, 2, 3)})
+    pos5 = Position(4, 0, 0, {Property.COLOR: (1, 2, 3)})
+    pos6 = Position(5, 0, 0, {Property.COLOR: (100, 200, 300)})
+
+    path = Path.from_list([pos1, pos2, pos3, pos4, pos5, pos6])
+    paths = path.split_by_color()
+
+    new_path1 = Path.from_list([Position(0, 0, 0, {Property.COLOR: (1, 2, 3)}),
+                                Position(1, 0, 0, {Property.COLOR: (1, 2, 3)}),
+                                Position(2, 1, 0, {Property.COLOR: (1, 2, 3)})])
+
+    new_path2 = Path.from_list([Position(2, 1, 0, {Property.COLOR: (100, 200, 300)}),
+                                Position(3, -1, 0, {Property.COLOR: (100, 200, 300)})])
+
+    new_path3 = Path.from_list([Position(3, -1, 0, {Property.COLOR: (1, 2, 3)}),
+                                Position(4, 0, 0, {Property.COLOR: (1, 2, 3)}),
+                                Position(5, 0, 0, {Property.COLOR: (1, 2, 3)})])
+
+    new_path4 = Path.from_list([Position(5, 0, 0, {Property.COLOR: (100, 200, 300)}),
+                                Position(5, 0, 0, {Property.COLOR: (100, 200, 300)})])
+    compare_paths = [new_path1, new_path2, new_path3, new_path4]
+
+    assert compare_paths == paths
