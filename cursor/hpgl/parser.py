@@ -12,6 +12,7 @@ IN = 'IN'
 SP = 'SP'
 LB = 'LB'
 SI = 'SI'
+VS = 'VS'
 
 PA = 'PA'
 PD = 'PD'
@@ -44,7 +45,8 @@ class HPGLParser:
 
         self.func_map = {IN: self.__init, SP: self.__parse_pen_select, PA: self.__parse_pen_absolute,
                          LB: self.__parse_label, SI: self.__parse_font_size, PD: self.__parse_pen_down,
-                         PU: self.__parse_pen_up, DI: self.__parse_direction_absolute, ES: self.__parse_spacing}
+                         PU: self.__parse_pen_up, DI: self.__parse_direction_absolute, ES: self.__parse_spacing,
+                         VS: self.__parse_velocity}
 
         self.__init()
 
@@ -72,6 +74,7 @@ class HPGLParser:
         self.cur_pen = 0
         self.pos = (0, 0)
         self.char_size_mm = 2.85, 3.75
+        self.velocity = None
 
         self.run = 1
         self.rise = 0
@@ -100,6 +103,8 @@ class HPGLParser:
         if self.pen_down:
             path = Path.from_tuple_list(pts)
             path.pen_select = self.cur_pen
+            if self.velocity:
+                path.velocity = self.velocity
             self.paths.add(path)
 
     def __parse_label(self, cmd: str):
@@ -157,6 +162,9 @@ class HPGLParser:
     def __parse_spacing(self, cmd: str):
         _size = cmd[2:].split(',')
         self.spacing = float(_size[0]), float(_size[1])
+
+    def __parse_velocity(self, cmd: str):
+        self.velocity = int(cmd[2:])
 
 
 stick_font = {
