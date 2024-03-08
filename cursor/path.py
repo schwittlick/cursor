@@ -42,6 +42,7 @@ class Path:
             Property.LAYER: "layer1",
             Property.COLOR: (0, 0, 0),
             Property.WIDTH: 1,
+            Property.TAGS: []
         }
 
         if vertices is not None:
@@ -176,6 +177,13 @@ class Path:
     @velocity.setter
     def velocity(self, pen_velocity: int) -> None:
         self.properties[Property.VELOCITY] = pen_velocity
+
+    @property
+    def tags(self) -> list[str] | None:
+        if Property.TAGS not in self.properties.keys():
+            return None
+
+        return self.properties[Property.TAGS]
 
     @property
     def color(self) -> tuple[int, ...] | None:

@@ -35,10 +35,10 @@ class HPGL:
         self.__data: list[str] = []
 
     @property
-    def data(self):
+    def data(self) -> str:
         return "".join(self.__data)
 
-    def save(self, fn):
+    def save(self, fn: str) -> None:
         logging.info(f"Saving {fn}")
         with open(fn, "w", encoding="utf-8") as file:
             file.write(self.data)
@@ -117,8 +117,8 @@ class HPGL:
         # for now the internal LF/CR commands are not being calculated
 
         new_x = (
-            self.pos[0]
-            + len(label) * self.char_size_mm[0] * self.plotter_unit * self.char_spacing
+                self.pos[0]
+                + len(label) * self.char_size_mm[0] * self.plotter_unit * self.char_spacing
         )
         new_y = self.pos[1]
         self.pos = rotate(self.pos, (new_x, new_y), math.radians(self.degree))

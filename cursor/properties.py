@@ -20,3 +20,4 @@ class Property(str, Enum):
     COLOR = "color"
     WIDTH = "width"
     RADIUS = 'radius'
+    TAGS = 'tags'
