@@ -1,5 +1,6 @@
 import logging
 import pathlib
+from argparse import ArgumentParser
 from tkinter import filedialog
 import tkinter as tk
 
@@ -10,11 +11,15 @@ if __name__ == "__main__":
     There is no way to "detect" a Index Everest V2.
     It does not respond on any input..
     """
-    port = "/dev/ttyUSB3"
+
+    parser = ArgumentParser()
+    parser.add_argument('port')
+    args = parser.parse_args()
+
     baud = 9600
     response = ""
     s = serial.Serial(
-        port,
+        args.port,
         baud,
         timeout=1,
         parity=serial.PARITY_NONE,
