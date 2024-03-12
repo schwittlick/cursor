@@ -17,16 +17,7 @@ def save(data: list[str], filename: str) -> None:
     logging.info(f"Saved {filename}")
 
 
-def main():
-    root = tk.Tk()
-    root.withdraw()
-
-    file_path = filedialog.askopenfilename()
-
-    if not file_path:
-        logging.warning("Not selected any file. Aborting")
-        sys.exit(0)
-
+def convert(file_path: str):
     path = pathlib.Path(file_path)
 
     logging.info(f"Loaded {path.as_posix()}")
@@ -40,6 +31,19 @@ def main():
 
     save(braille_image, f"{path.as_posix()}.vim")
     save(braille_inverted, f"{path.as_posix()}_inverted.vim")
+
+
+def main():
+    root = tk.Tk()
+    root.withdraw()
+
+    file_path = filedialog.askopenfilename()
+
+    if not file_path:
+        logging.warning("Not selected any file. Aborting")
+        sys.exit(0)
+
+    convert(file_path)
 
 
 if __name__ == "__main__":
