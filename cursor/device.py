@@ -24,6 +24,7 @@ class PlotterType(Enum):
     ROLAND_DPX3300_A3 = auto()
 
     HP_7550A_A3 = auto()
+    HP_7550A_A4 = auto()
 
     HP_7475A_A4 = auto()
     HP_7475A_A3 = auto()
@@ -77,6 +78,7 @@ class ExportFormatMappings:
         PlotterType.ROLAND_DPX3300_A3: ExportFormat.HPGL,
 
         PlotterType.HP_7550A_A3: ExportFormat.HPGL,
+        PlotterType.HP_7550A_A4: ExportFormat.HPGL,
 
         PlotterType.HP_7475A_A3: ExportFormat.HPGL,
         PlotterType.HP_7475A_A4: ExportFormat.HPGL,
@@ -152,6 +154,7 @@ class MinmaxMapping:
         PlotterType.ROLAND_DPX3300_A3: BB(-16920, -11180, -1112, -3276),
 
         PlotterType.HP_7550A_A3: BB(0, 0, 15970, 10870) - BB(0, 0, 320, 0),
+        PlotterType.HP_7550A_A4: BB(0, 0, 10870, 7600) - BB(0, 0, 0, 320),
         # subtracting 8 mm of extra space from bottom. how much padding does this have on paper?
 
         PlotterType.HP_7475A_A4: BB(0, 0, 11040, 7721),
@@ -205,6 +208,7 @@ class PlotterName:
         PlotterType.ROLAND_DPX3300_A3: "dpx3300_a3",
 
         PlotterType.HP_7550A_A3: "hp7550a_a3",
+        PlotterType.HP_7550A_A4: "hp7550a_a4",
 
         PlotterType.HP_7475A_A3: "hp7475a_a3",
         PlotterType.HP_7475A_A4: "hp7475a_a4",
@@ -246,7 +250,7 @@ class PlotterName:
 class PlotterHpglNames:
     names = {
         "DPX-3300": [PlotterType.ROLAND_DPX3300_A1, PlotterType.ROLAND_DPX3300_A2, PlotterType.ROLAND_DPX3300_A3],
-        "7550A": [PlotterType.HP_7550A_A3],
+        "7550A": [PlotterType.HP_7550A_A3, PlotterType.HP_7550A_A4],
         "7475A": [PlotterType.HP_7475A_A3, PlotterType.HP_7475A_A4],
         "7595A": [PlotterType.HP_DM_SX_A1, PlotterType.HP_DM_SX_A3, PlotterType.MUTOH_XP500_100x70cm,
                   PlotterType.MUTOH_XP500_500x297mm,
@@ -268,6 +272,10 @@ class XYFactors:
         PlotterType.ROLAND_DPX3300_A1: (40, 40),
         PlotterType.ROLAND_DPX3300_A2: (40, 40),
         PlotterType.ROLAND_DPX3300_A3: (40, 40),
+
+        PlotterType.HP_7550A_A3: (40, 40),
+        PlotterType.HP_7550A_A4: (40, 40),
+
         PlotterType.DIY_PLOTTER: (2.85714, 2.90572),
         PlotterType.AXIDRAW: (3.704, 3.704),
         PlotterType.HP_7475A_A3: (40, 40),
@@ -282,7 +290,6 @@ class XYFactors:
         PlotterType.HP_DM_II_A3: (39.948, 40),
         PlotterType.DIGIPLOT_A1: (40, 40),
         PlotterType.HP_7470A_A4: (40, 40),
-        PlotterType.HP_7550A_A3: (40, 40),
         PlotterType.HP_DM_RX_PLUS_A2: (40, 39.5),
         PlotterType.ROLAND_PNC1000_50x100: (40.04, 40.04),
         PlotterType.HP_DM_RX_PLUS_A0: (39.9, 40.04),
@@ -303,6 +310,10 @@ class MaxSpeed:
         PlotterType.ROLAND_DPX3300_A1: 40,
         PlotterType.ROLAND_DPX3300_A2: 40,
         PlotterType.ROLAND_DPX3300_A3: 40,
+
+        PlotterType.HP_7550A_A3: 80,
+        PlotterType.HP_7550A_A4: 80,
+
         PlotterType.DIY_PLOTTER: 1,
         PlotterType.AXIDRAW: 1,
         PlotterType.HP_7475A_A3: 40,
@@ -317,7 +328,6 @@ class MaxSpeed:
         PlotterType.HP_DM_II_A3: 110,
         PlotterType.DIGIPLOT_A1: 1,
         PlotterType.HP_7470A_A4: 40,
-        PlotterType.HP_7550A_A3: 80,
         PlotterType.HP_DM_RX_PLUS_A2: 110,
         PlotterType.ROLAND_PNC1000_50x100: 40,
         PlotterType.HP_DM_RX_PLUS_A0: 110,
@@ -339,6 +349,10 @@ class BufferSize:
         PlotterType.ROLAND_DPX3300_A1: 0,  # 0 = not tested
         PlotterType.ROLAND_DPX3300_A2: 0,
         PlotterType.ROLAND_DPX3300_A3: 0,
+
+        PlotterType.HP_7550A_A3: 512,
+        PlotterType.HP_7550A_A4: 512,
+
         PlotterType.DIY_PLOTTER: 1,
         PlotterType.AXIDRAW: 1,
         PlotterType.HP_7475A_A3: 512,
@@ -353,7 +367,6 @@ class BufferSize:
         PlotterType.HP_DM_II_A3: 1024,
         PlotterType.DIGIPLOT_A1: 0,
         PlotterType.HP_7470A_A4: 256,
-        PlotterType.HP_7550A_A3: 512,
         PlotterType.HP_DM_RX_PLUS_A2: 1024,
         PlotterType.ROLAND_PNC1000_50x100: 0,
         PlotterType.HP_DM_RX_PLUS_A0: 1024,
