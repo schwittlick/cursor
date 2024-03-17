@@ -64,7 +64,7 @@ class JpegRenderer(BaseRenderer):
         for path in self.collection:
             path.scale(scale, scale)
             points = path.as_tuple_list()
-            self.img_draw.line(points, fill=path.color, width=path.width, joint="curve")
+            self.img_draw.line(points, fill=path.color, width=int(path.width), joint="curve")
 
     def render_points(self, points: list[Position], scale: float) -> Image:
         img: Image = Image.new("RGBA", (self.img.width, self.img.height),

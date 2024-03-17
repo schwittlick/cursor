@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from cursor.data import DateHandler
+from cursor.data import DateHandler, DataDirHandler
 from cursor.path import Path
 from cursor.properties import Property
 from cursor.position import Position
@@ -230,3 +230,10 @@ class Loader:
 
     def __len__(self) -> int:
         return len(self._recordings)
+
+
+def load_recording(fn: str = "1700043253.391094_just_another_day") -> Collection:
+    recordings = DataDirHandler().recordings()
+    _loader = Loader(directory=recordings,
+                     limit_files=[fn])
+    return _loader.all_paths()

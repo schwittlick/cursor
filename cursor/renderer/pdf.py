@@ -49,8 +49,8 @@ class PdfRenderer(BaseRenderer):
     def render_all_paths(self, scale: float = 1.0) -> None:
         for path in self.collection:
             path.scale(scale, scale)
-            r, g, b = path.properties[Property.COLOR]
-            width = path.properties[Property.WIDTH]
+            r, g, b = path.color
+            width = path.width
             self.pdf.set_line_width(width)
             self.pdf.set_draw_color(r, g, b)
             self.pdf.polyline(path.as_tuple_list())
