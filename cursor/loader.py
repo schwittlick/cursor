@@ -232,7 +232,7 @@ class Loader:
         return len(self._recordings)
 
 
-def load_recording(fn: str = "1700043253.391094_just_another_day") -> Collection:
+def load_recording(fn: str = "1704821016.488495_tuesday_evening") -> Collection:
     recordings = DataDirHandler().recordings()
     _loader = Loader(directory=recordings,
                      limit_files=[fn])
