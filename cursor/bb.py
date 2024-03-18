@@ -75,3 +75,6 @@ class BoundingBox:
 
     def __sub__(self, o: BoundingBox) -> BoundingBox:
         return BoundingBox(self.x - o.x, self.y - o.y, self.x2 - o.x2, self.y2 - o.y2)
+
+    def __add__(self, o: BoundingBox) -> BoundingBox:
+        return BoundingBox(self.x + o.x, self.y + o.y, self.x2 + o.x2, self.y2 + o.y2)

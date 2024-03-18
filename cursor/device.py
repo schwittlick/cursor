@@ -154,7 +154,7 @@ class MinmaxMapping:
         PlotterType.ROLAND_DPX3300_A3: BB(-16920, -11180, -1112, -3276),
 
         PlotterType.HP_7550A_A3: BB(0, 0, 15970, 10870) - BB(0, 0, 320, 0),
-        PlotterType.HP_7550A_A4: BB(0, 0, 10870, 7600) - BB(0, 0, 0, 320),
+        PlotterType.HP_7550A_A4: BB(0, 0, 10870, 7600) + BB(0, 360, 0, 0),
         # subtracting 8 mm of extra space from bottom. how much padding does this have on paper?
 
         PlotterType.HP_7475A_A4: BB(0, 0, 11040, 7721),
