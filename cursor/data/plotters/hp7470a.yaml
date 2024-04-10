@@ -1,0 +1,16 @@
+- name: HP 7470A
+  shortname: hp7470a
+  data_format: hpgl
+  hpgl_name: 7470A
+  bounding_boxes:
+    - size: a4
+      bb:
+        - 0
+        - 0
+        - 10900
+        - 7650
+  units_per_cm:
+    - 40
+    - 40
+  max_speed: 40
+  default_buffer_size: 256

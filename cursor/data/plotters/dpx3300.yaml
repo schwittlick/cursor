@@ -1,0 +1,28 @@
+- name: Roland DPX 3300
+  shortname: dpx3300
+  data_format: hpgl
+  hpgl_name: DPX-3300
+  bounding_boxes:
+    - size: a1
+      bb:
+        - -16920 # x1
+        - -11180 # y1
+        - 16340 # x2
+        - 11180 # y2
+    - size: a2
+      bb:
+        - -16920
+        - -11180
+        - 5440
+        - 4629
+    - size: a3
+      bb:
+        - -16920
+        - -11180
+        - -1112
+        - -3276
+  units_per_cm:
+    - 40
+    - 40
+  max_speed: 40
+  default_buffer_size: 512 # TODO: test this

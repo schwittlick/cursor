@@ -1,0 +1,46 @@
+- name: HP DraftMaster RX Plus
+  shortname: hpdm_rx_plus
+  data_format: hpgl
+  hpgl_name: 7596A
+  bounding_boxes:
+    - size: a0
+      bb:
+        - -21760
+        - -15400
+        - 22880
+        - 15480
+    - size: 1000x700
+      bb:
+        - -19230
+        - -13791
+        - 19230
+        - 13791
+    - size: 30x50
+      bb:
+        - -8925
+        - -5813
+        - 8925
+        - 5813
+    - size: a1
+      bb:
+        - -16090
+        - -11684
+        - 16090
+        - 11684
+    - size: a2
+      bb:
+        - -10740
+        - -8230
+        - 10740
+        - 8230
+    - size: a3 # TODO: a4 missing
+      bb:
+        - -7302
+        - -5820
+        - 7302
+        - 5820
+  units_per_cm:
+    - 40
+    - 40
+  max_speed: 110
+  default_buffer_size: 1024

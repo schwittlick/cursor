@@ -601,6 +601,46 @@ class Path:
 
         return angles
 
+    def slopes(self) -> list[float]:
+        """
+        Calculates and normalizes the slopes of the path. The normalization adjusts
+        the slopes by the general slope of the line connecting the start and end points
+        of the polyline, compensating for the overall orientation.
+
+        :return: List of normalized slopes for each segment of the polyline
+        """
+
+        def cal_slope(p1: Position, p2: Position) -> float:
+            return (p1.y - p2.y) / (p1.x - p2.x)
+
+        if len(self.vertices) < 2:
+            return []  # Not enough points to form a line
+
+        if self.vertices[0].x == self.vertices[-1].x:
+            general_slope = float('inf')
+        else:
+            general_slope = cal_slope(self.vertices[-1], self.vertices[0])
+
+        normalized_slopes = []
+        for i in range(len(self.vertices) - 1):
+            if self.vertices[i].x == self.vertices[i + 1].x:
+                # Simplify by treating vertical segments as having zero slope
+                segment_slope = float('inf')
+            else:
+                segment_slope = cal_slope(self.vertices[i + 1], self.vertices[i])
+
+            # If both slopes are infinite, the normalized slope is considered 0 (parallel lines)
+            if general_slope == float('inf') and segment_slope == float('inf'):
+                normalized_slope = 0
+            elif general_slope == float('inf'):
+                # If only the general slope is infinite, cannot normalize; set as infinite
+                normalized_slope = float('inf')
+            else:
+                normalized_slope = segment_slope - general_slope
+
+            normalized_slopes.append(normalized_slope)
+        return normalized_slopes
+
     @property
     def duration(self) -> int:
         start = self.start_pos().timestamp
@@ -1208,7 +1248,7 @@ class Path:
         return len(set(x_values)) == 1 or len(set(y_values)) == 1
 
     @timing
-    def is_functional(self, res: float = 0.1) -> tuple[bool, list[list[Position]]]:
+    def vertical_line_test(self, res: float = 0.1) -> tuple[bool, list[list[Position]]]:
         f_direction_vector = self.end_pos() - self.start_pos()
         f_perp_vector = Position(-f_direction_vector.y, f_direction_vector.x)
 
@@ -1250,7 +1290,7 @@ class Path:
         is_functional = not any(len(e) > 1 for e in all_intersections)
         return is_functional, all_intersections
 
-    def is_functional_fixed(self, n_sample_points: int | None = None):
+    def vertical_line_test2(self, n_sample_points: int | None = None) -> tuple[bool, list[set[Position]]]:
         """
         the previous implementation has the bug that it doesnt detect a curved path
         new idea: take n random points on the path instead of lerped x,y pos at an interval
@@ -1301,6 +1341,17 @@ class Path:
 
         is_functional = not any(len(e) > 1 for e in all_intersections)
         return is_functional, all_intersections
+
+    def vertical_line_test_fast(self) -> bool:
+        morped_path = self.morph((0, 0), (1, 0))
+        for i in range(len(morped_path) - 1):
+            _from = morped_path[i]
+            _to = morped_path[i + 1]
+
+            if _to.x <= _from.x:
+                return False
+
+        return True
 
     def rotated_into_bb(self, target_bb: BoundingBox) -> Path:
         if self.is_1_dimensional():

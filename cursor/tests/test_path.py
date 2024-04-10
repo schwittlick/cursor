@@ -426,6 +426,22 @@ def test_angles_posneg():
     assert math.isclose(changes[2], -45.0, abs_tol=0.00001)
 
 
+def test_slopes():
+    p = Path.from_tuple_list(
+        [(0, 1), (1, 1), (1, 0), (1, 1)])
+
+    slopes = p.slopes()
+    assert slopes == [0.0, float('inf'), float('inf')]
+
+
+def test_slopes2():
+    p = Path.from_tuple_list(
+        [(0, 0), (1, 0), (2, 1), (1, 1), (1, 3), (2, 3), (4, 0)])
+
+    slopes = p.slopes()
+    assert slopes == [0.0, float('inf'), float('inf')]
+
+
 def disabled_test_similarity():
     p1 = Path.from_tuple_list(
         [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4)])
@@ -599,13 +615,13 @@ def test_move_to_origin():
 
 def test_functional():
     path = Path.from_tuple_list([(0, 0), (1, 0), (2, 1), (3, -1), (4, 0), (5, 0)])
-    is_functional, intersections = path.is_functional(0.1)
+    is_functional, intersections = path.vertical_line_test(0.1)
     assert is_functional
 
 
 def test_functional_fixed():
     path = Path.from_tuple_list([(0, 0), (1, 0), (2, 1), (3, -1), (4, 0), (5, 0)])
-    is_functional, intersections = path.is_functional_fixed()
+    is_functional, intersections = path.vertical_line_test2()
     assert is_functional
 
 

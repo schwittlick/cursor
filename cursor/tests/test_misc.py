@@ -27,8 +27,8 @@ def test_line_intersect():
     f.transform(bb, BoundingBox(0, 0, dimension, dimension))
     nf.transform(bb, BoundingBox(0, 0, dimension, dimension))
 
-    is_func1, intersections_functional = f.is_functional(0.01)
-    is_func2, intersections_non_functional = nf.is_functional(0.01)
+    is_func1, intersections_functional = f.vertical_line_test(0.01)
+    is_func2, intersections_non_functional = nf.vertical_line_test(0.01)
 
     is_functional1 = all(len(ele) == 1 for ele in intersections_functional)
     is_functional2 = all(len(ele) == 1 for ele in intersections_non_functional)

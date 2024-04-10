@@ -1,0 +1,16 @@
+- name: HP 7550
+  shortname: hp7550
+  data_format: hpgl
+  hpgl_name: 7550A
+  bounding_boxes:
+    - size: a3 # todo: A4 missing
+      bb:
+        - 0
+        - 0
+        - 15970
+        - 10870
+  units_per_cm:
+    - 40
+    - 40
+  max_speed: 80
+  default_buffer_size: 512
