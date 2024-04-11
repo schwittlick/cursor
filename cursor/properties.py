@@ -5,7 +5,7 @@ from enum import Enum
 
 class Property(str, Enum):
     LAYER = "layer"
-    LINETYPE = "linetype"
+    LINE_TYPE = "linetype"
     VELOCITY = "velocity"
     PEN_FORCE = "penforce"
     PEN_SELECT = "penselect"

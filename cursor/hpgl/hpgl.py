@@ -69,6 +69,9 @@ class HPGL:
     def FS(self, force: int) -> None:
         self.__data.append(f"FS{force};")
 
+    def LT(self, line_type: tuple[int, int]) -> None:
+        self.__data.append(f"LT{line_type[0]},{line_type[1]};")
+
     def DT(self, c: chr = chr(3)):
         self.terminator = c
         self.__data.append(f"DT{c};")

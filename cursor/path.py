@@ -124,15 +124,15 @@ class Path:
         self._vertices = vertices
 
     @property
-    def line_type(self) -> int | None:
-        if Property.LINETYPE not in self.properties.keys():
+    def line_type(self) -> tuple[int, int] | None:
+        if Property.LINE_TYPE not in self.properties.keys():
             return None
 
-        return self.properties[Property.LINETYPE]
+        return self.properties[Property.LINE_TYPE]
 
     @line_type.setter
-    def line_type(self, line_type: int) -> None:
-        self.properties[Property.LINETYPE] = line_type
+    def line_type(self, line_type: tuple[int, int]) -> None:
+        self.properties[Property.LINE_TYPE] = line_type
 
     @property
     def layer(self) -> str | None:

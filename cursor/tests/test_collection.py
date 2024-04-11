@@ -560,19 +560,19 @@ def test_collection_travel_distance():
 
 
 def test_pathcollection_line_types():
-    p1 = Path(properties={Property.LINETYPE: 1})
+    p1 = Path(properties={Property.LINE_TYPE: 1})
     p1.add(0, 0)
 
-    p2 = Path(properties={Property.LINETYPE: 2})
+    p2 = Path(properties={Property.LINE_TYPE: 2})
     p2.add(0, 0)
 
-    p3 = Path(properties={Property.LINETYPE: 3})
+    p3 = Path(properties={Property.LINE_TYPE: 3})
     p3.add(0, 0)
 
-    p4 = Path(properties={Property.LINETYPE: 4})
+    p4 = Path(properties={Property.LINE_TYPE: 4})
     p4.add(0, 0)
 
-    p5 = Path(properties={Property.LINETYPE: 4})
+    p5 = Path(properties={Property.LINE_TYPE: 4})
     p5.add(0, 0)
 
     pc = Collection()
