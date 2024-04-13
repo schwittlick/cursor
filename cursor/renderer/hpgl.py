@@ -88,6 +88,12 @@ class HPGLRenderer(BaseRenderer):
                         _hpgl.FS(_fs)
                         _prev_force = _fs
 
+                _lt = p.line_type
+                if _lt:
+                    if _prev_line_type != _lt:
+                        _hpgl.LT(_lt)
+                        _prev_line_type = _lt
+
                 if p.laser_pwm:
                     _hpgl.custom(f"PWM{p.laser_pwm};")
 
