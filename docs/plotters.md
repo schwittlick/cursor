@@ -9,9 +9,10 @@
 | Roland DXY 1200                 | Marcel  | A3    | Not tested yet, one leg is broken | DP25 M & HP-IB    | HPGL     | HP/RO                | 8         |
 | Roland DXY 1200                 | Marcel  | A3    |                                   | DP25 M & HP-IB    | HPGL     | HP/RO                | 8         |
 | Roland DXY 1300                 | Marcel  | A3    | OK                                | DP25 M & HP-IB    | HPGL     | HP/RO                | 8         |
-| Roland DXY 990                  | Marcel  | A3    |                                   | DP25 M & HP-IB    | HPGL     |                      | 8         |
-| Roland DXY 1150A                | Marcel  | A3    |                                   | DP25 M & HP-IB    | HPGL     |                      | 8         |
-| Roland DXY 1150A                | Marcel  | A3    |                                   | DP25 M & HP-IB    | HPGL     |                      | 8         |
+| Roland DXY 990                  | Marcel  | A3    |                                   | DP25 M & HP-IB    | HPGL     | HP/RO                | 8         |
+| Roland DXY 1150A                | Marcel  | A3    | NOK                               | DP25 M & HP-IB    | HPGL     | HP/RO                | 8         |
+| Roland DXY 1150A                | Marcel  | A3    | NOK                               | DP25 M & HP-IB    | HPGL     | HP/RO                | 8         |
+| Roland DXY 1150A                | Marcel  | A3    | OK (Needs new surface)            | DP25 M & HP-IB    | HPGL     | HP/RO                | 8         |
 | [Graphtec MP2000](graphtech.md) | Marcel  | A3    | OK                                | DP25 M & HP-IB    | HPGL     | Graphtec Pens        | 8         |
 | Graphtec MP3100                 | Marcel  | A3    | OK                                | DP25 M & HP-IB    | HPGL     | Graphtec Pens        | 8         |
 | [HP 7470A](hp7470a.md)          | Marcel  | A4    | OK                                | DP25 M            | HPGL     |                      | 2         |
