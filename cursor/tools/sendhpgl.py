@@ -54,6 +54,8 @@ class SerialSender:
     def wait_for_free_io_memory(self, memory_amount: int) -> None:
         free_io_memory = self.plotter.free_memory()
 
+        logging.info(f"Free memory: {free_io_memory}")
+
         while free_io_memory < memory_amount:
             sleep(0.05)
             free_io_memory = self.plotter.free_memory()
