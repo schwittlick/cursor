@@ -56,6 +56,7 @@ class PlotterType(Enum):
     ROLAND_DXY980 = auto()
     ROLAND_DXY990 = auto()
     ROLAND_DXY1200_A3 = auto()
+    ROLAND_DXY1200_A5 = auto()
     ROLAND_DXY1200_A3_EXPANDED = auto()
     ROLAND_DXY1300 = auto()
 
@@ -117,6 +118,7 @@ class ExportFormatMappings:
         PlotterType.ROLAND_DXY980: ExportFormat.HPGL,
         PlotterType.ROLAND_DXY990: ExportFormat.HPGL,
         PlotterType.ROLAND_DXY1200_A3: ExportFormat.HPGL,
+        PlotterType.ROLAND_DXY1200_A5: ExportFormat.HPGL,
         PlotterType.ROLAND_DXY1200_A3_EXPANDED: ExportFormat.HPGL,
         PlotterType.ROLAND_DXY1300: ExportFormat.HPGL,
 
@@ -202,6 +204,7 @@ class MinmaxMapping:
         PlotterType.ROLAND_DXY980: BB(0, 0, 15200, 10800),  # taken from manual
         PlotterType.ROLAND_DXY990: BB(0, 0, 16640, 11040),  # taken from manual
         PlotterType.ROLAND_DXY1200_A3: BB(0, 0, 16158, 11040),  # taken from OH;
+        PlotterType.ROLAND_DXY1200_A5: BB(0, 0, 8400, 5950),  # taken from OA;
         PlotterType.ROLAND_DXY1200_A3_EXPANDED: BB(0, 0, 17272, 11880),
         PlotterType.ROLAND_DXY1300: BB(0, 0, 16158, 11040),  # taken from OH;
 
@@ -260,7 +263,8 @@ class PlotterName:
         PlotterType.ROLAND_DXY885: "dxy885",
         PlotterType.ROLAND_DXY980: "dxy980",
         PlotterType.ROLAND_DXY990: "dxy990",
-        PlotterType.ROLAND_DXY1200_A3: "dxy1200",
+        PlotterType.ROLAND_DXY1200_A3: "dxy1200_a3",
+        PlotterType.ROLAND_DXY1200_A5: "dxy1200_a5",
         PlotterType.ROLAND_DXY1200_A3_EXPANDED: "dxy1200_expanded",
         PlotterType.ROLAND_DXY1300: "dxy1300",
 
@@ -290,7 +294,8 @@ class PlotterHpglNames:
                   PlotterType.HP_DM_RX_PLUS_A3],
 
         "DXY-1300": [PlotterType.ROLAND_DXY1300],
-        "DXY-1200": [PlotterType.ROLAND_DXY1200_A3, PlotterType.ROLAND_DXY1200_A3_EXPANDED],
+        "DXY-1200": [PlotterType.ROLAND_DXY1200_A3, PlotterType.ROLAND_DXY1200_A5,
+                     PlotterType.ROLAND_DXY1200_A3_EXPANDED],
         "DXY-990": [PlotterType.ROLAND_DXY990],
         "DXY-980": [PlotterType.ROLAND_DXY980],
         "DXY-885": [PlotterType.ROLAND_DXY885],
@@ -313,6 +318,7 @@ class XYFactors:
         PlotterType.ROLAND_DXY980: (40, 40),
         PlotterType.ROLAND_DXY990: (40, 40),
         PlotterType.ROLAND_DXY1200_A3: (40, 40),
+        PlotterType.ROLAND_DXY1200_A5: (40, 40),
         PlotterType.ROLAND_DXY1200_A3_EXPANDED: (40, 40),
         PlotterType.ROLAND_DXY1300: (40, 40),
 
@@ -360,6 +366,7 @@ class MaxSpeed:
         PlotterType.ROLAND_DXY980: 40,
         PlotterType.ROLAND_DXY990: 40,
         PlotterType.ROLAND_DXY1200_A3: 40,
+        PlotterType.ROLAND_DXY1200_A5: 40,
         PlotterType.ROLAND_DXY1200_A3_EXPANDED: 40,
         PlotterType.ROLAND_DXY1300: 40,
 
@@ -407,6 +414,7 @@ class BufferSize:
         PlotterType.ROLAND_DXY980: 0,
         PlotterType.ROLAND_DXY990: 0,
         PlotterType.ROLAND_DXY1200_A3: 0,
+        PlotterType.ROLAND_DXY1200_A5: 0,
         PlotterType.ROLAND_DXY1200_A3_EXPANDED: 0,
         PlotterType.ROLAND_DXY1300: 0,
 
