@@ -52,16 +52,18 @@ class PlotterType(Enum):
     DIY_PLOTTER = auto()
     AXIDRAW = auto()
 
-    ROLAND_DXY1200_A3 = auto()
-    ROLAND_DXY1300 = auto()
-    ROLAND_DXY1200_A3_EXPANDED = auto()
-    ROLAND_DXY990 = auto()
-    ROLAND_DXY980 = auto()
     ROLAND_DXY885 = auto()
+    ROLAND_DXY980 = auto()
+    ROLAND_DXY990 = auto()
+    ROLAND_DXY1200_A3 = auto()
+    ROLAND_DXY1200_A3_EXPANDED = auto()
+    ROLAND_DXY1300 = auto()
+
     ROLAND_PNC1000 = auto()
+    ROLAND_PNC1000_50x100 = auto()
+
     TEKTRONIX_4662 = auto()
     DIGIPLOT_A1 = auto()
-    ROLAND_PNC1000_50x100 = auto()
     HP_7570A_A1 = auto()
     GRAPHTEC_MP2000 = auto()
     GRAPHTEC_MP3100 = auto()
@@ -111,16 +113,19 @@ class ExportFormatMappings:
         PlotterType.DIY_PLOTTER: ExportFormat.GCODE,
         PlotterType.AXIDRAW: ExportFormat.SVG,
 
-        PlotterType.ROLAND_DXY1300: ExportFormat.HPGL,
-        PlotterType.ROLAND_DXY1200_A3: ExportFormat.HPGL,
-        PlotterType.ROLAND_DXY990: ExportFormat.HPGL,
-        PlotterType.ROLAND_DXY980: ExportFormat.HPGL,
         PlotterType.ROLAND_DXY885: ExportFormat.HPGL,
+        PlotterType.ROLAND_DXY980: ExportFormat.HPGL,
+        PlotterType.ROLAND_DXY990: ExportFormat.HPGL,
+        PlotterType.ROLAND_DXY1200_A3: ExportFormat.HPGL,
+        PlotterType.ROLAND_DXY1200_A3_EXPANDED: ExportFormat.HPGL,
+        PlotterType.ROLAND_DXY1300: ExportFormat.HPGL,
+
         PlotterType.ROLAND_PNC1000: ExportFormat.HPGL,
+        PlotterType.ROLAND_PNC1000_50x100: ExportFormat.HPGL,
+
         PlotterType.TEKTRONIX_4662: ExportFormat.TEK,
 
         PlotterType.DIGIPLOT_A1: ExportFormat.DIGI,
-        PlotterType.ROLAND_PNC1000_50x100: ExportFormat.HPGL,
 
         PlotterType.HP_7570A_A1: ExportFormat.HPGL,
         PlotterType.GRAPHTEC_MP2000: ExportFormat.HPGL,
@@ -193,12 +198,13 @@ class MinmaxMapping:
         PlotterType.DIY_PLOTTER: BB(0, 0, 3350, -1715),
         PlotterType.AXIDRAW: BB(0, 0, 0, 0),  # todo: missing real bounds
 
-        PlotterType.ROLAND_DXY1300: BB(0, 0, 16158, 11040),  # taken from OH;
+        PlotterType.ROLAND_DXY885: BB(0, 0, 16158, 11040),  # taken from OH;
+        PlotterType.ROLAND_DXY980: BB(0, 0, 15200, 10800),  # taken from manual
+        PlotterType.ROLAND_DXY990: BB(0, 0, 16640, 11040),  # taken from manual
         PlotterType.ROLAND_DXY1200_A3: BB(0, 0, 16158, 11040),  # taken from OH;
         PlotterType.ROLAND_DXY1200_A3_EXPANDED: BB(0, 0, 17272, 11880),
-        PlotterType.ROLAND_DXY990: BB(0, 0, 16640, 11040),  # taken from manual
-        PlotterType.ROLAND_DXY980: BB(0, 0, 15200, 10800),  # taken from manual
-        PlotterType.ROLAND_DXY885: BB(0, 0, 16158, 11040),  # taken from OH;
+        PlotterType.ROLAND_DXY1300: BB(0, 0, 16158, 11040),  # taken from OH;
+
         # PlotterType.HP_7595A_A0: BB(-23160, -17602, 23160 + 1160, 17602),
         # HP_7595A: minimum 35mm padding
         PlotterType.ROLAND_PNC1000: BB(0, 0, 18800, 40000),  # actually unlimited y
@@ -250,16 +256,19 @@ class PlotterName:
 
         PlotterType.AXIDRAW: "axidraw",
         PlotterType.DIY_PLOTTER: "custom",
-        PlotterType.ROLAND_DXY1300: "dxy1300",
-        PlotterType.ROLAND_DXY1200_A3: "dxy1200",
-        PlotterType.ROLAND_DXY990: "dxy990",
-        PlotterType.ROLAND_DXY980: "dxy980",
-        PlotterType.ROLAND_DXY885: "dxy885",
-        PlotterType.ROLAND_PNC1000: "roland_camm1",
-        PlotterType.TEKTRONIX_4662: "tektronix4662",
 
-        PlotterType.DIGIPLOT_A1: "digiplot_a1",
+        PlotterType.ROLAND_DXY885: "dxy885",
+        PlotterType.ROLAND_DXY980: "dxy980",
+        PlotterType.ROLAND_DXY990: "dxy990",
+        PlotterType.ROLAND_DXY1200_A3: "dxy1200",
+        PlotterType.ROLAND_DXY1200_A3_EXPANDED: "dxy1200_expanded",
+        PlotterType.ROLAND_DXY1300: "dxy1300",
+
+        PlotterType.ROLAND_PNC1000: "roland_camm1",
         PlotterType.ROLAND_PNC1000_50x100: "roland_pnc1000",
+
+        PlotterType.TEKTRONIX_4662: "tektronix4662",
+        PlotterType.DIGIPLOT_A1: "digiplot_a1",
 
         PlotterType.HP_7570A_A1: "hp7570a_draftpro",
         PlotterType.GRAPHTEC_MP2000: "graphtec_mp2000",
@@ -281,7 +290,7 @@ class PlotterHpglNames:
                   PlotterType.HP_DM_RX_PLUS_A3],
 
         "DXY-1300": [PlotterType.ROLAND_DXY1300],
-        "DXY-1200": [PlotterType.ROLAND_DXY1200_A3],
+        "DXY-1200": [PlotterType.ROLAND_DXY1200_A3, PlotterType.ROLAND_DXY1200_A3_EXPANDED],
         "DXY-990": [PlotterType.ROLAND_DXY990],
         "DXY-980": [PlotterType.ROLAND_DXY980],
         "DXY-885": [PlotterType.ROLAND_DXY885],
@@ -300,17 +309,18 @@ class XYFactors:
         PlotterType.HP_7550A_A3: (40, 40),
         PlotterType.HP_7550A_A4: (40, 40),
 
+        PlotterType.ROLAND_DXY885: (40, 40),
+        PlotterType.ROLAND_DXY980: (40, 40),
+        PlotterType.ROLAND_DXY990: (40, 40),
+        PlotterType.ROLAND_DXY1200_A3: (40, 40),
+        PlotterType.ROLAND_DXY1200_A3_EXPANDED: (40, 40),
+        PlotterType.ROLAND_DXY1300: (40, 40),
+
         PlotterType.DIY_PLOTTER: (2.85714, 2.90572),
         PlotterType.AXIDRAW: (3.704, 3.704),
         PlotterType.HP_7475A_A3: (40, 40),
         PlotterType.HP_7475A_A4: (40, 40),
-        PlotterType.GRAPHTEC_MP2000: (40, 40),
-        PlotterType.GRAPHTEC_MP3100: (40, 40),
-        PlotterType.ROLAND_DXY1300: (40, 40),
-        PlotterType.ROLAND_DXY1200_A3: (40, 40),
-        PlotterType.ROLAND_DXY990: (40, 40),
-        PlotterType.ROLAND_DXY980: (40, 40),
-        PlotterType.ROLAND_DXY885: (40, 40),
+
         PlotterType.HP_DM_RX_PLUS_A1: (40, 40),
         PlotterType.ROLAND_PNC1000: (40, 40),
         PlotterType.HP_DM_RX_PLUS_A3: (37, 37),
@@ -331,6 +341,9 @@ class XYFactors:
         PlotterType.MUTOH_XP500_A1: (40.0, 40.0),
         PlotterType.MUTOH_XP500_A2: (40.0, 40.0),
         PlotterType.MUTOH_XP500_A3: (40.0, 40.0),
+
+        PlotterType.GRAPHTEC_MP2000: (40, 40),
+        PlotterType.GRAPHTEC_MP3100: (40, 40),
     }
 
 
@@ -343,17 +356,20 @@ class MaxSpeed:
         PlotterType.HP_7550A_A3: 80,
         PlotterType.HP_7550A_A4: 80,
 
+        PlotterType.ROLAND_DXY885: 40,
+        PlotterType.ROLAND_DXY980: 40,
+        PlotterType.ROLAND_DXY990: 40,
+        PlotterType.ROLAND_DXY1200_A3: 40,
+        PlotterType.ROLAND_DXY1200_A3_EXPANDED: 40,
+        PlotterType.ROLAND_DXY1300: 40,
+
         PlotterType.DIY_PLOTTER: 1,
         PlotterType.AXIDRAW: 1,
         PlotterType.HP_7475A_A3: 40,
         PlotterType.HP_7475A_A4: 40,
         PlotterType.GRAPHTEC_MP2000: 40,
         PlotterType.GRAPHTEC_MP3100: 40,
-        PlotterType.ROLAND_DXY1300: 40,
-        PlotterType.ROLAND_DXY1200_A3: 40,
-        PlotterType.ROLAND_DXY990: 40,
-        PlotterType.ROLAND_DXY980: 40,
-        PlotterType.ROLAND_DXY885: 40,
+
         PlotterType.HP_DM_RX_PLUS_A1: 110,
         PlotterType.ROLAND_PNC1000: 40,
         PlotterType.HP_DM_RX_PLUS_A3: 40,
@@ -387,16 +403,19 @@ class BufferSize:
         PlotterType.HP_7550A_A3: 512,
         PlotterType.HP_7550A_A4: 512,
 
+        PlotterType.ROLAND_DXY885: 0,
+        PlotterType.ROLAND_DXY980: 0,
+        PlotterType.ROLAND_DXY990: 0,
+        PlotterType.ROLAND_DXY1200_A3: 0,
+        PlotterType.ROLAND_DXY1200_A3_EXPANDED: 0,
+        PlotterType.ROLAND_DXY1300: 0,
+
         PlotterType.DIY_PLOTTER: 1,
         PlotterType.AXIDRAW: 1,
         PlotterType.HP_7475A_A3: 512,
         PlotterType.HP_7475A_A4: 512,
         PlotterType.GRAPHTEC_MP2000: 512,
-        PlotterType.ROLAND_DXY1300: 0,
-        PlotterType.ROLAND_DXY1200_A3: 0,
-        PlotterType.ROLAND_DXY990: 0,
-        PlotterType.ROLAND_DXY980: 0,
-        PlotterType.ROLAND_DXY885: 0,
+
         PlotterType.HP_DM_RX_PLUS_A1: 1024,
         PlotterType.ROLAND_PNC1000: 0,
         PlotterType.HP_DM_RX_PLUS_A3: 1024,
