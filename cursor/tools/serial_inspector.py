@@ -70,10 +70,9 @@ def send_serial_file(sender, app_data, user_data):
 def send_serial_command(sender, app_data, user_data):
     command = dpg.get_value("input_text")
     if serial_connection:
-        print_output(f"Not connected. not sending {command}")
+        send_command(command)
     else:
         print_output(f"Not connected. not sending {command}")
-    send_command(command)
     dpg.focus_item("input_text")
 
 
@@ -82,9 +81,9 @@ def send_command(command):
         try:
             serial_connection.write(command.encode())
             received_data = serial_connection.read(1024).decode()
-            current_text = dpg.get_value("output_text")
-            new_text = f"{current_text}\n{received_data}".strip()
-            print_output(new_text)
+            #current_text = dpg.get_value("output_text")
+            #new_text = f"{received_data}\n{current_text}".strip()
+            print_output(received_data)
         except serial.SerialException as e:
             print_output(str(e))
     else:
@@ -93,7 +92,7 @@ def send_command(command):
 
 dpg.create_context()
 
-with dpg.file_dialog(directory_selector=False, show=False, callback=file_selected, id="file_dialog", width=700,
+with dpg.file_dialog(directory_selector=False, show=False, callback=file_selected, tag="file_dialog", width=700,
                      height=400):
     dpg.add_file_extension(".*")
     dpg.add_file_extension("", color=(150, 255, 150, 255))
@@ -104,19 +103,19 @@ with dpg.file_dialog(directory_selector=False, show=False, callback=file_selecte
 
 with dpg.window(label="Plotter Inspector", width=900, height=800):
     with dpg.group(horizontal=True):
-        dpg.add_combo(label="Port", default_value="None", id="serial_port_dropdown", width=200)
-        dpg.add_combo(label="Baud", items=["1200", "9600"], default_value="9600", id="baud_dropdown", width=100)
+        dpg.add_combo(label="Port", default_value="None", tag="serial_port_dropdown", width=200)
+        dpg.add_combo(label="Baud", items=["1200", "9600"], default_value="9600", tag="baud_dropdown", width=100)
         dpg.add_button(label="Refresh", callback=refresh_serial_ports)
-        dpg.add_button(label="Connect", callback=connect_disconnect_serial, id="connect_button")
-        dpg.add_text("Status: Disconnected", id="connection_status")
+        dpg.add_button(label="Connect", callback=connect_disconnect_serial, tag="connect_button")
+        dpg.add_text("Status: Disconnected", tag="connection_status")
 
     with dpg.group(horizontal=True):
-        dpg.add_input_text(label="Command", id="input_text", on_enter=True, callback=send_serial_command)
+        dpg.add_input_text(label="Command", tag="input_text", on_enter=True, callback=send_serial_command)
         dpg.add_button(label="Send", callback=send_serial_command)
 
     with dpg.group(horizontal=True):
         dpg.add_button(label="Select File", callback=lambda: dpg.show_item("file_dialog"))
-        dpg.add_input_text(label="Selected File Path", id="file_path_text", readonly=True, width=700)
+        dpg.add_input_text(label="Selected File Path", tag="file_path_text", readonly=True, width=700)
         dpg.add_button(label="Send", callback=send_serial_file)
 
     with dpg.group(horizontal=True):
@@ -124,7 +123,7 @@ with dpg.window(label="Plotter Inspector", width=900, height=800):
         dpg.add_button(label="Send OH;", callback=lambda: send_command("OH;"))
 
     with dpg.child_window(height=650, autosize_x=True, horizontal_scrollbar=True):
-        dpg.add_text("", id="output_text")
+        dpg.add_text("", tag="output_text")
 
 refresh_serial_ports(None, None, None)
 
