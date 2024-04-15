@@ -9,10 +9,10 @@ from cursor.position import Position
 
 
 class HPGLPlotter:
-    def __init__(self, serialport: str):
+    def __init__(self, serialport: str, baud: int = 9600):
         self.serial_port_address = serialport
 
-        self.serial = Serial(port=serialport, baudrate=9600, timeout=1)
+        self.serial = Serial(port=serialport, baudrate=baud, timeout=1)
 
         model = self.identify()
         logging.info(f"Detected model {model}")

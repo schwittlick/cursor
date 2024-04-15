@@ -21,44 +21,47 @@ def concat_commands(cmd_list: list[str]) -> str:
 
 
 class SerialSender:
-    def __init__(self, serialport: str, hpgl_data: str):
+    def __init__(self):
+        pass
         # parser = HPGLParser()
         # collection = parser.parse(hpgl_data)
         # collection.sort(Sorter(param=SortParameter.PEN_SELECT, reverse=False))
         # now the problem is the scaling, we don't know the export parameters
-        self.commands = tokenizer(hpgl_data)
-        self.plotter = HPGLPlotter(serialport)
+        # self.commands = tokenizer(hpgl_data)
+        # self.plotter = HPGLPlotter(serialport)
 
-    def send(self):
+    @staticmethod
+    def send(plotter: HPGLPlotter, commands: list[str]):
         command_batch = 20
         # the amount of commands that are being sent to the plotter
         # in one batch. this speeds up drawing. take care to not send too
         # long commands that exceed the maximum buffer size
         logging.info(f"Sending with batch_count: {command_batch}")
         try:
-            with tqdm(total=len(self.commands)) as pbar:
+            with tqdm(total=len(commands)) as pbar:
                 pbar.update(0)
-                for i in range(0, len(self.commands), command_batch):
-                    batched_commands = self.commands[i:i + command_batch]
+                for i in range(0, len(commands), command_batch):
+                    batched_commands = commands[i:i + command_batch]
                     cmds = concat_commands(batched_commands)
-                    self.wait_for_free_io_memory(len(cmds) + 10)
+                    SerialSender.wait_for_free_io_memory(plotter, len(cmds) + 10)
 
-                    self.plotter.write(cmds)
+                    plotter.write(cmds)
                     pbar.update(command_batch)
         except KeyboardInterrupt:
             logging.warning("Interrupted- aborting.")
 
             sleep(0.1)
-            self.plotter.abort()
+            plotter.abort()
 
-    def wait_for_free_io_memory(self, memory_amount: int) -> None:
-        free_io_memory = self.plotter.free_memory()
+    @staticmethod
+    def wait_for_free_io_memory(plotter: HPGLPlotter, memory_amount: int) -> None:
+        free_io_memory = plotter.free_memory()
 
         logging.info(f"Free memory: {free_io_memory}")
 
         while free_io_memory < memory_amount:
             sleep(0.05)
-            free_io_memory = self.plotter.free_memory()
+            free_io_memory = plotter.free_memory()
 
 
 def main():
@@ -73,15 +76,12 @@ def main():
     text = ''.join(open(args.file, 'r', encoding='utf-8').readlines())
     # text = text.replace(" ", '').replace("\n", '').replace("\r", '')
 
-    sender = SerialSender(args.port, text)
-    sender.send()
+    commands = tokenizer(text)
+    plotter = HPGLPlotter(args.port)
+
+    sender = SerialSender()
+    sender.send(plotter, commands)
 
 
 if __name__ == '__main__':
-    test_filename = "/home/marcel/introspection/hwf.txt.hpgl.hpgl.hpgl"
-    test_serialport = "/dev/ttyUSB1"
-    text = ''.join(open(test_filename, 'r', encoding='utf-8').readlines())
-    # text = text.replace(" ", '').replace("\n", '').replace("\r", '')
-
-    sender = SerialSender(test_serialport, text)
-    sender.send()
+    pass
