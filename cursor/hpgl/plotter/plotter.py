@@ -1,4 +1,5 @@
 import logging
+import time
 
 from serial import Serial, SerialException
 
@@ -9,10 +10,8 @@ from cursor.position import Position
 
 
 class HPGLPlotter:
-    def __init__(self, serialport: str, baud: int = 9600):
-        self.serial_port_address = serialport
-
-        self.serial = Serial(port=serialport, baudrate=baud, timeout=1)
+    def __init__(self, serialport: Serial):
+        self.serial = serialport
 
         model = self.identify()
         logging.info(f"Detected model {model}")
@@ -70,8 +69,8 @@ class HPGLPlotter:
 
     def reopen(self):
         self.serial.close()
-        self.serial = None
-        self.serial = Serial(port=self.serial_port_address, baudrate=9600, timeout=1.0)
+        time.sleep(0.5)
+        self.serial.open()
 
     def read_until(self, char: chr = CR, timeout: float = 1.0) -> str:
         try:

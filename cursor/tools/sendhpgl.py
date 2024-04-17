@@ -2,6 +2,7 @@ import logging
 from argparse import ArgumentParser
 from time import sleep
 
+from serial import Serial
 from tqdm import tqdm
 
 from cursor.hpgl import LB_TERMINATOR
@@ -77,7 +78,9 @@ def main():
     # text = text.replace(" ", '').replace("\n", '').replace("\r", '')
 
     commands = tokenizer(text)
-    plotter = HPGLPlotter(args.port)
+
+    serial = Serial(port=args.port, baudrate=9600, timeout=1)
+    plotter = HPGLPlotter(serial)
 
     sender = SerialSender()
     sender.send(plotter, commands)
