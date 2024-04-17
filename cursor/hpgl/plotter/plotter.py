@@ -46,11 +46,11 @@ class HPGLPlotter:
     def free_memory(self):
         self.write(OUTBUT_BUFFER_SPACE)
         free_memory = self.read_until()
-        logging.info(f"free memory: {free_memory}")
+        #logging.info(f"free memory: {free_memory}")
         try:
             free_io_memory = int(free_memory)
         except ValueError as ve:
-            logging.warning(f"Failed getting info from plotter: {ve}")
+            #logging.warning(f"Failed getting info from plotter: {ve}")
             free_io_memory = 0
 
         return free_io_memory

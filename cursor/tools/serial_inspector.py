@@ -1,14 +1,22 @@
 import datetime
+import logging
+import time
 
 import dearpygui.dearpygui as dpg
 import serial
 import serial.tools.list_ports
 
-from cursor.hpgl import read_until_char
+from cursor.hpgl import read_until_char, RESET_DEVICE, ABORT_GRAPHICS
 from cursor.hpgl.hpgl_tokenize import tokenizer
 from cursor.hpgl.plotter.plotter import HPGLPlotter
-from cursor.tools.sendhpgl import SerialSender
+from cursor.tools.discovery import discover
+from cursor.tools.sendhpgl import SerialSender, concat_commands
 
+
+class MyHandler(logging.Handler):
+    def emit(self, record):
+        print_output(str(record))
+        #print('custom handler called with\n   ', record)
 
 # free static functions for the gui
 def open_file_dialog(sender, app_data, user_data):
@@ -34,8 +42,9 @@ def print_output(text: str) -> None:
 
 
 def refresh_serial_ports(sender, app_data, user_data):
-    ports = [port.device for port in serial.tools.list_ports.comports()]
-    dpg.configure_item("serial_port_dropdown", items=ports)
+    discovered_ports = discover(timeout=0.5)
+    ports_with_model = [f"{port[0]} -> {port[1]}" for port in discovered_ports]
+    dpg.configure_item("serial_port_dropdown", items=ports_with_model)
 
 
 class SerialInspector:
@@ -88,7 +97,7 @@ class SerialInspector:
             return
 
         try:
-            serial_port_string = dpg.get_value("serial_port_dropdown")
+            serial_port_string = str(dpg.get_value("serial_port_dropdown")).split(" ")[0]
             serial_port_baud = dpg.get_value("baud_dropdown")
             self.serial_connection = serial.Serial(serial_port_string, serial_port_baud, timeout=1)
             dpg.set_value("connection_status", "Connected")
@@ -108,6 +117,9 @@ class SerialInspector:
 
         plotter = HPGLPlotter(self.serial_connection)
 
+        loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+        for logger in loggers:
+            logger.addHandler(MyHandler())
         SerialSender().send(plotter, commands)
 
 
@@ -140,15 +152,49 @@ if __name__ == '__main__':
             dpg.add_button(label="Send", callback=inspector.send_serial_file)
 
         with dpg.group(horizontal=True):
-            dpg.add_button(label="Send OA;", callback=lambda: inspector.send_command("OA;"))
-            dpg.add_button(label="Send OE;", callback=lambda: inspector.send_command("OE;"))
-            dpg.add_button(label="Send OH;", callback=lambda: inspector.send_command("OH;"))
-            dpg.add_button(label="Send OI;", callback=lambda: inspector.send_command("OI;"))
+            dpg.add_button(label="IN;", callback=lambda: inspector.send_command("IN;"))
+            dpg.add_button(label="OA;", callback=lambda: inspector.send_command("OA;"))
+            dpg.add_button(label="OE;", callback=lambda: inspector.send_command("OE;"))
+            dpg.add_button(label="OH;", callback=lambda: inspector.send_command("OH;"))
+            dpg.add_button(label="OI;", callback=lambda: inspector.send_command("OI;"))
+        with dpg.group(horizontal=True):
+            dpg.add_button(label="PU;", callback=lambda: inspector.send_command("PU;"))
+            dpg.add_button(label="PD;", callback=lambda: inspector.send_command("PD;"))
+
+        with dpg.group(horizontal=True):
+            dpg.add_button(label="VS1;", callback=lambda: inspector.send_command("VS1;"))
+            dpg.add_button(label="VS10;", callback=lambda: inspector.send_command("VS10;"))
+            dpg.add_button(label="VS20;", callback=lambda: inspector.send_command("VS20;"))
+            dpg.add_button(label="VS40;", callback=lambda: inspector.send_command("VS40;"))
+            dpg.add_button(label="VS80;", callback=lambda: inspector.send_command("VS80;"))
+        with dpg.group(horizontal=True):
+            dpg.add_button(label="PA0,0;", callback=lambda: inspector.send_command("PA0,0;"))
+            dpg.add_button(label="PA10000,10000;", callback=lambda: inspector.send_command("PA10000,10000;"))
+
+        with dpg.group(horizontal=True):
+            dpg.add_button(label="ESC.R;", callback=lambda: inspector.send_command(f"{RESET_DEVICE};"))
+            dpg.add_button(label="ESC.K;", callback=lambda: inspector.send_command(f"{ABORT_GRAPHICS};"))
+
+        with dpg.group(horizontal=True):
+            dpg.add_button(label="SP0;", callback=lambda: inspector.send_command("SP0;"))
+            dpg.add_button(label="SP1;", callback=lambda: inspector.send_command("SP1;"))
+            dpg.add_button(label="SP2;", callback=lambda: inspector.send_command("SP2;"))
+            dpg.add_button(label="SP3;", callback=lambda: inspector.send_command("SP3;"))
+            dpg.add_button(label="SP4;", callback=lambda: inspector.send_command("SP4;"))
+            dpg.add_button(label="SP5;", callback=lambda: inspector.send_command("SP5;"))
+            dpg.add_button(label="SP6;", callback=lambda: inspector.send_command("SP6;"))
+            dpg.add_button(label="SP7;", callback=lambda: inspector.send_command("SP7;"))
+            dpg.add_button(label="SP8;", callback=lambda: inspector.send_command("SP8;"))
 
         with dpg.child_window(height=650, autosize_x=True, horizontal_scrollbar=True):
             dpg.add_input_text(label="", multiline=True, readonly=True, tag="output_text", width=970, height=700)
 
-    refresh_serial_ports(None, None, None)
+    ports = [port.device for port in serial.tools.list_ports.comports()]
+    dpg.configure_item("serial_port_dropdown", items=ports)
+
+    loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+    for logger in loggers:
+        print(logger)
 
     dpg.create_viewport(title='Serial Inspector', width=1020, height=850)
     dpg.setup_dearpygui()

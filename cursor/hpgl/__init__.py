@@ -14,6 +14,7 @@ OUTPUT_EXTENDED_STATUS = f"{ESC}.O"  # info about device satus etc
 OUTPUT_IDENTIFICATION = f"{ESC}.A"  # immediate return e.g. "7550A,firmwarenr"
 MODEL_IDENTIFICATION = "OI;"  # immediate return e.g. "7470A"
 ABORT_GRAPHICS = f"{ESC}.K"  # clears partially parsed cmds and clears buffer
+RESET_DEVICE = f"{ESC}.R"  # This command sets all the settings of the device control commands to their default values.
 WAIT = f"{ESC}.L"  # returns io buffer size when its empty. read it and wait for reply before next command
 OUTPUT_DIMENSIONS = "OH;"
 OUTPUT_POSITION = "OA;"

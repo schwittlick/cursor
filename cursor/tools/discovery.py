@@ -24,7 +24,7 @@ def async_discover(
         bytesize: tuple = serial.EIGHTBITS,
         parity: str = serial.PARITY_NONE,
         xonxoff: bool = False,
-        timeout: float = 5,
+        timeout: float = 1.0,
 ) -> tuple[str, str] | None:
     ser = serial.Serial(
         port=serial_port,
@@ -39,21 +39,21 @@ def async_discover(
         ser.write(f"{MODEL_IDENTIFICATION}".encode())
         """
         Using another command like @OUTPUT_IDENTIFICATION is not possible, because models
-        like the HP7470A do not respond to this command. Using the classic HPGL command OI;
-        @MODEL_IDENTIFICATION should work for all models. There might be only one difference that
-        the machines only respond to OI; when they are finished setting up. In the case of a HP7550
-        the machine will not reply it's model before the paper is loaded.
+        like the HP7470A and all Roland DXY plotters do not respond to this command. Using the 
+        classic HPGL command OI; @MODEL_IDENTIFICATION should work for all models. There might 
+        be only one difference that the machines only respond to OI; when they are finished 
+        setting up. In the case of a HP7550 the machine will not reply it's model before the 
+        paper is loaded.
         """
-        ret = read_until_char(ser)
+        ret = read_until_char(ser, timeout)
         model = ret.strip()
         if len(model) > 0:
             ser.write(f"{OUTPUT_DIMENSIONS}".encode())
-            ret = read_until_char(ser)
+            ret = read_until_char(ser, timeout)
             space = ret.strip()
 
             ser.close()
             logging.info(f"Discovery {serial_port} -> {model} (OH: {space})")
-
             return serial_port, model
         ser.close()
         return None
@@ -71,7 +71,7 @@ def discover(
         bytesize=serial.EIGHTBITS,
         parity=serial.PARITY_NONE,
         xonxoff=False,
-        timeout=1.5,
+        timeout=0.5,
 ) -> set[tuple[str, str]]:
     ports = list(serial.tools.list_ports.comports())
     data = []
