@@ -23,6 +23,8 @@
 | HP 7475A                        | Marcel  | A3/A4 | Cutter mod                        | DP25 M            | HPGL     | HP/RO                | 6         |
 | HP 7475A                        | Marcel  | A3/A4 | Cutter mod                        | DP25 M            | HPGL     | HP/RO                | 6         |
 | HP 7475A                        | Marcel  | A3/A4 |                                   | DP25 M            | HPGL     | HP/RO                | 6         |
+| HP 7475A                        | Marcel  | A3/A4 | Not tested                        | DP25 M            | HPGL     | HP/RO                | 6         |
+| HP 7475A                        | Marcel  | A3/A4 |                                   | HP-IB             | HPGL     | HP/RO                | 6         |
 | HP 7475A                        | Marcel  | A3/A4 |                                   | HP-IB             | HPGL     | HP/RO                | 6         |
 | HP 7475A                        | Marcel  | A3/A4 |                                   | HP-IB             | HPGL     | HP/RO                | 6         |
 | HP 7475A                        | Marcel  | A3/A4 |                                   | HP-IB             | HPGL     | HP/RO                | 6         |
@@ -33,6 +35,7 @@
 | HP 7550A                        | Marcel  | A3    | OK (Serial)                       | DP25 F & HP-IB    | HPGL     | HP/RO                | 8         |
 | HP 7550A                        | Marcel  | A3    | OK (Serial)                       | DP25 F & HP-IB    | HPGL     | HP/RO                | 8         |
 | HP 7550A                        | Marcel  | A3    | OK (Serial)                       | DP25 F & HP-IB    | HPGL     | HP/RO                | 8         |
+| HP 7550A                        | Marcel  | A3    | Not tested (Serial)               | DP25 F & HP-IB    | HPGL     | HP/RO                | 8         |
 | HP DraftMaster SX               | Marcel  | A0    | OK                                | DP25 M & HP-IB    | HPGL     |                      | 8         |
 | HP DraftMaster RX Plus          | Marcel  | A0    | X-Axis <br>broken                 | DP25 M & HP-IB    | HPGL     |                      | 8         |
 | HP DraftMaster II               | Marcel  | A0    | OK                                | DP25 M & HP-IB    | HPGL     |                      | 8         |
