@@ -1,5 +1,6 @@
 import datetime
 import logging
+import threading
 import time
 
 import dearpygui.dearpygui as dpg
@@ -10,13 +11,8 @@ from cursor.hpgl import read_until_char, RESET_DEVICE, ABORT_GRAPHICS
 from cursor.hpgl.hpgl_tokenize import tokenizer
 from cursor.hpgl.plotter.plotter import HPGLPlotter
 from cursor.tools.discovery import discover
-from cursor.tools.sendhpgl import SerialSender, concat_commands
+from cursor.tools.sendhpgl import SerialSender
 
-
-class MyHandler(logging.Handler):
-    def emit(self, record):
-        print_output(str(record))
-        #print('custom handler called with\n   ', record)
 
 # free static functions for the gui
 def open_file_dialog(sender, app_data, user_data):
@@ -45,6 +41,10 @@ def refresh_serial_ports(sender, app_data, user_data):
     discovered_ports = discover(timeout=0.5)
     ports_with_model = [f"{port[0]} -> {port[1]}" for port in discovered_ports]
     dpg.configure_item("serial_port_dropdown", items=ports_with_model)
+
+
+sending_file_paused = False
+sending_file_running = False
 
 
 class SerialInspector:
@@ -92,6 +92,7 @@ class SerialInspector:
         dpg.set_value("connection_status", "Disconnected")
 
     def connect_serial(self, sender, app_data, user_data):
+        logging.info(f"Fu")
         if self.check():
             print_output(f"Already connected to {self.serial_connection.port}")
             return
@@ -117,10 +118,10 @@ class SerialInspector:
 
         plotter = HPGLPlotter(self.serial_connection)
 
-        loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
-        for logger in loggers:
-            logger.addHandler(MyHandler())
         SerialSender().send(plotter, commands)
+
+    def pause_send_serial_file(self, sender, app_data, user_data):
+        logging.warn(f"Implement me. This should pause the not yet implemented thread that sends data to the plotter")
 
 
 if __name__ == '__main__':
@@ -133,10 +134,11 @@ if __name__ == '__main__':
         dpg.add_file_extension(".*")
         dpg.add_file_extension(".hpgl", color=(255, 0, 0, 255), custom_text="[HPGL]")
 
-    with dpg.window(label="Plotter Inspector", width=1000, height=800):
+    with dpg.window(label="Plotter Inspector", width=800, height=400):
         with dpg.group(horizontal=True):
             dpg.add_combo(label="Port", default_value="None", tag="serial_port_dropdown", width=200)
             dpg.add_combo(label="Baud", items=["1200", "9600"], default_value="9600", tag="baud_dropdown", width=100)
+        with dpg.group(horizontal=True):
             dpg.add_button(label="Refresh", callback=refresh_serial_ports)
             dpg.add_button(label="Connect", callback=inspector.connect_serial, tag="connect_button")
             dpg.add_button(label="Disconnect", callback=inspector.disconnect_serial, tag="disconnect_button")
@@ -145,11 +147,6 @@ if __name__ == '__main__':
         with dpg.group(horizontal=True):
             dpg.add_input_text(label="Command", tag="input_text", on_enter=True, callback=inspector.send_serial_command)
             dpg.add_button(label="Send", callback=inspector.send_serial_command)
-
-        with dpg.group(horizontal=True):
-            dpg.add_button(label="Select File", callback=lambda: dpg.show_item("file_dialog"))
-            dpg.add_input_text(label="Selected File Path", tag="file_path_text", readonly=True, width=700)
-            dpg.add_button(label="Send", callback=inspector.send_serial_file)
 
         with dpg.group(horizontal=True):
             dpg.add_button(label="IN;", callback=lambda: inspector.send_command("IN;"))
@@ -186,17 +183,84 @@ if __name__ == '__main__':
             dpg.add_button(label="SP7;", callback=lambda: inspector.send_command("SP7;"))
             dpg.add_button(label="SP8;", callback=lambda: inspector.send_command("SP8;"))
 
+    with dpg.window(label="Output", width=500, height=800, pos=(800, 0)):
         with dpg.child_window(height=650, autosize_x=True, horizontal_scrollbar=True):
             dpg.add_input_text(label="", multiline=True, readonly=True, tag="output_text", width=970, height=700)
 
     ports = [port.device for port in serial.tools.list_ports.comports()]
     dpg.configure_item("serial_port_dropdown", items=ports)
 
-    loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
-    for logger in loggers:
-        print(logger)
 
-    dpg.create_viewport(title='Serial Inspector', width=1020, height=850)
+    # SEND FILE SECTION
+
+    def run_task():
+        global sending_file_paused
+        global sending_file_running
+
+        dpg.set_item_label("start_send_button", "Pause")
+
+        for i in range(1, 101):
+            while sending_file_paused:
+                time.sleep(0.1)
+            if not sending_file_running:
+                return
+            dpg.set_value("send_file_progress", 1 / 100 * (i))
+            dpg.configure_item("send_file_progress", overlay=f"{i}%")
+            time.sleep(0.005)
+
+        sending_file_running = False
+        sending_file_paused = False
+
+        dpg.set_item_label("start_send_button", "Start")
+        # progress bar finished
+
+
+    def start_progress():
+        global sending_file_paused
+        global sending_file_running
+
+        if not sending_file_running:
+            logging.info(f"not runnng")
+            sending_file_running = True
+            sending_file_paused = False
+
+            dpg.set_item_label("start_send_button", "Pause")
+
+            thread = threading.Thread(target=run_task, args=(), daemon=True)
+            thread.start()
+        else:
+            logging.info(f"running..")
+            if not sending_file_paused:
+                sending_file_paused = True
+                logging.info(f"pausing")
+                dpg.set_item_label("start_send_button", "Resume")
+            else:
+                sending_file_paused = False
+                dpg.set_item_label("start_send_button", "Pause")
+
+
+    with dpg.window(label="Send file", width=800, height=200, pos=(0, 400)):
+        with dpg.group(horizontal=True):
+            dpg.add_button(label="Select File", callback=lambda: dpg.show_item("file_dialog"))
+        with dpg.group(horizontal=True):
+            dpg.add_input_text(label="", tag="file_path_text", readonly=True, width=700)
+        with dpg.group(horizontal=True):
+            dpg.add_button(label="Send blocking", callback=inspector.send_serial_file)
+        with dpg.group(horizontal=True):
+            dpg.add_progress_bar(label="Progress", tag="send_file_progress")
+            dpg.add_button(label="Start test progressbar thread", tag="start_send_button", callback=start_progress)
+
+
+    # SEND FILE SECTION
+
+    def on_log(record):
+        print_output(record.getMessage())
+        return True
+
+
+    logging.root.addFilter(on_log)
+
+    dpg.create_viewport(title='Serial Inspector', width=1320, height=850)
     dpg.setup_dearpygui()
     dpg.show_viewport()
     dpg.start_dearpygui()
