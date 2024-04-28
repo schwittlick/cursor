@@ -47,6 +47,16 @@ sending_file_paused = False
 sending_file_running = False
 
 
+def send_and_receive(serial_connection: serial.Serial, command: str, timeout: float = 1.0):
+    try:
+        serial_connection.write(command.encode())
+        print_output(f"{serial_connection.port} <- {command}")
+        received_data = read_until_char(serial_connection, timeout=timeout)
+        print_output(f"{serial_connection.port} -> {received_data}")
+    except serial.SerialException as e:
+        print_output(f"Error: {str(e)}")
+
+
 class SerialInspector:
     """
     SerialInspector
@@ -60,18 +70,12 @@ class SerialInspector:
     def check(self) -> bool:
         return self.serial_connection.is_open
 
-    def send_command(self, command):
+    def send_command(self, command: str):
         if not self.check():
             print_output(f"Serial connection not open.")
             return
 
-        try:
-            self.serial_connection.write(command.encode())
-            print_output(f"{self.serial_connection.port} <- {command}")
-            received_data = read_until_char(self.serial_connection)
-            print_output(f"{self.serial_connection.port} -> {received_data}")
-        except serial.SerialException as e:
-            print_output(str(e))
+        send_and_receive(self.serial_connection, command)
 
     def send_serial_command(self, sender, app_data, user_data):
         if not self.check():
@@ -249,6 +253,40 @@ if __name__ == '__main__':
         with dpg.group(horizontal=True):
             dpg.add_progress_bar(label="Progress", tag="send_file_progress")
             dpg.add_button(label="Start test progressbar thread", tag="start_send_button", callback=start_progress)
+
+
+    def start_bruteforce_progress():
+        bauds = [300, 900, 1200, 9600, 115200]
+        serial_connection = None
+        timeout = float(dpg.get_value("timeout_dropdown"))
+        for baudrate in bauds:
+            try:
+                serial_port_string = str(dpg.get_value("serial_port_dropdown")).split(" ")[0]
+                serial_connection = serial.Serial(serial_port_string, baudrate, timeout=timeout)
+                if serial_connection.is_open:
+                    serial_connection.close()
+                serial_connection.open()
+                logging.info(f"Connected to {serial_connection.port}:{baudrate} -> {serial_connection.is_open}")
+                send_and_receive(serial_connection, "OI;", timeout)
+                serial_connection.flushOutput()
+                serial_connection.flushInput()
+                serial_connection.close()
+
+                del serial_connection
+            except serial.SerialException as e:
+                logging.error(f"{type(e)}")
+                logging.error(f"Bruteforce: {e}")
+                if serial_connection:
+                    serial_connection.close()
+                continue
+
+
+    with dpg.window(label="Bruteforce", width=800, height=200, pos=(0, 600)):
+        with dpg.group(horizontal=True):
+            dpg.add_progress_bar(label="Bruteforce Progress", tag="bruteforce_progress")
+            dpg.add_button(label="Bruteforce", tag="start_bruteforce_button", callback=start_bruteforce_progress)
+            dpg.add_combo(label="Timeout", items=["0.1", "0.3", "0.7", "1.0", "2.0"], default_value="1.0",
+                          tag="timeout_dropdown", width=100)
 
 
     # SEND FILE SECTION
