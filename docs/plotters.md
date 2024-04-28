@@ -59,7 +59,7 @@
 | [Mutoh XP-500](mutoh_xp500.md)  | Marcel  | ~A0   |                                   | DP25 M?           | HPGL2    | HP/RO + Mutoh Pencil | 8         |
 | Mutoh iP-210                    | Marcel  | A3    |                                   | DP25 M & HP-IB    |          | Mutoh Pens           | 8         |
 | Phoenix Contact CMS-P1-Plotter  | Marcel  | A3    |                                   | DP15 M / Parallel |          |                      | 4         |
-| Océ Graphics G1022              | Marcel  | ~A3   |                                   | DP25 M & HP-IB    | ???      | HP/RO                | 6         |
+| Océ Graphics G1022              | Marcel  | ~A3   | Working (Recognized as 7475A)     | DP25 M & HP-IB    | HPGL     | HP/RO                | 6         |
 | PENMAN                          | Marcel  |       |                                   |                   | ???      | HP/RO                | 3         |
 | PENMAN                          | Marcel  |       |                                   |                   | ???      | HP/RO                | 3         |
 
