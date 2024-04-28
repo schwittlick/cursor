@@ -1,7 +1,7 @@
 import logging
 import threading
-import dearpygui.dearpygui as dpg
 
+import dearpygui.dearpygui as dpg
 import serial
 
 from cursor.tools.serial_powertools.seriallib import send_and_receive
@@ -59,8 +59,10 @@ class BruteForcer(threading.Thread):
                                                    timeout=self.timeout) as ser:
                                     response = send_and_receive(ser, self.test_message, self.timeout)
                                     if response:
-                                        responses.append((baud_rate, xonxoff, stopbit, parity,
-                                                          byte_size, response))
+                                        config = (baud_rate, xonxoff, stopbit, parity,
+                                                  byte_size, response)
+                                        logging.info(f"Detected {config}")
+                                        responses.append(config)
 
                             except (serial.SerialException, serial.SerialTimeoutException) as e:
                                 pass

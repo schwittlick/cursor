@@ -12,7 +12,7 @@ from cursor.hpgl.hpgl_tokenize import tokenizer
 from cursor.hpgl.plotter.plotter import HPGLPlotter
 from cursor.tools.discovery import discover
 from cursor.tools.serial_powertools.bruteforce import run_brute_force
-from cursor.tools.serial_powertools.seriallib import send_and_receive, SerialSender, AsyncSerialSender
+from cursor.tools.serial_powertools.seriallib import send_and_receive, AsyncSerialSender
 
 
 # free static functions for the gui
@@ -151,10 +151,10 @@ class SerialInspector:
             thread.stopped = True
             thread.join()
         serial_port_string = str(dpg.get_value("serial_port_dropdown")).split(" ")[0]
-        baud_rates = [300, 1200, 9600, 19200, 115200]  # Baud rates to try
+        baud_rates = [150, 300, 600, 1200, 2400, 4800, 9600, 19200, 115200]  # Baud rates to try
         parities = [serial.PARITY_NONE, serial.PARITY_ODD, serial.PARITY_EVEN]
         stop_bits = [serial.STOPBITS_ONE, serial.STOPBITS_TWO]
-        xonxoff = [True]
+        xonxoff = [True, False]
         byte_sizes = [serial.SEVENBITS, serial.EIGHTBITS]
 
         timeout = float(dpg.get_value("timeout_dropdown"))
@@ -164,6 +164,14 @@ class SerialInspector:
         self.bruteforce_threads = run_brute_force([serial_port_string], baud_rates, parities, stop_bits, xonxoff,
                                                   byte_sizes, message,
                                                   timeout)
+
+    def stop_bruteforce_progress(self):
+        for thread in self.bruteforce_threads:
+            thread.stopped = True
+            thread.join()
+
+        dpg.set_value("bruteforce_progress", 0)
+        logging.info(f"Stopped bruteforce threads")
 
 
 if __name__ == '__main__':
@@ -299,6 +307,8 @@ if __name__ == '__main__':
             dpg.add_progress_bar(label="Bruteforce Progress", tag="bruteforce_progress")
             dpg.add_button(label="Bruteforce", tag="start_bruteforce_button",
                            callback=inspector.start_bruteforce_progress)
+            dpg.add_button(label="Stop Bruteforce", tag="stop_bruteforce_button",
+                           callback=inspector.stop_bruteforce_progress)
             dpg.add_combo(label="Timeout", items=["0.1", "0.3", "0.7", "1.0", "2.0"], default_value="1.0",
                           tag="timeout_dropdown", width=100)
 
