@@ -7,11 +7,13 @@ import dearpygui.dearpygui as dpg
 import serial
 import serial.tools.list_ports
 
-from cursor.hpgl import read_until_char, RESET_DEVICE, ABORT_GRAPHICS
+from cursor.hpgl import RESET_DEVICE, ABORT_GRAPHICS
 from cursor.hpgl.hpgl_tokenize import tokenizer
 from cursor.hpgl.plotter.plotter import HPGLPlotter
 from cursor.tools.discovery import discover
 from cursor.tools.sendhpgl import SerialSender
+from cursor.tools.serial_powertools.bruteforce import run_brute_force
+from cursor.tools.serial_powertools.seriallib import send_and_receive
 
 
 # free static functions for the gui
@@ -47,16 +49,6 @@ sending_file_paused = False
 sending_file_running = False
 
 
-def send_and_receive(serial_connection: serial.Serial, command: str, timeout: float = 1.0):
-    try:
-        serial_connection.write(command.encode())
-        print_output(f"{serial_connection.port} <- {command}")
-        received_data = read_until_char(serial_connection, timeout=timeout)
-        print_output(f"{serial_connection.port} -> {received_data}")
-    except serial.SerialException as e:
-        print_output(f"Error: {str(e)}")
-
-
 class SerialInspector:
     """
     SerialInspector
@@ -66,6 +58,7 @@ class SerialInspector:
 
     def __init__(self):
         self.serial_connection = serial.Serial()
+        self.bruteforce_threads = []
 
     def check(self) -> bool:
         return self.serial_connection.is_open
@@ -126,6 +119,25 @@ class SerialInspector:
 
     def pause_send_serial_file(self, sender, app_data, user_data):
         logging.warn(f"Implement me. This should pause the not yet implemented thread that sends data to the plotter")
+
+    def start_bruteforce_progress(self):
+        for thread in self.bruteforce_threads:
+            thread.stopped = True
+            thread.join()
+        serial_port_string = str(dpg.get_value("serial_port_dropdown")).split(" ")[0]
+        baud_rates = [300, 1200, 9600, 19200, 115200]  # Baud rates to try
+        parities = [serial.PARITY_NONE, serial.PARITY_ODD, serial.PARITY_EVEN]
+        stop_bits = [serial.STOPBITS_ONE, serial.STOPBITS_TWO]
+        xonxoff = [True]
+        byte_sizes = [serial.SEVENBITS, serial.EIGHTBITS]
+
+        timeout = float(dpg.get_value("timeout_dropdown"))
+
+        message = "OI;"
+
+        self.bruteforce_threads = run_brute_force([serial_port_string], baud_rates, parities, stop_bits, xonxoff,
+                                                  byte_sizes, message,
+                                                  timeout)
 
 
 if __name__ == '__main__':
@@ -254,37 +266,11 @@ if __name__ == '__main__':
             dpg.add_progress_bar(label="Progress", tag="send_file_progress")
             dpg.add_button(label="Start test progressbar thread", tag="start_send_button", callback=start_progress)
 
-
-    def start_bruteforce_progress():
-        bauds = [300, 900, 1200, 9600, 115200]
-        serial_connection = None
-        timeout = float(dpg.get_value("timeout_dropdown"))
-        for baudrate in bauds:
-            try:
-                serial_port_string = str(dpg.get_value("serial_port_dropdown")).split(" ")[0]
-                serial_connection = serial.Serial(serial_port_string, baudrate, timeout=timeout)
-                if serial_connection.is_open:
-                    serial_connection.close()
-                serial_connection.open()
-                logging.info(f"Connected to {serial_connection.port}:{baudrate} -> {serial_connection.is_open}")
-                send_and_receive(serial_connection, "OI;", timeout)
-                serial_connection.flushOutput()
-                serial_connection.flushInput()
-                serial_connection.close()
-
-                del serial_connection
-            except serial.SerialException as e:
-                logging.error(f"{type(e)}")
-                logging.error(f"Bruteforce: {e}")
-                if serial_connection:
-                    serial_connection.close()
-                continue
-
-
     with dpg.window(label="Bruteforce", width=800, height=200, pos=(0, 600)):
         with dpg.group(horizontal=True):
             dpg.add_progress_bar(label="Bruteforce Progress", tag="bruteforce_progress")
-            dpg.add_button(label="Bruteforce", tag="start_bruteforce_button", callback=start_bruteforce_progress)
+            dpg.add_button(label="Bruteforce", tag="start_bruteforce_button",
+                           callback=inspector.start_bruteforce_progress)
             dpg.add_combo(label="Timeout", items=["0.1", "0.3", "0.7", "1.0", "2.0"], default_value="1.0",
                           tag="timeout_dropdown", width=100)
 
