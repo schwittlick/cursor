@@ -11,9 +11,8 @@ from cursor.hpgl import RESET_DEVICE, ABORT_GRAPHICS
 from cursor.hpgl.hpgl_tokenize import tokenizer
 from cursor.hpgl.plotter.plotter import HPGLPlotter
 from cursor.tools.discovery import discover
-from cursor.tools.sendhpgl import SerialSender
 from cursor.tools.serial_powertools.bruteforce import run_brute_force
-from cursor.tools.serial_powertools.seriallib import send_and_receive
+from cursor.tools.serial_powertools.seriallib import send_and_receive, SerialSender, AsyncSerialSender
 
 
 # free static functions for the gui
@@ -59,20 +58,21 @@ class SerialInspector:
     def __init__(self):
         self.serial_connection = serial.Serial()
         self.bruteforce_threads = []
+        self.async_sender = None
 
     def check(self) -> bool:
         return self.serial_connection.is_open
 
     def send_command(self, command: str):
         if not self.check():
-            print_output(f"Serial connection not open.")
+            logging.warning(f"Serial connection not open.")
             return
 
         send_and_receive(self.serial_connection, command)
 
     def send_serial_command(self, sender, app_data, user_data):
         if not self.check():
-            print_output(f"Serial connection not open.")
+            logging.warning(f"Serial connection not open.")
             return
 
         command = dpg.get_value("input_text")
@@ -81,17 +81,16 @@ class SerialInspector:
 
     def disconnect_serial(self, sender, app_data, user_data):
         if not self.check():
-            print_output(f"Serial connection not open.")
+            logging.warning(f"Serial connection not open.")
             return
 
         self.serial_connection.close()
-        print_output(f"Disconnected from {self.serial_connection.port}")
+        logging.info(f"Disconnected from {self.serial_connection.port}")
         dpg.set_value("connection_status", "Disconnected")
 
     def connect_serial(self, sender, app_data, user_data):
-        logging.info(f"Fu")
         if self.check():
-            print_output(f"Already connected to {self.serial_connection.port}")
+            logging.warning(f"Already connected to {self.serial_connection.port}")
             return
 
         try:
@@ -103,9 +102,25 @@ class SerialInspector:
         except serial.SerialException as e:
             print_output(str(e))
 
+    def stop_send_serial_file(self, sender, app_data, user_data):
+        dpg.set_item_label("send_async_button", "Send Async")
+        inspector.async_sender.stop()
+        inspector.async_sender.join()
+        logging.info(f"Stopped async sender. {inspector.async_sender.plotter}")
+
     def send_serial_file(self, sender, app_data, user_data):
         if not self.check():
-            print_output(f"Serial connection not open.")
+            logging.warning(f"Serial connection not open.")
+            return
+
+        if inspector.async_sender:
+            inspector.async_sender.pause()
+
+            if inspector.async_sender.paused:
+                dpg.set_item_label("send_async_button", "Resume")
+            else:
+                dpg.set_item_label("send_async_button", "Pause")
+
             return
 
         path_hpgl_file = dpg.get_value("file_path_text")
@@ -115,10 +130,21 @@ class SerialInspector:
 
         plotter = HPGLPlotter(self.serial_connection)
 
-        SerialSender().send(plotter, commands)
+        def progress_cb(command_idx: int):
+            percentage = command_idx / len(commands)
+            dpg.set_value("send_file_progress", percentage)
+            dpg.configure_item("send_file_progress", overlay=f"{command_idx}/{len(commands)}")
+
+        inspector.async_sender = AsyncSerialSender(plotter, commands, progress_cb)
+        inspector.async_sender.do_software_handshake = False
+        inspector.async_sender.command_batch = 1
+        inspector.async_sender.start()
+
+        dpg.set_item_label("send_async_button", "Pause")
 
     def pause_send_serial_file(self, sender, app_data, user_data):
-        logging.warn(f"Implement me. This should pause the not yet implemented thread that sends data to the plotter")
+        inspector.async_sender.pause()
+        # logging.warn(f"Implement me. This should pause the not yet implemented thread that sends data to the plotter")
 
     def start_bruteforce_progress(self):
         for thread in self.bruteforce_threads:
@@ -244,6 +270,8 @@ if __name__ == '__main__':
 
             thread = threading.Thread(target=run_task, args=(), daemon=True)
             thread.start()
+
+            inspector.async_sender = AsyncSerialSender()
         else:
             logging.info(f"running..")
             if not sending_file_paused:
@@ -261,10 +289,10 @@ if __name__ == '__main__':
         with dpg.group(horizontal=True):
             dpg.add_input_text(label="", tag="file_path_text", readonly=True, width=700)
         with dpg.group(horizontal=True):
-            dpg.add_button(label="Send blocking", callback=inspector.send_serial_file)
+            dpg.add_button(label="Send Async", tag="send_async_button", callback=inspector.send_serial_file)
+            dpg.add_button(label="Stop sending", tag="stop_sending_button", callback=inspector.stop_send_serial_file)
         with dpg.group(horizontal=True):
             dpg.add_progress_bar(label="Progress", tag="send_file_progress")
-            dpg.add_button(label="Start test progressbar thread", tag="start_send_button", callback=start_progress)
 
     with dpg.window(label="Bruteforce", width=800, height=200, pos=(0, 600)):
         with dpg.group(horizontal=True):
