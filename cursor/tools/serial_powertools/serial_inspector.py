@@ -1,5 +1,6 @@
 import datetime
 import logging
+import random
 import threading
 import time
 
@@ -217,6 +218,9 @@ if __name__ == '__main__':
         with dpg.group(horizontal=True):
             dpg.add_button(label="PA0,0;", callback=lambda: inspector.send_command("PA0,0;"))
             dpg.add_button(label="PA10000,10000;", callback=lambda: inspector.send_command("PA10000,10000;"))
+            x = random.randint(0, 10000)
+            y = random.randint(0, 10000)
+            dpg.add_button(label="PArandom(),random();", callback=lambda: inspector.send_command(f"PA{x},{y};"))
 
         with dpg.group(horizontal=True):
             dpg.add_button(label="ESC.R;", callback=lambda: inspector.send_command(f"{RESET_DEVICE};"))
