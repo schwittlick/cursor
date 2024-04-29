@@ -51,19 +51,33 @@ def wait_for_free_io_memory(plotter: HPGLPlotter, memory_amount: int) -> None:
 
 
 class AsyncSerialSender(threading.Thread):
-    def __init__(self, plotter: HPGLPlotter, commands: list[str], progress_cb: typing.Callable):
+    def __init__(self, plotter: HPGLPlotter):
         super().__init__()
 
+        # these parameters are set when commands are added to the sender
+        self.commands = None
+        self.command_batch = 1
+        self.progress_cb = None
+
+        # default init
         self.plotter = plotter
-        self.commands = commands
-        self.command_batch = min(20, len(commands))
         self.paused = False
         self.stopped = False
+        self.abort_queue = False
         self.send_single = False
+
+        self.do_software_handshake = True
+
+    def add_commands(self, commands: list[str], progress_cb: typing.Callable):
+        self.commands = commands
+        self.command_batch = min(20, len(commands))
 
         self.progress_cb = progress_cb
 
-        self.do_software_handshake = True
+        logging.info(f"Added {len(commands)} to async sender. batch: {self.command_batch}")
+
+    def abort(self):
+        self.abort_queue = True
 
     def stop(self):
         self.stopped = True
@@ -80,40 +94,44 @@ class AsyncSerialSender(threading.Thread):
             self.command_batch = min(20, len(self.commands))  # default value
 
     def run(self):
-        # the amount of commands that are being sent to the plotter
-        # in one batch. this speeds up drawing. take care to not send too
-        # long commands that exceed the maximum buffer size
-        logging.info(f"Sending with batch_count: {self.command_batch}")
+        while not self.stopped:
+            index = 0
+            while index < len(self.commands):
+                # for i in range(0, len(self.commands), self.command_batch):
+                if self.abort_queue:
+                    self.plotter.abort()
+                    self.commands = []
+                    self.abort_queue = False
+                    logging.info("Stopped AsyncSerialSender")
+                    continue
 
-        index = 0
-        while index < len(self.commands):
-            # for i in range(0, len(self.commands), self.command_batch):
-            if self.stopped:
-                self.plotter.abort()
-                logging.info("Stopped AsyncSerialSender")
-                return
+                batched_commands = self.commands[index:index + self.command_batch]
+                cmds = concat_commands(batched_commands)
 
-            batched_commands = self.commands[index:index + self.command_batch]
-            cmds = concat_commands(batched_commands)
+                if self.do_software_handshake:
+                    wait_for_free_io_memory(self.plotter, len(cmds) + 10)
 
-            if self.do_software_handshake:
-                wait_for_free_io_memory(self.plotter, len(cmds) + 10)
+                logging.info(cmds)
+                self.plotter.write(cmds)
 
-            logging.info(cmds)
-            self.plotter.write(cmds)
+                while self.paused:
+                    time.sleep(0.1)
 
-            while self.paused:
+                if self.send_single and not self.paused:
+                    self.command_batch = 1
+                    self.paused = True
+
+                index += self.command_batch
                 time.sleep(0.1)
 
-            if self.send_single and not self.paused:
-                self.command_batch = 1
-                self.paused = True
+                # call cb for progress
+                self.progress_cb(index)
 
-            index += self.command_batch
-            time.sleep(0.1)
-
-            # call cb for progress
-            self.progress_cb(index)
+            # after the currently set commands are done
+            # empty the queue and sleep from now on
+            # wait until new commands have been set
+            self.commands = []
+            time.sleep(1)
 
 
 class SerialSender:

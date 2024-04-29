@@ -50,6 +50,9 @@ class BruteForcer(threading.Thread):
                                 return
                             configuration_index += 1
 
+                            logging.info(
+                                f"Checking {self.serial_port}:{baud_rate}. {parity}, {xonxoff}, {byte_size}, {stopbit}")
+
                             progress_bar_value = configuration_index * self.progress_step_size
                             dpg.set_value("bruteforce_progress", progress_bar_value / 100)
                             try:
