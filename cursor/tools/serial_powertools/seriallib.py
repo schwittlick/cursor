@@ -55,7 +55,7 @@ class AsyncSerialSender(threading.Thread):
         super().__init__()
 
         # these parameters are set when commands are added to the sender
-        self.commands = None
+        self.commands = []
         self.command_batch = 1
         self.progress_cb = None
 

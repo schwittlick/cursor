@@ -35,7 +35,8 @@ class SerialInspector:
             logging.warning(f"Serial connection not open.")
             return
 
-        send_and_receive(self.serial_connection, command)
+        received = send_and_receive(self.serial_connection, command)
+        logging.info(f"{self.serial_connection.port} <- {received}")
 
     def send_serial_command(self, sender, app_data, user_data):
         if not self.check():
@@ -52,6 +53,8 @@ class SerialInspector:
             return
 
         self.serial_connection.close()
+        if self.async_sender:
+            self.async_sender.stop()
         logging.info(f"Disconnected from {self.serial_connection.port}")
         dpg.set_value("connection_status", "Disconnected")
 
@@ -72,9 +75,15 @@ class SerialInspector:
         # after successful serial connection
         # setup async sender for permanent interaction
         plotter = HPGLPlotter(self.serial_connection)
+
+        if self.async_sender:
+            self.async_sender.plotter.disconnect()
+
         self.async_sender = AsyncSerialSender(plotter)
-        self.async_sender.do_software_handshake = False  # for debugging purpos, don't check for buffer space
+        #self.async_sender.do_software_handshake = False  # for debugging purpos, don't check for buffer space
+        self.async_sender.do_software_handshake = True
         self.async_sender.command_batch = 1
+        self.async_sender.start()
 
     def stop_send_serial_file(self, sender, app_data, user_data):
         dpg.set_item_label("send_async_button", "Send Async")
@@ -86,17 +95,22 @@ class SerialInspector:
             logging.warning(f"Serial connection not open.")
             return
 
-        if self.async_sender:
-            self.async_sender.pause()
-
+        logging.info(len(self.async_sender.commands))
+        if len(self.async_sender.commands) > 0:
             if self.async_sender.paused:
                 dpg.set_item_label("send_async_button", "Resume")
-            else:
-                dpg.set_item_label("send_async_button", "Pause")
-
             return
+            #self.async_sender.pause()
+
+            #if self.async_sender.paused:
+            #    dpg.set_item_label("send_async_button", "Resume")
+            #    return
+        else:
+            dpg.set_item_label("send_async_button", "Pause")
+
 
         path_hpgl_file = dpg.get_value("file_path_text")
+        logging.info(f"Sending {path_hpgl_file}")
         hpgl_text = ''.join(open(path_hpgl_file, 'r', encoding='utf-8').readlines())
 
         commands = tokenizer(hpgl_text)
@@ -107,7 +121,6 @@ class SerialInspector:
             dpg.configure_item("send_file_progress", overlay=f"{command_idx}/{len(commands)}")
 
         self.async_sender.add_commands(commands, progress_cb)
-        self.async_sender.start()
 
         dpg.set_item_label("send_async_button", "Pause")
 
