@@ -1,4 +1,5 @@
 import datetime
+import logging
 import typing
 import random
 
@@ -27,6 +28,7 @@ def file_selected(sender, app_data, user_data):
 
 
 def refresh_serial_ports(sender, app_data, user_data):
+    logging.info(F"Starting refresh..")
     discovered_ports = discover(timeout=0.5)
     ports_with_model = [f"{port[0]} -> {port[1]}" for port in discovered_ports]
     dpg.configure_item("serial_port_dropdown", items=ports_with_model)
