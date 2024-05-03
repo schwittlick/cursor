@@ -201,9 +201,12 @@ class MinmaxMapping:
         PlotterType.AXIDRAW: BB(0, 0, 0, 0),  # todo: missing real bounds
 
         PlotterType.ROLAND_DXY885: BB(0, 0, 16158, 11040),  # taken from OH;
-        PlotterType.ROLAND_DXY980: BB(0, 0, 15200, 10800),  # taken from manual
-        PlotterType.ROLAND_DXY990: BB(0, 0, 16640, 11040),  # taken from manual
-        PlotterType.ROLAND_DXY1200_A3: BB(0, 0, 16158, 11040),  # taken from OH;
+        PlotterType.ROLAND_DXY980: BB(0, 0, 15200, 10800) - BB(0, 0, 0, 8 * 40) + BB(5 * 40, 13 * 40),
+        # taken from manual
+        PlotterType.ROLAND_DXY990: BB(0, 0, 16640, 11040) - BB(0, 0, 12 * 40, 0) + BB(6 * 40, 4 * 40, 0, 0),
+        # taken from manual
+        PlotterType.ROLAND_DXY1200_A3: BB(0, 0, 16158, 11040) - BB(0, 0, 6 * 40, 6 * 40),
+        # taken from OH; # removed 6mm*40units (on both direction)
         PlotterType.ROLAND_DXY1200_A5: BB(0, 0, 8400, 5950),  # taken from OA;
         PlotterType.ROLAND_DXY1200_A3_EXPANDED: BB(0, 0, 17272, 11880),
         PlotterType.ROLAND_DXY1300: BB(0, 0, 16158, 11040),  # taken from OH;

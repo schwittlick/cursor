@@ -36,7 +36,7 @@ class SerialInspector:
             return
 
         received = send_and_receive(self.serial_connection, command)
-        logging.info(f"{self.serial_connection.port} <- {received}")
+        logging.info(f"Sent: {command}: {self.serial_connection.port} <- {received}")
 
     def send_serial_command(self, sender, app_data, user_data):
         if not self.check():
@@ -63,6 +63,9 @@ class SerialInspector:
             logging.warning(f"Already connected to {self.serial_connection.port}")
             return
 
+        #if self.async_sender:
+        #    self.serial_connection.close()
+
         try:
             serial_port_string = str(dpg.get_value("serial_port_dropdown")).split(" ")[0]
             serial_port_baud = dpg.get_value("baud_dropdown")
@@ -72,15 +75,15 @@ class SerialInspector:
         except serial.SerialException as e:
             logging.error(str(e))
 
+
+            #self.async_sender.plotter.disconnect()
+
         # after successful serial connection
         # setup async sender for permanent interaction
         plotter = HPGLPlotter(self.serial_connection)
 
-        if self.async_sender:
-            self.async_sender.plotter.disconnect()
-
         self.async_sender = AsyncSerialSender(plotter)
-        #self.async_sender.do_software_handshake = False  # for debugging purpos, don't check for buffer space
+        # self.async_sender.do_software_handshake = False  # for debugging purpos, don't check for buffer space
         self.async_sender.do_software_handshake = True
         self.async_sender.command_batch = 1
         self.async_sender.start()
@@ -100,14 +103,13 @@ class SerialInspector:
             if self.async_sender.paused:
                 dpg.set_item_label("send_async_button", "Resume")
             return
-            #self.async_sender.pause()
+            # self.async_sender.pause()
 
-            #if self.async_sender.paused:
+            # if self.async_sender.paused:
             #    dpg.set_item_label("send_async_button", "Resume")
             #    return
         else:
             dpg.set_item_label("send_async_button", "Pause")
-
 
         path_hpgl_file = dpg.get_value("file_path_text")
         logging.info(f"Sending {path_hpgl_file}")
