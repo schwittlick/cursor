@@ -37,6 +37,7 @@ class PlotterType(Enum):
     HP_DM_RX_PLUS_A2 = auto()
     HP_DM_RX_PLUS_A3 = auto()
 
+    HP_DM_II_A0 = auto()
     HP_DM_II_A1 = auto()
     HP_DM_II_A3 = auto()
 
@@ -102,6 +103,7 @@ class ExportFormatMappings:
         PlotterType.HP_DM_SX_A1: ExportFormat.HPGL,
         PlotterType.HP_DM_SX_A3: ExportFormat.HPGL,
 
+        PlotterType.HP_DM_II_A0: ExportFormat.HPGL,
         PlotterType.HP_DM_II_A1: ExportFormat.HPGL,
         PlotterType.HP_DM_II_A3: ExportFormat.HPGL,
 
@@ -188,6 +190,7 @@ class MinmaxMapping:
         PlotterType.HP_DM_SX_A1: BB(-16100, -11600, 16100, 11600),
         PlotterType.HP_DM_SX_A3: BB(-7690, -5744, 7690, 5744),
 
+        PlotterType.HP_DM_II_A0: BB(-23036, -16598, 23036, 16598),
         PlotterType.HP_DM_II_A1: BB(-16080, -11660, 16080, 11660),
         PlotterType.HP_DM_II_A3: BB(-7656, -5740, 7656, 5740),
 
@@ -248,6 +251,7 @@ class PlotterName:
         PlotterType.HP_DM_RX_PLUS_A2: "hpdm_rx_plus_a2",
         PlotterType.HP_DM_RX_PLUS_A3: "hpdm_rx_plus_a3",
 
+        PlotterType.HP_DM_II_A0: "hpdm_ii_a0",
         PlotterType.HP_DM_II_A1: "hpdm_ii_a1",
         PlotterType.HP_DM_II_A3: "hpdm_ii_a3",
 
@@ -292,7 +296,7 @@ class PlotterHpglNames:
         "7595A": [PlotterType.HP_DM_SX_A1, PlotterType.HP_DM_SX_A3, PlotterType.MUTOH_XP500_100x70cm,
                   PlotterType.MUTOH_XP500_500x297mm,
                   PlotterType.MUTOH_XP500_A1, PlotterType.MUTOH_XP500_A2, PlotterType.MUTOH_XP500_A3],
-        "7596A": [PlotterType.HP_DM_II_A1, PlotterType.HP_DM_II_A3, PlotterType.HP_DM_RX_PLUS_A0,
+        "7596A": [PlotterType.HP_DM_II_A0, PlotterType.HP_DM_II_A1, PlotterType.HP_DM_II_A3, PlotterType.HP_DM_RX_PLUS_A0,
                   PlotterType.HP_DM_RX_PLUS_100x70cm, PlotterType.HP_DM_RX_PLUS_A1, PlotterType.HP_DM_RX_PLUS_A2,
                   PlotterType.HP_DM_RX_PLUS_A3],
 
@@ -334,6 +338,7 @@ class XYFactors:
         PlotterType.ROLAND_PNC1000: (40, 40),
         PlotterType.HP_DM_RX_PLUS_A3: (37, 37),
         PlotterType.TEKTRONIX_4662: (9.75, 9.19525),
+        PlotterType.HP_DM_II_A0: (39.948, 40),
         PlotterType.HP_DM_II_A1: (39.948, 40),
         PlotterType.HP_DM_II_A3: (39.948, 40),
         PlotterType.DIGIPLOT_A1: (40, 40),
@@ -384,6 +389,7 @@ class MaxSpeed:
         PlotterType.ROLAND_PNC1000: 40,
         PlotterType.HP_DM_RX_PLUS_A3: 40,
         PlotterType.TEKTRONIX_4662: 1,
+        PlotterType.HP_DM_II_A0: 110,
         PlotterType.HP_DM_II_A1: 110,
         PlotterType.HP_DM_II_A3: 110,
         PlotterType.DIGIPLOT_A1: 1,
@@ -431,6 +437,7 @@ class BufferSize:
         PlotterType.ROLAND_PNC1000: 0,
         PlotterType.HP_DM_RX_PLUS_A3: 1024,
         PlotterType.TEKTRONIX_4662: 0,
+        PlotterType.HP_DM_II_A0: 1024,
         PlotterType.HP_DM_II_A1: 1024,
         PlotterType.HP_DM_II_A3: 1024,
         PlotterType.DIGIPLOT_A1: 0,
