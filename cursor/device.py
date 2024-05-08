@@ -187,7 +187,7 @@ class MinmaxMapping:
         PlotterType.HP_DM_RX_PLUS_A2: BB(-10740, -8230, 10740, 8230),
         PlotterType.HP_DM_RX_PLUS_A3: BB(-7302, -5820, 7302, 5820),
 
-        PlotterType.HP_DM_SX_A1: BB(-16100, -11600, 16100, 11600),
+        PlotterType.HP_DM_SX_A1: BB(-16100, -11600, 16100, 11600) + BB(20 * 40, 0, 0, 0),
         PlotterType.HP_DM_SX_A3: BB(-7690, -5744, 7690, 5744),
 
         PlotterType.HP_DM_II_A0: BB(-23036, -16598, 23036, 16598),
