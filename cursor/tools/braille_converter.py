@@ -28,9 +28,10 @@ def convert(file_path: str):
 
     braille_image = BrailleTranslator().to_braille(image, "ascii")
     braille_inverted = BrailleTranslator().to_braille(inverted_image, "ascii")
-
+    # 👀︎👁︎👀︎👁︎
     save(braille_image, f"{path.as_posix()}.vim")
     save(braille_inverted, f"{path.as_posix()}_inverted.vim")
+    # ︎🐞︎🐟︎ ︎❤
 
 
 def main():
