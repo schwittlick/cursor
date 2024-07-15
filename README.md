@@ -4,12 +4,12 @@
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/schwittlick/cursor.svg?style=flat-square)
 [![GitHub license](https://img.shields.io/github/license/schwittlick/cursor.svg?style=flat-square)](https://github.com/schwittlick/cursor/blob/master/LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/ambv/black)
-[![Python 3.10.13](https://img.shields.io/badge/python-3.10.13-blue.svg)](https://www.python.org/downloads/release/python-31013/)
+[![Python 3.10.14](https://img.shields.io/badge/python-3.10.14-blue.svg)](https://www.python.org/downloads/release/python-31014/)
 
 setup
 
-    pyenv install 3.10.13
-    pyenv virtualenv 3.10.13 cursor
+    pyenv install 3.10.14
+    pyenv virtualenv 3.10.14 cursor
     pyenv activate cursor
     pip install -r requirements.txt
     git submodule update --init

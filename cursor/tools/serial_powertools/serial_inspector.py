@@ -40,7 +40,7 @@ class SerialInspector:
 
     def send_serial_command(self, sender, app_data, user_data):
         if not self.check():
-            logging.warning(f"Serial connection not open.")
+            logging.warning("Serial connection not open.")
             return
 
         command = dpg.get_value("input_text")
@@ -49,7 +49,7 @@ class SerialInspector:
 
     def disconnect_serial(self, sender, app_data, user_data):
         if not self.check():
-            logging.warning(f"Serial connection not open.")
+            logging.warning("Serial connection not open.")
             return
 
         self.serial_connection.close()
@@ -63,7 +63,7 @@ class SerialInspector:
             logging.warning(f"Already connected to {self.serial_connection.port}")
             return
 
-        #if self.async_sender:
+        # if self.async_sender:
         #    self.serial_connection.close()
 
         try:
@@ -75,8 +75,7 @@ class SerialInspector:
         except serial.SerialException as e:
             logging.error(str(e))
 
-
-            #self.async_sender.plotter.disconnect()
+            # self.async_sender.plotter.disconnect()
 
         # after successful serial connection
         # setup async sender for permanent interaction
@@ -95,7 +94,7 @@ class SerialInspector:
 
     def send_serial_file(self, sender, app_data, user_data):
         if not self.check():
-            logging.warning(f"Serial connection not open.")
+            logging.warning("Serial connection not open.")
             return
 
         logging.info(len(self.async_sender.commands))
@@ -157,11 +156,11 @@ class SerialInspector:
             thread.join()
 
         dpg.set_value("bruteforce_progress", 0)
-        logging.info(f"Stopped bruteforce threads")
+        logging.info("Stopped bruteforce threads")
 
     def get_plotter_model(self):
         if not self.check():
-            logging.warning(f"Serial connection not open.")
+            logging.warning("Serial connection not open.")
             return
 
         model = self.async_sender.plotter.identify()

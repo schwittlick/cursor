@@ -296,7 +296,8 @@ class PlotterHpglNames:
         "7595A": [PlotterType.HP_DM_SX_A1, PlotterType.HP_DM_SX_A3, PlotterType.MUTOH_XP500_100x70cm,
                   PlotterType.MUTOH_XP500_500x297mm,
                   PlotterType.MUTOH_XP500_A1, PlotterType.MUTOH_XP500_A2, PlotterType.MUTOH_XP500_A3],
-        "7596A": [PlotterType.HP_DM_II_A0, PlotterType.HP_DM_II_A1, PlotterType.HP_DM_II_A3, PlotterType.HP_DM_RX_PLUS_A0,
+        "7596A": [PlotterType.HP_DM_II_A0, PlotterType.HP_DM_II_A1, PlotterType.HP_DM_II_A3,
+                  PlotterType.HP_DM_RX_PLUS_A0,
                   PlotterType.HP_DM_RX_PLUS_100x70cm, PlotterType.HP_DM_RX_PLUS_A1, PlotterType.HP_DM_RX_PLUS_A2,
                   PlotterType.HP_DM_RX_PLUS_A3],
 

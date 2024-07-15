@@ -8,6 +8,7 @@ import serial
 
 from cursor.hpgl import RESET_DEVICE, ABORT_GRAPHICS
 from cursor.tools.discovery import discover
+from cursor.tools.serial_powertools.serial_inspector import SerialInspector
 
 
 def print_output(text: str) -> None:
@@ -28,7 +29,7 @@ def file_selected(sender, app_data, user_data):
 
 
 def refresh_serial_ports(sender, app_data, user_data):
-    logging.info(F"Starting refresh..")
+    logging.info("Starting refresh..")
     discovered_ports = discover(timeout=0.5)
     ports_with_model = [f"{port[0]} -> {port[1]}" for port in discovered_ports]
     dpg.configure_item("serial_port_dropdown", items=ports_with_model)
@@ -41,7 +42,7 @@ def create_file_dialogue(cb: typing.Callable):
         dpg.add_file_extension(".hpgl", color=(255, 0, 0, 255), custom_text="[HPGL]")
 
 
-def create_plotter_inspector_gui(inspector: "SerialInspector"):
+def create_plotter_inspector_gui(inspector: SerialInspector):
     with dpg.window(label="Inspector"):
         with dpg.group(horizontal=True):
             dpg.add_combo(label="Port", default_value="None", tag="serial_port_dropdown", width=200)
@@ -104,7 +105,7 @@ def add_output_window():
             dpg.add_input_text(label="", multiline=True, readonly=True, tag="output_text", width=650, height=800)
 
 
-def create_send_file_gui(inspector: "SerialInspector"):
+def create_send_file_gui(inspector: SerialInspector):
     with dpg.window(label="Send file", pos=(0, 400)):
         with dpg.group(horizontal=True):
             dpg.add_button(label="Select File", callback=lambda: dpg.show_item("file_dialog"))
@@ -117,7 +118,7 @@ def create_send_file_gui(inspector: "SerialInspector"):
             dpg.add_progress_bar(label="Progress", tag="send_file_progress")
 
 
-def create_bruteforce_gui(inspector: "SerialInspector"):
+def create_bruteforce_gui(inspector: SerialInspector):
     with dpg.window(label="Bruteforce", pos=(0, 600)):
         with dpg.group(horizontal=True):
             dpg.add_progress_bar(label="Bruteforce Progress", tag="bruteforce_progress")
@@ -130,7 +131,7 @@ def create_bruteforce_gui(inspector: "SerialInspector"):
                           tag="timeout_dropdown", width=100)
 
 
-def add_plotter_info_window(inspector: "SerialInspector"):
+def add_plotter_info_window(inspector: SerialInspector):
     with dpg.window(label="Plotter Info", pos=(0, 300)):
         with dpg.group(horizontal=True):
             dpg.add_button(label="Get model", tag="get_plotter_model", callback=inspector.get_plotter_model)

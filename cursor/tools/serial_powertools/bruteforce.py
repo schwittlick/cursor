@@ -67,7 +67,7 @@ class BruteForcer(threading.Thread):
                                         logging.info(f"Detected {config}")
                                         responses.append(config)
 
-                            except (serial.SerialException, serial.SerialTimeoutException) as e:
+                            except (serial.SerialException, serial.SerialTimeoutException):
                                 pass
                                 # logging.error(f"Failed on {self.serial_port} at {baud_rate} baud: {e}")
 
