@@ -3,6 +3,7 @@ import time
 import logging
 import typing
 from functools import wraps
+import datetime
 
 
 class Timer:
@@ -19,6 +20,11 @@ class Timer:
 
     def print_elapsed(self, msg: str = "") -> None:
         logging.info(f"{msg}: {round(self.elapsed() * 1000)}ms")
+
+    @staticmethod
+    def timestamp() -> str:
+        now = datetime.datetime.now()
+        return now.strftime("%Y%m%dT%H%M%S.%f")
 
 
 def timing(func: typing.Callable) -> typing.Callable:

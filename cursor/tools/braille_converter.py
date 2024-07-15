@@ -24,7 +24,7 @@ def convert(file_path: str):
 
     loaded = Image.open(path.as_posix())
     image = loaded.convert('1')  # binary
-    inverted_image = ImageOps.invert(loaded).convert('1')
+    inverted_image = ImageOps.invert(image)
 
     braille_image = BrailleTranslator().to_braille(image, "ascii")
     braille_inverted = BrailleTranslator().to_braille(inverted_image, "ascii")

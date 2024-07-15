@@ -948,7 +948,7 @@ class Path:
             result = line.parallel_offset(
                 abs(dist),
                 side=side,
-                resolution=64,
+                resolution=256,
                 join_style=join_style,
                 mitre_limit=mitre_limit,
             )
