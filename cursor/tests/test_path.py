@@ -439,7 +439,7 @@ def test_slopes2():
         [(0, 0), (1, 0), (2, 1), (1, 1), (1, 3), (2, 3), (4, 0)])
 
     slopes = p.slopes()
-    assert slopes == [0.0, float('inf'), float('inf')]
+    assert slopes == [0.0, 1.0, -0.0, float('inf'), 0.0, -1.5]
 
 
 def disabled_test_similarity():
