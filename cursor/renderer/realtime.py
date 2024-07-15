@@ -302,4 +302,4 @@ class RealtimeRenderer(arcade.Window):
 
     def on_mouse_motion(self, x, y, dx, dy):
         if self._on_mouse:
-            self._on_mouse(self, x, y, dx, dy)
+            self._on_mouse(x, y, dx, dy)
