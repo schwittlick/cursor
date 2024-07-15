@@ -205,8 +205,8 @@ def hobby_ctrl_points(points: list[tuple], tension: float = 1, cyclic: bool = Fa
 
 def velocity(theta: float, phi: float) -> float:
     """Metafont's velocity function."""
-    numerator = 2 + np.sqrt(2) * (np.sin(theta) - (1 / 16) *
-                                  np.sin(phi)) * (np.sin(phi) - (1 / 16) *
-                                                  np.sin(theta)) * (np.cos(theta) - np.cos(phi))
+    numerator = 2 + np.sqrt(2) * (np.sin(theta) - (1 / 16) * np.sin(phi)) \
+                * (np.sin(phi) - (1 / 16) * np.sin(theta)) \
+                * (np.cos(theta) - np.cos(phi))
     denominator = (1 + (1 / 2) * (np.sqrt(5) - 1) * np.cos(theta) + (1 / 2) * (3 - np.sqrt(5)) * np.cos(phi))
     return numerator / denominator

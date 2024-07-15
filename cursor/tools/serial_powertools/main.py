@@ -31,8 +31,8 @@ if __name__ == '__main__':
         dpg.add_key_press_handler(dpg.mvKey_Escape, callback=dpg.stop_dearpygui)
 
 
-    # making sure all internal logging messages arrive in the gui
     def on_log(record):
+        """making sure all internal logging messages arrive in the gui"""
         print_output(record.getMessage())
         return True
 

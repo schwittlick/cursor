@@ -9,6 +9,7 @@ from fpdf import FPDF
 # suppress verbose log outputs
 logging.getLogger('fontTools.subset').level = logging.WARN
 
+
 class PdfRenderer(BaseRenderer):
     def __init__(self, folder: pathlib.Path):
         super().__init__(folder)

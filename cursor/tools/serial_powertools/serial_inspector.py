@@ -32,7 +32,7 @@ class SerialInspector:
 
     def send_command(self, command: str):
         if not self.check():
-            logging.warning(f"Serial connection not open.")
+            logging.warning("Serial connection not open.")
             return
 
         received = send_and_receive(self.serial_connection, command)

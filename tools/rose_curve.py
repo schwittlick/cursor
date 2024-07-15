@@ -41,7 +41,7 @@ if __name__ == "__main__":
     collection = Collection()
 
     for x in range(15):
-        #letter_collection = HPGLParser().parse(f"SP1;LB{velocities[x]}{chr(3)}")
+        # letter_collection = HPGLParser().parse(f"SP1;LB{velocities[x]}{chr(3)}")
         letter_collection = HPGLParser().parse(f"SP1;LBLT1={line_type_x[x]};")
         letter_collection.pen_select = 1
         letter_collection.scale(0.001, 0.001)
@@ -49,7 +49,7 @@ if __name__ == "__main__":
         collection.add(letter_collection)
 
     for y in range(8):
-        #letter_collection = HPGLParser().parse(f"SP1;LBVS{velocities[y]}")
+        # letter_collection = HPGLParser().parse(f"SP1;LBVS{velocities[y]}")
         letter_collection = HPGLParser().parse(f"SP1;LBLT2={line_type_y[y]};")
         letter_collection.pen_select = 1
         letter_collection.scale(0.001, 0.001)
@@ -66,9 +66,9 @@ if __name__ == "__main__":
             lt = (line_type_x[x], line_type_y[y])
 
             rose_curve.pen_select = 1
-            rose_curve.velocity = 5#velocities[x]
+            rose_curve.velocity = 5  # velocities[x]
             rose_curve.line_type = lt  # line_types[x]
-            rose_curve.pen_force = 8#pen_force[y]
+            rose_curve.pen_force = 8  # pen_force[y]
             collection.add(rose_curve)
 
     export = ExportWrapper(
@@ -76,7 +76,7 @@ if __name__ == "__main__":
         PlotterType.HP_7550A_A3,
         0,
         "test_sheet",
-        f"hp7550a_lt_all",
+        "hp7550a_lt_all",
         keep_aspect_ratio=True)
     export.fit()
     export.ex()
