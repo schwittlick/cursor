@@ -22,9 +22,9 @@ class Timer:
         logging.info(f"{msg}: {round(self.elapsed() * 1000)}ms")
 
     @staticmethod
-    def timestamp() -> str:
+    def timestamp(timestamp_format: str = "%y%m%d_%H%M%S") -> str:
         now = datetime.datetime.now()
-        return now.strftime("%Y%m%dT%H%M%S.%f")
+        return now.strftime(timestamp_format)
 
 
 def timing(func: typing.Callable) -> typing.Callable:

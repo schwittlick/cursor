@@ -4,7 +4,6 @@ import cv2
 import numpy as np
 import numba as nb
 import pynput
-from datetime import datetime
 
 from shapely import LineString
 from shapely.affinity import affine_transform
@@ -256,11 +255,6 @@ class ditherModule(object):
 
 def current_source(frame):
     return inspect.getsource(inspect.getmodule(frame))
-
-
-def timestamp(format: str = "%y%m%d_%H%M%S") -> str:
-    now = datetime.now()
-    return now.strftime(format)
 
 
 def transformFn(stl, sbr, dtl, dbr):
