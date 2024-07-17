@@ -17,6 +17,13 @@ from tqdm import tqdm
 import logging
 
 
+class KeyPress:
+    def __init__(self, key, timestamp, is_down):
+        self.key = key
+        self.timestamp = timestamp
+        self.is_down = is_down
+
+
 class MyJsonEncoder(json.JSONEncoder):
     def default(self, o: Position | Path | Collection) -> dict | list[Position]:
         match o:
@@ -120,7 +127,7 @@ class Loader:
         self.verbose = False
 
         self._recordings = []
-        self._keyboard_recordings = []
+        self._keyboard_recordings: list[KeyPress] = []
 
         if directory is not None:
             self.load_all(
@@ -182,7 +189,7 @@ class Loader:
         if self.verbose:
             logging.info(f"Loading {path.stem}.json > {ts}")
 
-        new_keys = []
+        new_keys: list[KeyPress] = []
         with open(path.as_posix()) as json_file:
             json_string = json_file.readline()
             try:
@@ -192,8 +199,13 @@ class Loader:
                 _data = json.loads(json_string, cls=MyJsonDecoder)
             self._recordings.append(_data["mouse"])
             if load_keys:
-                for keys in _data["keys"]:
-                    new_keys.append(tuple(keys))
+                for key in _data["keys"]:
+                    char = key[0]
+                    timestamp = key[1]
+
+                    # some legacy recordings dont have information if its key-up or key-down
+                    is_down = key[2] if len(key) > 2 else 1
+                    new_keys.append(KeyPress(char, timestamp, is_down))
 
         self._keyboard_recordings.extend(new_keys)
         if self.verbose:
@@ -225,7 +237,7 @@ class Loader:
         single_recording = self._recordings[index]
         return single_recording
 
-    def keys(self) -> list[tuple]:
+    def keys(self) -> list[KeyPress]:
         return self._keyboard_recordings
 
     def __len__(self) -> int:
