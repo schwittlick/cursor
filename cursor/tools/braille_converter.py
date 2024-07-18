@@ -23,6 +23,19 @@ def convert(file_path: str):
     logging.info(f"Loaded {path.as_posix()}")
 
     loaded = Image.open(path.as_posix())
+
+    # rotating to support landscape images to be accepted
+    if loaded.width != 126:
+        loaded = loaded.transpose(Image.ROTATE_90)
+
+    # for 297x500mm paper, this is the resolution
+    assert loaded.width == 126
+    assert loaded.height == 225
+
+    # print it upside-down. like that it's possible to align embossed
+    # blocks of e.g. emojis, to be aligned at the bottom
+    loaded = loaded.transpose(Image.ROTATE_180)
+
     image = loaded.convert('1')  # binary
     inverted_image = ImageOps.invert(image)
 
