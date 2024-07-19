@@ -22,13 +22,13 @@ class HPGLPlotter:
             logging.info(memory_config)
             logging.info(plotter_config)
             self.apply_config(memory_config, plotter_config)
-        if model in ["7595A", "7596A"]:
-            dm = DraftMasterMemoryConfig()
-            memory_config, plotter_config = dm.memory_alloc_cmd(25518, 4, 0, 66, 12)
-            logging.info(f"Applying custom config to {model}")
-            logging.info(memory_config)
-            logging.info(plotter_config)
-            self.apply_config(memory_config, plotter_config)
+        #if model in ["7595A", "7596A"]:
+        #    dm = DraftMasterMemoryConfig()
+        #    memory_config, plotter_config = dm.memory_alloc_cmd(25518, 4, 0, 66, 12)
+        #    logging.info(f"Applying custom config to {model}")
+        #    logging.info(memory_config)
+        #    logging.info(plotter_config)
+        #    self.apply_config(memory_config, plotter_config)
 
     def write(self, data):
         self.serial.write(data.encode())

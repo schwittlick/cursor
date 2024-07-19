@@ -31,7 +31,7 @@ if __name__ == "__main__":
     root = tk.Tk()
     root.withdraw()
 
-    file_path = filedialog.askopenfilename()
+    file_path = filedialog.askopenfilename(initialdir='/home/marcel/braille/')
     path = pathlib.Path(file_path)
 
     logging.info(f"Loaded {path.as_posix()}")
