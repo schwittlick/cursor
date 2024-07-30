@@ -24,7 +24,11 @@ class Timer:
     @staticmethod
     def timestamp(timestamp_format: str = "%y%m%d_%H%M%S") -> str:
         now = datetime.datetime.now()
-        return now.strftime(timestamp_format)
+        return Timer.format_timestamp(now, timestamp_format)
+
+    @staticmethod
+    def format_timestamp(timestamp: datetime, timestamp_format: str = "%y%m%d_%H%M%S") -> str:
+        return timestamp.strftime(timestamp_format)
 
 
 def timing(func: typing.Callable) -> typing.Callable:

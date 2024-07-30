@@ -18,10 +18,10 @@ import logging
 
 
 class KeyPress:
-    def __init__(self, key, timestamp, is_down):
-        self.key = key
-        self.timestamp = timestamp
-        self.is_down = is_down
+    def __init__(self, key: chr, timestamp: float, is_down: bool):
+        self.key: chr = key
+        self.timestamp: float = timestamp
+        self.is_down: bool = is_down
 
 
 class MyJsonEncoder(json.JSONEncoder):
