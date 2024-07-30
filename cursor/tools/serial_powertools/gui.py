@@ -6,7 +6,10 @@ import random
 import dearpygui.dearpygui as dpg
 import serial
 
+from cursor.collection import Collection
 from cursor.hpgl import RESET_DEVICE, ABORT_GRAPHICS
+from cursor.path import Path
+from cursor.renderer.hpgl import HPGLRenderer
 from cursor.tools.discovery import discover
 from cursor.tools.serial_powertools.serial_inspector import SerialInspector
 
@@ -40,6 +43,37 @@ def create_file_dialogue(cb: typing.Callable):
                          height=400):
         dpg.add_file_extension(".*")
         dpg.add_file_extension(".hpgl", color=(255, 0, 0, 255), custom_text="[HPGL]")
+
+
+def generate_random_swirl() -> str:
+    units_per_mm = 40
+    diameter_mm = 10
+    lines = 30
+    speed = 1
+
+    collection = Collection()
+
+    offset_x = random.uniform(0, 10000)
+    offset_y = random.uniform(0, 10000)
+
+    p = Path()
+    p.velocity = speed
+    p.pen_select = 1
+
+    for l in range(lines):
+        diameter_units = diameter_mm * units_per_mm
+        x = random.uniform(-diameter_units, diameter_units)
+        y = random.uniform(-diameter_units, diameter_units)
+
+        x += offset_x
+        y += offset_y
+
+        p.add(x, y)
+
+    collection.add(p)
+    hpgl_code = HPGLRenderer.generate_string(collection)
+
+    return hpgl_code
 
 
 def create_plotter_inspector_gui(inspector: SerialInspector):
@@ -95,6 +129,10 @@ def create_plotter_inspector_gui(inspector: SerialInspector):
             dpg.add_button(label="SP7;", callback=lambda: inspector.send_command("SP7;"))
             dpg.add_button(label="SP8;", callback=lambda: inspector.send_command("SP8;"))
 
+        with dpg.group(horizontal=True):
+            dpg.add_button(label="Random Swirl (ink drink)",
+                           callback=lambda: inspector.send_command(generate_random_swirl()))
+
     ports = [port.device for port in serial.tools.list_ports.comports()]
     dpg.configure_item("serial_port_dropdown", items=ports)
 
@@ -136,3 +174,7 @@ def add_plotter_info_window(inspector: SerialInspector):
         with dpg.group(horizontal=True):
             dpg.add_button(label="Get model", tag="get_plotter_model", callback=inspector.get_plotter_model)
             dpg.add_text(label="Plotter Model", tag="plotter_model")
+
+
+if __name__ == '__main__':
+    print(generate_random_swirl())
