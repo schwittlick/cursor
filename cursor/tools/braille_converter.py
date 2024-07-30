@@ -5,6 +5,7 @@ import pathlib
 from tkinter import filedialog
 
 from PIL import Image, ImageOps
+from PIL.Image import Transpose
 
 from cursor.algorithm.braille import BrailleTranslator
 
@@ -26,7 +27,7 @@ def convert(file_path: str):
 
     # rotating to support landscape images to be accepted
     if loaded.width != 126:
-        loaded = loaded.transpose(Image.ROTATE_90)
+        loaded = loaded.transpose(Transpose.ROTATE_90)
 
     # for 297x500mm paper, this is the resolution
     assert loaded.width == 126
@@ -34,7 +35,7 @@ def convert(file_path: str):
 
     # print it upside-down. like that it's possible to align embossed
     # blocks of e.g. emojis, to be aligned at the bottom
-    loaded = loaded.transpose(Image.ROTATE_180)
+    loaded = loaded.transpose(Transpose.ROTATE_180)
 
     image = loaded.convert('1')  # binary
     inverted_image = ImageOps.invert(image)
@@ -51,7 +52,7 @@ def main():
     root = tk.Tk()
     root.withdraw()
 
-    file_path = filedialog.askopenfilename()
+    file_path = filedialog.askopenfilename(initialdir='/home/marcel/braille/')
 
     if not file_path:
         logging.warning("Not selected any file. Aborting")
