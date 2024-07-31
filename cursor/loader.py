@@ -120,7 +120,7 @@ class JsonCompressor:
 class Loader:
     def __init__(
             self,
-            directory: pathlib.Path = None,
+            directory: pathlib.Path = DataDirHandler().recordings(),
             limit_files: int | list[str] | None = None,
             load_keys: bool = False,
     ):

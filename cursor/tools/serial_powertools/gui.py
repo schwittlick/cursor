@@ -12,6 +12,7 @@ from cursor.path import Path
 from cursor.renderer.hpgl import HPGLRenderer
 from cursor.tools.discovery import discover
 from cursor.tools.serial_powertools.serial_inspector import SerialInspector
+from data.compositions.composition98.ink_drink import generate_circled_line
 
 
 def print_output(text: str) -> None:
@@ -76,6 +77,14 @@ def generate_random_swirl() -> str:
     return hpgl_code
 
 
+def generate_circled_line_gui() -> str:
+    path = generate_circled_line()
+    collection = Collection()
+    collection.add(path)
+    hpgl_code = HPGLRenderer.generate_string(collection)
+    return hpgl_code
+
+
 def create_plotter_inspector_gui(inspector: SerialInspector):
     with dpg.window(label="Inspector"):
         with dpg.group(horizontal=True):
@@ -132,6 +141,8 @@ def create_plotter_inspector_gui(inspector: SerialInspector):
         with dpg.group(horizontal=True):
             dpg.add_button(label="Random Swirl (ink drink)",
                            callback=lambda: inspector.send_command(generate_random_swirl()))
+            dpg.add_button(label="Random Circled Line (ink drink)",
+                           callback=lambda: inspector.send_command(generate_circled_line_gui()))
 
     ports = [port.device for port in serial.tools.list_ports.comports()]
     dpg.configure_item("serial_port_dropdown", items=ports)
