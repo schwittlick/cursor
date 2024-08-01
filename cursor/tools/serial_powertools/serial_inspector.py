@@ -6,7 +6,7 @@ import serial.tools.list_ports
 from cursor.hpgl.hpgl_tokenize import tokenizer
 from cursor.hpgl.plotter.plotter import HPGLPlotter
 from cursor.tools.serial_powertools.bruteforce import run_brute_force
-from cursor.tools.serial_powertools.seriallib import send_and_receive, AsyncSerialSender
+from cursor.tools.serial_powertools.seriallib import AsyncSerialSender
 
 
 # free static functions for the gui
@@ -31,12 +31,21 @@ class SerialInspector:
         return self.serial_connection.is_open
 
     def send_command(self, command: str):
+        """
+        This needs to send commands async, there could be more than one command
+        """
         if not self.check():
             logging.warning("Serial connection not open.")
             return
 
-        received = send_and_receive(self.serial_connection, command)
-        logging.info(f"Sent: {command}: {self.serial_connection.port} <- {received}")
+        commands = tokenizer(command)
+
+        def progress_cb(command_idx: int):
+            pass
+
+        self.async_sender.add_commands(commands, progress_cb)
+
+        logging.info(f"Sent: {command}: {self.serial_connection.port}")
 
     def send_serial_command(self, sender, app_data, user_data):
         if not self.check():
