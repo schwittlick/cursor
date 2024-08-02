@@ -41,7 +41,7 @@ def main():
 
     for line in vim_data:
         logging.info(line)
-        s.write(line.encode())
+        s.write(f"{line}\n".encode())
 
     logging.info(f"Finished sending to {s.port}")
 
