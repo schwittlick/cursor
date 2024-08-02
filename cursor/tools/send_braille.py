@@ -17,7 +17,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     baud = 9600
-    response = ""
     s = serial.Serial(
         args.port,
         baud,
