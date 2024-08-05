@@ -1,7 +1,7 @@
 import datetime
 import logging
-import typing
 import random
+import typing
 
 import dearpygui.dearpygui as dpg
 import serial
@@ -121,6 +121,33 @@ def generate_circled_line_gui() -> str:
     return hpgl_code
 
 
+def generate_random_dot_walk() -> str:
+    x = random.randint(0, 10000)
+    y = random.randint(0, 10000)
+
+    data = "SP1;VS1;PU;"
+    data += f"PA{x},{y};"
+
+    variance = 30
+
+    dots = 3000
+    for i in range(dots):
+        x += random.randint(-variance, variance)
+        y += random.randint(-variance, variance)
+        data += f"PA{x},{y};"
+        data += "PD;"
+        data += f"PA{x + 10},{y + 10};"
+        data += "PU;"
+
+    return data
+
+
+def generate_random_pa() -> str:
+    x = random.randint(0, 10000)
+    y = random.randint(0, 10000)
+    return f"PA{x},{y};"
+
+
 def create_plotter_inspector_gui(inspector: SerialInspector):
     with dpg.window(label="Inspector"):
         with dpg.group(horizontal=True):
@@ -155,9 +182,7 @@ def create_plotter_inspector_gui(inspector: SerialInspector):
         with dpg.group(horizontal=True):
             dpg.add_button(label="PA0,0;", callback=lambda: inspector.send_command("PA0,0;"))
             dpg.add_button(label="PA10000,10000;", callback=lambda: inspector.send_command("PA10000,10000;"))
-            x = random.randint(0, 10000)
-            y = random.randint(0, 10000)
-            dpg.add_button(label="PArandom(),random();", callback=lambda: inspector.send_command(f"PA{x},{y};"))
+            dpg.add_button(label="PArandom(),random();", callback=lambda: inspector.send_command(generate_random_pa()))
 
         with dpg.group(horizontal=True):
             dpg.add_button(label="ESC.R;", callback=lambda: inspector.send_command(f"{RESET_DEVICE};"))
@@ -179,6 +204,8 @@ def create_plotter_inspector_gui(inspector: SerialInspector):
                            callback=lambda: inspector.send_command(generate_random_swirl()))
             dpg.add_button(label="Random Circled Line (ink drink)",
                            callback=lambda: inspector.send_command(generate_circled_line_gui()))
+            dpg.add_button(label="Random dot walk",
+                           callback=lambda: inspector.send_command(generate_random_dot_walk()))
 
     ports = [port.device for port in serial.tools.list_ports.comports()]
     dpg.configure_item("serial_port_dropdown", items=ports)
