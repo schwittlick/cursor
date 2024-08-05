@@ -7,6 +7,7 @@ import dearpygui.dearpygui as dpg
 import serial
 
 from cursor.collection import Collection
+from cursor.device import PlotterHpglNames, MinmaxMapping, PlotterType
 from cursor.hpgl import RESET_DEVICE, ABORT_GRAPHICS
 from cursor.path import Path
 from cursor.renderer.hpgl import HPGLRenderer
@@ -139,6 +140,37 @@ def generate_random_dot_walk() -> str:
         data += f"PA{x + 10},{y + 10};"
         data += "PU;"
 
+    data += "SP0;PA0,0;"
+
+    return data
+
+
+def generate_filled_square(inspector: SerialInspector) -> str:
+    plotter_model = dpg.get_value("plotter_model")
+    potential_plotters = PlotterHpglNames.names[plotter_model]
+    guessed_plotter = potential_plotters[0]  # a3 size is the expected default here
+
+    bb = MinmaxMapping.maps[guessed_plotter]
+
+    w = random.randint(100, 2000)
+    h = random.randint(100, 2000)
+
+    # subtract w/h so we don't go out of bounds
+    x = random.randint(bb.x, bb.x2 - w)
+    y = random.randint(bb.y, bb.y2 - h)
+
+    data = "SP1;VS1;PU;"
+    data += f"PA{x},{y};"
+
+    stepsize = 30
+
+    for x_step in range(x, x + w, stepsize):
+        for y_step in range(y, y + h, stepsize):
+            data += f"PA{x_step},{y_step};"
+            data += "PD;"
+            data += f"PA{x_step + 10},{y_step + 10};"
+            data += "PU;"
+
     return data
 
 
@@ -206,6 +238,8 @@ def create_plotter_inspector_gui(inspector: SerialInspector):
                            callback=lambda: inspector.send_command(generate_circled_line_gui()))
             dpg.add_button(label="Random dot walk",
                            callback=lambda: inspector.send_command(generate_random_dot_walk()))
+            dpg.add_button(label="Fill square",
+                           callback=lambda: inspector.send_command(generate_filled_square(inspector)))
 
     ports = [port.device for port in serial.tools.list_ports.comports()]
     dpg.configure_item("serial_port_dropdown", items=ports)
