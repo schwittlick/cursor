@@ -136,12 +136,21 @@ def generate_random_dot_walk() -> str:
     data = "SP1;VS1;PU;"
     data += f"PA{x},{y};"
 
-    variance = 30
+    variance = 60
 
-    dots = 3000
+    dots = 30000
     for i in range(dots):
-        x += random.randint(-variance, variance)
-        y += random.randint(-variance, variance)
+        x_variance = random.randint(-variance, variance)
+        y_variance = random.randint(-variance, variance)
+        if not 0 < x + x_variance < bb.w:
+            x = random.randint(bb.x, bb.x2)
+        else:
+            x += x_variance
+        if not 0 < y + y_variance < bb.h:
+            y = random.randint(bb.y, bb.y2)
+        else:
+            y += y_variance
+        # here try to keep things in the plotter bb!
         data += f"PA{x},{y};"
         data += "PD;"
         data += f"PA{x + 10},{y + 10};"
