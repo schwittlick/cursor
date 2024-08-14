@@ -1,5 +1,5 @@
 from cursor.data import DataDirHandler
-from cursor.data import DateHandler
+from cursor.timer import DateHandler
 from cursor.device import PlotterType, PaperSize
 from cursor.export import ExportWrapper
 from cursor.renderer.realtime import RealtimeRenderer

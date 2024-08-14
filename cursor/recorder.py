@@ -1,6 +1,5 @@
 from cursor.path import Path
 from cursor.collection import Collection
-from cursor.data import DateHandler
 from cursor.loader import JsonCompressor
 from cursor.data import DataDirHandler
 from cursor.misc import convert_pynput_btn_to_key
@@ -16,6 +15,7 @@ from PIL import Image
 
 from cursor.position import Position
 from cursor.properties import Property
+from cursor.timer import DateHandler
 
 log = wasabi.Printer()
 

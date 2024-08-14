@@ -12,7 +12,8 @@ from arcade.experimental.uislider import UISlider
 from arcade.gui import UIManager, UIOnChangeEvent, UILabel
 
 from cursor.collection import Collection
-from cursor.data import DataDirHandler, DateHandler
+from cursor.data import DataDirHandler
+from cursor.timer import DateHandler
 from cursor.path import Path
 from cursor.position import Position
 

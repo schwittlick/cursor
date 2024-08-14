@@ -5,6 +5,8 @@ import typing
 from functools import wraps
 import datetime
 
+import pytz
+
 
 class Timer:
     def __init__(self):
@@ -45,3 +47,20 @@ def timing(func: typing.Callable) -> typing.Callable:
         return result
 
     return wrapper
+
+
+class DateHandler:
+    @staticmethod
+    def utc_timestamp() -> float:
+        now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+        utc_timestamp = datetime.datetime.timestamp(now)
+        return utc_timestamp
+
+    @staticmethod
+    def datetime_from_timestamp(ts: float):
+        return datetime.datetime.fromtimestamp(ts)
+
+    @staticmethod
+    def get_timestamp_from_utc(ts: float) -> str:
+        dt = DateHandler.datetime_from_timestamp(ts)
+        return dt.strftime("%d/%m/%y %H:%M:%S.%f")

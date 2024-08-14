@@ -1,23 +1,4 @@
 import pathlib
-import datetime
-import pytz
-
-
-class DateHandler:
-    @staticmethod
-    def utc_timestamp() -> float:
-        now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
-        utc_timestamp = datetime.datetime.timestamp(now)
-        return utc_timestamp
-
-    @staticmethod
-    def datetime_from_timestamp(ts: float):
-        return datetime.datetime.fromtimestamp(ts)
-
-    @staticmethod
-    def get_timestamp_from_utc(ts: float) -> str:
-        dt = DateHandler.datetime_from_timestamp(ts)
-        return dt.strftime("%d/%m/%y %H:%M:%S.%f")
 
 
 class DataDirHandler:
@@ -26,35 +7,42 @@ class DataDirHandler:
         self.data_dir = self.BASE_DIR / "data"
         self.test_data_dir = self.BASE_DIR / "cursor" / "tests" / "data"
 
-    def gcode(self, folder: str) -> pathlib.Path:
-        return self.data_dir / "experiments" / folder / "gcode"
+    def __create(self, folder: pathlib.Path) -> pathlib.Path:
+        folder.mkdir(parents=True, exist_ok=True)
+        return folder
 
-    def tek(self, folder: str) -> pathlib.Path:
-        return self.data_dir / "experiments" / folder / "tek"
+    def __sub(self, subfolder: str) -> pathlib.Path:
+        return self.data_dir / "experiments" / subfolder
 
-    def digi(self, folder: str) -> pathlib.Path:
-        return self.data_dir / "experiments" / folder / "digi"
+    def gcode(self, subfolder: str) -> pathlib.Path:
+        return self.__create(self.__sub(subfolder) / "gcode")
+
+    def tek(self, subfolder: str) -> pathlib.Path:
+        return self.__create(self.__sub(subfolder) / "tek")
+
+    def digi(self, subfolder: str) -> pathlib.Path:
+        return self.__create(self.__sub(subfolder) / "digi")
 
     def jpg(self, subfolder: str) -> pathlib.Path:
-        return self.data_dir / "experiments" / subfolder / "jpg"
+        return self.__create(self.__sub(subfolder) / "jpg")
 
     def video(self, subfolder: str) -> pathlib.Path:
-        return self.data_dir / "experiments" / subfolder / "video"
+        return self.__create(self.__sub(subfolder) / "video")
 
     def svg(self, subfolder: str) -> pathlib.Path:
-        return self.data_dir / "experiments" / subfolder / "svg"
+        return self.__create(self.__sub(subfolder) / "svg")
 
     def hpgl(self, subfolder: str) -> pathlib.Path:
-        return self.data_dir / "experiments" / subfolder / "hpgl"
+        return self.__create(self.__sub(subfolder) / "hpgl")
 
     def pickle(self, subfolder: str) -> pathlib.Path:
-        return self.data_dir / "experiments" / subfolder / "pickle"
+        return self.__create(self.__sub(subfolder) / "pickle")
 
     def pdf(self, subfolder: str) -> pathlib.Path:
-        return self.data_dir / "experiments" / subfolder / "pdf"
+        return self.__create(self.__sub(subfolder) / "pdf")
 
     def source(self, subfolder: str) -> pathlib.Path:
-        return self.data_dir / "experiments" / subfolder / "source"
+        return self.__create(self.__sub(subfolder) / "source")
 
     def images(self) -> pathlib.Path:
         return self.data_dir / "jpg"

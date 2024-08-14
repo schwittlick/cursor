@@ -1,6 +1,6 @@
 import logging
 
-from cursor.data import DateHandler
+from cursor.timer import DateHandler
 from cursor.path import Path
 from cursor.renderer.realtime import RealtimeRenderer
 
