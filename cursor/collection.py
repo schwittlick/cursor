@@ -68,8 +68,7 @@ class Collection:
                 return c
 
     def __repr__(self) -> str:
-        tuples = [pa.as_tuple_list() for pa in self]
-        return f"Collection({self.name}) -> ({len(self)})\n{tuples}"
+        return f"Collection({self.name}, {len(self)}) {self.bb()}"
 
     def __eq__(self, other: Collection) -> bool:
         if not isinstance(other, Collection):
