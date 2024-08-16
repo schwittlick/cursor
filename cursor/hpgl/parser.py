@@ -50,7 +50,6 @@ class HPGLParser:
 
         self.__init()
 
-    @timing
     def parse(self, hpgl: pathlib.Path | str) -> Collection:
         if type(hpgl) is str:
             hpgl_data = hpgl

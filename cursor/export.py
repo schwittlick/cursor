@@ -114,6 +114,7 @@ class Exporter:
                 transformed = pc.transformed(BoundingBox(0, 0, bb.w, bb.h))
                 # in case the BB is negative
                 jpeg_renderer = JpegRenderer(jpeg_folder, w=int(bb.w), h=int(bb.h))
+                jpeg_renderer.background((255, 255, 255))
                 jpeg_renderer.add(transformed)
                 jpeg_renderer.render()
                 jpeg_renderer.save(f"{fname}")

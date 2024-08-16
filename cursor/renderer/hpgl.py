@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pathlib
-from tqdm import tqdm
 import logging
 
 from cursor.collection import Collection
@@ -58,73 +57,73 @@ class HPGLRenderer(BaseRenderer):
 
         _hpgl.PU()
 
-        with tqdm(total=len(collection)) as pbar:
-            pbar.update(0)
-            for p in collection:
-                x = p.start_pos().x
-                y = p.start_pos().y
+        #with tqdm(total=len(collection)) as pbar:
+            #pbar.update(0)
+        for p in collection:
+            x = p.start_pos().x
+            y = p.start_pos().y
 
-                _ps = p.pen_select
-                if _prev_pen != _ps:
-                    if _ps:
-                        _hpgl.SP(_ps)
-                        _prev_pen = _ps
+            _ps = p.pen_select
+            if _prev_pen != _ps:
+                if _ps:
+                    _hpgl.SP(_ps)
+                    _prev_pen = _ps
 
-                _lt = p.line_type
-                if _lt:
-                    if _prev_line_type != _lt:
-                        _hpgl.LT(_lt)
-                        _prev_line_type = _lt
+            _lt = p.line_type
+            if _lt:
+                if _prev_line_type != _lt:
+                    _hpgl.LT(_lt)
+                    _prev_line_type = _lt
 
-                _v = p.velocity
-                if _prev_velocity != _v:
-                    if _v:
-                        _hpgl.VS(_v)
-                        _prev_velocity = _v
+            _v = p.velocity
+            if _prev_velocity != _v:
+                if _v:
+                    _hpgl.VS(_v)
+                    _prev_velocity = _v
 
-                _fs = p.pen_force
-                if _fs:
-                    if _prev_force != _fs:
-                        _hpgl.FS(_fs)
-                        _prev_force = _fs
+            _fs = p.pen_force
+            if _fs:
+                if _prev_force != _fs:
+                    _hpgl.FS(_fs)
+                    _prev_force = _fs
 
-                _lt = p.line_type
-                if _lt:
-                    if _prev_line_type != _lt:
-                        _hpgl.LT(_lt)
-                        _prev_line_type = _lt
+            _lt = p.line_type
+            if _lt:
+                if _prev_line_type != _lt:
+                    _hpgl.LT(_lt)
+                    _prev_line_type = _lt
 
-                if p.laser_pwm:
-                    _hpgl.custom(f"PWM{p.laser_pwm};")
+            if p.laser_pwm:
+                _hpgl.custom(f"PWM{p.laser_pwm};")
 
-                if p.laser_volt:
-                    _hpgl.custom(f"VOLT{p.laser_volt:.3};")
+            if p.laser_volt:
+                _hpgl.custom(f"VOLT{p.laser_volt:.3};")
 
-                if p.laser_delay:
-                    _hpgl.custom(f"DELAY{p.laser_delay:.3};")
+            if p.laser_delay:
+                _hpgl.custom(f"DELAY{p.laser_delay:.3};")
 
-                if p.laser_amp:
-                    _hpgl.custom(f"AMP{p.laser_amp:.3};")
+            if p.laser_amp:
+                _hpgl.custom(f"AMP{p.laser_amp:.3};")
+
+            _hpgl.PA(int(x), int(y))
+            if p.is_polygon:
+                _hpgl.custom("PM0;")
+
+            _hpgl.PD()
+
+            for point in p.vertices:
+                x = point.x
+                y = point.y
 
                 _hpgl.PA(int(x), int(y))
-                if p.is_polygon:
-                    _hpgl.custom("PM0;")
 
-                _hpgl.PD()
+            _hpgl.PU()
 
-                for point in p.vertices:
-                    x = point.x
-                    y = point.y
+            if p.is_polygon:
+                _hpgl.custom("PM2;")  # switch to PM2; to close and safe
+                _hpgl.custom("FP;")
 
-                    _hpgl.PA(int(x), int(y))
-
-                _hpgl.PU()
-
-                if p.is_polygon:
-                    _hpgl.custom("PM2;")  # switch to PM2; to close and safe
-                    _hpgl.custom("FP;")
-
-                pbar.update(1)
+            #pbar.update(1)
 
         _hpgl.PA(0, 0)
         _hpgl.SP(0)
