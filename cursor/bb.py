@@ -1,80 +1,138 @@
 from __future__ import annotations
 
-import numpy as np
+import math
+from typing import NamedTuple, Sequence
+
+
+class Point(NamedTuple):
+    x: float
+    y: float
 
 
 class BoundingBox:
     def __init__(self, x: float, y: float, x2: float, y2: float):
-        self.x = x
-        self.y = y
-        self.x2 = x2
-        self.y2 = y2
-        self.w = np.linalg.norm(self.x - self.x2)
-        self.h = np.linalg.norm(self.y - self.y2)
+        self.p1 = Point(min(x, x2), min(y, y2))
+        self.p2 = Point(max(x, x2), max(y, y2))
 
-    def center(self) -> tuple[float, float]:
-        center_x = (self.w / 2.0) + self.x
-        center_y = (self.h / 2.0) + self.y
-        return center_x, center_y
+    @property
+    def w(self) -> float:
+        return self.p2.x - self.p1.x
 
-    def scale(self, fac: float) -> None:
-        self.scale_x(fac)
-        self.scale_y(fac)
+    @property
+    def h(self) -> float:
+        return self.p2.y - self.p1.y
 
-    def scale_x(self, fac: float) -> None:
-        prevw = self.w
-        self.w = self.w * fac
+    @property
+    def x(self) -> float:
+        return self.p1.x
 
-        diff = np.linalg.norm(prevw - self.w)
-        self.x = self.x + diff / 2
-        self.x2 = self.x + self.w
+    @x.setter
+    def x(self, value: float) -> None:
+        self.p1 = Point(value, self.p1.y)
+        if value > self.p2.x:
+            self.p2 = Point(value, self.p2.y)
 
-    def scale_y(self, fac: float) -> None:
-        prevh = self.h
-        self.h = self.h * fac
+    @property
+    def y(self) -> float:
+        return self.p1.y
 
-        diff = np.linalg.norm(prevh - self.h)
-        self.y = self.y + diff / 2
-        self.y2 = self.y + self.h
+    @y.setter
+    def y(self, value: float) -> None:
+        self.p1 = Point(self.p1.x, value)
+        if value > self.p2.y:
+            self.p2 = Point(self.p2.x, value)
 
-    def aspect_ratio(self) -> float | np.inf:
-        if self.w == 0.0:
-            return np.inf
-        elif self.h == 0.0:
-            return -np.inf
+    @property
+    def x2(self) -> float:
+        return self.p2.x
 
+    @x2.setter
+    def x2(self, value: float) -> None:
+        self.p2 = Point(value, self.p2.y)
+        if value < self.p1.x:
+            self.p1 = Point(value, self.p1.y)
+
+    @property
+    def y2(self) -> float:
+        return self.p2.y
+
+    @y2.setter
+    def y2(self, value: float) -> None:
+        self.p2 = Point(self.p2.x, value)
+        if value < self.p1.y:
+            self.p1 = Point(self.p1.x, value)
+
+    def center(self) -> Point:
+        return Point(
+            (self.p1.x + self.p2.x) / 2,
+            (self.p1.y + self.p2.y) / 2
+        )
+
+    def scale(self, factor: float) -> None:
+        self.scale_x(factor)
+        self.scale_y(factor)
+
+    def scale_x(self, factor: float) -> None:
+        center_x = (self.p1.x + self.p2.x) / 2
+        half_width = self.w / 2 * factor
+        self.p1 = Point(center_x - half_width, self.p1.y)
+        self.p2 = Point(center_x + half_width, self.p2.y)
+
+    def scale_y(self, factor: float) -> None:
+        center_y = (self.p1.y + self.p2.y) / 2
+        half_height = self.h / 2 * factor
+        self.p1 = Point(self.p1.x, center_y - half_height)
+        self.p2 = Point(self.p2.x, center_y + half_height)
+
+    def aspect_ratio(self) -> float:
+        if self.w == 0:
+            return math.inf
+        elif self.h == 0:
+            return -math.inf
         return self.h / self.w
 
     def area(self) -> float:
         return self.w * self.h
 
-    def subdiv(self, xpieces: int, ypieces: int) -> list[BoundingBox]:
-        bbs = []
-        for x in range(xpieces):
-            for y in range(ypieces):
-                w = self.x2 / xpieces
-                h = self.y2 / ypieces
-                xoff = x * w + self.x
-                yoff = y * h + self.y
-                bb = BoundingBox(xoff, yoff, xoff + w, yoff + h)
-                bbs.append(bb)
+    def subdiv(self, x_pieces: int, y_pieces: int) -> Sequence[BoundingBox]:
+        w_step = self.w / x_pieces
+        h_step = self.h / y_pieces
+        return [
+            BoundingBox(
+                self.p1.x + x * w_step,
+                self.p1.y + y * h_step,
+                self.p1.x + (x + 1) * w_step,
+                self.p1.y + (y + 1) * h_step
+            )
+            for x in range(x_pieces)
+            for y in range(y_pieces)
+        ]
 
-        return bbs
-
-    def paths(self) -> list[tuple[float, float, float, float]]:
-        # returns a list of lines, x1, y1, x2, y2
-        paths = []
-        paths.append((self.x, self.y, self.x2, self.y))
-        paths.append((self.x2, self.y, self.x2, self.y2))
-        paths.append((self.x2, self.y2, self.x, self.y2))
-        paths.append((self.x, self.y2, self.x, self.y))
-        return paths
+    def paths(self) -> Sequence[tuple[float, float, float, float]]:
+        return [
+            (self.p1.x, self.p1.y, self.p2.x, self.p1.y),
+            (self.p2.x, self.p1.y, self.p2.x, self.p2.y),
+            (self.p2.x, self.p2.y, self.p1.x, self.p2.y),
+            (self.p1.x, self.p2.y, self.p1.x, self.p1.y),
+        ]
 
     def __repr__(self) -> str:
-        return f"BB(x={self.x:.2f}, y={self.y:.2f}, x2={self.x2:.2f}, y2={self.y2:.2f}, w={self.w:.2f}, h={self.h:.2f})"
+        return (f"BoundingBox(x={self.p1.x:.2f}, y={self.p1.y:.2f}, "
+                f"x2={self.p2.x:.2f}, y2={self.p2.y:.2f}, "
+                f"width={self.w:.2f}, height={self.h:.2f})")
 
-    def __sub__(self, o: BoundingBox) -> BoundingBox:
-        return BoundingBox(self.x - o.x, self.y - o.y, self.x2 - o.x2, self.y2 - o.y2)
+    def __sub__(self, other: BoundingBox) -> BoundingBox:
+        return BoundingBox(
+            self.p1.x - other.p1.x,
+            self.p1.y - other.p1.y,
+            self.p2.x - other.p2.x,
+            self.p2.y - other.p2.y
+        )
 
-    def __add__(self, o: BoundingBox) -> BoundingBox:
-        return BoundingBox(self.x + o.x, self.y + o.y, self.x2 + o.x2, self.y2 + o.y2)
+    def __add__(self, other: BoundingBox) -> BoundingBox:
+        return BoundingBox(
+            self.p1.x + other.p1.x,
+            self.p1.y + other.p1.y,
+            self.p2.x + other.p2.x,
+            self.p2.y + other.p2.y
+        )
