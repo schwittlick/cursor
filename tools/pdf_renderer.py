@@ -2,7 +2,7 @@ from fpdf import fpdf
 
 from cursor.data import DataDirHandler
 from cursor.device import Paper, PaperSize
-from cursor.loader import Loader
+from cursor.load.loader import Loader
 from cursor.renderer import JpegRenderer, AsciiRenderer
 
 if __name__ == "__main__":

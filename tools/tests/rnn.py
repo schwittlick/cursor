@@ -1,6 +1,6 @@
 from cursor.data import DataDirHandler
 from cursor.filter import MaxPointCountFilter, MinPointCountFilter
-from cursor.loader import Loader
+from cursor.load.loader import Loader
 
 import tensorflow as tf
 

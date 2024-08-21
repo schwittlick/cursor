@@ -4,7 +4,7 @@ import pathlib
 import cursor.position
 from cursor.collection import Collection
 from cursor.data import DataDirHandler
-from cursor.loader import JsonCompressor
+from cursor.load.compress import JsonCompressor
 from cursor.path import Path
 
 

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 from cursor.collection import Collection
 from cursor.data import DataDirHandler
-from cursor.loader import Loader
+from cursor.load.loader import Loader
 from cursor.timer import Timer
 
 

@@ -1,129 +1,26 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-
-from cursor.data import DataDirHandler
-from cursor.path import Path
-from cursor.properties import Property
-from cursor.position import Position
-from cursor.collection import Collection
-from cursor.timer import Timer, DateHandler
-
-import pathlib
 import json
-import base64
-import zlib
-import pyautogui
-from functools import reduce
-from tqdm import tqdm
 import logging
+import pathlib
+from functools import reduce
 
+from tqdm import tqdm
 
-@dataclass
-class KeyPress:
-    key: chr
-    timestamp: float
-    is_down: bool
-
-
-class MyJsonEncoder(json.JSONEncoder):
-    def default(self, o: Position | Path | Collection) -> dict | list[Position]:
-        match o:
-            case Collection():
-                return {
-                    "paths": o.get_all(),
-                    "timestamp": o.timestamp(),
-                }
-            case Path():
-                return o.vertices
-            case Position():
-                d = {
-                    "x": round(o.x, 4),
-                    "y": round(o.y, 4)
-                }
-
-                if o.timestamp:
-                    d["ts"] = round(o.timestamp, 2)
-
-                if Property.COLOR in o.properties.keys():
-                    color = o.properties[Property.COLOR]
-                    if color:
-                        d["c"] = color
-                return d
-
-
-class MyJsonDecoder(json.JSONDecoder):
-    def __init__(self, *args, **kwargs):
-        json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
-
-    def object_hook(self, dct: dict) -> dict | Position | Collection:
-        if "x" in dct:
-            if "c" in dct:
-                if dct["c"] is not None:
-                    c = tuple(dct["c"])
-                else:
-                    c = None
-            else:
-                c = None
-            return Position(dct["x"], dct["y"], dct["ts"], {Property.COLOR: c})
-        if "w" in dct and "h" in dct:
-            s = pyautogui.Size(dct["w"], dct["h"])
-            return s
-        if "paths" in dct and "timestamp" in dct:
-            ts = dct["timestamp"]
-            pc = Collection(ts)
-            for _p in dct["paths"]:
-                pc.add(Path(_p))
-            return pc
-        return dct
-
-
-class JsonCompressor:
-    ZIPJSON_KEY = "base64(zip(o))"
-
-    def json_zip(self, j: dict) -> dict:
-        dumped = json.dumps(j, cls=MyJsonEncoder)
-        dumped_encoded = dumped.encode("utf-8")
-        compressed = zlib.compress(dumped_encoded)
-        encoded = {self.ZIPJSON_KEY: base64.b64encode(compressed).decode("ascii")}
-
-        return encoded
-
-    # @profile
-    def json_unzip(self, j: dict, insist: bool = True) -> dict:
-        try:
-            assert j[self.ZIPJSON_KEY]
-            assert set(j.keys()) == {self.ZIPJSON_KEY}
-        except AssertionError:
-            if insist:
-                raise RuntimeError(
-                    "JSON not in the expected format {"
-                    + str(self.ZIPJSON_KEY)
-                    + ": zipstring}"
-                )
-            else:
-                return j
-
-        try:
-            decoded = base64.b64decode(j[self.ZIPJSON_KEY])
-            decompressed = zlib.decompress(decoded)
-        except zlib.error:
-            raise RuntimeError("Could not decode/unzip the contents")
-
-        try:
-            decompressed = json.loads(decompressed, cls=MyJsonDecoder)
-        except TypeError and json.JSONDecodeError:
-            raise RuntimeError("Could interpret the unzipped contents")
-
-        return decompressed
+from cursor.collection import Collection
+from cursor.load import KeyPress
+from cursor.load.compress import JsonCompressor
+from cursor.load.decode import MyJsonDecoder
+from cursor.path import Path
+from cursor.timer import Timer, DateHandler
 
 
 class Loader:
     def __init__(
-            self,
-            directory: pathlib.Path = None,
-            limit_files: int | list[str] | None = None,
-            load_keys: bool = False,
+        self,
+        directory: pathlib.Path = None,
+        limit_files: int | list[str] | None = None,
+        load_keys: bool = False,
     ):
         self.verbose = False
 
@@ -136,10 +33,10 @@ class Loader:
             )
 
     def load_all(
-            self,
-            directory: pathlib.Path,
-            limit_files: int | list[str] | None = None,
-            load_keys: bool = False,
+        self,
+        directory: pathlib.Path,
+        limit_files: int | list[str] | None = None,
+        load_keys: bool = False,
     ) -> None:
         t = Timer()
         t.start()
@@ -243,10 +140,3 @@ class Loader:
 
     def __len__(self) -> int:
         return len(self._recordings)
-
-
-def load_recording(fn: str = "1704821016.488495_tuesday_evening") -> Collection:
-    recordings = DataDirHandler().recordings()
-    _loader = Loader(directory=recordings,
-                     limit_files=[fn])
-    return _loader.all_paths()

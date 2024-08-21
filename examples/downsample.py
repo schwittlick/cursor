@@ -3,7 +3,7 @@ from cursor.collection import Collection
 from cursor.data import DataDirHandler
 from cursor.device import PaperSize, Paper
 from cursor.filter import MinPointCountFilter
-from cursor.loader import Loader
+from cursor.load.loader import Loader
 
 if __name__ == "__main__":
     res = Paper.sizes[PaperSize.LANDSCAPE_A1]

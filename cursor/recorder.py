@@ -1,6 +1,6 @@
 from cursor.path import Path
 from cursor.collection import Collection
-from cursor.loader import JsonCompressor
+from cursor.load.compress import JsonCompressor
 from cursor.data import DataDirHandler
 from cursor.misc import convert_pynput_btn_to_key
 

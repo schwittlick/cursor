@@ -1,6 +1,6 @@
 from cursor.data import DataDirHandler
 from cursor.device import Paper, PaperSize
-from cursor.loader import Loader
+from cursor.load.loader import Loader
 from cursor.renderer.ascii import AsciiRenderer
 from cursor.renderer.jpg import JpegRenderer
 

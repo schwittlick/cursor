@@ -1,6 +1,7 @@
 from cursor.bb import BoundingBox
 from cursor.data import DataDirHandler
-from cursor.loader import JsonCompressor, Loader
+from cursor.load.loader import Loader
+from cursor.load.compress import JsonCompressor
 
 
 def save(m):

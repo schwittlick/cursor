@@ -1,7 +1,7 @@
 import sys
 
 from cursor.sorter import SortParameter, Sorter
-from cursor.loader import Loader
+from cursor.load.loader import Loader
 from cursor.data import DataDirHandler
 
 from cursor.bb import BoundingBox
