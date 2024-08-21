@@ -1,13 +1,10 @@
-import cursor.load.loader
-from cursor import data
-from cursor import loader
+from cursor.load.loader import Loader
+from cursor.data import DataDirHandler
 
-import wasabi
-
-log = wasabi.Printer()
+import logging
 
 if __name__ == "__main__":
-    p = data.DataDirHandler().recordings()
-    ll = cursor.load.loader.Loader(directory=p, limit_files=None)
+    p = DataDirHandler().recordings()
+    ll = Loader(directory=p, limit_files=None)
     all_paths = ll.all_paths()
-    log.info(f"Valid path count: {len(all_paths)}")
+    logging.info(f"Valid path count: {len(all_paths)}")

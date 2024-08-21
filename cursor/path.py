@@ -660,7 +660,7 @@ class Path:
         return calc_entropy(self.direction_changes())
 
     def __differential_entropy_wrap(self, values: list[float]) -> float:
-        window_length = None # max(int(len(values) * 0.1), 1)
+        window_length = None  # max(int(len(values) * 0.1), 1)
         if len(values) < 5:
             logging.error("Can't compute window_length for such small list of values..")
         try:
