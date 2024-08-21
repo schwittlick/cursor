@@ -4,6 +4,7 @@ import base64
 import json
 import zlib
 
+from cursor.timer import timing
 from cursor.load.decode import MyJsonDecoder
 from cursor.load.encode import MyJsonEncoder
 
@@ -19,7 +20,7 @@ class JsonCompressor:
 
         return encoded
 
-    # @profile
+    @timing
     def json_unzip(self, j: dict, insist: bool = True) -> dict:
         try:
             assert j[self.ZIPJSON_KEY]
@@ -41,8 +42,11 @@ class JsonCompressor:
             raise RuntimeError("Could not decode/unzip the contents")
 
         try:
+            print(decompressed)
             decompressed = json.loads(decompressed, cls=MyJsonDecoder)
+
         except TypeError and json.JSONDecodeError:
             raise RuntimeError("Could interpret the unzipped contents")
 
         return decompressed
+
