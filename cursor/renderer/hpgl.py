@@ -10,9 +10,7 @@ from cursor.timer import Timer
 
 
 class HPGLRenderer(BaseRenderer):
-    def __init__(
-            self, folder: pathlib.Path
-    ) -> None:
+    def __init__(self, folder: pathlib.Path) -> None:
         super().__init__(folder)
 
         self.__save_path = folder
@@ -57,8 +55,6 @@ class HPGLRenderer(BaseRenderer):
 
         _hpgl.PU()
 
-        #with tqdm(total=len(collection)) as pbar:
-            #pbar.update(0)
         for p in collection:
             x = p.start_pos().x
             y = p.start_pos().y
@@ -122,8 +118,6 @@ class HPGLRenderer(BaseRenderer):
             if p.is_polygon:
                 _hpgl.custom("PM2;")  # switch to PM2; to close and safe
                 _hpgl.custom("FP;")
-
-            #pbar.update(1)
 
         _hpgl.PA(0, 0)
         _hpgl.SP(0)

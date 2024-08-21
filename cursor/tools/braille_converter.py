@@ -46,7 +46,7 @@ def convert(file_path: pathlib.Path) -> list[str]:
     fmt = detect_paper_size(im.width, im.height)
     if not fmt:
         logging.error(f"w:{im.width} h:{im.height}")
-        logging.error(f"Input image has unknown size")
+        logging.error("Input image has unknown size")
         return []
 
     # rotating to support landscape images to be accepted

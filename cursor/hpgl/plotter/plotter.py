@@ -5,7 +5,7 @@ from serial import Serial, SerialException
 
 from cursor.hpgl import read_until_char, CR, OUTPUT_IDENTIFICATION, WAIT, ABORT_GRAPHICS, OUTBUT_BUFFER_SPACE, \
     OUTPUT_POSITION
-from cursor.hpgl.plotter.memory_config import HP7550AMemoryConfig, DraftMasterMemoryConfig
+from cursor.hpgl.plotter.memory_config import HP7550AMemoryConfig
 from cursor.position import Position
 
 
@@ -22,7 +22,7 @@ class HPGLPlotter:
             logging.info(memory_config)
             logging.info(plotter_config)
             self.apply_config(memory_config, plotter_config)
-        #if model in ["7595A", "7596A"]:
+        # if model in ["7595A", "7596A"]:
         #    dm = DraftMasterMemoryConfig()
         #    memory_config, plotter_config = dm.memory_alloc_cmd(25518, 4, 0, 66, 12)
         #    logging.info(f"Applying custom config to {model}")
