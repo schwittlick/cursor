@@ -1,10 +1,8 @@
 from cursor.timer import Timer
 
 import sys
-import wasabi
 import copy
-
-log = wasabi.Printer()
+import logging
 
 
 class Filter:
@@ -31,10 +29,10 @@ class EntropyMinFilter(Filter):
         ]
         len_after = len(paths)
 
-        log.good(
+        logging.info(
             f"Filtering via {__class__.__name__} took {round(t.elapsed() * 1000)}ms."
         )
-        log.good(
+        logging.info(
             f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
         )
 
@@ -55,8 +53,8 @@ class EntropyMaxFilter(Filter):
 
         len_after = len(paths)
         elapsed = t.elapsed()
-        log.good(f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
-        log.good(
+        logging.info(f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
+        logging.info(
             f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
         )
 
@@ -76,10 +74,10 @@ class DirectionChangeEntropyFilter(Filter):
         ]
 
         len_after = len(paths)
-        log.good(
+        logging.info(
             f"Filtering via {__class__.__name__} took {round(t.elapsed() * 1000)}ms."
         )
-        log.good(
+        logging.info(
             f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
         )
 
@@ -104,10 +102,10 @@ class MinPointCountFilter(Filter):
         paths[:] = [p for p in paths if len(p) >= self.point_count]
 
         len_after = len(paths)
-        log.good(
+        logging.info(
             f"Filtering via {__class__.__name__} took {round(t.elapsed() * 1000)}ms."
         )
-        log.good(
+        logging.info(
             f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
         )
 
@@ -124,10 +122,10 @@ class MaxPointCountFilter(Filter):
         paths[:] = [p for p in paths if len(p) <= self.point_count]
 
         len_after = len(paths)
-        log.good(
+        logging.info(
             f"Filtering via {__class__.__name__} took {round(t.elapsed() * 1000)}ms."
         )
-        log.good(
+        logging.info(
             f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
         )
 
@@ -140,7 +138,7 @@ class DistanceFilter(Filter):
         len_before = len(paths)
         paths[:] = [p for p in paths if p.distance <= self.max_distance]
         len_after = len(paths)
-        log.good(f"DistanceFilter: reduced path count from {len_before} to {len_after}")
+        logging.info(f"DistanceFilter: reduced path count from {len_before} to {len_after}")
 
 
 class AspectRatioFilter(Filter):
@@ -148,6 +146,7 @@ class AspectRatioFilter(Filter):
     Before using an AspectRatioFilter, all paths should be "normalized" in a certain way
     e.g. morphed from 0,0 to 1,0 and then the aspect ratio will be more expressive
     """
+
     def __init__(self, min_as, max_as=sys.maxsize):
         self.min_as = min_as
         self.max_as = max_as
@@ -156,7 +155,7 @@ class AspectRatioFilter(Filter):
         len_before = len(paths)
         paths[:] = [p for p in paths if self.min_as < p.aspect_ratio() < self.max_as]
         len_after = len(paths)
-        log.good(
+        logging.info(
             f"AspectRatioFilter: reduced path count from {len_before} to {len_after}"
         )
 
@@ -183,11 +182,11 @@ class DistanceBetweenPointsFilter(Filter):
             pa.clean()
 
         len_after = len(paths)
-        log.good(
+        logging.info(
             f"DistanceBetweenPointsFilter: reduced path count from {len_before} to {len_after}"
         )
 
-        log.good(f"This took {t.elapsed()}s")
+        logging.info(f"This took {t.elapsed()}s")
 
 
 class MinTravelDistanceFilter(Filter):
@@ -198,6 +197,6 @@ class MinTravelDistanceFilter(Filter):
         len_before = len(paths)
         paths[:] = [p for p in paths if p.distance > self.min_distance]
         len_after = len(paths)
-        log.good(
+        logging.info(
             f"MinDistanceFilter: reduced path count from {len_before} to {len_after}"
         )

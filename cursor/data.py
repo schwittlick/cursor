@@ -41,6 +41,9 @@ class DataDirHandler:
     def pdf(self, subfolder: str) -> pathlib.Path:
         return self.__create(self.__sub(subfolder) / "pdf")
 
+    def json(self, subfolder: str) -> pathlib.Path:
+        return self.__create(self.__sub(subfolder) / "json")
+
     def source(self, subfolder: str) -> pathlib.Path:
         return self.__create(self.__sub(subfolder) / "source")
 
@@ -64,6 +67,9 @@ class DataDirHandler:
 
     def pdfs(self) -> pathlib.Path:
         return self.data_dir / "pdf"
+
+    def jsons(self) -> pathlib.Path:
+        return self.data_dir / "json"
 
     def ascii(self) -> pathlib.Path:
         return self.data_dir / "ascii"

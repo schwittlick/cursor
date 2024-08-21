@@ -2,11 +2,7 @@ from __future__ import annotations
 
 from enum import Enum, auto
 
-import wasabi
-
 from cursor.bb import BoundingBox as BB
-
-log = wasabi.Printer()
 
 
 class PlotterConfig:
@@ -51,6 +47,7 @@ class PlotterType(Enum):
     MUTOH_XP500_A3 = auto()
 
     DIY_PLOTTER = auto()
+    DIY_PLOTTER_A2 = auto()
     AXIDRAW = auto()
 
     ROLAND_DXY885 = auto()
@@ -114,6 +111,7 @@ class ExportFormatMappings:
         PlotterType.MUTOH_XP500_A3: ExportFormat.HPGL,
 
         PlotterType.DIY_PLOTTER: ExportFormat.GCODE,
+        PlotterType.DIY_PLOTTER_A2: ExportFormat.GCODE,
         PlotterType.AXIDRAW: ExportFormat.SVG,
 
         PlotterType.ROLAND_DXY885: ExportFormat.HPGL,
@@ -200,7 +198,8 @@ class MinmaxMapping:
         PlotterType.MUTOH_XP500_A2: BB(-11284, -8149, 11285, 8149),
         PlotterType.MUTOH_XP500_A3: BB(-7815, -5716, 7815, 5716),
 
-        PlotterType.DIY_PLOTTER: BB(0, 0, 3350, -1715),
+        PlotterType.DIY_PLOTTER: BB(0, 0, 3350, -1715),  # A1
+        PlotterType.DIY_PLOTTER_A2: BB(0, 0, 1720, -1220),
         PlotterType.AXIDRAW: BB(0, 0, 0, 0),  # todo: missing real bounds
 
         PlotterType.ROLAND_DXY885: BB(0, 0, 16158, 11040),  # taken from OH;
@@ -266,6 +265,7 @@ class PlotterName:
 
         PlotterType.AXIDRAW: "axidraw",
         PlotterType.DIY_PLOTTER: "custom",
+        PlotterType.DIY_PLOTTER_A2: "custom_a2",
 
         PlotterType.ROLAND_DXY885: "dxy885",
         PlotterType.ROLAND_DXY980: "dxy980",
@@ -331,6 +331,7 @@ class XYFactors:
         PlotterType.ROLAND_DXY1300: (40, 40),
 
         PlotterType.DIY_PLOTTER: (2.85714, 2.90572),
+        PlotterType.DIY_PLOTTER_A2: (2.896, 2.905),
         PlotterType.AXIDRAW: (3.704, 3.704),
         PlotterType.HP_7475A_A3: (40, 40),
         PlotterType.HP_7475A_A4: (40, 40),
@@ -380,6 +381,7 @@ class MaxSpeed:
         PlotterType.ROLAND_DXY1300: 40,
 
         PlotterType.DIY_PLOTTER: 1,
+        PlotterType.DIY_PLOTTER_A2: 1,
         PlotterType.AXIDRAW: 1,
         PlotterType.HP_7475A_A3: 40,
         PlotterType.HP_7475A_A4: 40,
@@ -429,6 +431,7 @@ class BufferSize:
         PlotterType.ROLAND_DXY1300: 1024,
 
         PlotterType.DIY_PLOTTER: 1,
+        PlotterType.DIY_PLOTTER_A2: 1,
         PlotterType.AXIDRAW: 1,
         PlotterType.HP_7475A_A3: 512,
         PlotterType.HP_7475A_A4: 512,

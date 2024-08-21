@@ -167,25 +167,23 @@ class Exporter:
             if format is ExportFormat.GCODE:
                 gcode_folder = DataDirHandler().gcode(self.name)
                 if self.gcode_speed:
-                    gcode_renderer = GCodeRenderer(gcode_folder, z_down=4.5)
+                    gcode_renderer = GCodeRenderer(gcode_folder, feedrate_xy=self.gcode_speed, z_down=-6)
                 else:
-                    gcode_renderer = GCodeRenderer(
-                        gcode_folder, feedrate_xy=self.gcode_speed, z_down=4.5
-                    )
+                    gcode_renderer = GCodeRenderer(gcode_folder, z_down=-6)
                 gcode_renderer.render(pc)
-                gcode_renderer.save(f"{layer}_{fname}")
+                gcode_renderer.save(f"{fname}_{layer}")
 
             if format is ExportFormat.TEK:
                 tek_folder = DataDirHandler().tek(self.name)
                 tek_renderer = TektronixRenderer(tek_folder)
                 tek_renderer.render(pc)
-                tek_renderer.save(f"{layer}_{fname}")
+                tek_renderer.save(f"{fname}_{layer}")
 
             if format is ExportFormat.DIGI:
                 digi_folder = DataDirHandler().digi(self.name)
                 digi_renderer = DigiplotRenderer(digi_folder)
                 digi_renderer.render(pc)
-                digi_renderer.save(f"{layer}_{fname}")
+                digi_renderer.save(f"{fname}_{layer}")
 
     def export_copic_color_mapping(self, fname: str, layers: dict[str, Collection]) -> None:
         """

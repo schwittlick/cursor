@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from cursor.data import DataDirHandler
 from cursor.path import Path
 from cursor.properties import Property
@@ -17,11 +19,11 @@ from tqdm import tqdm
 import logging
 
 
+@dataclass
 class KeyPress:
-    def __init__(self, key: chr, timestamp: float, is_down: bool):
-        self.key: chr = key
-        self.timestamp: float = timestamp
-        self.is_down: bool = is_down
+    key: chr
+    timestamp: float
+    is_down: bool
 
 
 class MyJsonEncoder(json.JSONEncoder):
@@ -54,7 +56,6 @@ class MyJsonDecoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
         json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
 
-    # @profile
     def object_hook(self, dct: dict) -> dict | Position | Collection:
         if "x" in dct:
             if "c" in dct:
@@ -120,7 +121,7 @@ class JsonCompressor:
 class Loader:
     def __init__(
             self,
-            directory: pathlib.Path = DataDirHandler().recordings(),
+            directory: pathlib.Path = None,
             limit_files: int | list[str] | None = None,
             load_keys: bool = False,
     ):

@@ -1,12 +1,9 @@
 from __future__ import annotations
 
 import pathlib
-
-import wasabi
-
+import logging
 from cursor.collection import Collection
 
-log = wasabi.Printer()
 
 
 class TektronixRenderer:
@@ -46,7 +43,7 @@ class TektronixRenderer:
 
     def render(self, paths: Collection) -> None:
         self.__paths += paths
-        log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
+        logging.info(f"{__class__.__name__}: rendered {len(paths)} paths")
 
     def save(self, filename: str) -> str:
         pathlib.Path(self.__save_path).mkdir(parents=True, exist_ok=True)
@@ -76,6 +73,6 @@ class TektronixRenderer:
         with open(fname.as_posix(), "wb") as file:
             file.write(output_string.encode("utf-8"))
 
-        log.good(f"Finished saving {fname}")
+        logging.info(f"Finished saving {fname}")
 
         return output_string

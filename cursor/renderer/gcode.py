@@ -1,12 +1,9 @@
 from __future__ import annotations
 
 import pathlib
-
-import wasabi
+import logging
 
 from cursor.collection import Collection
-
-log = wasabi.Printer()
 
 
 class GCodeRenderer:
@@ -17,7 +14,7 @@ class GCodeRenderer:
             feedrate_z: int = 1000,
             z_down: float = 3.5,
             z_up: float = 0.0,
-            invert_y: bool = True,
+            invert_y: bool = False,
     ):
         self.save_path = folder
         self.z_down = z_down
@@ -28,7 +25,7 @@ class GCodeRenderer:
         self.paths = Collection()
 
     def render(self, paths: Collection) -> None:
-        log.good(f"{__class__.__name__}: rendered {len(paths)} paths")
+        logging.info(f"{__class__.__name__}: rendered {len(paths)} paths")
         self.paths += paths
 
     def g01(self, x: float, y: float, z: float) -> str:
@@ -110,4 +107,4 @@ class GCodeRenderer:
         with open(fname.as_posix(), "w") as file:
             for instruction in instructions:
                 file.write(f"{instruction}\n")
-        log.good(f"Finished saving {fname}")
+        logging.info(f"Finished saving {fname}")
