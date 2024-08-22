@@ -49,4 +49,3 @@ class JsonCompressor:
             raise RuntimeError("Could interpret the unzipped contents")
 
         return decompressed
-

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import orjson
 import re
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, Union
 
 import pyautogui
 
@@ -42,7 +42,7 @@ def parse_collection(obj: Dict[str, Any]) -> Collection:
 
 
 def custom_decoder(
-    obj: Dict[str, Any]
+        obj: Dict[str, Any]
 ) -> Union[Dict, Position, pyautogui.Size, Collection]:
     if isinstance(obj, dict):
         if "x" in obj and "y" in obj:

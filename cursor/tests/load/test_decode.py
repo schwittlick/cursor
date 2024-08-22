@@ -1,4 +1,3 @@
-from cursor.data import DataDirHandler
 from cursor.load.compress import JsonCompressor
 from cursor.load.decode import load_json
 
