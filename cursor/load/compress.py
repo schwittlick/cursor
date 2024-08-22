@@ -42,7 +42,6 @@ class JsonCompressor:
             raise RuntimeError("Could not decode/unzip the contents")
 
         try:
-            print(decompressed)
             decompressed = json.loads(decompressed, cls=MyJsonDecoder)
 
         except TypeError and json.JSONDecodeError:

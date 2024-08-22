@@ -1,10 +1,14 @@
 import pathlib
 import logging
 
+import fpdf
+
 from cursor.properties import Property
 from cursor.renderer import BaseRenderer
 
+from PIL import Image
 from fpdf import FPDF
+from io import BytesIO
 
 # suppress verbose log outputs
 logging.getLogger('fontTools.subset').level = logging.WARN
@@ -23,6 +27,24 @@ class PdfRenderer(BaseRenderer):
         self.pdf = FPDF(orientation=orientation, unit="mm", format=(w, h))
         self.pdf.set_author("Marcel Schwittlick")
         self.pdf.set_margins(self.margin_x, self.margin_y)
+
+    def add_image(self, image: Image, x: float, y: float, w: float, h: float) -> None:
+        """
+        Add a Pillow Image to the PDF at the specified position and size.
+
+        :param image: Pillow Image object
+        :param x: x-coordinate of the image's top-left corner (in mm)
+        :param y: y-coordinate of the image's top-left corner (in mm)
+        :param w: width of the image in the PDF (in mm)
+        :param h: height of the image in the PDF (in mm)
+        """
+        # Convert Pillow Image to bytes
+        img_byte_arr = BytesIO()
+        image.save(img_byte_arr, format='PNG')
+        img_byte_arr = img_byte_arr.getvalue()
+
+        # Add the image to the PDF
+        self.pdf.image(BytesIO(img_byte_arr), x=x, y=y, w=w, h=h)
 
     def render(self, scale: float = 1.0) -> None:
         self.render_all_paths(scale=scale)
@@ -56,7 +78,8 @@ class PdfRenderer(BaseRenderer):
             width = path.width
             self.pdf.set_line_width(width)
             self.pdf.set_draw_color(r, g, b)
-            self.pdf.polyline(path.as_tuple_list())
+
+            self.pdf.polyline(path.as_tuple_list(), style=fpdf.enums.RenderStyle.DF)
 
     def render_all_points(self, scale: float = 1.0) -> None:
         for point in self.positions:
