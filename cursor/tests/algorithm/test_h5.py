@@ -1,14 +1,10 @@
 import random
 
 from cursor.algorithm.h5 import (
-    save_test_file,
-    load_test_file,
-    save_test_collection,
-    load_test_collection_file,
+    save_collection_to_h5,
+    load_collection_from_h5,
 )
 from cursor.collection import Collection
-from cursor.data import DataDirHandler
-from cursor.load.loader import Loader
 from cursor.path import Path
 from cursor.position import Position
 from cursor.properties import Property
@@ -43,34 +39,18 @@ def generate_test_collection(length_collection: int, length_paths: int) -> Colle
     )
 
 
-def DISABLED_test_saved_loaded_path():
-    path = generate_test_path(100)
-    temp_file = DataDirHandler().test_data_file("test_path.h5")
-    saved_path = save_test_file(temp_file, path)
-    loaded_path = load_test_file(temp_file)
-    assert saved_path == loaded_path
+def test_collection_save_load():
+    collection = generate_test_collection(20, 20)
 
+    # Save the collection to an HDF5 file
+    save_collection_to_h5(collection, "test_collection.h5")
 
-def DISABLED_test_saved_loaded_collection():
-    collection = generate_test_collection(200, 300)
-    temp_file = DataDirHandler().test_data_file("test_collection.h5")
-    saved_collection = save_test_collection(temp_file, collection)
-    loaded_collection = load_test_collection_file(temp_file)
-    assert saved_collection == loaded_collection
+    # Load the collection from the HDF5 file
+    loaded_collection = load_collection_from_h5("test_collection.h5")
 
+    # Verify the loaded collection
+    assert loaded_collection.name == collection.name
+    assert len(loaded_collection.paths) == len(collection.paths)
+    assert loaded_collection.properties == collection.properties
 
-def DISABLED_test_save_load_collection_benchmark():
-    """
-    my h5 code can't handle collections of paths with varying lengths yet, it seems.
-
-    """
-    recordings = DataDirHandler().recordings()
-    _loader = Loader(
-        directory=recordings,
-        limit_files=["1700043253.391094_just_another_day"],
-    )
-    collection = _loader.all_paths()
-    temp_file = DataDirHandler().test_data_file("test_collection.h5")
-    saved_collection = save_test_collection(temp_file, collection)
-    loaded_collection = load_test_collection_file(temp_file)
-    assert saved_collection == loaded_collection
+    print("Collection successfully saved and loaded!")

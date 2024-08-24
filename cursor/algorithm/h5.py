@@ -1,5 +1,3 @@
-import json
-import pathlib
 import numpy as np
 import h5py
 
@@ -15,119 +13,101 @@ for the current files saved as json. we need a benchmark
 """
 
 
-def dataset_from_collection(collection: Collection):
-    ds_arr = np.recarray(
-        len(collection),
-        dtype=[
-            ("paths", (float, 3), len(collection[0])),
-            ("timestamp", int),
-            ("name", "S50"),
-            ("properties", "S75"),
-        ],
-    )
-    all_collection_data = np.array(
-        [
-            np.array([np.array([p2.x, p2.y, p2.timestamp]) for p2 in p.vertices])
-            for p in collection.paths
-        ],
-        dtype=object,
-    )
-    ds_arr["paths"] = all_collection_data
-    return ds_arr
+@timing
+def save_collection_to_h5(collection: Collection, filename: str) -> None:
+    with h5py.File(filename, "w") as f:
+        # Save collection attributes
+        f.attrs["name"] = collection.name
+        f.attrs["timestamp"] = collection._timestamp
 
+        # Create a group for properties
+        props_group = f.create_group("properties")
+        for key, value in collection.properties.items():
+            props_group.attrs[key] = value
 
-def dataset_from_path(path):
-    ds_arr = np.recarray(
-        len(path),
-        dtype=[
-            ("positions", float, 2),
-            ("timestamp", int),
-            ("properties", "S75"),  # S50 means string apparently?
-        ],
-    )
+        # Create a group for paths
+        paths_group = f.create_group("paths")
 
-    ds_arr["positions"] = path.as_array()
-    ds_arr["timestamp"] = np.asarray([p.timestamp for p in path.vertices])
-    ds_arr["properties"] = np.asarray([json.dumps(p.properties) for p in path.vertices])
-    return ds_arr
+        for i, path in enumerate(collection.paths):
+            path_group = paths_group.create_group(f"path_{i}")
 
+            # Save path properties
+            path_props = path_group.create_group("properties")
+            for key, value in path.properties.items():
+                if isinstance(value, (list, tuple)):
+                    path_props.create_dataset(key, data=np.array(value))
+                else:
+                    path_props.attrs[key] = value
 
-def path_from_dataset(dataset_positions, dataset_properties) -> Path:
-    asarray = np.array(dataset_positions)
-    parsed = from_array(asarray)
-    parsed.properties = dict(json.loads(dataset_properties[0][0]))
-    return parsed
+            # Save vertices
+            vertices = path_group.create_group("vertices")
+            x_data = [v.x for v in path.vertices]
+            y_data = [v.y for v in path.vertices]
+            timestamp_data = [v.timestamp for v in path.vertices]
 
+            vertices.create_dataset("x", data=np.array(x_data))
+            vertices.create_dataset("y", data=np.array(y_data))
+            vertices.create_dataset("timestamp", data=np.array(timestamp_data))
 
-def collection_from_dataset(dataset_positions, dataset_properties) -> Collection:
-    asarray = np.array(dataset_positions)
-    parsed_collection = collection_from_array(asarray)
-    parsed_collection.properties = dict(json.loads(dataset_properties[0][0]))
-    return parsed_collection
+            # Save vertex properties
+            vertex_props = vertices.create_group("properties")
+            for j, vertex in enumerate(path.vertices):
+                if vertex.properties:
+                    v_prop = vertex_props.create_group(f"vertex_{j}")
+                    for key, value in vertex.properties.items():
+                        if isinstance(value, (list, tuple)):
+                            v_prop.create_dataset(key, data=np.array(value))
+                        else:
+                            v_prop.attrs[key] = value
 
 
 @timing
-def save_test_file(file: pathlib.Path, path: Path):
-    """
-    Main problem is saving up the properties/metadata per Path and per Position
-    Maybe it's not necessary for this actually.. The recorder doesnt save this up either,
-    since there are no properties at this point except from default values
+def load_collection_from_h5(filename: str) -> Collection:
+    with h5py.File(filename, "r") as f:
+        collection = Collection(name=f.attrs["name"], timestamp=f.attrs["timestamp"])
 
-    And when one needs these properties, one can just pickle the objects
-    """
+        # Load collection properties
+        if "properties" in f:
+            for key, value in f["properties"].attrs.items():
+                collection.properties[key] = value
 
-    ds_arr_prop = np.recarray(1, dtype=[("properties", "S80")])
-    json_string = json.dumps(path.properties)
+        # Load paths
+        paths_group = f["paths"]
+        for path_name in paths_group:
+            path_group = paths_group[path_name]
+            path = Path()
 
-    ds_arr_prop["properties"] = np.asarray(json_string)
-    # property is a value saved for each position
-    with h5py.File(file.as_posix(), "w") as h5f:
-        h5f.create_dataset(
-            "positions", data=dataset_from_path(path)
-        )  # positions & position-properties
-        h5f.create_dataset("properties", data=ds_arr_prop)  # path-global properties
+            # Load path properties
+            if "properties" in path_group:
+                for key, value in path_group["properties"].attrs.items():
+                    path.properties[key] = value
+                for key in path_group["properties"]:
+                    if isinstance(path_group["properties"][key], h5py.Dataset):
+                        path.properties[key] = path_group["properties"][key][()]
 
-    return path
+            # Load vertices
+            vertices = path_group["vertices"]
+            x_data = vertices["x"][()]
+            y_data = vertices["y"][()]
+            timestamp_data = vertices["timestamp"][()]
 
+            for x, y, ts in zip(x_data, y_data, timestamp_data):
+                position = Position(x, y, ts)
+                path.add_position(position)
 
-def from_array(arr: np.array) -> Path:
-    return Path.from_list([Position(a[0][0], a[0][1], a[1], a[2]) for a in arr])
+            # Load vertex properties
+            if "properties" in vertices:
+                vertex_props = vertices["properties"]
+                for i, vertex in enumerate(path.vertices):
+                    v_prop_name = f"vertex_{i}"
+                    if v_prop_name in vertex_props:
+                        v_prop = vertex_props[v_prop_name]
+                        for key, value in v_prop.attrs.items():
+                            vertex.properties[key] = value
+                        for key in v_prop:
+                            if isinstance(v_prop[key], h5py.Dataset):
+                                vertex.properties[key] = v_prop[key][()]
 
-
-def collection_from_array(arr: np.array) -> Collection:
-    return Collection.from_path_list(
-        [
-            Path.from_list(
-                [Position(pos_ar[0], pos_ar[1], pos_ar[2]) for pos_ar in a[0]]
-            )
-            for a in arr
-        ]
-    )
-
-
-@timing
-def load_test_file(file: pathlib.Path):
-    f = h5py.File(file.as_posix(), "r")
-    parsed_path = path_from_dataset(f["positions"], f["properties"])
-    return parsed_path
-
-
-@timing
-def load_test_collection_file(file: pathlib.Path) -> Collection:
-    f = h5py.File(file.as_posix(), "r")
-    parsed_collection = collection_from_dataset(f["positions"], f["properties"])
-    return parsed_collection
-
-
-@timing
-def save_test_collection(file: pathlib.Path, collection: Collection):
-    ds_arr_prop = np.recarray(1, dtype=[("properties", "S80")])
-    json_string = json.dumps(collection.properties)
-
-    ds_arr_prop["properties"] = np.asarray(json_string)
-    # property is a value saved for each position
-    with h5py.File(file.as_posix(), "w") as h5f:
-        h5f.create_dataset("positions", data=dataset_from_collection(collection))
-        h5f.create_dataset("properties", data=ds_arr_prop)  # path-global properties
+            collection.add(path)
 
     return collection
