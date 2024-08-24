@@ -13,7 +13,7 @@ def test_experiments_path():
 
 
 def test_images_path():
-    test_recordings_dir = DataDirHandler().images()
+    test_recordings_dir = DataDirHandler().jpgs()
     assert test_recordings_dir.as_posix().endswith("cursor/data/jpg")
 
 

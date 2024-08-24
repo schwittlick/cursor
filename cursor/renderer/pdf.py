@@ -1,6 +1,7 @@
 import pathlib
 import logging
 
+import cairo
 import fpdf
 
 from cursor.properties import Property
@@ -46,6 +47,24 @@ class PdfRenderer(BaseRenderer):
         # Add the image to the PDF
         self.pdf.image(BytesIO(img_byte_arr), x=x, y=y, w=w, h=h)
 
+    def add_cairo_surface(self, surface: cairo.Surface, x: float, y: float, w: float, h: float) -> None:
+        """
+        Add a Cairo surface to the PDF at the specified position and size.
+
+        :param surface: Cairo ImageSurface object
+        :param x: x-coordinate of the image's top-left corner (in mm)
+        :param y: y-coordinate of the image's top-left corner (in mm)
+        :param w: width of the image in the PDF (in mm)
+        :param h: height of the image in the PDF (in mm)
+        """
+        # Convert Cairo surface to PNG bytes
+        img_byte_arr = BytesIO()
+        surface.write_to_png(img_byte_arr)
+        img_byte_arr.seek(0)
+
+        # Add the image to the PDF
+        self.pdf.image(img_byte_arr, x=x, y=y, w=w, h=h)
+
     def render(self, scale: float = 1.0) -> None:
         self.render_all_paths(scale=scale)
         self.render_all_points(scale=scale)
@@ -79,7 +98,7 @@ class PdfRenderer(BaseRenderer):
             self.pdf.set_line_width(width)
             self.pdf.set_draw_color(r, g, b)
 
-            self.pdf.polyline(path.as_tuple_list(), style=fpdf.enums.RenderStyle.DF)
+            self.pdf.polyline(path.as_tuple_list())
 
     def render_all_points(self, scale: float = 1.0) -> None:
         for point in self.positions:

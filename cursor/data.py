@@ -26,6 +26,9 @@ class DataDirHandler:
     def jpg(self, subfolder: str) -> pathlib.Path:
         return self.__create(self.__sub(subfolder) / "jpg")
 
+    def png(self, subfolder: str) -> pathlib.Path:
+        return self.__create(self.__sub(subfolder) / "png")
+
     def video(self, subfolder: str) -> pathlib.Path:
         return self.__create(self.__sub(subfolder) / "video")
 
@@ -47,8 +50,11 @@ class DataDirHandler:
     def source(self, subfolder: str) -> pathlib.Path:
         return self.__create(self.__sub(subfolder) / "source")
 
-    def images(self) -> pathlib.Path:
+    def jpgs(self) -> pathlib.Path:
         return self.data_dir / "jpg"
+
+    def pngs(self) -> pathlib.Path:
+        return self.data_dir / "pngs"
 
     def videos(self) -> pathlib.Path:
         return self.data_dir / "video"

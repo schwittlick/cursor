@@ -13,9 +13,7 @@ class JpegRenderer(BaseRenderer):
     def __init__(self, folder: pathlib.Path, w: int = 1920, h: int = 1080):
         super().__init__(folder)
 
-        logging.info(
-            f"Creating image with size=({w}, {h})"
-        )
+        logging.debug(f"Creating image with size=({w}, {h})")
         self._background = (0, 0, 0)
         self.img: Image = Image.new("RGBA", (w, h), self._background)
         self.img_draw = ImageDraw.ImageDraw(self.img)
