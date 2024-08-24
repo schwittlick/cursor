@@ -1,12 +1,10 @@
 import pathlib
 import logging
 
-import cairo
-import fpdf
-
 from cursor.properties import Property
 from cursor.renderer import BaseRenderer
 
+import cairo
 from PIL import Image
 from fpdf import FPDF
 from io import BytesIO
