@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import pathlib
+from datetime import datetime
 from functools import reduce
 
 from tqdm import tqdm
@@ -17,12 +18,12 @@ from cursor.timer import Timer, DateHandler
 
 class Loader:
     def __init__(
-        self,
-        directory: pathlib.Path = None,
-        limit_files: int | list[str] | None = None,
-        load_keys: bool = False,
+            self,
+            directory: pathlib.Path = None,
+            limit_files: int | list[str] | None = None,
+            load_keys: bool = False,
     ):
-        self.verbose = False
+        self.verbose = True
 
         self._recordings = []
         self._keyboard_recordings: list[KeyPress] = []
@@ -33,10 +34,10 @@ class Loader:
             )
 
     def load_all(
-        self,
-        directory: pathlib.Path,
-        limit_files: int | list[str] | None = None,
-        load_keys: bool = False,
+            self,
+            directory: pathlib.Path,
+            limit_files: int | list[str] | None = None,
+            load_keys: bool = False,
     ) -> None:
         t = Timer()
         t.start()
