@@ -165,11 +165,11 @@ class Exporter:
             fname = self._generate_filename(layer)
             jpeg_folder = DataDirHandler().jpg(self.name)
             bb = self.collection.bb()
-            bb.scale(0.1)
-            transformed = pc.transformed(BoundingBox(0, 0, bb.w, bb.h))
+            #bb.scale(0.1)
+            #transformed = pc.transformed(BoundingBox(0, 0, bb.w, bb.h))
             jpeg_renderer = JpegRenderer(jpeg_folder, w=int(bb.w), h=int(bb.h))
             jpeg_renderer.background((255, 255, 255))
-            jpeg_renderer.add(transformed)
+            jpeg_renderer.add(self.collection)
             jpeg_renderer.render()
             jpeg_renderer.save(fname)
 
@@ -285,7 +285,7 @@ class Exporter:
     def _export_gcode(self, pc: Collection, fname: str) -> None:
         gcode_folder = DataDirHandler().gcode(self.name)
         gcode_renderer = GCodeRenderer(
-            gcode_folder, feedrate_xy=self.gcode_speed or 3000, z_down=-6
+            gcode_folder, feedrate_xy=self.gcode_speed or 2000, z_down=-6
         )
         gcode_renderer.render(pc)
         gcode_renderer.save(fname)

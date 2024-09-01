@@ -48,6 +48,7 @@ class PlotterType(Enum):
 
     DIY_PLOTTER = auto()
     DIY_PLOTTER_A2 = auto()
+    DIY_PLOTTER_A1 = auto()
     AXIDRAW = auto()
 
     ROLAND_DXY885 = auto()
@@ -112,6 +113,7 @@ class ExportFormatMappings:
 
         PlotterType.DIY_PLOTTER: ExportFormat.GCODE,
         PlotterType.DIY_PLOTTER_A2: ExportFormat.GCODE,
+        PlotterType.DIY_PLOTTER_A1: ExportFormat.GCODE,
         PlotterType.AXIDRAW: ExportFormat.SVG,
 
         PlotterType.ROLAND_DXY885: ExportFormat.HPGL,
@@ -200,6 +202,7 @@ class MinmaxMapping:
 
         PlotterType.DIY_PLOTTER: BB(0, 0, 3350, -1715),  # A1
         PlotterType.DIY_PLOTTER_A2: BB(0, 0, 1720, -1220),
+        PlotterType.DIY_PLOTTER_A1: BB(0, 0, 2900, -1800),
         PlotterType.AXIDRAW: BB(0, 0, 0, 0),  # todo: missing real bounds
 
         PlotterType.ROLAND_DXY885: BB(0, 0, 16158, 11040),  # taken from OH;
@@ -266,6 +269,7 @@ class PlotterName:
         PlotterType.AXIDRAW: "axidraw",
         PlotterType.DIY_PLOTTER: "custom",
         PlotterType.DIY_PLOTTER_A2: "custom_a2",
+        PlotterType.DIY_PLOTTER_A1: "custom_a1",
 
         PlotterType.ROLAND_DXY885: "dxy885",
         PlotterType.ROLAND_DXY980: "dxy980",
@@ -332,6 +336,7 @@ class XYFactors:
 
         PlotterType.DIY_PLOTTER: (2.85714, 2.90572),
         PlotterType.DIY_PLOTTER_A2: (2.896, 2.905),
+        PlotterType.DIY_PLOTTER_A1: (2.896, 2.905),
         PlotterType.AXIDRAW: (3.704, 3.704),
         PlotterType.HP_7475A_A3: (40, 40),
         PlotterType.HP_7475A_A4: (40, 40),
@@ -382,6 +387,7 @@ class MaxSpeed:
 
         PlotterType.DIY_PLOTTER: 1,
         PlotterType.DIY_PLOTTER_A2: 1,
+        PlotterType.DIY_PLOTTER_A1: 1,
         PlotterType.AXIDRAW: 1,
         PlotterType.HP_7475A_A3: 40,
         PlotterType.HP_7475A_A4: 40,
@@ -432,6 +438,7 @@ class BufferSize:
 
         PlotterType.DIY_PLOTTER: 1,
         PlotterType.DIY_PLOTTER_A2: 1,
+        PlotterType.DIY_PLOTTER_A1: 1,
         PlotterType.AXIDRAW: 1,
         PlotterType.HP_7475A_A3: 512,
         PlotterType.HP_7475A_A4: 512,
