@@ -1,11 +1,7 @@
 from cursor.bb import BoundingBox
 from cursor.data import DataDirHandler
 from cursor.load.loader import Loader
-from cursor.renderer import RealtimeRenderer
-
-import wasabi
-
-log = wasabi.Printer()
+from renderer.realtime import RealtimeRenderer
 
 if __name__ == "__main__":
     ll = Loader()

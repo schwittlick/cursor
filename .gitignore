@@ -1,4 +1,5 @@
 cursor/tests/data
+.vscode
 venv/
 .idea
 .coverage
@@ -7,3 +8,4 @@ __pycache__
 .cache/
 cursor.egg-info/
 JetBrainsMono-Regular.pkl
+*.h5

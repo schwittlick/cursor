@@ -1,11 +1,51 @@
+import configparser
 import pathlib
+from typing import Dict, Optional
+import os
+import logging
+
+
+def load_cursor_config(config_path: str = 'config.ini') -> Dict[str, Optional[str]]:
+    # Create a ConfigParser object
+    config: configparser.ConfigParser = configparser.ConfigParser()
+
+    # Read the configuration file
+    config.read(config_path)
+
+    # Check if the 'cursor' section exists
+    if 'cursor' not in config:
+        raise ValueError("The 'cursor' section is missing from the config file.")
+
+    # Get the values from the 'cursor' section
+    data_dir: Optional[str] = config['cursor'].get('data_dir')
+    log_level: Optional[str] = config['cursor'].get('log_level')
+
+    # Convert log_level to uppercase if it exists
+    if log_level:
+        log_level = log_level.upper()
+
+    # Set up logging
+    numeric_level: int = getattr(logging, log_level, logging.INFO)
+    logging.basicConfig(level=numeric_level, format='%(asctime)s - %(levelname)s - %(message)s')
+
+    # Validate data_dir
+    if data_dir and not os.path.isdir(data_dir):
+        logging.warning(f"The specified data_dir '{data_dir}' does not exist.")
+
+    return {
+        'data_dir': data_dir,
+        'log_level': log_level
+    }
 
 
 class DataDirHandler:
     def __init__(self):
-        self.BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
-        self.data_dir = self.BASE_DIR / "data"
-        self.test_data_dir = self.BASE_DIR / "cursor" / "tests" / "data"
+        base_dir = pathlib.Path(__file__).resolve().parent.parent
+        ini_path = base_dir / "config.ini"
+        cursor_config: Dict[str, Optional[str]] = load_cursor_config(ini_path.as_posix())
+
+        self.data_dir = pathlib.Path(cursor_config['data_dir'])
+        self.test_data_dir = base_dir / "cursor" / "tests" / "data"
 
     def __create(self, folder: pathlib.Path) -> pathlib.Path:
         folder.mkdir(parents=True, exist_ok=True)
