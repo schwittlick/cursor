@@ -9,3 +9,4 @@ __pycache__
 cursor.egg-info/
 JetBrainsMono-Regular.pkl
 *.h5
+config_local.ini

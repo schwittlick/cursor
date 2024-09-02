@@ -41,7 +41,7 @@ def load_cursor_config(config_path: str = 'config.ini') -> Dict[str, Optional[st
 class DataDirHandler:
     def __init__(self):
         base_dir = pathlib.Path(__file__).resolve().parent.parent
-        ini_path = base_dir / "config.ini"
+        ini_path = base_dir / "config_local.ini"
         cursor_config: Dict[str, Optional[str]] = load_cursor_config(ini_path.as_posix())
 
         self.data_dir = pathlib.Path(cursor_config['data_dir'])
