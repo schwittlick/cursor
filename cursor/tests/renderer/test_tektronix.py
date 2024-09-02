@@ -1,7 +1,7 @@
 from cursor.collection import Collection
-from cursor.data import DataDirHandler
 from cursor.path import Path
 from cursor.renderer.tektronix import TektronixRenderer
+from cursor.tests.fixture import get_test_hpgl_folder
 
 
 def test_tektronix_renderer():
@@ -23,7 +23,7 @@ def test_tektronix_renderer():
     pc.add(p0)
     pc.add(p1)
 
-    renderer = TektronixRenderer(DataDirHandler().test_hpgls())
+    renderer = TektronixRenderer(get_test_hpgl_folder())
     renderer.render(pc)
     out = renderer.save("tektronix_test01")
 

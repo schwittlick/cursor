@@ -1,11 +1,11 @@
 import random
 
 from cursor.collection import Collection
-from cursor.data import DataDirHandler
 from cursor.load.loader import Loader
 from cursor.path import Path
 from cursor.sorter import SortParameter
 from cursor.sorter import Sorter
+from cursor.tests.fixture import get_test_recordings_path
 
 
 def test_sort_simple():
@@ -65,7 +65,7 @@ def test_entropy_sort():
 
 
 def test_entropy_sort2():
-    loader = Loader(directory=DataDirHandler().test_recordings(), limit_files=2)
+    loader = Loader(directory=get_test_recordings_path(), limit_files=2)
     c = loader.all_paths()
 
     s = Sorter(param=SortParameter.ENTROPY_X, reverse=True)

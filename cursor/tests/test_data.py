@@ -33,23 +33,3 @@ def test_svg_path():
 def test_recordings_path():
     recordings_dir = DataDirHandler().recordings()
     assert recordings_dir.parts[-1:] == ("recordings",)
-
-
-def test_test_images_path():
-    test_images_dir = DataDirHandler().test_images()
-    assert test_images_dir.parts[-4:] == ("cursor", "tests", "data", "jpg")
-
-
-def test_test_gcode_path():
-    test_gcode_dir = DataDirHandler().test_gcodes()
-    assert test_gcode_dir.parts[-4:] == ("cursor", "tests", "data", "gcode")
-
-
-def test_test_svg_path():
-    test_svg_dir = DataDirHandler().test_svgs()
-    assert test_svg_dir.parts[-4:] == ("cursor", "tests", "data", "svg")
-
-
-def test_test_recordings_path():
-    test_recordings_dir = DataDirHandler().test_recordings()
-    assert test_recordings_dir.parts[-4:] == ("cursor", "tests", "data", "test_recordings")

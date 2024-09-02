@@ -1,10 +1,12 @@
-from cursor.data import DataDirHandler
+import pathlib
+
 from cursor.hpgl.analyze import HPGLAnalyzer, Pen, PenData, HPGLAnalyzeData
 
 
 def test_analyze():
     analyzer = HPGLAnalyzer()
-    file = DataDirHandler().test_hpgls() / "complex_hpgl01.hpgl"
+    test_hpgl_path = pathlib.Path(__file__).resolve().parent.parent / "data" / "hpgl"
+    file = test_hpgl_path / "complex_hpgl01.hpgl"
     data = analyzer.analyze(file)
 
     analyzed_data_to_compare = HPGLAnalyzeData(545, 0, 5872, 68)

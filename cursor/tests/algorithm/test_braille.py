@@ -1,14 +1,15 @@
 import numpy as np
+import pathlib
 from PIL import Image
 
 from cursor.algorithm.braille import BrailleTranslator
-from cursor.data import DataDirHandler
 
 
 def test_from_image():
     bt = BrailleTranslator()
 
-    im = DataDirHandler().test_images() / "smiley.png"
+    test_images_path = pathlib.Path(__file__).resolve().parent.parent / "data" / "jpg"
+    im = test_images_path / "smiley.png"
     loaded = Image.open(im)
     loaded = loaded.resize((50, 60))
     loaded = loaded.convert('1')

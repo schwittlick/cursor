@@ -4,16 +4,17 @@ from cursor.load.loader import Loader
 from cursor.path import Path
 from cursor.position import Position
 from cursor.renderer.jpg import JpegRenderer
+from cursor.tests.fixture import get_test_recordings_path, get_test_jpg_folder
 
 
 def test_new_api():
-    renderer = JpegRenderer(DataDirHandler().test_images())
+    renderer = JpegRenderer(get_test_jpg_folder())
     renderer.add([Position(), Position()])
     renderer.add([Path(), Path()])
 
 
 def test_jpegrenderer():
-    path = DataDirHandler().test_recordings()
+    path = get_test_recordings_path()
     loader = Loader(directory=path)
 
     rec = loader.all_paths()
@@ -24,17 +25,17 @@ def test_jpegrenderer():
         cutoff_mm=0,
     )
 
-    r = JpegRenderer(DataDirHandler().test_images())
+    r = JpegRenderer(get_test_jpg_folder())
     r.add(rec)
     r.render()
     r.save("test1")
 
 
 def test_jpegrenderer_size():
-    renderer = JpegRenderer(DataDirHandler().test_images())
+    renderer = JpegRenderer(get_test_jpg_folder())
     assert renderer.img.width == 1920
     assert renderer.img.height == 1080
 
-    renderer = JpegRenderer(DataDirHandler().test_images(), 4096, 4096)
+    renderer = JpegRenderer(get_test_jpg_folder(), 4096, 4096)
     assert renderer.img.width == 4096
     assert renderer.img.height == 4096

@@ -1,8 +1,8 @@
-from cursor.data import DataDirHandler
 from cursor.renderer.pdf import PdfRenderer
+from cursor.tests.fixture import get_test_pdf_folder
 
 
 def test_gcoderenderer():
-    path = DataDirHandler().test_pdfs()
+    path = get_test_pdf_folder()
     r = PdfRenderer(path)
     r.pdf.add_page()

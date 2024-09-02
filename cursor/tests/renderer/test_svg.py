@@ -1,9 +1,9 @@
 from cursor.collection import Collection
-from cursor.data import DataDirHandler
 from cursor.path import Path
 from cursor.position import Position
 from cursor.properties import Property
 from cursor.renderer.svg import SvgRenderer
+from cursor.tests.fixture import get_test_svg_folder
 
 
 def test_svgrenderer():
@@ -26,7 +26,7 @@ def test_svgrenderer():
     pos2.properties[Property.COLOR] = (0, 255, 255)
     pos2.properties[Property.WIDTH] = 0.1
 
-    r = SvgRenderer(DataDirHandler().test_svgs(), 10, 10)
+    r = SvgRenderer(get_test_svg_folder(), 10, 10)
     r.add(pc)
     r.add([pos1, pos2])
     r.render()

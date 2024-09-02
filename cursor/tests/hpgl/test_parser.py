@@ -1,5 +1,6 @@
+import pathlib
+
 from cursor.collection import Collection
-from cursor.data import DataDirHandler
 from cursor.hpgl.parser import HPGLParser
 from cursor.path import Path
 from cursor.position import Position
@@ -60,7 +61,10 @@ def test_hpgl_parser_string():
     properties = {Property.PEN_SELECT: 1, "label": 1}
 
     path1 = Path([Position(200.0, 0.0), Position(450.0, 0.0)], properties)
-    path2 = Path([Position(200.0, 250.0), Position(350.0, 400.0), Position(350.0, 0.0)], properties)
+    path2 = Path(
+        [Position(200.0, 250.0), Position(350.0, 400.0), Position(350.0, 0.0)],
+        properties,
+    )
     collection = Collection.from_path_list([path1, path2])
 
     assert len(paths) == len(collection)
@@ -70,24 +74,52 @@ def test_hpgl_parser_string():
 
 
 def test_hpgl_parser_string2():
-    string = 'SP1;SI1.000,1.000;DI0.839,0.545;LBTDI1.000,0.000;SP3;LBAIN;PU0,0;SP4;SI1.000,1.000;DI0.839,' \
-             '0.545;LBASP2;PA201,130;PD1201,1130;'
+    string = (
+        "SP1;SI1.000,1.000;DI0.839,0.545;LBTDI1.000,0.000;SP3;LBAIN;PU0,0;SP4;SI1.000,1.000;DI0.839,"
+        "0.545;LBASP2;PA201,130;PD1201,1130;"
+    )
     parser = HPGLParser()
     paths = parser.parse(string)
 
     properties = {Property.PEN_SELECT: 1, "label": 1}
 
-    path1 = Path([Position(-217.8970, 335.4414), Position(117.5444, 553.3383)], properties)
-    path2 = Path([Position(-50.1763, 444.3899), Position(167.7207, 108.9485)], properties)
-    path3 = Path([Position(477.8017, 362.9126), Position(677.8017, 762.9126), Position(877.8017, 362.9126)],
-                 {Property.PEN_SELECT: 3, "label": 3})
-    path4 = Path([Position(527.8017, 462.9126), Position(827.8017, 462.9126)], {Property.PEN_SELECT: 3, "label": 3})
-    path5 = Path([Position(0.0, 0.0), Position(-50.1763, 444.3899), Position(335.4414, 217.8970)],
-                 {Property.PEN_SELECT: 4, "label": 4})
-    path6 = Path([Position(-12.5441, 111.0975), Position(239.0370, 274.5202)], {Property.PEN_SELECT: 4, "label": 4})
-    path7 = Path([Position(201.0, 130.0), Position(1201.0, 1130.0)], {Property.PEN_SELECT: 2})
+    path1 = Path(
+        [Position(-217.8970, 335.4414), Position(117.5444, 553.3383)], properties
+    )
+    path2 = Path(
+        [Position(-50.1763, 444.3899), Position(167.7207, 108.9485)], properties
+    )
+    path3 = Path(
+        [
+            Position(477.8017, 362.9126),
+            Position(677.8017, 762.9126),
+            Position(877.8017, 362.9126),
+        ],
+        {Property.PEN_SELECT: 3, "label": 3},
+    )
+    path4 = Path(
+        [Position(527.8017, 462.9126), Position(827.8017, 462.9126)],
+        {Property.PEN_SELECT: 3, "label": 3},
+    )
+    path5 = Path(
+        [
+            Position(0.0, 0.0),
+            Position(-50.1763, 444.3899),
+            Position(335.4414, 217.8970),
+        ],
+        {Property.PEN_SELECT: 4, "label": 4},
+    )
+    path6 = Path(
+        [Position(-12.5441, 111.0975), Position(239.0370, 274.5202)],
+        {Property.PEN_SELECT: 4, "label": 4},
+    )
+    path7 = Path(
+        [Position(201.0, 130.0), Position(1201.0, 1130.0)], {Property.PEN_SELECT: 2}
+    )
 
-    collection = Collection.from_path_list([path1, path2, path3, path4, path5, path6, path7])
+    collection = Collection.from_path_list(
+        [path1, path2, path3, path4, path5, path6, path7]
+    )
 
     assert len(paths) == len(collection)
 
@@ -96,7 +128,8 @@ def test_hpgl_parser_string2():
 
 
 def test_hpgl_parser_PA():
-    file = DataDirHandler().test_data_file("hpgl_pa_pd_pu.hpgl")
+    test_data_path = pathlib.Path(__file__).resolve().parent.parent / "data"
+    file = test_data_path / "hpgl_pa_pd_pu.hpgl"
     parser = HPGLParser()
     paths = parser.parse(file)
 
