@@ -1,5 +1,4 @@
 from cursor.collection import Collection
-from cursor.data import DataDirHandler
 from cursor.path import Path
 from cursor.renderer.digi import DigiplotRenderer
 from cursor.tests.fixture import get_test_hpgl_folder

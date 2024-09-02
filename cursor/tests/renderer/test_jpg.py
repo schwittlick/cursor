@@ -1,4 +1,3 @@
-from cursor.data import DataDirHandler
 from cursor.device import PaperSize, Paper
 from cursor.load.loader import Loader
 from cursor.path import Path

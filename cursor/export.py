@@ -8,7 +8,6 @@ from typing import Optional, Dict
 
 from cursor.algorithm.color.copic import Copic
 from cursor.algorithm.color.copic_pen_enum import CopicColorCode
-from cursor.bb import BoundingBox
 from cursor.collection import Collection
 from cursor.data import DataDirHandler
 from cursor.device import (
@@ -165,8 +164,8 @@ class Exporter:
             fname = self._generate_filename(layer)
             jpeg_folder = DataDirHandler().jpg(self.name)
             bb = self.collection.bb()
-            #bb.scale(0.1)
-            #transformed = pc.transformed(BoundingBox(0, 0, bb.w, bb.h))
+            # bb.scale(0.1)
+            # transformed = pc.transformed(BoundingBox(0, 0, bb.w, bb.h))
             jpeg_renderer = JpegRenderer(jpeg_folder, w=int(bb.w), h=int(bb.h))
             jpeg_renderer.background((255, 255, 255))
             jpeg_renderer.add(self.collection)

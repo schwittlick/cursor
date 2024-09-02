@@ -6,7 +6,6 @@ import h5py
 from cursor.collection import Collection
 from cursor.path import Path
 from cursor.position import Position
-from cursor.timer import timing
 
 """
 These functions save/load path/collection data from/to H5 files
