@@ -6,6 +6,7 @@ import hashlib
 import pathlib
 from typing import Optional, Dict
 
+from bb import BoundingBox
 from cursor.algorithm.color.copic import Copic
 from cursor.algorithm.color.copic_pen_enum import CopicColorCode
 from cursor.collection import Collection
@@ -19,7 +20,6 @@ from cursor.device import (
     ExportFormat,
 )
 
-
 from cursor.renderer.digi import DigiplotRenderer
 from cursor.renderer.gcode import GCodeRenderer
 from cursor.renderer.hpgl import HPGLRenderer
@@ -32,13 +32,13 @@ from cursor.timer import Timer
 
 class ExportConfig:
     def __init__(
-        self,
-        type: Optional[PlotterType] = None,
-        margin: Optional[int] = None,
-        cutoff: Optional[int] = None,
-        export_source: bool = False,
-        export_jpeg_preview: bool = False,
-        optimize_hpgl_by_tsp: bool = True,
+            self,
+            type: Optional[PlotterType] = None,
+            margin: Optional[int] = None,
+            cutoff: Optional[int] = None,
+            export_source: bool = False,
+            export_jpeg_preview: bool = False,
+            optimize_hpgl_by_tsp: bool = True,
     ):
         self.type: PlotterType = type
         self.margin = margin
@@ -50,18 +50,18 @@ class ExportConfig:
 
 class ExportWrapper:
     def __init__(
-        self,
-        paths: Collection,
-        ptype: PlotterType,
-        margin: int,
-        name: str = "output_name",
-        suffix: str = "",
-        cutoff: Optional[int] = None,
-        gcode_speed: Optional[int] = None,
-        export_reversed: bool = False,
-        keep_aspect_ratio: bool = False,
-        export_jpg_preview: bool = False,
-        optimize: bool = False,
+            self,
+            paths: Collection,
+            ptype: PlotterType,
+            margin: int,
+            name: str = "output_name",
+            suffix: str = "",
+            cutoff: Optional[int] = None,
+            gcode_speed: Optional[int] = None,
+            export_reversed: bool = False,
+            keep_aspect_ratio: bool = False,
+            export_jpg_preview: bool = False,
+            optimize: bool = False,
     ):
         self.paths = paths
         self.ptype = ptype
@@ -164,11 +164,11 @@ class Exporter:
             fname = self._generate_filename(layer)
             jpeg_folder = DataDirHandler().jpg(self.name)
             bb = self.collection.bb()
-            # bb.scale(0.1)
-            # transformed = pc.transformed(BoundingBox(0, 0, bb.w, bb.h))
+            bb.scale(0.1)
+            transformed = pc.transformed(BoundingBox(0, 0, bb.w, bb.h))
             jpeg_renderer = JpegRenderer(jpeg_folder, w=int(bb.w), h=int(bb.h))
             jpeg_renderer.background((255, 255, 255))
-            jpeg_renderer.add(self.collection)
+            jpeg_renderer.add(transformed)
             jpeg_renderer.render()
             jpeg_renderer.save(fname)
 
@@ -181,7 +181,7 @@ class Exporter:
         logging.info(f"Saved source to {source_folder / fname}")
 
     def export_copic_color_mapping(
-        self, fname: str, layers: Dict[str, Collection]
+            self, fname: str, layers: Dict[str, Collection]
     ) -> None:
         if not self.cfg or not self.cfg.type:
             raise ValueError("Configuration or plotter type is not set")
@@ -201,8 +201,8 @@ class Exporter:
                 pdf_renderer.pdf.text(x, y, f"layer {layer}")
                 y += 5
                 if (
-                    "pen_mapping" in self.collection.properties
-                    and layer in self.collection.properties["pen_mapping"]
+                        "pen_mapping" in self.collection.properties
+                        and layer in self.collection.properties["pen_mapping"]
                 ):
                     pen_mapping = self.collection.properties["pen_mapping"][layer]
                     for pen_idx, color_code in pen_mapping.items():
