@@ -171,14 +171,14 @@ class Collection:
     def clear(self) -> None:
         self.__paths.clear()
 
-    def clean(self) -> None:
+    def clean(self, min_vertex_count: int = 1) -> None:
         """
         removes all paths with only one point
         """
         [p.clean() for p in self.__paths]
 
         len_before = len(self)
-        self.__paths = [path for path in self.__paths if len(path) > 1]
+        self.__paths = [path for path in self.__paths if len(path) > min_vertex_count]
 
         logging.debug(
             f"PathCollection::clean: reduced path count from {len_before} to {len(self)}"
