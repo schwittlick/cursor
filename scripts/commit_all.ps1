@@ -27,9 +27,9 @@ git commit -m "$commitMessage"
 
 Set-Location ..\cursor-data\compositions
 Commit-And-Push $commitMessage
-Set-Location ..\..
+Set-Location ..
 
-Set-Location ..\cursor-data\recordings
+Set-Location .\recordings
 Commit-And-Push $commitMessage
 Set-Location ..\..
 
