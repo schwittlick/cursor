@@ -25,18 +25,12 @@ git add .\firmware
 git add .\tools
 git commit -m "$commitMessage"
 
-Set-Location .\data\compositions
+Set-Location ..\cursor-data\compositions
 Commit-And-Push $commitMessage
 Set-Location ..\..
 
-Set-Location .\data\recordings
+Set-Location ..\cursor-data\recordings
 Commit-And-Push $commitMessage
 Set-Location ..\..
-
-# Commit the updated submodules to the main repository
-git add .\data\compositions
-git add .\data\recordings
-git commit -m "$commitMessage"
-git push origin $currentBranch
 
 Write-Host "Updated submodules with commit: $commitMessage"

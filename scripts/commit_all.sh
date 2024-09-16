@@ -25,23 +25,18 @@ git add ./cursor ./scripts ./examples ./docs ./firmware ./tools
 git commit -m "$commitMessage"
 
 # Change directory and commit changes
-cd ./data/compositions || {
+cd ../cursor-data/compositions || {
   echo "Directory ./data/compositions does not exist"
   exit 1
 }
 commit_and_push "$commitMessage"
-cd ../..
+cd ..
 
-cd ./data/recordings || {
+cd ./recordings || {
   echo "Directory ./data/recordings does not exist"
   exit 1
 }
 commit_and_push "$commitMessage"
-cd ../..
-
-# Commit the updated submodules to the main repository
-git add ./data/compositions ./data/recordings
-git commit -m "$commitMessage"
-git push origin "$currentBranch"
+cd ..
 
 echo "Updated submodules with commit: $commitMessage"
