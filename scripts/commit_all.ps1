@@ -33,4 +33,6 @@ Set-Location .\recordings
 Commit-And-Push $commitMessage
 Set-Location ..\..
 
+Set-Location cursor
+
 Write-Host "Updated submodules with commit: $commitMessage"
