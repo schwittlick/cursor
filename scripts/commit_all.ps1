@@ -35,4 +35,6 @@ Set-Location ..\..
 
 Set-Location cursor
 
+git push origin $currentBranch
+
 Write-Host "Updated submodules with commit: $commitMessage"

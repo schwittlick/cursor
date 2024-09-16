@@ -37,6 +37,7 @@ cd ./recordings || {
   exit 1
 }
 commit_and_push "$commitMessage"
-cd ..
+cd ../cursor
 
+git push origin "$currentBranch"
 echo "Updated submodules with commit: $commitMessage"
