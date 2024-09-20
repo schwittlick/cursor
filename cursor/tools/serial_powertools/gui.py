@@ -13,7 +13,6 @@ from cursor.path import Path
 from cursor.renderer.hpgl import HPGLRenderer
 from cursor.tools.discovery import discover
 from cursor.tools.serial_powertools.serial_inspector import SerialInspector
-from data.compositions.composition98.ink_drink import generate_circled_line
 
 
 def print_output(text: str) -> None:
@@ -75,50 +74,6 @@ def generate_random_swirl() -> str:
     collection.add(p)
     hpgl_code = HPGLRenderer.generate_string(collection)
 
-    return hpgl_code
-
-
-def generate_circled_line_gui() -> str:
-    path = generate_circled_line()
-    collection = Collection()
-    collection.add(path)
-    collection.add(path.copy())
-    collection.add(path.copy())
-    collection.add(path.copy())
-    collection.add(path.copy())
-    collection.add(path.copy())
-
-    collection2 = collection.copy()
-    collection2.translate(50, 0)
-    collection3 = collection.copy()
-    collection3.translate(100, 0)
-
-    collection4 = collection.copy()
-    collection4.translate(150, 0)
-    collection5 = collection.copy()
-    collection5.translate(200, 0)
-    collection6 = collection.copy()
-    collection6.translate(250, 0)
-    collection7 = collection.copy()
-    collection7.translate(300, 0)
-    collection8 = collection.copy()
-    collection8.translate(350, 0)
-    collection9 = collection.copy()
-    collection9.translate(400, 0)
-    collection10 = collection.copy()
-    collection10.translate(450, 0)
-
-    hpgl_code = HPGLRenderer.generate_string(collection)
-
-    hpgl_code += HPGLRenderer.generate_string(collection2)
-    hpgl_code += HPGLRenderer.generate_string(collection3)
-    hpgl_code += HPGLRenderer.generate_string(collection4)
-    hpgl_code += HPGLRenderer.generate_string(collection5)
-    hpgl_code += HPGLRenderer.generate_string(collection6)
-    hpgl_code += HPGLRenderer.generate_string(collection7)
-    hpgl_code += HPGLRenderer.generate_string(collection8)
-    hpgl_code += HPGLRenderer.generate_string(collection9)
-    hpgl_code += HPGLRenderer.generate_string(collection10)
     return hpgl_code
 
 
@@ -284,8 +239,6 @@ def create_plotter_inspector_gui(inspector: SerialInspector):
         with dpg.group(horizontal=True):
             dpg.add_button(label="Random Swirl (ink drink)",
                            callback=lambda: inspector.send_command(generate_random_swirl()))
-            dpg.add_button(label="Random Circled Line (ink drink)",
-                           callback=lambda: inspector.send_command(generate_circled_line_gui()))
             dpg.add_button(label="Random dot walk",
                            callback=lambda: inspector.send_command(generate_random_dot_walk()))
             dpg.add_button(label="Fill square (dotted)",
