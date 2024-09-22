@@ -192,7 +192,7 @@ def init_available_pens() -> dict[CCG, list[CCC]]:
     ]
 
     pens[CCG.YR] = [
-        CCC.YR01, CCC.YR02, CCC.YR04, CCC.YR07, CCC.YR18, CCC.YR23, CCC.YR24, CCC.YR68,
+        CCC.YR01, CCC.YR02, CCC.YR04, CCC.YR07, CCC.YR12, CCC.YR18, CCC.YR23, CCC.YR24, CCC.YR68,
         CCC.FYR,
     ]
 
@@ -215,7 +215,7 @@ def init_available_pens() -> dict[CCG, list[CCC]]:
     ]
 
     pens[CCG.BG] = [
-        CCC.BG01, CCC.BG02, CCC.BG07, CCC.BG09, CCC.BG13, CCC.BG15, CCC.BG18, CCC.BG57, CCC.BG72,
+        CCC.BG01, CCC.BG02, CCC.BG07, CCC.BG09, CCC.BG10, CCC.BG13, CCC.BG15, CCC.BG18, CCC.BG57, CCC.BG72,
         CCC.FBG2,
     ]
 
