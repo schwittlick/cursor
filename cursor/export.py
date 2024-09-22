@@ -6,7 +6,7 @@ import hashlib
 import pathlib
 from typing import Optional, Dict
 
-from bb import BoundingBox
+from cursor.bb import BoundingBox
 from cursor.algorithm.color.copic import Copic
 from cursor.algorithm.color.copic_pen_enum import CopicColorCode
 from cursor.collection import Collection
