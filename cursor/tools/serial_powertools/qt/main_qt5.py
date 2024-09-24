@@ -1,22 +1,38 @@
-import sys
 import logging
 import random
-import typing
+import sys
+
+from PyQt5.QtCore import pyqtSignal, QObject, QThread, Qt
+from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QComboBox, QTextEdit, QFileDialog, QProgressBar,
-                             QLabel, QLineEdit)
-from PyQt5.QtCore import QThread, pyqtSignal, Qt
-import serial
-from serial.tools import list_ports
+                             QLabel, QLineEdit, QShortcut)
 
 # Assuming these imports are available in your project structure
-from cursor.collection import Collection
-from cursor.device import PlotterHpglNames, MinmaxMapping
 from cursor.hpgl import RESET_DEVICE, ABORT_GRAPHICS
-from cursor.path import Path
-from cursor.renderer.hpgl import HPGLRenderer
 from cursor.tools.discovery import discover
-from tools.serial_powertools.qt.serial_inspector_qt5 import SerialInspector
+from cursor.tools.serial_powertools.qt.serial_inspector_qt5 import SerialInspector
+
+
+class ThreadSafeLogHandler(QObject, logging.Handler):
+    new_log_record = pyqtSignal(str)
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        super(logging.Handler).__init__()
+
+    def emit(self, record):
+        msg = self.format(record)
+        self.new_log_record.emit(msg)
+
+
+class SerialPortDiscoveryWorker(QObject):
+    finished = pyqtSignal(list)
+
+    def discover_ports(self):
+        discovered_ports = discover(timeout=0.5)
+        ports_with_model = [f"{port[0]} -> {port[1]}" for port in discovered_ports]
+        self.finished.emit(ports_with_model)
 
 
 class SerialInspectorGUI(QMainWindow):
@@ -24,6 +40,10 @@ class SerialInspectorGUI(QMainWindow):
         super().__init__()
         self.inspector = SerialInspector()
         self.init_ui()
+        self.setup_logging()
+        self.setup_shortcuts()
+
+        self.inspector.connection_status_changed.connect(self.update_connection_status)
 
     def init_ui(self):
         self.setWindowTitle('Serial Inspector')
@@ -59,6 +79,44 @@ class SerialInspectorGUI(QMainWindow):
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
 
+    def setup_logging(self):
+        logging.basicConfig(level=logging.INFO)
+        log_handler = ThreadSafeLogHandler(self)
+        log_handler.new_log_record.connect(self.print_output)
+        logging.getLogger().addHandler(log_handler)
+
+    def setup_shortcuts(self):
+        # Setup ESC key to close the application
+        self.shortcut_close = QShortcut(QKeySequence(Qt.Key_Escape), self)
+        self.shortcut_close.activated.connect(self.close)
+
+    def closeEvent(self, event):
+        # This method is called when the window is closed
+        self.shutdown()
+        event.accept()
+
+    def shutdown(self):
+        logging.info("Shutting down the application...")
+
+        # Stop the serial connection if it's open
+        if self.inspector.check():
+            self.inspector.disconnect_serial()
+
+        # Stop any running bruteforce threads
+        self.inspector.stop_bruteforce_progress()
+
+        # Stop the async sender if it's running
+        if self.inspector.async_sender:
+            self.inspector.async_sender.stop()
+
+        # Add any other cleanup code here
+        # For example, stopping any other threads, closing file handles, etc.
+
+        logging.info("Application shutdown complete.")
+
+    def print_output(self, text: str):
+        self.output_text.append(text)
+
     def create_inspector_widget(self):
         widget = QWidget()
         layout = QVBoxLayout()
@@ -79,14 +137,11 @@ class SerialInspectorGUI(QMainWindow):
         conn_layout = QHBoxLayout()
         refresh_btn = QPushButton("Refresh")
         refresh_btn.clicked.connect(self.refresh_serial_ports)
-        connect_btn = QPushButton("Connect")
-        connect_btn.clicked.connect(self.inspector.connect_serial)
-        disconnect_btn = QPushButton("Disconnect")
-        disconnect_btn.clicked.connect(self.inspector.disconnect_serial)
+        self.connect_btn = QPushButton("Connect")
+        self.connect_btn.clicked.connect(self.toggle_connection)
         self.connection_status = QLabel("Status: Disconnected")
         conn_layout.addWidget(refresh_btn)
-        conn_layout.addWidget(connect_btn)
-        conn_layout.addWidget(disconnect_btn)
+        conn_layout.addWidget(self.connect_btn)
         conn_layout.addWidget(self.connection_status)
         layout.addLayout(conn_layout)
 
@@ -120,39 +175,30 @@ class SerialInspectorGUI(QMainWindow):
                 btn_layout.addWidget(btn)
             layout.addLayout(btn_layout)
 
-        # Special command buttons
-        special_layout = QHBoxLayout()
-        special_buttons = [
-            ("Random Swirl", self.generate_random_swirl),
-            ("Random dot walk", self.generate_random_dot_walk),
-            ("Fill square (dotted)", self.generate_filled_square_dotted),
-            ("Fill square (lines)", self.generate_filled_square_lines),
-        ]
-        for label, func in special_buttons:
-            btn = QPushButton(label)
-            btn.clicked.connect(func)
-            special_layout.addWidget(btn)
-        layout.addLayout(special_layout)
-
         widget.setLayout(layout)
         return widget
+
+    def connect_to_port(self):
+        port = self.port_combo.currentText().split(" ")[0]  # Get the selected port
+        baud = int(self.baud_combo.currentText())  # Get the selected baud rate
+        self.inspector.connect_serial(port, baud)
 
     def create_send_file_widget(self):
         widget = QWidget()
         layout = QVBoxLayout()
 
         file_layout = QHBoxLayout()
-        self.file_path = QLineEdit()
-        self.file_path.setReadOnly(True)
+        self.file_path_input = QLineEdit()
+        self.file_path_input.setReadOnly(True)
         select_file_btn = QPushButton("Select File")
         select_file_btn.clicked.connect(self.select_file)
-        file_layout.addWidget(self.file_path)
+        file_layout.addWidget(self.file_path_input)
         file_layout.addWidget(select_file_btn)
         layout.addLayout(file_layout)
 
         send_layout = QHBoxLayout()
         send_async_btn = QPushButton("Send Async")
-        send_async_btn.clicked.connect(self.inspector.send_serial_file)
+        send_async_btn.clicked.connect(self.send_file)
         stop_sending_btn = QPushButton("Stop sending")
         stop_sending_btn.clicked.connect(self.inspector.stop_send_serial_file)
         send_layout.addWidget(send_async_btn)
@@ -164,6 +210,18 @@ class SerialInspectorGUI(QMainWindow):
 
         widget.setLayout(layout)
         return widget
+
+    def select_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select File")
+        if file_path:
+            self.file_path_input.setText(file_path)
+
+    def send_file(self):
+        file_path = self.file_path_input.text()
+        if file_path:
+            self.inspector.send_serial_file(file_path)
+        else:
+            logging.warning("No file selected for sending.")
 
     def create_bruteforce_widget(self):
         widget = QWidget()
@@ -208,42 +266,42 @@ class SerialInspectorGUI(QMainWindow):
         return self.output_text
 
     def refresh_serial_ports(self):
-        logging.info("Starting refresh..")
-        discovered_ports = discover(timeout=0.5)
-        ports_with_model = [f"{port[0]} -> {port[1]}" for port in discovered_ports]
-        self.port_combo.clear()
-        self.port_combo.addItems(ports_with_model)
+        logging.info("Starting refresh...")
+        self.thread = QThread()
+        self.worker = SerialPortDiscoveryWorker()
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.discover_ports)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.worker.finished.connect(self.update_port_combo)
+        self.thread.start()
 
     def send_command(self, command=None):
         if command is None:
             command = self.command_input.text()
-        self.inspector.send_serial_command(command)
+        self.inspector.send_command(command)
         self.command_input.clear()
 
-    def select_file(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, "Select File")
-        if file_path:
-            self.file_path.setText(file_path)
+    def update_port_combo(self, ports_with_model):
+        self.port_combo.clear()
+        self.port_combo.addItems(ports_with_model)
 
-    def print_output(self, text: str):
-        self.output_text.append(f"{text}")
+    def toggle_connection(self):
+        if self.inspector.check():
+            self.inspector.disconnect_serial()
+        else:
+            port = self.port_combo.currentText().split(" ")[0]
+            baud = int(self.baud_combo.currentText())
+            self.inspector.connect_serial(port, baud)
 
-    # Generate functions (these would be implemented similarly to the original code)
-    def generate_random_swirl(self):
-        # Implementation similar to the original code
-        pass
-
-    def generate_random_dot_walk(self):
-        # Implementation similar to the original code
-        pass
-
-    def generate_filled_square_dotted(self):
-        # Implementation similar to the original code
-        pass
-
-    def generate_filled_square_lines(self):
-        # Implementation similar to the original code
-        pass
+    def update_connection_status(self, status):
+        self.connection_status.setText(f"Status: {status}")
+        if status == "Connected":
+            self.connect_btn.setText("Disconnect")
+        else:
+            self.connect_btn.setText("Connect")
+        logging.info(f"Connection status updated: {status}")
 
     def generate_random_pa(self):
         x = random.randint(0, 10000)
@@ -255,24 +313,6 @@ def main():
     app = QApplication(sys.argv)
     gui = SerialInspectorGUI()
     gui.show()
-
-    # Set up logging
-    logging.basicConfig(level=logging.INFO)
-    logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
-
-    # Redirect logging to GUI
-    class QTextEditLogger(logging.Handler):
-        def __init__(self, widget):
-            super().__init__()
-            self.widget = widget
-
-        def emit(self, record):
-            msg = self.format(record)
-            self.widget.print_output(msg)
-
-    logger = logging.getLogger()
-    logger.addHandler(QTextEditLogger(gui))
-
     sys.exit(app.exec_())
 
 

@@ -6,7 +6,8 @@ import serial.tools.list_ports
 from cursor.hpgl.hpgl_tokenize import tokenizer
 from cursor.hpgl.plotter.plotter import HPGLPlotter
 from cursor.tools.serial_powertools.seriallib import AsyncSerialSender
-from tools.serial_powertools.qt.bruteforce_qt5 import run_brute_force
+
+from bruteforce_qt5 import run_brute_force
 
 
 class SerialInspector(QObject):
@@ -50,19 +51,39 @@ class SerialInspector(QObject):
         self.connection_status_changed.emit("Disconnected")
 
     def connect_serial(self, port: str, baud: int):
+        logging.info(f"Attempting to connect to {port} at {baud} baud")
+
         if self.check():
             logging.warning(f"Already connected to {self.serial_connection.port}")
             return
 
         try:
             self.serial_connection = serial.Serial(port, baud, timeout=1)
+            logging.info(f"Serial connection established to {self.serial_connection.port}")
+
             self.connection_status_changed.emit("Connected")
             logging.info(f"Connected to {self.serial_connection.port}")
-        except serial.SerialException as e:
-            logging.error(str(e))
-            return
 
-        plotter = HPGLPlotter(self.serial_connection)
+            plotter = HPGLPlotter(self.serial_connection)
+            logging.info("HPGLPlotter instance created")
+
+            self.async_sender = AsyncSerialSender(plotter)
+            logging.info("AsyncSerialSender instance created")
+
+            self.async_sender.do_software_handshake = True
+            self.async_sender.command_batch = 1
+            logging.info("AsyncSerialSender configured")
+
+            self.async_sender.start()
+            logging.info("AsyncSerialSender started")
+
+        except serial.SerialException as e:
+            logging.error(f"Failed to connect to {port}: {str(e)}")
+            self.connection_status_changed.emit(f"Connection failed: {str(e)}")
+        except Exception as e:
+            logging.error(f"Unexpected error while connecting to {port}: {str(e)}")
+            self.connection_status_changed.emit(f"Connection failed: Unexpected error")
+
         self.async_sender = AsyncSerialSender(plotter)
         self.async_sender.do_software_handshake = True
         self.async_sender.command_batch = 1
