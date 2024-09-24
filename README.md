@@ -14,8 +14,13 @@ setup
     pip install -r requirements.txt
     git submodule update --init
 
+adjust config.ini
+
+    cp config config_local.ini
+    # adjust paths to data folder. within data folder we expect "recordings" and "experiments" folder
+
 test
-    
+
     # linux/osx
     py.test --cov cursor -v
     flake8 --max-line-length=100 --ignore=E402,W503

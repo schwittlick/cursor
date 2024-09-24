@@ -53,7 +53,7 @@ class HPGLRenderer(BaseRenderer):
         _prev_force = 0
         _prev_pen = 0
 
-        _hpgl.PU()
+        _hpgl.IN()
 
         for p in collection:
             x = p.start_pos().x
