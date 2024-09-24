@@ -6,8 +6,8 @@ from PyQt5.QtCore import Qt
 
 import colour
 
-from algorithm.color.combinations import ColorDictionary
-from algorithm.color.copic import Copic
+from cursor.algorithm.color.combinations import ColorDictionary
+from cursor.algorithm.color.copic import Copic
 
 
 class ColorCombinationApp(QWidget):
