@@ -196,7 +196,8 @@ class MinmaxMapping:
         PlotterType.HP_DM_II_A1: BB(-16080, -11660, 16080, 11660),
         PlotterType.HP_DM_II_A3: BB(-7656, -5740, 7656, 5740),
 
-        PlotterType.MUTOH_XP500_100x70cm: BB(-19370, -13728, 19370, 13728),
+        PlotterType.MUTOH_XP500_100x70cm: BB(-19370, -13728, 19370, 13728) - BB(0, 0, 10 * 40, 0),
+        # one more cm padding on bottom
         PlotterType.MUTOH_XP500_500x297mm: BB(-9452, -5722, 9452, 5722),
         PlotterType.MUTOH_XP500_A1: BB(-16200, -11645, 16200, 11645),
         PlotterType.MUTOH_XP500_A2: BB(-11284, -8149, 11285, 8149),
