@@ -36,7 +36,7 @@ from cursor.timer import timing
 class Path:
     def __init__(
             self, vertices: list[Position] | None = None, properties: dict | None = None
-    ):
+    ) -> None:
         self._vertices: list[Position] = []
         self.properties = {
             Property.LAYER: "layer1",
@@ -56,7 +56,7 @@ class Path:
             if Property.WIDTH not in self.properties.keys():
                 self.width = 1
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         rep = (
             f"vertices: {len(self.vertices)} "
             f"bb: {self.bb()}"
@@ -77,7 +77,7 @@ class Path:
 
         return True
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(repr(self))
 
     def __len__(self) -> int:
@@ -87,13 +87,13 @@ class Path:
         for v in self.vertices:
             yield v
 
-    def __getitem__(self, item) -> Position:
+    def __getitem__(self, item: int) -> Position:
         return self._vertices[item]
 
     def as_tuple_list(self) -> list[tuple[float, float]]:
         return [v.as_tuple() for v in self.vertices]
 
-    def as_array(self) -> np.array:
+    def as_array(self) -> np.ndarray:
         return np.array([p.as_array() for p in self.vertices])
 
     def as_dataframe(self) -> pd.DataFrame:
@@ -292,7 +292,8 @@ class Path:
 
     def copy(self) -> Path:
         return Path(
-            None if self.empty() else copy.deepcopy(self.vertices), copy.deepcopy(self.properties)
+            None if self.empty() else copy.deepcopy(
+                self.vertices), copy.deepcopy(self.properties)
         )
 
     def reverse(self) -> None:
@@ -484,7 +485,8 @@ class Path:
         try:
             angle = np.arccos(
                 np.clip(
-                    np.dot(current_start_to_end, new_start_to_end), -math.pi, math.pi
+                    np.dot(current_start_to_end, new_start_to_end), -
+                    math.pi, math.pi
                 )
             )
         except RuntimeWarning as w:
@@ -531,8 +533,10 @@ class Path:
                     if ok == 0:
                         ok = 0.01
                     lDetDivInv = 1 / ok
-                    i_x = -((diffLAx * compareB) - (compareA * diffLBx)) * lDetDivInv
-                    i_y = -((diffLAy * compareB) - (compareA * diffLBy)) * lDetDivInv
+                    i_x = -((diffLAx * compareB) -
+                            (compareA * diffLBx)) * lDetDivInv
+                    i_y = -((diffLAy * compareB) -
+                            (compareA * diffLBy)) * lDetDivInv
 
                     return True, i_x, i_y
 
@@ -552,7 +556,8 @@ class Path:
                                                       line2Start.as_tuple(), line2End.as_tuple())
 
                 if intersection:
-                    intersection_points.append(Position.from_tuple(intersection))
+                    intersection_points.append(
+                        Position.from_tuple(intersection))
 
         return intersection_points
 
@@ -581,7 +586,7 @@ class Path:
         mapped: default is output values between -360° and 360°
         if True, mapped from 0 - 360°
 
-        :return: len() = self.__len() - 1
+        :return: len() = self.__len__() - 1
 
         """
         angles = []
@@ -627,7 +632,8 @@ class Path:
                 # Simplify by treating vertical segments as having zero slope
                 segment_slope = float('inf')
             else:
-                segment_slope = cal_slope(self.vertices[i + 1], self.vertices[i])
+                segment_slope = cal_slope(
+                    self.vertices[i + 1], self.vertices[i])
 
             # If both slopes are infinite, the normalized slope is considered 0 (parallel lines)
             if general_slope == float('inf') and segment_slope == float('inf'):
@@ -662,7 +668,8 @@ class Path:
     def __differential_entropy_wrap(self, values: list[float]) -> float:
         window_length = None  # max(int(len(values) * 0.1), 1)
         if len(values) < 5:
-            logging.error("Can't compute window_length for such small list of values..")
+            logging.error(
+                "Can't compute window_length for such small list of values..")
         try:
             de = stats.differential_entropy(
                 values,
@@ -811,7 +818,7 @@ class Path:
                 points_inside += 1
         return points_inside > points_outside
 
-    def _parallel(self, p1: Position, p2: Position, offset_amount: float):
+    def _parallel(self, p1: Position, p2: Position, offset_amount: float) -> Path:
         delta_y = p2.y - p1.y
         delta_x = p2.x - p1.x
         theta = math.atan2(delta_y, delta_x)
@@ -835,13 +842,15 @@ class Path:
         out_path.add(line_b[1].x, line_b[1].y)
         return out_path
 
-    def _cross_product(self, a, b):
+    def _cross_product(self, a: list[float], b: list[float]) -> list[float]:
         return [a[1] * 0 - 0 * b[1], 0 * b[0] - a[0] * 0, a[0] * b[1] - a[1] * b[0]]
 
-    def _extended_line(self, a, b, delta_a, delta_b):
+    def _extended_line(self, a: Position, b: Position, delta_a: float, delta_b: float) -> list[list[float]]:
         theta = math.atan2(b.y - a.y, b.x - a.x)
-        new_a = [a.x - (delta_a * math.cos(theta)), a.y - (delta_a * math.sin(theta))]
-        new_b = [b.x + (delta_b * math.cos(theta)), b.y + (delta_b * math.sin(theta))]
+        new_a = [a.x - (delta_a * math.cos(theta)),
+                 a.y - (delta_a * math.sin(theta))]
+        new_b = [b.x + (delta_b * math.cos(theta)),
+                 b.y + (delta_b * math.sin(theta))]
 
         return [new_a, new_b]
 
@@ -856,7 +865,8 @@ class Path:
         b = p1.distance(p2)
         c = p3.distance(p1)
 
-        acos_arg = (math.pow(a, 2) + math.pow(b, 2) - math.pow(c, 2)) / (2 * a * b)
+        acos_arg = (math.pow(a, 2) + math.pow(b, 2) -
+                    math.pow(c, 2)) / (2 * a * b)
         if abs(acos_arg) > 1:
             acos_arg = 0
         gamma = math.acos(acos_arg)
@@ -914,12 +924,12 @@ class Path:
             pa.add(x, y)
         return pa
 
-    def add_if(self, pa: Path, out: list[Path]):
+    def add_if(self, pa: Path, out: list[Path]) -> None:
         if len(pa) > 2:
             pa.simplify(0.01)
             out.append(pa)
 
-    def curve_offset(self, dist: float, join_style=JOIN_STYLE.mitre, mitre_limit=1.0):
+    def curve_offset(self, dist: float, join_style=JOIN_STYLE.mitre, mitre_limit: float = 1.0) -> list[Path]:
         return_paths = []
 
         line = LineString(self.as_tuple_list())
@@ -937,7 +947,7 @@ class Path:
         return return_paths
 
     def parallel_offset(
-            self, dist: float, join_style=JOIN_STYLE.mitre, mitre_limit=1.0
+            self, dist: float, join_style=JOIN_STYLE.mitre, mitre_limit: float = 1.0
     ) -> list[Path]:
 
         return_paths = []
@@ -969,7 +979,7 @@ class Path:
 
         return return_paths
 
-    def intersection_points(self, grid_size=0.001) -> list:
+    def intersection_points(self, grid_size: float = 0.001) -> list[tuple[float, float]]:
         ls = LineString(self.as_tuple_list())
         # mls = unary_union(ls, 1)
         ls.normalize()
@@ -1032,7 +1042,8 @@ class Path:
                 if right_position < n:
                     cur.translate(*self.vertices[right_position].as_tuple())
                     sum += weights[j]
-                result.vertices[i].translate(cur.x * weights[j], cur.y * weights[j])
+                result.vertices[i].translate(
+                    cur.x * weights[j], cur.y * weights[j])
             result.vertices[i].x = result.vertices[i].x / sum
             result.vertices[i].y = result.vertices[i].y / sum
 
@@ -1058,7 +1069,8 @@ class Path:
         num_intervals = int(total_distance / target_dist)
 
         # Determine the new distances for interpolation
-        new_distances = [0.0] + [i * target_dist for i in range(1, num_intervals + 1)]
+        new_distances = [0.0] + \
+            [i * target_dist for i in range(1, num_intervals + 1)]
         if new_distances[-1] > total_distance:
             new_distances.pop()
 
@@ -1073,7 +1085,7 @@ class Path:
     def resample(self, target_dist: float) -> None:
         self.vertices = self.resampled(target_dist).vertices
 
-    def subset(self, start: int, end: int):
+    def subset(self, start: int, end: int) -> Path:
         if start < 0 or start > len(self) or end < 0 or end > len(self):
             raise Exception("bounds should be within number of vertices")
         positions = self._vertices[start:end]
@@ -1106,7 +1118,7 @@ class Path:
         # log.info(f"Path::simplify({e}) reduced points {before} -> {len(self.vertices)}")
 
     @staticmethod
-    def intersect_segment(p1: tuple, p2: tuple, p3: tuple, p4: tuple):
+    def intersect_segment(p1: tuple[float, float], p2: tuple[float, float], p3: tuple[float, float], p4: tuple[float, float]) -> tuple[float, float] | None:
         # https://gist.github.com/kylemcdonald/6132fc1c29fd3767691442ba4bc84018
         x1, y1 = p1
         x2, y2 = p2
@@ -1253,7 +1265,8 @@ class Path:
         f_perp_vector = Position(-f_direction_vector.y, f_direction_vector.x)
 
         # normalize perpendicular direction vector
-        mag = math.sqrt((f_perp_vector.x * f_perp_vector.x) + (f_perp_vector.y * f_perp_vector.y))
+        mag = math.sqrt((f_perp_vector.x * f_perp_vector.x) +
+                        (f_perp_vector.y * f_perp_vector.y))
         ray_dir = Position(f_perp_vector.x / mag, f_perp_vector.y / mag)
 
         perc = 0.0
@@ -1307,7 +1320,8 @@ class Path:
         f_perp_vector = Position(-f_direction_vector.y, f_direction_vector.x)
 
         # normalize perpendicular direction vector
-        mag = math.sqrt((f_perp_vector.x * f_perp_vector.x) + (f_perp_vector.y * f_perp_vector.y))
+        mag = math.sqrt((f_perp_vector.x * f_perp_vector.x) +
+                        (f_perp_vector.y * f_perp_vector.y))
         ray_dir = Position(f_perp_vector.x / mag, f_perp_vector.y / mag)
 
         all_intersections = []
