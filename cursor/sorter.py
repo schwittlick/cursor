@@ -1,5 +1,6 @@
 from enum import Enum, auto
 from operator import itemgetter
+from typing import List, Optional
 
 from cursor.algorithm import frechet
 from cursor.path import Path
@@ -28,34 +29,37 @@ class SortParameter(Enum):
 
 
 class Sorter:
-    def __init__(self, reverse=False, param=SortParameter.ENTROPY_X):
+    def __init__(self, reverse: bool = False, param: SortParameter = SortParameter.ENTROPY_X):
         self.__reverse = reverse
         self.__param = param
 
     @property
-    def param(self):
+    def param(self) -> SortParameter:
         return self.__param
 
     @param.setter
-    def param(self, v):
+    def param(self, v: SortParameter) -> None:
         self.__param = v
 
     @timing
     def sort(
             self,
-            paths: list[Path],
-            reference_path: Path = None,
-    ):
+            paths: List[Path],
+            reference_path: Optional[Path] = None,
+    ) -> None:
         if self.__param is SortParameter.ENTROPY_X:
             paths.sort(key=lambda x: x.entropy_x, reverse=self.__reverse)
         elif self.__param is SortParameter.ENTROPY_Y:
             paths.sort(key=lambda x: x.entropy_y, reverse=self.__reverse)
         elif self.__param is SortParameter.ENTROPY_CROSS:
-            paths.sort(key=lambda x: x.entropy_y * x.entropy_x, reverse=self.__reverse)
+            paths.sort(key=lambda x: x.entropy_y *
+                       x.entropy_x, reverse=self.__reverse)
         elif self.__param is SortParameter.DIFFERENTIAL_ENTROPY_X:
-            paths.sort(key=lambda x: x.differential_entropy_x, reverse=self.__reverse)
+            paths.sort(key=lambda x: x.differential_entropy_x,
+                       reverse=self.__reverse)
         elif self.__param is SortParameter.DIFFERENTIAL_ENTROPY_Y:
-            paths.sort(key=lambda x: x.differential_entropy_y, reverse=self.__reverse)
+            paths.sort(key=lambda x: x.differential_entropy_y,
+                       reverse=self.__reverse)
         elif self.__param is SortParameter.DIFFERENTIAL_ENTROPY_CROSS:
             paths.sort(
                 key=lambda x: x.differential_entropy_x * x.differential_entropy_y,
@@ -92,9 +96,9 @@ class Sorter:
     @timing
     def sorted(
             self,
-            paths: list[Path],
-            reference_path: Path = None,
-    ):
+            paths: List[Path],
+            reference_path: Optional[Path] = None,
+    ) -> List[Path]:
         if self.__param is SortParameter.ENTROPY_X:
             sorted_list = sorted(
                 paths, key=lambda x: x.entropy_x, reverse=self.__reverse
@@ -132,15 +136,18 @@ class Sorter:
                 paths, key=lambda x: x.distance, reverse=self.__reverse
             )
         elif self.__param is SortParameter.HASH:
-            sorted_list = sorted(paths, key=lambda x: x.hash, reverse=self.__reverse)
+            sorted_list = sorted(
+                paths, key=lambda x: x.hash, reverse=self.__reverse)
         elif self.__param is SortParameter.LAYER:
-            sorted_list = sorted(paths, key=lambda x: x.layer, reverse=self.__reverse)
+            sorted_list = sorted(
+                paths, key=lambda x: x.layer, reverse=self.__reverse)
         elif self.__param is SortParameter.PEN_SELECT:
             sorted_list = sorted(
                 paths, key=lambda x: x.pen_select, reverse=self.__reverse
             )
         elif self.__param is SortParameter.POINT_COUNT:
-            sorted_list = sorted(paths, key=lambda x: len(x), reverse=self.__reverse)
+            sorted_list = sorted(
+                paths, key=lambda x: len(x), reverse=self.__reverse)
         elif (
                 self.__param is SortParameter.FRECHET_DISTANCE
                 and reference_path is not None
@@ -151,14 +158,16 @@ class Sorter:
             # at least on windows duh
             # test this on unix with start_method='fork' method
             if use_multiprocessing:
-                distances = frechet.frechet_multiprocessing(paths, reference_path)
+                distances = frechet.frechet_multiprocessing(
+                    paths, reference_path)
             else:
                 distances = [
                     (index, item.frechet_similarity(reference_path), item)
                     for index, item in enumerate(paths)
                 ]
 
-            sorted_idxes = sorted(distances, key=itemgetter(1), reverse=self.__reverse)
+            sorted_idxes = sorted(
+                distances, key=itemgetter(1), reverse=self.__reverse)
             sorted_list = [el[2] for el in sorted_idxes]
         elif self.__param is SortParameter.VARIATION_X:
             sorted_list = sorted(
@@ -169,5 +178,6 @@ class Sorter:
                 paths, key=lambda x: x.variation_y, reverse=self.__reverse
             )
         else:
-            raise Exception(f"Wrong param {self.__param} for {__class__.__name__}")
+            raise Exception(
+                f"Wrong param {self.__param} for {__class__.__name__}")
         return sorted_list

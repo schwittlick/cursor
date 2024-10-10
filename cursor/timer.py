@@ -9,14 +9,14 @@ import pytz
 
 
 class Timer:
-    def __init__(self):
-        self._time = None
+    def __init__(self) -> None:
+        self._time: float = None
         self.start()
 
-    def start(self):
+    def start(self) -> None:
         self._time = time.perf_counter()
 
-    def elapsed(self):
+    def elapsed(self) -> float:
         t1 = time.perf_counter()
         return t1 - self._time
 
@@ -29,13 +29,13 @@ class Timer:
         return Timer.format_timestamp(now, timestamp_format)
 
     @staticmethod
-    def format_timestamp(timestamp: datetime, timestamp_format: str = "%y%m%d_%H%M%S") -> str:
+    def format_timestamp(timestamp: datetime.datetime, timestamp_format: str = "%y%m%d_%H%M%S") -> str:
         return timestamp.strftime(timestamp_format)
 
 
 def timing(func: typing.Callable) -> typing.Callable:
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
         timer = Timer()
         result = func(*args, **kwargs)
         code_obj = func.__code__
@@ -57,7 +57,7 @@ class DateHandler:
         return utc_timestamp
 
     @staticmethod
-    def datetime_from_timestamp(ts: float):
+    def datetime_from_timestamp(ts: float) -> datetime.datetime:
         return datetime.datetime.fromtimestamp(ts)
 
     @staticmethod

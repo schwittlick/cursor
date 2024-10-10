@@ -13,7 +13,7 @@ import time
 import logging
 from functools import reduce
 
-import fast_tsp
+import fast_tsp as fasttsp
 import numpy as np
 import pandas as pd
 import pytz
@@ -178,7 +178,8 @@ class Collection:
         [p.clean() for p in self.__paths]
 
         len_before = len(self)
-        self.__paths = [path for path in self.__paths if len(path) > min_vertex_count]
+        self.__paths = [path for path in self.__paths if len(
+            path) > min_vertex_count]
 
         logging.debug(
             f"PathCollection::clean: reduced path count from {len_before} to {len(self)}"
@@ -263,19 +264,22 @@ class Collection:
         if isinstance(pathsorter, Sorter):
             pathsorter.sort(self.__paths, reference_path)
         else:
-            raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
+            raise Exception(
+                f"Cant sort with a class of type {type(pathsorter)}")
 
     def sorted(self, pathsorter: Sorter, reference_path: Path = None) -> list[Path]:
         if isinstance(pathsorter, Sorter):
             return pathsorter.sorted(self.__paths, reference_path)
         else:
-            raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
+            raise Exception(
+                f"Cant sort with a class of type {type(pathsorter)}")
 
     def filter(self, pathfilter: Filter) -> None:
         if isinstance(pathfilter, Filter):
             pathfilter.filter(self.__paths)
         else:
-            raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
+            raise Exception(
+                f"Cant filter with a class of type {type(pathfilter)}")
 
     def filtered(self, pathfilter: Filter) -> Collection:
         if isinstance(pathfilter, Filter):
@@ -283,7 +287,8 @@ class Collection:
             pc.__paths = pathfilter.filtered(self.__paths)
             return pc
         else:
-            raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
+            raise Exception(
+                f"Cant filter with a class of type {type(pathfilter)}")
 
     def timestamp(self) -> float:
         return self._timestamp
@@ -427,7 +432,8 @@ class Collection:
         for p in self:
             p.simplify(e)
 
-        logging.debug(f"C::simplify from {count} to {self.point_count()} points.")
+        logging.debug(
+            f"C::simplify from {count} to {self.point_count()} points.")
 
     def split_by_color(self):
         new_paths = []
@@ -589,20 +595,24 @@ class Collection:
 
     @timing
     def fast_tsp(self, plot_preview: bool = False, duration_seconds: int = 5) -> list[int]:
-        start_positions_float = np.array([pa.start_pos().as_tuple() for pa in self])
-        end_positions_float = np.array([pa.end_pos().as_tuple() for pa in self])
+        start_positions_float = np.array(
+            [pa.start_pos().as_tuple() for pa in self])
+        end_positions_float = np.array(
+            [pa.end_pos().as_tuple() for pa in self])
 
         dists = spatial.distance.cdist(
             end_positions_float, start_positions_float, metric="euclidean"
         )
         int_dists_from_floats = dists.astype(int)
 
-        order = fast_tsp.find_tour(int_dists_from_floats, duration_seconds=duration_seconds)
+        order = fasttsp.find_tour(
+            int_dists_from_floats, duration_seconds=duration_seconds)
 
         if plot_preview:
             fig, ax = plt.subplots(1, 1)
             best_points_coordinate = start_positions_float[order, :]
-            ax.plot(best_points_coordinate[:, 0], best_points_coordinate[:, 1], ".-r")
+            ax.plot(best_points_coordinate[:, 0],
+                    best_points_coordinate[:, 1], ".-r")
             plt.show()
 
         final_order = []
@@ -655,7 +665,8 @@ class Collection:
             best_points_ = np.concatenate([best_points, [best_points[0]]])
             best_points_coordinate = start_positions[best_points_, :]
             ax[0].plot(
-                best_points_coordinate[:, 0], best_points_coordinate[:, 1], "o-r"
+                best_points_coordinate[:,
+                                       0], best_points_coordinate[:, 1], "o-r"
             )
             ax[1].plot(ga_tsp.generation_best_Y)
             plt.show()

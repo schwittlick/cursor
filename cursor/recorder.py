@@ -12,6 +12,7 @@ import pymsgbox
 import threading
 import sys
 from PIL import Image
+from typing import Tuple, Optional, Any
 
 from cursor.position import Position
 from cursor.properties import Property
@@ -21,7 +22,7 @@ log = wasabi.Printer()
 
 
 class Recorder:
-    def __init__(self, suffix: str):
+    def __init__(self, suffix: str) -> None:
         self._fn_suffix = suffix
 
         self._timer = None
@@ -48,16 +49,16 @@ class Recorder:
 
         log.good("Started cursor recorder")
 
-    def stop(self):
+    def stop(self) -> None:
         self._timer.cancel()
 
-    def __save_async(self):
+    def __save_async(self) -> None:
         self.save()
         log.good("Setting up 30min auto-save")
         self._timer = threading.Timer(60 * 30, self.__save_async, [])
         self._timer.start()
 
-    def on_move(self, x, y):
+    def on_move(self, x: int, y: int) -> None:
         _x = x / self._resolution[0]
         _y = y / self._resolution[1]
         try:
@@ -73,7 +74,7 @@ class Recorder:
         _p = Position(_x, _y, _t, {Property.COLOR: _c})
         self._current_line.add_position(_p)
 
-    def on_click(self, x, y, button, pressed):
+    def on_click(self, x: int, y: int, button: pynput.mouse.Button, pressed: bool) -> None:
         if not self._started and pressed:
             self.on_move(x, y)
             self._started = True
@@ -84,7 +85,7 @@ class Recorder:
             icon.update_menu()
             self._current_line.clear()
 
-    def on_press(self, btn):
+    def on_press(self, btn: pynput.keyboard.Key) -> None:
         try:
             key = btn.char
         except AttributeError:
@@ -95,7 +96,7 @@ class Recorder:
         t = (key, DateHandler.utc_timestamp(), 1)
         self._keyboard_recodings.append(t)
 
-    def on_release(self, btn):
+    def on_release(self, btn: pynput.keyboard.Key) -> None:
         try:
             key = btn.char
         except AttributeError as ae:
@@ -107,18 +108,20 @@ class Recorder:
         t = (key, DateHandler.utc_timestamp(), 0)
         self._keyboard_recodings.append(t)
 
-    def save(self):
+    def save(self) -> None:
         save_path = DataDirHandler().recordings()
         save_path.mkdir(parents=True, exist_ok=True)
 
-        recs = {"mouse": self._mouse_recordings, "keys": self._keyboard_recodings}
+        recs = {"mouse": self._mouse_recordings,
+                "keys": self._keyboard_recodings}
 
         filename = str(self._start_time_stamp) + f"_{self._fn_suffix}.json"
         fname_compressed = save_path / filename
 
         log.warn(DateHandler.utc_timestamp())
         log.good(f"Saving mouse recordings: {len(self._mouse_recordings)}")
-        log.good(f"Saving keyboard recordings: {len(self._keyboard_recodings)}")
+        log.good(
+            f"Saving keyboard recordings: {len(self._keyboard_recodings)}")
         log.good(f"{fname_compressed.as_posix()}")
 
         with open(fname_compressed.as_posix(), "w") as fp:
@@ -132,13 +135,13 @@ icon = None
 suffix = ""
 
 
-def save_exit(icon, item):
+def save_exit(icon: pystray.Icon, item: pystray.MenuItem) -> None:
     global rr
     rr.stop()
     icon.stop()
 
 
-def recorder_setup(icon):
+def recorder_setup(icon: pystray.Icon) -> None:
     global rr
     global suffix
 
@@ -146,13 +149,13 @@ def recorder_setup(icon):
     icon.visible = True
 
 
-def main():
+def main() -> None:
     # the main recorder entry point
     # 1. creates a gui
     # 2. starts the recorder
     # loops forever until quit forcefully or via gui
 
-    def update(icon):
+    def update(icon: pystray.Icon) -> None:
         icon.update_menu()
 
     icon_path = DataDirHandler().data_dir / "mouse-icon.gif"

@@ -19,7 +19,7 @@ class Position:
             y: float = 0.0,
             timestamp: int = 0,
             properties: dict | None = None
-    ):
+    ) -> None:
         if properties is None:
             properties = {}
         else:
@@ -33,7 +33,7 @@ class Position:
         return cls(xy_tuple[0], xy_tuple[1])
 
     @classmethod
-    def from_array(cls, arr: np.array) -> Position:
+    def from_array(cls, arr: np.ndarray) -> Position:
         return cls(arr[0], arr[1])
 
     @property
@@ -69,7 +69,7 @@ class Position:
     def as_tuple(self) -> tuple[float, float]:
         return self.x, self.y
 
-    def as_array(self) -> np.array:
+    def as_array(self) -> np.ndarray:
         return self._pos.astype(float)
 
     def time(self) -> int:
@@ -77,7 +77,8 @@ class Position:
 
     def copy(self) -> Position:
         return type(self)(
-            copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(self.timestamp), copy.deepcopy(self.properties)
+            copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(
+                self.timestamp), copy.deepcopy(self.properties)
         )
 
     def distance(self, t: Position | np.ndarray | tuple[float, float]) -> float:
@@ -91,7 +92,7 @@ class Position:
                 return func(self.as_array() - np.asarray(t))
 
     def distance_squared(self, t: Position | np.ndarray | tuple[float, float]) -> float:
-        def squared_euclidean_distance(p1: tuple, p2: tuple) -> float:
+        def squared_euclidean_distance(p1: tuple[float, float], p2: tuple[float, float]) -> float:
             # dx = p1.x - p2.x
             # dy = p1.y - p2.y
             # return dx * dx + dy * dy
@@ -108,8 +109,10 @@ class Position:
     ) -> None:
         ox, oy = origin
 
-        qx = ox + math.cos(angle) * (self.x - ox) - math.sin(angle) * (self.y - oy)
-        qy = oy + math.sin(angle) * (self.x - ox) + math.cos(angle) * (self.y - oy)
+        qx = ox + math.cos(angle) * (self.x - ox) - \
+            math.sin(angle) * (self.y - oy)
+        qy = oy + math.sin(angle) * (self.x - ox) + \
+            math.cos(angle) * (self.y - oy)
 
         self.x = qx
         self.y = qy
@@ -170,7 +173,7 @@ class Position:
     def __hash__(self) -> int:
         return hash(repr(self))
 
-    def __mul__(self, o: Position) -> np.array:
+    def __mul__(self, o: Position) -> np.ndarray:
         return self.as_array() * o.as_array()
 
     def __sub__(self, o: Position) -> Position:

@@ -1,4 +1,5 @@
 import inspect
+from typing import List, Tuple, Callable, Optional, Any
 
 import numba as nb
 import numpy as np
@@ -10,7 +11,7 @@ from cursor.position import Position
 
 
 @nb.njit(fastmath=True, parallel=True)
-def calc_distance(vec_1, vec_2):
+def calc_distance(vec_1: np.ndarray, vec_2: np.ndarray) -> np.ndarray:
     res = np.empty((vec_1.shape[0], vec_2.shape[0]), dtype=np.float64)
     for i in nb.prange(vec_1.shape[0]):
         for j in range(vec_2.shape[0]):
@@ -21,11 +22,11 @@ def calc_distance(vec_1, vec_2):
     return res
 
 
-def mix(begin: float, end: float, perc: float):
+def mix(begin: float, end: float, perc: float) -> float:
     return ((end - begin) * perc) + begin
 
 
-def convert_pynput_btn_to_key(btn):
+def convert_pynput_btn_to_key(btn: pynput.keyboard.Key) -> Optional[str]:
     """
     these keyboard keys dont have char representation
     we make it ourselves
@@ -84,7 +85,7 @@ def convert_pynput_btn_to_key(btn):
     return None
 
 
-def generate_perlin_noise_2d(shape, res):
+def generate_perlin_noise_2d(shape: Tuple[int, int], res: Tuple[int, int]) -> np.ndarray:
     def f(t):
         return 6 * t ** 5 - 15 * t ** 4 + 10 * t ** 3
 
@@ -110,7 +111,7 @@ def generate_perlin_noise_2d(shape, res):
     return np.sqrt(2) * ((1 - t[:, :, 1]) * n0 + t[:, :, 1] * n1)
 
 
-def map(value, in_min, in_max, out_min, out_max, clamp=True):
+def map(value: float, in_min: float, in_max: float, out_min: float, out_max: float, clamp: bool = True) -> float:
     out = (value - in_min) / (in_max - in_min) * (out_max - out_min) + out_min
 
     if clamp:
@@ -127,7 +128,7 @@ def map(value, in_min, in_max, out_min, out_max, clamp=True):
     return out
 
 
-def clamp(n, smallest, largest):
+def clamp(n: float, smallest: float, largest: float) -> float:
     return max(smallest, min(n, largest))
 
 
@@ -163,11 +164,11 @@ def remap(i_min: float, i_max: float, o_min: float, o_max: float, v: float) -> f
     return lerp(o_min, o_max, inv_lerp(i_min, i_max, v))
 
 
-def current_source(frame):
+def current_source(frame: inspect.FrameInfo) -> str:
     return inspect.getsource(inspect.getmodule(frame))
 
 
-def transformFn(stl, sbr, dtl, dbr):
+def transformFn(stl: Tuple[float, float], sbr: Tuple[float, float], dtl: Tuple[float, float], dbr: Tuple[float, float]) -> Callable[[Position], Position]:
     """
     ty lars wander
     https://larswander.com/writing/centering-and-scaling/
@@ -193,13 +194,13 @@ def transformFn(stl, sbr, dtl, dbr):
     return calc
 
 
-def apply_matrix(pa: list[tuple], _ma) -> list[tuple]:
+def apply_matrix(pa: List[Tuple[float, float]], _ma: Any) -> List[Tuple[float, float]]:
     l = LineString(pa)
     xx, yy, = affine_transform(l, _ma).coords.xy
     return zip(yy, xx)
 
 
-def line_intersection(ray_origin: np.array, ray_direction: np.array, segment_start: np.array, segment_end: np.array):
+def line_intersection(ray_origin: np.ndarray, ray_direction: np.ndarray, segment_start: np.ndarray, segment_end: np.ndarray) -> Optional[List[float]]:
     # Calculate differences
     d_se = segment_end - segment_start
     d_ro_s_s = ray_origin - segment_start
@@ -217,7 +218,7 @@ def line_intersection(ray_origin: np.array, ray_direction: np.array, segment_sta
     return None
 
 
-def split_list_into_chunks(lst, n):
+def split_list_into_chunks(lst: List[Any], n: int) -> List[List[Any]]:
     """Split a list into n chunks of approximately equal size."""
     # Calculate the size of each chunk
     chunk_size = len(lst) // n
@@ -241,7 +242,7 @@ def split_list_into_chunks(lst, n):
     return chunks
 
 
-def split_list_into_chunks_of_size(lst: list, chunksize: int) -> list[list]:
+def split_list_into_chunks_of_size(lst: List[Any], chunksize: int) -> List[List[Any]]:
     """ Splits list into chunks, where each chunk has certain size. Last chunk will contain remaining """
     for i in range(0, len(lst), chunksize):
         yield lst[i:i + chunksize]
