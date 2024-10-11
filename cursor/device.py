@@ -1,18 +1,19 @@
 from __future__ import annotations
 
 from enum import Enum, auto
+from typing import Dict, List, Tuple
 
 from cursor.bb import BoundingBox as BB
 
 
 class PlotterConfig:
     def __init__(self, type: PlotterType):
-        self.type = type
-        self.bb = MinmaxMapping.maps[type]
+        self.type: PlotterType = type
+        self.bb: BB = MinmaxMapping.maps[type]
 
 
 class PlotterType(Enum):
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     ROLAND_DPX3300_A1 = auto()
@@ -80,7 +81,7 @@ class ExportFormat(Enum):
 
 
 class ExportFormatMappings:
-    maps = {
+    maps: Dict[PlotterType, ExportFormat] = {
         PlotterType.ROLAND_DPX3300_A1: ExportFormat.HPGL,
         PlotterType.ROLAND_DPX3300_A2: ExportFormat.HPGL,
         PlotterType.ROLAND_DPX3300_A3: ExportFormat.HPGL,
@@ -169,7 +170,7 @@ class PaperSize(Enum):
 
 
 class MinmaxMapping:
-    maps = {
+    maps: Dict[PlotterType, BB] = {
         PlotterType.ROLAND_DPX3300_A1: BB(-16920, -11180, 16340, 11180),
         PlotterType.ROLAND_DPX3300_A2: BB(-16920, -11180, 5440, 4629),
         PlotterType.ROLAND_DPX3300_A3: BB(-16920, -11180, -1112, -3276),
@@ -204,8 +205,10 @@ class MinmaxMapping:
         PlotterType.MUTOH_XP500_A3: BB(-7815, -5716, 7815, 5716),
 
         PlotterType.DIY_PLOTTER: BB(0, 0, 3350, -1715),  # A1
-        PlotterType.DIY_PLOTTER_A2: BB(0, 0, 1720, -1220),  # deprecated bc grbl changed
-        PlotterType.DIY_PLOTTER_A1: BB(0, 0, 2900, -1800),  # deprecated bc grbl changed
+        # deprecated bc grbl changed
+        PlotterType.DIY_PLOTTER_A2: BB(0, 0, 1720, -1220),
+        # deprecated bc grbl changed
+        PlotterType.DIY_PLOTTER_A1: BB(0, 0, 2900, -1800),
         PlotterType.DIY_PLOTTER_100x59: BB(0, 0, -1330, -630),
         PlotterType.AXIDRAW: BB(0, 0, 0, 0),  # todo: missing real bounds
 
@@ -222,8 +225,10 @@ class MinmaxMapping:
 
         # PlotterType.HP_7595A_A0: BB(-23160, -17602, 23160 + 1160, 17602),
         # HP_7595A: minimum 35mm padding
-        PlotterType.ROLAND_PNC1000: BB(0, 0, 18800, 40000),  # actually unlimited y
-        PlotterType.ROLAND_PNC1000_50x100: BB(260, 560, 18700, 39000),  # for 50x100cm paper centered
+        # actually unlimited y
+        PlotterType.ROLAND_PNC1000: BB(0, 0, 18800, 40000),
+        # for 50x100cm paper centered
+        PlotterType.ROLAND_PNC1000_50x100: BB(260, 560, 18700, 39000),
         PlotterType.TEKTRONIX_4662: BB(0, 0, 4095, 2731),
         # tekronix: 10x15 inches (25.4 x 38.1 cm)
 
@@ -238,7 +243,7 @@ class MinmaxMapping:
 class PlotterName:
     # please create configurations like this
     # https://djipco.github.io/hpgl/hpgl.js.html
-    names = {
+    names: Dict[PlotterType, str] = {
         PlotterType.ROLAND_DPX3300_A1: "dpx3300_a1",
         PlotterType.ROLAND_DPX3300_A2: "dpx3300_a2",
         PlotterType.ROLAND_DPX3300_A3: "dpx3300_a3",
@@ -297,7 +302,7 @@ class PlotterName:
 
 
 class PlotterHpglNames:
-    names = {
+    names: Dict[str, List[PlotterType]] = {
         "DPX-3300": [PlotterType.ROLAND_DPX3300_A1, PlotterType.ROLAND_DPX3300_A2, PlotterType.ROLAND_DPX3300_A3],
         "7550A": [PlotterType.HP_7550A_A3, PlotterType.HP_7550A_A4],
         "7475A": [PlotterType.HP_7475A_A3, PlotterType.HP_7475A_A4, PlotterType.GRAPHTEC_MP2000,
@@ -323,7 +328,7 @@ class PlotterHpglNames:
 
 
 class XYFactors:
-    fac = {
+    fac: Dict[PlotterType, Tuple[float, float]] = {
         PlotterType.ROLAND_DPX3300_A1: (40, 40),
         PlotterType.ROLAND_DPX3300_A2: (40, 40),
         PlotterType.ROLAND_DPX3300_A3: (40, 40),
@@ -376,7 +381,7 @@ class XYFactors:
 
 
 class MaxSpeed:
-    fac = {
+    fac: Dict[PlotterType, int] = {
         PlotterType.ROLAND_DPX3300_A1: 40,
         PlotterType.ROLAND_DPX3300_A2: 40,
         PlotterType.ROLAND_DPX3300_A3: 40,
@@ -429,7 +434,7 @@ class MaxSpeed:
 
 class BufferSize:
     # Default buffer sizes. Can be changed
-    fac = {
+    fac: Dict[PlotterType, int] = {
         PlotterType.ROLAND_DPX3300_A1: 0,  # 0 = not tested
         PlotterType.ROLAND_DPX3300_A2: 0,
         PlotterType.ROLAND_DPX3300_A3: 0,
@@ -479,7 +484,7 @@ class BufferSize:
 
 
 class PaperSizeName:
-    names = {
+    names: Dict[PaperSize, str] = {
         PaperSize.PORTRAIT_36_48: "portrait_36_48",
         PaperSize.LANDSCAPE_48_36: "landscape_48_36",
         PaperSize.PORTRAIT_42_56: "portrait_42_56",
@@ -510,7 +515,7 @@ class PaperSizeName:
 
 
 class Paper:
-    sizes = {
+    sizes: Dict[PaperSize, BB] = {
         PaperSize.PORTRAIT_36_48: BB(0, 0, 360, 480),
         PaperSize.LANDSCAPE_48_36: BB(0, 0, 480, 360),
         PaperSize.PORTRAIT_42_56: BB(0, 0, 420, 560),
