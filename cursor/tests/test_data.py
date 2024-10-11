@@ -1,4 +1,28 @@
+import os
+import pytest
+from configparser import ConfigParser
+
 from cursor.data import DataDirHandler
+
+
+@pytest.fixture(scope="session")
+def create_config_local():
+    # Create a temporary config_local.ini file
+    config = ConfigParser()
+    config['cursor'] = {
+        'data_dir': '.',
+        'log_level': 'DEBUG'
+    }
+    # Write the config to a file
+    base_dir = pathlib.Path(__file__).resolve().parent.parent.parent
+    config_path = base_dir / 'config_local.ini'
+    with config_path.open('w') as configfile:
+        config.write(configfile)
+
+    yield  # This allows the test to run
+
+    # Clean up after the tests
+    os.remove('config_local.ini')
 
 
 def test_experiments_path():
