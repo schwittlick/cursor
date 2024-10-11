@@ -20,7 +20,6 @@ from cursor.position import Position
 arcade.enable_timings(100)
 
 
-
 class RealtimeRenderer(arcade.Window):
     def __init__(self, width, height, title, resizable: bool = False):
         super().__init__(
@@ -68,7 +67,8 @@ class RealtimeRenderer(arcade.Window):
 
     def bloom(self):
         bloom_color_attachment = self.ctx.texture((self.width, self.height))
-        bloom_screen = self.ctx.framebuffer(color_attachments=[bloom_color_attachment])
+        bloom_screen = self.ctx.framebuffer(
+            color_attachments=[bloom_color_attachment])
 
         kernel_size = 1
         sigma = 5
@@ -98,7 +98,8 @@ class RealtimeRenderer(arcade.Window):
         folder.mkdir(parents=True, exist_ok=True)
         logging.info(f"saving {fn.as_posix()}")
         try:
-            arcade.get_image(0, 0, self.width, self.height).save(fn.as_posix(), "PNG")
+            arcade.get_image(0, 0, self.width, self.height).save(
+                fn.as_posix(), "PNG")
         except ValueError as ve:
             logging.error(f"Couldn't get image {ve}")
         except OSError as oe:
@@ -137,7 +138,8 @@ class RealtimeRenderer(arcade.Window):
             width=w,
             height=h,
         )
-        ui_label = UILabel(x=x + w, y=y, text=f"{name}: {value}", text_color=text_color)
+        ui_label = UILabel(
+            x=x + w, y=y, text=f"{name}: {value}", text_color=text_color)
 
         @ui_slider.event()
         def on_change(event: UIOnChangeEvent):
@@ -191,7 +193,8 @@ class RealtimeRenderer(arcade.Window):
         _line_width = p.width if p.width else line_width
         _color = p.color if p.color else color
 
-        line_strip = arcade.create_line_strip(p.as_tuple_list(), _color, _line_width)
+        line_strip = arcade.create_line_strip(
+            p.as_tuple_list(), _color, _line_width)
         self.shapes.append(line_strip)
 
         if self.render_points:

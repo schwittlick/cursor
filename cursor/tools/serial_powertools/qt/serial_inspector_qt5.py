@@ -54,12 +54,14 @@ class SerialInspector(QObject):
         logging.info(f"Attempting to connect to {port} at {baud} baud")
 
         if self.check():
-            logging.warning(f"Already connected to {self.serial_connection.port}")
+            logging.warning(
+                f"Already connected to {self.serial_connection.port}")
             return
 
         try:
             self.serial_connection = serial.Serial(port, baud, timeout=1)
-            logging.info(f"Serial connection established to {self.serial_connection.port}")
+            logging.info(
+                f"Serial connection established to {self.serial_connection.port}")
 
             self.connection_status_changed.emit("Connected")
             logging.info(f"Connected to {self.serial_connection.port}")
@@ -81,8 +83,10 @@ class SerialInspector(QObject):
             logging.error(f"Failed to connect to {port}: {str(e)}")
             self.connection_status_changed.emit(f"Connection failed: {str(e)}")
         except Exception as e:
-            logging.error(f"Unexpected error while connecting to {port}: {str(e)}")
-            self.connection_status_changed.emit(f"Connection failed: Unexpected error")
+            logging.error(
+                f"Unexpected error while connecting to {port}: {str(e)}")
+            self.connection_status_changed.emit(
+                "Connection failed: Unexpected error")
 
         self.async_sender = AsyncSerialSender(plotter)
         self.async_sender.do_software_handshake = True

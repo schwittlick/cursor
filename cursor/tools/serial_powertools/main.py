@@ -28,14 +28,13 @@ if __name__ == '__main__':
 
     # exit on ESC
     with dpg.handler_registry():
-        dpg.add_key_press_handler(dpg.mvKey_Escape, callback=dpg.stop_dearpygui)
-
+        dpg.add_key_press_handler(
+            dpg.mvKey_Escape, callback=dpg.stop_dearpygui)
 
     def on_log(record):
         """making sure all internal logging messages arrive in the gui"""
         print_output(record.getMessage())
         return True
-
 
     logging.root.addFilter(on_log)
 

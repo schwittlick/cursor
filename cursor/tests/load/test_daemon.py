@@ -1,13 +1,13 @@
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import msgpack
 from cursor.collection import Collection
 from cursor.path import Path
 from cursor.position import Position
 
 # Import the FastAPI app
-from cursor.load.daemon import app, loaded_collections
+from cursor.load.daemon import app
 from cursor.load.daemon_client import query_cursor_service
 
 # Create a test client
@@ -18,9 +18,11 @@ client = TestClient(app)
 def test_query_paths_empty():
     # Mock the loaded_collections to be empty
     with patch("cursor.load.daemon.loaded_collections", []):
-        response = client.post("/query_paths", json={"min_vertices": 1, "limit": 10})
+        response = client.post(
+            "/query_paths", json={"min_vertices": 1, "limit": 10})
         assert response.status_code == 404
-        assert response.json() == {"detail": "No paths found matching the criteria"}
+        assert response.json() == {
+            "detail": "No paths found matching the criteria"}
 
 
 def test_query_paths_success():
@@ -38,7 +40,8 @@ def test_query_paths_success():
 
     # Mock the loaded_collections
     with patch("cursor.load.daemon.loaded_collections", [mock_collection]):
-        response = client.post("/query_paths", json={"min_vertices": 2, "limit": 10})
+        response = client.post(
+            "/query_paths", json={"min_vertices": 2, "limit": 10})
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/x-msgpack"
 
@@ -60,7 +63,8 @@ def test_query_paths_limit():
 
     # Mock the loaded_collections
     with patch("cursor.load.daemon.loaded_collections", [mock_collection]):
-        response = client.post("/query_paths", json={"min_vertices": 1, "limit": 3})
+        response = client.post(
+            "/query_paths", json={"min_vertices": 1, "limit": 3})
         assert response.status_code == 200
 
         # Deserialize the MessagePack data
@@ -77,7 +81,8 @@ def test_query_cursor_service_success(monkeypatch):
             self.content = msgpack.packb(
                 [
                     {"vertices": [(0, 0, 0), (1, 1, 1)], "properties": {}},
-                    {"vertices": [(0, 0, 0), (1, 1, 1), (2, 2, 2)], "properties": {}},
+                    {"vertices": [(0, 0, 0), (1, 1, 1), (2, 2, 2)],
+                     "properties": {}},
                 ]
             )
 

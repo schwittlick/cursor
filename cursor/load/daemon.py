@@ -6,7 +6,6 @@ import uvicorn
 from cursor.data import DataDirHandler
 from cursor.load.loader import Loader
 from cursor.collection import Collection
-from cursor.path import Path
 import msgpack
 
 app = FastAPI()
@@ -50,7 +49,8 @@ async def query_paths(query: PathQuery):
             status_code=404, detail="No paths found matching the criteria"
         )
 
-    result_collection = Collection.from_path_list(filtered_paths[: query.limit])
+    result_collection = Collection.from_path_list(
+        filtered_paths[: query.limit])
 
     # Convert paths to a serializable format
     serialized_paths = [

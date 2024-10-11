@@ -12,7 +12,6 @@ import pymsgbox
 import threading
 import sys
 from PIL import Image
-from typing import Tuple, Optional, Any
 
 from cursor.position import Position
 from cursor.properties import Property
@@ -67,9 +66,8 @@ class Recorder:
         except NotImplementedError as e:
             log.fail(f"Something else didnt work {e}")
             _c = (0, 0, 0)
-        except:
+        except Exception:
             _c = (0, 0, 0)
-            # log.fail(f"Could not get color at cursor position {_x}x{_y}. Saving (0, 0, 0)")
         _t = int(DateHandler.utc_timestamp())
         _p = Position(_x, _y, _t, {Property.COLOR: _c})
         self._current_line.add_position(_p)

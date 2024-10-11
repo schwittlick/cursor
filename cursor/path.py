@@ -1118,7 +1118,10 @@ class Path:
         # log.info(f"Path::simplify({e}) reduced points {before} -> {len(self.vertices)}")
 
     @staticmethod
-    def intersect_segment(p1: tuple[float, float], p2: tuple[float, float], p3: tuple[float, float], p4: tuple[float, float]) -> tuple[float, float] | None:
+    def intersect_segment(p1: tuple[float, float],
+                          p2: tuple[float, float],
+                          p3: tuple[float, float],
+                          p4: tuple[float, float]) -> tuple[float, float] | None:
         # https://gist.github.com/kylemcdonald/6132fc1c29fd3767691442ba4bc84018
         x1, y1 = p1
         x2, y2 = p2

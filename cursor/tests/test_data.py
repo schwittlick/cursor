@@ -1,5 +1,6 @@
 import os
 import pytest
+import pathlib
 from configparser import ConfigParser
 
 from cursor.data import DataDirHandler
@@ -7,7 +8,7 @@ from cursor.data import DataDirHandler
 
 @pytest.fixture(scope="session")
 def create_config_local():
-    # Create a temporary config_local.ini file
+    # Create a temporary config_local.ini fileloaded_collections
     config = ConfigParser()
     config['cursor'] = {
         'data_dir': '.',

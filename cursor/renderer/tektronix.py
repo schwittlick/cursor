@@ -5,7 +5,6 @@ import logging
 from cursor.collection import Collection
 
 
-
 class TektronixRenderer:
     def __init__(
             self,
@@ -29,7 +28,8 @@ class TektronixRenderer:
         else:
             remx = xcoord % 4
             remy = ycoord % 4
-            eb = chr(96 + remx + (4 * remy))  # see Operators manual Appendix B-1
+            # see Operators manual Appendix B-1
+            eb = chr(96 + remx + (4 * remy))
 
         # the 'low' bits are actually the highest 5 of the lowest 7 bits
         # there is also a lower precision mode that ignores the remainder

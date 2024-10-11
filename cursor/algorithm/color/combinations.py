@@ -3,6 +3,7 @@ import pathlib
 from typing import List, Dict, Tuple
 
 import colour
+from copic import Copic  # Adjust the import path as needed
 
 
 class Color:
@@ -22,7 +23,8 @@ class ColorDictionary:
     def __init__(self):
         self.colors: Dict[str, Color] = {}
 
-        data_path = pathlib.Path(__file__).parent / "data" / "color_dictionary.json"
+        data_path = pathlib.Path(__file__).parent / \
+            "data" / "color_dictionary.json"
         self.load_colors(data_path.as_posix())
 
     def load_colors(self, json_file: str):
@@ -58,7 +60,7 @@ class ColorDictionary:
 
         return most_similar_color
 
-    def compare_with_copic(self, copic_color: 'Color', copic_instance: 'Copic') -> Tuple[Color, float]:
+    def compare_with_copic(self, copic_color: 'Color', copic_instance: Copic) -> Tuple[Color, float]:
         target_rgb = copic_color.as_srgb()
         color_dict_match = self.most_similar(target_rgb)
 

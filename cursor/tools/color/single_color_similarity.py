@@ -1,7 +1,5 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QComboBox, QLabel, QPushButton, QScrollArea
-from PyQt5.QtGui import QColor, QPalette
-from PyQt5.QtCore import Qt
 
 import colour
 
@@ -52,13 +50,16 @@ class ColorComparisonApp(QWidget):
 
         # Initial color display
         self.update_selected_color()
-        self.color_combo.currentIndexChanged.connect(self.update_selected_color)
+        self.color_combo.currentIndexChanged.connect(
+            self.update_selected_color)
 
     def update_selected_color(self):
         color_name = self.color_combo.currentText()
         color = self.color_dict.get_color(color_name)
-        self.selected_color_display.setStyleSheet(f"background-color: {color.hex};")
-        self.selected_color_label.setText(f'Selected Color: {color_name} ({color.hex})')
+        self.selected_color_display.setStyleSheet(
+            f"background-color: {color.hex};")
+        self.selected_color_label.setText(
+            f'Selected Color: {color_name} ({color.hex})')
 
     def compare_colors(self):
         color_name = self.color_combo.currentText()
@@ -90,9 +91,11 @@ class ColorComparisonApp(QWidget):
             result_layout = QHBoxLayout(result_widget)
             color_display = QLabel()
             color_display.setFixedSize(50, 25)
-            color_display.setStyleSheet(f"background-color: rgb{color.as_rgb()};")
+            color_display.setStyleSheet(
+                f"background-color: rgb{color.as_rgb()};")
             result_layout.addWidget(color_display)
-            result_layout.addWidget(QLabel(f"{i}. {color.name} ({color.code.name}) - Delta E: {delta:.2f}"))
+            result_layout.addWidget(
+                QLabel(f"{i}. {color.name} ({color.code.name}) - Delta E: {delta:.2f}"))
             self.results_layout.addWidget(result_widget)
 
 

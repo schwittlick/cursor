@@ -1,5 +1,5 @@
 from cursor.timer import Timer
-from typing import List, Optional
+from typing import List
 
 import sys
 import copy

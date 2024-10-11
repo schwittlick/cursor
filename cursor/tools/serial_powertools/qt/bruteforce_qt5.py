@@ -1,5 +1,4 @@
 import logging
-import threading
 from PyQt5.QtCore import QThread, pyqtSignal
 import serial
 
@@ -31,7 +30,8 @@ class BruteForcer(QThread):
         self.timeout = timeout
         self.test_message = test_message
 
-        self.options = len(baud_rates) * len(parities) * len(xonxoffs) * len(byte_sizes) * len(stopbits)
+        self.options = len(baud_rates) * len(parities) * \
+            len(xonxoffs) * len(byte_sizes) * len(stopbits)
         self.progress_step_size = 100 / self.options
 
         self.stopped = False
@@ -61,7 +61,8 @@ class BruteForcer(QThread):
                                                    xonxoff=xonxoff, stopbits=stopbit, parity=parity,
                                                    bytesize=byte_size,
                                                    timeout=self.timeout) as ser:
-                                    response = send_and_receive(ser, self.test_message, self.timeout)
+                                    response = send_and_receive(
+                                        ser, self.test_message, self.timeout)
                                     if response:
                                         config = (baud_rate, xonxoff, stopbit, parity,
                                                   byte_size, response)
@@ -91,7 +92,8 @@ def run_brute_force(serial_ports: list[str],
 
     duration_approximated_seconds = len(baud_rates) * len(parities) * len(stop_bits) * len(xonxoff) * len(
         byte_sizes) * timeout
-    logging.info(f"This bruteforce configuration will take ~{duration_approximated_seconds}s")
+    logging.info(
+        f"This bruteforce configuration will take ~{duration_approximated_seconds}s")
 
     bruteforcer_threads = []
     for port in serial_ports:
@@ -111,12 +113,14 @@ class SerialInspectorGUI:
         self.bruteforcer_threads = []
 
     def start_bruteforce(self):
-        ports = [self.port_combo.currentText().split(" ")[0]]  # Get the selected port
+        ports = [self.port_combo.currentText().split(
+            " ")[0]]  # Get the selected port
         baud_rates = [300, 900, 1200, 9600, 19200, 38400, 115200]
         parities = [serial.PARITY_NONE, serial.PARITY_ODD, serial.PARITY_EVEN]
         stop_bits = [serial.STOPBITS_ONE, serial.STOPBITS_TWO]
         xonxoff = [True, False]
-        byte_sizes = [serial.FIVEBITS, serial.SIXBITS, serial.SEVENBITS, serial.EIGHTBITS]
+        byte_sizes = [serial.FIVEBITS, serial.SIXBITS,
+                      serial.SEVENBITS, serial.EIGHTBITS]
         timeout = float(self.timeout_combo.currentText())
         message = "OI;"
 

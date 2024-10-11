@@ -168,7 +168,10 @@ def current_source(frame: inspect.FrameInfo) -> str:
     return inspect.getsource(inspect.getmodule(frame))
 
 
-def transformFn(stl: Tuple[float, float], sbr: Tuple[float, float], dtl: Tuple[float, float], dbr: Tuple[float, float]) -> Callable[[Position], Position]:
+def transformFn(stl: Tuple[float, float],
+                sbr: Tuple[float, float],
+                dtl: Tuple[float, float],
+                dbr: Tuple[float, float]) -> Callable[[Position], Position]:
     """
     ty lars wander
     https://larswander.com/writing/centering-and-scaling/
@@ -200,7 +203,10 @@ def apply_matrix(pa: List[Tuple[float, float]], _ma: Any) -> List[Tuple[float, f
     return zip(yy, xx)
 
 
-def line_intersection(ray_origin: np.ndarray, ray_direction: np.ndarray, segment_start: np.ndarray, segment_end: np.ndarray) -> Optional[List[float]]:
+def line_intersection(ray_origin: np.ndarray,
+                      ray_direction: np.ndarray,
+                      segment_start: np.ndarray,
+                      segment_end: np.ndarray) -> Optional[List[float]]:
     # Calculate differences
     d_se = segment_end - segment_start
     d_ro_s_s = ray_origin - segment_start
