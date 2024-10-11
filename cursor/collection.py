@@ -12,6 +12,7 @@ import random
 import time
 import logging
 from functools import reduce
+from typing import Iterator
 
 import fast_tsp as fasttsp
 import numpy as np
@@ -35,7 +36,7 @@ from cursor.timer import timing
 
 
 class Collection:
-    def __init__(self, timestamp: float | None = None, name: str = "noname"):
+    def __init__(self, timestamp: float | None = None, name: str = "noname") -> None:
         self.__paths: list[Path] = []
         self.name = name
         if timestamp:
@@ -85,7 +86,7 @@ class Collection:
 
         return True
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Path]:
         for p in self.__paths:
             yield p
 
@@ -94,7 +95,8 @@ class Collection:
             case int():
                 if len(self.__paths) < item + 1:
                     raise IndexError(
-                        f"Index {item} too high. Maximum is {len(self.__paths)}"
+                        f"Index {item} too high. Maximum is {
+                            len(self.__paths)}"
                     )
 
                 return self.__paths[item]
@@ -154,10 +156,10 @@ class Collection:
     def pop(self, idx: int) -> Path:
         return self.__paths.pop(idx)
 
-    def as_array(self) -> np.array:
+    def as_array(self) -> np.ndarray:
         return np.array([p.as_array() for p in self.__paths], dtype=object)
 
-    def as_dataframe(self):
+    def as_dataframe(self) -> pd.DataFrame:
         df = pd.concat([p.as_dataframe() for p in self.__paths], axis=1)
         return df
 
@@ -182,7 +184,8 @@ class Collection:
             path) > min_vertex_count]
 
         logging.debug(
-            f"PathCollection::clean: reduced path count from {len_before} to {len(self)}"
+            f"PathCollection::clean: reduced path count from {
+                len_before} to {len(self)}"
         )
 
     def merge(self) -> Path:
@@ -260,14 +263,14 @@ class Collection:
     def random_pop(self) -> Path:
         return self.paths.pop(int(random.randint(0, len(self) - 1)))
 
-    def sort(self, pathsorter: Sorter, reference_path: Path = None) -> None:
+    def sort(self, pathsorter: Sorter, reference_path: Path | None = None) -> None:
         if isinstance(pathsorter, Sorter):
             pathsorter.sort(self.__paths, reference_path)
         else:
             raise Exception(
                 f"Cant sort with a class of type {type(pathsorter)}")
 
-    def sorted(self, pathsorter: Sorter, reference_path: Path = None) -> list[Path]:
+    def sorted(self, pathsorter: Sorter, reference_path: Path | None = None) -> list[Path]:
         if isinstance(pathsorter, Sorter):
             return pathsorter.sorted(self.__paths, reference_path)
         else:
@@ -327,7 +330,7 @@ class Collection:
 
         return points
 
-    def get_line_types(self):
+    def get_line_types(self) -> dict[int, Collection]:
         types = {}
         for type in self.get_all_line_types():
             types[type] = []
@@ -435,14 +438,14 @@ class Collection:
         logging.debug(
             f"C::simplify from {count} to {self.point_count()} points.")
 
-    def split_by_color(self):
+    def split_by_color(self) -> None:
         new_paths = []
         for p in self:
             new_paths.extend(p.split_by_color())
 
         self.__paths = new_paths
 
-    def move_to_origin(self):
+    def move_to_origin(self) -> None:
         """
         moves pathcollection to zero origin
         after calling this the bb of the pathcollection has its x,y at 0,0
@@ -476,12 +479,12 @@ class Collection:
             newpaths.extend(_p)
         self.__paths = newpaths
 
-    def calc_pen_down_distance(self, fac) -> float:
+    def calc_pen_down_distance(self, fac: float) -> float:
         if len(self) == 0:
             return 0.0
         return reduce(lambda a, b: a + b, [x.distance / fac for x in self.__paths])
 
-    def calc_pen_up_distance(self, fac) -> float:
+    def calc_pen_up_distance(self, fac: float) -> float:
         sum_dist_pen_up = 0
         for path_index in range(len(self.paths) - 1):
             end_p1 = self.paths[path_index].end_pos()
@@ -492,13 +495,13 @@ class Collection:
 
     def fit(
             self,
-            output_bounds: BoundingBox = None,
+            output_bounds: BoundingBox | None = None,
             xy_factor: tuple[float, float] = (1.0, 1.0),
-            padding_mm: int = None,
-            padding_units: int = None,
-            padding_percent: int = None,
-            cutoff_mm=None,
-            keep_aspect=False,
+            padding_mm: int | None = None,
+            padding_units: int | None = None,
+            padding_percent: int | None = None,
+            cutoff_mm: float | None = None,
+            keep_aspect: bool = False,
     ) -> None:
         """
         fits (scales and centers) a collection of paths into a bounding box. units can be in pixels or mm
@@ -575,7 +578,7 @@ class Collection:
 
             self.__paths = [x for x in self.__paths if x.inside(cutoff_bb)]
 
-    def move_to_center(self, width, height, output_bounds=None):
+    def move_to_center(self, width: float, height: float, output_bounds: BoundingBox | None = None) -> None:
         _bb = self.bb()
         paths_center = _bb.center()
 
@@ -628,10 +631,10 @@ class Collection:
 
     def sort_tsp(
             self,
-            iters=3000,
-            population_size=50,
-            mutation_probability=0.1,
-            plot_preview=False,
+            iters: int = 3000,
+            population_size: int = 50,
+            mutation_probability: float = 0.1,
+            plot_preview: bool = False,
     ) -> list[int]:
         start_positions = np.array([pa.start_pos().as_tuple() for pa in self])
         end_positions = np.array([pa.end_pos().as_tuple() for pa in self])
@@ -747,7 +750,8 @@ class Collection:
 
         elapsed = time.time() - start_benchmark
         logging.debug(
-            f"reorder_quadrants with x={xq} y={yq} took {round(elapsed * 1000)}ms."
+            f"reorder_quadrants with x={xq} y={
+                yq} took {round(elapsed * 1000)}ms."
         )
 
         self.__paths = list(ss.keys())
