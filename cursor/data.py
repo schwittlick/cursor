@@ -7,9 +7,22 @@ import logging
 
 def load_cursor_config(config_path: str = "config.ini") -> str:
     config: configparser.ConfigParser = configparser.ConfigParser()
-    config.read(config_path)
+
+    # Try to read the config file, if it exists
+    if os.path.exists(config_path):
+        config.read(config_path)
+    else:
+        # Use default values if the config file doesn't exist
+        logging.warning(
+            f"Config file '{config_path}' not found. Using default values.")
+        config['cursor'] = {
+            'data_dir': '/tmp/cursor_data',
+            'log_level': 'INFO'
+        }
+
     if "cursor" not in config:
-        raise ValueError("The 'cursor' section is missing from the config file.")
+        raise ValueError(
+            "The 'cursor' section is missing from the config file.")
 
     data_dir: Optional[str] = config["cursor"].get("data_dir")
     log_level: Optional[str] = config["cursor"].get("log_level")
