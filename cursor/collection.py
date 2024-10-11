@@ -183,8 +183,7 @@ class Collection:
             path) > min_vertex_count]
 
         logging.debug(
-            f"PathCollection: clean: reduced path count from {
-                len_before} to {len(self)}"
+            f"PathCollection: clean: reduced path count from {len_before} to {len(self)}"
         )
 
     def merge(self) -> Path:
@@ -749,8 +748,7 @@ class Collection:
 
         elapsed = time.time() - start_benchmark
         logging.debug(
-            f"reorder_quadrants with x={xq} y={
-                yq} took {round(elapsed * 1000)}ms."
+            f"reorder_quadrants with x={xq} y={yq} took {round(elapsed * 1000)}ms."
         )
 
         self.__paths = list(ss.keys())
