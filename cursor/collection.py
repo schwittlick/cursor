@@ -95,8 +95,7 @@ class Collection:
             case int():
                 if len(self.__paths) < item + 1:
                     raise IndexError(
-                        f"Index {item} too high. Maximum is {
-                            len(self.__paths)}"
+                        f"Index {item} too high. Maximum is {len(self.__paths) - 1}"
                     )
 
                 return self.__paths[item]
@@ -184,7 +183,7 @@ class Collection:
             path) > min_vertex_count]
 
         logging.debug(
-            f"PathCollection::clean: reduced path count from {
+            f"PathCollection: clean: reduced path count from {
                 len_before} to {len(self)}"
         )
 
