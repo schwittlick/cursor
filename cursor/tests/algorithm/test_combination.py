@@ -35,7 +35,7 @@ def test_comparison():
     color_dict = ColorDictionary()
     copic = Copic()
     copic_color = copic.random()
-    match, delta = color_dict.compare_with_copic(copic_color, copic)
+    match, delta = color_dict.compare_with_copic(copic_color)
     print(
         f"Copic color {copic_color.name} is most similar to {match.name} with delta {delta}")
 

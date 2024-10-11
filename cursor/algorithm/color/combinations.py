@@ -3,7 +3,6 @@ import pathlib
 from typing import List, Dict, Tuple
 
 import colour
-from copic import Copic  # Adjust the import path as needed
 
 
 class Color:
@@ -60,7 +59,7 @@ class ColorDictionary:
 
         return most_similar_color
 
-    def compare_with_copic(self, copic_color: 'Color', copic_instance: Copic) -> Tuple[Color, float]:
+    def compare_with_copic(self, copic_color: 'Color') -> Tuple[Color, float]:
         target_rgb = copic_color.as_srgb()
         color_dict_match = self.most_similar(target_rgb)
 
