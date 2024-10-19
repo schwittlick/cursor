@@ -27,18 +27,23 @@ class CopicColorCode(IntEnum):
 
     # Blue-Violet
     BV0000 = auto()
+    BV01 = auto()
     BV04 = auto()
     BV11 = auto()
+    BV17 = auto()
     BV20 = auto()
+    BV29 = auto()
     BV31 = auto()
     BV34 = auto()
 
     # Violet
+    V05 = auto()
     V09 = auto()
     V12 = auto()
     V17 = auto()
     V15 = auto()
     V20 = auto()
+    V25 = auto()
     V91 = auto()
     V99 = auto()
     FV = auto()
@@ -85,14 +90,20 @@ class CopicColorCode(IntEnum):
     R89 = auto()
 
     # Yellow-Red
+    YR00 = auto()
     YR01 = auto()
     YR02 = auto()
     YR04 = auto()
     YR07 = auto()
     YR12 = auto()
+    YR14 = auto()
+    YR16 = auto()
     YR18 = auto()
+    YR21 = auto()
     YR23 = auto()
     YR24 = auto()
+    YR27 = auto()
+    YR61 = auto()
     YR68 = auto()
     FYR = auto()
 
@@ -118,14 +129,18 @@ class CopicColorCode(IntEnum):
     FY1 = auto()
 
     # Yellow-Green
+    YG00 = auto()
     YG01 = auto()
     YG05 = auto()
+    YG06 = auto()
+    YG07 = auto()
     YG11 = auto()
     YG21 = auto()
     YG25 = auto()
     YG45 = auto()
     YG67 = auto()
     YG91 = auto()
+    YG99 = auto()
     FYG1 = auto()
 
     # Green
@@ -217,10 +232,19 @@ class CopicColorCode(IntEnum):
     E87 = auto()
     E97 = auto()
 
-    # Flourescent
+    # Neutral Gray
+    N1 = auto()
+    N2 = auto()
+    N3 = auto()
+    N4 = auto()
+    N5 = auto()
+    N6 = auto()
+    N7 = auto()
+    N8 = auto()
+    N9 = auto()
+    N10 = auto()
 
     # Grays (C T N)
-    N3 = auto()
     T9 = auto()
 
     # Warm Gray

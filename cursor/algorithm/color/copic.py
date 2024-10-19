@@ -173,11 +173,11 @@ def init_available_pens() -> dict[CCG, list[CCC]]:
     ]
 
     pens[CCG.BV] = [
-        CCC.BV0000, CCC.BV04, CCC.BV11, CCC.BV20, CCC.BV31, CCC.BV34
+        CCC.BV0000, CCC.BV01, CCC.BV04, CCC.BV11, CCC.BV17, CCC.BV20, CCC.BV29, CCC.BV31, CCC.BV34
     ]
 
     pens[CCG.V] = [
-        CCC.V09, CCC.V12, CCC.V15, CCC.V17, CCC.V20, CCC.V91, CCC.V99, CCC.FV
+        CCC.V05, CCC.V09, CCC.V12, CCC.V15, CCC.V17, CCC.V20, CCC.V25, CCC.V91, CCC.V99, CCC.FV
     ]
 
     pens[CCG.RV] = [
@@ -192,19 +192,19 @@ def init_available_pens() -> dict[CCG, list[CCC]]:
     ]
 
     pens[CCG.YR] = [
-        CCC.YR01, CCC.YR02, CCC.YR04, CCC.YR07, CCC.YR12, CCC.YR18, CCC.YR23, CCC.YR24, CCC.YR68,
-        CCC.FYR,
+        CCC.YR00, CCC.YR01, CCC.YR02, CCC.YR04, CCC.YR07, CCC.YR12, CCC.YR14, CCC.YR16, CCC.YR18, CCC.YR21,
+        CCC.YR23, CCC.YR24, CCC.YR27, CCC.YR61, CCC.YR68, CCC.FYR,
     ]
 
     pens[CCG.Y] = [
         CCC.Y00, CCC.Y02, CCC.Y04, CCC.Y06, CCC.Y08, CCC.Y11, CCC.Y13, CCC.Y15, CCC.Y17, CCC.Y18, CCC.Y19,
-        CCC.Y21, CCC.Y23, CCC.Y28, CCC.Y32, CCC.Y35, CCC.Y38,
+        CCC.Y21, CCC.Y23, CCC.Y26, CCC.Y28, CCC.Y32, CCC.Y35, CCC.Y38,
         CCC.FY1,
     ]
 
     pens[CCG.YG] = [
-        CCC.YG01, CCC.YG05, CCC.YG11, CCC.YG21, CCC.YG25, CCC.YG45, CCC.YG67, CCC.YG91,
-        CCC.FYG1,
+        CCC.YG00, CCC.YG01, CCC.YG05, CCC.YG06, CCC.YG07, CCC.YG11, CCC.YG21, CCC.YG25, CCC.YG45, CCC.YG67,
+        CCC.YG91, CCC.YG99, CCC.FYG1,
     ]
 
     pens[CCG.G] = [
@@ -240,7 +240,7 @@ def init_available_pens() -> dict[CCG, list[CCC]]:
     ]
 
     pens[CCG.N] = [
-        CCC.N3
+        CCC.N1, CCC.N2, CCC.N3, CCC.N4, CCC.N5, CCC.N6, CCC.N7, CCC.N8, CCC.N9, CCC.N10
     ]
 
     return pens
