@@ -50,9 +50,6 @@ def wait_for_free_io_memory(plotter: HPGLPlotter, memory_amount: int) -> None:
         free_io_memory = plotter.free_memory()
 
 
-import threading
-
-
 class AsyncSerialSender(threading.Thread):
     def __init__(self, plotter: HPGLPlotter):
         super().__init__()
@@ -113,18 +110,18 @@ class AsyncSerialSender(threading.Thread):
                 self.plotter.write(cmds)
 
                 while self.paused:
-                    self.lock.release()
+                    #self.lock.release()
                     time.sleep(0.1)
-                    self.lock.acquire()
+                    #self.lock.acquire()
 
                 if self.send_single and not self.paused:
                     self.command_batch = 1
                     self.paused = True
 
                 self.current_command_index = end_index
-                self.lock.release()
+                #self.lock.release()
                 time.sleep(0.1)
-                self.lock.acquire()
+                #self.lock.acquire()
 
                 # call cb for progress
                 self.progress_cb(self.current_command_index)

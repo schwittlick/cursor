@@ -95,7 +95,7 @@ class SerialInspectorGUI(QMainWindow):
             self.inspector.insert_command(command)
 
     def update_command_log(self, command):
-        self.command_log.append(f"Inserted: {command}")
+        logging.info(f"Inserted: {command}")
 
     def setup_logging(self):
         logging.basicConfig(level=logging.INFO)
