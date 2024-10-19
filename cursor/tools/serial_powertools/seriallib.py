@@ -50,6 +50,9 @@ def wait_for_free_io_memory(plotter: HPGLPlotter, memory_amount: int) -> None:
         free_io_memory = plotter.free_memory()
 
 
+import threading
+
+
 class AsyncSerialSender(threading.Thread):
     def __init__(self, plotter: HPGLPlotter):
         super().__init__()
@@ -68,44 +71,39 @@ class AsyncSerialSender(threading.Thread):
 
         self.do_software_handshake = True
 
-    def add_commands(self, commands: list[str], progress_cb: typing.Callable):
-        self.commands = commands
-        self.command_batch = min(20, len(commands))
+        self.lock = threading.Lock()
+        self.current_command_index = 0
 
-        self.progress_cb = progress_cb
+    def add_commands(self, commands: list[str], progress_cb: typing.Callable):
+        with self.lock:
+            self.commands = commands
+            self.command_batch = min(20, len(commands))
+            self.progress_cb = progress_cb
+            self.current_command_index = 0
 
         logging.info(f"Added {len(commands)} to async sender. batch: {self.command_batch}")
 
-    def abort(self):
-        self.abort_queue = True
-
-    def stop(self):
-        self.stopped = True
-
-    def pause(self):
-        self.paused = not self.paused
-
-    def toggle_single(self):
-        self.send_single = not self.send_single
-
-        if self.send_single:
-            self.command_batch = 1
-        else:
-            self.command_batch = min(20, len(self.commands))  # default value
+    def insert_commands(self, commands: list[str]):
+        with self.lock:
+            # Insert the new commands at the current position
+            logging.info(f"Inserting {len(commands)} into async sender at index: {self.current_command_index}")
+            self.commands[self.current_command_index:self.current_command_index] = commands
 
     def run(self):
         while not self.stopped:
-            index = 0
-            while index < len(self.commands):
-                # for i in range(0, len(self.commands), self.command_batch):
+            while self.current_command_index < len(self.commands):
                 if self.abort_queue:
                     self.plotter.abort()
                     self.commands = []
+                    self.current_command_index = 0
                     self.abort_queue = False
                     logging.info("Stopped AsyncSerialSender")
-                    continue
+                    break
 
-                batched_commands = self.commands[index:index + self.command_batch]
+                end_index = min(self.current_command_index + self.command_batch, len(self.commands))
+                with self.lock:
+                    logging.info(f"Getting commands from index: {self.current_command_index}, end: {end_index}")
+                    batched_commands = self.commands[self.current_command_index:end_index]
                 cmds = concat_commands(batched_commands)
 
                 if self.do_software_handshake:
@@ -115,22 +113,28 @@ class AsyncSerialSender(threading.Thread):
                 self.plotter.write(cmds)
 
                 while self.paused:
+                    self.lock.release()
                     time.sleep(0.1)
+                    self.lock.acquire()
 
                 if self.send_single and not self.paused:
                     self.command_batch = 1
                     self.paused = True
 
-                index += self.command_batch
+                self.current_command_index = end_index
+                self.lock.release()
                 time.sleep(0.1)
+                self.lock.acquire()
 
                 # call cb for progress
-                self.progress_cb(index)
+                self.progress_cb(self.current_command_index)
 
             # after the currently set commands are done
-            # empty the queue and sleep from now on
-            # wait until new commands have been set
+            # empty the queue and reset the index
             self.commands = []
+            self.current_command_index = 0
+
+            # wait until new commands have been set
             time.sleep(1)
 
 

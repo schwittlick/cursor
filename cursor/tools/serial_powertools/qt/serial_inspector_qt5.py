@@ -39,6 +39,20 @@ class SerialInspector(QObject):
         logging.info(f"Sent: {command}: {self.serial_connection.port}")
         self.command_sent.emit(command)
 
+    def insert_command(self, command: str):
+        if not self.check():
+            logging.warning("Serial connection not open.")
+            return
+
+        if self.async_sender is None:
+            logging.warning("No active job to insert command into.")
+            return
+
+        commands = tokenizer(command)
+        self.async_sender.insert_commands(commands)
+        logging.info(f"Inserted command: {command}")
+        self.command_sent.emit(command)
+
     def disconnect_serial(self):
         if not self.check():
             logging.warning("Serial connection not open.")

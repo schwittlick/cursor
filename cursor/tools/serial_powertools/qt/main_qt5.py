@@ -62,6 +62,15 @@ class SerialInspectorGUI(QMainWindow):
         send_file_widget = self.create_send_file_widget()
         left_layout.addWidget(send_file_widget)
 
+        self.insert_command_button = QPushButton("Insert Command")
+        self.insert_command_button.clicked.connect(self.insert_command)
+        left_layout.addWidget(self.insert_command_button)
+
+        self.insert_command_input = QLineEdit()
+        left_layout.addWidget(self.insert_command_input)
+
+        self.inspector.command_sent.connect(self.update_command_log)
+
         # Bruteforce section
         bruteforce_widget = self.create_bruteforce_widget()
         left_layout.addWidget(bruteforce_widget)
@@ -78,6 +87,15 @@ class SerialInspectorGUI(QMainWindow):
         main_layout.addLayout(right_layout)
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
+
+    def insert_command(self):
+        command = self.insert_command_input.text()
+        logging.info(f"Inserting command: {command}")
+        if command:
+            self.inspector.insert_command(command)
+
+    def update_command_log(self, command):
+        self.command_log.append(f"Inserted: {command}")
 
     def setup_logging(self):
         logging.basicConfig(level=logging.INFO)
