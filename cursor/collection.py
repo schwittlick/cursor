@@ -158,6 +158,9 @@ class Collection:
     def as_array(self) -> np.ndarray:
         return np.array([p.as_array() for p in self.__paths], dtype=object)
 
+    def as_list(self) -> list[list[tuple]]:
+        return [p.as_tuple_list() for p in self.__paths]
+
     def as_dataframe(self) -> pd.DataFrame:
         df = pd.concat([p.as_dataframe() for p in self.__paths], axis=1)
         return df
@@ -433,7 +436,7 @@ class Collection:
         for p in self:
             p.simplify(e)
 
-        logging.debug(
+        logging.info(
             f"C::simplify from {count} to {self.point_count()} points.")
 
     def split_by_color(self) -> None:

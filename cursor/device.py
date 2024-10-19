@@ -186,18 +186,18 @@ class MinmaxMapping:
 
         PlotterType.HP_DM_RX_PLUS_A0: BB(-21760, -15400, 22880, 15480),
         PlotterType.HP_DM_RX_PLUS_100x70cm: BB(-19230, -13791, 19230, 13791),
-        PlotterType.HP_DM_RX_PLUS_A1: BB(-16090, -11684, 16090, 11684),
+        PlotterType.HP_DM_RX_PLUS_A1: BB(-16090, -11684, 16090, 11684) + BB(5 * 40, 5 * 40, 0, -5 * 40),
         PlotterType.HP_DM_RX_PLUS_A2: BB(-10740, -8230, 10740, 8230),
         PlotterType.HP_DM_RX_PLUS_A3: BB(-7302, -5820, 7302, 5820),
 
-        PlotterType.HP_DM_SX_A1: BB(-16100, -11600, 16100, 11600) + BB(20 * 40, 0, 0, 0),
+        PlotterType.HP_DM_SX_A1: BB(-16100, -11600, 16100, 11600) + BB(25 * 40, 5 * 40, 0, -5 * 40),
         PlotterType.HP_DM_SX_A3: BB(-7690, -5744, 7690, 5744),
 
         PlotterType.HP_DM_II_A0: BB(-23036, -16598, 23036, 16598),
         PlotterType.HP_DM_II_A1: BB(-16080, -11660, 16080, 11660),
         PlotterType.HP_DM_II_A3: BB(-7656, -5740, 7656, 5740),
 
-        PlotterType.MUTOH_XP500_100x70cm: BB(-19370, -13728, 19370, 13728) - BB(0, 0, 10 * 40, 0),
+        PlotterType.MUTOH_XP500_100x70cm: BB(-19370, -13728, 19370, 13728) - BB(0, 0, 20 * 40, 0),
         # one more cm padding on bottom
         PlotterType.MUTOH_XP500_500x297mm: BB(-9452, -5722, 9452, 5722),
         PlotterType.MUTOH_XP500_A1: BB(-16200, -11645, 16200, 11645),

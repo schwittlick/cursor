@@ -1115,7 +1115,7 @@ class Path:
         self.vertices = Path.from_tuple_list(
             ramer_douglas_peucker.rdp(self.as_tuple_list(), e)
         ).vertices
-        # log.info(f"Path::simplify({e}) reduced points {before} -> {len(self.vertices)}")
+        # logging.info(f"Path::simplify({e}) reduced points {before} -> {len(self.vertices)}")
 
     @staticmethod
     def intersect_segment(p1: tuple[float, float],
