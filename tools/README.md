@@ -13,3 +13,11 @@ Features:
 Features
 
 - Renders one segmentation outline at a time, by category
+
+
+[**combinations_similarity.py**](./color/combinations_similarity.py)
+similar colors to the combinations from the color dictionary
+
+
+[**single_color_similarity.py**](./color/single_color_similarity.py)
+similar copic colors to each copic color
