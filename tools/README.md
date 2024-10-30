@@ -2,7 +2,7 @@
 
 This directory contains various tools and utilities for the Cursor project.
 
-1. [**hpgl_visualizer.py**](./hpgl_visualizer.py): Visualizes HPGL files using OpenGL.
+[**hpgl_visualizer.py**](./hpgl_visualizer.py): Visualizes HPGL files using OpenGL.
 
 Usage:
 
@@ -14,8 +14,7 @@ Features:
 
 - Renders HPGL commands in real-time
 
-
-2. [**mscoco.py**](./mscoco.py): Processes MS COCO dataset
+[**mscoco.py**](./mscoco.py): Processes MS COCO dataset
 
 Features
 
