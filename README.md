@@ -45,7 +45,7 @@ experiment
 
 tools
 
-    See [tools README](tools/README.md) for more information on available tools.
+See [tools](tools/README.md) for more information on available tools.
 
 data handling
 
