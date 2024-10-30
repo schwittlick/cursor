@@ -43,6 +43,10 @@ experiment
     cd experiments
     python file.py
 
+tools
+
+    See [tools README](tools/README.md) for more information on available tools.
+
 data handling
 
     # remove recording files with <3kb in file size
