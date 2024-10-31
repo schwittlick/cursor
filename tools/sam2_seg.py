@@ -125,13 +125,13 @@ else:
 image = Image.open(image_path)
 image = np.array(image.convert("RGB"))
 
-# Perform dilation
-kernel_size = 15  # You can adjust this value
-kernel = np.ones((kernel_size, kernel_size), np.uint8)
-dilated_image = cv2.dilate(image, kernel, iterations=1)
+# Perform Gaussian blur
+blur_kernel_size = (15, 15)  # You can adjust this value (must be odd numbers)
+sigma = 0  # 0 means that sigma is calculated automatically
+blurred_image = cv2.GaussianBlur(image, blur_kernel_size, sigma)
 
-# Use the dilated image for further processing
-image = dilated_image
+# Use the blurred image for further processing
+image = blurred_image
 
 from sam2.build_sam import build_sam2
 from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
