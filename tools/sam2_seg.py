@@ -138,11 +138,11 @@ mask_generator_2 = SAM2AutomaticMaskGenerator(
     pred_iou_thresh=0.7,
     stability_score_thresh=0.92,
     stability_score_offset=0.7,
-    crop_n_layers=1,
+    crop_n_layers=0,
     box_nms_thresh=0.7,
     crop_n_points_downscale_factor=2,
-    min_mask_region_area=25.0,
-    use_m2m=True,
+    min_mask_region_area=50,
+    use_m2m=False,
 )
 
 masks2 = mask_generator_2.generate(image)
