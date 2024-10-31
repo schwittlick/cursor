@@ -65,7 +65,7 @@ def show_anns(anns, borders=True):
 
 
 # Specify the folder containing images
-image_folder = Path('~/Downloads/sam2')  # Replace with your actual folder path
+image_folder = Path('/home/marcel/Downloads/sam2/')  # Replace with your actual folder path
 
 # Get a list of all jpg files in the folder
 jpg_files = list(image_folder.glob('*.jpg'))
