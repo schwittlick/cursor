@@ -1,32 +1,70 @@
 import os
-
 from cursor.data import DataDirHandler
 from cursor.timer import Timer
 
 # if using Apple MPS, fall back to CPU for unsupported ops
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
 from PIL import Image
-
 import random
 from pathlib import Path
+
+
+def get_gpu_info():
+    if not torch.cuda.is_available():
+        return None
+
+    props = torch.cuda.get_device_properties(0)
+    return {
+        'name': props.name,
+        'compute_capability': f"{props.major}.{props.minor}",
+        'total_memory': props.total_memory / 1024 ** 3  # Convert to GB
+    }
+
 
 # select the device for computation
 if torch.cuda.is_available():
     device = torch.device("cuda")
+    gpu_info = get_gpu_info()
+    print(f"GPU detected: {gpu_info['name']} (Compute Capability: {gpu_info['compute_capability']})")
 elif torch.backends.mps.is_available():
     device = torch.device("mps")
 else:
     device = torch.device("cpu")
-print(f"using device: {device}")
+print(f"Using device: {device}")
+
+
+# Function to check GPU capabilities
+def get_optimal_precision():
+    if not torch.cuda.is_available():
+        return None, "fp32"
+
+    cc_major = torch.cuda.get_device_properties(0).major
+
+    # Ampere (8.x) or newer - supports BF16
+    if cc_major >= 8:
+        return torch.bfloat16, "bf16"
+    # Pascal (6.x) or newer - good FP16 support
+    elif cc_major >= 6:
+        return torch.float16, "fp16"
+    # Older GPUs - best to stick with FP32
+    else:
+        return torch.float32, "fp32"
+
 
 if device.type == "cuda":
-    # use bfloat16 for the entire notebook
-    torch.autocast("cuda", dtype=torch.bfloat16).__enter__()
-    # turn on tfloat32 for Ampere GPUs (https://pytorch.org/docs/stable/notes/cuda.html#tensorfloat-32-tf32-on-ampere-devices)
+    dtype, precision_name = get_optimal_precision()
+    print(f"Using {precision_name.upper()} precision based on GPU capabilities")
+
+    if dtype != torch.float32:
+        torch.autocast("cuda", dtype=dtype).__enter__()
+
+    # Enable TF32 for Ampere GPUs
     if torch.cuda.get_device_properties(0).major >= 8:
+        print("Enabling TF32 for matrix multiplications")
         torch.backends.cuda.matmul.allow_tf32 = True
         torch.backends.cudnn.allow_tf32 = True
 elif device.type == "mps":
@@ -45,7 +83,6 @@ def show_anns(anns, borders=True):
     sorted_anns = sorted(anns, key=(lambda x: x['area']), reverse=True)
     ax = plt.gca()
     ax.set_autoscale_on(False)
-
     img = np.ones((sorted_anns[0]['segmentation'].shape[0], sorted_anns[0]['segmentation'].shape[1], 4))
     img[:, :, 3] = 0
     for ann in sorted_anns:
@@ -55,30 +92,20 @@ def show_anns(anns, borders=True):
         if borders:
             import cv2
             contours, _ = cv2.findContours(m.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-            # Try to smooth contours
             contours = [cv2.approxPolyDP(contour, epsilon=0.01, closed=True) for contour in contours]
             cv2.drawContours(img, contours, -1, (0, 0, 1, 0.4), thickness=1)
-
     ax.imshow(img)
-
     plt.show()
 
 
-# Specify the folder containing images
-image_folder = Path('/home/marcel/Downloads/sam2/')  # Replace with your actual folder path
-
-# Get a list of all jpg files in the folder
+# Your image loading and processing code...
+image_folder = Path('/home/marcel/Downloads/sam2/')
 jpg_files = list(image_folder.glob('*.jpg'))
-
 if not jpg_files:
     raise ValueError(f"No jpg files found in {image_folder}")
 
-# Select a random jpg file
 random_image_path = random.choice(jpg_files)
-
 print(f"Selected image: {random_image_path}")
-
-# Open the random image
 image = Image.open(random_image_path)
 image = np.array(image.convert("RGB"))
 
@@ -87,7 +114,6 @@ from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
 
 sam2_checkpoint = DataDirHandler().data_dir / "sam2" / "checkpoints" / "sam2.1_hiera_large.pt"
 model_cfg = "configs/sam2.1/sam2.1_hiera_l.yaml"
-
 sam2 = build_sam2(model_cfg, sam2_checkpoint, device=device, apply_postprocessing=False)
 
 mask_generator_2 = SAM2AutomaticMaskGenerator(
@@ -103,11 +129,12 @@ mask_generator_2 = SAM2AutomaticMaskGenerator(
     min_mask_region_area=25.0,
     use_m2m=True,
 )
+
 masks2 = mask_generator_2.generate(image)
+
 plt.figure(figsize=(20, 20))
 plt.imshow(image)
 # show_anns(masks2)
 plt.axis('off')
 # plt.show()
-
 plt.savefig(DataDirHandler().png("sam2") / f'sam2_{Timer.timestamp()}.png')
