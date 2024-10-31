@@ -100,9 +100,49 @@ def show_anns(anns, borders=True):
     plt.show()
 
 
+def run_the_thing(image_path):
+    image = Image.open(image_path)
+    image = np.array(image.convert("RGB"))
+
+    # Perform Gaussian blur
+    blur_kernel_size = (15, 15)  # You can adjust this value (must be odd numbers)
+    sigma = 0  # 0 means that sigma is calculated automatically
+    blurred_image = cv2.GaussianBlur(image, blur_kernel_size, sigma)
+
+    # Use the blurred image for further processing
+    image = blurred_image
+
+    from sam2.build_sam import build_sam2
+    from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
+
+    sam2_checkpoint = DataDirHandler().data_dir / "sam2" / "checkpoints" / "sam2.1_hiera_large.pt"
+    model_cfg = "configs/sam2.1/sam2.1_hiera_l.yaml"
+    sam2 = build_sam2(model_cfg, sam2_checkpoint, device=device, apply_postprocessing=False)
+
+    mask_generator_2 = SAM2AutomaticMaskGenerator(
+        model=sam2,
+        points_per_side=16,
+        points_per_batch=32,
+        min_mask_region_area=50,
+    )
+
+    masks2 = mask_generator_2.generate(image)
+
+    white_image = np.full_like(image, 255, dtype=np.uint8)
+
+    plt.figure(figsize=(20, 20))
+    plt.imshow(white_image)
+    show_anns(masks2)
+    plt.axis('off')
+    # plt.show()
+
+    plt.savefig(DataDirHandler().png("sam2") / f'{image_path.stem}_{Timer.timestamp()}.png')
+
+
 # Set up argument parser
 parser = argparse.ArgumentParser(description='Process an image with SAM2.')
 parser.add_argument('--image', type=str, help='Path to the image file')
+parser.add_argument('--loops', type=int, default=1, help='how many times to run')
 args = parser.parse_args()
 
 # Your image loading and processing code...
@@ -112,6 +152,7 @@ if args.image:
     if not image_path.exists():
         raise ValueError(f"Provided image path does not exist: {image_path}")
     print(f"Using provided image: {image_path}")
+    run_the_thing(image_path)
 else:
     # Use a random image from the folder
     image_folder = Path('/home/marcel/Downloads/sam2/')
@@ -119,42 +160,7 @@ else:
     if not jpg_files:
         raise ValueError(f"No jpg files found in {image_folder}")
 
-    image_path = random.choice(jpg_files)
-    print(f"Selected random image: {image_path}")
-
-image = Image.open(image_path)
-image = np.array(image.convert("RGB"))
-
-# Perform Gaussian blur
-blur_kernel_size = (15, 15)  # You can adjust this value (must be odd numbers)
-sigma = 0  # 0 means that sigma is calculated automatically
-blurred_image = cv2.GaussianBlur(image, blur_kernel_size, sigma)
-
-# Use the blurred image for further processing
-image = blurred_image
-
-from sam2.build_sam import build_sam2
-from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
-
-sam2_checkpoint = DataDirHandler().data_dir / "sam2" / "checkpoints" / "sam2.1_hiera_large.pt"
-model_cfg = "configs/sam2.1/sam2.1_hiera_l.yaml"
-sam2 = build_sam2(model_cfg, sam2_checkpoint, device=device, apply_postprocessing=False)
-
-mask_generator_2 = SAM2AutomaticMaskGenerator(
-    model=sam2,
-    points_per_side=16,
-    points_per_batch=32,
-    min_mask_region_area=50,
-)
-
-masks2 = mask_generator_2.generate(image)
-
-white_image = np.full_like(image, 255, dtype=np.uint8)
-
-plt.figure(figsize=(20, 20))
-plt.imshow(white_image)
-show_anns(masks2)
-plt.axis('off')
-# plt.show()
-
-plt.savefig(DataDirHandler().png("sam2") / f'{image_path.stem}_{Timer.timestamp()}.png')
+    for _ in range(args.loops):
+        image_path = random.choice(jpg_files)
+        print(f"Selected random image: {image_path}")
+        run_the_thing(image_path)
