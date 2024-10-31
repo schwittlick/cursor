@@ -21,3 +21,6 @@ similar colors to the combinations from the color dictionary
 
 [**single_color_similarity.py**](./color/single_color_similarity.py)
 similar copic colors to each copic color
+
+[**watershed.py**](./watershed.py)
+gui to explore watershed algorithm
