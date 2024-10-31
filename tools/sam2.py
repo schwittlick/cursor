@@ -1,7 +1,7 @@
 import os
 
 from cursor.data import DataDirHandler
-from timer import Timer
+from cursor.timer import Timer
 
 # if using Apple MPS, fall back to CPU for unsupported ops
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
