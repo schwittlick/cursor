@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 from setuptools import setup
+import pathlib
+
+# Read the contents of requirements.txt
+here = pathlib.Path(__file__).parent
+with open(here / 'requirements.txt', 'r') as f:
+    requires = [line.strip() for line in f if line.strip()]
 
 try:
     import pypandoc
@@ -17,7 +23,7 @@ extras_require = {}
 
 setup(
     name="cursor",
-    version="230605",
+    version="241031",
     description="cursor line experiments",
     long_description=long_description,
     author="Marcel Schwittlick",
