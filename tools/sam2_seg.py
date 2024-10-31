@@ -1,4 +1,5 @@
 import os
+import argparse
 from cursor.data import DataDirHandler
 from cursor.timer import Timer
 
@@ -98,15 +99,29 @@ def show_anns(anns, borders=True):
     plt.show()
 
 
-# Your image loading and processing code...
-image_folder = Path('/home/marcel/Downloads/sam2/')
-jpg_files = list(image_folder.glob('*.jpg'))
-if not jpg_files:
-    raise ValueError(f"No jpg files found in {image_folder}")
+# Set up argument parser
+parser = argparse.ArgumentParser(description='Process an image with SAM2.')
+parser.add_argument('--image', type=str, help='Path to the image file')
+args = parser.parse_args()
 
-random_image_path = random.choice(jpg_files)
-print(f"Selected image: {random_image_path}")
-image = Image.open(random_image_path)
+# Your image loading and processing code...
+if args.image:
+    # Use the provided image path
+    image_path = Path(args.image)
+    if not image_path.exists():
+        raise ValueError(f"Provided image path does not exist: {image_path}")
+    print(f"Using provided image: {image_path}")
+else:
+    # Use a random image from the folder
+    image_folder = Path('/home/marcel/Downloads/sam2/')
+    jpg_files = list(image_folder.glob('*.jpg'))
+    if not jpg_files:
+        raise ValueError(f"No jpg files found in {image_folder}")
+
+    image_path = random.choice(jpg_files)
+    print(f"Selected random image: {image_path}")
+
+image = Image.open(image_path)
 image = np.array(image.convert("RGB"))
 
 from sam2.build_sam import build_sam2
@@ -114,7 +129,7 @@ from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
 
 sam2_checkpoint = DataDirHandler().data_dir / "sam2" / "checkpoints" / "sam2.1_hiera_large.pt"
 model_cfg = "configs/sam2.1/sam2.1_hiera_l.yaml"
-sam2 = build_sam2(model_cfg, sam2_checkpoint, device=device, apply_postprocessing=True)
+sam2 = build_sam2(model_cfg, sam2_checkpoint, device=device, apply_postprocessing=False)
 
 mask_generator_2 = SAM2AutomaticMaskGenerator(
     model=sam2,
