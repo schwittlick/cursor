@@ -156,4 +156,5 @@ plt.imshow(white_image)
 show_anns(masks2)
 plt.axis('off')
 # plt.show()
-plt.savefig(DataDirHandler().png("sam2") / f'sam2_{Timer.timestamp()}.png')
+
+plt.savefig(DataDirHandler().png("sam2") / f'{image_path.stem}_{Timer.timestamp()}.png')
