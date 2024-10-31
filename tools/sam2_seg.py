@@ -132,9 +132,11 @@ mask_generator_2 = SAM2AutomaticMaskGenerator(
 
 masks2 = mask_generator_2.generate(image)
 
+white_image = np.full_like(image, 255, dtype=np.uint8)
+
 plt.figure(figsize=(20, 20))
-plt.imshow(image)
-# show_anns(masks2)
+plt.imshow(white_image)
+show_anns(masks2)
 plt.axis('off')
 # plt.show()
 plt.savefig(DataDirHandler().png("sam2") / f'sam2_{Timer.timestamp()}.png')
