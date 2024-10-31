@@ -126,7 +126,7 @@ image = Image.open(image_path)
 image = np.array(image.convert("RGB"))
 
 # Perform dilation
-kernel_size = 3  # You can adjust this value
+kernel_size = 30  # You can adjust this value
 kernel = np.ones((kernel_size, kernel_size), np.uint8)
 dilated_image = cv2.dilate(image, kernel, iterations=1)
 
