@@ -1,6 +1,6 @@
 import os
 
-from data import DataDirHandler
+from cursor.data import DataDirHandler
 from timer import Timer
 
 # if using Apple MPS, fall back to CPU for unsupported ops
