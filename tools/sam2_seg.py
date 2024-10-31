@@ -6,6 +6,7 @@ from cursor.timer import Timer
 # if using Apple MPS, fall back to CPU for unsupported ops
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
+import cv2
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
@@ -123,6 +124,14 @@ else:
 
 image = Image.open(image_path)
 image = np.array(image.convert("RGB"))
+
+# Perform dilation
+kernel_size = 3  # You can adjust this value
+kernel = np.ones((kernel_size, kernel_size), np.uint8)
+dilated_image = cv2.dilate(image, kernel, iterations=1)
+
+# Use the dilated image for further processing
+image = dilated_image
 
 from sam2.build_sam import build_sam2
 from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
