@@ -112,9 +112,9 @@ image = np.array(image.convert("RGB"))
 from sam2.build_sam import build_sam2
 from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
 
-sam2_checkpoint = DataDirHandler().data_dir / "sam2" / "checkpoints" / "sam2.1_hiera_tiny.pt"
-model_cfg = "configs/sam2.1/sam2.1_hiera_t.yaml"
-sam2 = build_sam2(model_cfg, sam2_checkpoint, device=device, apply_postprocessing=False)
+sam2_checkpoint = DataDirHandler().data_dir / "sam2" / "checkpoints" / "sam2.1_hiera_large.pt"
+model_cfg = "configs/sam2.1/sam2.1_hiera_l.yaml"
+sam2 = build_sam2(model_cfg, sam2_checkpoint, device=device, apply_postprocessing=True)
 
 mask_generator_2 = SAM2AutomaticMaskGenerator(
     model=sam2,
