@@ -118,8 +118,8 @@ sam2 = build_sam2(model_cfg, sam2_checkpoint, device=device, apply_postprocessin
 
 mask_generator_2 = SAM2AutomaticMaskGenerator(
     model=sam2,
-    points_per_side=64,
-    points_per_batch=128,
+    points_per_side=16,
+    points_per_batch=32,
     pred_iou_thresh=0.7,
     stability_score_thresh=0.92,
     stability_score_offset=0.7,
