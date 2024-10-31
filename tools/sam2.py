@@ -10,6 +10,9 @@ import torch
 import matplotlib.pyplot as plt
 from PIL import Image
 
+import random
+from pathlib import Path
+
 # select the device for computation
 if torch.cuda.is_available():
     device = torch.device("cuda")
@@ -58,15 +61,29 @@ def show_anns(anns, borders=True):
 
     ax.imshow(img)
 
-
     plt.show()
 
-image = Image.open('images/cars.jpg')
+
+# Specify the folder containing images
+image_folder = Path('~/Download/sam2')  # Replace with your actual folder path
+
+# Get a list of all jpg files in the folder
+jpg_files = list(image_folder.glob('*.jpg'))
+
+if not jpg_files:
+    raise ValueError(f"No jpg files found in {image_folder}")
+
+# Select a random jpg file
+random_image_path = random.choice(jpg_files)
+
+print(f"Selected image: {random_image_path}")
+
+# Open the random image
+image = Image.open(random_image_path)
 image = np.array(image.convert("RGB"))
 
 from sam2.build_sam import build_sam2
 from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
-
 
 sam2_checkpoint = DataDirHandler().data_dir / "sam2" / "checkpoints" / "sam2.1_hiera_large.pt"
 model_cfg = "sam2/configs/sam2.1/sam2.1_hiera_l.yaml"
@@ -89,8 +106,8 @@ mask_generator_2 = SAM2AutomaticMaskGenerator(
 masks2 = mask_generator_2.generate(image)
 plt.figure(figsize=(20, 20))
 plt.imshow(image)
-#show_anns(masks2)
+# show_anns(masks2)
 plt.axis('off')
-#plt.show()
+# plt.show()
 
 plt.savefig(DataDirHandler().png("sam2") / f'sam2_{Timer.timestamp()}.png')
