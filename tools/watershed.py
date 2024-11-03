@@ -107,7 +107,7 @@ class WatershedGUI(QMainWindow):
         self.compactness_label = QLabel(f'Value: 0.00')
         params_layout.addWidget(self.compactness_label)
 
-        self.blur_slider = self.create_slider(0, 20, 0, 'Blur:')
+        self.blur_slider = self.create_slider(0, 300, 0, 'Blur:')
         params_layout.addWidget(QLabel('Blur:'))
         params_layout.addWidget(self.blur_slider)
         self.blur_label = QLabel(f'Blur: 0')
