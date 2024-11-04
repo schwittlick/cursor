@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QOpenGLWidget, QPushButto
 from PyQt5.QtCore import QTimer, Qt
 from OpenGL.GL import *
 import time
+import os
 
 from hpgl.hpgl_tokenize import tokenizer
 from hpgl.parser import HPGLParser
@@ -26,17 +27,18 @@ class HPGLVisualizer(QOpenGLWidget):
     def initializeGL(self):
         glClearColor(1.0, 1.0, 1.0, 1.0)
         glEnable(GL_LINE_SMOOTH)
-        glLineWidth(1.0)
+        glLineWidth(0.3)
 
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        print(self.bb)
         if not self.bb:
-            glOrtho(0, 16000, 11000, 0, -1, 1)  # Adjust based on your HPGL coordinate range
+            # Swap dimensions for 90° rotation
+            glOrtho(0, 11000, 16000, 0, -1, 1)
         else:
-            glOrtho(self.bb.x, self.bb.x2, self.bb.y2, self.bb.y, -1, 1)  # Adjust based on your HPGL coordinate range
+            # Swap dimensions for 90° rotation
+            glOrtho(self.bb.y, self.bb.y2, self.bb.x2, self.bb.x, -1, 1)
 
     def paintGL(self):
         glClear(GL_COLOR_BUFFER_BIT)
@@ -45,8 +47,9 @@ class HPGLVisualizer(QOpenGLWidget):
         for i in range(self.current_command):
             cmd = self.commands[i]
             if cmd[0] == 'PD':
-                glVertex2f(cmd[1][0], cmd[1][1])
-                glVertex2f(cmd[2][0], cmd[2][1])
+                # Rotate coordinates 90° clockwise: (x,y) -> (y,-x)
+                glVertex2f(cmd[1][1], cmd[1][0])
+                glVertex2f(cmd[2][1], cmd[2][0])
         glEnd()
 
     def load_hpgl(self, filename):
@@ -54,10 +57,8 @@ class HPGLVisualizer(QOpenGLWidget):
             hpgl_data = file.read().replace('\n', '')
 
         coll = HPGLParser().parse(hpgl_data)
-        #coll.move_to_origin()
         self.bb = coll.bb()
         tokens = tokenizer(hpgl_data)
-        print("First 10 tokens:", tokens[:10])
 
         self.commands = []
         current_pos = (0, 0)
@@ -110,7 +111,7 @@ class HPGLVisualizer(QOpenGLWidget):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("HPGL Visualizer")
+        self.setWindowTitle(" ")
         self.setGeometry(100, 100, 800, 600)
 
         central_widget = QWidget()
@@ -125,7 +126,7 @@ class MainWindow(QMainWindow):
         button_layout = QHBoxLayout()
         layout.addLayout(button_layout)
 
-        load_button = QPushButton("Load HPGL")
+        load_button = QPushButton("Load")
         load_button.clicked.connect(self.load_hpgl)
         button_layout.addWidget(load_button)
 
@@ -144,6 +145,9 @@ class MainWindow(QMainWindow):
         filename, _ = QFileDialog.getOpenFileName(self, "Open HPGL file", "", "HPGL files (*.hpgl)")
         if filename:
             self.visualizer.load_hpgl(filename)
+            # Update window title to include filename
+            base_filename = os.path.basename(filename)
+            self.setWindowTitle(f"{base_filename}")
 
     def start_animation(self):
         self.visualizer.start_animation()
