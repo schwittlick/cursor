@@ -60,7 +60,7 @@ class HPGLPlotter:
         answer = self.read_until()
         # logging.info(answer)
         if len(answer) == 0:
-            return Position(0, 0)
+            return Position()
         current_pos = answer.split(',')
         if len(current_pos) < 2:
             # should throw an exception and handle at caller
