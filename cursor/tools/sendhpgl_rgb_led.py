@@ -34,6 +34,8 @@ class RgbLedSerialSender:
                     elif cmd.startswith("PA"):
                         po = self.parse_pa(cmd)
                         self.send_and_wait(po)
+                    elif cmd.startswith("RGB"):
+                        self.set_arduino_color(f"{cmd};")
                     elif cmd.startswith("PWM"):
                         pass
                         # parsed_pwm = int(re.findall(r'\d+', cmd)[0])
@@ -60,6 +62,12 @@ class RgbLedSerialSender:
     def set_arduino_pwm(self, pwm: int):
         logging.info(f"set arduino pwm: {pwm}")
         self.port_arduino.write(f"{pwm}".encode('utf-8'))
+        ret = self.port_arduino.readline()
+        logging.info(f"arduino: {ret}")
+
+    def set_arduino_color(self, color: str):
+        logging.info(f"set arduino color: {color}")
+        self.port_arduino.write(f"{color}".encode('utf-8'))
         ret = self.port_arduino.readline()
         logging.info(f"arduino: {ret}")
 
