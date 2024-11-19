@@ -64,7 +64,7 @@ class ImageAnnotationViewer:
         plt.show()
 
     def export_contour(self):
-        export_img = np.ones((88, 126), dtype=np.uint8) * 255
+        export_img = np.ones((90, 126), dtype=np.uint8) * 255
 
         ann_file = os.path.join(self.base_ann_path, f"annotation_{self.current_index:04d}.mat")
         data = loadmat(ann_file)
@@ -73,7 +73,7 @@ class ImageAnnotationViewer:
 
         img = np.array(PILImage.open(os.path.join(self.base_img_path, f"image_{self.current_index:04d}.jpg")))
         scale_x = 126 / img.shape[1]
-        scale_y = 88 / img.shape[0]
+        scale_y = 90 / img.shape[0]
 
         num_points = obj_contour.shape[1]
         contour_points = np.zeros((num_points, 2), dtype=np.int32)
