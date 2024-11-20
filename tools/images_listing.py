@@ -1,16 +1,27 @@
 import os
-import pathlib
 
-"""
-This prints a list of files for the overview-website
-"""
+
+def list_files_as_array(directory_path):
+    # Get all files in the directory
+    files = [f for f in os.listdir(directory_path) if os.path.isfile(os.path.join(directory_path, f))]
+
+    # Format the output string
+    output = "let data = [\n"
+
+    # Add each file with proper formatting
+    for i, file in enumerate(files):
+        if i > 0:
+            output += ",\n"
+        output += f'    "{file}"'
+
+    output += "\n];"
+
+    # Print and return the result
+    print(output)
+    return output
+
+
+# Example usage
 if __name__ == "__main__":
-    folder = "C:\\Users\\schwittlick\\dev\\schwittlick.net\\img\\works\\"
-    folder = pathlib.Path(folder)
-
-    data = {}
-    for x in os.walk(folder):
-        elements = x[2]
-        data[x[0][41:]] = elements
-    del data["img\\works"]
-    print(data)
+    directory_path = "C:\\Users\\schwittlick\\dev\\schwittlick.net\\img\\composition92\\digital_png\\"  # Change this to your directory path
+    list_files_as_array(directory_path)
