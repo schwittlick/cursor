@@ -207,9 +207,7 @@ class Exporter:
                     pen_mapping = self.collection.properties["pen_mapping"][layer]
                     for pen_idx, color_code in pen_mapping.items():
                         try:
-                            # Convert string color code to CopicColorCode enum
-                            copic_color_code = CopicColorCode[color_code]
-                            c = copic.color_by_code(copic_color_code)
+                            c = copic.color_by_code(color_code)
                             pdf_renderer.pdf.set_fill_color(0, 0, 0)
                             pdf_renderer.pdf.text(x, y, f"Pen {pen_idx} -> {c}")
 
