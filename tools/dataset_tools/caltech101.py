@@ -66,7 +66,7 @@ class ImageAnnotationViewer:
 
     def export_contour(self):
         OUTPUT_WIDTH = 126
-        OUTPUT_HEIGHT = 90
+        OUTPUT_HEIGHT = 84
         MARGIN = 5
 
         export_img_outline = np.ones((OUTPUT_HEIGHT, OUTPUT_WIDTH), dtype=np.uint8) * 255
