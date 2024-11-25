@@ -14,7 +14,7 @@ from cursor.algorithm.braille import BrailleTranslator
 class BrailleFormats(Enum):
     _30_50 = 126, 255  # 297x500mm (this is the max)
     _30_30 = 126, 126  # 297x297
-    _a4 = 126, 96  # 297x210
+    _a4 = 126, 84  # 297x210
     # a4 missing something like 126, 88?
 
 
