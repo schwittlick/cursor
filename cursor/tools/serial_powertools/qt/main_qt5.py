@@ -62,12 +62,8 @@ class SerialInspectorGUI(QMainWindow):
         send_file_widget = self.create_send_file_widget()
         left_layout.addWidget(send_file_widget)
 
-        self.insert_command_button = QPushButton("Insert Command")
-        self.insert_command_button.clicked.connect(self.insert_command)
-        left_layout.addWidget(self.insert_command_button)
-
-        self.insert_command_input = QLineEdit()
-        left_layout.addWidget(self.insert_command_input)
+        insert_command_widget = self.create_insert_command_widget()
+        left_layout.addWidget(insert_command_widget)
 
         self.inspector.command_sent.connect(self.update_command_log)
 
@@ -78,6 +74,9 @@ class SerialInspectorGUI(QMainWindow):
         # Plotter Info section
         plotter_info_widget = self.create_plotter_info_widget()
         left_layout.addWidget(plotter_info_widget)
+
+        # Add a stretch factor to push all widgets to the top
+        left_layout.addStretch(1)
 
         # Output section
         output_widget = self.create_output_widget()
@@ -177,13 +176,15 @@ class SerialInspectorGUI(QMainWindow):
         cmd_buttons = [
             ("IN;", "IN;"), ("OA;", "OA;"), ("OE;", "OE;"), ("OH;", "OH;"), ("OI;", "OI;"),
             ("PU;", "PU;"), ("PD;", "PD;"),
-            ("VS1;", "VS1;"), ("VS10;", "VS10;"), ("VS20;", "VS20;"), ("VS40;", "VS40;"), ("VS80;", "VS80;"),
             ("PA0,0;", "PA0,0;"), ("PA10000,10000;", "PA10000,10000;"),
             ("PArandom(),random();", self.generate_random_pa),
-            ("ESC.R;", RESET_DEVICE + ";"), ("ESC.K;", ABORT_GRAPHICS + ";"),
-            ("SP0;", "SP0;"), ("SP1;", "SP1;"), ("SP2;", "SP2;"), ("SP3;", "SP3;"), ("SP4;", "SP4;"),
-            ("SP5;", "SP5;"), ("SP6;", "SP6;"), ("SP7;", "SP7;"), ("SP8;", "SP8;"),
+            ("ESC.R (reset device);", RESET_DEVICE + ";"), ("ESC.K; (absort graphics)", ABORT_GRAPHICS + ";"),
         ]
+
+        vs = [("VS1;", "VS1;"), ("VS10;", "VS10;"), ("VS20;", "VS20;"), ("VS40;", "VS40;"), ("VS80;", "VS80;")]
+
+        pen_select = [("SP0;", "SP0;"), ("SP1;", "SP1;"), ("SP2;", "SP2;"), ("SP3;", "SP3;"), ("SP4;", "SP4;"),
+                      ("SP5;", "SP5;"), ("SP6;", "SP6;"), ("SP7;", "SP7;"), ("SP8;", "SP8;")]
 
         for i in range(0, len(cmd_buttons), 5):
             btn_layout = QHBoxLayout()
@@ -192,6 +193,20 @@ class SerialInspectorGUI(QMainWindow):
                 btn.clicked.connect(lambda _, cmd=command: self.send_command(cmd))
                 btn_layout.addWidget(btn)
             layout.addLayout(btn_layout)
+
+        sp_layout = QHBoxLayout()
+        for label, command in pen_select:
+            btn = QPushButton(label)
+            btn.clicked.connect(lambda _, cmd=command: self.send_command(cmd))
+            sp_layout.addWidget(btn)
+        layout.addLayout(sp_layout)
+
+        vs_layout = QHBoxLayout()
+        for label, command in vs:
+            btn = QPushButton(label)
+            btn.clicked.connect(lambda _, cmd=command: self.send_command(cmd))
+            vs_layout.addWidget(btn)
+        layout.addLayout(vs_layout)
 
         widget.setLayout(layout)
         return widget
@@ -212,20 +227,38 @@ class SerialInspectorGUI(QMainWindow):
         select_file_btn.clicked.connect(self.select_file)
         file_layout.addWidget(self.file_path_input)
         file_layout.addWidget(select_file_btn)
-        layout.addLayout(file_layout)
 
         send_layout = QHBoxLayout()
         send_async_btn = QPushButton("Send Async")
         send_async_btn.clicked.connect(self.send_file)
         stop_sending_btn = QPushButton("Stop sending")
         stop_sending_btn.clicked.connect(self.inspector.stop_send_serial_file)
-        send_layout.addWidget(send_async_btn)
-        send_layout.addWidget(stop_sending_btn)
-        layout.addLayout(send_layout)
+
+        file_layout.addWidget(send_async_btn)
+        file_layout.addWidget(stop_sending_btn)
+
+        layout.addLayout(file_layout)
 
         self.send_file_progress = QProgressBar()
         layout.addWidget(self.send_file_progress)
 
+        widget.setLayout(layout)
+        return widget
+
+    def create_insert_command_widget(self):
+        widget = QWidget()
+        layout = QVBoxLayout()
+
+        file_layout = QHBoxLayout()
+
+        self.insert_command_input = QLineEdit()
+        file_layout.addWidget(self.insert_command_input)
+
+        self.insert_command_button = QPushButton("Insert Command")
+        self.insert_command_button.clicked.connect(self.insert_command)
+        file_layout.addWidget(self.insert_command_button)
+
+        layout.addLayout(file_layout)
         widget.setLayout(layout)
         return widget
 
