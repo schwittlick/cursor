@@ -8,6 +8,7 @@ import cv2
 from tkinter import *
 import tkinter as tk
 from data import DataDirHandler
+from timer import Timer
 
 
 class ImageAnnotationViewer:
@@ -72,8 +73,15 @@ class ImageAnnotationViewer:
         export_img_filled = np.ones((OUTPUT_HEIGHT, OUTPUT_WIDTH), dtype=np.uint8) * 255
         export_img_original = np.ones((OUTPUT_HEIGHT, OUTPUT_WIDTH, 3), dtype=np.uint8) * 255
 
+        # Load and rotate image
         img = np.array(PILImage.open(os.path.join(self.base_img_path, f"image_{self.current_index:04d}.jpg")))
-        img = cv2.rotate(img, cv2.ROTATE_180)
+        img = cv2.rotate(img, cv2.ROTATE_180)  # Initial 180-degree rotation from original code
+
+        # Check if height > width and rotate if needed
+        should_rotate = img.shape[0] > img.shape[1]
+        if should_rotate:
+            img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
+
         ann_file = os.path.join(self.base_ann_path, f"annotation_{self.current_index:04d}.mat")
         data = loadmat(ann_file)
         box_coord = data['box_coord'].flatten()
@@ -81,10 +89,17 @@ class ImageAnnotationViewer:
 
         orig_contour = np.zeros((obj_contour.shape[1], 2), dtype=np.int32)
         for i in range(obj_contour.shape[1]):
-            orig_contour[i] = [
-                img.shape[1] - (obj_contour[0, i] + box_coord[2]),
-                img.shape[0] - (obj_contour[1, i] + box_coord[0])
-            ]
+            if should_rotate:
+                # For 90-degree rotation: (x,y) -> (y, height-x)
+                orig_contour[i] = [
+                    img.shape[1] - (obj_contour[1, i] + box_coord[0]),  # y becomes x
+                    obj_contour[0, i] + box_coord[2]  # x becomes y
+                ]
+            else:
+                orig_contour[i] = [
+                    img.shape[1] - (obj_contour[0, i] + box_coord[2]),
+                    img.shape[0] - (obj_contour[1, i] + box_coord[0])
+                ]
 
         # Create binary mask from original contour
         orig_mask = np.zeros(img.shape[:2], dtype=np.uint8)
@@ -100,8 +115,8 @@ class ImageAnnotationViewer:
         xmin, xmax = np.where(cols)[0][[0, -1]]
 
         # Extract the masked regions
-        masked_region = masked_img[ymin:ymax+1, xmin:xmax+1]
-        mask_region = orig_mask[ymin:ymax+1, xmin:xmax+1]
+        masked_region = masked_img[ymin:ymax + 1, xmin:xmax + 1]
+        mask_region = orig_mask[ymin:ymax + 1, xmin:xmax + 1]
 
         # Scale contour for outline and filled versions
         scale_x = (OUTPUT_WIDTH - 2 * MARGIN) / (xmax - xmin)
@@ -131,16 +146,16 @@ class ImageAnnotationViewer:
         mask_resized = cv2.resize(mask_region, (scaled_width, scaled_height))
 
         # Apply mask to maintain white background
-        region_slice = export_img_original[y_offset:y_offset+scaled_height, x_offset:x_offset+scaled_width]
+        region_slice = export_img_original[y_offset:y_offset + scaled_height, x_offset:x_offset + scaled_width]
         region_slice[mask_resized > 0] = masked_region_resized[mask_resized > 0]
-        export_img_original[y_offset:y_offset+scaled_height, x_offset:x_offset+scaled_width] = region_slice
+        export_img_original[y_offset:y_offset + scaled_height, x_offset:x_offset + scaled_width] = region_slice
 
         category = self.selected_category.get().split(" (")[0]
         folder = DataDirHandler().png("datasets")
 
-        output_path_outline = folder / f"{category}_contour_outline_{self.current_index:04d}.png"
-        output_path_filled = folder / f"{category}_contour_filled_{self.current_index:04d}.png"
-        output_path_original = folder / f"{category}_contour_original_{self.current_index:04d}.png"
+        output_path_outline = folder / f"{category}_contour_outline_{self.current_index:04d}_{Timer.timestamp()}.png"
+        output_path_filled = folder / f"{category}_contour_filled_{self.current_index:04d}_{Timer.timestamp()}.png"
+        output_path_original = folder / f"{category}_contour_original_{self.current_index:04d}_{Timer.timestamp()}.png"
 
         cv2.imwrite(str(output_path_outline), export_img_outline)
         cv2.imwrite(str(output_path_filled), export_img_filled)
