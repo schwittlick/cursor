@@ -71,6 +71,9 @@ class AsyncSerialSender(threading.Thread):
         self.lock = threading.Lock()
         self.current_command_index = 0
 
+    def stop(self):
+        self.stopped = True
+
     def add_commands(self, commands: list[str], progress_cb: typing.Callable):
         with self.lock:
             self.commands = commands
