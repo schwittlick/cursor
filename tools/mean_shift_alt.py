@@ -33,50 +33,51 @@ class ClusteringWorker(QThread):
             h, w = self.image.shape[:2]
             pixels = self.image.reshape(-1, 3)
 
-            # Normalize pixel values
-            pixels = pixels.astype(float) / 255.0
+            # Create a mask for white pixels (allowing for small variations)
+            white_threshold = 250  # Allow slightly off-white pixels
+            white_mask = np.all(pixels >= white_threshold, axis=1)
 
-            self.progress.emit(10)
+            # Only normalize and cluster non-white pixels
+            if len(pixels[~white_mask]) > 0:  # Check if there are any non-white pixels
+                # Normalize non-white pixel values
+                non_white_pixels = pixels[~white_mask].astype(float) / 255.0
 
-            if self.algorithm == "meanshift":
-                # Use scikit-learn's MeanShift instead of custom implementation
-                bandwidth = self.params.get('bandwidth', 0.2)
-                ms = MeanShift(bandwidth=bandwidth, bin_seeding=True)
-                labels = ms.fit_predict(pixels)
-                result = self.labels_to_image(labels, h, w)
-            elif self.algorithm == "fuzzy_cmeans":
-                # Special handling for Fuzzy C-Means
-                n_clusters = int(self.params.get('n_clusters', 8))
-                fcm = FCM(n_clusters=n_clusters)
+                self.progress.emit(10)
 
-                # Fit the model
-                fcm.fit(pixels)
+                if self.algorithm == "meanshift":
+                    bandwidth = self.params.get('bandwidth', 0.2)
+                    ms = MeanShift(bandwidth=bandwidth, bin_seeding=True)
+                    labels = ms.fit_predict(non_white_pixels)
+                    clustered_pixels = self.labels_to_colors(labels, exclude_white=True) * 255
+                elif self.algorithm == "fuzzy_cmeans":
+                    n_clusters = int(self.params.get('n_clusters', 8))
+                    fcm = FCM(n_clusters=n_clusters)
+                    fcm.fit(non_white_pixels)
+                    labels = np.argmax(fcm.u, axis=1)
+                    clustered_pixels = self.labels_to_colors(labels, exclude_white=True) * 255
+                else:
+                    clusterer = self.get_clusterer()
+                    print(f"Initialized clusterer: {clusterer}")
+                    self.progress.emit(30)
+                    labels = clusterer.fit_predict(non_white_pixels)
+                    print(f"Clustering completed, labels shape: {labels.shape}")
+                    self.progress.emit(60)
+                    clustered_pixels = self.labels_to_colors(labels, exclude_white=True) * 255
 
-                # Get the cluster labels (using the highest membership value)
-                labels = np.argmax(fcm.u, axis=1)
+                # Create the result array filled with white
+                result = np.ones_like(pixels) * 255
 
-                # Convert labels to image
-                result = self.labels_to_image(labels, h, w)
+                # Fill in the clustered non-white pixels
+                result[~white_mask] = clustered_pixels.astype(np.uint8)
 
-                # Alternative: use membership values for smooth transitions
-                # memberships = fcm.u
-                # centers = fcm.centers
-                # result = np.dot(memberships, centers).reshape(h, w, 3)
+                # Ensure white pixels stay white
+                result[white_mask] = 255
             else:
-                # Initialize the selected clustering algorithm
-                clusterer = self.get_clusterer()
-                print(f"Initialized clusterer: {clusterer}")
+                # If all pixels are white, return a white image
+                result = np.ones_like(pixels) * 255
 
-                self.progress.emit(30)
-
-                # Fit and predict
-                labels = clusterer.fit_predict(pixels)
-
-                print(f"Clustering completed, labels shape: {labels.shape}")
-                self.progress.emit(60)
-
-                # Convert labels to image
-                result = self.labels_to_image(labels, h, w)
+            # Reshape back to image dimensions
+            result = result.reshape(h, w, 3)
 
             self.progress.emit(100)
             print("Emitting finished signal")
@@ -108,14 +109,19 @@ class ClusteringWorker(QThread):
         elif self.algorithm == "fuzzy_cmeans":
             return FCM(n_clusters=int(self.params.get('n_clusters', 8)))
 
-    def labels_to_image(self, labels, height, width):
+    def labels_to_colors(self, labels, exclude_white=False):
         # Create color map for unique labels
         unique_labels = np.unique(labels)
-        colors = np.random.rand(len(unique_labels), 3)
+        num_colors = len(unique_labels)
+
+        # Generate random colors, excluding very light/white colors
+        colors = np.random.rand(num_colors, 3)
+        if exclude_white:
+            # Ensure colors aren't too close to white by scaling them down
+            colors = colors * 0.8  # Scale to make colors more saturated
 
         # Map labels to colors
-        result = colors[labels]
-        return result.reshape(height, width, 3)
+        return colors[labels]
 
 
 class ImageLabel(QLabel):
@@ -484,13 +490,7 @@ class MainWindow(QMainWindow):
         return processed_image
 
     def save_processed_image(self):
-        if not hasattr(self, 'current_image'):
-            print("No image to save")
-            return
-
-        # Get the processed image
-        processed_image = self.get_processed_image(self.current_image)
-
+        current_tab = self.tabs.currentWidget()
         # Open save file dialog
         file_name, _ = QFileDialog.getSaveFileName(
             self,
@@ -504,8 +504,8 @@ class MainWindow(QMainWindow):
             self.last_save_directory = os.path.dirname(file_name)
             self.save_last_save_directory(self.last_save_directory)
 
-            # Convert RGB to BGR for OpenCV
-            save_image = cv2.cvtColor(processed_image, cv2.COLOR_RGB2BGR)
+            # Get the pixmap from the result_label
+            pixmap = current_tab.result_label.pixmap()
 
             # Get the file extension
             _, ext = os.path.splitext(file_name)
@@ -515,12 +515,10 @@ class MainWindow(QMainWindow):
 
             # Save the image
             try:
-                # For PNG images, we can use compression
-                if ext.lower() == '.png':
-                    cv2.imwrite(file_name, save_image, [cv2.IMWRITE_PNG_COMPRESSION, 9])
+                if pixmap.save(file_name):
+                    print(f"Image saved successfully to: {file_name}")
                 else:
-                    cv2.imwrite(file_name, save_image)
-                print(f"Image saved successfully to: {file_name}")
+                    print(f"Failed to save image to: {file_name}")
             except Exception as e:
                 print(f"Error saving image: {e}")
 
