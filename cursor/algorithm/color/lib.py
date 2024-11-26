@@ -33,6 +33,9 @@ def sort_collection_by_copic_color(collection: Collection) -> dict[Color, Collec
 
 
 def sort_collection_by_copic_color_group(collection: Collection) -> Collection:
+    """
+    the coordinates of the paths are in pixel space, not in hpgl/plotter space
+    """
     out_color_names_pen_mapping = {}
     color_names_pen_mapping = {}
 
@@ -41,6 +44,8 @@ def sort_collection_by_copic_color_group(collection: Collection) -> Collection:
     pen_index = 1
     layer_index = 0
     groups = {}
+
+    add_legende = True
 
     # separating app paths into the copic color groups
     for path in collection:
@@ -55,6 +60,17 @@ def sort_collection_by_copic_color_group(collection: Collection) -> Collection:
 
         for path_color, paths_same_color in sorted_by_colors.items():
             color_names_pen_mapping[pen_index] = path_color.code
+
+            if add_legende:
+                # here add a single point at 0,0 with that color and pen number
+                x = layer_index * 2
+                y = pen_index * 2
+                legend_path = Path(
+                    [Position(x, y), Position(x, y)])
+                legend_path.layer = layer_index
+                legend_path.pen_select = pen_index
+                legend_path.color = path_color.as_rgb()
+                c.add(legend_path)
 
             for path in paths_same_color:
                 path.pen_select = pen_index
