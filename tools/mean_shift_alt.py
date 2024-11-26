@@ -212,6 +212,9 @@ class AlgorithmTab(QWidget):
             print(f"Applying {self.algorithm_name} clustering")
             params = self.get_params()
 
+            # Store original dimensions
+            self.original_height, self.original_width = main_window.current_image.shape[:2]
+
             # Get the processed image (scaled and blurred)
             processed_image = main_window.get_processed_image(main_window.current_image)
 
@@ -228,9 +231,13 @@ class AlgorithmTab(QWidget):
     def update_result(self, result_image):
         print("Updating result image")
         result_image = (result_image * 255).astype(np.uint8)
+
+        # Resize the result image to original dimensions
+        result_image = cv2.resize(result_image, (self.original_width, self.original_height),
+                                  interpolation=cv2.INTER_LINEAR)
+
         height, width = result_image.shape[:2]
         bytes_per_line = 3 * width
-
         q_img = QImage(result_image.data, width, height,
                        bytes_per_line, QImage.Format_RGB888)
         pixmap = QPixmap.fromImage(q_img)
@@ -507,6 +514,14 @@ class MainWindow(QMainWindow):
             # Get the pixmap from the result_label
             pixmap = current_tab.result_label.pixmap()
 
+            # Adjust scaling to ensure correct width
+            scaled_pixmap = pixmap.scaled(
+                current_tab.original_width,
+                current_tab.original_height,
+                Qt.IgnoreAspectRatio,
+                Qt.SmoothTransformation
+            )
+
             # Get the file extension
             _, ext = os.path.splitext(file_name)
             if not ext:  # If no extension provided, default to PNG
@@ -515,7 +530,7 @@ class MainWindow(QMainWindow):
 
             # Save the image
             try:
-                if pixmap.save(file_name):
+                if scaled_pixmap.save(file_name):
                     print(f"Image saved successfully to: {file_name}")
                 else:
                     print(f"Failed to save image to: {file_name}")
