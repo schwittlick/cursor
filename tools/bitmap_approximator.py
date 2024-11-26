@@ -9,12 +9,21 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
+from cursor.collection import Collection
+from cursor.path import Path
 from cursor.algorithm.color.copic import Copic
 from cursor.data import DataDirHandler
 from cursor.device import PlotterType
 from cursor.export import ExportWrapper
 from cursor.renderer.jpg import JpegRenderer
 from cursor.algorithm.color.lib import convert_color_coordinates_to_collection
+
+
+def add_legende(collection: Collection):
+    p1 = Path()
+    p1.pen_select = 1
+    p1.add(0, 0)
+
 
 if __name__ == '__main__':
     root = tk.Tk()
@@ -32,11 +41,14 @@ if __name__ == '__main__':
 
     loaded = loaded.rotate(90, expand=True)
 
-    width = 126
-    wpercent = (width / float(loaded.size[0]))
-    height = int((float(loaded.size[1]) * float(wpercent)))
-    loaded = loaded.resize((width, height))
-    logging.info(f"Resized to {width}x{height}")
+    do_resize = False
+
+    if do_resize:
+        width = 126
+        wpercent = (width / float(loaded.size[0]))
+        height = int((float(loaded.size[1]) * float(wpercent)))
+        loaded = loaded.resize((width, height))
+        logging.info(f"Resized to {width}x{height}")
     loaded = loaded.convert('RGB')
     data = np.asarray(loaded)
     data = data / np.array(255)
@@ -60,6 +72,8 @@ if __name__ == '__main__':
 
     collection = convert_color_coordinates_to_collection(color_coordinates)
 
+    add_legende(collection)
+
     dir = DataDirHandler().jpg("color_interpolation")
     r = JpegRenderer(dir, w=data.shape[0], h=data.shape[1])
     r.add(collection)
@@ -69,10 +83,10 @@ if __name__ == '__main__':
     wrapper = ExportWrapper(
         collection,
         PlotterType.HP_7550A_A4,
-        25,
+        50,  # 25
         "color_interpolation",
         f"bitmap_approximator_{path.name}",
         keep_aspect_ratio=True,
-        optimize=False)
+        optimize=True)
     wrapper.fit()
     wrapper.ex()
