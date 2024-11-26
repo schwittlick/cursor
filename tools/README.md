@@ -24,3 +24,11 @@ similar copic colors to each copic color
 
 [**watershed.py**](./watershed.py)
 gui to explore watershed algorithm
+
+[**bitmap_approximator.py**](./bitmap_approximator.py)
+converts image to plottable copic grid
+
+[**meanshift_alt.py**](./meanshift_alt.py)
+the best segmentation tool here.
+
+press 'a' to run

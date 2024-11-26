@@ -1,5 +1,7 @@
 import sys
 import cv2
+import json
+import os
 import numpy as np
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QPushButton, QLabel, QFileDialog,
@@ -232,6 +234,10 @@ class AlgorithmTab(QWidget):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+
+        self.last_directory = self.load_last_directory()
+        self.last_save_directory = self.load_last_save_directory()  # Add this line
+
         self.init_ui()
 
     def init_ui(self):
@@ -381,9 +387,57 @@ class MainWindow(QMainWindow):
             self.current_image = image
             self.update_display_image()
 
+    def load_last_directory(self):
+        try:
+            config_file = os.path.join(os.path.expanduser('~'), '.watershed_gui_config.json')
+            if os.path.exists(config_file):
+                with open(config_file, 'r') as f:
+                    config = json.load(f)
+                    return config.get('last_directory', '')
+        except Exception as e:
+            print(f"Error loading config: {e}")
+        return ''
+
+    def load_last_save_directory(self):
+        try:
+            config_file = os.path.join(os.path.expanduser('~'), '.watershed_gui_config.json')
+            if os.path.exists(config_file):
+                with open(config_file, 'r') as f:
+                    config = json.load(f)
+                    return config.get('last_save_directory', '')
+        except Exception as e:
+            print(f"Error loading config: {e}")
+        return ''
+
+    def save_last_directory(self, directory):
+        try:
+            config_file = os.path.join(os.path.expanduser('~'), '.watershed_gui_config.json')
+            config = {'last_directory': directory}
+            if hasattr(self, 'last_save_directory'):
+                config['last_save_directory'] = self.last_save_directory
+            with open(config_file, 'w') as f:
+                json.dump(config, f)
+        except Exception as e:
+            print(f"Error saving config: {e}")
+
+    def save_last_save_directory(self, directory):
+        try:
+            config_file = os.path.join(os.path.expanduser('~'), '.watershed_gui_config.json')
+            config = {'last_save_directory': directory}
+            if hasattr(self, 'last_directory'):
+                config['last_directory'] = self.last_directory
+            with open(config_file, 'w') as f:
+                json.dump(config, f)
+        except Exception as e:
+            print(f"Error saving config: {e}")
+
     def setup_shortcuts(self):
         self.shortcut_apply = QShortcut(QKeySequence('A'), self)
         self.shortcut_apply.activated.connect(self.trigger_apply)
+
+        # Add save shortcut
+        self.shortcut_save = QShortcut(QKeySequence('S'), self)
+        self.shortcut_save.activated.connect(self.save_processed_image)
 
     def trigger_apply(self):
         current_tab = self.tabs.currentWidget()
@@ -392,10 +446,13 @@ class MainWindow(QMainWindow):
 
     def load_image(self):
         file_name, _ = QFileDialog.getOpenFileName(
-            self, "Open Image File", "",
+            self, "Open Image File", self.last_directory,
             "Images (*.png *.xpm *.jpg *.bmp)")
 
         if file_name:
+            self.last_directory = os.path.dirname(file_name)
+            self.save_last_directory(self.last_directory)
+
             print(f"Loading image: {file_name}")
             image = cv2.imread(file_name)
             if image is None:
@@ -405,6 +462,9 @@ class MainWindow(QMainWindow):
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             self.current_image = image
             self.update_display_image()
+
+            # Update the window title with the loaded file name
+            self.setWindowTitle(f'{file_name}')
 
     def get_processed_image(self, image):
         """Apply scale and blur processing to the image"""
@@ -422,6 +482,47 @@ class MainWindow(QMainWindow):
             processed_image = cv2.GaussianBlur(processed_image, kernel_size, 0)
 
         return processed_image
+
+    def save_processed_image(self):
+        if not hasattr(self, 'current_image'):
+            print("No image to save")
+            return
+
+        # Get the processed image
+        processed_image = self.get_processed_image(self.current_image)
+
+        # Open save file dialog
+        file_name, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save Image",
+            self.last_save_directory,
+            "Images (*.png *.jpg *.jpeg *.bmp)"
+        )
+
+        if file_name:
+            # Update and save the last save directory
+            self.last_save_directory = os.path.dirname(file_name)
+            self.save_last_save_directory(self.last_save_directory)
+
+            # Convert RGB to BGR for OpenCV
+            save_image = cv2.cvtColor(processed_image, cv2.COLOR_RGB2BGR)
+
+            # Get the file extension
+            _, ext = os.path.splitext(file_name)
+            if not ext:  # If no extension provided, default to PNG
+                file_name += '.png'
+                ext = '.png'
+
+            # Save the image
+            try:
+                # For PNG images, we can use compression
+                if ext.lower() == '.png':
+                    cv2.imwrite(file_name, save_image, [cv2.IMWRITE_PNG_COMPRESSION, 9])
+                else:
+                    cv2.imwrite(file_name, save_image)
+                print(f"Image saved successfully to: {file_name}")
+            except Exception as e:
+                print(f"Error saving image: {e}")
 
     def update_display_image(self):
         if hasattr(self, 'current_image'):
