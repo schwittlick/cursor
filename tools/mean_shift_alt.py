@@ -37,6 +37,9 @@ class ClusteringWorker(QThread):
             white_threshold = 250  # Allow slightly off-white pixels
             white_mask = np.all(pixels >= white_threshold, axis=1)
 
+            # Store the white pixel positions
+            white_pixels = pixels[white_mask]
+
             # Only normalize and cluster non-white pixels
             if len(pixels[~white_mask]) > 0:  # Check if there are any non-white pixels
                 # Normalize non-white pixel values
@@ -64,14 +67,14 @@ class ClusteringWorker(QThread):
                     self.progress.emit(60)
                     clustered_pixels = self.labels_to_colors(labels, exclude_white=True) * 255
 
-                # Create the result array filled with white
-                result = np.ones_like(pixels) * 255
+                # Create the result array
+                result = np.zeros_like(pixels)  # Initialize with zeros
 
                 # Fill in the clustered non-white pixels
                 result[~white_mask] = clustered_pixels.astype(np.uint8)
 
-                # Ensure white pixels stay white
-                result[white_mask] = 255
+                # Set white pixels to pure white (255, 255, 255)
+                result[white_mask] = [255, 255, 255]
             else:
                 # If all pixels are white, return a white image
                 result = np.ones_like(pixels) * 255
@@ -230,11 +233,16 @@ class AlgorithmTab(QWidget):
 
     def update_result(self, result_image):
         print("Updating result image")
-        result_image = (result_image * 255).astype(np.uint8)
+        # Make sure result_image is in the correct range
+        result_image = np.clip(result_image, 0, 255).astype(np.uint8)
 
         # Resize the result image to original dimensions
         result_image = cv2.resize(result_image, (self.original_width, self.original_height),
-                                  interpolation=cv2.INTER_LINEAR)
+                                  interpolation=cv2.INTER_LINEAR)  # Changed to NEAREST
+
+        # Ensure white pixels stay white after resize
+        white_mask = np.all(result_image >= 250, axis=2)
+        result_image[white_mask] = [255, 255, 255]
 
         height, width = result_image.shape[:2]
         bytes_per_line = 3 * width
@@ -485,7 +493,8 @@ class MainWindow(QMainWindow):
         scale = self.scale_slider.value() / 100
         height, width = image.shape[:2]
         new_size = (int(width * scale), int(height * scale))
-        processed_image = cv2.resize(image, new_size)
+        processed_image = cv2.resize(image, new_size, interpolation=cv2.INTER_LINEAR_EXACT)
+        processed_image = cv2.resize(processed_image, (width, height), interpolation=cv2.INTER_LINEAR_EXACT)
 
         # Then apply blur if needed
         blur_value = self.blur_slider.value()
@@ -519,7 +528,7 @@ class MainWindow(QMainWindow):
                 current_tab.original_width,
                 current_tab.original_height,
                 Qt.IgnoreAspectRatio,
-                Qt.SmoothTransformation
+                Qt.FastTransformation
             )
 
             # Get the file extension
