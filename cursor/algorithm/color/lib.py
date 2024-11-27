@@ -65,12 +65,15 @@ def sort_collection_by_copic_color_group(collection: Collection) -> Collection:
                 # here add a single point at 0,0 with that color and pen number
                 x = layer_index * 2
                 y = pen_index * 2
-                legend_path = Path(
-                    [Position(x, y), Position(x, y)])
-                legend_path.layer = layer_index
-                legend_path.pen_select = pen_index
-                legend_path.color = path_color.as_rgb()
-                c.add(legend_path)
+
+                num_legend_points = 3
+                for _ in range(num_legend_points):
+                    legend_path = Path(
+                        [Position(x, y), Position(x, y)])
+                    legend_path.layer = layer_index
+                    legend_path.pen_select = pen_index
+                    legend_path.color = path_color.as_rgb()
+                    c.add(legend_path)
 
             for path in paths_same_color:
                 path.pen_select = pen_index

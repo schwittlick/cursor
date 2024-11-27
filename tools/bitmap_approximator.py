@@ -83,7 +83,7 @@ if __name__ == '__main__':
     wrapper = ExportWrapper(
         collection,
         PlotterType.HP_7550A_A4,
-        50,  # 25
+        25,
         "color_interpolation",
         f"bitmap_approximator_{path.name}",
         keep_aspect_ratio=True,
