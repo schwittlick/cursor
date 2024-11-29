@@ -4,21 +4,37 @@ from cursor.collection import Collection
 from cursor.path import Path
 from cursor.position import Position
 
+from cursor.position import Position
+from cursor.bb import BoundingBox
+import math
 
-def convert_color_coordinates_to_collection(color_coords: dict[CopicColorCode, list[tuple]]) -> Collection:
+
+def convert_color_coordinates_to_collection(color_coords: dict[CopicColorCode, list[tuple]],
+                                            legende: bool) -> Collection:
     """
     creates a layered collection with 8 pens per layer
     sorts the layers by color group, in order to avoid chaos when loading up the pens
     first all blues, then greens, all reds, all RV etc etc
     """
+    all_points = [coord for coords in color_coords.values() for coord in coords]
+    bb = Path.from_tuple_list(all_points).bb()
+    center_x, center_y = bb.center()
+
+    angle = math.radians(-20)
+    cos_theta, sin_theta = math.cos(angle), math.sin(angle)
+
     all_paths = Collection()
     for color, coordinates in color_coords.items():
         for coordinate in coordinates:
-            pixel = Path.from_tuple_list([(coordinate[0], coordinate[1]), (coordinate[0], coordinate[1])])
+            x, y = coordinate
+            dx, dy = x - center_x, y - center_y
+            rotated_x = center_x + (dx * cos_theta - dy * sin_theta)
+            rotated_y = center_y + (dx * sin_theta + dy * cos_theta)
+            pixel = Path.from_tuple_list([(rotated_x, rotated_y), (rotated_x, rotated_y)])
             pixel.properties["copic_color"] = Copic().color_by_code(color)
             all_paths.add(pixel)
 
-    return sort_collection_by_copic_color_group(all_paths)
+    return sort_collection_by_copic_color_group(all_paths, legende)
 
 
 def sort_collection_by_copic_color(collection: Collection) -> dict[Color, Collection]:
@@ -32,7 +48,7 @@ def sort_collection_by_copic_color(collection: Collection) -> dict[Color, Collec
     return dict(sorted(colors.items()))
 
 
-def sort_collection_by_copic_color_group(collection: Collection) -> Collection:
+def sort_collection_by_copic_color_group(collection: Collection, legende: bool = False) -> Collection:
     """
     the coordinates of the paths are in pixel space, not in hpgl/plotter space
     """
@@ -45,8 +61,6 @@ def sort_collection_by_copic_color_group(collection: Collection) -> Collection:
     layer_index = 0
     groups = {}
 
-    add_legende = True
-
     # separating app paths into the copic color groups
     for path in collection:
         path_copic_color = path.properties["copic_color"]
@@ -55,25 +69,32 @@ def sort_collection_by_copic_color_group(collection: Collection) -> Collection:
 
         groups[path_copic_color.group].add(path)
 
+    collection_bb = collection.bb()
+
     for group, paths in groups.items():
         sorted_by_colors = sort_collection_by_copic_color(paths)
 
         for path_color, paths_same_color in sorted_by_colors.items():
             color_names_pen_mapping[pen_index] = path_color.code
 
-            if add_legende:
-                # here add a single point at 0,0 with that color and pen number
-                x = layer_index * 2
-                y = pen_index * 2
+            # adding legende of used colors
+            if legende:
+                x = collection_bb.x2 + layer_index * 2  # left side for legende
+            else:
+                x = collection_bb.x + layer_index * 2  # legende on right side
 
-                num_legend_points = 3
-                for _ in range(num_legend_points):
-                    legend_path = Path(
-                        [Position(x, y), Position(x, y)])
-                    legend_path.layer = layer_index
-                    legend_path.pen_select = pen_index
-                    legend_path.color = path_color.as_rgb()
-                    c.add(legend_path)
+            y = collection_bb.y + pen_index * 2
+
+            num_legend_points = 3
+            for _ in range(num_legend_points):
+                legend_path = Path(
+                    [Position(x, y), Position(x, y)])
+                legend_path.layer = layer_index
+                legend_path.pen_select = pen_index
+                legend_path.color = path_color.as_rgb()
+                c.add(legend_path)
+
+            #######
 
             for path in paths_same_color:
                 path.pen_select = pen_index
