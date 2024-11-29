@@ -1,6 +1,7 @@
 import sys
 import cv2
 import json
+import random
 import os
 import numpy as np
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
@@ -15,6 +16,10 @@ from hdbscan import HDBSCAN
 from fcmeans import FCM
 import skimage.segmentation as seg
 
+from algorithm.color.copic import Copic
+from algorithm.color.copic_pen_enum import CopicColorGroup as CCG
+from algorithm.color.copic_pen_enum import CopicColorCode as CCC
+
 
 class ClusteringWorker(QThread):
     progress = pyqtSignal(int)
@@ -26,6 +31,8 @@ class ClusteringWorker(QThread):
         self.algorithm = algorithm
         self.image = image.copy()  # Make a copy to prevent reference issues
         self.params = params
+
+        self.copic = Copic()
 
     def run(self):
         try:
@@ -116,13 +123,23 @@ class ClusteringWorker(QThread):
         # Create color map for unique labels
         unique_labels = np.unique(labels)
         num_colors = len(unique_labels)
+        print(num_colors)
 
-        # Generate random colors, excluding very light/white colors
-        colors = np.random.rand(num_colors, 3)
-        if exclude_white:
-            # Ensure colors aren't too close to white by scaling them down
-            colors = colors * 0.8  # Scale to make colors more saturated
+        random_group = random.choice(list(CCG))
+        print(random_group)
+        print(type(random_group))
 
+        # Get color group from Copic
+        random_color_group = self.copic.get_colors_by_group(random_group)
+
+        # Shuffle the list of colors
+        random.shuffle(random_color_group)
+
+        # Select the first num_colors colors
+        selected_colors = [self.copic.color_by_code(c) for c in random_color_group[:num_colors]]
+        print(selected_colors)
+        colors = np.array([color.as_srgb() for color in selected_colors])
+        print(colors)
         # Map labels to colors
         return colors[labels]
 
@@ -558,8 +575,12 @@ class MainWindow(QMainWindow):
             self.image_label.setPixmap(QPixmap.fromImage(q_img))
 
 
-if __name__ == '__main__':
+def main():
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
     sys.exit(app.exec_())
+
+
+if __name__ == '__main__':
+    main()

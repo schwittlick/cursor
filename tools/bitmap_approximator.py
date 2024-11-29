@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
                 pbar.update(1)
 
-    collection = convert_color_coordinates_to_collection(color_coordinates)
+    collection = convert_color_coordinates_to_collection(color_coordinates, True)
 
     add_legende(collection)
 
