@@ -1,7 +1,7 @@
 from enum import Enum, auto, IntEnum
 
 
-class CopicColorGroup(Enum):
+class CopicColorGroup(IntEnum):
     BLACK = auto()
     BV = auto()
     V = auto()
