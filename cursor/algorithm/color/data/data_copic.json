@@ -3298,7 +3298,14 @@
   },
   {
     "id": "YR27",
-    "name": "Tuscan Orange"
+    "name": "Tuscan Orange",
+    "hex": "d86745",
+    "rgbv": [
+      "216",
+      "103",
+      "69"
+    ],
+    "rgb": "216,103,69"
   },
   {
     "id": "RV000",
