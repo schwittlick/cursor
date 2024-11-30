@@ -123,20 +123,23 @@ class ClusteringWorker(QThread):
         # Create color map for unique labels
         unique_labels = np.unique(labels)
         num_colors = len(unique_labels)
-        print(num_colors)
 
         random_group = random.choice(list(CCG))
-        print(random_group)
-        print(type(random_group))
+        random_group2 = random.choice(list(CCG))
 
         # Get color group from Copic
         random_color_group = self.copic.get_colors_by_group(random_group)
 
+        # add second group of colors
+        random_color_group2 = self.copic.get_colors_by_group(random_group2)
+        combination = random_color_group.copy()
+        combination.extend(random_color_group2.copy())
+
         # Shuffle the list of colors
-        random.shuffle(random_color_group)
+        random.shuffle(combination)
 
         # Select the first num_colors colors
-        selected_colors = [self.copic.color_by_code(c) for c in random_color_group[:num_colors]]
+        selected_colors = [self.copic.color_by_code(c) for c in combination[:num_colors]]
         print(selected_colors)
         colors = np.array([color.as_srgb() for color in selected_colors])
         print(colors)
