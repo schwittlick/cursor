@@ -29,8 +29,8 @@ class HPGLRenderer(BaseRenderer):
         """
 
         timer = Timer()
-        collections_split_by_pen = [Collection() for _ in range(8)]
 
+        collections_split_by_pen = [Collection() for _ in range(8)]
         for pa in self.collection:
             collections_split_by_pen[pa.pen_select - 1].add(pa.copy())
 
