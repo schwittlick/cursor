@@ -151,6 +151,11 @@ class Collection:
                 self.__paths.append(p)
             case Collection():
                 self.__paths.extend(path.paths)
+            case _:
+                if isinstance(path, Path):
+                    self.__paths.append(path)
+                else:
+                    raise TypeError(f"Unsupported type: {type(path)}")
 
     def pop(self, idx: int) -> Path:
         return self.__paths.pop(idx)
