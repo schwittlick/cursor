@@ -26,7 +26,7 @@ class GCodeRenderer:
 
     def render(self, paths: Collection) -> None:
         logging.info(f"{__class__.__name__}: rendered {len(paths)} paths")
-        self.paths += paths
+        self.paths.paths.extend(paths.paths)
 
     def g01(self, x: float, y: float, z: float) -> str:
         return f"G01 X{x:.2f} Y{y:.2f} Z{z:.2f} F{self.feedrate_xy}"
