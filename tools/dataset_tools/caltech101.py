@@ -7,7 +7,12 @@ import os
 import cv2
 from tkinter import *
 import tkinter as tk
+
+from collection import Collection
 from data import DataDirHandler
+from device import PlotterType
+from export import ExportWrapper
+from path import Path
 from timer import Timer
 
 
@@ -65,27 +70,55 @@ class ImageAnnotationViewer:
         plt.show()
 
     def export_contour(self):
-        OUTPUT_WIDTH = 126 * 2
-        OUTPUT_HEIGHT = 84 * 2
-        MARGIN = 5 * 2
+        def convert_contour_to_path(contour):
+            path = []
+            for point in contour:
+                path.append((float(point[0]), float(point[1])))
+            return path
 
-        export_img_outline = np.ones((OUTPUT_HEIGHT, OUTPUT_WIDTH), dtype=np.uint8) * 255
-        export_img_filled = np.ones((OUTPUT_HEIGHT, OUTPUT_WIDTH), dtype=np.uint8) * 255
+        def calc_should_rotate(contours):
+            path = Path()
+            for i in range(contours.shape[1]):
+                x = contours[0, i]
+                y = contours[1, i]
+                path.add(float(x), float(y))
+
+            path_bb = path.bb()
+            if path_bb.w < path_bb.h:
+                return True
+            return False
+
+        OUTLINE_WIDTH, OUTLINE_HEIGHT = 126, 84
+        OUTLINE_MARGIN = 5
+
+        A4_MULT = 2
+        A3_MULT = 4
+        format_multiplier = A4_MULT
+
+        OUTPUT_WIDTH = 126 * format_multiplier
+        OUTPUT_HEIGHT = 84 * format_multiplier
+        MARGIN = 5 * format_multiplier
+
+        export_img_outline = np.ones((OUTLINE_HEIGHT, OUTLINE_WIDTH), dtype=np.uint8) * 255
+        export_img_filled = np.ones((OUTLINE_HEIGHT, OUTLINE_WIDTH), dtype=np.uint8) * 255
         export_img_original = np.ones((OUTPUT_HEIGHT, OUTPUT_WIDTH, 3), dtype=np.uint8) * 255
 
         # Load and rotate image
         img = np.array(PILImage.open(os.path.join(self.base_img_path, f"image_{self.current_index:04d}.jpg")))
         img = cv2.rotate(img, cv2.ROTATE_180)  # Initial 180-degree rotation from original code
 
-        # Check if height > width and rotate if needed
-        should_rotate = img.shape[0] > img.shape[1]
-        if should_rotate:
-            img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
+
 
         ann_file = os.path.join(self.base_ann_path, f"annotation_{self.current_index:04d}.mat")
         data = loadmat(ann_file)
         box_coord = data['box_coord'].flatten()
         obj_contour = data['obj_contour']
+
+        # Check if height > width and rotate if needed
+        #should_rotate = img.shape[0] > img.shape[1]
+        should_rotate = calc_should_rotate(obj_contour)
+        if should_rotate:
+            img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
         orig_contour = np.zeros((obj_contour.shape[1], 2), dtype=np.int32)
         for i in range(obj_contour.shape[1]):
@@ -118,15 +151,15 @@ class ImageAnnotationViewer:
         masked_region = masked_img[ymin:ymax + 1, xmin:xmax + 1]
         mask_region = orig_mask[ymin:ymax + 1, xmin:xmax + 1]
 
-        # Scale contour for outline and filled versions
-        scale_x = (OUTPUT_WIDTH - 2 * MARGIN) / (xmax - xmin)
-        scale_y = (OUTPUT_HEIGHT - 2 * MARGIN) / (ymax - ymin)
+        # Scale contour for outline and filled versions (126x84)
+        scale_x = (OUTLINE_WIDTH - 2 * OUTLINE_MARGIN) / (xmax - xmin)
+        scale_y = (OUTLINE_HEIGHT - 2 * OUTLINE_MARGIN) / (ymax - ymin)
         scale = min(scale_x, scale_y)
 
         scaled_width = int((xmax - xmin) * scale)
         scaled_height = int((ymax - ymin) * scale)
-        x_offset = int((OUTPUT_WIDTH - scaled_width) / 2)
-        y_offset = int((OUTPUT_HEIGHT - scaled_height) / 2)
+        x_offset = int((OUTLINE_WIDTH - scaled_width) / 2)
+        y_offset = int((OUTLINE_HEIGHT - scaled_height) / 2)
 
         # Create scaled contour points for outline/filled versions
         scaled_contour = np.zeros((obj_contour.shape[1], 2), dtype=np.int32)
@@ -141,14 +174,26 @@ class ImageAnnotationViewer:
         cv2.polylines(export_img_outline, [scaled_contour], isClosed=True, color=0, thickness=1)
         cv2.fillPoly(export_img_filled, [scaled_contour], color=0)
 
+        # Scale for original image (OUTPUT_WIDTH x OUTPUT_HEIGHT)
+        scale_x_orig = (OUTPUT_WIDTH - 2 * MARGIN) / (xmax - xmin)
+        scale_y_orig = (OUTPUT_HEIGHT - 2 * MARGIN) / (ymax - ymin)
+        scale_orig = min(scale_x_orig, scale_y_orig)
+
+        scaled_width_orig = int((xmax - xmin) * scale_orig)
+        scaled_height_orig = int((ymax - ymin) * scale_orig)
+        x_offset_orig = int((OUTPUT_WIDTH - scaled_width_orig) / 2)
+        y_offset_orig = int((OUTPUT_HEIGHT - scaled_height_orig) / 2)
+
         # Scale masked region and mask for final image
-        masked_region_resized = cv2.resize(masked_region, (scaled_width, scaled_height))
-        mask_resized = cv2.resize(mask_region, (scaled_width, scaled_height))
+        masked_region_resized = cv2.resize(masked_region, (scaled_width_orig, scaled_height_orig))
+        mask_resized = cv2.resize(mask_region, (scaled_width_orig, scaled_height_orig))
 
         # Apply mask to maintain white background
-        region_slice = export_img_original[y_offset:y_offset + scaled_height, x_offset:x_offset + scaled_width]
+        region_slice = export_img_original[y_offset_orig:y_offset_orig + scaled_height_orig,
+                       x_offset_orig:x_offset_orig + scaled_width_orig]
         region_slice[mask_resized > 0] = masked_region_resized[mask_resized > 0]
-        export_img_original[y_offset:y_offset + scaled_height, x_offset:x_offset + scaled_width] = region_slice
+        export_img_original[y_offset_orig:y_offset_orig + scaled_height_orig,
+        x_offset_orig:x_offset_orig + scaled_width_orig] = region_slice
 
         category = self.selected_category.get().split(" (")[0]
         folder = DataDirHandler().png("datasets")
@@ -165,6 +210,19 @@ class ImageAnnotationViewer:
         print(f"  Outline: {output_path_outline}")
         print(f"  Filled: {output_path_filled}")
         print(f"  Original: {output_path_original}")
+
+        path = convert_contour_to_path(orig_contour)
+        coll = Collection.from_tuples([path])
+
+        wrapper = ExportWrapper(
+            coll,
+            PlotterType.DIY_PLOTTER_70x50,
+            10,  # 25mm - 11mm
+            "datasets",
+            f"grog_outline_{category}_{Timer.timestamp()}",
+            keep_aspect_ratio=True)
+        wrapper.fit()
+        wrapper.ex()
 
     def on_key_press(self, event):
         if event.key == 'e':
