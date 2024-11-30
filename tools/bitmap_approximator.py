@@ -9,21 +9,13 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
-from cursor.collection import Collection
-from cursor.path import Path
+from collection import Collection
 from cursor.algorithm.color.copic import Copic
 from cursor.data import DataDirHandler
-from cursor.device import PlotterType
+from cursor.device import PlotterType, MinmaxMapping
 from cursor.export import ExportWrapper
 from cursor.renderer.jpg import JpegRenderer
 from cursor.algorithm.color.lib import convert_color_coordinates_to_collection
-
-
-def add_legende(collection: Collection):
-    p1 = Path()
-    p1.pen_select = 1
-    p1.add(0, 0)
-
 
 if __name__ == '__main__':
     root = tk.Tk()
@@ -42,12 +34,11 @@ if __name__ == '__main__':
     loaded = loaded.rotate(90, expand=True)
 
     do_resize = False
-
     if do_resize:
         width = 126
         wpercent = (width / float(loaded.size[0]))
         height = int((float(loaded.size[1]) * float(wpercent)))
-        loaded = loaded.resize((width, height))
+        loaded = loaded.resize((width, height), Image.Resampling.NEAREST)
         logging.info(f"Resized to {width}x{height}")
     loaded = loaded.convert('RGB')
     data = np.asarray(loaded)
@@ -60,6 +51,7 @@ if __name__ == '__main__':
             for x in range(0, data.shape[1], 1):
                 color_value = data[y][x]
                 if (color_value == (1.0, 1.0, 1.0)).all():
+                    pbar.update(1)
                     continue
                 closest_color = Copic().most_similar_rgb_kdtree(color_value)
 
@@ -70,9 +62,7 @@ if __name__ == '__main__':
 
                 pbar.update(1)
 
-    collection = convert_color_coordinates_to_collection(color_coordinates, True)
-
-    add_legende(collection)
+    collection = convert_color_coordinates_to_collection(color_coordinates, True, True)
 
     dir = DataDirHandler().jpg("color_interpolation")
     r = JpegRenderer(dir, w=data.shape[0], h=data.shape[1])
@@ -80,10 +70,20 @@ if __name__ == '__main__':
     r.render()
     r.save(f"bitmap_approximator_{path.name}")
 
+    create_separate_layers_per_pen = False
+
+    if create_separate_layers_per_pen:
+        # use pen select as hack to use it as the layer
+        for pa in collection:
+            pa.layer = pa.pen_select - 1
+            pa.pen_select = 1
+
+    # the final resolution we want to export is 1 dot per ~40 units. Maybe 35-40 units is the sweet spot.
+
     wrapper = ExportWrapper(
         collection,
         PlotterType.HP_7550A_A4,
-        25,
+        14, # 25mm - 11mm
         "color_interpolation",
         f"bitmap_approximator_{path.name}",
         keep_aspect_ratio=True,
