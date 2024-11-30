@@ -2,25 +2,24 @@ from cursor.algorithm.color.copic import Copic, Color
 from cursor.algorithm.color.copic_pen_enum import CopicColorCode
 from cursor.collection import Collection
 from cursor.path import Path
-from cursor.position import Position
 
 from cursor.position import Position
-from cursor.bb import BoundingBox
 import math
 
 
 def convert_color_coordinates_to_collection(color_coords: dict[CopicColorCode, list[tuple]],
-                                            legende: bool) -> Collection:
+                                            legende_x: bool, legende_y: bool) -> Collection:
     """
     creates a layered collection with 8 pens per layer
     sorts the layers by color group, in order to avoid chaos when loading up the pens
     first all blues, then greens, all reds, all RV etc etc
+    before that it rotates all points by n degrees from the center of its bounding box
     """
     all_points = [coord for coords in color_coords.values() for coord in coords]
     bb = Path.from_tuple_list(all_points).bb()
     center_x, center_y = bb.center()
 
-    angle = math.radians(-20)
+    angle = math.radians(0)
     cos_theta, sin_theta = math.cos(angle), math.sin(angle)
 
     all_paths = Collection()
@@ -34,7 +33,7 @@ def convert_color_coordinates_to_collection(color_coords: dict[CopicColorCode, l
             pixel.properties["copic_color"] = Copic().color_by_code(color)
             all_paths.add(pixel)
 
-    return sort_collection_by_copic_color_group(all_paths, legende)
+    return sort_collection_by_copic_color_group(all_paths, legende_x, legende_y)
 
 
 def sort_collection_by_copic_color(collection: Collection) -> dict[Color, Collection]:
@@ -48,7 +47,8 @@ def sort_collection_by_copic_color(collection: Collection) -> dict[Color, Collec
     return dict(sorted(colors.items()))
 
 
-def sort_collection_by_copic_color_group(collection: Collection, legende: bool = False) -> Collection:
+def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool = False,
+                                         legende_y: bool = False) -> Collection:
     """
     the coordinates of the paths are in pixel space, not in hpgl/plotter space
     """
@@ -78,12 +78,14 @@ def sort_collection_by_copic_color_group(collection: Collection, legende: bool =
             color_names_pen_mapping[pen_index] = path_color.code
 
             # adding legende of used colors
-            if legende:
+            if legende_x:
                 x = collection_bb.x2 + layer_index * 2  # left side for legende
             else:
                 x = collection_bb.x + layer_index * 2  # legende on right side
-
-            y = collection_bb.y + pen_index * 2
+            if legende_y:
+                y = collection_bb.y2 - pen_index * 2
+            else:
+                y = collection_bb.y + pen_index * 2
 
             num_legend_points = 3
             for _ in range(num_legend_points):
