@@ -52,6 +52,7 @@ class PlotterType(IntEnum):
     DIY_PLOTTER_A1 = auto()
     DIY_PLOTTER_100x59 = auto()
     DIY_PLOTTER_70x50 = auto()
+    DIY_PLOTTER_60x60 = auto()
     AXIDRAW = auto()
 
     ROLAND_DXY885 = auto()
@@ -119,6 +120,7 @@ class ExportFormatMappings:
         PlotterType.DIY_PLOTTER_A1: ExportFormat.GCODE,
         PlotterType.DIY_PLOTTER_100x59: ExportFormat.GCODE,
         PlotterType.DIY_PLOTTER_70x50: ExportFormat.GCODE,
+        PlotterType.DIY_PLOTTER_60x60: ExportFormat.GCODE,
         PlotterType.AXIDRAW: ExportFormat.SVG,
 
         PlotterType.ROLAND_DXY885: ExportFormat.HPGL,
@@ -213,6 +215,7 @@ class MinmaxMapping:
         PlotterType.DIY_PLOTTER_A1: BB(0, 0, 2900, -1800),
         PlotterType.DIY_PLOTTER_100x59: BB(0, 0, -1330, -630),
         PlotterType.DIY_PLOTTER_70x50: BB(0, 0, -931, -533),
+        PlotterType.DIY_PLOTTER_60x60: BB(0, 0, -798, -640),
         PlotterType.AXIDRAW: BB(0, 0, 0, 0),  # todo: missing real bounds
 
         PlotterType.ROLAND_DXY885: BB(0, 0, 16158, 11040),  # taken from OH;
@@ -284,6 +287,7 @@ class PlotterName:
         PlotterType.DIY_PLOTTER_A1: "custom_a1",
         PlotterType.DIY_PLOTTER_100x59: "custom_100x59",
         PlotterType.DIY_PLOTTER_70x50: "custom_70x50",
+        PlotterType.DIY_PLOTTER_60x60: "custom_60x60",
 
         PlotterType.ROLAND_DXY885: "dxy885",
         PlotterType.ROLAND_DXY980: "dxy980",
@@ -353,6 +357,7 @@ class XYFactors:
         PlotterType.DIY_PLOTTER_A1: (2.896, 2.905),
         PlotterType.DIY_PLOTTER_100x59: (1.33, 1.085),
         PlotterType.DIY_PLOTTER_70x50: (1.33, 1.085),
+        PlotterType.DIY_PLOTTER_60x60: (1.33, 1.085),
 
         PlotterType.AXIDRAW: (3.704, 3.704),
         PlotterType.HP_7475A_A3: (40, 40),
@@ -407,6 +412,7 @@ class MaxSpeed:
         PlotterType.DIY_PLOTTER_A1: 1,
         PlotterType.DIY_PLOTTER_100x59: 1,
         PlotterType.DIY_PLOTTER_70x50: 1,
+        PlotterType.DIY_PLOTTER_60x60: 1,
 
         PlotterType.AXIDRAW: 1,
         PlotterType.HP_7475A_A3: 40,
@@ -461,6 +467,7 @@ class BufferSize:
         PlotterType.DIY_PLOTTER_A1: 1,
         PlotterType.DIY_PLOTTER_100x59: 1,
         PlotterType.DIY_PLOTTER_70x50: 1,
+        PlotterType.DIY_PLOTTER_60x60: 1,
 
         PlotterType.AXIDRAW: 1,
         PlotterType.HP_7475A_A3: 512,
