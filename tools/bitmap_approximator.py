@@ -9,10 +9,9 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
-from collection import Collection
 from cursor.algorithm.color.copic import Copic
 from cursor.data import DataDirHandler
-from cursor.device import PlotterType, MinmaxMapping
+from cursor.device import PlotterType
 from cursor.export import ExportWrapper
 from cursor.renderer.jpg import JpegRenderer
 from cursor.algorithm.color.lib import convert_color_coordinates_to_collection
@@ -70,7 +69,7 @@ if __name__ == '__main__':
     r.render()
     r.save(f"bitmap_approximator_{path.name}")
 
-    create_separate_layers_per_pen = False
+    create_separate_layers_per_pen = True
 
     if create_separate_layers_per_pen:
         # use pen select as hack to use it as the layer
@@ -83,7 +82,7 @@ if __name__ == '__main__':
     wrapper = ExportWrapper(
         collection,
         PlotterType.HP_7550A_A4,
-        14, # 25mm - 11mm
+        14,  # 25mm - 11mm
         "color_interpolation",
         f"bitmap_approximator_{path.name}",
         keep_aspect_ratio=True,
