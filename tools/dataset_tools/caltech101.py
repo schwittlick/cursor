@@ -5,7 +5,6 @@ from scipy.io import loadmat
 from PIL import Image as PILImage
 import os
 import cv2
-from tkinter import *
 import tkinter as tk
 
 from collection import Collection
@@ -19,7 +18,7 @@ from timer import Timer
 class ImageAnnotationViewer:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title("Category Selection")
+        self.root.title("CALTECH-101 Image Annotation Viewer")
 
         # Get all categories
         self.base_path = "E:\\Datasets\\caltech-101"
@@ -33,6 +32,7 @@ class ImageAnnotationViewer:
 
         # Create button to load viewer
         tk.Button(self.root, text="Load Category", command=self._load_viewer).pack()
+        tk.Button(self.root, text="Save Category Contours", command=self._save_contours).pack()
 
         self.root.mainloop()
 
@@ -69,6 +69,71 @@ class ImageAnnotationViewer:
         self.update_display()
         plt.show()
 
+    def _save_contours(self):
+        category_info = self.categories_with_counts[self.selected_category.get()]
+        category, count = category_info
+    
+        img_path = os.path.join(self.base_path, "101_ObjectCategories", category)
+        ann_path = os.path.join(self.base_path, "Annotations", category)
+    
+        output_dir = os.path.join(self.base_path, "Contours", category)
+        os.makedirs(output_dir, exist_ok=True)
+    
+        for i in range(1, count + 1):
+            img_file = os.path.join(img_path, f"image_{i:04d}.jpg")
+            ann_file = os.path.join(ann_path, f"annotation_{i:04d}.mat")
+    
+            if not os.path.exists(img_file) or not os.path.exists(ann_file):
+                print(f"Skipping image {i} due to missing files.")
+                continue
+    
+            img = cv2.imread(img_file)
+            data = loadmat(ann_file)
+            obj_contour = data['obj_contour']
+    
+            contour_img = np.ones((2560, 1440), dtype=np.uint8) * 255
+    
+            # Find contour bounds
+            x_min, y_min = np.min(obj_contour, axis=1)
+            x_max, y_max = np.max(obj_contour, axis=1)
+            contour_width = x_max - x_min
+            contour_height = y_max - y_min
+    
+            # Add padding (5% of the larger dimension)
+            padding = int(0.05 * max(contour_width, contour_height))
+            contour_width += 2 * padding
+            contour_height += 2 * padding
+    
+            # Calculate scale to fit contour while maintaining aspect ratio
+            scale_x = 1440 / contour_width
+            scale_y = 2560 / contour_height
+            scale = min(scale_x, scale_y)
+    
+            # Calculate padding to center the contour
+            pad_x = int((1440 - contour_width * scale) / 2)
+            pad_y = int((2560 - contour_height * scale) / 2)
+    
+            scaled_contour = np.zeros((obj_contour.shape[1], 2), dtype=np.int32)
+            for j in range(obj_contour.shape[1]):
+                scaled_contour[j] = [
+                    int((obj_contour[0, j] - x_min + padding) * scale) + pad_x,
+                    int((obj_contour[1, j] - y_min + padding) * scale) + pad_y
+                ]
+    
+            cv2.drawContours(contour_img, [scaled_contour], 0, 0, 1)
+    
+            folder = DataDirHandler().png("datasets")
+            output_file = os.path.join(output_dir, f"contour_{i:04d}.bmp")
+            cv2.imwrite(output_file, contour_img)
+    
+            # Export CSV with absolute pixel coordinates
+            csv_file = os.path.join(output_dir, f"contour_{i:04d}.csv")
+            with open(csv_file, 'w') as f:
+                for point in scaled_contour:
+                    f.write(f"{point[0]};{point[1]}\n")
+    
+        print(f"Saved {count} contour images and CSV files for category '{category}' in {output_dir}")
+
     def export_contour(self):
         def convert_contour_to_path(contour):
             path = []
@@ -89,7 +154,7 @@ class ImageAnnotationViewer:
             return False
 
         OUTLINE_WIDTH, OUTLINE_HEIGHT = 126, 84
-        OUTLINE_MARGIN = 5
+        OUTLINE_MARGIN = 4
 
         A4_MULT = 2
         A3_MULT = 4
@@ -107,15 +172,13 @@ class ImageAnnotationViewer:
         img = np.array(PILImage.open(os.path.join(self.base_img_path, f"image_{self.current_index:04d}.jpg")))
         img = cv2.rotate(img, cv2.ROTATE_180)  # Initial 180-degree rotation from original code
 
-
-
         ann_file = os.path.join(self.base_ann_path, f"annotation_{self.current_index:04d}.mat")
         data = loadmat(ann_file)
         box_coord = data['box_coord'].flatten()
         obj_contour = data['obj_contour']
 
         # Check if height > width and rotate if needed
-        #should_rotate = img.shape[0] > img.shape[1]
+        # should_rotate = img.shape[0] > img.shape[1]
         should_rotate = calc_should_rotate(obj_contour)
         if should_rotate:
             img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
@@ -216,7 +279,7 @@ class ImageAnnotationViewer:
 
         wrapper = ExportWrapper(
             coll,
-            PlotterType.DIY_PLOTTER_70x50,
+            PlotterType.DIY_PLOTTER_60x60,
             10,  # 25mm - 11mm
             "datasets",
             f"grog_outline_{category}_{Timer.timestamp()}",
