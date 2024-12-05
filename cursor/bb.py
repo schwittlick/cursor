@@ -127,11 +127,33 @@ class BoundingBox:
             bool: True if the other BoundingBox is fully contained within this one, False otherwise.
         """
         return (
-            self.p1.x <= other.p1.x and
-            self.p1.y <= other.p1.y and
-            self.p2.x >= other.p2.x and
-            self.p2.y >= other.p2.y
+                self.p1.x <= other.p1.x and
+                self.p1.y <= other.p1.y and
+                self.p2.x >= other.p2.x and
+                self.p2.y >= other.p2.y
         )
+
+    def intersects(self, other: BoundingBox) -> bool:
+        """
+        Check if this bounding box intersects with another bounding box.
+
+        Args:
+            other (BoundingBox): The other bounding box to check intersection with.
+
+        Returns:
+            bool: True if the bounding boxes intersect, False otherwise.
+        """
+        # Check if one rectangle is on left side of other
+        if (self.x >= other.x + other.w or
+                other.x >= self.x + self.w):
+            return False
+
+        # Check if one rectangle is above other
+        if (self.y >= other.y + other.h or
+                other.y >= self.y + self.h):
+            return False
+
+        return True
 
     def __repr__(self) -> str:
         return (f"BoundingBox(x={self.p1.x:.2f}, y={self.p1.y:.2f}, "
