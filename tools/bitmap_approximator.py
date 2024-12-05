@@ -9,14 +9,17 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
+from collection import Collection
 from cursor.algorithm.color.copic import Copic
 from cursor.data import DataDirHandler
-from cursor.device import PlotterType
+from cursor.device import PlotterType, MinmaxMapping
 from cursor.export import ExportWrapper
 from cursor.renderer.jpg import JpegRenderer
 from cursor.algorithm.color.lib import convert_color_coordinates_to_collection
+from timer import Timer
 
-if __name__ == '__main__':
+
+def select_file() -> pathlib.Path:
     root = tk.Tk()
     root.withdraw()
 
@@ -26,23 +29,10 @@ if __name__ == '__main__':
         logging.warning("Not selected any file. Aborting")
         sys.exit(0)
 
-    path = pathlib.Path(file_path)
+    return pathlib.Path(file_path)
 
-    loaded = Image.open(path.as_posix())
 
-    loaded = loaded.rotate(90, expand=True)
-
-    do_resize = False
-    if do_resize:
-        width = 126
-        wpercent = (width / float(loaded.size[0]))
-        height = int((float(loaded.size[1]) * float(wpercent)))
-        loaded = loaded.resize((width, height), Image.Resampling.NEAREST)
-        logging.info(f"Resized to {width}x{height}")
-    loaded = loaded.convert('RGB')
-    data = np.asarray(loaded)
-    data = data / np.array(255)
-
+def do_bitmap_approximation(data: np.ndarray) -> Collection:
     color_coordinates = {}
 
     with tqdm(total=data.shape[0] * data.shape[1]) as pbar:
@@ -62,15 +52,118 @@ if __name__ == '__main__':
                 pbar.update(1)
 
     collection = convert_color_coordinates_to_collection(color_coordinates, True, True)
+    return collection
 
+
+def export_jpg_preview(data: np.ndarray, collection: Collection, path: pathlib.Path) -> None:
     dir = DataDirHandler().jpg("color_interpolation")
     r = JpegRenderer(dir, w=data.shape[0], h=data.shape[1])
     r.add(collection)
     r.render()
-    r.save(f"bitmap_approximator_{path.name}")
+    r.save(f"bitmap_approx_{path.name}")
 
-    create_separate_layers_per_pen = True
 
+import random
+from cursor.bb import BoundingBox
+from cursor.position import Position
+
+
+def create_fridge():
+    fridge_collection: Collection = Collection()
+    fridge_bb = MinmaxMapping.maps[PlotterType.HP_DM_RX_PLUS_A1]
+    collections = []
+    placed_bbs = []
+    preview_positions = []
+    for _ in range(4):
+        path = select_file()
+
+        loaded = Image.open(path.as_posix())
+        loaded = loaded.rotate(90, expand=True)
+        loaded = loaded.convert('RGB')
+        data = np.asarray(loaded)
+        data = data / np.array(255)
+
+        collection = do_bitmap_approximation(data)
+        collection.scale(85 / 2, 85 / 2)
+
+        rotation_angle = random.uniform(0, 360)
+        collection.rot(rotation_angle / 180)
+
+        max_attempts = 100
+        for _ in range(max_attempts):
+            padding = 200
+            max_x = fridge_bb.x2 - collection.bb().w - padding
+            max_y = fridge_bb.y2 - collection.bb().h - padding
+            random_x = random.uniform(fridge_bb.x + padding, max_x)
+            random_y = random.uniform(fridge_bb.y + padding, max_y)
+
+            temp_collection = collection.copy()
+            temp_collection.move_to_origin()
+            temp_collection.translate(random_x, random_y)
+            temp_bb = temp_collection.bb()
+
+            if all(not temp_bb.intersects(placed_bb) for placed_bb in placed_bbs):
+                collection = temp_collection
+                placed_bbs.append(temp_bb)
+                collections.append(collection)
+                break
+        else:
+            print(f"Warning: Could not place collection without overlap after {max_attempts} attempts.")
+
+    for idx, coll in enumerate(collections):
+        create_separate_layers_per_pen = True
+        if create_separate_layers_per_pen:
+            # use pen select as hack to use it as the layer
+            for pa in coll:
+                _pa = pa.copy()
+                _pa.pen_select = _pa.pen_select + idx * 2
+                _pa.color = "black"
+                _pa.width = 250
+                fridge_collection.add(_pa)
+
+                pa.layer = pa.pen_select - 1
+                pa.pen_select = 1
+
+        wrapper = ExportWrapper(
+            coll,
+            PlotterType.HP_DM_RX_PLUS_A1,
+            14,
+            "color_interpolation",
+            f"bitmap_approximator_double_{idx}",
+            keep_aspect_ratio=True,
+            optimize=True,
+            export_jpg_preview=True)
+        wrapper.ex()
+
+    jpeg_folder = DataDirHandler().jpg("color_interpolation")
+    fridge_collection.transform(BoundingBox(0, 0, fridge_bb.w, fridge_bb.h))
+    for pa in fridge_collection:
+        pos = Position(pa[0].x, pa[0].y)
+        pos.color = "black"
+        pos.radius = 10
+        preview_positions.append(pos)
+    jpeg_renderer = JpegRenderer(jpeg_folder, w=int(fridge_bb.w), h=int(fridge_bb.h))
+    jpeg_renderer.background((255, 255, 255))
+    jpeg_renderer.add(preview_positions)
+    jpeg_renderer.render()
+    jpeg_renderer.save(f"bitmap_approximator_preview_{Timer.timestamp()}")
+
+
+def main_approximation():
+    path = select_file()
+
+    loaded = Image.open(path.as_posix())
+
+    # only resize to make sure its landscape
+    loaded = loaded.rotate(90, expand=True)
+    loaded = loaded.convert('RGB')
+    data = np.asarray(loaded)
+    data = data / np.array(255)
+
+    collection = do_bitmap_approximation(data)
+    export_jpg_preview(data, collection, path)
+
+    create_separate_layers_per_pen = False
     if create_separate_layers_per_pen:
         # use pen select as hack to use it as the layer
         for pa in collection:
@@ -79,6 +172,10 @@ if __name__ == '__main__':
 
     # the final resolution we want to export is 1 dot per ~40 units. Maybe 35-40 units is the sweet spot.
 
+    # for postcards, just remove the padding at the A4 export
+
+    # a4 = 252x168px
+    # a3 = 504x336px
     wrapper = ExportWrapper(
         collection,
         PlotterType.HP_7550A_A4,
@@ -89,3 +186,8 @@ if __name__ == '__main__':
         optimize=True)
     wrapper.fit()
     wrapper.ex()
+
+
+if __name__ == '__main__':
+    # main_approximation()
+    create_fridge()
