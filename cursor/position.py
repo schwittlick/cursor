@@ -66,6 +66,17 @@ class Position:
     def color(self, color: tuple[int, ...]) -> None:
         self.properties[Property.COLOR] = color
 
+    @property
+    def radius(self) -> int | None:
+        if Property.RADIUS not in self.properties.keys():
+            return None
+
+        return self.properties[Property.RADIUS]
+
+    @radius.setter
+    def radius(self, color: int) -> None:
+        self.properties[Property.RADIUS] = color
+
     def as_tuple(self) -> tuple[float, float]:
         return self.x, self.y
 
