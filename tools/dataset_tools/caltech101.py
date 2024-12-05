@@ -70,6 +70,9 @@ class ImageAnnotationViewer:
         plt.show()
 
     def _save_contours(self):
+        """
+        These are the contours saved for e paper
+        """
         category_info = self.categories_with_counts[self.selected_category.get()]
         category, count = category_info
     
@@ -87,7 +90,6 @@ class ImageAnnotationViewer:
                 print(f"Skipping image {i} due to missing files.")
                 continue
     
-            img = cv2.imread(img_file)
             data = loadmat(ann_file)
             obj_contour = data['obj_contour']
     
@@ -99,8 +101,8 @@ class ImageAnnotationViewer:
             contour_width = x_max - x_min
             contour_height = y_max - y_min
     
-            # Add padding (5% of the larger dimension)
-            padding = int(0.05 * max(contour_width, contour_height))
+            # Add padding (8% of the larger dimension)
+            padding = int(0.08 * max(contour_width, contour_height))
             contour_width += 2 * padding
             contour_height += 2 * padding
     
@@ -120,16 +122,32 @@ class ImageAnnotationViewer:
                     int((obj_contour[1, j] - y_min + padding) * scale) + pad_y
                 ]
     
-            cv2.drawContours(contour_img, [scaled_contour], 0, 0, 1)
+            # Interpolate points to ensure maximum distance of 400 pixels
+            interpolated_contour = []
+            for j in range(len(scaled_contour)):
+                p1 = scaled_contour[j]
+                p2 = scaled_contour[(j + 1) % len(scaled_contour)]
+                interpolated_contour.append(p1)
     
-            folder = DataDirHandler().png("datasets")
+                distance = np.linalg.norm(np.array(p2) - np.array(p1))
+                if distance > 400:
+                    num_points = int(np.ceil(distance / 400))
+                    for k in range(1, num_points):
+                        t = k / num_points
+                        interp_point = (1 - t) * np.array(p1) + t * np.array(p2)
+                        interpolated_contour.append(interp_point.astype(np.int32))
+    
+            interpolated_contour = np.array(interpolated_contour)
+    
+            cv2.drawContours(contour_img, [interpolated_contour], 0, 0, 1)
+    
             output_file = os.path.join(output_dir, f"contour_{i:04d}.bmp")
             cv2.imwrite(output_file, contour_img)
     
             # Export CSV with absolute pixel coordinates
             csv_file = os.path.join(output_dir, f"contour_{i:04d}.csv")
             with open(csv_file, 'w') as f:
-                for point in scaled_contour:
+                for point in interpolated_contour:
                     f.write(f"{point[0]};{point[1]}\n")
     
         print(f"Saved {count} contour images and CSV files for category '{category}' in {output_dir}")
@@ -156,13 +174,15 @@ class ImageAnnotationViewer:
         OUTLINE_WIDTH, OUTLINE_HEIGHT = 126, 84
         OUTLINE_MARGIN = 4
 
+        A6_MULT = 0.5
+        A5_MULT = 1
         A4_MULT = 2
         A3_MULT = 4
-        format_multiplier = A4_MULT
+        format_multiplier = A5_MULT
 
-        OUTPUT_WIDTH = 126 * format_multiplier
-        OUTPUT_HEIGHT = 84 * format_multiplier
-        MARGIN = 5 * format_multiplier
+        OUTPUT_WIDTH = int(126 * format_multiplier)
+        OUTPUT_HEIGHT = int(84 * format_multiplier)
+        MARGIN = int(5 * format_multiplier)
 
         export_img_outline = np.ones((OUTLINE_HEIGHT, OUTLINE_WIDTH), dtype=np.uint8) * 255
         export_img_filled = np.ones((OUTLINE_HEIGHT, OUTLINE_WIDTH), dtype=np.uint8) * 255
@@ -279,7 +299,7 @@ class ImageAnnotationViewer:
 
         wrapper = ExportWrapper(
             coll,
-            PlotterType.DIY_PLOTTER_60x60,
+            PlotterType.DIY_PLOTTER_70x50,
             10,  # 25mm - 11mm
             "datasets",
             f"grog_outline_{category}_{Timer.timestamp()}",
