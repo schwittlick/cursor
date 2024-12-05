@@ -5,7 +5,7 @@ import pathlib
 import typing
 
 from cursor.collection import Collection
-from cursor.path import Path
+from path import Path
 from cursor.position import Position
 
 
@@ -59,10 +59,14 @@ class BaseRenderer:
             case Path():
                 self.collection.add(input)
             case list():
-                if all(isinstance(item, Path) for item in input):
-                    self.collection.add(input)
-                if all(isinstance(item, Position) for item in input):
-                    self.positions.extend(input)
-                if all(isinstance(item, Collection) for item in input):
-                    for collection in input:
-                        self.collection += collection
+                for item in input:
+                    if isinstance(item, Path):
+                        self.collection.add(item)
+                    elif isinstance(item, Position):
+                        self.positions.append(item)
+                    elif isinstance(item, Collection):
+                        self.collection += item
+                    else:
+                        raise ValueError("Unsupported input type in list")
+            case _:
+                raise ValueError("Unsupported input type")
