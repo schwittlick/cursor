@@ -133,29 +133,25 @@ class Collection:
         return c
 
     def add(self, path: BoundingBox | Path | list[Path] | Collection) -> None:
-        match path:
-            case Path():
-                self.__paths.append(path)
-            case list():
-                self.__paths.extend(path)
-            case BoundingBox():
-                p = Path().from_tuple_list(
-                    [
-                        (path.x, path.y),
-                        (path.x, path.y2),
-                        (path.x2, path.y2),
-                        (path.x2, path.y),
-                        (path.x, path.y),
-                    ]
-                )
-                self.__paths.append(p)
-            case Collection():
-                self.__paths.extend(path.paths)
-            case _:
-                if isinstance(path, Path):
-                    self.__paths.append(path)
-                else:
-                    raise TypeError(f"Unsupported type: {type(path)}")
+        if isinstance(path, Collection):
+            self.__paths.extend(path.paths)
+        elif isinstance(path, Path):
+            self.__paths.append(path)
+        elif isinstance(path, list):
+            self.__paths.extend(path)
+        elif isinstance(path, BoundingBox):
+            p = Path().from_tuple_list(
+                [
+                    (path.x, path.y),
+                    (path.x, path.y2),
+                    (path.x2, path.y2),
+                    (path.x2, path.y),
+                    (path.x, path.y),
+                ]
+            )
+            self.__paths.append(p)
+        else:
+            raise TypeError(f"Unsupported type: {type(path)}")
 
     def pop(self, idx: int) -> Path:
         return self.__paths.pop(idx)
@@ -557,7 +553,7 @@ class Collection:
             else:
                 yscale = xscale
 
-        logging.debug(f"fit: scaled by {xscale:.2f} {yscale:.2f}")
+        logging.info(f"fit: scaled by {xscale:.2f} {yscale:.2f}")
         self.scale(xscale, yscale)
 
         _bb = self.bb()
