@@ -1,3 +1,4 @@
+import pathlib
 import sys
 import cv2
 import json
@@ -19,6 +20,7 @@ import skimage.segmentation as seg
 from algorithm.color.copic import Copic
 from algorithm.color.copic_pen_enum import CopicColorGroup as CCG
 from algorithm.color.copic_pen_enum import CopicColorCode as CCC
+from timer import Timer
 
 
 class ClusteringWorker(QThread):
@@ -491,6 +493,7 @@ class MainWindow(QMainWindow):
             "Images (*.png *.xpm *.jpg *.bmp)")
 
         if file_name:
+            self.current_image_path = file_name
             self.last_directory = os.path.dirname(file_name)
             self.save_last_directory(self.last_directory)
 
@@ -527,18 +530,11 @@ class MainWindow(QMainWindow):
 
     def save_processed_image(self):
         current_tab = self.tabs.currentWidget()
-        # Open save file dialog
-        file_name, _ = QFileDialog.getSaveFileName(
-            self,
-            "Save Image",
-            self.last_save_directory,
-            "Images (*.png *.jpg *.jpeg *.bmp)"
-        )
 
-        if file_name:
-            # Update and save the last save directory
-            self.last_save_directory = os.path.dirname(file_name)
-            self.save_last_save_directory(self.last_save_directory)
+        if hasattr(self, 'current_image_path'):
+            original_path = pathlib.Path(self.current_image_path)
+            new_filename = f"{original_path.stem}_{Timer.timestamp()}{original_path.suffix}"
+            new_path = original_path.parent / new_filename
 
             # Get the pixmap from the result_label
             pixmap = current_tab.result_label.pixmap()
@@ -551,20 +547,16 @@ class MainWindow(QMainWindow):
                 Qt.FastTransformation
             )
 
-            # Get the file extension
-            _, ext = os.path.splitext(file_name)
-            if not ext:  # If no extension provided, default to PNG
-                file_name += '.png'
-                ext = '.png'
-
             # Save the image
             try:
-                if scaled_pixmap.save(file_name):
-                    print(f"Image saved successfully to: {file_name}")
+                if scaled_pixmap.save(str(new_path)):
+                    print(f"Image saved successfully to: {new_path}")
                 else:
-                    print(f"Failed to save image to: {file_name}")
+                    print(f"Failed to save image to: {new_path}")
             except Exception as e:
                 print(f"Error saving image: {e}")
+        else:
+            print("No original image loaded. Cannot save.")
 
     def update_display_image(self):
         if hasattr(self, 'current_image'):
