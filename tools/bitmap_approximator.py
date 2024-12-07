@@ -1,4 +1,5 @@
 import logging
+import math
 import pathlib
 import sys
 
@@ -9,7 +10,7 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
-from collection import Collection
+from cursor.collection import Collection
 from cursor.algorithm.color.copic import Copic
 from cursor.data import DataDirHandler
 from cursor.device import PlotterType, MinmaxMapping
@@ -74,7 +75,7 @@ def create_fridge():
     collections = []
     placed_bbs = []
     preview_positions = []
-    for _ in range(4):
+    for _ in range(16):
         path = select_file()
 
         loaded = Image.open(path.as_posix())
@@ -87,7 +88,7 @@ def create_fridge():
         collection.scale(85 / 2, 85 / 2)
 
         rotation_angle = random.uniform(0, 360)
-        collection.rot(rotation_angle / 180)
+        collection.rot(rotation_angle * (math.pi / 180))
 
         max_attempts = 100
         for _ in range(max_attempts):
