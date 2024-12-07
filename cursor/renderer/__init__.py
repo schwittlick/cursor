@@ -4,6 +4,7 @@ import copy
 import pathlib
 import typing
 
+# TODO: sometimes i need to import this via cursor.collection.Collection. why?
 from cursor.collection import Collection
 from path import Path
 from cursor.position import Position
@@ -51,22 +52,19 @@ class BaseRenderer:
         self.positions.clear()
 
     def add(self, input: Collection | Path | Position | list[Collection] | list[Path] | list[Position]):
-        match input:
-            case Collection():
-                self.collection.paths.extend(input.paths)
-            case Position():
-                self.positions.append(input)
-            case Path():
-                self.collection.add(input)
-            case list():
-                for item in input:
-                    if isinstance(item, Path):
-                        self.collection.add(item)
-                    elif isinstance(item, Position):
-                        self.positions.append(item)
-                    elif isinstance(item, Collection):
-                        self.collection += item
-                    else:
-                        raise ValueError("Unsupported input type in list")
-            case _:
-                raise ValueError("Unsupported input type")
+        if isinstance(input, Collection):
+            self.collection.paths.extend(input.paths)
+        elif isinstance(input, Position):
+            self.positions.append(input)
+        elif isinstance(input, Path):
+            self.collection.add(input)
+        elif isinstance(input, list):
+            for item in input:
+                if isinstance(item, Path):
+                    self.collection.add(item)
+                elif isinstance(item, Position):
+                    self.positions.append(item)
+                elif isinstance(item, Collection):
+                    self.collection += item
+        else:
+            raise ValueError(f"Unsupported input type: {type(input)}")
