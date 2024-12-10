@@ -69,66 +69,69 @@ class ImageAnnotationViewer:
         self.update_display()
         plt.show()
 
-    def _save_contours(self):
+    def _save_contours(self, rotate_90=True):
         """
         These are the contours saved for e paper
         """
         category_info = self.categories_with_counts[self.selected_category.get()]
         category, count = category_info
-    
+
         img_path = os.path.join(self.base_path, "101_ObjectCategories", category)
         ann_path = os.path.join(self.base_path, "Annotations", category)
-    
+
         output_dir = os.path.join(self.base_path, "Contours", category)
         os.makedirs(output_dir, exist_ok=True)
-    
+
         for i in range(1, count + 1):
             img_file = os.path.join(img_path, f"image_{i:04d}.jpg")
             ann_file = os.path.join(ann_path, f"annotation_{i:04d}.mat")
-    
+
             if not os.path.exists(img_file) or not os.path.exists(ann_file):
                 print(f"Skipping image {i} due to missing files.")
                 continue
-    
+
             data = loadmat(ann_file)
             obj_contour = data['obj_contour']
-    
+
+            if rotate_90:
+                obj_contour = np.array([obj_contour[1], -obj_contour[0]])
+
             contour_img = np.ones((2560, 1440), dtype=np.uint8) * 255
-    
+
             # Find contour bounds
             x_min, y_min = np.min(obj_contour, axis=1)
             x_max, y_max = np.max(obj_contour, axis=1)
             contour_width = x_max - x_min
             contour_height = y_max - y_min
-    
+
             # Add padding (8% of the larger dimension)
             padding = int(0.08 * max(contour_width, contour_height))
             contour_width += 2 * padding
             contour_height += 2 * padding
-    
+
             # Calculate scale to fit contour while maintaining aspect ratio
             scale_x = 1440 / contour_width
             scale_y = 2560 / contour_height
             scale = min(scale_x, scale_y)
-    
+
             # Calculate padding to center the contour
             pad_x = int((1440 - contour_width * scale) / 2)
             pad_y = int((2560 - contour_height * scale) / 2)
-    
+
             scaled_contour = np.zeros((obj_contour.shape[1], 2), dtype=np.int32)
             for j in range(obj_contour.shape[1]):
                 scaled_contour[j] = [
                     int((obj_contour[0, j] - x_min + padding) * scale) + pad_x,
                     int((obj_contour[1, j] - y_min + padding) * scale) + pad_y
                 ]
-    
+
             # Interpolate points to ensure maximum distance of 400 pixels
             interpolated_contour = []
             for j in range(len(scaled_contour)):
                 p1 = scaled_contour[j]
                 p2 = scaled_contour[(j + 1) % len(scaled_contour)]
                 interpolated_contour.append(p1)
-    
+
                 distance = np.linalg.norm(np.array(p2) - np.array(p1))
                 if distance > 400:
                     num_points = int(np.ceil(distance / 400))
@@ -136,20 +139,20 @@ class ImageAnnotationViewer:
                         t = k / num_points
                         interp_point = (1 - t) * np.array(p1) + t * np.array(p2)
                         interpolated_contour.append(interp_point.astype(np.int32))
-    
+
             interpolated_contour = np.array(interpolated_contour)
-    
+
             cv2.drawContours(contour_img, [interpolated_contour], 0, 0, 1)
-    
+
             output_file = os.path.join(output_dir, f"contour_{i:04d}.bmp")
             cv2.imwrite(output_file, contour_img)
-    
+
             # Export CSV with absolute pixel coordinates
             csv_file = os.path.join(output_dir, f"contour_{i:04d}.csv")
             with open(csv_file, 'w') as f:
                 for point in interpolated_contour:
                     f.write(f"{point[0]};{point[1]}\n")
-    
+
         print(f"Saved {count} contour images and CSV files for category '{category}' in {output_dir}")
 
     def export_contour(self):
@@ -167,11 +170,11 @@ class ImageAnnotationViewer:
                 path.add(float(x), float(y))
 
             path_bb = path.bb()
-            if path_bb.w < path_bb.h:
+            if path_bb.w > path_bb.h:
                 return True
             return False
 
-        OUTLINE_WIDTH, OUTLINE_HEIGHT = 126, 84
+        OUTLINE_WIDTH, OUTLINE_HEIGHT = 126, 174
         OUTLINE_MARGIN = 4
 
         A6_MULT = 0.5
@@ -180,9 +183,9 @@ class ImageAnnotationViewer:
         A3_MULT = 4
         format_multiplier = A5_MULT
 
-        OUTPUT_WIDTH = int(126 * format_multiplier)
-        OUTPUT_HEIGHT = int(84 * format_multiplier)
-        MARGIN = int(5 * format_multiplier)
+        OUTPUT_WIDTH = int(OUTLINE_WIDTH * format_multiplier)
+        OUTPUT_HEIGHT = int(OUTLINE_HEIGHT * format_multiplier)
+        MARGIN = int(OUTLINE_MARGIN * format_multiplier)
 
         export_img_outline = np.ones((OUTLINE_HEIGHT, OUTLINE_WIDTH), dtype=np.uint8) * 255
         export_img_filled = np.ones((OUTLINE_HEIGHT, OUTLINE_WIDTH), dtype=np.uint8) * 255
@@ -289,10 +292,28 @@ class ImageAnnotationViewer:
         cv2.imwrite(str(output_path_filled), export_img_filled)
         cv2.imwrite(str(output_path_original), cv2.cvtColor(export_img_original, cv2.COLOR_RGB2BGR))
 
+        from dataset_tools.skeletonize_qt5 import skeletonize
+        # Apply skeletonization to the filled outline image
+        skeleton = skeletonize(255 - export_img_filled)
+
+        # Create a colored skeleton image for visualization
+        skeleton_color = cv2.cvtColor(skeleton.astype(np.uint8) * 255, cv2.COLOR_GRAY2BGR)
+
+        # Save the skeletonized image
+        output_path_skeleton = folder / f"{category}_contour_skeleton_{self.current_index:04d}_{Timer.timestamp()}.png"
+        cv2.imwrite(str(output_path_skeleton), skeleton_color)
+
         print(f"Exported contours to:")
         print(f"  Outline: {output_path_outline}")
         print(f"  Filled: {output_path_filled}")
         print(f"  Original: {output_path_original}")
+        print(f"  Skeleton: {output_path_skeleton}")
+
+        # Create a side-by-side comparison image
+        comparison_image = np.hstack((cv2.cvtColor(export_img_filled, cv2.COLOR_GRAY2BGR), skeleton_color))
+        output_path_comparison = folder / f"{category}_contour_comparison_{self.current_index:04d}_{Timer.timestamp()}.png"
+        cv2.imwrite(str(output_path_comparison), comparison_image)
+        print(f"  Comparison: {output_path_comparison}")
 
         path = convert_contour_to_path(orig_contour)
         coll = Collection.from_tuples([path])
