@@ -14,6 +14,8 @@ from export import ExportWrapper
 from path import Path
 from timer import Timer
 
+from dataset_tools.skeletonize_qt5 import skeletonize
+
 
 class ImageAnnotationViewer:
     def __init__(self):
@@ -170,18 +172,20 @@ class ImageAnnotationViewer:
                 path.add(float(x), float(y))
 
             path_bb = path.bb()
-            if path_bb.w > path_bb.h:
+            # we change the rotation depending on format grml
+            if path_bb.w < path_bb.h:
                 return True
             return False
 
-        OUTLINE_WIDTH, OUTLINE_HEIGHT = 126, 174
+        OUTLINE_WIDTH, OUTLINE_HEIGHT = 126, 84#126, 174
+        # change outline manually here
         OUTLINE_MARGIN = 4
 
         A6_MULT = 0.5
         A5_MULT = 1
         A4_MULT = 2
         A3_MULT = 4
-        format_multiplier = A5_MULT
+        format_multiplier = A4_MULT
 
         OUTPUT_WIDTH = int(OUTLINE_WIDTH * format_multiplier)
         OUTPUT_HEIGHT = int(OUTLINE_HEIGHT * format_multiplier)
@@ -292,25 +296,20 @@ class ImageAnnotationViewer:
         cv2.imwrite(str(output_path_filled), export_img_filled)
         cv2.imwrite(str(output_path_original), cv2.cvtColor(export_img_original, cv2.COLOR_RGB2BGR))
 
-        from dataset_tools.skeletonize_qt5 import skeletonize
         # Apply skeletonization to the filled outline image
         skeleton = skeletonize(255 - export_img_filled)
 
         # Create a colored skeleton image for visualization
         skeleton_color = cv2.cvtColor(skeleton.astype(np.uint8) * 255, cv2.COLOR_GRAY2BGR)
 
-        # Save the skeletonized image
+        inverted_skeleton = cv2.bitwise_not(skeleton_color)
+
+        # Save the inverted skeletonized image
         output_path_skeleton = folder / f"{category}_contour_skeleton_{self.current_index:04d}_{Timer.timestamp()}.png"
-        cv2.imwrite(str(output_path_skeleton), skeleton_color)
+        cv2.imwrite(str(output_path_skeleton), inverted_skeleton)
 
-        print(f"Exported contours to:")
-        print(f"  Outline: {output_path_outline}")
-        print(f"  Filled: {output_path_filled}")
-        print(f"  Original: {output_path_original}")
-        print(f"  Skeleton: {output_path_skeleton}")
-
-        # Create a side-by-side comparison image
-        comparison_image = np.hstack((cv2.cvtColor(export_img_filled, cv2.COLOR_GRAY2BGR), skeleton_color))
+        # Create a side-by-side comparison image with the inverted skeleton
+        comparison_image = np.hstack((cv2.cvtColor(export_img_filled, cv2.COLOR_GRAY2BGR), inverted_skeleton))
         output_path_comparison = folder / f"{category}_contour_comparison_{self.current_index:04d}_{Timer.timestamp()}.png"
         cv2.imwrite(str(output_path_comparison), comparison_image)
         print(f"  Comparison: {output_path_comparison}")
@@ -318,15 +317,35 @@ class ImageAnnotationViewer:
         path = convert_contour_to_path(orig_contour)
         coll = Collection.from_tuples([path])
 
+        fname = f"{category}_grog_outline_{Timer.timestamp()}"
         wrapper = ExportWrapper(
             coll,
-            PlotterType.DIY_PLOTTER_70x50,
+            PlotterType.DIY_PLOTTER_60x60,
             10,  # 25mm - 11mm
             "datasets",
-            f"grog_outline_{category}_{Timer.timestamp()}",
+            fname,
             keep_aspect_ratio=True)
         wrapper.fit()
         wrapper.ex()
+
+        fname2 = f"{category}_grog_outline_{Timer.timestamp()}"
+        wrapper2 = ExportWrapper(
+            coll,
+            PlotterType.ROLAND_DXY1200_A3,
+            10,  # 25mm - 11mm
+            "datasets",
+            fname2,
+            keep_aspect_ratio=True)
+        wrapper2.fit()
+        wrapper2.ex()
+
+        print(f"Exported contours to:")
+        print(f"  Outline: {output_path_outline}")
+        print(f"  Filled: {output_path_filled}")
+        print(f"  Original: {output_path_original}")
+        print(f"  Skeleton: {output_path_skeleton}")
+        print(f"  Grog outline: {fname}")
+        print(f"  HPGL outline: {fname2}")
 
     def on_key_press(self, event):
         if event.key == 'e':
