@@ -42,7 +42,8 @@ class Path:
             Property.LAYER: "layer1",
             Property.COLOR: (0, 0, 0),
             Property.WIDTH: 1,
-            Property.TAGS: []
+            Property.TAGS: [],
+            Property.PEN_SELECT: 1
         }
 
         if vertices is not None:
