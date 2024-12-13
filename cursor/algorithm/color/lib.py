@@ -47,6 +47,42 @@ def sort_collection_by_copic_color(collection: Collection) -> dict[Color, Collec
     return dict(sorted(colors.items()))
 
 
+def create_legend_path(x: float, y: float, layer_index: int, pen_index: int, path_color: Color) -> Path:
+    legend_path = Path([Position(x, y), Position(x, y)])
+    legend_path.layer = layer_index
+    legend_path.pen_select = pen_index
+    legend_path.color = path_color.as_rgb()
+    return legend_path
+
+
+def add_legende_all_corners(collection_bb, layer_index, c, pen_index, path_color):
+    num_legend_points = 3
+
+    x = collection_bb.x2 + layer_index * 2  # left side for legende
+    y = collection_bb.y2 - pen_index * 2
+    for _ in range(num_legend_points):
+        legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
+        c.add(legend_path)
+
+    x = collection_bb.x2 + layer_index * 2  # left side for legende
+    y = collection_bb.y + pen_index * 2
+    for _ in range(num_legend_points):
+        legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
+        c.add(legend_path)
+
+    x = collection_bb.x + layer_index * 2  # legende on right side
+    y = collection_bb.y2 - pen_index * 2
+    for _ in range(num_legend_points):
+        legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
+        c.add(legend_path)
+
+    x = collection_bb.x + layer_index * 2  # legende on right side
+    y = collection_bb.y + pen_index * 2
+    for _ in range(num_legend_points):
+        legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
+        c.add(legend_path)
+
+
 def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool = False,
                                          legende_y: bool = False) -> Collection:
     """
@@ -77,25 +113,25 @@ def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool
         for path_color, paths_same_color in sorted_by_colors.items():
             color_names_pen_mapping[pen_index] = path_color.code
 
-            # adding legende of used colors
-            if legende_x:
-                x = collection_bb.x2 + layer_index * 2  # left side for legende
+            all_corners = True
+            if all_corners:
+                add_legende_all_corners(collection_bb, layer_index, c, pen_index, path_color)
             else:
-                x = collection_bb.x + layer_index * 2  # legende on right side
-            if legende_y:
-                y = collection_bb.y2 - pen_index * 2
-            else:
-                y = collection_bb.y + pen_index * 2
+                num_legend_points = 3
 
-            num_legend_points = 3
-            for _ in range(num_legend_points):
-                legend_path = Path(
-                    [Position(x, y), Position(x, y)])
-                legend_path.layer = layer_index
-                legend_path.pen_select = pen_index
-                legend_path.color = path_color.as_rgb()
-                c.add(legend_path)
+                # adding legende of used colors
+                if legende_x:
+                    x = collection_bb.x2 + layer_index * 2  # left side for legende
+                else:
+                    x = collection_bb.x + layer_index * 2  # legende on right side
+                if legende_y:
+                    y = collection_bb.y2 - pen_index * 2
+                else:
+                    y = collection_bb.y + pen_index * 2
 
+                for _ in range(num_legend_points):
+                    legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
+                    c.add(legend_path)
             #######
 
             for path in paths_same_color:
