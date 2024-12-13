@@ -5,7 +5,7 @@ import pathlib
 import typing
 
 # TODO: sometimes i need to import this via cursor.collection.Collection. why?
-from collection import Collection
+from cursor.collection import Collection
 from path import Path
 from position import Position
 
