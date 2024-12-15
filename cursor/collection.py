@@ -29,10 +29,11 @@ from cursor.bb import BoundingBox
 from cursor.data import DataDirHandler
 from cursor.filter import Filter
 from cursor.misc import apply_matrix
-from cursor.path import Path
-from cursor.position import Position
 from cursor.sorter import Sorter
 from cursor.timer import timing
+
+from cursor.path import Path
+from cursor.position import Position
 
 
 class Collection:
@@ -671,7 +672,7 @@ class Collection:
             best_points_coordinate = start_positions[best_points_, :]
             ax[0].plot(
                 best_points_coordinate[:,
-                                       0], best_points_coordinate[:, 1], "o-r"
+                0], best_points_coordinate[:, 1], "o-r"
             )
             ax[1].plot(ga_tsp.generation_best_Y)
             plt.show()
