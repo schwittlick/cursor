@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
@@ -7,11 +9,16 @@ import os
 import cv2
 import tkinter as tk
 
-from collection import Collection
+from algorithm.color.copic import Copic
+from algorithm.color.copic_pen_enum import CopicColorGroup
+from algorithm.color.lib import sort_collection_by_copic_color_group
+from cursor import Collection
+from cursor import Path
+from cursor import Position
+
 from data import DataDirHandler
 from device import PlotterType
 from export import ExportWrapper
-from path import Path
 from timer import Timer
 
 from dataset_tools.skeletonize_qt5 import skeletonize
@@ -35,6 +42,7 @@ class ImageAnnotationViewer:
         # Create button to load viewer
         tk.Button(self.root, text="Load Category", command=self._load_viewer).pack()
         tk.Button(self.root, text="Save Category Contours", command=self._save_contours).pack()
+        tk.Button(self.root, text="Export overview", command=self._save_overview).pack()
 
         self.root.mainloop()
 
@@ -71,18 +79,10 @@ class ImageAnnotationViewer:
         self.update_display()
         plt.show()
 
-    def _save_contours(self, rotate_90=True):
-        """
-        These are the contours saved for e paper
-        """
-        category_info = self.categories_with_counts[self.selected_category.get()]
-        category, count = category_info
-
+    def _compute_contours(self, category, count, rotate_90=True):
         img_path = os.path.join(self.base_path, "101_ObjectCategories", category)
         ann_path = os.path.join(self.base_path, "Annotations", category)
-
-        output_dir = os.path.join(self.base_path, "Contours", category)
-        os.makedirs(output_dir, exist_ok=True)
+        all_contours = []
 
         for i in range(1, count + 1):
             img_file = os.path.join(img_path, f"image_{i:04d}.jpg")
@@ -97,8 +97,6 @@ class ImageAnnotationViewer:
 
             if rotate_90:
                 obj_contour = np.array([obj_contour[1], -obj_contour[0]])
-
-            contour_img = np.ones((2560, 1440), dtype=np.uint8) * 255
 
             # Find contour bounds
             x_min, y_min = np.min(obj_contour, axis=1)
@@ -143,8 +141,22 @@ class ImageAnnotationViewer:
                         interpolated_contour.append(interp_point.astype(np.int32))
 
             interpolated_contour = np.array(interpolated_contour)
+            all_contours.append(interpolated_contour)
 
-            cv2.drawContours(contour_img, [interpolated_contour], 0, 0, 1)
+        return all_contours
+
+    def _save_contours(self, rotate_90=True):
+        category_info = self.categories_with_counts[self.selected_category.get()]
+        category, count = category_info
+
+        output_dir = os.path.join(self.base_path, "Contours", category)
+        os.makedirs(output_dir, exist_ok=True)
+
+        all_contours = self._compute_contours(category, count, rotate_90)
+
+        for i, contour in enumerate(all_contours, 1):
+            contour_img = np.ones((2560, 1440), dtype=np.uint8) * 255
+            cv2.drawContours(contour_img, [contour], 0, 0, 1)
 
             output_file = os.path.join(output_dir, f"contour_{i:04d}.bmp")
             cv2.imwrite(output_file, contour_img)
@@ -152,10 +164,40 @@ class ImageAnnotationViewer:
             # Export CSV with absolute pixel coordinates
             csv_file = os.path.join(output_dir, f"contour_{i:04d}.csv")
             with open(csv_file, 'w') as f:
-                for point in interpolated_contour:
+                for point in contour:
                     f.write(f"{point[0]};{point[1]}\n")
 
         print(f"Saved {count} contour images and CSV files for category '{category}' in {output_dir}")
+
+    def _save_overview(self, rotate_90=True):
+        category_info = self.categories_with_counts[self.selected_category.get()]
+        category, count = category_info
+
+        output_dir = os.path.join(self.base_path, "Contours", category)
+        os.makedirs(output_dir, exist_ok=True)
+
+        all_contours = self._compute_contours(category, count, rotate_90)
+
+        overview_collection = Collection()
+        for idx, contour in enumerate(all_contours):
+            pa = Path.from_array(contour)
+            pa.pen_select = idx + 1
+            color_group = Copic().get_colors_by_group(CopicColorGroup.B)
+            color = color_group[idx % len(color_group)]  # pick color from the color group for each contour
+            pa.properties["copic_color"] = Copic().color_by_code(color)
+            overview_collection.add(pa)
+        overview_collection.rot(math.radians(90))
+        overview_collection = sort_collection_by_copic_color_group(overview_collection)
+
+        wrapper2 = ExportWrapper(
+            overview_collection,
+            PlotterType.HP_7550A_A3,
+            10,  # 25mm - 11mm
+            "datasets",
+            f"overview_contours_{category}",
+            keep_aspect_ratio=True)
+        wrapper2.fit()
+        wrapper2.ex()
 
     def export_contour(self):
         def convert_contour_to_path(contour):
@@ -177,7 +219,7 @@ class ImageAnnotationViewer:
                 return True
             return False
 
-        OUTLINE_WIDTH, OUTLINE_HEIGHT = 126, 84#126, 174
+        OUTLINE_WIDTH, OUTLINE_HEIGHT = 126, 84  # 126, 174
         # change outline manually here
         OUTLINE_MARGIN = 4
 
