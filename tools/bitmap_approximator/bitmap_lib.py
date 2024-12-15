@@ -7,13 +7,13 @@ from tqdm import tqdm
 from algorithm.color.copic import Copic
 from algorithm.color.lib import convert_color_coordinates_to_collection
 
-from bb import BoundingBox
-from collection import Collection
-from data import DataDirHandler
-from export import ExportWrapper
-from position import Position
-from renderer.jpg import JpegRenderer
-from timer import Timer
+from cursor.bb import BoundingBox
+from cursor.collection import Collection
+from cursor.data import DataDirHandler
+from cursor.export import ExportWrapper
+from cursor.position import Position
+from cursor.renderer.jpg import JpegRenderer
+from cursor.timer import Timer
 
 
 def select_files():

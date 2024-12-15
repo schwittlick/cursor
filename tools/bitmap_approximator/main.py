@@ -1,4 +1,4 @@
-from bitmap_approximator.simple_style import main_approximation
+from simple_style import main_approximation
 from device import PlotterType
 from grid_style import create_grid
 

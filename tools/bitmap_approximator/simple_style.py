@@ -7,12 +7,12 @@ from tkinter import filedialog
 import numpy as np
 from PIL import Image
 
-from bitmap_approximator.bitmap_lib import do_bitmap_approximation
-from collection import Collection
-from data import DataDirHandler
-from device import PlotterType
-from export import ExportWrapper
-from renderer.jpg import JpegRenderer
+from bitmap_lib import do_bitmap_approximation
+from cursor.collection import Collection
+from cursor.data import DataDirHandler
+from cursor.device import PlotterType
+from cursor.export import ExportWrapper
+from cursor.renderer.jpg import JpegRenderer
 
 
 def main_approximation():
