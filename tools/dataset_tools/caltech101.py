@@ -110,7 +110,7 @@ class ImageAnnotationViewer:
             contour_height += 2 * padding
 
             # Calculate scale to fit contour while maintaining aspect ratio
-            scale_x = 1440 / contour_width
+            scale_x = -1440 / contour_width
             scale_y = 2560 / contour_height
             scale = min(scale_x, scale_y)
 
@@ -227,7 +227,7 @@ class ImageAnnotationViewer:
         A5_MULT = 1
         A4_MULT = 2
         A3_MULT = 4
-        format_multiplier = A4_MULT
+        format_multiplier = A5_MULT
 
         OUTPUT_WIDTH = int(OUTLINE_WIDTH * format_multiplier)
         OUTPUT_HEIGHT = int(OUTLINE_HEIGHT * format_multiplier)
@@ -452,8 +452,17 @@ class ImageAnnotationViewer:
         )
 
         self.ax.set_title(f'{self.selected_category.get()} - Image {self.current_index}')
+
+        self.ax.set_xticks([])
+        self.ax.set_yticks([])
+        self.ax.set_xticklabels([])
+        self.ax.set_yticklabels([])
+        self.ax.axis('off')
+
         self.ax.axis('image')
         self.fig.canvas.draw_idle()
+
+        self.root.title(f'{self.selected_category.get()}')
 
 
 if __name__ == '__main__':
