@@ -112,6 +112,14 @@ class Path:
             _pa.add_position(pa)
         return _pa
 
+    @classmethod
+    def from_array(cls, array: np.ndarray) -> Path:
+        if array.ndim != 2 or array.shape[1] != 2:
+            raise ValueError("Input array must be 2D with shape (n, 2)")
+
+        positions = [Position(x.item(), y.item()) for x, y in array]
+        return cls(positions)
+
     @property
     def hash(self) -> str:
         return hashlib.md5(str(self.vertices).encode("utf-8")).hexdigest()
@@ -1071,7 +1079,7 @@ class Path:
 
         # Determine the new distances for interpolation
         new_distances = [0.0] + \
-            [i * target_dist for i in range(1, num_intervals + 1)]
+                        [i * target_dist for i in range(1, num_intervals + 1)]
         if new_distances[-1] > total_distance:
             new_distances.pop()
 
