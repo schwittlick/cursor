@@ -1,4 +1,5 @@
 import math
+import random
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,15 +10,18 @@ import os
 import cv2
 import tkinter as tk
 
+from skimage.util import img_as_ubyte
+
 from algorithm.color.copic import Copic
 from algorithm.color.copic_pen_enum import CopicColorGroup
 from algorithm.color.lib import sort_collection_by_copic_color_group
+from bb import BoundingBox
 from cursor import Collection
 from cursor import Path
-from cursor import Position
 
 from data import DataDirHandler
-from device import PlotterType
+from dataset_tools.skeletonize_lib import skeleton_to_vectors
+from device import PlotterType, MinmaxMapping
 from export import ExportWrapper
 from timer import Timer
 
@@ -43,6 +47,7 @@ class ImageAnnotationViewer:
         tk.Button(self.root, text="Load Category", command=self._load_viewer).pack()
         tk.Button(self.root, text="Save Category Contours", command=self._save_contours).pack()
         tk.Button(self.root, text="Export overview", command=self._save_overview).pack()
+        tk.Button(self.root, text="Export skeleton overview", command=self._save_skeleton_overview).pack()
 
         self.root.mainloop()
 
@@ -150,7 +155,9 @@ class ImageAnnotationViewer:
         category, count = category_info
 
         output_dir = os.path.join(self.base_path, "Contours", category)
+        output_dir_png = os.path.join(self.base_path, "Contours", f"{category}_png")
         os.makedirs(output_dir, exist_ok=True)
+        os.makedirs(output_dir_png, exist_ok=True)
 
         all_contours = self._compute_contours(category, count, rotate_90)
 
@@ -163,6 +170,15 @@ class ImageAnnotationViewer:
 
             # Export CSV with absolute pixel coordinates
             csv_file = os.path.join(output_dir, f"contour_{i:04d}.csv")
+            with open(csv_file, 'w') as f:
+                for point in contour:
+                    f.write(f"{point[0]};{point[1]}\n")
+
+            output_file_png = os.path.join(output_dir_png, f"contour_{i:04d}.png")
+            cv2.imwrite(output_file_png, contour_img)
+
+            # Export CSV with absolute pixel coordinates
+            csv_file = os.path.join(output_dir_png, f"contour_{i:04d}.csv")
             with open(csv_file, 'w') as f:
                 for point in contour:
                     f.write(f"{point[0]};{point[1]}\n")
@@ -182,16 +198,17 @@ class ImageAnnotationViewer:
         for idx, contour in enumerate(all_contours):
             pa = Path.from_array(contour)
             pa.pen_select = idx + 1
-            color_group = Copic().get_colors_by_group(CopicColorGroup.B)
+            pa.velocity = 20
+            color_group = Copic().get_colors_by_group(CopicColorGroup.R)
             color = color_group[idx % len(color_group)]  # pick color from the color group for each contour
             pa.properties["copic_color"] = Copic().color_by_code(color)
             overview_collection.add(pa)
         overview_collection.rot(math.radians(90))
-        overview_collection = sort_collection_by_copic_color_group(overview_collection)
+        overview_collection = sort_collection_by_copic_color_group(overview_collection, legende_scale=40)
 
         wrapper2 = ExportWrapper(
             overview_collection,
-            PlotterType.HP_7550A_A3,
+            PlotterType.HP_DM_RX_PLUS_A1,
             10,  # 25mm - 11mm
             "datasets",
             f"overview_contours_{category}",
@@ -199,26 +216,155 @@ class ImageAnnotationViewer:
         wrapper2.fit()
         wrapper2.ex()
 
+    def _save_skeleton_overview(self, rotate_90=True):
+        category_info = self.categories_with_counts[self.selected_category.get()]
+        category, count = category_info
+
+        output_dir = os.path.join(self.base_path, "Skeletons", category)
+        os.makedirs(output_dir, exist_ok=True)
+
+        all_skeletons = Collection()
+
+        for i in range(1, count - 1):
+            # Load image
+            img_path = os.path.join(self.base_img_path, f"image_{i:04d}.jpg")
+            img = cv2.imread(img_path)
+
+            # Rotate image if needed
+            if rotate_90:
+                img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+
+            # Get contour
+            ann_file = os.path.join(self.base_ann_path, f"annotation_{i:04d}.mat")
+            data = loadmat(ann_file)
+            obj_contour = data['obj_contour']
+
+            # Create scaled contour
+            height, width = img.shape[:2]
+            orig_contour = np.zeros((obj_contour.shape[1], 2), dtype=np.int32)
+            for j in range(obj_contour.shape[1]):
+                orig_contour[j] = [obj_contour[0, j], obj_contour[1, j]]
+
+            # Get bounds for the contour
+            xmin, ymin = np.min(orig_contour, axis=0)
+            xmax, ymax = np.max(orig_contour, axis=0)
+
+            # Calculate scale to fit contour
+            scale_x = width / (xmax - xmin)
+            scale_y = height / (ymax - ymin)
+            scale = min(scale_x, scale_y)
+
+            # Calculate offsets to center the contour
+            x_offset = int((width - (xmax - xmin) * scale) / 2)
+            y_offset = int((height - (ymax - ymin) * scale) / 2)
+
+            # Create scaled contour
+            scaled_contour = self.construct_scaled_contour(orig_contour, xmin, ymin, scale, x_offset, y_offset)
+
+            # Create filled outline image
+            filled_outline = self.generate_filled_outline(scaled_contour, width, height)
+            filled_outline_resized = cv2.resize(filled_outline, (width * 2, height * 2),
+                                                interpolation=cv2.INTER_NEAREST)
+
+            # Skeletonize
+            skeleton = skeletonize(255 - filled_outline_resized)
+
+            # Convert skeleton to uint8
+            skeleton_uint8 = img_as_ubyte(skeleton)
+
+            # Convert skeleton to vectors
+            skeleton_vectors = skeleton_to_vectors(skeleton_uint8)
+
+            # Create paths from vectors and add to collection
+            group = Collection()
+            for vector in skeleton_vectors:
+                path = Path()
+                for point in vector:
+                    path.add(float(point[1]), float(point[0]))  # Swap x and y coordinates
+
+                group.add(path)
+
+            random_placement = False
+            if random_placement:
+                bb = MinmaxMapping.maps[PlotterType.HP_DM_RX_PLUS_A1]
+                padding = 200
+                max_x = bb.x2 - group.bb().w - padding
+                max_y = bb.y2 - group.bb().h - padding
+                random_x = random.uniform(bb.x + padding, max_x)
+                random_y = random.uniform(bb.y + padding, max_y)
+                group.move_to_origin()
+                group.translate(-group.bb().w / 2, -group.bb().h / 2)
+                group.scale(10, 10)
+                group.translate(random_x, random_y)
+            else:
+                bb = MinmaxMapping.maps[PlotterType.HP_DM_RX_PLUS_A1]
+                group.transform(bb)  # Fit to unit bounding box
+
+            for path in group:
+                path.pen_select = (i % 8) + 1  # Use image index as pen selection
+                path.velocity = 20
+                all_skeletons.add(path)
+
+            # Save individual skeleton image (optional)
+            skeleton_img_path = os.path.join(output_dir, f"skeleton_{i:04d}.png")
+            cv2.imwrite(skeleton_img_path, skeleton_uint8)
+
+        # Process the collection of all skeletons
+        # all_skeletons.rot(math.radians(90))  # Rotate 90 degrees
+        # all_skeletons.fit(BoundingBox(0, 0, 1, 1))  # Fit to unit bounding box
+
+        # Export the collection
+        wrapper = ExportWrapper(
+            all_skeletons,
+            PlotterType.HP_DM_RX_PLUS_A1,
+            10,  # 25mm - 11mm
+            "datasets",
+            f"overview_skeletons_{category}",
+            keep_aspect_ratio=True
+        )
+        wrapper.fit()
+        wrapper.ex()
+
+        print(f"Saved skeleton overview for category '{category}' with {count} images")
+
+        return all_skeletons
+
+    def construct_scaled_contour(self, orig_contour, xmin, ymin, scale, x_offset, y_offset):
+        scaled_contour = np.zeros((orig_contour.shape[0], 2), dtype=np.int32)
+        for i in range(orig_contour.shape[0]):
+            x = orig_contour[i][0] - xmin
+            y = orig_contour[i][1] - ymin
+            scaled_contour[i] = [
+                int(x * scale) + x_offset,
+                int(y * scale) + y_offset
+            ]
+        return scaled_contour
+
+    def generate_filled_outline(self, scaled_contour, width, height):
+        export_img_filled = np.ones((height, width), dtype=np.uint8) * 255
+        cv2.fillPoly(export_img_filled, [scaled_contour], color=0)
+        return export_img_filled
+
+    def convert_contour_to_path(self, contour):
+        path = []
+        for point in contour:
+            path.append((float(point[0]), float(point[1])))
+        return path
+
+    def calc_should_rotate(self, contours):
+        path = Path()
+        for i in range(contours.shape[1]):
+            x = contours[0, i]
+            y = contours[1, i]
+            path.add(float(x), float(y))
+
+        path_bb = path.bb()
+        # we change the rotation depending on format grml
+        if path_bb.w < path_bb.h:
+            return True
+        return False
+
     def export_contour(self):
-        def convert_contour_to_path(contour):
-            path = []
-            for point in contour:
-                path.append((float(point[0]), float(point[1])))
-            return path
-
-        def calc_should_rotate(contours):
-            path = Path()
-            for i in range(contours.shape[1]):
-                x = contours[0, i]
-                y = contours[1, i]
-                path.add(float(x), float(y))
-
-            path_bb = path.bb()
-            # we change the rotation depending on format grml
-            if path_bb.w < path_bb.h:
-                return True
-            return False
-
         OUTLINE_WIDTH, OUTLINE_HEIGHT = 126, 84  # 126, 174
         # change outline manually here
         OUTLINE_MARGIN = 4
@@ -248,7 +394,7 @@ class ImageAnnotationViewer:
 
         # Check if height > width and rotate if needed
         # should_rotate = img.shape[0] > img.shape[1]
-        should_rotate = calc_should_rotate(obj_contour)
+        should_rotate = self.calc_should_rotate(obj_contour)
         if should_rotate:
             img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
@@ -293,18 +439,11 @@ class ImageAnnotationViewer:
         x_offset = int((OUTLINE_WIDTH - scaled_width) / 2)
         y_offset = int((OUTLINE_HEIGHT - scaled_height) / 2)
 
-        # Create scaled contour points for outline/filled versions
-        scaled_contour = np.zeros((obj_contour.shape[1], 2), dtype=np.int32)
-        for i in range(obj_contour.shape[1]):
-            x = orig_contour[i][0] - xmin
-            y = orig_contour[i][1] - ymin
-            scaled_contour[i] = [
-                int(x * scale) + x_offset,
-                int(y * scale) + y_offset
-            ]
+        # Use the new function to construct the scaled contour
+        scaled_contour = self.construct_scaled_contour(orig_contour, xmin, ymin, scale, x_offset, y_offset)
 
         cv2.polylines(export_img_outline, [scaled_contour], isClosed=True, color=0, thickness=1)
-        cv2.fillPoly(export_img_filled, [scaled_contour], color=0)
+        export_img_filled = self.generate_filled_outline(scaled_contour, OUTLINE_WIDTH, OUTLINE_HEIGHT)
 
         # Scale for original image (OUTPUT_WIDTH x OUTPUT_HEIGHT)
         scale_x_orig = (OUTPUT_WIDTH - 2 * MARGIN) / (xmax - xmin)
@@ -356,7 +495,7 @@ class ImageAnnotationViewer:
         cv2.imwrite(str(output_path_comparison), comparison_image)
         print(f"  Comparison: {output_path_comparison}")
 
-        path = convert_contour_to_path(orig_contour)
+        path = self.convert_contour_to_path(orig_contour)
         coll = Collection.from_tuples([path])
 
         fname = f"{category}_grog_outline_{Timer.timestamp()}"
