@@ -6,8 +6,9 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from time import sleep
 
-from hpgl.hpgl_tokenize import tokenizer
-from hpgl.plotter.plotter import HPGLPlotter
+from cursor import Position
+from cursor.hpgl.hpgl_tokenize import tokenizer
+from cursor.hpgl.plotter.plotter import HPGLPlotter
 
 
 class PlotterThread(QThread):
@@ -24,11 +25,16 @@ class PlotterThread(QThread):
 
     def run(self):
         try:
-            plotter = HPGLPlotter(serial.Serial(self.plotter_port))
+            print("unning")
+            plotter = HPGLPlotter(serial.Serial(self.plotter_port, baudrate=9600, timeout=1))
+            print("plot")
             arduino = serial.Serial(self.arduino_port, baudrate=9600, timeout=1)
+            print("ard")
             commands = tokenizer(self.hpgl_data)
+            print(commands)
 
             for i, cmd in enumerate(commands):
+                print(cmd)
                 if not self.is_running:
                     break
 
@@ -43,8 +49,16 @@ class PlotterThread(QThread):
                 elif cmd.startswith("PA"):
                     pos = cmd[2:].split(',')
                     po = (int(pos[0]), int(pos[1]))
+                    pos = Position.from_tuple(po)
+                    print(pos)
                     plotter.write(f"PA{po[0]},{po[1]};")
-                    self._poll_position(plotter, po)
+                    self._poll_position(plotter, pos)
+
+                    pos.translate(10, 10)
+                    plotter.write(f"PA{int(pos.x)},{int(pos.y)};")
+                    self._poll_position(plotter, pos)
+                    arduino.write(f"RGB0,0,0;".encode('utf-8'))
+                    arduino.readline()  # Read acknowledgment
                 elif cmd.startswith("RGB"):
                     arduino.write(f"{cmd};".encode('utf-8'))
                     arduino.readline()  # Read acknowledgment
@@ -58,6 +72,7 @@ class PlotterThread(QThread):
             self.finished.emit()
 
         except Exception as e:
+            print(e)
             self.status.emit(f"Error: {str(e)}")
             self.finished.emit()
 
@@ -65,6 +80,7 @@ class PlotterThread(QThread):
         attempts = 0
         while attempts < 20 and self.is_running:
             current_pos = plotter.get_position()
+            print(f"curpos: {current_pos}")
             if current_pos == target_pos:
                 return True
             attempts += 1
@@ -187,6 +203,8 @@ class MainWindow(QMainWindow):
         self.start_btn.setEnabled(False)
         self.stop_btn.setEnabled(True)
         self.progress_bar.setValue(0)
+
+        print(self.hpgl_data)
 
         self.plotter_thread = PlotterThread(plotter_port, arduino_port, self.hpgl_data)
         self.plotter_thread.progress.connect(self.update_progress)
