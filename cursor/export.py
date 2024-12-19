@@ -163,7 +163,7 @@ class Exporter:
             fname = self._generate_filename(layer)
             jpeg_folder = DataDirHandler().jpg(self.name)
             bb = self.collection.bb()
-            # bb.scale(0.1)
+            bb.scale(0.1)
             transformed = pc.transformed(BoundingBox(0, 0, bb.w, bb.h))
             jpeg_renderer = JpegRenderer(jpeg_folder, w=int(bb.w), h=int(bb.h))
             jpeg_renderer.background((255, 255, 255))
