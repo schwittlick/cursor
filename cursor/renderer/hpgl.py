@@ -92,6 +92,8 @@ class HPGLRenderer(BaseRenderer):
             if p.laser_pwm:
                 _hpgl.custom(f"PWM{p.laser_pwm};")
 
+
+
             if p.laser_volt:
                 _hpgl.custom(f"VOLT{p.laser_volt:.3};")
 
@@ -106,6 +108,9 @@ class HPGLRenderer(BaseRenderer):
                 _hpgl.custom("PM0;")
 
             _hpgl.PD()
+
+            if p.rgb_led_color:
+                _hpgl.custom(f"\nRGB{p.rgb_led_color[0]},{p.rgb_led_color[1]},{p.rgb_led_color[2]};")
 
             for point in p.vertices:
                 x = point.x

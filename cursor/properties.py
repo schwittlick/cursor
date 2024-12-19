@@ -21,3 +21,4 @@ class Property(str, Enum):
     WIDTH = "width"
     RADIUS = 'radius'
     TAGS = 'tags'
+    RGB_LED_COLOR = 'rgb_led_color'

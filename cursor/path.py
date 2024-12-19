@@ -228,6 +228,18 @@ class Path:
         self.properties[Property.LASER_PWM] = laser_pwm
 
     @property
+    def rgb_led_color(self) -> tuple[int, int, int] | None:
+        # 255,255,255 etc
+        if Property.RGB_LED_COLOR not in self.properties.keys():
+            return None
+
+        return self.properties[Property.RGB_LED_COLOR]
+
+    @rgb_led_color.setter
+    def rgb_led_color(self, rgb_led_color: tuple[int, int, int]) -> None:
+        self.properties[Property.RGB_LED_COLOR] = rgb_led_color
+
+    @property
     def laser_volt(self) -> float | None:
         if Property.LASER_VOLT not in self.properties.keys():
             return None
