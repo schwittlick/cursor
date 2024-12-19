@@ -206,12 +206,12 @@ class ImageAnnotationViewer:
             pa = Path.from_array(contour)
             pa.pen_select = idx + 1
             pa.velocity = 20
-            color_group = Copic().get_colors_by_group(CopicColorGroup.R)
+            color_group = Copic().get_colors_by_group(CopicColorGroup.Y)
             color = color_group[idx % len(color_group)]  # pick color from the color group for each contour
             pa.properties["copic_color"] = Copic().color_by_code(color)
             overview_collection.add(pa)
         overview_collection.rot(math.radians(90))
-        overview_collection = sort_collection_by_copic_color_group(overview_collection, legende_scale=40)
+        overview_collection = sort_collection_by_copic_color_group(overview_collection, legende_scale=1)
 
         wrapper2 = ExportWrapper(
             overview_collection,
@@ -219,7 +219,8 @@ class ImageAnnotationViewer:
             10,  # 25mm - 11mm
             "datasets",
             f"overview_contours_{category}",
-            keep_aspect_ratio=True)
+            keep_aspect_ratio=True,
+            export_jpg_preview=True)
         wrapper2.fit()
         wrapper2.ex()
 

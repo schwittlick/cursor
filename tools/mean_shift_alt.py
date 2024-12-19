@@ -351,7 +351,7 @@ class MainWindow(QMainWindow):
         # Algorithm parameters
         algorithms = {
             'meanshift': {'bandwidth': {'min': 0.1, 'max': 1.0, 'default': 0.2}},
-            'kmeans': {'n_clusters': {'min': 2, 'max': 20, 'default': 8}},
+            'kmeans': {'n_clusters': {'min': 2, 'max': 40, 'default': 8}},
             'dbscan': {
                 'eps': {'min': 0.1, 'max': 1.0, 'default': 0.3},
                 'min_samples': {'min': 2, 'max': 20, 'default': 5}

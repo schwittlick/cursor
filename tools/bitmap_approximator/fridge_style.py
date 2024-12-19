@@ -47,7 +47,7 @@ def process_image(path):
 
 
 def place_collection(collection, fridge_bb, placed_bbs, collections):
-    max_attempts = 100
+    max_attempts = 200
     for _ in range(max_attempts):
         if try_place_collection(collection, fridge_bb, placed_bbs):
             collections.append(collection)
