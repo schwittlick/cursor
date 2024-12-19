@@ -1,9 +1,10 @@
 import logging
 import sys
 import serial.tools.list_ports
+from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QLabel, QComboBox, QPushButton,
-                             QFileDialog, QProgressBar, QTextEdit)
+                             QFileDialog, QProgressBar, QTextEdit, QShortcut)
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from time import sleep
 
@@ -39,7 +40,9 @@ class PlotterThread(QThread):
                 print(cmd)
                 timer = Timer()
                 if not self.is_running:
-                    break
+                    sleep(0.1)  # Wait while paused
+                    if self.isInterruptionRequested():
+                        return  # Exit if the thread is stopped
 
                 self.progress.emit(int((i / len(commands)) * 100))
                 self.status.emit(f"Processing command: {cmd}")
@@ -60,10 +63,10 @@ class PlotterThread(QThread):
 
                     plotter.write(f"PA{int(pos.x)},{int(pos.y)};")
                     self._poll_position(plotter, pos)
-                    #arduino.write("RGB0,0,0;".encode('utf-8'))
+                    # arduino.write("RGB0,0,0;".encode('utf-8'))
                 elif cmd.startswith("RGB"):
                     arduino.write(f"{cmd};".encode('utf-8'))
-                    #arduino.readline()
+                    # arduino.readline()
                 elif cmd.startswith("VS"):
                     plotter.write(f"{cmd};")
 
@@ -81,7 +84,7 @@ class PlotterThread(QThread):
 
     def _poll_position(self, plotter, target_pos):
         attempts = 0
-        while attempts <50 and self.is_running:
+        while attempts < 50 and self.is_running:
             current_pos = plotter.get_position()
             print(f"curpos: {current_pos}")
             if current_pos == target_pos:
@@ -95,6 +98,8 @@ class PlotterThread(QThread):
 
     def stop(self):
         self.is_running = False
+        self.requestInterruption()
+        self.wait()
 
 
 class MainWindow(QMainWindow):
@@ -167,6 +172,13 @@ class MainWindow(QMainWindow):
 
         layout.addLayout(button_layout)
 
+        # Add shortcut for start/pause plotting
+        self.plot_shortcut = QShortcut(QKeySequence('P'), self)
+        self.plot_shortcut.activated.connect(self.toggle_plotting)
+
+        # Add a flag to track if plotting is paused
+        self.is_paused = False
+
         # Initialize
         self.hpgl_data = None
         self.plotter_thread = None
@@ -194,6 +206,17 @@ class MainWindow(QMainWindow):
             except Exception as e:
                 self.log_message(f"Error loading file: {str(e)}")
 
+    def toggle_plotting(self):
+        if not self.plotter_thread or not self.plotter_thread.isRunning():
+            # If not running, start plotting
+            self.start_plotting()
+        else:
+            # If running, toggle pause/resume
+            if self.is_paused:
+                self.resume_plotting()
+            else:
+                self.pause_plotting()
+
     def start_plotting(self):
         if not self.hpgl_data:
             self.log_message("No HPGL file loaded!")
@@ -218,6 +241,22 @@ class MainWindow(QMainWindow):
         self.plotter_thread.finished.connect(self.plotting_finished)
         self.plotter_thread.start()
 
+        self.is_paused = False
+        self.log_message("Plotting started")
+
+    def pause_plotting(self):
+        if self.plotter_thread and self.plotter_thread.isRunning():
+            self.plotter_thread.is_running = False
+            self.is_paused = True
+            self.log_message("Plotting paused")
+
+    def resume_plotting(self):
+        if self.plotter_thread and not self.plotter_thread.isRunning():
+            self.plotter_thread.is_running = True
+            self.plotter_thread.start()
+            self.is_paused = False
+            self.log_message("Plotting resumed")
+
     def stop_plotting(self):
         if self.plotter_thread and self.plotter_thread.isRunning():
             self.plotter_thread.stop()
@@ -228,6 +267,7 @@ class MainWindow(QMainWindow):
     def plotting_finished(self):
         self.start_btn.setEnabled(True)
         self.stop_btn.setEnabled(False)
+        self.is_paused = False
 
     def update_progress(self, value):
         self.progress_bar.setValue(value)
