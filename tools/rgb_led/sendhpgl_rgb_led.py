@@ -57,8 +57,6 @@ class PlotterThread(QThread):
                     pos.translate(10, 10)
                     plotter.write(f"PA{int(pos.x)},{int(pos.y)};")
                     self._poll_position(plotter, pos)
-                    arduino.write(f"RGB0,0,0;".encode('utf-8'))
-                    arduino.readline()  # Read acknowledgment
                 elif cmd.startswith("RGB"):
                     arduino.write(f"{cmd};".encode('utf-8'))
                     arduino.readline()  # Read acknowledgment
@@ -78,7 +76,7 @@ class PlotterThread(QThread):
 
     def _poll_position(self, plotter, target_pos):
         attempts = 0
-        while attempts < 20 and self.is_running:
+        while attempts < 50 and self.is_running:
             current_pos = plotter.get_position()
             print(f"curpos: {current_pos}")
             if current_pos == target_pos:
