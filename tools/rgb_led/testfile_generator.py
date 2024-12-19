@@ -28,13 +28,14 @@ class MainWindow(QMainWindow):
     def create_lines(self, color: tuple[int, int, int], offset_x: float, offset_y: float) -> Collection:
         pc = Collection()
         # Generate 10 parallel lines
+        vss = [2, 4, 6, 8, 10, 15, 20, 30, 40, 50]
         for i in range(10):
             p = Path()
             p.add(offset_x, offset_y + i * 0.1)  # Start point
             p.add(offset_x + 0.3, offset_y + i * 0.1)  # End point
 
             p.pen_select = 1
-            p.velocity = 40
+            p.velocity = vss[i]
             p.rgb_led_color = color
             pc.add(p)
 
