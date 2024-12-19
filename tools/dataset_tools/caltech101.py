@@ -106,22 +106,25 @@ class ImageAnnotationViewer:
             # Find contour bounds
             x_min, y_min = np.min(obj_contour, axis=1)
             x_max, y_max = np.max(obj_contour, axis=1)
+
             contour_width = x_max - x_min
             contour_height = y_max - y_min
 
             # Add padding (8% of the larger dimension)
-            padding = int(0.08 * max(contour_width, contour_height))
-            contour_width += 2 * padding
-            contour_height += 2 * padding
+            random_padding = random.uniform(0.04, 0.08)
+            padding = int(random_padding * max(contour_width, contour_height))
+            padded_width = contour_width + 2 * padding
+            padded_height = contour_height + 2 * padding
 
             # Calculate scale to fit contour while maintaining aspect ratio
-            scale_x = -1440 / contour_width
-            scale_y = 2560 / contour_height
+            target_width, target_height = 1440, 2560
+            scale_x = target_width / padded_width
+            scale_y = target_height / padded_height
             scale = min(scale_x, scale_y)
 
             # Calculate padding to center the contour
-            pad_x = int((1440 - contour_width * scale) / 2)
-            pad_y = int((2560 - contour_height * scale) / 2)
+            pad_x = int((target_width - padded_width * scale) / 2)
+            pad_y = int((target_height - padded_height * scale) / 2)
 
             scaled_contour = np.zeros((obj_contour.shape[1], 2), dtype=np.int32)
             for j in range(obj_contour.shape[1]):
@@ -146,6 +149,10 @@ class ImageAnnotationViewer:
                         interpolated_contour.append(interp_point.astype(np.int32))
 
             interpolated_contour = np.array(interpolated_contour)
+
+            # Flip the contour horizontally (left/right axis)
+            interpolated_contour[:, 0] = target_width - interpolated_contour[:, 0]
+
             all_contours.append(interpolated_contour)
 
         return all_contours
