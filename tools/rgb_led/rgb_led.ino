@@ -15,8 +15,8 @@ void setup() {
 void loop() {
   // when a complete message arrives, process the RGB values
   if (stringComplete) {
-    Serial.print("Received: ");
-    Serial.println(inputString);
+    //Serial.print("Received: ");
+    //Serial.println(inputString);
 
     inputString.trim();  // Remove any leading/trailing whitespace
 
@@ -24,8 +24,8 @@ void loop() {
       // Remove "RGB" prefix and ";" suffix
       String values = inputString.substring(3, inputString.length() - 1);
 
-      Serial.print("Parsed values: ");
-      Serial.println(values);
+      //Serial.print("Parsed values: ");
+      //Serial.println(values);
 
       // parse the comma-separated values
       int firstComma = values.indexOf(',');
@@ -48,17 +48,17 @@ void loop() {
         setColor(r, g, b);
 
         // echo back the received values
-        Serial.print("Set RGB to: ");
-        Serial.print(r);
-        Serial.print(",");
-        Serial.print(g);
-        Serial.print(",");
-        Serial.println(b);
+        //Serial.print("Set RGB to: ");
+        //Serial.print(r);
+        //Serial.print(",");
+        //Serial.print(g);
+        //Serial.print(",");
+        //Serial.println(b);
       } else {
-        Serial.println("Invalid format: Couldn't find commas");
+        //Serial.println("Invalid format: Couldn't find commas");
       }
     } else {
-      Serial.println("Invalid format. Use: RGB255,0,0;");
+      //Serial.println("Invalid format. Use: RGB255,0,0;");
     }
 
     // clear the string for new input

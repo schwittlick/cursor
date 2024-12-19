@@ -1,3 +1,4 @@
+import logging
 import sys
 import serial.tools.list_ports
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
@@ -9,6 +10,7 @@ from time import sleep
 from cursor import Position
 from cursor.hpgl.hpgl_tokenize import tokenizer
 from cursor.hpgl.plotter.plotter import HPGLPlotter
+from cursor.timer import Timer
 
 
 class PlotterThread(QThread):
@@ -35,6 +37,7 @@ class PlotterThread(QThread):
 
             for i, cmd in enumerate(commands):
                 print(cmd)
+                timer = Timer()
                 if not self.is_running:
                     break
 
@@ -44,26 +47,28 @@ class PlotterThread(QThread):
                 if cmd.startswith("PD"):
                     plotter.write(f"{cmd};")
                 elif cmd.startswith("PU"):
-                    arduino.write("RGB0,0,0;".encode('utf-8'))
+
                     plotter.write(f"{cmd};")
                 elif cmd.startswith("PA"):
                     pos = cmd[2:].split(',')
                     po = (int(pos[0]), int(pos[1]))
                     pos = Position.from_tuple(po)
-                    print(pos)
-                    plotter.write(f"PA{po[0]},{po[1]};")
+                    plotter.write(f"PA{int(pos.x)},{int(pos.y)};")
                     self._poll_position(plotter, pos)
 
                     pos.translate(10, 10)
+
                     plotter.write(f"PA{int(pos.x)},{int(pos.y)};")
                     self._poll_position(plotter, pos)
+                    #arduino.write("RGB0,0,0;".encode('utf-8'))
                 elif cmd.startswith("RGB"):
                     arduino.write(f"{cmd};".encode('utf-8'))
-                    arduino.readline()  # Read acknowledgment
+                    #arduino.readline()
                 elif cmd.startswith("VS"):
                     plotter.write(f"{cmd};")
 
                 sleep(0.1)
+                timer.print_elapsed(f"{cmd} took")
 
             self.progress.emit(100)
             self.status.emit("Plotting completed!")
@@ -76,13 +81,16 @@ class PlotterThread(QThread):
 
     def _poll_position(self, plotter, target_pos):
         attempts = 0
-        while attempts < 50 and self.is_running:
+        while attempts <50 and self.is_running:
             current_pos = plotter.get_position()
             print(f"curpos: {current_pos}")
             if current_pos == target_pos:
                 return True
             attempts += 1
-            sleep(0.1)
+            sleep(0.01)
+
+        logging.error(f"Failed to poll position successfully")
+        logging.error(target_pos)
         return False
 
     def stop(self):
