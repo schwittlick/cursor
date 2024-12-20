@@ -1,21 +1,21 @@
 import math
 import random
 
-import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
-from scipy.io import loadmat
 from PIL import Image as PILImage
-import os
 import cv2
 import tkinter as tk
+import json
+import os
+import numpy as np
+from scipy.io import loadmat
 
 from skimage.util import img_as_ubyte
 
 from algorithm.color.copic import Copic
 from algorithm.color.copic_pen_enum import CopicColorGroup
 from algorithm.color.lib import sort_collection_by_copic_color_group
-from bb import BoundingBox
 from cursor import Collection
 from cursor import Path
 
@@ -48,7 +48,7 @@ class ImageAnnotationViewer:
         tk.Button(self.root, text="Save Category Contours", command=self._save_contours).pack()
         tk.Button(self.root, text="Export overview", command=self._save_overview).pack()
         tk.Button(self.root, text="Export skeleton overview", command=self._save_skeleton_overview).pack()
-
+        tk.Button(self.root, text="Export Normalized Contours", command=self._export_normalized_contours).pack()
         self.root.mainloop()
 
     def _get_categories(self):
@@ -157,6 +157,84 @@ class ImageAnnotationViewer:
 
         return all_contours
 
+    def _export_normalized_contours(self):
+        """
+        Exports all contours from the selected category in a normalized format (coordinates between 0.0 and 1.0).
+        Maintains original aspect ratio and saves contours without padding.
+        Saves the results as JSON files containing normalized coordinates and metadata.
+        """
+
+        category_info = self.categories_with_counts[self.selected_category.get()]
+        category, count = category_info
+
+        # Create output directory
+        output_dir = os.path.join(self.base_path, "NormalizedContours", category)
+        os.makedirs(output_dir, exist_ok=True)
+
+        all_contours = []
+
+        for i in range(1, count + 1):
+            # Load annotation file
+            ann_file = os.path.join(self.base_ann_path, f"annotation_{i:04d}.mat")
+            if not os.path.exists(ann_file):
+                print(f"Skipping image {i} due to missing annotation file.")
+                continue
+
+            try:
+                # Load contour data
+                data = loadmat(ann_file)
+                obj_contour = data['obj_contour']
+
+                # Convert to numpy array of points
+                points = np.array([obj_contour[0], obj_contour[1]]).T
+
+                # Find min and max values for normalization
+                min_vals = np.min(points, axis=0)
+                max_vals = np.max(points, axis=0)
+
+                # Calculate ranges
+                ranges = max_vals - min_vals
+
+                # Normalize points to 0-1 range while preserving aspect ratio
+                max_range = np.max(ranges)
+                normalized_points = (points - min_vals) / max_range
+
+                # Convert to list of [x, y] coordinates
+                contour_data = {
+                    'points': normalized_points.tolist(),
+                    'original_width': float(ranges[0]),
+                    'original_height': float(ranges[1]),
+                    'aspect_ratio': float(ranges[1] / ranges[0]),
+                    'index': i
+                }
+
+                # Save individual contour file
+                output_file = os.path.join(output_dir, f"normalized_contour_{i:04d}.json")
+                with open(output_file, 'w') as f:
+                    json.dump(contour_data, f, indent=2)
+
+                all_contours.append(contour_data)
+
+            except Exception as e:
+                print(f"Error processing image {i}: {str(e)}")
+                continue
+
+        # Save collection file with all contours
+        collection_file = os.path.join(output_dir, f"{category}_normalized_contours.json")
+        collection_data = {
+            'category': category,
+            'count': len(all_contours),
+            'contours': all_contours
+        }
+
+        with open(collection_file, 'w') as f:
+            json.dump(collection_data, f, indent=2)
+
+        print(f"Exported {len(all_contours)} normalized contours for category '{category}'")
+        print(f"Collection file saved to: {collection_file}")
+
+        return collection_data
+
     def _save_contours(self, rotate_90=True):
         category_info = self.categories_with_counts[self.selected_category.get()]
         category, count = category_info
@@ -165,6 +243,9 @@ class ImageAnnotationViewer:
         output_dir_png = os.path.join(self.base_path, "Contours", f"{category}_png")
         os.makedirs(output_dir, exist_ok=True)
         os.makedirs(output_dir_png, exist_ok=True)
+
+        if category == "flamingo":
+            rotate_90 = False
 
         all_contours = self._compute_contours(category, count, rotate_90)
 
