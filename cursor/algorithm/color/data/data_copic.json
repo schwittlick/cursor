@@ -2126,7 +2126,7 @@
     "rgb": "180,96,52"
   },
   {
-    "id": "C-0",
+    "id": "C0",
     "name": "Cool Gray No.0",
     "hex": "e0e7ed",
     "rgbv": [
@@ -2137,7 +2137,7 @@
     "rgb": "224,231,237"
   },
   {
-    "id": "C-1",
+    "id": "C1",
     "name": "Cool Gray No.1",
     "hex": "dae3e8",
     "rgbv": [
@@ -2148,7 +2148,7 @@
     "rgb": "218,227,232"
   },
   {
-    "id": "C-2",
+    "id": "C2",
     "name": "Cool Gray No.2",
     "hex": "ccd7dd",
     "rgbv": [
@@ -2159,7 +2159,7 @@
     "rgb": "204,215,221"
   },
   {
-    "id": "C-3",
+    "id": "C3",
     "name": "Cool Gray No.3",
     "hex": "c1ccd2",
     "rgbv": [
@@ -2170,7 +2170,7 @@
     "rgb": "193,204,210"
   },
   {
-    "id": "C-4",
+    "id": "C4",
     "name": "Cool Gray No.4",
     "hex": "92a0ab",
     "rgbv": [
@@ -2181,7 +2181,7 @@
     "rgb": "146,160,171"
   },
   {
-    "id": "C-5",
+    "id": "C5",
     "name": "Cool Gray No.5",
     "hex": "92a0ab",
     "rgbv": [
@@ -2192,7 +2192,7 @@
     "rgb": "146,160,171"
   },
   {
-    "id": "C-6",
+    "id": "C6",
     "name": "Cool Gray No.6",
     "hex": "637079",
     "rgbv": [
@@ -2203,7 +2203,7 @@
     "rgb": "99,112,121"
   },
   {
-    "id": "C-7",
+    "id": "C7",
     "name": "Cool Gray No.7",
     "hex": "637079",
     "rgbv": [
@@ -2214,7 +2214,7 @@
     "rgb": "99,112,121"
   },
   {
-    "id": "C-8",
+    "id": "C8",
     "name": "Cool Gray No.8",
     "hex": "535d66",
     "rgbv": [
@@ -2226,7 +2226,7 @@
     "textColor":"white"
   },
   {
-    "id": "C-9",
+    "id": "C9",
     "name": "Cool Gray No.9",
     "hex": "3c474d",
     "rgbv": [
@@ -2238,7 +2238,7 @@
     "textColor":"white"
   },
   {
-    "id": "C-10",
+    "id": "C10",
     "name": "Cool Gray No.10",
     "hex": "202b31",
     "rgbv": [
@@ -2249,7 +2249,7 @@
     "rgb": "32,43,49"
   },
   {
-    "id": "T-0",
+    "id": "T0",
     "name": "Toner Gray No.0",
     "hex": "eceeed",
     "rgbv": [
@@ -2261,7 +2261,7 @@
     "textColor":"white"
   },
   {
-    "id": "T-1",
+    "id": "T1",
     "name": "Toner Gray No.1",
     "hex": "eaeae8",
     "rgbv": [
@@ -2272,7 +2272,7 @@
     "rgb": "234,234,232"
   },
   {
-    "id": "T-2",
+    "id": "T2",
     "name": "Toner Gray No.2",
     "hex": "e0e0de",
     "rgbv": [
@@ -2283,7 +2283,7 @@
     "rgb": "224,224,222"
   },
   {
-    "id": "T-3",
+    "id": "T3",
     "name": "Toner Gray No.3",
     "hex": "d1d2cc",
     "rgbv": [
@@ -2294,7 +2294,7 @@
     "rgb": "209,210,204"
   },
   {
-    "id": "T-4",
+    "id": "T4",
     "name": "Toner Gray No.4",
     "hex": "bcbbb9",
     "rgbv": [
@@ -2305,7 +2305,7 @@
     "rgb": "188,187,185"
   },
   {
-    "id": "T-5",
+    "id": "T5",
     "name": "Toner Gray No.5",
     "hex": "a8a7a3",
     "rgbv": [
@@ -2316,7 +2316,7 @@
     "rgb": "168,167,163"
   },
   {
-    "id": "T-6",
+    "id": "T6",
     "name": "Toner Gray No.6",
     "hex": "949590",
     "rgbv": [
@@ -2327,7 +2327,7 @@
     "rgb": "148,149,144"
   },
   {
-    "id": "T-7",
+    "id": "T7",
     "name": "Toner Gray No.7",
     "hex": "777674",
     "rgbv": [
@@ -2338,7 +2338,7 @@
     "rgb": "119,118,116"
   },
   {
-    "id": "T-8",
+    "id": "T8",
     "name": "Toner Gray No.8",
     "hex": "63645f",
     "rgbv": [
@@ -2350,7 +2350,7 @@
     "textColor":"white"
   },
   {
-    "id": "T-9",
+    "id": "T9",
     "name": "Toner Gray No.9",
     "hex": "4c4b49",
     "rgbv": [
@@ -2362,7 +2362,7 @@
     "textColor":"white"
   },
   {
-    "id": "T-10",
+    "id": "T10",
     "name": "Toner Gray No.10",
     "hex": "322e2d",
     "rgbv": [
@@ -2374,7 +2374,7 @@
     "textColor":"white"
   },
   {
-    "id": "N-0",
+    "id": "N0",
     "name": "Neutral Gray No.0",
     "hex": "eceeed",
     "rgbv": [
@@ -2385,7 +2385,7 @@
     "rgb": "236,238,237"
   },
   {
-    "id": "N-1",
+    "id": "N1",
     "name": "Neutral Gray No.1",
     "hex": "e2e3e5",
     "rgbv": [
@@ -2396,7 +2396,7 @@
     "rgb": "226,227,229"
   },
   {
-    "id": "N-2",
+    "id": "N2",
     "name": "Neutral Gray No.2",
     "hex": "dadbdd",
     "rgbv": [
@@ -2407,7 +2407,7 @@
     "rgb": "218,219,221"
   },
   {
-    "id": "N-3",
+    "id": "N3",
     "name": "Neutral Gray No.3",
     "hex": "d1d2d4",
     "rgbv": [
@@ -2418,7 +2418,7 @@
     "rgb": "209,210,212"
   },
   {
-    "id": "N-4",
+    "id": "N4",
     "name": "Neutral Gray No.4",
     "hex": "bcbdc1",
     "rgbv": [
@@ -2429,7 +2429,7 @@
     "rgb": "188,189,193"
   },
   {
-    "id": "N-5",
+    "id": "N5",
     "name": "Neutral Gray No.5",
     "hex": "a8a9ad",
     "rgbv": [
@@ -2440,7 +2440,7 @@
     "rgb": "168,169,173"
   },
   {
-    "id": "N-6",
+    "id": "N6",
     "name": "Neutral Gray No.6",
     "hex": "949599",
     "rgbv": [
@@ -2451,7 +2451,7 @@
     "rgb": "148,149,153"
   },
   {
-    "id": "N-7",
+    "id": "N7",
     "name": "Neutral Gray No.7",
     "hex": "77787c",
     "rgbv": [
@@ -2462,7 +2462,7 @@
     "rgb": "119,120,124"
   },
   {
-    "id": "N-8",
+    "id": "N8",
     "name": "Neutral Gray No.8",
     "hex": "636466",
     "rgbv": [
@@ -2474,7 +2474,7 @@
     "textColor":"white"
   },
   {
-    "id": "N-9",
+    "id": "N9",
     "name": "Neutral Gray No.9",
     "hex": "4c4d4f",
     "rgbv": [
@@ -2486,7 +2486,7 @@
     "textColor":"white"
   },
   {
-    "id": "N-10",
+    "id": "N10",
     "name": "Neutral Gray No.10",
     "hex": "312f30",
     "rgbv": [
@@ -2498,7 +2498,7 @@
     "textColor":"white"
   },
   {
-    "id": "W-0",
+    "id": "W0",
     "name": "Warm Gray No.0",
     "hex": "ecece4",
     "rgbv": [
@@ -2509,7 +2509,7 @@
     "rgb": "236,236,228"
   },
   {
-    "id": "C-00",
+    "id": "C00",
     "name": "Cool Gray No.00",
     "hex": "e0e7ed",
     "rgbv": [
@@ -2520,7 +2520,7 @@
     "rgb": "224,231,237"
   },
   {
-    "id": "W-00",
+    "id": "W00",
     "name": "Warm Gray No.00",
     "hex": "f3f3eb",
     "rgbv": [
