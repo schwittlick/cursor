@@ -126,25 +126,22 @@ class ClusteringWorker(QThread):
         unique_labels = np.unique(labels)
         num_colors = len(unique_labels)
 
-        random_group = random.choice(list(CCG))
-        random_group2 = random.choice(list(CCG))
-
-        # Get color group from Copic
-        random_color_group = self.copic.get_colors_by_group(random_group)
-
-        # add second group of colors
-        random_color_group2 = self.copic.get_colors_by_group(random_group2)
-        combination = random_color_group.copy()
-        combination.extend(random_color_group2.copy())
+        combination = []
+        while len(combination) < num_colors:
+            random_group = random.choice(list(CCG))
+            random_color_group = self.copic.get_colors_by_group(random_group)
+            combination.extend(random_color_group)
 
         # Shuffle the list of colors
         random.shuffle(combination)
 
         # Select the first num_colors colors
-        selected_colors = [self.copic.color_by_code(c) for c in combination[:num_colors]]
-        print(selected_colors)
+        selected_colors = []
+        for c in combination[:num_colors]:
+            cc = self.copic.color_by_code(c)
+            selected_colors.append(cc)
+
         colors = np.array([color.as_srgb() for color in selected_colors])
-        print(colors)
         # Map labels to colors
         return colors[labels]
 
@@ -328,7 +325,7 @@ class MainWindow(QMainWindow):
         self.blur_label = QLabel('Blur: 0')
         self.blur_slider = QSlider(Qt.Horizontal)
         self.blur_slider.setMinimum(0)
-        self.blur_slider.setMaximum(7)  # Max kernel size will be (2*7 + 1) = 15
+        self.blur_slider.setMaximum(100)  # Max kernel size will be (2*7 + 1) = 15
         self.blur_slider.setValue(0)
         self.blur_slider.valueChanged.connect(
             lambda value: (self.blur_label.setText(f'Blur: {value}'),
@@ -351,7 +348,7 @@ class MainWindow(QMainWindow):
         # Algorithm parameters
         algorithms = {
             'meanshift': {'bandwidth': {'min': 0.1, 'max': 1.0, 'default': 0.2}},
-            'kmeans': {'n_clusters': {'min': 2, 'max': 40, 'default': 8}},
+            'kmeans': {'n_clusters': {'min': 2, 'max': 160, 'default': 8}},
             'dbscan': {
                 'eps': {'min': 0.1, 'max': 1.0, 'default': 0.3},
                 'min_samples': {'min': 2, 'max': 20, 'default': 5}

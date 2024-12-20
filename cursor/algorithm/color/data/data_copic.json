@@ -3375,7 +3375,14 @@
   },
   {
     "id": "RV09",
-    "name": "Fuchsia"
+    "name": "Fuchsia",
+    "hex": "df6da6",
+    "rgbv": [
+      "223",
+      "109",
+      "166"
+    ],
+    "rgb": "223,109,166"
   },
   {
     "id": "RV10",
@@ -3570,7 +3577,14 @@
   },
   {
     "id": "RV93",
-    "name": "Smoky Purple"
+    "name": "Smoky Purple",
+    "hex": "eec3d2",
+    "rgbv": [
+      "238",
+      "195",
+      "210"
+    ],
+    "rgb": "238,195,210"
   },
   {
     "id": "RV95",
