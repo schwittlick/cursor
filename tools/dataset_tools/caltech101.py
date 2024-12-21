@@ -26,6 +26,7 @@ from export import ExportWrapper
 from timer import Timer
 
 from dataset_tools.skeletonize_qt5 import skeletonize
+from skimage.morphology import skeletonize as sk_skeletonize
 
 
 class ImageAnnotationViewer:
@@ -49,7 +50,52 @@ class ImageAnnotationViewer:
         tk.Button(self.root, text="Export overview", command=self._save_overview).pack()
         tk.Button(self.root, text="Export skeleton overview", command=self._save_skeleton_overview).pack()
         tk.Button(self.root, text="Export Normalized Contours", command=self._export_normalized_contours).pack()
+        tk.Button(self.root, text="Export Skeleton Grid", command=self._export_skeleton_grid).pack()
         self.root.mainloop()
+
+    def _export_skeleton_grid(self):
+        category_info = self.categories_with_counts[self.selected_category.get()]
+        category, count = category_info
+
+        # Calculate grid dimensions
+        grid_size = math.ceil(math.sqrt(count))
+
+        # Create a large canvas for the grid
+        canvas_size = 126  # Size of each image in the grid
+        canvas = np.zeros((canvas_size * grid_size, canvas_size * grid_size)) * 255
+
+        # Compute contours for the category
+        all_contours = self._compute_contours(category, count, rotate_90=False, target_width=canvas_size,
+                                              target_height=canvas_size)
+
+        for i, contour in enumerate(all_contours):
+            # Create a blank image for the contour
+            img = np.zeros((canvas_size, canvas_size), dtype=np.uint8)
+
+            # Draw the filled contour
+            cv2.drawContours(img, [contour], 0, 255, -1)
+
+            # Create skeleton
+            skeleton = sk_skeletonize(img > 0)
+
+            # Resize skeleton to fit in the grid
+            resized_skeleton = cv2.resize(skeleton.astype(np.uint8) * 255, (canvas_size, canvas_size),
+                                          interpolation=cv2.INTER_NEAREST)
+
+            # Calculate position in the grid
+            row = i // grid_size
+            col = i % grid_size
+
+            # Place the skeleton in the canvas
+            canvas[row * canvas_size:(row + 1) * canvas_size,
+            col * canvas_size:(col + 1) * canvas_size] = resized_skeleton
+            print(f"Skeleton saved to grid position ({row}, {col})")
+
+        # Save the grid image
+        output_dir = DataDirHandler().png("datasets")
+        output_file = os.path.join(output_dir, f"{category}_skeleton_grid_{Timer.timestamp()}.png")
+        cv2.imwrite(output_file, canvas)
+        print(f"Skeleton grid saved to: {output_file}")
 
     def _get_categories(self):
         img_path = os.path.join(self.base_path, "101_ObjectCategories")
@@ -84,7 +130,7 @@ class ImageAnnotationViewer:
         self.update_display()
         plt.show()
 
-    def _compute_contours(self, category, count, rotate_90=True):
+    def _compute_contours(self, category, count, rotate_90=True, target_width=1440, target_height=2560):
         img_path = os.path.join(self.base_path, "101_ObjectCategories", category)
         ann_path = os.path.join(self.base_path, "Annotations", category)
         all_contours = []
@@ -117,7 +163,6 @@ class ImageAnnotationViewer:
             padded_height = contour_height + 2 * padding
 
             # Calculate scale to fit contour while maintaining aspect ratio
-            target_width, target_height = 1440, 2560
             scale_x = target_width / padded_width
             scale_y = target_height / padded_height
             scale = min(scale_x, scale_y)
