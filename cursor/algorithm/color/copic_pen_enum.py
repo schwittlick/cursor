@@ -1,4 +1,4 @@
-from enum import Enum, auto, IntEnum
+from enum import auto, IntEnum
 
 
 class CopicColorGroup(IntEnum):

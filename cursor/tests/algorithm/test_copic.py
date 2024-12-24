@@ -4,7 +4,7 @@ from cursor.algorithm.color.copic_pen_enum import CopicColorGroup as CCG
 
 
 def test_rgb_data():
-    assert len(Copic().available_colors) == 193
+    assert len(Copic().available_colors) == 206
 
 
 def test_singleton():
@@ -18,14 +18,14 @@ def test_most_similar():
     assert Copic().most_similar((0.2, 0.3, 0.4)).code is CCC.V99
     assert Copic().most_similar((0, 0, 0)).code is CCC._110
     assert Copic().most_similar((1, 1, 1)).code is CCC.B0000
-    assert Copic().most_similar((0.9, 0.9, 0.9)).code is CCC.W1
+    assert Copic().most_similar((0.9, 0.9, 0.9)).code is CCC.N1
 
 
 def test_most_similar_srgb_kdtree():
     assert Copic().most_similar_rgb_kdtree((0.2, 0.3, 0.4)).code is CCC.BV29  # difference?
     assert Copic().most_similar_rgb_kdtree((0, 0, 0)).code is CCC._110
     assert Copic().most_similar_rgb_kdtree((1, 1, 1)).code is CCC.B0000
-    assert Copic().most_similar_rgb_kdtree((0.9, 0.9, 0.9)).code is CCC.W1
+    assert Copic().most_similar_rgb_kdtree((0.9, 0.9, 0.9)).code is CCC.N1
 
 
 def test_get_colors_by_group():
