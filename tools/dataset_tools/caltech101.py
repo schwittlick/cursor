@@ -667,8 +667,8 @@ class ImageAnnotationViewer:
 
     def export_parallel_lines(self, pa: Path, category: str) -> None:
         parallel_lines = Collection()
-        for i in range(400):
-            new_parallel_path = pa.parallel_offset(i * 20)
+        for i in range(1, 600):
+            new_parallel_path = pa.parallel_offset(i * 10)
             parallel_lines.add(new_parallel_path)
 
         fname = f"{category}_parallel_lines_{Timer.timestamp()}"
