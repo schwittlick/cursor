@@ -654,6 +654,9 @@ class ImageAnnotationViewer:
         wrapper2.fit()
         wrapper2.ex()
 
+        # assuming there is only one contour in the collection
+        self.export_parallel_lines(coll[0], category)
+
         print(f"Exported contours to:")
         print(f"  Outline: {output_path_outline}")
         print(f"  Filled: {output_path_filled}")
@@ -661,6 +664,23 @@ class ImageAnnotationViewer:
         print(f"  Skeleton: {output_path_skeleton}")
         print(f"  Grog outline: {fname}")
         print(f"  HPGL outline: {fname2}")
+
+    def export_parallel_lines(self, pa: Path, category: str) -> None:
+        parallel_lines = Collection()
+        for i in range(400):
+            new_parallel_path = pa.parallel_offset(i * 20)
+            parallel_lines.add(new_parallel_path)
+
+        fname = f"{category}_parallel_lines_{Timer.timestamp()}"
+        wrapper = ExportWrapper(
+            parallel_lines,
+            PlotterType.HP_7550A_A3,
+            10,  # 25mm - 11mm
+            "datasets",
+            fname,
+            keep_aspect_ratio=True)
+        wrapper.fit()
+        wrapper.ex()
 
     def on_key_press(self, event):
         if event.key == 'e':
