@@ -12,21 +12,21 @@ import numpy as np
 from scipy.io import loadmat
 
 from skimage.util import img_as_ubyte
+from skimage.morphology import skeletonize as sk_skeletonize
 
-from algorithm.color.copic import Copic
-from algorithm.color.copic_pen_enum import CopicColorGroup
-from algorithm.color.lib import sort_collection_by_copic_color_group
+from cursor.algorithm.color.copic import Copic
+from cursor.algorithm.color.copic_pen_enum import CopicColorGroup
+from cursor.algorithm.color.lib import sort_collection_by_copic_color_group
 from cursor import Collection
 from cursor import Path
 
-from data import DataDirHandler
-from dataset_tools.skeletonize_lib import skeleton_to_vectors
-from device import PlotterType, MinmaxMapping
-from export import ExportWrapper
-from timer import Timer
+from cursor.data import DataDirHandler
+from cursor.device import PlotterType, MinmaxMapping
+from cursor.export import ExportWrapper
+from cursor.timer import Timer
 
-from dataset_tools.skeletonize_qt5 import skeletonize
-from skimage.morphology import skeletonize as sk_skeletonize
+from skeletonize_lib import skeleton_to_vectors
+from skeletonize_qt5 import skeletonize
 
 
 class ImageAnnotationViewer:
@@ -35,7 +35,7 @@ class ImageAnnotationViewer:
         self.root.title("CALTECH-101 Image Annotation Viewer")
 
         # Get all categories
-        self.base_path = "E:\\Datasets\\caltech-101"
+        self.base_path = "/home/marcel/38c3/caltech-101/"
         categories = self._get_categories()
         self.categories_with_counts = self._count_images(categories)
 
@@ -330,19 +330,19 @@ class ImageAnnotationViewer:
         overview_collection = Collection()
         for idx, contour in enumerate(all_contours):
             pa = Path.from_array(contour)
-            pa.pen_select = idx + 1
+            pa.pen_select = 1  # idx + 1
             pa.velocity = 20
             color_group = Copic().get_colors_by_group(CopicColorGroup.Y)
             color = color_group[idx % len(color_group)]  # pick color from the color group for each contour
             pa.properties["copic_color"] = Copic().color_by_code(color)
             overview_collection.add(pa)
         overview_collection.rot(math.radians(90))
-        overview_collection = sort_collection_by_copic_color_group(overview_collection, legende_scale=1)
+        # overview_collection = sort_collection_by_copic_color_group(overview_collection, legende_scale=1)
 
         wrapper2 = ExportWrapper(
             overview_collection,
-            PlotterType.HP_DM_RX_PLUS_A1,
-            10,  # 25mm - 11mm
+            PlotterType.HP_7550A_A3,
+            20,  # 25mm - 11mm
             "datasets",
             f"overview_contours_{category}",
             keep_aspect_ratio=True,
@@ -671,6 +671,9 @@ class ImageAnnotationViewer:
             new_parallel_path = pa.parallel_offset(i * 10)
             parallel_lines.add(new_parallel_path)
 
+        for pa in parallel_lines:
+            pa.velocity = 10
+
         fname = f"{category}_parallel_lines_{Timer.timestamp()}"
         wrapper = ExportWrapper(
             parallel_lines,
@@ -683,8 +686,15 @@ class ImageAnnotationViewer:
         wrapper.ex()
 
     def on_key_press(self, event):
+        print(event.key)
         if event.key == 'e':
             self.export_contour()
+        if event.key == 'left':
+            self.current_index = max(self.current_index - 1, 1)
+            self.update_display()
+        if event.key == 'right':
+            self.current_index = min(self.current_index + 1, self.max_index)
+            self.update_display()
 
     def on_scroll(self, event):
         if event.button == 'up':
@@ -760,3 +770,4 @@ class ImageAnnotationViewer:
 
 if __name__ == '__main__':
     viewer = ImageAnnotationViewer()
+    
