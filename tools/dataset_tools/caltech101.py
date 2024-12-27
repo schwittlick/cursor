@@ -1,7 +1,9 @@
 import math
 import random
+import sys
 
 import matplotlib.pyplot as plt
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QMainWindow, QComboBox, QPushButton
 from matplotlib.patches import Rectangle
 from PIL import Image as PILImage
 import cv2
@@ -29,32 +31,66 @@ from skeletonize_lib import skeleton_to_vectors
 from skeletonize_qt5 import skeletonize
 
 
-class ImageAnnotationViewer:
+class MainWindow(QMainWindow):
     def __init__(self):
-        self.root = tk.Tk()
-        self.root.title("CALTECH-101 Image Annotation Viewer")
+        super().__init__()
+
+        self.init_ui()
+
+    def init_ui(self):
+        # Enable drop events for the window
+        self.setAcceptDrops(True)
+
+        self.setWindowTitle('caltech101')
+        self.setGeometry(100, 100, 1200, 800)
 
         # Get all categories
         self.base_path = "/home/marcel/38c3/caltech-101/"
         categories = self._get_categories()
         self.categories_with_counts = self._count_images(categories)
+        self.selected_category = ""
 
-        # Create dropdown
-        self.selected_category = tk.StringVar()
-        self.dropdown = tk.OptionMenu(self.root, self.selected_category, *self.categories_with_counts.keys())
-        self.dropdown.pack()
+        combobox1 = QComboBox()
+        combobox1.currentTextChanged.connect(self._update_selected_category)
+        combobox1.addItems(list(self.categories_with_counts.keys()))
 
-        # Create button to load viewer
-        tk.Button(self.root, text="Load Category", command=self._load_viewer).pack()
-        tk.Button(self.root, text="Save Category Contours", command=self._save_contours).pack()
-        tk.Button(self.root, text="Export overview", command=self._save_overview).pack()
-        tk.Button(self.root, text="Export skeleton overview", command=self._save_skeleton_overview).pack()
-        tk.Button(self.root, text="Export Normalized Contours", command=self._export_normalized_contours).pack()
-        tk.Button(self.root, text="Export Skeleton Grid", command=self._export_skeleton_grid).pack()
-        self.root.mainloop()
+        buttonLoad = QPushButton('Load Category', self)
+        buttonLoad.clicked.connect(self._load_viewer)
+
+        buttonSaveCategoryContours = QPushButton('Save Category Contours', self)
+        buttonSaveCategoryContours.clicked.connect(self._save_contours)
+
+        buttonExportOverview = QPushButton('Export overview', self)
+        buttonExportOverview.clicked.connect(self._save_overview)
+
+        buttonExportSkeletonOverview = QPushButton('Export skeleton overview', self)
+        buttonExportSkeletonOverview.clicked.connect(self._save_skeleton_overview)
+
+        buttonExportNormalizedContours = QPushButton('Export Normalized Contours', self)
+        buttonExportNormalizedContours.clicked.connect(self._export_normalized_contours)
+
+        buttonExportSkeletonGrid = QPushButton('Export Skeleton Grid', self)
+        buttonExportSkeletonGrid.clicked.connect(self._export_skeleton_grid)
+
+        # Main widget and layout
+        main_widget = QWidget()
+
+        layout = QVBoxLayout()
+        layout.addWidget(combobox1)
+        layout.addWidget(buttonLoad)
+        layout.addWidget(buttonSaveCategoryContours)
+        layout.addWidget(buttonExportOverview)
+        layout.addWidget(buttonExportSkeletonOverview)
+        layout.addWidget(buttonExportNormalizedContours)
+        layout.addWidget(buttonExportSkeletonGrid)
+        main_widget.setLayout(layout)
+        self.setCentralWidget(main_widget)
+
+    def _update_selected_category(self, s):
+        self.selected_category = s
 
     def _export_skeleton_grid(self):
-        category_info = self.categories_with_counts[self.selected_category.get()]
+        category_info = self.categories_with_counts[self.selected_category]
         category, count = category_info
 
         # Calculate grid dimensions
@@ -115,7 +151,7 @@ class ImageAnnotationViewer:
         return counts
 
     def _load_viewer(self):
-        category_info = self.categories_with_counts[self.selected_category.get()]
+        category_info = self.categories_with_counts[self.selected_category]
         category, count = category_info
 
         self.base_img_path = os.path.join(self.base_path, "101_ObjectCategories", category)
@@ -209,7 +245,7 @@ class ImageAnnotationViewer:
         Saves the results as JSON files containing normalized coordinates and metadata.
         """
 
-        category_info = self.categories_with_counts[self.selected_category.get()]
+        category_info = self.categories_with_counts[self.selected_category]
         category, count = category_info
 
         # Create output directory
@@ -281,7 +317,7 @@ class ImageAnnotationViewer:
         return collection_data
 
     def _save_contours(self, rotate_90=True):
-        category_info = self.categories_with_counts[self.selected_category.get()]
+        category_info = self.categories_with_counts[self.selected_category]
         category, count = category_info
 
         output_dir = os.path.join(self.base_path, "Contours", category)
@@ -319,7 +355,7 @@ class ImageAnnotationViewer:
         print(f"Saved {count} contour images and CSV files for category '{category}' in {output_dir}")
 
     def _save_overview(self, rotate_90=True):
-        category_info = self.categories_with_counts[self.selected_category.get()]
+        category_info = self.categories_with_counts[self.selected_category]
         category, count = category_info
 
         output_dir = os.path.join(self.base_path, "Contours", category)
@@ -351,7 +387,7 @@ class ImageAnnotationViewer:
         wrapper2.ex()
 
     def _save_skeleton_overview(self, rotate_90=True):
-        category_info = self.categories_with_counts[self.selected_category.get()]
+        category_info = self.categories_with_counts[self.selected_category]
         category, count = category_info
 
         output_dir = os.path.join(self.base_path, "Skeletons", category)
@@ -600,7 +636,7 @@ class ImageAnnotationViewer:
         export_img_original[y_offset_orig:y_offset_orig + scaled_height_orig,
         x_offset_orig:x_offset_orig + scaled_width_orig] = region_slice
 
-        category = self.selected_category.get().split(" (")[0]
+        category = self.selected_category.split(" (")[0]
         folder = DataDirHandler().png("datasets")
 
         output_path_outline = folder / f"{category}_contour_outline_{self.current_index:04d}_{Timer.timestamp()}.png"
@@ -677,7 +713,7 @@ class ImageAnnotationViewer:
         fname = f"{category}_parallel_lines_{Timer.timestamp()}"
         wrapper = ExportWrapper(
             parallel_lines,
-            PlotterType.HP_7550A_A3,
+            PlotterType.HP_7475A_A3,
             10,  # 25mm - 11mm
             "datasets",
             fname,
@@ -754,7 +790,7 @@ class ImageAnnotationViewer:
             linewidth=4
         )
 
-        self.ax.set_title(f'{self.selected_category.get()} - Image {self.current_index}')
+        self.ax.set_title(f'{self.selected_category} - Image {self.current_index}')
 
         self.ax.set_xticks([])
         self.ax.set_yticks([])
@@ -765,9 +801,17 @@ class ImageAnnotationViewer:
         self.ax.axis('image')
         self.fig.canvas.draw_idle()
 
-        self.root.title(f'{self.selected_category.get()}')
+        self.setWindowTitle(self.selected_category)
+
+
+def main():
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec_())
 
 
 if __name__ == '__main__':
-    viewer = ImageAnnotationViewer()
-    
+    # viewer = ImageAnnotationViewer()
+
+    main()
