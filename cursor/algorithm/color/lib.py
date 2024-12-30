@@ -138,6 +138,7 @@ def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool
                 path.pen_select = pen_index
                 path.layer = layer_index
                 path.color = path_color.as_rgb()
+                path.properties["copic_color"] = path_color
 
                 c.add(path)
 

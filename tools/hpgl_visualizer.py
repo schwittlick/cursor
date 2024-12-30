@@ -6,8 +6,8 @@ from OpenGL.GL import *
 import time
 import os
 
-from hpgl.hpgl_tokenize import tokenizer
-from hpgl.parser import HPGLParser
+from cursor.hpgl.hpgl_tokenize import tokenizer
+from cursor.hpgl.parser import HPGLParser
 
 
 class HPGLVisualizer(QOpenGLWidget):

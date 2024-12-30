@@ -11,12 +11,12 @@ import cv2
 import os
 
 from cursor.collection import Collection
-from data import DataDirHandler
-from dataset_tools.skeletonize_lib import skeleton_to_vectors
+from cursor.data import DataDirHandler
 from cursor.device import PlotterType
 from cursor.export import ExportWrapper
 from cursor.timer import Timer
 
+from skeletonize_lib import skeleton_to_vectors
 
 class ScalableImageLabel(QLabel):
     def __init__(self, title=""):

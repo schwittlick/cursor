@@ -710,11 +710,14 @@ class MainWindow(QMainWindow):
         for pa in parallel_lines:
             pa.velocity = 10
 
+        # flip up/down
+        parallel_lines.scale(-1, 1)
+
         fname = f"{category}_parallel_lines_{Timer.timestamp()}"
         wrapper = ExportWrapper(
             parallel_lines,
             PlotterType.HP_7475A_A3,
-            10,  # 25mm - 11mm
+            20,  # 25mm - 11mm
             "datasets",
             fname,
             keep_aspect_ratio=True)

@@ -15,12 +15,15 @@ from sklearn.cluster import (KMeans, DBSCAN, AgglomerativeClustering,
 from sklearn.mixture import GaussianMixture
 from hdbscan import HDBSCAN
 from fcmeans import FCM
+# pip install fuzzy-c-means
+# pip install opencv-python-headless
+
 import skimage.segmentation as seg
 
-from algorithm.color.copic import Copic
-from algorithm.color.copic_pen_enum import CopicColorGroup as CCG
-from algorithm.color.copic_pen_enum import CopicColorCode as CCC
-from timer import Timer
+from cursor.algorithm.color.copic import Copic
+from cursor.algorithm.color.copic_pen_enum import CopicColorGroup as CCG
+from cursor.algorithm.color.copic_pen_enum import CopicColorCode as CCC
+from cursor.timer import Timer
 
 
 class ClusteringWorker(QThread):
