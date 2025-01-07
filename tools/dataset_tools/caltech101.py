@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
         self.setGeometry(100, 100, 1200, 800)
 
         # Get all categories
-        self.base_path = "/home/marcel/38c3/caltech-101/"
+        self.base_path = "E:\\Datasets\\caltech-101"
         categories = self._get_categories()
         self.categories_with_counts = self._count_images(categories)
         self.selected_category = ""
@@ -59,6 +59,9 @@ class MainWindow(QMainWindow):
 
         buttonSaveCategoryContours = QPushButton('Save Category Contours', self)
         buttonSaveCategoryContours.clicked.connect(self._save_contours)
+
+        buttonSaveAllCategoryContours = QPushButton('Save All Category Contours', self)
+        buttonSaveAllCategoryContours.clicked.connect(self._save_all_contours)
 
         buttonExportOverview = QPushButton('Export overview', self)
         buttonExportOverview.clicked.connect(self._save_overview)
@@ -79,6 +82,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(combobox1)
         layout.addWidget(buttonLoad)
         layout.addWidget(buttonSaveCategoryContours)
+        layout.addWidget(buttonSaveAllCategoryContours)
         layout.addWidget(buttonExportOverview)
         layout.addWidget(buttonExportSkeletonOverview)
         layout.addWidget(buttonExportNormalizedContours)
@@ -222,8 +226,8 @@ class MainWindow(QMainWindow):
                 interpolated_contour.append(p1)
 
                 distance = np.linalg.norm(np.array(p2) - np.array(p1))
-                if distance > 400:
-                    num_points = int(np.ceil(distance / 400))
+                if distance > 40:
+                    num_points = int(np.ceil(distance / 40))
                     for k in range(1, num_points):
                         t = k / num_points
                         interp_point = (1 - t) * np.array(p1) + t * np.array(p2)
@@ -325,9 +329,6 @@ class MainWindow(QMainWindow):
         os.makedirs(output_dir, exist_ok=True)
         os.makedirs(output_dir_png, exist_ok=True)
 
-        if category == "flamingo":
-            rotate_90 = False
-
         all_contours = self._compute_contours(category, count, rotate_90)
 
         for i, contour in enumerate(all_contours, 1):
@@ -353,6 +354,40 @@ class MainWindow(QMainWindow):
                     f.write(f"{point[0]};{point[1]}\n")
 
         print(f"Saved {count} contour images and CSV files for category '{category}' in {output_dir}")
+
+    def _save_all_contours(self):
+        categories = [('ant', True),  # landscape
+                      ('bass', True),  # landscape
+                      ('brontosaurus', True),
+                      ('buddha', False),
+                      ('butterfly', True),  # landscape
+                      ('crab', True),  # landscape
+                      ('crayfish', True),
+                      ('crocodile', True),  # landscape
+                      ('dolphin', True),  # landscape
+                      ('dragonfly', False),
+                      ('elephant', True),  # landscape
+                      ('flamingo', False),  # portrait
+                      ('hawksbill', True),  # landscape
+                      ('ibis', False),
+                      ('kangaroo', False),
+                      ('llama', True),  # landscape
+                      ('lobster', False),  # landscape
+                      ('mayfly', False),
+                      ('octopus', False),
+                      ('okapi', False),
+                      ('pigeon', True),  # landscape
+                      ('rhino', True),  # landscape
+                      ('rooster', False),  # portrait
+                      ('scorpion', True),  # landscape
+                      ('sea_horse', False),  # portrait
+                      ('starfish', True),  # portrait / landscape
+                      ('wild_cat', True),  # landscape
+                      ]
+        for category in categories:
+            category_name = [k for k, v in self.categories_with_counts.items() if category[0] in k][0]
+            self.selected_category = category_name
+            self._save_contours(category[1])
 
     def _save_overview(self, rotate_90=True):
         category_info = self.categories_with_counts[self.selected_category]
@@ -530,12 +565,12 @@ class MainWindow(QMainWindow):
 
         path_bb = path.bb()
         # we change the rotation depending on format grml
-        if path_bb.w < path_bb.h:
+        if path_bb.w > path_bb.h:
             return True
         return False
 
     def export_contour(self):
-        OUTLINE_WIDTH, OUTLINE_HEIGHT = 126, 84  # 126, 174
+        OUTLINE_WIDTH, OUTLINE_HEIGHT = 126, 174  # 126, 174(a3) or 84(a4)
         # change outline manually here
         OUTLINE_MARGIN = 4
 
@@ -668,7 +703,7 @@ class MainWindow(QMainWindow):
         path = self.convert_contour_to_path(orig_contour)
         coll = Collection.from_tuples([path])
 
-        fname = f"{category}_grog_outline_{Timer.timestamp()}"
+        fname = f"{category}_{self.current_index:04d}_grog_outline_{Timer.timestamp()}"
         wrapper = ExportWrapper(
             coll,
             PlotterType.DIY_PLOTTER_60x60,
@@ -679,7 +714,7 @@ class MainWindow(QMainWindow):
         wrapper.fit()
         wrapper.ex()
 
-        fname2 = f"{category}_grog_outline_{Timer.timestamp()}"
+        fname2 = f"{category}_{self.current_index:04d}_grog_outline_{Timer.timestamp()}"
         wrapper2 = ExportWrapper(
             coll,
             PlotterType.ROLAND_DXY1200_A3,

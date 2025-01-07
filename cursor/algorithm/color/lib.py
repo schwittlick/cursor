@@ -113,7 +113,7 @@ def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool
         for path_color, paths_same_color in sorted_by_colors.items():
             color_names_pen_mapping[pen_index] = path_color.code
 
-            all_corners = False
+            all_corners = True
             if all_corners:
                 add_legende_all_corners(collection_bb, layer_index, c, pen_index, path_color, legende_scale)
             else:

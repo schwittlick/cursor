@@ -43,8 +43,8 @@ def main_approximation():
     # a1 = 672x512 (a bit tighter would be 788x600
     wrapper = ExportWrapper(
         collection,
-        PlotterType.HP_DM_RX_PLUS_A1,  # PlotterType.HP_7550A_A4,HP_DM_RX_PLUS_A1
-        25,  # 25mm - 11mm # for postcards in a4, set padding to 0 and add legende on all four sides, use 25 for a1
+        PlotterType.HP_7550A_A4,  # PlotterType.HP_7550A_A4,HP_DM_RX_PLUS_A1
+        0,  # 25mm - 11mm # for postcards in a4, set padding to 0 and add legende on all four sides, use 25 for a1
         "color_interpolation",
         f"bitmap_approximator_{path.name}",
         keep_aspect_ratio=True,
