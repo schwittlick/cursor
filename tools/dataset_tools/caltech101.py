@@ -572,7 +572,7 @@ class MainWindow(QMainWindow):
     def export_contour(self):
         OUTLINE_WIDTH, OUTLINE_HEIGHT = 126, 174  # 126, 174(a3) or 84(a4)
         # change outline manually here
-        OUTLINE_MARGIN = 4
+        OUTLINE_MARGIN = 8
 
         A6_MULT = 0.5
         A5_MULT = 1
@@ -599,7 +599,7 @@ class MainWindow(QMainWindow):
 
         # Check if height > width and rotate if needed
         # should_rotate = img.shape[0] > img.shape[1]
-        should_rotate = self.calc_should_rotate(obj_contour)
+        should_rotate = False#self.calc_should_rotate(obj_contour)
         if should_rotate:
             img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
