@@ -1099,9 +1099,28 @@ class Path:
         new_x = np.interp(new_distances, distances, [p.x for p in self])
         new_y = np.interp(new_distances, distances, [p.y for p in self])
 
-        new_vertices = list(zip(new_x, new_y))
+        # Create new points with interpolated properties
+        new_points = []
+        for i, (x, y) in enumerate(zip(new_x, new_y)):
+            new_point = Position(x, y)  # Create a new point with interpolated coordinates
 
-        return Path.from_tuple_list(new_vertices)
+            # Example for a property called 'color'
+            if hasattr(self[0], 'color'):
+                # For RGB colors (assuming color is a tuple of 3 values)
+                r_values = [p.color[0] for p in self]
+                g_values = [p.color[1] for p in self]
+                b_values = [p.color[2] for p in self]
+
+                new_r = np.interp(new_distances[i], distances, r_values)
+                new_g = np.interp(new_distances[i], distances, g_values)
+                new_b = np.interp(new_distances[i], distances, b_values)
+
+                new_point.color = (int(new_r), int(new_g), int(new_b))
+
+            # Add other properties as needed
+            new_points.append(new_point)
+
+        return Path.from_list(new_points)
 
     def resample(self, target_dist: float) -> None:
         self.vertices = self.resampled(target_dist).vertices
