@@ -490,7 +490,8 @@ class Path:
             if math.isinf(mag_diff):
                 mag_diff = 1.0
             nparr = nparr * mag_diff
-            path.add(nparr[0], nparr[1], point.timestamp)
+            new_pos = Position(nparr[0], nparr[1], point.timestamp, point.properties)
+            path.add_position(new_pos)
 
         current_end = path.end_pos().as_array()
         current_start = path.start_pos().as_array()
@@ -1105,7 +1106,7 @@ class Path:
             new_point = Position(x, y)  # Create a new point with interpolated coordinates
 
             # Example for a property called 'color'
-            if hasattr(self[0], 'color'):
+            if 'color' in self[0].properties.keys():
                 # For RGB colors (assuming color is a tuple of 3 values)
                 r_values = [p.color[0] for p in self]
                 g_values = [p.color[1] for p in self]
@@ -1218,9 +1219,9 @@ class Path:
                     p.add(prev_v.x, prev_v.y)
                     p.add(v.x, v.y)
                     intersection = get_intersection(p, bb_lines)
-                    current_path.add_position(
-                        Position(intersection[0], intersection[1])
-                    )
+                    pos = Position(intersection[0], intersection[1])
+                    pos.properties = v.properties
+                    current_path.add_position(pos)
                     new_paths.append(current_path.copy())
                     current_path = Path()
                 if not prev_inside and curr_inside:
@@ -1228,10 +1229,12 @@ class Path:
                     p.add(prev_v.x, prev_v.y)
                     p.add(v.x, v.y)
                     intersection = get_intersection(p, bb_lines)
-                    current_path.add_position(
-                        Position(intersection[0], intersection[1])
-                    )
-                    current_path.add_position(Position(v.x, v.y))
+                    pos = Position(intersection[0], intersection[1])
+                    pos.properties = v.properties
+                    current_path.add_position(pos)
+                    pos2 = Position(v.x, v.y)
+                    pos2.properties = v.properties
+                    current_path.add_position(pos2)
             else:
                 if v.inside(bb):
                     current_path.add_position(v)

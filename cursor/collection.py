@@ -281,11 +281,7 @@ class Collection:
                 f"Cant sort with a class of type {type(pathsorter)}")
 
     def filter(self, pathfilter: Filter) -> None:
-        if isinstance(pathfilter, Filter):
-            pathfilter.filter(self.__paths)
-        else:
-            raise Exception(
-                f"Cant filter with a class of type {type(pathfilter)}")
+        pathfilter.filter(self.__paths)
 
     def filtered(self, pathfilter: Filter) -> Collection:
         if isinstance(pathfilter, Filter):
