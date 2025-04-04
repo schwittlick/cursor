@@ -151,7 +151,7 @@ class MainWindow(QMainWindow):
         for category in categories:
             img_path = os.path.join(self.base_path, "101_ObjectCategories", category)
             count = len([f for f in os.listdir(img_path) if f.endswith('.jpg')])
-            counts[f"{category} ({count} images)"] = (category, count)
+            counts[f"{category}"] = (category, count)
         return counts
 
     def _load_viewer(self):
@@ -769,6 +769,8 @@ class MainWindow(QMainWindow):
         if event.key == 'right':
             self.current_index = min(self.current_index + 1, self.max_index)
             self.update_display()
+        if event.key == 'w':
+            plt.savefig("butterfly_tight.jpg",bbox_inches='tight')
 
     def on_scroll(self, event):
         if event.button == 'up':
@@ -828,7 +830,7 @@ class MainWindow(QMainWindow):
             linewidth=4
         )
 
-        self.ax.set_title(f'{self.selected_category} - Image {self.current_index}')
+        self.ax.set_title(f'{self.selected_category} - Image {self.current_index}/{self.max_index}')
 
         self.ax.set_xticks([])
         self.ax.set_yticks([])

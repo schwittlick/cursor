@@ -533,7 +533,7 @@ class MainWindow(QMainWindow):
 
         if hasattr(self, 'current_image_path'):
             original_path = pathlib.Path(self.current_image_path)
-            new_filename = f"{original_path.stem}_{Timer.timestamp()}{original_path.suffix}"
+            new_filename = f"{original_path.stem}_{Timer.timestamp()}.png"
             new_path = original_path.parent / new_filename
 
             # Get the pixmap from the result_label
