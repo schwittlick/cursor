@@ -2,11 +2,15 @@
 from setuptools import setup
 import pathlib
 
-# Read the contents of requirements.txt
+requires = []
+
 here = pathlib.Path(__file__).parent
 with open(here / 'requirements.txt', 'r') as f:
-    requires = [line.strip() for line in f if line.strip()]
+    for line in f:
+        print(line)
+    requires = [line.strip() for line in f]
 
+print(requires)
 try:
     import pypandoc
 
@@ -18,7 +22,6 @@ packages = [
     "cursor",
 ]
 
-requires = []
 extras_require = {}
 
 setup(
