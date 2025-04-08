@@ -1,3 +1,5 @@
+import logging
+
 from cursor.algorithm.color.copic import Copic, Color
 from cursor.algorithm.color.copic_pen_enum import CopicColorCode
 from cursor.collection import Collection
@@ -84,7 +86,7 @@ def add_legende_all_corners(collection_bb, layer_index, c, pen_index, path_color
 
 
 def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool = False,
-                                         legende_y: bool = False, legende_scale: int = 1) -> Collection:
+                                         legende_y: bool = False, legende_scale: float = 1) -> Collection:
     """
     the coordinates of the paths are in pixel space, not in hpgl/plotter space
     """
@@ -113,7 +115,7 @@ def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool
         for path_color, paths_same_color in sorted_by_colors.items():
             color_names_pen_mapping[pen_index] = path_color.code
 
-            wtf = False
+            wtf = True
             if wtf:
                 all_corners = False
                 if all_corners:
@@ -127,7 +129,7 @@ def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool
                     else:
                         x = collection_bb.x + layer_index * 2 * legende_scale  # legende on right side
                     if legende_y:
-                        y = collection_bb.y2 - pen_index * 2 * legende_scale
+                        y = collection_bb.y2 + pen_index * 2 * legende_scale
                     else:
                         y = collection_bb.y + pen_index * 2 * legende_scale
 
@@ -135,6 +137,10 @@ def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool
                         legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
                         c.add(legend_path)
             #######
+
+            #logging.info(f"travel pen up distance before tsp: {paths_same_color.calc_pen_up_distance(40):.2f} mm")
+            #paths_same_color.fast_tsp(plot_preview=False, duration_seconds=1)
+            #logging.info(f"travel pen up distance after tsp: {paths_same_color.calc_pen_up_distance(40):.2f} mm")
 
             for path in paths_same_color:
                 path.pen_select = pen_index
