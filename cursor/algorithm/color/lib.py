@@ -115,32 +115,42 @@ def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool
         for path_color, paths_same_color in sorted_by_colors.items():
             color_names_pen_mapping[pen_index] = path_color.code
 
+            # logging.info(f"travel pen up distance before tsp: {paths_same_color.calc_pen_up_distance(40):.2f} mm")
+            # paths_same_color.fast_tsp(plot_preview=False, duration_seconds=1)
+            # logging.info(f"travel pen up distance after tsp: {paths_same_color.calc_pen_up_distance(40):.2f} mm")
+
+            legend_paths = Collection()
             wtf = True
             if wtf:
                 all_corners = False
                 if all_corners:
-                    add_legende_all_corners(collection_bb, layer_index, c, pen_index, path_color, legende_scale)
+                    add_legende_all_corners(collection_bb, layer_index, legend_paths, pen_index, path_color,
+                                            legende_scale)
                 else:
                     num_legend_points = 3
 
-                    # adding legende of used colors
-                    if legende_x:
-                        x = collection_bb.x2 + layer_index * 2 * legende_scale  # left side for legende
-                    else:
-                        x = collection_bb.x + layer_index * 2 * legende_scale  # legende on right side
-                    if legende_y:
-                        y = collection_bb.y2 + pen_index * 2 * legende_scale
-                    else:
-                        y = collection_bb.y + pen_index * 2 * legende_scale
+                    absolute = False
 
-                    for _ in range(num_legend_points):
-                        legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
-                        c.add(legend_path)
-            #######
+                    if absolute:
+                        pass
+                    else:
+                        # adding legende of used colors
+                        if legende_x:
+                            x = collection_bb.x2 + layer_index * 2 * legende_scale  # left side for legende
+                        else:
+                            x = collection_bb.x + layer_index * 2 * legende_scale  # legende on right side
+                        if legende_y:
+                            y = collection_bb.y2 + pen_index * 2 * legende_scale
+                        else:
+                            y = collection_bb.y + pen_index * 2 * legende_scale
 
-            #logging.info(f"travel pen up distance before tsp: {paths_same_color.calc_pen_up_distance(40):.2f} mm")
-            #paths_same_color.fast_tsp(plot_preview=False, duration_seconds=1)
-            #logging.info(f"travel pen up distance after tsp: {paths_same_color.calc_pen_up_distance(40):.2f} mm")
+                        for _ in range(num_legend_points):
+                            legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
+                            legend_paths.add(legend_path)
+
+            # adds legend paths at beginning of layer
+            for path in legend_paths:
+                c.add(path.copy())
 
             for path in paths_same_color:
                 path.pen_select = pen_index
@@ -149,6 +159,10 @@ def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool
                 path.properties["copic_color"] = path_color
 
                 c.add(path)
+
+            # adds legend paths at end of layer
+            for path in legend_paths:
+                c.add(path.copy())
 
             pen_index += 1
 
