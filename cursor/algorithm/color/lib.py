@@ -60,26 +60,26 @@ def create_legend_path(x: float, y: float, layer_index: int, pen_index: int, pat
 def add_legende_all_corners(collection_bb, layer_index, c, pen_index, path_color, legende_scale):
     num_legend_points = 3
 
-    x = collection_bb.x2 + layer_index * 2 * legende_scale  # left side for legende
-    y = collection_bb.y2 - pen_index * 2 * legende_scale
+    x = collection_bb.x2 + layer_index * legende_scale  # left side for legende
+    y = collection_bb.y2 - pen_index * legende_scale
     for _ in range(num_legend_points):
         legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
         c.add(legend_path)
 
-    x = collection_bb.x2 + layer_index * 2 * legende_scale  # left side for legende
-    y = collection_bb.y + pen_index * 2 * legende_scale
+    x = collection_bb.x2 + layer_index * legende_scale  # left side for legende
+    y = collection_bb.y + pen_index * legende_scale
     for _ in range(num_legend_points):
         legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
         c.add(legend_path)
 
-    x = collection_bb.x + layer_index * 2 * legende_scale  # legende on right side
-    y = collection_bb.y2 - pen_index * 2 * legende_scale
+    x = collection_bb.x + layer_index * legende_scale  # legende on right side
+    y = collection_bb.y2 - pen_index * legende_scale
     for _ in range(num_legend_points):
         legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
         c.add(legend_path)
 
-    x = collection_bb.x + layer_index * 2 * legende_scale  # legende on right side
-    y = collection_bb.y + pen_index * 2 * legende_scale
+    x = collection_bb.x + layer_index * legende_scale  # legende on right side
+    y = collection_bb.y + pen_index * legende_scale
     for _ in range(num_legend_points):
         legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
         c.add(legend_path)
@@ -94,6 +94,9 @@ def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool
     color_names_pen_mapping = {}
 
     c = Collection()
+
+    # toggle to separate each pen in a new layer
+    separate_sp_to_layer = True
 
     pen_index = 1
     layer_index = 0
@@ -130,19 +133,26 @@ def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool
                     num_legend_points = 3
 
                     absolute = False
+                    absolute_offset = (400, 400)  # 40 = 1mm
 
                     if absolute:
-                        pass
+                        x = absolute_offset[0] + layer_index * legende_scale
+                        y = absolute_offset[1] + pen_index * legende_scale
+                        for _ in range(num_legend_points):
+                            legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
+                            legend_paths.add(legend_path)
                     else:
                         # adding legende of used colors
                         if legende_x:
-                            x = collection_bb.x2 + layer_index * 2 * legende_scale  # left side for legende
+                            x = collection_bb.x2 + absolute_offset[
+                                0] + pen_index * legende_scale  # left side for legende
                         else:
-                            x = collection_bb.x + layer_index * 2 * legende_scale  # legende on right side
+                            x = collection_bb.x - absolute_offset[
+                                0] + pen_index * legende_scale  # legende on right side
                         if legende_y:
-                            y = collection_bb.y2 + pen_index * 2 * legende_scale
+                            y = collection_bb.y2 + layer_index * legende_scale
                         else:
-                            y = collection_bb.y + pen_index * 2 * legende_scale
+                            y = collection_bb.y + layer_index * legende_scale
 
                         for _ in range(num_legend_points):
                             legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
@@ -172,11 +182,13 @@ def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool
                 pen_index = 1
                 layer_index += 1
 
-        # out_color_names_pen_mapping[layer_index] = color_names_pen_mapping.copy()
-        # layer_index += 1
-        # pen_index = 1
+        if separate_sp_to_layer:
+            out_color_names_pen_mapping[layer_index] = color_names_pen_mapping.copy()
+            layer_index += 1
+            pen_index = 1
 
-    out_color_names_pen_mapping[layer_index] = color_names_pen_mapping.copy()
+    if not separate_sp_to_layer:
+        out_color_names_pen_mapping[layer_index] = color_names_pen_mapping.copy()
 
     c.properties["pen_mapping"] = out_color_names_pen_mapping
 
