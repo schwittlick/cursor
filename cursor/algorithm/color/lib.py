@@ -100,19 +100,19 @@ def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool
 
     pen_index = 1
     layer_index = 0
-    groups = {}
+    pens = {}
 
-    # separating app paths into the copic color groups
+    # separating app paths by the copic color code
     for path in collection:
         path_copic_color = path.properties["copic_color"]
-        if path_copic_color.group not in groups.keys():
-            groups[path_copic_color.group] = Collection()
+        if path_copic_color.code not in pens.keys():
+            pens[path_copic_color.code] = Collection()
 
-        groups[path_copic_color.group].add(path)
+        pens[path_copic_color.code].add(path)
 
     collection_bb = collection.bb()
 
-    for group, paths in groups.items():
+    for _, paths in pens.items():
         sorted_by_colors = sort_collection_by_copic_color(paths)
 
         for path_color, paths_same_color in sorted_by_colors.items():
