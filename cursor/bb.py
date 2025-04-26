@@ -14,6 +14,9 @@ class BoundingBox:
         self.p1 = Point(min(x, x2), min(y, y2))
         self.p2 = Point(max(x, x2), max(y, y2))
 
+    def copy(self):
+        return BoundingBox(self.p1.x, self.p1.y, self.p2.x, self.p2.y)
+
     @property
     def w(self) -> float:
         return self.p2.x - self.p1.x
@@ -154,6 +157,29 @@ class BoundingBox:
             return False
 
         return True
+
+    def move_to_origin(self) -> None:
+        """
+        moves bb to zero origin
+        """
+
+        if self.x < 0:
+            v = abs(self.x)
+            self.x += v
+            self.x2 += v
+        else:
+            v = -abs(self.x)
+            self.x += v
+            self.x2 += v
+
+        if self.y < 0:
+            v = abs(self.y)
+            self.y += v
+            self.y2 += v
+        else:
+            v = -abs(self.y)
+            self.y += v
+            self.y2 += v
 
     def __repr__(self) -> str:
         return (f"BoundingBox(x={self.p1.x:.2f}, y={self.p1.y:.2f}, "
