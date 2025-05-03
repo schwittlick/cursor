@@ -14,7 +14,7 @@ class Color:
         self.cmyk = tuple(cmyk)
         self.combinations = combinations
 
-    def as_srgb(self) -> Tuple[float, float, float]:
+    def as_srgb(self) -> tuple[float, ...]:
         return tuple(v / 255 for v in self.rgb)
 
 
