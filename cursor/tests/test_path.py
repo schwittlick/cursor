@@ -511,6 +511,20 @@ def test_resample():
     assert len(p1) == 8
 
 
+def test_resampled():
+    p1 = Path.from_tuple_list(
+        [(0, 0), (1, 0), (0, 1), (1.1, 1.1)])
+    # using (1.1, 1.1) for the last points in order to not drop the last
+    # point because it would not be included (the last two points distance
+    # would be below 0.5)
+    p1.color = (255, 0, 0)
+
+    p2 = p1.resampled(0.5)
+
+    assert len(p2) == 8
+    assert p2.color == (255, 0, 0)
+
+
 def test_rdp():
     p = Path.from_tuple_list(
         [(0, 0), (1, 0), (2, 0), (3, 0),

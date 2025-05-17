@@ -1127,7 +1127,9 @@ class Path:
             # Add other properties as needed
             new_points.append(new_point)
 
-        return Path.from_list(new_points)
+        return_path = Path.from_list(new_points)
+        return_path.properties = self.properties
+        return return_path
 
     def resample(self, target_dist: float) -> None:
         self.vertices = self.resampled(target_dist).vertices
