@@ -250,5 +250,7 @@ def split_list_into_chunks(lst: List[Any], n: int) -> List[List[Any]]:
 
 def split_list_into_chunks_of_size(lst: List[Any], chunksize: int) -> List[List[Any]]:
     """ Splits list into chunks, where each chunk has certain size. Last chunk will contain remaining """
+    chunks = []
     for i in range(0, len(lst), chunksize):
-        yield lst[i:i + chunksize]
+        chunks.append(lst[i:i + chunksize])
+    return chunks
