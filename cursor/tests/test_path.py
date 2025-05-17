@@ -300,16 +300,34 @@ def test_path_limit():
     assert len(p) == 5
 
 
-def test_path_offset_shapely():
+def test_path_parallel_offset_shapely():
     p = Path.from_tuple_list(
         [(0.9, 0.9), (0.9, 1.0), (0.9, 1.1), (0.1, 0.8),
          (-0.1, 0.8), (0.0, 0.0), (1.0, 1.0)])
     p.scale(10, 10)
 
+    p.color = (0, 0, 255)
+
     new = p.parallel_offset(1)
 
     assert len(new) == 1
     assert len(new[0]) == 7
+    assert new[0].color == (0, 0, 255)
+
+
+def test_path_curve_offset_shapely():
+    p = Path.from_tuple_list(
+        [(0.9, 0.9), (0.9, 1.0), (0.9, 1.1), (0.1, 0.8),
+         (-0.1, 0.8), (0.0, 0.0), (1.0, 1.0)])
+    p.scale(10, 10)
+
+    p.color = (0, 0, 255)
+
+    new = p.curve_offset(1)
+
+    assert len(new) == 1
+    assert len(new[0]) == 7
+    assert new[0].color == (0, 0, 255)
 
 
 def test_path_nearest_points():

@@ -966,6 +966,9 @@ class Path:
             pa = self.iter_and_return_path(result)
             self.add_if(pa, return_paths)
 
+        for return_path in return_paths:
+            return_path.properties = self.properties
+
         return return_paths
 
     def parallel_offset(
@@ -998,6 +1001,9 @@ class Path:
                 print(f"nothing matched for type {type(result)}")
         except ValueError as ve:
             print(f"Exception {ve}")
+
+        for return_path in return_paths:
+            return_path.properties = self.properties
 
         return return_paths
 
