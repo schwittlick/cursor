@@ -1230,6 +1230,7 @@ class Path:
                     pos = Position(intersection[0], intersection[1])
                     pos.properties = v.properties
                     current_path.add_position(pos)
+                    current_path.properties = self.properties
                     new_paths.append(current_path.copy())
                     current_path = Path()
                 if not prev_inside and curr_inside:
@@ -1248,6 +1249,7 @@ class Path:
                     current_path.add_position(v)
             prev_v = v
         if not current_path.empty():
+            current_path.properties = self.properties
             new_paths.append(current_path)
         return new_paths
 

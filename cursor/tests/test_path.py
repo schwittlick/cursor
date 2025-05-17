@@ -554,6 +554,8 @@ def test_clip():
         [(5, 5), (5, 15), (6, 15), (6, 5),
          (5, 5), (11, 5), (12, 5), (5, 5), (7, 5)])
 
+    p.color = (255, 0, 0)
+
     bb = BoundingBox(1, 1, 10, 10)
 
     clipped = p.clip(bb)
@@ -570,6 +572,11 @@ def test_clip():
     assert clipped[2][0] == Position(10, 5)
     assert clipped[2][1] == Position(5, 5)
     assert clipped[2][2] == Position(7, 5)
+
+    # check that path-properties are preserved after clipping
+    assert clipped[0].color == (255, 0, 0)
+    assert clipped[1].color == (255, 0, 0)
+    assert clipped[2].color == (255, 0, 0)
 
     assert p[0] == Position(5, 5)
     assert p[1] == Position(5, 15)
