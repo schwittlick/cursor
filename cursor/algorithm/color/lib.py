@@ -110,6 +110,7 @@ def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool
 
         pens[path_copic_color.code].add(path)
 
+    logging.info(f"{len(pens)} colors detected")
     collection_bb = collection.bb()
 
     for _, paths in pens.items():

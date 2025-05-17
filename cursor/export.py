@@ -220,8 +220,7 @@ class Exporter:
                             logging.warning(f"Invalid color code: {color_code}")
                             continue
 
-            layer_counter += 1
-            if layer_counter % 6 == 0:
+            if y > 250:
                 x += 65
                 y = 10
         pdf_renderer.save(fname)
