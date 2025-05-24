@@ -19,6 +19,7 @@ class PlotterType(IntEnum):
     ROLAND_DPX3300_A1 = auto()
     ROLAND_DPX3300_A2 = auto()
     ROLAND_DPX3300_A3 = auto()
+    ROLAND_DPX3300_65_48 = auto()
 
     HP_7550A_A3 = auto()
     HP_7550A_A4 = auto()
@@ -87,6 +88,7 @@ class ExportFormatMappings:
         PlotterType.ROLAND_DPX3300_A1: ExportFormat.HPGL,
         PlotterType.ROLAND_DPX3300_A2: ExportFormat.HPGL,
         PlotterType.ROLAND_DPX3300_A3: ExportFormat.HPGL,
+        PlotterType.ROLAND_DPX3300_65_48: ExportFormat.HPGL,
 
         PlotterType.HP_7550A_A3: ExportFormat.HPGL,
         PlotterType.HP_7550A_A4: ExportFormat.HPGL,
@@ -178,6 +180,7 @@ class MinmaxMapping:
         PlotterType.ROLAND_DPX3300_A1: BB(-16920, -11180, 16340, 11180),
         PlotterType.ROLAND_DPX3300_A2: BB(-16920, -11180, 5440, 4629),
         PlotterType.ROLAND_DPX3300_A3: BB(-16920, -11180, -1112, -3276),
+        PlotterType.ROLAND_DPX3300_65_48: BB(-16920, -11180, 8600, 7100),
 
         PlotterType.HP_7550A_A3: BB(0, 0, 15970, 10870) - BB(0, 0, 320, 0),
         # subtracting 8 mm of extra space from bottom. how much padding does this have on paper?
@@ -253,6 +256,7 @@ class PlotterName:
         PlotterType.ROLAND_DPX3300_A1: "dpx3300_a1",
         PlotterType.ROLAND_DPX3300_A2: "dpx3300_a2",
         PlotterType.ROLAND_DPX3300_A3: "dpx3300_a3",
+        PlotterType.ROLAND_DPX3300_65_48: "dpx3300_65_48cm",
 
         PlotterType.HP_7550A_A3: "hp7550a_a3",
         PlotterType.HP_7550A_A4: "hp7550a_a4",
@@ -311,7 +315,8 @@ class PlotterName:
 
 class PlotterHpglNames:
     names: Dict[str, List[PlotterType]] = {
-        "DPX-3300": [PlotterType.ROLAND_DPX3300_A1, PlotterType.ROLAND_DPX3300_A2, PlotterType.ROLAND_DPX3300_A3],
+        "DPX-3300": [PlotterType.ROLAND_DPX3300_A1, PlotterType.ROLAND_DPX3300_A2, PlotterType.ROLAND_DPX3300_A3,
+                     PlotterType.ROLAND_DPX3300_65_48],
         "7550A": [PlotterType.HP_7550A_A3, PlotterType.HP_7550A_A4],
         "7475A": [PlotterType.HP_7475A_A3, PlotterType.HP_7475A_A4, PlotterType.GRAPHTEC_MP2000,
                   PlotterType.GRAPHTEC_MP3100],
@@ -340,6 +345,7 @@ class XYFactors:
         PlotterType.ROLAND_DPX3300_A1: (40, 40),
         PlotterType.ROLAND_DPX3300_A2: (40, 40),
         PlotterType.ROLAND_DPX3300_A3: (40, 40),
+        PlotterType.ROLAND_DPX3300_65_48: (40, 40),
 
         PlotterType.HP_7550A_A3: (40, 40),
         PlotterType.HP_7550A_A4: (40, 40),
@@ -395,6 +401,7 @@ class MaxSpeed:
         PlotterType.ROLAND_DPX3300_A1: 40,
         PlotterType.ROLAND_DPX3300_A2: 40,
         PlotterType.ROLAND_DPX3300_A3: 40,
+        PlotterType.ROLAND_DPX3300_65_48: 40,
 
         PlotterType.HP_7550A_A3: 80,
         PlotterType.HP_7550A_A4: 80,
@@ -450,6 +457,7 @@ class BufferSize:
         PlotterType.ROLAND_DPX3300_A1: 0,  # 0 = not tested
         PlotterType.ROLAND_DPX3300_A2: 0,
         PlotterType.ROLAND_DPX3300_A3: 0,
+        PlotterType.ROLAND_DPX3300_65_48: 0,
 
         PlotterType.HP_7550A_A3: 512,
         PlotterType.HP_7550A_A4: 512,
