@@ -425,6 +425,32 @@ class Collection:
         """
         [p.rot(delta) for p in self]
 
+    def rotate_points(self, rotation_center, angle_degrees):
+        """
+        Rotate points around arbitrary center using only built-in Python.
+        """
+        cx, cy = rotation_center
+        angle_rad = math.radians(angle_degrees)
+        cos_a = math.cos(angle_rad)
+        sin_a = math.sin(angle_rad)
+
+        for path in self:
+            for pos in path:
+                # Translate to origin
+                tx = pos.x - cx
+                ty = pos.y - cy
+
+                # Apply rotation
+                rx = tx * cos_a - ty * sin_a
+                ry = tx * sin_a + ty * cos_a
+
+                # Translate back
+                new_x = rx + cx
+                new_y = ry + cy
+
+                pos.x = new_x
+                pos.y = new_y
+
     def downsample(self, dist: float) -> None:
         [p.downsample(dist) for p in self]
 

@@ -674,6 +674,23 @@ def test_reorder_quadrants2():
     assert len(pc) == 100
 
 
+def test_rotate_points():
+    p0 = Path.from_tuple_list([(1, 1), (1, 1)])
+    p1 = Path.from_tuple_list([(1, 10), (1, 10)])
+    p2 = Path.from_tuple_list([(5, 5), (5, 5)])
+
+    pc = Collection.from_path_list([p0, p1, p2])
+
+    pc.rotate_points((0, 0), 180)
+
+    assert round(pc[0][0].x, 10) == -1
+    assert round(pc[0][0].y, 10) == -1
+    assert round(pc[1][0].x, 10) == -1
+    assert round(pc[1][0].y, 10) == -10
+    assert round(pc[2][0].x, 10) == -5
+    assert round(pc[2][0].y, 10) == -5
+
+
 def DISABLED_test_tsp_performances():
     random.seed(1)
     points = 100
