@@ -263,11 +263,21 @@ class Exporter:
     def _export_hpgl(self, pc: Collection, fname: str) -> None:
         hpgl_folder = DataDirHandler().hpgl(self.name)
         hpgl_renderer = HPGLRenderer(hpgl_folder)
+
+        mutohs = {PlotterType.MUTOH_XP500_A1, PlotterType.MUTOH_XP500_A2, PlotterType.MUTOH_XP500_A3,
+                  PlotterType.MUTOH_XP500_100x70cm, PlotterType.MUTOH_XP500_500x297mm}
+        if self.cfg.type in mutohs:
+            bb = MinmaxMapping.maps[self.cfg.type]
+            # rotate drawing 180degrees for MUTOH plotters
+            # bc there is more margin on the top of the paper for MUTOH plotters
+            pc.rotate_points(bb.center(), 180)
+
         hpgl_renderer.add(pc)
         if self.cfg and self.cfg.optimize_hpgl_by_tsp:
             self.print_pen_move_distances(hpgl_renderer.collection)
             hpgl_renderer.optimize()
             self.print_pen_move_distances(hpgl_renderer.collection)
+
         hpgl_renderer.save(fname)
 
     def _export_svg(self, pc: Collection, fname: str) -> None:
