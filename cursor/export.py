@@ -156,7 +156,8 @@ class Exporter:
         machinename = PlotterName.names[self.cfg.type]
         h = hashlib.sha256(ms.encode("utf-8")).hexdigest()
         hash_short = f"{h[:4]}{h[-4:]}"
-        return f"{self.name}_{self.suffix}_{machinename}_{layer}_{hash_short}"
+        timestamp = Timer.timestamp()
+        return f"{self.name}_{self.suffix}_{machinename}_{layer}_{hash_short}_{timestamp}"
 
     def export_jpeg_preview(self, separate_layers: Dict[str, Collection]) -> None:
         for layer, pc in separate_layers.items():
