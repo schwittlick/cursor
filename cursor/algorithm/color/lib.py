@@ -49,39 +49,41 @@ def sort_collection_by_copic_color(collection: Collection) -> dict[Color, Collec
     return dict(sorted(colors.items()))
 
 
-def create_legend_path(x: float, y: float, layer_index: int, pen_index: int, path_color: Color) -> Path:
+def create_legend_path(x: float, y: float, layer_index: int, pen_index: int, path_color: Color, radius: float) -> Path:
     legend_path = Path([Position(x, y), Position(x, y)])
     legend_path.layer = layer_index
     legend_path.pen_select = pen_index
     legend_path.color = path_color.as_rgb()
+    for pos in legend_path:
+        pos.radius = radius
     return legend_path
 
 
-def add_legende_all_corners(collection_bb, layer_index, c, pen_index, path_color, legende_scale):
+def add_legende_all_corners(collection_bb, layer_index, c, pen_index, path_color, legende_scale, radius):
     num_legend_points = 3
 
     x = collection_bb.x2 + layer_index * legende_scale  # left side for legende
     y = collection_bb.y2 - pen_index * legende_scale
     for _ in range(num_legend_points):
-        legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
+        legend_path = create_legend_path(x, y, layer_index, pen_index, path_color, radius)
         c.add(legend_path)
 
     x = collection_bb.x2 + layer_index * legende_scale  # left side for legende
     y = collection_bb.y + pen_index * legende_scale
     for _ in range(num_legend_points):
-        legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
+        legend_path = create_legend_path(x, y, layer_index, pen_index, path_color, radius)
         c.add(legend_path)
 
     x = collection_bb.x + layer_index * legende_scale  # legende on right side
     y = collection_bb.y2 - pen_index * legende_scale
     for _ in range(num_legend_points):
-        legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
+        legend_path = create_legend_path(x, y, layer_index, pen_index, path_color, radius)
         c.add(legend_path)
 
     x = collection_bb.x + layer_index * legende_scale  # legende on right side
     y = collection_bb.y + pen_index * legende_scale
     for _ in range(num_legend_points):
-        legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
+        legend_path = create_legend_path(x, y, layer_index, pen_index, path_color, radius)
         c.add(legend_path)
 
 
@@ -101,6 +103,8 @@ def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool
     pen_index = 1
     layer_index = 0
     pens = {}
+
+    radius = collection.paths[0][0].radius
 
     # separating app paths by the copic color code
     for path in collection:
@@ -129,7 +133,7 @@ def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool
                 all_corners = False
                 if all_corners:
                     add_legende_all_corners(collection_bb, layer_index, legend_paths, pen_index, path_color,
-                                            legende_scale)
+                                            legende_scale, radius)
                 else:
                     num_legend_points = 3
 
@@ -140,7 +144,7 @@ def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool
                         x = absolute_offset[0] + layer_index * legende_scale
                         y = absolute_offset[1] + pen_index * legende_scale
                         for _ in range(num_legend_points):
-                            legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
+                            legend_path = create_legend_path(x, y, layer_index, pen_index, path_color, radius)
                             legend_paths.add(legend_path)
                     else:
                         # adding legende of used colors
@@ -156,7 +160,7 @@ def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool
                             y = collection_bb.y + layer_index * legende_scale
 
                         for _ in range(num_legend_points):
-                            legend_path = create_legend_path(x, y, layer_index, pen_index, path_color)
+                            legend_path = create_legend_path(x, y, layer_index, pen_index, path_color, radius)
                             legend_paths.add(legend_path)
 
             # adds legend paths at beginning of layer
