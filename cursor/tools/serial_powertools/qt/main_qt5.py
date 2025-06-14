@@ -178,7 +178,7 @@ class SerialInspectorGUI(QMainWindow):
             ("IN;", "IN;"), ("OA;", "OA;"), ("OE;", "OE;"), ("OH;", "OH;"), ("OI;", "OI;"),
             ("PU;", "PU;"), ("PD;", "PD;"),
             ("PA0,0;", "PA0,0;"), ("PA10000,10000;", "PA10000,10000;"),
-            ("PArandom(),random();", self.generate_random_pa),
+            ("PArandom(),random();", self.generate_random_pa()),
             ("ESC.R (reset device);", RESET_DEVICE + ";"), ("ESC.K; (absort graphics)", ABORT_GRAPHICS + ";"),
         ]
 
