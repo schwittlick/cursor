@@ -44,6 +44,7 @@ class SerialInspectorGUI(QMainWindow):
         self.setup_shortcuts()
 
         self.inspector.connection_status_changed.connect(self.update_connection_status)
+        self.inspector.file_progress_updated.connect(self.update_file_progress)
 
     def init_ui(self):
         self.setWindowTitle('Serial Inspector')
@@ -232,7 +233,7 @@ class SerialInspectorGUI(QMainWindow):
         send_async_btn = QPushButton("Send Async")
         send_async_btn.clicked.connect(self.send_file)
         stop_sending_btn = QPushButton("Stop sending")
-        stop_sending_btn.clicked.connect(self.inspector.stop_send_serial_file)
+        stop_sending_btn.clicked.connect(self.stop_send_file)
 
         file_layout.addWidget(send_async_btn)
         file_layout.addWidget(stop_sending_btn)
@@ -240,6 +241,7 @@ class SerialInspectorGUI(QMainWindow):
         layout.addLayout(file_layout)
 
         self.send_file_progress = QProgressBar()
+        self.send_file_progress.setRange(0, 100)
         layout.addWidget(self.send_file_progress)
 
         widget.setLayout(layout)
@@ -273,6 +275,10 @@ class SerialInspectorGUI(QMainWindow):
             self.inspector.send_serial_file(file_path)
         else:
             logging.warning("No file selected for sending.")
+
+    def stop_send_file(self):
+        self.send_file_progress.setValue(0)
+        self.inspector.stop_send_serial_file()
 
     def create_bruteforce_widget(self):
         widget = QWidget()
@@ -353,6 +359,11 @@ class SerialInspectorGUI(QMainWindow):
         else:
             self.connect_btn.setText("Connect")
         logging.info(f"Connection status updated: {status}")
+
+    def update_file_progress(self, idx, max_length):
+        progress = int((idx / max_length) * 100)
+        self.send_file_progress.setValue(progress)
+        logging.info(f"File progress updated: {progress}%")
 
     def generate_random_pa(self):
         x = random.randint(0, 10000)

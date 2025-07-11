@@ -108,8 +108,11 @@ class SerialInspector(QObject):
         self.async_sender.start()
 
     def stop_send_serial_file(self):
-        self.async_sender.stop()
-        logging.info(f"Stopped async sender. {self.async_sender.plotter}")
+        if self.async_sender:
+            self.async_sender.stop()
+            logging.info(f"Stopped async sender. {self.async_sender.plotter}")
+        else:
+            logging.warning("No active job to stop.")
 
     def send_serial_file(self, file_path: str):
         if not self.check():
