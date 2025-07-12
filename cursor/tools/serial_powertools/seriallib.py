@@ -40,14 +40,16 @@ def concat_commands(cmd_list: list[str]) -> str:
     return concatenated
 
 
-def wait_for_free_io_memory(plotter: HPGLPlotter, memory_amount: int) -> None:
+def wait_for_free_io_memory(plotter: HPGLPlotter, memory_amount: int, limit: int = 64) -> None:
     free_io_memory = plotter.free_memory()
+    free_io_memory %= limit
 
     logging.info(f"Free memory: {free_io_memory}")
 
     while free_io_memory < memory_amount:
         sleep(0.05)
         free_io_memory = plotter.free_memory()
+        free_io_memory %= limit
 
 
 class AsyncSerialSender(threading.Thread):
@@ -107,24 +109,24 @@ class AsyncSerialSender(threading.Thread):
                 cmds = concat_commands(batched_commands)
 
                 if self.do_software_handshake:
-                    wait_for_free_io_memory(self.plotter, len(cmds) + 10)
+                    wait_for_free_io_memory(self.plotter, len(cmds))
 
                 logging.info(cmds)
                 self.plotter.write(cmds)
 
                 while self.paused:
-                    #self.lock.release()
+                    # self.lock.release()
                     time.sleep(0.1)
-                    #self.lock.acquire()
+                    # self.lock.acquire()
 
                 if self.send_single and not self.paused:
                     self.command_batch = 1
                     self.paused = True
 
                 self.current_command_index = end_index
-                #self.lock.release()
+                # self.lock.release()
                 time.sleep(0.1)
-                #self.lock.acquire()
+                # self.lock.acquire()
 
                 # call cb for progress
                 self.progress_cb(self.current_command_index)
@@ -161,7 +163,7 @@ class SerialSender:
                 for i in range(0, len(commands), command_batch):
                     batched_commands = commands[i:i + command_batch]
                     cmds = concat_commands(batched_commands)
-                    wait_for_free_io_memory(plotter, len(cmds) + 10)
+                    wait_for_free_io_memory(plotter, len(cmds))
 
                     plotter.write(cmds)
                     pbar.update(command_batch)
