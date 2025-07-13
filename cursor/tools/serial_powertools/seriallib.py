@@ -42,14 +42,15 @@ def concat_commands(cmd_list: list[str]) -> str:
 
 def wait_for_free_io_memory(plotter: HPGLPlotter, memory_amount: int, limit: int = 64) -> None:
     free_io_memory = plotter.free_memory()
-    free_io_memory %= limit
+    free_io_memory = min(free_io_memory, limit)
 
-    logging.info(f"Free memory: {free_io_memory}")
+    logging.info(f"Free memory: {free_io_memory} requested: {memory_amount}")
 
     while free_io_memory < memory_amount:
         sleep(0.05)
         free_io_memory = plotter.free_memory()
-        free_io_memory %= limit
+        free_io_memory = min(free_io_memory, limit)
+        logging.info(f"Free memory: {free_io_memory} requested: {memory_amount}")
 
 
 class AsyncSerialSender(threading.Thread):
@@ -79,7 +80,7 @@ class AsyncSerialSender(threading.Thread):
     def add_commands(self, commands: list[str], progress_cb: typing.Callable):
         with self.lock:
             self.commands = commands
-            self.command_batch = min(20, len(commands))
+            self.command_batch = min(5, len(commands))
             self.progress_cb = progress_cb
             self.current_command_index = 0
 
