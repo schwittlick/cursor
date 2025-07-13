@@ -8,6 +8,8 @@ from cursor.path import Path
 from cursor.position import Position
 import math
 
+from properties import Property
+
 
 def convert_color_coordinates_to_collection(color_coords: dict[CopicColorCode, list[tuple]],
                                             legende_x: bool, legende_y: bool) -> Collection:
@@ -54,8 +56,11 @@ def create_legend_path(x: float, y: float, layer_index: int, pen_index: int, pat
     legend_path.layer = layer_index
     legend_path.pen_select = pen_index
     legend_path.color = path_color.as_rgb()
+    legend_path.properties[Property.COPIC_COLOR] = path_color
     for pos in legend_path:
         pos.radius = radius
+        pos.color = path_color.as_rgb()
+        pos.properties[Property.COPIC_COLOR] = path_color
     return legend_path
 
 
@@ -108,7 +113,7 @@ def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool
 
     # separating app paths by the copic color code
     for path in collection:
-        path_copic_color = path.properties["copic_color"]
+        path_copic_color = path.properties[Property.COPIC_COLOR]
         if path_copic_color.code not in pens.keys():
             pens[path_copic_color.code] = Collection()
 
@@ -170,8 +175,8 @@ def sort_collection_by_copic_color_group(collection: Collection, legende_x: bool
             for path in paths_same_color:
                 path.pen_select = pen_index
                 path.layer = layer_index
-                path.color = path_color.as_rgb()
-                path.properties["copic_color"] = path_color
+                # path.color = path_color.as_rgb()
+                # path.properties[Property.COPIC_COLOR] = path_color
 
                 c.add(path)
 

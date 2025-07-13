@@ -133,7 +133,7 @@ class Copic:
             self.rgb_kdtree = KDTree(rgb_points, 3)
 
         rgb_dist, closest_color = self.rgb_kdtree.get_nearest(c1_rgbs)
-        closest = self.available_colors_rgb_index[closest_color]
+        closest = self.available_colors_rgb_index[closest_color[0]]
         return closest
 
     @timing

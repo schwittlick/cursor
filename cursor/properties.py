@@ -18,6 +18,7 @@ class Property(str, Enum):
     LASER_Z = "z"
     # below used for jpeg renderer
     COLOR = "color"
+    COPIC_COLOR = "copic_color"
     WIDTH = "width"
     RADIUS = 'radius'
     TAGS = 'tags'
