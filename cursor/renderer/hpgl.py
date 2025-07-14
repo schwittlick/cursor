@@ -117,7 +117,7 @@ class HPGLRenderer(BaseRenderer):
                 _hpgl.PA(int(x), int(y))
 
             if p.rgb_led_color:
-                _hpgl.custom(f"\nRGB0,0,0;")
+                _hpgl.custom("\nRGB0,0,0;")
 
             _hpgl.PU()
 

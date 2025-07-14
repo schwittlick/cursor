@@ -694,8 +694,7 @@ class Collection:
             best_points_coordinate = start_positions[best_points_, :]
             ax[0].plot(
                 best_points_coordinate[:,
-                0], best_points_coordinate[:, 1], "o-r"
-            )
+                0], best_points_coordinate[:, 1], "o-r")
             ax[1].plot(ga_tsp.generation_best_Y)
             plt.show()
 

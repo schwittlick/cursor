@@ -66,7 +66,6 @@ class KDTree:
         def get_knn(node, point, k, return_dist_sq, heap, i=0, tiebreaker=1):
             if node is not None:
                 node_point = node[2][0]  # Extract the point part
-                node_props = node[2][1]  # Extract the properties part
                 dist_sq = dist_sq_func(point, node_point)
                 dx = node_point[i] - point[i]
                 if len(heap) < k:
