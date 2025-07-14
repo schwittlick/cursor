@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cursor"
+version = "250714"
+description = "cursor line experiments"
+authors = [
+    { name = "Marcel Schwittlick", email = "info@schwittlick.net" }
+]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dynamic = ["dependencies"]
+
+[project.urls]
+Homepage = "https://github.com/schwittlick/cursor"
+Repository = "https://github.com/schwittlick/cursor"
+
+[project.scripts]
+cursor_recorder = "cursor.recorder:main"
+discovery = "cursor.tools.discovery:discover"
+sendhpgl = "cursor.tools.sendhpgl:main"
+braille_convert = "cursor.tools.braille_converter:main"
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["cursor*"]
+
+[tool.setuptools.package-data]
+cursor = ["*"]

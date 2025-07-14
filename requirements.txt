@@ -45,7 +45,7 @@ numba==0.60.0
 numpy==1.26.4
 opencv-python==4.10.0.84
 orjson==3.10.7
-packaging==24.1
+packaging==25.0
 pandas==2.2.2
 pathspec==0.12.1
 Pillow>=9.4.0
