@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/cursor
     docker:
-      - image: python:3.11.4-buster
+      - image: python:3.11
     steps:
       - checkout
       - run:
@@ -25,7 +25,7 @@ jobs:
       - run:
           name: Run Flake8
           command: |
-            mkdir cursor/tests/artifacts
+            mkdir -p cursor/tests/artifacts
             flake8 . --count --exit-zero --max-complexity=10 --max-line-length=120 --ignore=E402,W503,E203,E303,E722,E741,E731,W504 --statistics --output-file cursor/tests/artifacts/flake8_report.txt
       - run:
           name: Run tests
