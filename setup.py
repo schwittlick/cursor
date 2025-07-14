@@ -1,16 +1,12 @@
-#!/usr/bin/env python
 from setuptools import setup
 import pathlib
 
 requires = []
 
 here = pathlib.Path(__file__).parent
-with open(here / 'requirements.txt', 'r') as f:
-    for line in f:
-        print(line)
+with open(here / 'requirements.txt', 'r', encoding='utf-8') as f:
     requires = [line.strip() for line in f]
 
-print(requires)
 try:
     import pypandoc
 
