@@ -7,6 +7,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install system dependencies
+          command: |
+            apt update
+            apt install -y libcairo2-dev pkg-config python3-dev
+      - run:
           name: Install dependencies
           command: |
             pip3 install --upgrade pip
@@ -14,8 +19,8 @@ jobs:
       - run:
           name: Install xvfb
           command: |
-            apt-get update
-            apt-get install -y xvfb
+            apt update
+            apt install -y xvfb
           background: false
       - run:
           name: Running X virtual framebuffer
