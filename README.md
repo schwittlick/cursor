@@ -16,7 +16,7 @@ setup
 
 adjust config.ini
 
-    cp config config_local.ini
+    cp config.ini config_local.ini
     # adjust paths to data folder. within data folder we expect "recordings" and "experiments" folder
 
 test
