@@ -81,7 +81,7 @@ python-dateutil==2.9.0.post0
 pytiled-parser==2.2.0
 pytweening==1.2.0
 pytz==2024.1
-requests==2.32.3
+requests==2.32.4
 rich==13.7.1
 scikit-image==0.24.0
 scikit-learn==1.5.1
