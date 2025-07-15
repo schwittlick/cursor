@@ -1,6 +1,4 @@
 import pytest
-import numpy as np
-from math import pi
 
 from cursor.algorithm.visvalingam_whyatt import simplify_vw, triangle_area, VisvalingamWhyatt
 from cursor.path import Path
@@ -67,7 +65,8 @@ def test_basic_simplification():
     for case in test_cases:
         simplified = simplify_vw(positions, case['threshold'])
         assert len(simplified) == case['expected_length'], \
-            f"{case['message']}: Expected {case['expected_length']} points with threshold {case['threshold']}, got {len(simplified)}"
+            f"{case['message']}: Expected {case['expected_length']} points with threshold " \
+            f"{case['threshold']}, got {len(simplified)}"
 
         # Always verify that endpoints are preserved
         assert simplified[0] == positions[0]

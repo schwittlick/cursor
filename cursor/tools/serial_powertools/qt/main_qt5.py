@@ -229,7 +229,6 @@ class SerialInspectorGUI(QMainWindow):
         file_layout.addWidget(self.file_path_input)
         file_layout.addWidget(select_file_btn)
 
-        send_layout = QHBoxLayout()
         send_async_btn = QPushButton("Send Async")
         send_async_btn.clicked.connect(self.send_file)
         stop_sending_btn = QPushButton("Stop sending")

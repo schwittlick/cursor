@@ -50,7 +50,6 @@ class MainWindow(QMainWindow):
     def generate_parallel_lines(self):
         # Define grid layout
         grid_width = 3
-        grid_height = 2
         spacing_x = 0.5
         spacing_y = 0.5
 

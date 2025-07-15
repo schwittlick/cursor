@@ -38,7 +38,7 @@ def test_get_colors_by_group():
     assert CCC.R89 in colors
 
 
-def test_get_colors_by_group():
+def test_get_colors_by_group_all_groups():
     """
     Test the get_colors_by_group method of the Copic class.
 

@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QMainWindow, QCo
 from matplotlib.patches import Rectangle
 from PIL import Image as PILImage
 import cv2
-import tkinter as tk
 import json
 import os
 import numpy as np
@@ -18,7 +17,6 @@ from skimage.morphology import skeletonize as sk_skeletonize
 
 from cursor.algorithm.color.copic import Copic
 from cursor.algorithm.color.copic_pen_enum import CopicColorGroup
-from cursor.algorithm.color.lib import sort_collection_by_copic_color_group
 from cursor import Collection
 from cursor import Path
 
@@ -128,7 +126,7 @@ class MainWindow(QMainWindow):
 
             # Place the skeleton in the canvas
             canvas[row * canvas_size:(row + 1) * canvas_size,
-            col * canvas_size:(col + 1) * canvas_size] = resized_skeleton
+                   col * canvas_size:(col + 1) * canvas_size] = resized_skeleton
             print(f"Skeleton saved to grid position ({row}, {col})")
 
         # Save the grid image
@@ -574,10 +572,10 @@ class MainWindow(QMainWindow):
         # change outline manually here
         OUTLINE_MARGIN = 8
 
-        A6_MULT = 0.5
+        # A6_MULT = 0.5
         A5_MULT = 1
-        A4_MULT = 2
-        A3_MULT = 4
+        # A4_MULT = 2
+        # A3_MULT = 4
         format_multiplier = A5_MULT
 
         OUTPUT_WIDTH = int(OUTLINE_WIDTH * format_multiplier)
@@ -599,7 +597,7 @@ class MainWindow(QMainWindow):
 
         # Check if height > width and rotate if needed
         # should_rotate = img.shape[0] > img.shape[1]
-        should_rotate = False#self.calc_should_rotate(obj_contour)
+        should_rotate = False  # self.calc_should_rotate(obj_contour)
         if should_rotate:
             img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
@@ -666,10 +664,10 @@ class MainWindow(QMainWindow):
 
         # Apply mask to maintain white background
         region_slice = export_img_original[y_offset_orig:y_offset_orig + scaled_height_orig,
-                       x_offset_orig:x_offset_orig + scaled_width_orig]
+                                           x_offset_orig:x_offset_orig + scaled_width_orig]
         region_slice[mask_resized > 0] = masked_region_resized[mask_resized > 0]
         export_img_original[y_offset_orig:y_offset_orig + scaled_height_orig,
-        x_offset_orig:x_offset_orig + scaled_width_orig] = region_slice
+                            x_offset_orig:x_offset_orig + scaled_width_orig] = region_slice
 
         category = self.selected_category.split(" (")[0]
         folder = DataDirHandler().png("datasets")
@@ -696,7 +694,9 @@ class MainWindow(QMainWindow):
 
         # Create a side-by-side comparison image with the inverted skeleton
         comparison_image = np.hstack((cv2.cvtColor(export_img_filled, cv2.COLOR_GRAY2BGR), inverted_skeleton))
-        output_path_comparison = folder / f"{category}_contour_comparison_{self.current_index:04d}_{Timer.timestamp()}.png"
+        output_path_comparison = (
+            folder / f"{category}_contour_comparison_{self.current_index:04d}_{Timer.timestamp()}.png"
+        )
         cv2.imwrite(str(output_path_comparison), comparison_image)
         print(f"  Comparison: {output_path_comparison}")
 
@@ -728,7 +728,7 @@ class MainWindow(QMainWindow):
         # assuming there is only one contour in the collection
         self.export_parallel_lines(coll[0], category)
 
-        print(f"Exported contours to:")
+        print("Exported contours to:")
         print(f"  Outline: {output_path_outline}")
         print(f"  Filled: {output_path_filled}")
         print(f"  Original: {output_path_original}")
@@ -770,7 +770,7 @@ class MainWindow(QMainWindow):
             self.current_index = min(self.current_index + 1, self.max_index)
             self.update_display()
         if event.key == 'w':
-            plt.savefig("butterfly_tight.jpg",bbox_inches='tight')
+            plt.savefig("butterfly_tight.jpg", bbox_inches='tight')
 
     def on_scroll(self, event):
         if event.button == 'up':

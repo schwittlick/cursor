@@ -18,11 +18,9 @@ from fcmeans import FCM
 # pip install fuzzy-c-means
 # pip install opencv-python-headless
 
-import skimage.segmentation as seg
 
 from cursor.algorithm.color.copic import Copic
 from cursor.algorithm.color.copic_pen_enum import CopicColorGroup as CCG
-from cursor.algorithm.color.copic_pen_enum import CopicColorCode as CCC
 from cursor.timer import Timer
 
 
@@ -48,9 +46,6 @@ class ClusteringWorker(QThread):
             # Create a mask for white pixels (allowing for small variations)
             white_threshold = 250  # Allow slightly off-white pixels
             white_mask = np.all(pixels >= white_threshold, axis=1)
-
-            # Store the white pixel positions
-            white_pixels = pixels[white_mask]
 
             # Only normalize and cluster non-white pixels
             if len(pixels[~white_mask]) > 0:  # Check if there are any non-white pixels

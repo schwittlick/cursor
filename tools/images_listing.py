@@ -23,5 +23,7 @@ def list_files_as_array(directory_path):
 
 # Example usage
 if __name__ == "__main__":
-    directory_path = "C:\\Users\\schwittlick\\dev\\schwittlick.net\\img\\composition92\\digital_png\\"  # Change this to your directory path
+    directory_path = (
+        "C:\\Users\\schwittlick\\dev\\schwittlick.net\\img\\composition92\\digital_png\\"
+    )  # Change this to your directory path
     list_files_as_array(directory_path)

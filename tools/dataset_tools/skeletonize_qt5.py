@@ -18,6 +18,7 @@ from cursor.timer import Timer
 
 from skeletonize_lib import skeleton_to_vectors
 
+
 class ScalableImageLabel(QLabel):
     def __init__(self, title=""):
         super().__init__(title)

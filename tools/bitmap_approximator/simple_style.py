@@ -14,7 +14,6 @@ from cursor.data import DataDirHandler
 from cursor.device import PlotterType
 from cursor.export import ExportWrapper
 from cursor.renderer.jpg import JpegRenderer
-from properties import Property
 
 
 def main_approximation():

@@ -5,7 +5,7 @@ from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QLabel, QComboBox, QPushButton,
                              QFileDialog, QProgressBar, QTextEdit, QShortcut)
-from PyQt5.QtCore import Qt, QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal
 from time import sleep
 
 from cursor import Position
@@ -92,7 +92,7 @@ class PlotterThread(QThread):
             attempts += 1
             sleep(0.01)
 
-        logging.error(f"Failed to poll position successfully")
+        logging.error("Failed to poll position successfully")
         logging.error(target_pos)
         return False
 

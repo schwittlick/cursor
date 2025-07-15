@@ -1,7 +1,5 @@
-from typing import List, Set, Tuple, TypeAlias, Dict
+from typing import List, Set, Tuple, TypeAlias
 import numpy as np
-from scipy.ndimage import label, generate_binary_structure
-from collections import deque
 
 # Type aliases for clarity
 Point: TypeAlias = Tuple[int, int]
@@ -93,8 +91,6 @@ def trace_path(skel: np.ndarray, start: Point, visited: Set[Point],
         if not neighbors:
             break
 
-        neighbor_counts = [count_neighbors(skel, n) for n in neighbors]
-
         # If we're at a junction point
         if len(neighbors) > 1:
             # Choose the neighbor that continues the most similar direction
@@ -127,6 +123,7 @@ def trace_path(skel: np.ndarray, start: Point, visited: Set[Point],
 
     return path
 
+
 def should_connect_paths(skel: np.ndarray, path1: Path, path2: Path, max_distance: int = 2) -> bool:
     """
     Check if two paths should be connected based on the original skeleton.
@@ -156,6 +153,7 @@ def should_connect_paths(skel: np.ndarray, path1: Path, path2: Path, max_distanc
                 if np.any(neighborhood):
                     return True
     return False
+
 
 def connect_paths(paths: Paths, skel: np.ndarray) -> Paths:
     """
@@ -228,9 +226,6 @@ def skeleton_to_vectors(img: np.ndarray,
 
     # Find all endpoints and junctions
     endpoints, junctions = find_special_points(skel)
-
-    # Start points are endpoints and junctions
-    start_points = endpoints + junctions
 
     # Keep track of visited pixels
     visited: Set[Point] = set()

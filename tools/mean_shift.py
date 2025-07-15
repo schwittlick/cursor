@@ -1,11 +1,11 @@
 import sys
 import cv2
-import numpy as np
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QLabel, QSlider, QPushButton, QFileDialog,
-                             QScrollArea, QSizePolicy, QMessageBox)
+                             QSizePolicy, QMessageBox)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap
+
 
 class ImageLabel(QLabel):
     def __init__(self):
@@ -27,6 +27,7 @@ class ImageLabel(QLabel):
         if self._pixmap:
             scaled = self._pixmap.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
             super().setPixmap(scaled)
+
 
 class MeanShiftApp(QMainWindow):
     def __init__(self):
@@ -189,7 +190,7 @@ class MeanShiftApp(QMainWindow):
             # Create a copy of the image
             img = self.original_image.copy()
 
-            print(f"Processing image with parameters:")
+            print("Processing image with parameters:")
             print(f"Spatial radius: {spatial_radius}")
             print(f"Color radius: {color_radius}")
             print(f"Scale factor: {scale_factor}")
@@ -234,6 +235,7 @@ class MeanShiftApp(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Error processing image: {str(e)}")
             print(f"Error during processing: {str(e)}")
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

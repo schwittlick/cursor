@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt
 import cv2
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
-from skimage.morphology import skeletonize, thin, medial_axis
+from skimage.morphology import skeletonize, medial_axis
 from skimage.util import img_as_ubyte
 from PIL import Image
 
@@ -140,7 +140,7 @@ class ImageViewer(QMainWindow):
         # Normalize the distance
         distance_on_skel = distance * skel
         distance_on_skel = (distance_on_skel - distance_on_skel.min()) / (
-                distance_on_skel.max() - distance_on_skel.min())
+            distance_on_skel.max() - distance_on_skel.min())
 
         # Create a custom colormap similar to 'magma'
         colors = ['#000003', '#3B0F6F', '#8C2981', '#DD4968', '#FD9F6C', '#FBFCBF']
@@ -192,7 +192,7 @@ class ImageViewer(QMainWindow):
             # Try to load new image
             try:
                 self.loadImage()
-            except Exception as e:
+            except Exception:
                 print(f"Failed to load image at index {self.current_index}, reverting...")
                 self.current_index = old_index
                 self.loadImage()

@@ -1,7 +1,7 @@
 import sys
 import json
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
-                             QPushButton, QFileDialog, QLabel)
+                             QPushButton, QFileDialog)
 from PyQt5.QtGui import QPixmap, QPainter, QPen, QImage
 from PyQt5.QtCore import Qt, QPoint
 

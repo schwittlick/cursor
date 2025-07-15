@@ -5,16 +5,13 @@ import json
 import os
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QLabel,
                              QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog,
-                             QSlider, QComboBox, QGroupBox, QMessageBox, QScrollArea,
+                             QSlider, QComboBox, QGroupBox, QMessageBox,
                              QProgressDialog)
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap
 from scipy import ndimage as ndi
 from skimage import filters, color, feature
 from skimage.segmentation import watershed
-from skimage.feature import peak_local_max
-from cursor.algorithm.color.copic import Copic as CopicColor
-from skimage.transform import resize
 
 
 class ImageLabel(QLabel):
@@ -77,7 +74,7 @@ class WatershedGUI(QMainWindow):
         self.scale_slider = self.create_slider(10, 100, 100, 'Image Scale (%):')
         params_layout.addWidget(QLabel('Image Scale:'))
         params_layout.addWidget(self.scale_slider)
-        self.scale_label = QLabel(f'Scale: 100%')
+        self.scale_label = QLabel('Scale: 100%')
         params_layout.addWidget(self.scale_label)
 
         # Gradient method selector
@@ -90,27 +87,27 @@ class WatershedGUI(QMainWindow):
         self.min_distance = self.create_slider(1, 100, 20, 'Min Distance:')
         params_layout.addWidget(QLabel('Min Distance:'))
         params_layout.addWidget(self.min_distance)
-        self.min_distance_label = QLabel(f'Value: 20')
+        self.min_distance_label = QLabel('Value: 20')
         params_layout.addWidget(self.min_distance_label)
 
         # Min gradient slider
         self.min_gradient = self.create_slider(1, 50, 10, 'Min Gradient:')
         params_layout.addWidget(QLabel('Min Gradient:'))
         params_layout.addWidget(self.min_gradient)
-        self.min_gradient_label = QLabel(f'Value: 10')
+        self.min_gradient_label = QLabel('Value: 10')
         params_layout.addWidget(self.min_gradient_label)
 
         # Compactness slider
         self.compactness = self.create_slider(0, 10, 0, 'Compactness:')
         params_layout.addWidget(QLabel('Compactness:'))
         params_layout.addWidget(self.compactness)
-        self.compactness_label = QLabel(f'Value: 0.00')
+        self.compactness_label = QLabel('Value: 0.00')
         params_layout.addWidget(self.compactness_label)
 
         self.blur_slider = self.create_slider(0, 300, 0, 'Blur:')
         params_layout.addWidget(QLabel('Blur:'))
         params_layout.addWidget(self.blur_slider)
-        self.blur_label = QLabel(f'Blur: 0')
+        self.blur_label = QLabel('Blur: 0')
         params_layout.addWidget(self.blur_label)
 
         # Connect blur slider

@@ -130,10 +130,10 @@ class BoundingBox:
             bool: True if the other BoundingBox is fully contained within this one, False otherwise.
         """
         return (
-                self.p1.x <= other.p1.x and
-                self.p1.y <= other.p1.y and
-                self.p2.x >= other.p2.x and
-                self.p2.y >= other.p2.y)
+            self.p1.x <= other.p1.x and
+            self.p1.y <= other.p1.y and
+            self.p2.x >= other.p2.x and
+            self.p2.y >= other.p2.y)
 
     def intersects(self, other: BoundingBox) -> bool:
         """
