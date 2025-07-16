@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
 
 # Assuming these imports are available in your project structure
 from cursor.hpgl import RESET_DEVICE, ABORT_GRAPHICS
+from cursor.timer import Timer
 from cursor.tools.discovery import discover
 from cursor.tools.serial_powertools.qt.serial_inspector_qt5 import SerialInspector
 
@@ -45,6 +46,8 @@ class SerialInspectorGUI(QMainWindow):
 
         self.inspector.connection_status_changed.connect(self.update_connection_status)
         self.inspector.file_progress_updated.connect(self.update_file_progress)
+
+        self.send_file_timer = Timer()
 
     def init_ui(self):
         self.setWindowTitle('Serial Inspector')
@@ -239,9 +242,14 @@ class SerialInspectorGUI(QMainWindow):
 
         layout.addLayout(file_layout)
 
+        progress_layout = QHBoxLayout()
         self.send_file_progress = QProgressBar()
         self.send_file_progress.setRange(0, 100)
-        layout.addWidget(self.send_file_progress)
+        progress_layout.addWidget(self.send_file_progress)
+
+        self.elapsed_label = QLabel("Elapsed: 0s")
+        progress_layout.addWidget(self.elapsed_label)
+        layout.addLayout(progress_layout)
 
         widget.setLayout(layout)
         return widget
@@ -272,6 +280,7 @@ class SerialInspectorGUI(QMainWindow):
         file_path = self.file_path_input.text()
         if file_path:
             self.inspector.send_serial_file(file_path)
+            self.send_file_timer.start()
         else:
             logging.warning("No file selected for sending.")
 
@@ -363,6 +372,9 @@ class SerialInspectorGUI(QMainWindow):
         progress = int((idx / max_length) * 100)
         self.send_file_progress.setValue(progress)
         logging.info(f"File progress updated: {progress}%")
+
+        elapsed = self.send_file_timer.elapsed()
+        self.elapsed_label.setText(f"Elapsed: {elapsed}s")
 
     def generate_random_pa(self):
         x = random.randint(0, 10000)
