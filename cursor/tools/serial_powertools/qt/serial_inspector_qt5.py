@@ -114,6 +114,13 @@ class SerialInspector(QObject):
         else:
             logging.warning("No active job to stop.")
 
+    def toggle_pause(self):
+        if self.async_sender:
+            self.async_sender.paused = not self.async_sender.paused
+            logging.info(f"Pause {self.async_sender.paused} on async sender. {self.async_sender.plotter}")
+        else:
+            logging.warning("No active job to toggle pause.")
+
     def send_serial_file(self, file_path: str):
         if not self.check():
             logging.warning("Serial connection not open.")

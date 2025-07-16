@@ -182,7 +182,7 @@ class SerialInspectorGUI(QMainWindow):
             ("PU;", "PU;"), ("PD;", "PD;"),
             ("PA0,0;", "PA0,0;"), ("PA10000,10000;", "PA10000,10000;"),
             ("PArandom(),random();", self.generate_random_pa()),
-            ("ESC.R (reset device);", RESET_DEVICE + ";"), ("ESC.K; (absort graphics)", ABORT_GRAPHICS + ";"),
+            ("ESC.R (reset device);", RESET_DEVICE + ";"), ("ESC.K; (abort graphics)", ABORT_GRAPHICS + ";"),
         ]
 
         vs = [("VS1;", "VS1;"), ("VS10;", "VS10;"), ("VS20;", "VS20;"), ("VS40;", "VS40;"), ("VS80;", "VS80;")]
@@ -234,6 +234,8 @@ class SerialInspectorGUI(QMainWindow):
 
         send_async_btn = QPushButton("Send Async")
         send_async_btn.clicked.connect(self.send_file)
+        pause_async_btn = QPushButton("Pause")
+        pause_async_btn.clicked.connect(self.pause_send_file)
         stop_sending_btn = QPushButton("Stop sending")
         stop_sending_btn.clicked.connect(self.stop_send_file)
 
@@ -283,6 +285,9 @@ class SerialInspectorGUI(QMainWindow):
             self.send_file_timer.start()
         else:
             logging.warning("No file selected for sending.")
+
+    def pause_send_file(self):
+        self.inspector.toggle_pause()
 
     def stop_send_file(self):
         self.send_file_progress.setValue(0)
