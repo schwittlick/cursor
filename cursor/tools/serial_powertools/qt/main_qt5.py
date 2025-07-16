@@ -376,7 +376,6 @@ class SerialInspectorGUI(QMainWindow):
     def update_file_progress(self, idx, max_length):
         progress = int((idx / max_length) * 100)
         self.send_file_progress.setValue(progress)
-        logging.info(f"File progress updated: {progress}%")
 
         elapsed = self.send_file_timer.elapsed()
         self.elapsed_label.setText(f"Elapsed: {round(elapsed)}s")
