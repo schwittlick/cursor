@@ -379,7 +379,7 @@ class SerialInspectorGUI(QMainWindow):
         logging.info(f"File progress updated: {progress}%")
 
         elapsed = self.send_file_timer.elapsed()
-        self.elapsed_label.setText(f"Elapsed: {elapsed}s")
+        self.elapsed_label.setText(f"Elapsed: {round(elapsed)}s")
 
     def generate_random_pa(self):
         x = random.randint(0, 10000)
