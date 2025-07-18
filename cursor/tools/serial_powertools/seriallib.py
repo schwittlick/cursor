@@ -126,7 +126,7 @@ class AsyncSerialSender(threading.Thread):
 
                 self.current_command_index = end_index
                 # self.lock.release()
-                time.sleep(0.1)
+                time.sleep(0.01)
                 # self.lock.acquire()
 
                 # call cb for progress
