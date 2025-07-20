@@ -4,21 +4,9 @@ import sys
 
 from PyQt5.QtCore import pyqtSignal, QObject, QThread, Qt
 from PyQt5.QtGui import QKeySequence
-from PyQt5.QtWidgets import (
-    QApplication,
-    QMainWindow,
-    QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QPushButton,
-    QComboBox,
-    QTextEdit,
-    QFileDialog,
-    QProgressBar,
-    QLabel,
-    QLineEdit,
-    QShortcut,
-)
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+                             QPushButton, QComboBox, QTextEdit, QFileDialog, QProgressBar,
+                             QLabel, QLineEdit, QShortcut)
 
 # Assuming these imports are available in your project structure
 from cursor.hpgl import RESET_DEVICE, ABORT_GRAPHICS
@@ -62,7 +50,7 @@ class SerialInspectorGUI(QMainWindow):
         self.send_file_timer = Timer()
 
     def init_ui(self):
-        self.setWindowTitle("Serial Inspector")
+        self.setWindowTitle('Serial Inspector')
         self.setGeometry(100, 100, 1550, 900)
 
         main_widget = QWidget()
@@ -190,43 +178,21 @@ class SerialInspectorGUI(QMainWindow):
 
         # Command buttons
         cmd_buttons = [
-            ("IN;", "IN;"),
-            ("OA;", "OA;"),
-            ("OE;", "OE;"),
-            ("OH;", "OH;"),
-            ("OI;", "OI;"),
-            ("PU;", "PU;"),
-            ("PD;", "PD;"),
-            ("PA0,0;", "PA0,0;"),
-            ("PA10000,10000;", "PA10000,10000;"),
+            ("IN;", "IN;"), ("OA;", "OA;"), ("OE;", "OE;"), ("OH;", "OH;"), ("OI;", "OI;"),
+            ("PU;", "PU;"), ("PD;", "PD;"),
+            ("PA0,0;", "PA0,0;"), ("PA10000,10000;", "PA10000,10000;"),
             ("PArandom(),random();", self.generate_random_pa()),
-            ("ESC.R (reset device);", RESET_DEVICE + ";"),
-            ("ESC.K; (abort graphics)", ABORT_GRAPHICS + ";"),
+            ("ESC.R (reset device);", RESET_DEVICE + ";"), ("ESC.K; (abort graphics)", ABORT_GRAPHICS + ";"),
         ]
 
-        vs = [
-            ("VS1;", "VS1;"),
-            ("VS10;", "VS10;"),
-            ("VS20;", "VS20;"),
-            ("VS40;", "VS40;"),
-            ("VS80;", "VS80;"),
-        ]
+        vs = [("VS1;", "VS1;"), ("VS10;", "VS10;"), ("VS20;", "VS20;"), ("VS40;", "VS40;"), ("VS80;", "VS80;")]
 
-        pen_select = [
-            ("SP0;", "SP0;"),
-            ("SP1;", "SP1;"),
-            ("SP2;", "SP2;"),
-            ("SP3;", "SP3;"),
-            ("SP4;", "SP4;"),
-            ("SP5;", "SP5;"),
-            ("SP6;", "SP6;"),
-            ("SP7;", "SP7;"),
-            ("SP8;", "SP8;"),
-        ]
+        pen_select = [("SP0;", "SP0;"), ("SP1;", "SP1;"), ("SP2;", "SP2;"), ("SP3;", "SP3;"), ("SP4;", "SP4;"),
+                      ("SP5;", "SP5;"), ("SP6;", "SP6;"), ("SP7;", "SP7;"), ("SP8;", "SP8;")]
 
         for i in range(0, len(cmd_buttons), 5):
             btn_layout = QHBoxLayout()
-            for label, command in cmd_buttons[i : i + 5]:
+            for label, command in cmd_buttons[i:i + 5]:
                 btn = QPushButton(label)
                 btn.clicked.connect(lambda _, cmd=command: self.send_command(cmd))
                 btn_layout.addWidget(btn)
@@ -407,11 +373,11 @@ class SerialInspectorGUI(QMainWindow):
             self.connect_btn.setText("Connect")
         logging.info(f"Connection status updated: {status}")
 
-    def seconds_to_readable_timestamp(seconds: int) -> str:
+    def seconds_to_readable_timestamp(self, seconds: int) -> str:
         hours = seconds // 3600
         minutes = (seconds % 3600) // 60
         secs = seconds % 60
-
+        
         if hours > 0:
             return f"{hours}h {minutes}m {secs}s"
         elif minutes > 0:
@@ -424,7 +390,7 @@ class SerialInspectorGUI(QMainWindow):
         self.send_file_progress.setValue(progress)
 
         elapsed = self.send_file_timer.elapsed()
-        self.elapsed_label.setText(f"Elapsed: {round(elapsed)}s")
+        self.elapsed_label.setText(f"Elapsed: {self.seconds_to_readable_timestamp(round(elapsed))}")
 
     def generate_random_pa(self):
         x = random.randint(0, 10000)
@@ -439,5 +405,5 @@ def main():
     sys.exit(app.exec_())
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
