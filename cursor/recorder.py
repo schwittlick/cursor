@@ -156,7 +156,7 @@ def main() -> None:
     def update(icon: pystray.Icon) -> None:
         icon.update_menu()
 
-    icon_path = DataDirHandler().data_dir / "mouse-icon.gif"
+    icon_path = DataDirHandler().base_dir / "mouse-icon.gif"
     image = Image.open(icon_path.as_posix())
     global icon
     icon = pystray.Icon(
