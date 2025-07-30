@@ -67,7 +67,6 @@ PyMsgBox==1.0.9
 pymunk==6.4.0
 pynput==1.7.7
 pyopengl==3.1.7
-pyopengl_accelerate==3.1.7
 pyparsing==3.1.2
 pyperclip==1.9.0
 PyRect==0.2.0
