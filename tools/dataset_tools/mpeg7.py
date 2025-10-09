@@ -15,8 +15,9 @@ class ImageViewer(QMainWindow):
     def __init__(self, image_folder):
         super().__init__()
         self.image_folder = image_folder
-        self.image_files = [f for f in os.listdir(image_folder)
-                            if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif'))]
+        self.image_files = [
+            f for f in os.listdir(image_folder) if f.lower().endswith((".png", ".jpg", ".jpeg", ".bmp", ".gif"))
+        ]
         if not self.image_files:
             raise Exception("No images found in the specified folder")
 
@@ -27,7 +28,7 @@ class ImageViewer(QMainWindow):
         self.loadImage()
 
     def initUI(self):
-        self.setWindowTitle('')
+        self.setWindowTitle("")
         self.setGeometry(100, 100, 1200, 1000)  # Adjusted size for 2x2 layout
 
         central_widget = QWidget()
@@ -48,7 +49,7 @@ class ImageViewer(QMainWindow):
         self.dilation_slider.setTickInterval(1)
         self.dilation_slider.valueChanged.connect(self.onSliderValueChanged)
 
-        slider_label = QLabel('Dilation Kernel Size:')
+        slider_label = QLabel("Dilation Kernel Size:")
         slider_layout = QHBoxLayout()
         slider_layout.addWidget(slider_label)
         slider_layout.addWidget(self.dilation_slider)
@@ -86,8 +87,8 @@ class ImageViewer(QMainWindow):
 
         try:
             pil_image = Image.open(image_path)
-            if pil_image.mode != 'RGB':
-                pil_image = pil_image.convert('RGB')
+            if pil_image.mode != "RGB":
+                pil_image = pil_image.convert("RGB")
             self.original_img = np.array(pil_image)
             self.original_img = cv2.cvtColor(self.original_img, cv2.COLOR_RGB2BGR)
 
@@ -95,7 +96,7 @@ class ImageViewer(QMainWindow):
             gray = cv2.cvtColor(self.original_img, cv2.COLOR_BGR2GRAY)
             _, self.binary_img = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
 
-            self.setWindowTitle(f'{self.image_files[self.current_index]}')
+            self.setWindowTitle(f"{self.image_files[self.current_index]}")
             self.updateDisplay()
 
             # Update progress bar
@@ -140,12 +141,13 @@ class ImageViewer(QMainWindow):
         # Normalize the distance
         distance_on_skel = distance * skel
         distance_on_skel = (distance_on_skel - distance_on_skel.min()) / (
-            distance_on_skel.max() - distance_on_skel.min())
+            distance_on_skel.max() - distance_on_skel.min()
+        )
 
         # Create a custom colormap similar to 'magma'
-        colors = ['#000003', '#3B0F6F', '#8C2981', '#DD4968', '#FD9F6C', '#FBFCBF']
+        colors = ["#000003", "#3B0F6F", "#8C2981", "#DD4968", "#FD9F6C", "#FBFCBF"]
         n_bins = 100
-        cmap = LinearSegmentedColormap.from_list('custom_magma', colors, N=n_bins)
+        cmap = LinearSegmentedColormap.from_list("custom_magma", colors, N=n_bins)
 
         # Apply colormap to distance transform
         colored_distance = cmap(distance_on_skel)
@@ -166,14 +168,10 @@ class ImageViewer(QMainWindow):
             (original_qimage, self.original_label),
             (dilated_qimage, self.dilated_label),
             (skeleton_qimage, self.skeleton_label),
-            (medial_axis_qimage, self.medial_axis_label)
+            (medial_axis_qimage, self.medial_axis_label),
         ]:
             pixmap = QPixmap.fromImage(qimage)
-            pixmap = pixmap.scaled(
-                label.size(),
-                Qt.KeepAspectRatio,
-                Qt.SmoothTransformation
-            )
+            pixmap = pixmap.scaled(label.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
             label.setPixmap(pixmap)
             label.setAlignment(Qt.AlignCenter)
 
@@ -202,7 +200,7 @@ class ImageViewer(QMainWindow):
             # Safely ignore the event if something goes wrong
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # Replace with your MPEG-7 dataset folder path

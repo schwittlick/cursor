@@ -12,7 +12,7 @@ class HobbyPoint(complex):
     """A class for associating numerical quantities from Hobby's algorithm with points that appear on a Hobby curve.
     We subclass `complex` to perform complex arithmetic with points on the Hobby curve, as required in the algorithm."""
 
-    def __new__(cls, x: float, y: float, tension: float) -> 'HobbyPoint':
+    def __new__(cls, x: float, y: float, tension: float) -> "HobbyPoint":
         return super().__new__(cls, x, y)
 
     def __init__(self, x: float, y: float, tension: float) -> None:
@@ -27,13 +27,15 @@ class HobbyPoint(complex):
         self.psi = 0  # Another offset angle.
 
     def debug_info(self) -> str:
-        return f"{(self.x, self.y)} " \
-               f"alpha={self.alpha}, " \
-               f"beta={self.beta}, " \
-               f"theta={self.theta}, " \
-               f"psi={self.psi}, " \
-               f"phi={self.phi}, " \
-               f"d_val={self.d_val}"
+        return (
+            f"{(self.x, self.y)} "
+            f"alpha={self.alpha}, "
+            f"beta={self.beta}, "
+            f"theta={self.theta}, "
+            f"psi={self.psi}, "
+            f"phi={self.phi}, "
+            f"d_val={self.d_val}"
+        )
 
     def __repr__(self) -> str:
         return f"{(self.x, self.y)}"
@@ -42,8 +44,15 @@ class HobbyPoint(complex):
 class HobbyCurve:
     """A class for calculating the control points required to draw a Hobby curve."""
 
-    def __init__(self, points: list[tuple], tension: float = 1, cyclic: bool = False, begin_curl: float = 1,
-                 end_curl: float = 1, debug: bool = False) -> None:
+    def __init__(
+        self,
+        points: list[tuple],
+        tension: float = 1,
+        cyclic: bool = False,
+        begin_curl: float = 1,
+        end_curl: float = 1,
+        debug: bool = False,
+    ) -> None:
         if len(points) < 2:
             raise ValueError("Algorithm needs more than 2 points")
         self.points = [HobbyPoint(*point, tension) for point in points]
@@ -86,7 +95,8 @@ class HobbyCurve:
                 logging.debug(z_j - z_i, z_i - z_h)
             except ZeroDivisionError:
                 raise ZeroDivisionError(
-                    f"Consecutive points {(z_h.x, z_h.y)} and {(z_i.x, z_i.y)} cause zero division.")
+                    f"Consecutive points {(z_h.x, z_h.y)} and {(z_i.x, z_i.y)} cause zero division."
+                )
             z_i.psi = np.arctan2(polygonal_turn.imag, polygonal_turn.real)
 
     def calculate_theta_vals(self) -> None:
@@ -105,10 +115,10 @@ class HobbyCurve:
             z_i = self.points[i]
             z_j = self.points[(i + 1) % self.num_points]
 
-            A[i] = z_h.alpha / (z_i.beta ** 2 * z_h.d_val)
-            B[i] = (3 - z_h.alpha) / (z_i.beta ** 2 * z_h.d_val)
-            C[i] = (3 - z_j.beta) / (z_i.alpha ** 2 * z_i.d_val)
-            D[i] = z_j.beta / (z_i.alpha ** 2 * z_i.d_val)
+            A[i] = z_h.alpha / (z_i.beta**2 * z_h.d_val)
+            B[i] = (3 - z_h.alpha) / (z_i.beta**2 * z_h.d_val)
+            C[i] = (3 - z_j.beta) / (z_i.alpha**2 * z_i.d_val)
+            D[i] = z_j.beta / (z_i.alpha**2 * z_i.d_val)
             R[i] = -B[i] * z_i.psi - D[i] * z_j.psi
 
         # Set up matrix M such that the soln. Mx = R are the theta values.
@@ -124,16 +134,16 @@ class HobbyCurve:
             # First row of M
             alpha_0 = self.points[0].alpha
             beta_1 = self.points[1].beta
-            xi_0 = (alpha_0 ** 2 * self.begin_curl) / beta_1 ** 2
+            xi_0 = (alpha_0**2 * self.begin_curl) / beta_1**2
             M[0][0] = alpha_0 * xi_0 + 3 - beta_1
             M[0][1] = (3 - alpha_0) * xi_0 + beta_1
             R[0] = -((3 - alpha_0) * xi_0 + beta_1) * self.points[1].psi
             # Last row of M
             alpha_n_1 = self.points[-2].alpha
             beta_n = self.points[-1].beta
-            xi_n = (beta_n ** 2 * self.end_curl) / alpha_n_1 ** 2
+            xi_n = (beta_n**2 * self.end_curl) / alpha_n_1**2
             M[-1][-2] = (3 - beta_n) * xi_n + alpha_n_1
-            M[-1][-1] = (beta_n * xi_n + 3 - alpha_n_1)
+            M[-1][-1] = beta_n * xi_n + 3 - alpha_n_1
             R[-1] = 0
 
         # Solve for theta values.
@@ -144,7 +154,7 @@ class HobbyCurve:
     def calculate_phi_vals(self) -> None:
         """Calculates the phi_k values via the relationship theta_k + phi_k + psi_k = 0."""
         for point in self.points:
-            point.phi = - (point.psi + point.theta)
+            point.phi = -(point.psi + point.theta)
 
     def calculate_ctrl_pts(self) -> list[tuple]:
         """Calculates the Bezier control points from z_i to z_{i+1}."""
@@ -173,8 +183,14 @@ class HobbyCurve:
         return repr(cartesian_points)
 
 
-def hobby_ctrl_points(points: list[tuple], tension: float = 1, cyclic: bool = False, begin_curl: float = 1,
-                      end_curl: float = 1, debug: bool = False) -> list[tuple]:
+def hobby_ctrl_points(
+    points: list[tuple],
+    tension: float = 1,
+    cyclic: bool = False,
+    begin_curl: float = 1,
+    end_curl: float = 1,
+    debug: bool = False,
+) -> list[tuple]:
     """Calculates all cubic Bezier control points, based on John Hobby's algorithm, and pretty prints them."""
     curve = HobbyCurve(points, tension=tension, cyclic=cyclic, begin_curl=begin_curl, end_curl=end_curl, debug=debug)
     ctrl_points = curve.get_ctrl_points()
@@ -184,8 +200,10 @@ def hobby_ctrl_points(points: list[tuple], tension: float = 1, cyclic: bool = Fa
     for ctrl_point in ctrl_points:
         x, y = ctrl_point
         # Calculate number of digits in x, y before decimal, and take the max for nice padding.
-        padding = max(1 if abs(x) <= 0.1 else int(np.ceil(np.log10(abs(x)))) + 1,
-                      1 if abs(y) <= 0.1 else int(np.ceil(np.log10(abs(y)))) + 1)
+        padding = max(
+            1 if abs(x) <= 0.1 else int(np.ceil(np.log10(abs(x)))) + 1,
+            1 if abs(y) <= 0.1 else int(np.ceil(np.log10(abs(y)))) + 1,
+        )
         if max_pad < padding:
             max_pad = padding
 
@@ -196,9 +214,11 @@ def hobby_ctrl_points(points: list[tuple], tension: float = 1, cyclic: bool = Fa
     while i < len(ctrl_points) - 1:
         x_1, y_1 = ctrl_points[i]
         x_2, y_2 = ctrl_points[i + 1]
-        logging.debug(f"({x_1:<{space}.{precision}f}, {y_1:<{space}.{precision}f}) "
-                      f"and "
-                      f"({x_2:<{space}.{precision}f}, {y_2:<{space}.{precision}f})")
+        logging.debug(
+            f"({x_1:<{space}.{precision}f}, {y_1:<{space}.{precision}f}) "
+            f"and "
+            f"({x_2:<{space}.{precision}f}, {y_2:<{space}.{precision}f})"
+        )
         i += 2
     return ctrl_points
 
@@ -209,5 +229,5 @@ def velocity(theta: float, phi: float) -> float:
     p2 = np.sin(phi) - (1 / 16) * np.sin(theta)
     p3 = np.cos(theta) - np.cos(phi)
     numerator = 2 + np.sqrt(2) * p1 * p2 * p3
-    denominator = (1 + (1 / 2) * (np.sqrt(5) - 1) * np.cos(theta) + (1 / 2) * (3 - np.sqrt(5)) * np.cos(phi))
+    denominator = 1 + (1 / 2) * (np.sqrt(5) - 1) * np.cos(theta) + (1 / 2) * (3 - np.sqrt(5)) * np.cos(phi)
     return numerator / denominator

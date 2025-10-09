@@ -1,6 +1,5 @@
 annotated-types==0.7.0
 attrs==24.2.0
-black==24.8.0
 blis==0.7.11
 catalogue==2.0.10
 certifi==2024.7.4
@@ -17,7 +16,6 @@ cycler==0.12.1
 cymem==2.0.8
 defusedxml==0.7.1
 fast_tsp==0.1.4
-flake8==7.1.1
 fonttools==4.53.1
 fpdf2==2.7.9
 h5py==3.11.0
@@ -82,6 +80,7 @@ pytweening==1.2.0
 pytz==2024.1
 requests==2.32.3
 rich==13.7.1
+ruff==0.14.0
 scikit-image==0.24.0
 scikit-learn==1.5.1
 scikit-opt==0.6.6

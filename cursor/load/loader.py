@@ -17,10 +17,10 @@ from cursor.timer import Timer, DateHandler
 
 class Loader:
     def __init__(
-            self,
-            directory: pathlib.Path = None,
-            limit_files: int | list[str] | None = None,
-            load_keys: bool = False,
+        self,
+        directory: pathlib.Path = None,
+        limit_files: int | list[str] | None = None,
+        load_keys: bool = False,
     ):
         self.verbose = True
 
@@ -28,21 +28,17 @@ class Loader:
         self._keyboard_recordings: list[KeyPress] = []
 
         if directory is not None:
-            self.load_all(
-                directory=directory, limit_files=limit_files, load_keys=load_keys
-            )
+            self.load_all(directory=directory, limit_files=limit_files, load_keys=load_keys)
 
     def load_all(
-            self,
-            directory: pathlib.Path,
-            limit_files: int | list[str] | None = None,
-            load_keys: bool = False,
+        self,
+        directory: pathlib.Path,
+        limit_files: int | list[str] | None = None,
+        load_keys: bool = False,
     ) -> None:
         t = Timer()
         t.start()
-        all_json_files = [
-            f for f in directory.iterdir() if self.is_file_and_json(directory / f)
-        ]
+        all_json_files = [f for f in directory.iterdir() if self.is_file_and_json(directory / f)]
 
         fin = []
         if limit_files and type(limit_files) is int:
@@ -69,12 +65,8 @@ class Loader:
             # pc.limit()
             pc.clean()
 
-        logging.info(
-            f"Loaded {absolut_path_count} paths from {len(self._recordings)} recordings"
-        )
-        logging.info(
-            f"Loaded {len(self._keyboard_recordings)} keys from {len(all_json_files)} recordings"
-        )
+        logging.info(f"Loaded {absolut_path_count} paths from {len(self._recordings)} recordings")
+        logging.info(f"Loaded {len(self._keyboard_recordings)} keys from {len(all_json_files)} recordings")
         logging.info(f"This took {round(t.elapsed() * 1000)}ms.")
 
     def load_file(self, path: pathlib.Path, load_keys: bool = False) -> None:

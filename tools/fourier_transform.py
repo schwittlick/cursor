@@ -28,9 +28,7 @@ def argparser():
         default=1e5,
         help="Max. number of images before program exit",
     )
-    parser.add_argument(
-        "-N", "--numBins", type=int, default=200, help="number of integration bins"
-    )
+    parser.add_argument("-N", "--numBins", type=int, default=200, help="number of integration bins")
     parser.add_argument(
         "-o",
         "--nContrIms",
@@ -79,9 +77,7 @@ def argparser():
         action="store_true",
         help="remove central lines from the FFT image",
     )
-    parser.add_argument(
-        "-f", "--figid", type=str, default="liveFFT", help="name of the image window"
-    )
+    parser.add_argument("-f", "--figid", type=str, default="liveFFT", help="name of the image window")
     parser.add_argument(
         "-r",
         "--rows",
@@ -110,9 +106,7 @@ def argparser():
         default=1,
         help="maximum contrast scaling (adjusts white level)",
     )
-    parser.add_argument(
-        "-q", "--color", action="store_true", help="trade a little speed for color"
-    )
+    parser.add_argument("-q", "--color", action="store_true", help="trade a little speed for color")
 
     return parser.parse_args()
 
@@ -127,9 +121,7 @@ class live_FT2(object):
     # internal variables and constants:
     color = False
     imMin = 0.004  # minimum allowed value of any pixel of the captured image
-    contrast = np.concatenate(
-        (np.zeros((10, 1)), np.ones((10, 1))), axis=1
-    )  # internal use.
+    contrast = np.concatenate((np.zeros((10, 1)), np.ones((10, 1))), axis=1)  # internal use.
 
     def __init__(self, **kwargs):
         # process kwargs:
@@ -171,9 +163,7 @@ class live_FT2(object):
         )
         # start image cleanup with something like this:
         # for a running contrast of nContrIms frames
-        self.contrast = np.concatenate(
-            (np.zeros((self.nContrIms, 1)), np.ones((self.nContrIms, 1))), axis=1
-        )
+        self.contrast = np.concatenate((np.zeros((self.nContrIms, 1)), np.ones((self.nContrIms, 1))), axis=1)
 
         # prepare for plotting integrated graph
         [xsize, ysize] = [self.columns, self.rows]
@@ -185,9 +175,7 @@ class live_FT2(object):
         # y, xEdges = np.histogram(dist, weights = a, bins = binEdges, density = True)
 
         self.pltFig = plt.figure(figsize=[8, 4])
-        self.pltAx = self.pltFig.add_axes(
-            [0, 0, 1, 1], frameon=False, facecolor="g", yscale="log"
-        )
+        self.pltAx = self.pltFig.add_axes([0, 0, 1, 1], frameon=False, facecolor="g", yscale="log")
         self.pltAx.set_autoscaley_on(False)
         self.pltAx.set_xlim(0.0, 0.7)
         self.pltAx.set_ylim(0.1, 1)
@@ -243,9 +231,7 @@ class live_FT2(object):
         if self.color:
             Intensity = np.zeros(np.shape(im))
             for ci in range(np.size(im, 2)):
-                Intensity[:, :, ci] = (
-                    np.abs(np.fft.fftshift(np.fft.fft2(im[:, :, ci]))) ** 2
-                )
+                Intensity[:, :, ci] = np.abs(np.fft.fftshift(np.fft.fft2(im[:, :, ci]))) ** 2
         else:
             Intensity = np.abs(np.fft.fftshift(np.fft.fft2(im))) ** 2
 
@@ -263,24 +249,16 @@ class live_FT2(object):
             # by copying the next row/column
             if not self.color:
                 h, w = np.shape(Intensity)
-                Intensity[int(h / 2 - 1) : int(h / 2 + 1), :] = Intensity[
-                    int(h / 2 + 1) : int(h / 2 + 3), :
-                ]
-                Intensity[:, int(w / 2 - 1) : int(w / 2 + 1)] = Intensity[
-                    :, int(w / 2 + 1) : int(w / 2 + 3)
-                ]
+                Intensity[int(h / 2 - 1) : int(h / 2 + 1), :] = Intensity[int(h / 2 + 1) : int(h / 2 + 3), :]
+                Intensity[:, int(w / 2 - 1) : int(w / 2 + 1)] = Intensity[:, int(w / 2 + 1) : int(w / 2 + 3)]
             else:
                 h, w, c = np.shape(Intensity)
                 Intensity[int(h / 2 - 1) : int(h / 2 + 1), :, :] = Intensity[int(h / 2 + 1) : int(h / 2 + 3), :, :]
-                Intensity[:, int(w / 2 - 1) : int(w / 2 + 1), :] = Intensity[
-                    :, int(w / 2 + 1) : int(w / 2 + 3), :
-                ]
+                Intensity[:, int(w / 2 - 1) : int(w / 2 + 1), :] = Intensity[:, int(w / 2 + 1) : int(w / 2 + 3), :]
 
         # running average of contrast
         # circshift contrast matrix up
-        contrast = contrast[
-            np.arange(1, np.size(contrast, 0) + 1) % np.size(contrast, 0), :
-        ]
+        contrast = contrast[np.arange(1, np.size(contrast, 0) + 1) % np.size(contrast, 0), :]
         # replace bottom values with new values for minimum and maximum
         contrast[-1, :] = [np.min(Intensity), np.max(Intensity)]
 

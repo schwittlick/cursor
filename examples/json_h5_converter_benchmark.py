@@ -60,9 +60,7 @@ def compare_load_times(json_path, h5_path, num_runs=5):
             if len(json_path) == len(h5_path):
                 print(f"Path {i} lengths match: {len(json_path)} vertices")
             else:
-                print(
-                    f"Path {i} lengths do not match: JSON: {len(json_path)}, HDF5: {len(h5_path)}"
-                )
+                print(f"Path {i} lengths do not match: JSON: {len(json_path)}, HDF5: {len(h5_path)}")
     else:
         print("Warning: Path counts do not match!")
 

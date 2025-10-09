@@ -1,6 +1,6 @@
 import json
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """
     parses json from teztok https://graphiql.teztok.com/
     prints only relevant data to
@@ -23,10 +23,10 @@ if __name__ == '__main__':
     data = json.load(open("raffle.json"))
     offers = data["data"]["tokens_by_pk"]["offers"]
     for offer in offers:
-        profile = offer['buyer_profile']
+        profile = offer["buyer_profile"]
         alias = "None"
         if profile:
             alias = profile["alias"]
-        price = offer['price'] / 1000000
+        price = offer["price"] / 1000000
         out = f"{price};{offer['buyer_address']};{alias} "
         print(out)

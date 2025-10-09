@@ -15,8 +15,9 @@ class DraftMasterMemoryConfig(MemoryConfig):
 
         self.max_sum = 25600
 
-    def memory_alloc_cmd(self, io: int = 1024, polygon: int = 3072, char: int = 0, vector: int = 3000,
-                         pen_sort: int = 18504) -> tuple[str, str]:
+    def memory_alloc_cmd(
+        self, io: int = 1024, polygon: int = 3072, char: int = 0, vector: int = 3000, pen_sort: int = 18504
+    ) -> tuple[str, str]:
         assert self.physical_io_buffer[0] <= io <= self.physical_io_buffer[1]
         assert self.polygon_buffer[0] <= polygon <= self.polygon_buffer[1]
         assert self.char_buffer[0] <= char <= self.char_buffer[1]
@@ -47,8 +48,9 @@ class HP7550AMemoryConfig(MemoryConfig):
 
         self.max_sum = 12800
 
-    def memory_alloc_cmd(self, io: int = 1024, polygon: int = 1778, char: int = 0, replot: int = 9954,
-                         vector: int = 44) -> tuple[str, str]:
+    def memory_alloc_cmd(
+        self, io: int = 1024, polygon: int = 1778, char: int = 0, replot: int = 9954, vector: int = 44
+    ) -> tuple[str, str]:
         assert self.physical_io_buffer[0] <= io <= self.physical_io_buffer[1]
         assert self.polygon_buffer[0] <= polygon <= self.polygon_buffer[1]
         assert self.char_buffer[0] <= char <= self.char_buffer[1]

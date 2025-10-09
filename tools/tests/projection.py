@@ -19,7 +19,7 @@ def on_mouse(rr: RealtimeRenderer, x, y, dx, dy):
 
     temp_points = []
 
-    for (x1, y1), (x2, y2) in thefont.lines_for_text('HEYH'):
+    for (x1, y1), (x2, y2) in thefont.lines_for_text("HEYH"):
         temp_points.append([[x1, -y1, 0], [x2, -y2, 0]])
 
     print(rr)

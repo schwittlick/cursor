@@ -7,8 +7,8 @@ from cursor.collection import Collection
 
 class TektronixRenderer:
     def __init__(
-            self,
-            folder: pathlib.Path,
+        self,
+        folder: pathlib.Path,
     ):
         self.__save_path = folder
         self.__paths = Collection()

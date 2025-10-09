@@ -29,8 +29,9 @@ class OffsetRenderer(RealtimeRenderer):
         padding = 10
 
         # path = Path.from_tuple_list([(0, 0), (1, 0), (2, 2), (1, 5), (3, 3)])
-        self.path.transform(self.path.bb(),
-                            BoundingBox(padding, padding, self.width / 4 - padding, self.height - padding))
+        self.path.transform(
+            self.path.bb(), BoundingBox(padding, padding, self.width / 4 - padding, self.height - padding)
+        )
 
         offset = x
 

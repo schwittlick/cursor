@@ -17,11 +17,11 @@ def catmull_rom_one_point(x, v0, v1, v2, v3):
         v2: 3rd support point
         v3: 4th support point
     """
-    c1 = 1. * v1
-    c2 = -.5 * v0 + .5 * v2
-    c3 = 1. * v0 + -2.5 * v1 + 2. * v2 - .5 * v3
-    c4 = -.5 * v0 + 1.5 * v1 + -1.5 * v2 + .5 * v3
-    return (((c4 * x + c3) * x + c2) * x + c1)
+    c1 = 1.0 * v1
+    c2 = -0.5 * v0 + 0.5 * v2
+    c3 = 1.0 * v0 + -2.5 * v1 + 2.0 * v2 - 0.5 * v3
+    c4 = -0.5 * v0 + 1.5 * v1 + -1.5 * v2 + 0.5 * v3
+    return ((c4 * x + c3) * x + c2) * x + c1
 
 
 def catmull_rom(p_x, p_y, res):
@@ -43,41 +43,47 @@ def catmull_rom(p_x, p_y, res):
     # loop over segments (we have n-1 segments for n points)
     for i in range(len(p_x) - 1):
         # set x-coords
-        x_intpol[i * res:(i + 1) * res] = np.linspace(
-            p_x[i], p_x[i + 1], res, endpoint=False)
+        x_intpol[i * res : (i + 1) * res] = np.linspace(p_x[i], p_x[i + 1], res, endpoint=False)
         if i == 0:
             # need to estimate an additional support point before the first
-            y_intpol[:res] = np.array([
-                catmull_rom_one_point(
-                    x,
-                    p_y[0] - (p_y[1] - p_y[0]),  # estimated start point,
-                    p_y[0],
-                    p_y[1],
-                    p_y[2])
-                for x in np.linspace(0., 1., res, endpoint=False)])
+            y_intpol[:res] = np.array(
+                [
+                    catmull_rom_one_point(
+                        x,
+                        p_y[0] - (p_y[1] - p_y[0]),  # estimated start point,
+                        p_y[0],
+                        p_y[1],
+                        p_y[2],
+                    )
+                    for x in np.linspace(0.0, 1.0, res, endpoint=False)
+                ]
+            )
         elif i == len(p_x) - 2:
             # need to estimate an additional support point after the last
-            y_intpol[i * res:-1] = np.array([
-                catmull_rom_one_point(
-                    x,
-                    p_y[i - 1],
-                    p_y[i],
-                    p_y[i + 1],
-                    p_y[i + 1] + (p_y[i + 1] - p_y[i])  # estimated end point
-                ) for x in np.linspace(0., 1., res, endpoint=False)])
+            y_intpol[i * res : -1] = np.array(
+                [
+                    catmull_rom_one_point(
+                        x,
+                        p_y[i - 1],
+                        p_y[i],
+                        p_y[i + 1],
+                        p_y[i + 1] + (p_y[i + 1] - p_y[i]),  # estimated end point
+                    )
+                    for x in np.linspace(0.0, 1.0, res, endpoint=False)
+                ]
+            )
         else:
-            y_intpol[i * res:(i + 1) * res] = np.array([
-                catmull_rom_one_point(
-                    x,
-                    p_y[i - 1],
-                    p_y[i],
-                    p_y[i + 1],
-                    p_y[i + 2]) for x in np.linspace(0., 1., res, endpoint=False)])
+            y_intpol[i * res : (i + 1) * res] = np.array(
+                [
+                    catmull_rom_one_point(x, p_y[i - 1], p_y[i], p_y[i + 1], p_y[i + 2])
+                    for x in np.linspace(0.0, 1.0, res, endpoint=False)
+                ]
+            )
 
     return (x_intpol, y_intpol)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
     # set the resolution (number of interpolated points between each pair of
@@ -86,10 +92,10 @@ if __name__ == '__main__':
     res = 50
 
     # generate some random support points
-    p_x = np.arange(-10, 11, dtype='float32')
+    p_x = np.arange(-10, 11, dtype="float32")
     p_y = np.zeros_like(p_x)
     for i in range(len(p_x)):
-        p_y[i] = np.random.rand() * 3. - 1.5
+        p_y[i] = np.random.rand() * 3.0 - 1.5
 
     # do the catmull-rom
     x_intpol, y_intpol = catmull_rom(p_x, p_y, res)

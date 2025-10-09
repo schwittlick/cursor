@@ -1,8 +1,18 @@
 import sys
 import cv2
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
-                             QHBoxLayout, QLabel, QSlider, QPushButton, QFileDialog,
-                             QSizePolicy, QMessageBox)
+from PyQt5.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QSlider,
+    QPushButton,
+    QFileDialog,
+    QSizePolicy,
+    QMessageBox,
+)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap
 
@@ -77,17 +87,13 @@ class MeanShiftApp(QMainWindow):
         sliders_layout.setContentsMargins(0, 0, 0, 0)
 
         # Add sliders
-        self.spatial_radius_slider = self.create_slider(
-            "Spatial Radius", 5, 100, 20, sliders_layout)
+        self.spatial_radius_slider = self.create_slider("Spatial Radius", 5, 100, 20, sliders_layout)
 
-        self.color_radius_slider = self.create_slider(
-            "Color Radius", 5, 100, 30, sliders_layout)
+        self.color_radius_slider = self.create_slider("Color Radius", 5, 100, 30, sliders_layout)
 
-        self.scale_slider = self.create_slider(
-            "Downscale Factor", 1, 16, 1, sliders_layout)
+        self.scale_slider = self.create_slider("Downscale Factor", 1, 16, 1, sliders_layout)
 
-        self.blur_slider = self.create_slider(
-            "Blur Kernel Size", 1, 31, 1, sliders_layout)
+        self.blur_slider = self.create_slider("Blur Kernel Size", 1, 31, 1, sliders_layout)
 
         control_layout.addWidget(sliders_widget)
         control_layout.addStretch()
@@ -144,8 +150,7 @@ class MeanShiftApp(QMainWindow):
         slider.setMinimum(min_val)
         slider.setMaximum(max_val)
         slider.setValue(default_val)
-        slider.valueChanged.connect(
-            lambda v: value_label.setText(str(v)))
+        slider.valueChanged.connect(lambda v: value_label.setText(str(v)))
 
         slider_layout.addWidget(header_widget)
         slider_layout.addWidget(slider)
@@ -162,8 +167,7 @@ class MeanShiftApp(QMainWindow):
 
     def load_image(self):
         try:
-            file_name, _ = QFileDialog.getOpenFileName(
-                self, "Open Image", "", "Image Files (*.png *.jpg *.jpeg *.bmp)")
+            file_name, _ = QFileDialog.getOpenFileName(self, "Open Image", "", "Image Files (*.png *.jpg *.jpeg *.bmp)")
             if file_name:
                 self.original_image = cv2.imread(file_name)
                 if self.original_image is None:
@@ -221,8 +225,7 @@ class MeanShiftApp(QMainWindow):
 
             # Resize back to original size if scaled
             if scale_factor > 1:
-                img = cv2.resize(img, (self.original_image.shape[1],
-                                       self.original_image.shape[0]))
+                img = cv2.resize(img, (self.original_image.shape[1], self.original_image.shape[0]))
                 print("Resized back to original dimensions")
 
             self.processed_image = img
@@ -237,7 +240,7 @@ class MeanShiftApp(QMainWindow):
             print(f"Error during processing: {str(e)}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MeanShiftApp()
     window.show()

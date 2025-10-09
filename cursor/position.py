@@ -13,13 +13,7 @@ getcontext().prec = 5
 
 
 class Position:
-    def __init__(
-            self,
-            x: float = 0.0,
-            y: float = 0.0,
-            timestamp: int = 0,
-            properties: dict | None = None
-    ) -> None:
+    def __init__(self, x: float = 0.0, y: float = 0.0, timestamp: int = 0, properties: dict | None = None) -> None:
         if properties is None:
             properties = {}
         else:
@@ -88,8 +82,7 @@ class Position:
 
     def copy(self) -> Position:
         return type(self)(
-            copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(
-                self.timestamp), copy.deepcopy(self.properties)
+            copy.deepcopy(self.x), copy.deepcopy(self.y), copy.deepcopy(self.timestamp), copy.deepcopy(self.properties)
         )
 
     def distance(self, t: Position | np.ndarray | tuple[float, float]) -> float:
@@ -115,15 +108,11 @@ class Position:
             case tuple():
                 return squared_euclidean_distance(self.as_tuple(), t)
 
-    def rot(
-            self, angle: float, origin: tuple[float, float] = (0.0, 0.0)
-    ) -> None:
+    def rot(self, angle: float, origin: tuple[float, float] = (0.0, 0.0)) -> None:
         ox, oy = origin
 
-        qx = ox + math.cos(angle) * (self.x - ox) - \
-            math.sin(angle) * (self.y - oy)
-        qy = oy + math.sin(angle) * (self.x - ox) + \
-            math.cos(angle) * (self.y - oy)
+        qx = ox + math.cos(angle) * (self.x - ox) - math.sin(angle) * (self.y - oy)
+        qy = oy + math.sin(angle) * (self.x - ox) + math.cos(angle) * (self.y - oy)
 
         self.x = qx
         self.y = qy

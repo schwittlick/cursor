@@ -1,8 +1,8 @@
 import logging
 import pathlib
+import tkinter as tk
 from argparse import ArgumentParser
 from tkinter import filedialog
-import tkinter as tk
 
 import serial
 
@@ -13,7 +13,7 @@ if __name__ == "__main__":
     """
 
     parser = ArgumentParser()
-    parser.add_argument('port')
+    parser.add_argument("port")
     args = parser.parse_args()
 
     baud = 9600
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     root = tk.Tk()
     root.withdraw()
 
-    file_path = filedialog.askopenfilename(initialdir='/home/marcel/braille/')
+    file_path = filedialog.askopenfilename(initialdir="/home/marcel/braille/")
     path = pathlib.Path(file_path)
 
     logging.info(f"Loaded {path.as_posix()}")

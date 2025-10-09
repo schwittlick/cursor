@@ -2,11 +2,19 @@ import logging
 
 import dearpygui.dearpygui as dpg
 
-from cursor.tools.serial_powertools.gui import create_file_dialogue, create_plotter_inspector_gui, file_selected, \
-    print_output, add_output_window, create_send_file_gui, create_bruteforce_gui, add_plotter_info_window
+from cursor.tools.serial_powertools.gui import (
+    add_output_window,
+    add_plotter_info_window,
+    create_bruteforce_gui,
+    create_file_dialogue,
+    create_plotter_inspector_gui,
+    create_send_file_gui,
+    file_selected,
+    print_output,
+)
 from cursor.tools.serial_powertools.serial_inspector import SerialInspector
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """
     This is where everything is glued together
     """
@@ -28,8 +36,7 @@ if __name__ == '__main__':
 
     # exit on ESC
     with dpg.handler_registry():
-        dpg.add_key_press_handler(
-            dpg.mvKey_Escape, callback=dpg.stop_dearpygui)
+        dpg.add_key_press_handler(dpg.mvKey_Escape, callback=dpg.stop_dearpygui)
 
     def on_log(record):
         """making sure all internal logging messages arrive in the gui"""
@@ -38,7 +45,7 @@ if __name__ == '__main__':
 
     logging.root.addFilter(on_log)
 
-    dpg.create_viewport(title='Serial Inspector', width=1550, height=900)
+    dpg.create_viewport(title="Serial Inspector", width=1550, height=900)
     dpg.setup_dearpygui()
     dpg.show_viewport()
     dpg.start_dearpygui()

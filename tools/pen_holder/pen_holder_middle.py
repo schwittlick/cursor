@@ -6,12 +6,14 @@ from cursor.path import Path
 from cursor.properties import Property
 from cursor.renderer.pdf import PdfRenderer
 
-B = [["B0000", "B000", "B00", "B01", "B02", "B04"],
-     ["B05", "B06", "B12", "B14", "B16", "B18"],
-     ["B21", "B23", "B24", "B26", "B28", "B29"],
-     ["B32", "B34", "B37", "B39", "B41", "B45"],
-     ["B52", "B60", "B63", "B66", "B69", "B79"],
-     ["B91", "B93", "B95", "B97", "B99", ""]]
+B = [
+    ["B0000", "B000", "B00", "B01", "B02", "B04"],
+    ["B05", "B06", "B12", "B14", "B16", "B18"],
+    ["B21", "B23", "B24", "B26", "B28", "B29"],
+    ["B32", "B34", "B37", "B39", "B41", "B45"],
+    ["B52", "B60", "B63", "B66", "B69", "B79"],
+    ["B91", "B93", "B95", "B97", "B99", ""],
+]
 
 
 def place_label(label: str) -> Collection:
@@ -33,7 +35,7 @@ if __name__ == "__main__":
     h = 6
     distance_holes = 25
     radius_holes = 5.8
-    padding_holes = (distance_holes - 2 * radius_holes)
+    padding_holes = distance_holes - 2 * radius_holes
 
     pdf_w = w * distance_holes + padding_holes
     pdf_h = h * distance_holes + padding_holes
@@ -57,9 +59,7 @@ if __name__ == "__main__":
             label_x = x * distance_holes + padding_holes
             label_y = y * distance_holes
 
-            label_paths.transform(
-                BoundingBox(label_x, label_y,
-                            label_x + radius_holes * 2, label_y + radius_holes * 2))
+            label_paths.transform(BoundingBox(label_x, label_y, label_x + radius_holes * 2, label_y + radius_holes * 2))
             pdf_renderer.add(label_paths)
 
     pdf_renderer.render()

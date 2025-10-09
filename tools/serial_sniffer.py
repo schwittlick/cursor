@@ -1,7 +1,7 @@
 import serial
 import time
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """
     Used a virtual serial port to connect COM1 <-> COM2
     The PSU is connected via USB, turned on and is COM10
@@ -28,22 +28,22 @@ if __name__ == '__main__':
     CURRent:LIMit 2.000 -> set current limit
     """
 
-    serial_ipowercontrol = serial.Serial('COM2', 9600)
-    serial_psu = serial.Serial('COM10', 115200)
+    serial_ipowercontrol = serial.Serial("COM2", 9600)
+    serial_psu = serial.Serial("COM10", 115200)
     while True:
         try:
             if serial_psu.in_waiting > 0:
-                data = serial_psu.readline().decode('utf-8').strip()
-                print('Received from PSU:', data)
+                data = serial_psu.readline().decode("utf-8").strip()
+                print("Received from PSU:", data)
 
-                serial_ipowercontrol.write(f"{data}\n".encode('utf-8'))
+                serial_ipowercontrol.write(f"{data}\n".encode("utf-8"))
 
             if serial_ipowercontrol.in_waiting > 0:
-                data = serial_ipowercontrol.readline().decode('utf-8').strip()
+                data = serial_ipowercontrol.readline().decode("utf-8").strip()
 
-                print('Received from iPowerControl:', data)
+                print("Received from iPowerControl:", data)
 
-                serial_psu.write(f"{data}\n".encode('utf-8'))
+                serial_psu.write(f"{data}\n".encode("utf-8"))
 
             time.sleep(0.01)
 

@@ -4,9 +4,7 @@ import sys
 
 
 if __name__ == "__main__":
-    s = serial.Serial(
-        port="/dev/ttyUSB1", baudrate=300, parity=serial.PARITY_NONE, timeout=2
-    )
+    s = serial.Serial(port="/dev/ttyUSB1", baudrate=300, parity=serial.PARITY_NONE, timeout=2)
     b = b""
     logs = {}
     c = 0

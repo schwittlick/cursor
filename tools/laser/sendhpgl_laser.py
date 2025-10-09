@@ -28,16 +28,16 @@ DEBUG = False
 
 
 def read_code(path):
-    with open(path, 'r') as f:
+    with open(path, "r") as f:
         code = f.read()
     return code
 
 
 def check_avail(serial):
-    serial.write(b'\x1B.B')
-    b = b''
+    serial.write(b"\x1b.B")
+    b = b""
     n = 0
-    while b != b'\r':
+    while b != b"\r":
         if len(b) > 0:
             n = n * 10 + b[0] - 48
         b = serial.read()
@@ -47,24 +47,33 @@ def check_avail(serial):
 
 def show_progress(pos, total, length=100):
     fill = length * pos // total
-    print('\rProgress: [' + fill * '\u2588' + (length - fill) * '\u2591' + '] ' + str(pos) + ' of ' + str(
-        total) + ' bytes sent', end='\r')
+    print(
+        "\rProgress: ["
+        + fill * "\u2588"
+        + (length - fill) * "\u2591"
+        + "] "
+        + str(pos)
+        + " of "
+        + str(total)
+        + " bytes sent",
+        end="\r",
+    )
     if pos == total:
         print()
 
 
 def set_arduino_pwm(arduino: serial.Serial, pwm: int):
     log.info(f"set arduino pwm: {pwm}")
-    arduino.write(f"{pwm}".encode('utf-8'))
+    arduino.write(f"{pwm}".encode("utf-8"))
     ret = arduino.readline()
     log.info(f"arduino: {ret}")
 
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument('port')
-    parser.add_argument('file')
-    parser.add_argument('arduino_port')
+    parser.add_argument("port")
+    parser.add_argument("file")
+    parser.add_argument("arduino_port")
     args = parser.parse_args()
 
     serial_plotter = Serial(port=args.port, timeout=1)
@@ -90,7 +99,7 @@ def main():
         next_c = commands[i + 1]
         if c == "PD":
             set_arduino_pwm(serial_arduino, current_pwm)
-            serial_plotter.write(f"{c};".encode('utf-8'))
+            serial_plotter.write(f"{c};".encode("utf-8"))
 
         if c == "PU":
             set_arduino_pwm(serial_arduino, LASER_OFF)
@@ -107,30 +116,30 @@ def main():
                 send_and_wait(serial_plotter, c, little_off)
 
         if c.startswith("PWM"):
-            parsed_pwm = int(re.findall(r'\d+', c)[0])
+            parsed_pwm = int(re.findall(r"\d+", c)[0])
             current_pwm = parsed_pwm
             log.info(f"current_pwm: {parsed_pwm}")
         if c.startswith("VS"):
             log.info(f"{c}")
-            serial_plotter.write(f"{c};".encode('utf-8'))
+            serial_plotter.write(f"{c};".encode("utf-8"))
 
 
 def parse_pa(c) -> tuple[int, int]:
-    pos = c[2:].split(',')
+    pos = c[2:].split(",")
     po = (int(pos[0]), int(pos[1]))
     return po
 
 
 def send_and_wait(plotter, cmd, pp):
-    plotter.write(f"PA{pp[0]},{pp[1]};".encode('utf-8'))
+    plotter.write(f"PA{pp[0]},{pp[1]};".encode("utf-8"))
     poll(plotter, pp)
 
 
 def readit(port):
-    response = ''
+    response = ""
     while True:
         response += port.read().decode()
-        if '\r' in response:
+        if "\r" in response:
             return response
 
 
@@ -138,26 +147,26 @@ def poll(ser: serial.Serial, target_pos: typing.Tuple):
     if DEBUG:
         return True
 
-    ser.write('OA;'.encode('utf-8'))
+    ser.write("OA;".encode("utf-8"))
     ret = readit(ser).rstrip()
     if len(ret) == 0:
         return False
-    current_pos = ret.split(',')
+    current_pos = ret.split(",")
     current_po = (int(current_pos[0]), int(current_pos[1]))
 
     attempts = 0
     while current_po != target_pos:
-        ser.write('OA;'.encode('utf-8'))
+        ser.write("OA;".encode("utf-8"))
         ret = readit(ser).rstrip()
         if len(ret) == 0:
             attempts += 1
             continue
 
-        if ',' not in ret:
+        if "," not in ret:
             attempts += 1
             continue
 
-        current_pos = ret.split(',')
+        current_pos = ret.split(",")
         current_po = (int(current_pos[0]), int(current_pos[1]))
 
         time.sleep(0.1)
@@ -167,5 +176,5 @@ def poll(ser: serial.Serial, target_pos: typing.Tuple):
     return True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

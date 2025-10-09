@@ -18,12 +18,12 @@ def flatten(list_of_lists) -> list:
 
 
 def catmull_rom_spline(
-        P0: tuple,
-        P1: tuple,
-        P2: tuple,
-        P3: tuple,
-        num_points: int,
-        alpha: float = 0.5,
+    P0: tuple,
+    P1: tuple,
+    P2: tuple,
+    P3: tuple,
+    num_points: int,
+    alpha: float = 0.5,
 ):
     """
     Compute the points in the spline segment
@@ -40,8 +40,8 @@ def catmull_rom_spline(
         xi, yi = pi
         xj, yj = pj
         dx, dy = xj - xi, yj - yi
-        l = (dx ** 2 + dy ** 2) ** 0.5
-        return ti + l ** alpha
+        l = (dx**2 + dy**2) ** 0.5
+        return ti + l**alpha
 
     t0: float = 0.0
     t1: float = tj(t0, P0, P1)

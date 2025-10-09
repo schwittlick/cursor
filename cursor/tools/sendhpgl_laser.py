@@ -5,9 +5,9 @@ import wasabi
 from serial import Serial
 from tqdm import tqdm
 
+from cursor.devices.psu import PSU
 from cursor.hpgl import read_until_char
 from cursor.tools.serial_powertools.seriallib import SerialSender
-from cursor.devices.psu import PSU
 
 log = wasabi.Printer(pretty=True)
 
@@ -49,7 +49,7 @@ class LaserSerialSender(SerialSender):
                         # self.set_arduino_pwm(current_pwm)  # turn on previously configured pwm
                         self.psu.on()
 
-                        self.plotter.write(f"{cmd};".encode('utf-8'))
+                        self.plotter.write(f"{cmd};".encode("utf-8"))
 
                         sleep(current_delay)
                         current_delay = 0
@@ -87,7 +87,7 @@ class LaserSerialSender(SerialSender):
                         log.info(f"DELAY: {current_delay}")
                     elif cmd.startswith("VS"):
                         log.info(f"{cmd}")
-                        self.plotter.write(f"{cmd};".encode('utf-8'))
+                        self.plotter.write(f"{cmd};".encode("utf-8"))
                     pbar.update(1)
 
             self.psu.off()
@@ -97,17 +97,17 @@ class LaserSerialSender(SerialSender):
             self.abort()
 
     def parse_pa(self, cmd) -> tuple[int, int]:
-        pos = cmd[2:].split(',')
+        pos = cmd[2:].split(",")
         po = (int(pos[0]), int(pos[1]))
         return po
 
     def send_and_wait(self, pp: tuple[int, int]):
-        self.plotter.write(f"PA{pp[0]},{pp[1]};".encode('utf-8'))
+        self.plotter.write(f"PA{pp[0]},{pp[1]};".encode("utf-8"))
         self.poll(pp)
 
     def set_arduino_pwm(self, pwm: int):
         log.info(f"set arduino pwm: {pwm}")
-        self.port_arduino.write(f"{pwm}".encode('utf-8'))
+        self.port_arduino.write(f"{pwm}".encode("utf-8"))
         ret = self.port_arduino.readline()
         log.info(f"arduino: {ret}")
 
@@ -115,26 +115,26 @@ class LaserSerialSender(SerialSender):
         if DEBUG:
             return True
 
-        self.plotter.write('OA;'.encode('utf-8'))
+        self.plotter.write("OA;".encode("utf-8"))
         ret = read_until_char(self.plotter).rstrip()
         if len(ret) == 0:
             return False
-        current_pos = ret.split(',')
+        current_pos = ret.split(",")
         current_po = (int(current_pos[0]), int(current_pos[1]))
 
         attempts = 0
         while current_po != target_pos:
-            self.plotter.write('OA;'.encode('utf-8'))
+            self.plotter.write("OA;".encode("utf-8"))
             ret = read_until_char(self.plotter).rstrip()
             if len(ret) == 0:
                 attempts += 1
                 continue
 
-            if ',' not in ret:
+            if "," not in ret:
                 attempts += 1
                 continue
 
-            current_pos = ret.split(',')
+            current_pos = ret.split(",")
             current_po = (int(current_pos[0]), int(current_pos[1]))
 
             sleep(0.1)
@@ -146,18 +146,18 @@ class LaserSerialSender(SerialSender):
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument('plotter')
-    parser.add_argument('arduino')
-    parser.add_argument('psu')
-    parser.add_argument('file')
+    parser.add_argument("plotter")
+    parser.add_argument("arduino")
+    parser.add_argument("psu")
+    parser.add_argument("file")
     args = parser.parse_args()
 
-    text = ''.join(open(args.file, 'r', encoding='utf-8').readlines())
-    text = text.replace(" ", '').replace("\n", '').replace("\r", '')
+    text = "".join(open(args.file, "r", encoding="utf-8").readlines())
+    text = text.replace(" ", "").replace("\n", "").replace("\r", "")
 
     sender = LaserSerialSender(args.plotter, args.arduino, args.psu, text)
     sender.send()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

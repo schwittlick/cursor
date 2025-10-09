@@ -37,9 +37,7 @@ def get_pixel_neighbors(img: np.ndarray, point: Point) -> List[Point]:
                 continue
 
             ny, nx = y + dy, x + dx
-            if (0 <= ny < img.shape[0] and
-                    0 <= nx < img.shape[1] and
-                    img[ny, nx]):
+            if 0 <= ny < img.shape[0] and 0 <= nx < img.shape[1] and img[ny, nx]:
                 neighbors.append((int(ny), int(nx)))
 
     return neighbors
@@ -74,8 +72,7 @@ def find_special_points(skel: np.ndarray) -> Tuple[List[Point], List[Point]]:
     return endpoints, junctions
 
 
-def trace_path(skel: np.ndarray, start: Point, visited: Set[Point],
-               allow_junction_to_junction: bool = True) -> Path:
+def trace_path(skel: np.ndarray, start: Point, visited: Set[Point], allow_junction_to_junction: bool = True) -> Path:
     """
     Trace a path from start point until hitting endpoint or junction.
     """
@@ -85,8 +82,7 @@ def trace_path(skel: np.ndarray, start: Point, visited: Set[Point],
     is_start_junction = count_neighbors(skel, start) >= 3
 
     while True:
-        neighbors = [n for n in get_pixel_neighbors(skel, current)
-                     if n not in visited]
+        neighbors = [n for n in get_pixel_neighbors(skel, current) if n not in visited]
 
         if not neighbors:
             break
@@ -96,13 +92,12 @@ def trace_path(skel: np.ndarray, start: Point, visited: Set[Point],
             # Choose the neighbor that continues the most similar direction
             if len(path) >= 2:
                 prev_dir = (path[-1][0] - path[-2][0], path[-1][1] - path[-2][1])
-                best_dir_diff = float('inf')
+                best_dir_diff = float("inf")
                 best_neighbor = neighbors[0]
 
                 for n in neighbors:
                     new_dir = (n[0] - path[-1][0], n[1] - path[-1][1])
-                    dir_diff = abs(np.arctan2(new_dir[0], new_dir[1]) -
-                                   np.arctan2(prev_dir[0], prev_dir[1]))
+                    dir_diff = abs(np.arctan2(new_dir[0], new_dir[1]) - np.arctan2(prev_dir[0], prev_dir[1]))
                     if dir_diff < best_dir_diff:
                         best_dir_diff = dir_diff
                         best_neighbor = n
@@ -175,7 +170,7 @@ def connect_paths(paths: Paths, skel: np.ndarray) -> Paths:
         # Find closest endpoints
         endpoints1 = [path1[0], path1[-1]]
         endpoints2 = [path2[0], path2[-1]]
-        min_dist = float('inf')
+        min_dist = float("inf")
         best_endpoints = None
 
         for p1 in endpoints1:
@@ -205,10 +200,9 @@ def connect_paths(paths: Paths, skel: np.ndarray) -> Paths:
     return result_paths
 
 
-def skeleton_to_vectors(img: np.ndarray,
-                        min_path_length: int = 2,
-                        allow_junction_to_junction: bool = True,
-                        connect_paths_flag: bool = True) -> Paths:
+def skeleton_to_vectors(
+    img: np.ndarray, min_path_length: int = 2, allow_junction_to_junction: bool = True, connect_paths_flag: bool = True
+) -> Paths:
     """
     Convert skeletonized image to vector paths.
 
@@ -243,8 +237,7 @@ def skeleton_to_vectors(img: np.ndarray,
     # Then trace remaining paths from junctions
     for start in junctions:
         # Get unvisited neighbors of the junction
-        neighbors = [n for n in get_pixel_neighbors(skel, start)
-                     if n not in visited]
+        neighbors = [n for n in get_pixel_neighbors(skel, start) if n not in visited]
 
         for neighbor in neighbors:
             if neighbor not in visited:

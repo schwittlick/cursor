@@ -27,11 +27,7 @@ class JsonCompressor:
             assert set(j.keys()) == {self.ZIPJSON_KEY}
         except AssertionError:
             if insist:
-                raise RuntimeError(
-                    "JSON not in the expected format {"
-                    + str(self.ZIPJSON_KEY)
-                    + ": zipstring}"
-                )
+                raise RuntimeError("JSON not in the expected format {" + str(self.ZIPJSON_KEY) + ": zipstring}")
             else:
                 return j
 

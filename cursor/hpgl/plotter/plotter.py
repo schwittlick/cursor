@@ -3,8 +3,15 @@ import time
 
 from serial import Serial, SerialException
 
-from cursor.hpgl import read_until_char, CR, OUTPUT_IDENTIFICATION, WAIT, ABORT_GRAPHICS, OUTBUT_BUFFER_SPACE, \
-    OUTPUT_POSITION
+from cursor.hpgl import (
+    read_until_char,
+    CR,
+    OUTPUT_IDENTIFICATION,
+    WAIT,
+    ABORT_GRAPHICS,
+    OUTBUT_BUFFER_SPACE,
+    OUTPUT_POSITION,
+)
 from cursor.hpgl.plotter.memory_config import HP7550AMemoryConfig
 from cursor.position import Position
 
@@ -41,7 +48,7 @@ class HPGLPlotter:
     def identify(self):
         self.write(OUTPUT_IDENTIFICATION)
         answer = self.read_until()
-        return answer.split(',')[0]
+        return answer.split(",")[0]
 
     def free_memory(self):
         self.write(OUTBUT_BUFFER_SPACE)
@@ -61,7 +68,7 @@ class HPGLPlotter:
         # logging.info(answer)
         if len(answer) == 0:
             return Position()
-        current_pos = answer.split(',')
+        current_pos = answer.split(",")
         if len(current_pos) < 2:
             # should throw an exception and handle at caller
             return Position()

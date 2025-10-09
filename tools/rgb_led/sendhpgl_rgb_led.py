@@ -2,9 +2,20 @@ import logging
 import sys
 import serial.tools.list_ports
 from PyQt5.QtGui import QKeySequence
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
-                             QHBoxLayout, QLabel, QComboBox, QPushButton,
-                             QFileDialog, QProgressBar, QTextEdit, QShortcut)
+from PyQt5.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QLabel,
+    QComboBox,
+    QPushButton,
+    QFileDialog,
+    QProgressBar,
+    QTextEdit,
+    QShortcut,
+)
 from PyQt5.QtCore import QThread, pyqtSignal
 from time import sleep
 
@@ -50,10 +61,9 @@ class PlotterThread(QThread):
                 if cmd.startswith("PD"):
                     plotter.write(f"{cmd};")
                 elif cmd.startswith("PU"):
-
                     plotter.write(f"{cmd};")
                 elif cmd.startswith("PA"):
-                    pos = cmd[2:].split(',')
+                    pos = cmd[2:].split(",")
                     po = (int(pos[0]), int(pos[1]))
                     pos = Position.from_tuple(po)
                     plotter.write(f"PA{int(pos.x)},{int(pos.y)};")
@@ -65,7 +75,7 @@ class PlotterThread(QThread):
                     self._poll_position(plotter, pos)
                     # arduino.write("RGB0,0,0;".encode('utf-8'))
                 elif cmd.startswith("RGB"):
-                    arduino.write(f"{cmd};".encode('utf-8'))
+                    arduino.write(f"{cmd};".encode("utf-8"))
                     # arduino.readline()
                 elif cmd.startswith("VS"):
                     plotter.write(f"{cmd};")
@@ -173,7 +183,7 @@ class MainWindow(QMainWindow):
         layout.addLayout(button_layout)
 
         # Add shortcut for start/pause plotting
-        self.plot_shortcut = QShortcut(QKeySequence('P'), self)
+        self.plot_shortcut = QShortcut(QKeySequence("P"), self)
         self.plot_shortcut.activated.connect(self.toggle_plotting)
 
         # Add a flag to track if plotting is paused
@@ -197,9 +207,9 @@ class MainWindow(QMainWindow):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open HPGL File", "", "HPGL Files (*.hpgl);;All Files (*.*)")
         if file_path:
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    self.hpgl_data = ''.join(f.readlines())
-                self.hpgl_data = self.hpgl_data.replace(" ", '').replace("\n", '').replace("\r", '')
+                with open(file_path, "r", encoding="utf-8") as f:
+                    self.hpgl_data = "".join(f.readlines())
+                self.hpgl_data = self.hpgl_data.replace(" ", "").replace("\n", "").replace("\r", "")
                 self.file_path_label.setText(file_path)
                 self.start_btn.setEnabled(True)
                 self.log_message(f"Loaded file: {file_path}")
@@ -287,5 +297,5 @@ def main():
     sys.exit(app.exec_())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

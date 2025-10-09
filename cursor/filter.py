@@ -28,17 +28,11 @@ class EntropyMinFilter(Filter):
         t = Timer()
         t.start()
         len_before = len(paths)
-        paths[:] = [
-            p for p in paths if p.entropy_x > self.min_x and p.entropy_y > self.min_y
-        ]
+        paths[:] = [p for p in paths if p.entropy_x > self.min_x and p.entropy_y > self.min_y]
         len_after = len(paths)
 
-        logging.info(
-            f"Filtering via {__class__.__name__} took {round(t.elapsed() * 1000)}ms."
-        )
-        logging.info(
-            f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
-        )
+        logging.info(f"Filtering via {__class__.__name__} took {round(t.elapsed() * 1000)}ms.")
+        logging.info(f"{__class__.__name__}: reduced path count from {len_before} to {len_after}")
 
 
 class EntropyMaxFilter(Filter):
@@ -51,17 +45,12 @@ class EntropyMaxFilter(Filter):
         t.start()
         len_before = len(paths)
 
-        paths[:] = [
-            p for p in paths if p.entropy_x < self.max_x and p.entropy_y < self.max_y
-        ]
+        paths[:] = [p for p in paths if p.entropy_x < self.max_x and p.entropy_y < self.max_y]
 
         len_after = len(paths)
         elapsed = t.elapsed()
-        logging.info(
-            f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
-        logging.info(
-            f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
-        )
+        logging.info(f"Filtering via {__class__.__name__} took {round(elapsed * 1000)}ms.")
+        logging.info(f"{__class__.__name__}: reduced path count from {len_before} to {len_after}")
 
 
 class DirectionChangeEntropyFilter(Filter):
@@ -74,17 +63,11 @@ class DirectionChangeEntropyFilter(Filter):
         t.start()
         len_before = len(paths)
 
-        paths[:] = [
-            p for p in paths if self.max > p.entropy_direction_changes > self.min
-        ]
+        paths[:] = [p for p in paths if self.max > p.entropy_direction_changes > self.min]
 
         len_after = len(paths)
-        logging.info(
-            f"Filtering via {__class__.__name__} took {round(t.elapsed() * 1000)}ms."
-        )
-        logging.info(
-            f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
-        )
+        logging.info(f"Filtering via {__class__.__name__} took {round(t.elapsed() * 1000)}ms.")
+        logging.info(f"{__class__.__name__}: reduced path count from {len_before} to {len_after}")
 
 
 class BoundingBoxFilter(Filter):
@@ -107,12 +90,8 @@ class MinPointCountFilter(Filter):
         paths[:] = [p for p in paths if len(p) >= self.point_count]
 
         len_after = len(paths)
-        logging.info(
-            f"Filtering via {__class__.__name__} took {round(t.elapsed() * 1000)}ms."
-        )
-        logging.info(
-            f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
-        )
+        logging.info(f"Filtering via {__class__.__name__} took {round(t.elapsed() * 1000)}ms.")
+        logging.info(f"{__class__.__name__}: reduced path count from {len_before} to {len_after}")
 
 
 class MaxPointCountFilter(Filter):
@@ -127,12 +106,8 @@ class MaxPointCountFilter(Filter):
         paths[:] = [p for p in paths if len(p) <= self.point_count]
 
         len_after = len(paths)
-        logging.info(
-            f"Filtering via {__class__.__name__} took {round(t.elapsed() * 1000)}ms."
-        )
-        logging.info(
-            f"{__class__.__name__}: reduced path count from {len_before} to {len_after}"
-        )
+        logging.info(f"Filtering via {__class__.__name__} took {round(t.elapsed() * 1000)}ms.")
+        logging.info(f"{__class__.__name__}: reduced path count from {len_before} to {len_after}")
 
 
 class DistanceFilter(Filter):
@@ -143,8 +118,7 @@ class DistanceFilter(Filter):
         len_before = len(paths)
         paths[:] = [p for p in paths if p.distance <= self.max_distance]
         len_after = len(paths)
-        logging.info(
-            f"DistanceFilter: reduced path count from {len_before} to {len_after}")
+        logging.info(f"DistanceFilter: reduced path count from {len_before} to {len_after}")
 
 
 class AspectRatioFilter(Filter):
@@ -154,12 +128,9 @@ class AspectRatioFilter(Filter):
 
     def filter(self, paths: List[Path]) -> None:
         len_before = len(paths)
-        paths[:] = [p for p in paths if self.min_as < p.aspect_ratio() <
-                    self.max_as]
+        paths[:] = [p for p in paths if self.min_as < p.aspect_ratio() < self.max_as]
         len_after = len(paths)
-        logging.info(
-            f"AspectRatioFilter: reduced path count from {len_before} to {len_after}"
-        )
+        logging.info(f"AspectRatioFilter: reduced path count from {len_before} to {len_after}")
 
 
 class DistanceBetweenPointsFilter(Filter):
@@ -184,9 +155,7 @@ class DistanceBetweenPointsFilter(Filter):
             pa.clean()
 
         len_after = len(paths)
-        logging.info(
-            f"DistanceBetweenPointsFilter: reduced path count from {len_before} to {len_after}"
-        )
+        logging.info(f"DistanceBetweenPointsFilter: reduced path count from {len_before} to {len_after}")
 
         logging.info(f"This took {t.elapsed()}s")
 
@@ -199,6 +168,4 @@ class MinTravelDistanceFilter(Filter):
         len_before = len(paths)
         paths[:] = [p for p in paths if p.distance > self.min_distance]
         len_after = len(paths)
-        logging.info(
-            f"MinDistanceFilter: reduced path count from {len_before} to {len_after}"
-        )
+        logging.info(f"MinDistanceFilter: reduced path count from {len_before} to {len_after}")

@@ -8,9 +8,7 @@ from cursor.collection import Collection
 # Import the save_collection_to_h5 function we created earlier
 
 
-def convert_json_to_h5(
-    input_directory: str, output_file: str, limit_files: int | list[str] | None = None
-):
+def convert_json_to_h5(input_directory: str, output_file: str, limit_files: int | list[str] | None = None):
     # Create a Loader instance
     loader = Loader(
         directory=pathlib.Path(input_directory),
@@ -28,9 +26,7 @@ def convert_json_to_h5(
 
     # Add keyboard data to the collection properties if loaded
     if loader.keys():
-        combined_collection.properties["keyboard_data"] = [
-            (k.key, k.timestamp, k.is_down) for k in loader.keys()
-        ]
+        combined_collection.properties["keyboard_data"] = [(k.key, k.timestamp, k.is_down) for k in loader.keys()]
 
     # Save the combined collection to an HDF5 file
     save_collection_to_h5(combined_collection, output_file)

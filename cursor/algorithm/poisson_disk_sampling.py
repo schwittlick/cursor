@@ -12,10 +12,10 @@ Published under MIT license.
 
 
 def getGridCoordinates(coords):
-    return np.floor(coords).astype('int')
+    return np.floor(coords).astype("int")
 
 
-def poissonDiskSampling(radius, k=30, radiusType='default'):
+def poissonDiskSampling(radius, k=30, radiusType="default"):
     """
     Implementation of the Poisson Disk Sampling algorithm.
 
@@ -45,7 +45,6 @@ def poissonDiskSampling(radius, k=30, radiusType='default'):
 
     # Continue iteration while there is still points in active list
     while queue:
-
         # Pick random element in active queue
         idx = np.random.randint(len(queue))
         activeCoords = queue[idx]
@@ -53,11 +52,10 @@ def poissonDiskSampling(radius, k=30, radiusType='default'):
 
         success = False
         for _ in range(k):
-
-            if radiusType == 'default':
+            if radiusType == "default":
                 # Pick radius for new sample particle ranging between 1 and 2 times the local radius
                 newRadius = radius[activeGridCoords[1], activeGridCoords[0]] * (np.random.random() + 1)
-            elif radiusType == 'normDist':
+            elif radiusType == "normDist":
                 # Pick radius for new sample particle from a normal distribution around 1.5 times the local radius
                 newRadius = radius[activeGridCoords[1], activeGridCoords[0]] * np.random.normal(1.5, 0.2)
 
@@ -75,10 +73,14 @@ def poissonDiskSampling(radius, k=30, radiusType='default'):
             newGridCoords = getGridCoordinates((newCoords[1], newCoords[0]))
 
             radiusThere = np.ceil(radius[newGridCoords[1], newGridCoords[0]])
-            gridRangeX = (np.max([newGridCoords[0] - radiusThere, 0]).astype('int'),
-                          np.min([newGridCoords[0] + radiusThere + 1, gridWidth]).astype('int'))
-            gridRangeY = (np.max([newGridCoords[1] - radiusThere, 0]).astype('int'),
-                          np.min([newGridCoords[1] + radiusThere + 1, gridHeight]).astype('int'))
+            gridRangeX = (
+                np.max([newGridCoords[0] - radiusThere, 0]).astype("int"),
+                np.min([newGridCoords[0] + radiusThere + 1, gridWidth]).astype("int"),
+            )
+            gridRangeY = (
+                np.max([newGridCoords[1] - radiusThere, 0]).astype("int"),
+                np.min([newGridCoords[1] + radiusThere + 1, gridHeight]).astype("int"),
+            )
 
             searchGrid = grid[slice(gridRangeY[0], gridRangeY[1]), slice(gridRangeX[0], gridRangeX[1])]
             conflicts = np.where(searchGrid > 0)
@@ -104,13 +106,13 @@ def poissonDiskSampling(radius, k=30, radiusType='default'):
 
 
 def uniformDensity(shape, d=3):
-    """ Create a radius array with uniform density """
+    """Create a radius array with uniform density"""
     rad = np.zeros(shape) + d
     return rad
 
 
 def sphericalDensity(shape):
-    """ Create a radius array with the density radially increasing towards the centre """
+    """Create a radius array with the density radially increasing towards the centre"""
     rad = np.zeros(shape)
     for x in range(shape[1]):
         for y in range(shape[0]):
@@ -131,7 +133,7 @@ def sphericalDensity(shape):
 
 
 def quartersOfConstantDensity(shape):
-    """ Create a radius array consisting of four quarters with different densities """
+    """Create a radius array consisting of four quarters with different densities"""
     rad = np.zeros(shape)
 
     halfY = int(shape[0] / 2)
@@ -150,14 +152,14 @@ def quartersOfConstantDensity(shape):
 
 
 def chessDensity(shape):
-    """ Create a radius array resembling a chessboard pattern """
+    """Create a radius array resembling a chessboard pattern"""
     rad = np.zeros(shape)
     for i in range(5):
         for o in range(5):
             if (o + i * 5) % 2 == 0:
-                rad[60 * i:60 * (i + 1), 60 * o:60 * (o + 1)] = 3
+                rad[60 * i : 60 * (i + 1), 60 * o : 60 * (o + 1)] = 3
             else:
-                rad[60 * i:60 * (i + 1), 60 * o:60 * (o + 1)] = 5
+                rad[60 * i : 60 * (i + 1), 60 * o : 60 * (o + 1)] = 5
 
     # Add some noise
     rand = np.random.normal(1, 0.1, shape[0] * shape[1]).reshape(shape)
@@ -167,19 +169,19 @@ def chessDensity(shape):
 
 
 def plotSampling(particleCoordinates, rad, name="uniformDensity5000"):
-    """ Plot the density map and resulting Poisson Disk Sampling. """
+    """Plot the density map and resulting Poisson Disk Sampling."""
     fig, (ax1, ax2) = plt.subplots(1, 2, sharex=True, sharey=True, figsize=(50, 25))
     ax1.set_title("Density Field")
-    ax1.imshow(rad, cmap='RdBu', interpolation='none')
+    ax1.imshow(rad, cmap="RdBu", interpolation="none")
     ax2.set_title("Poisson Disk Sampling")
-    ax2.scatter(particleCoordinates[:, 0], particleCoordinates[:, 1], marker='.', s=4, c='k')
+    ax2.scatter(particleCoordinates[:, 0], particleCoordinates[:, 1], marker=".", s=4, c="k")
 
     ax1.xaxis.set_major_locator(MultipleLocator(50))
     ax1.yaxis.set_major_locator(MultipleLocator(50))
     ax1.xaxis.set_minor_locator(MultipleLocator(25))
     ax1.yaxis.set_minor_locator(MultipleLocator(25))
-    ax1.tick_params(direction="in", which='both', bottom=True, top=True, left=True, right=True)
-    ax2.tick_params(direction="in", which='both', bottom=True, top=True, left=True, right=True)
+    ax1.tick_params(direction="in", which="both", bottom=True, top=True, left=True, right=True)
+    ax2.tick_params(direction="in", which="both", bottom=True, top=True, left=True, right=True)
     # ax1.set_xlim([0, 1090])
     # ax1.set_ylim([0, 1090])
 
@@ -199,6 +201,6 @@ if __name__ == "__main__":
     # rad = chessDensity((300,300))              # A chessboard pattern of different densities (run with k=100)
 
     # Run the Poisson Disk Sampling
-    nParticle, particleCoordinates = poissonDiskSampling(rad, k=30, radiusType='default')
+    nParticle, particleCoordinates = poissonDiskSampling(rad, k=30, radiusType="default")
     # Visualise the resulting sampling
     plotSampling(particleCoordinates, rad)

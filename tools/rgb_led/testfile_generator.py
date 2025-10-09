@@ -61,7 +61,7 @@ class MainWindow(QMainWindow):
             (0, 0, 255),  # Blue
             (255, 0, 255),  # Magenta
             (0, 255, 255),  # Cyan
-            (255, 255, 0)  # Yellow
+            (255, 255, 0),  # Yellow
         ]
 
         for i, color in enumerate(colors):
@@ -73,11 +73,8 @@ class MainWindow(QMainWindow):
             all_lines.extend(lines)
 
         wrappe = ExportWrapper(
-            all_lines,
-            PlotterType.ROLAND_DXY1200_A3,
-            25,
-            "rgb_led_plotter_testfile",
-            "parallel_lines")
+            all_lines, PlotterType.ROLAND_DXY1200_A3, 25, "rgb_led_plotter_testfile", "parallel_lines"
+        )
         wrappe.fit()
         wrappe.ex()
 
@@ -138,7 +135,8 @@ class MainWindow(QMainWindow):
             PlotterType.ROLAND_DXY1200_A3,
             10,
             "rgb_led_plotter_testfile",
-            f"dot_test_pattern_low_intensity_{Timer.timestamp()}")
+            f"dot_test_pattern_low_intensity_{Timer.timestamp()}",
+        )
         # wrapper.fit()
         wrapper.ex()
 
@@ -162,7 +160,8 @@ class MainWindow(QMainWindow):
             10,
             "rgb_led_plotter_testfile",
             f"random_dots{Timer.timestamp()}",
-            optimize=True)
+            optimize=True,
+        )
         # wrapper.fit()
         wrapper.ex()
 
@@ -174,5 +173,5 @@ def main():
     sys.exit(app.exec_())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

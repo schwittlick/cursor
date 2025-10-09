@@ -8,13 +8,13 @@ from cursor.collection import Collection
 
 class GCodeRenderer:
     def __init__(
-            self,
-            folder: pathlib.Path,
-            feedrate_xy: int = 2000,
-            feedrate_z: int = 1000,
-            z_down: float = 3.5,
-            z_up: float = 0.0,
-            invert_y: bool = False,
+        self,
+        folder: pathlib.Path,
+        feedrate_xy: int = 2000,
+        feedrate_z: int = 1000,
+        z_down: float = 3.5,
+        z_up: float = 0.0,
+        invert_y: bool = False,
     ):
         self.save_path = folder
         self.z_down = z_down

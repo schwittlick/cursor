@@ -6,11 +6,23 @@ from sklearn.preprocessing import MinMaxScaler
 
 from tools.stock.data_aggr import calculate_time
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     model = keras.models.load_model("btc_hourly_230725.model")
 
-    headers = ["Open Time", "Open", "High", "Low", "Close", "Volume", "Close Time", "QAV", "NAT", "TBBAV", "TBQAV",
-               "Ignore"]
+    headers = [
+        "Open Time",
+        "Open",
+        "High",
+        "Low",
+        "Close",
+        "Volume",
+        "Close Time",
+        "QAV",
+        "NAT",
+        "TBBAV",
+        "TBQAV",
+        "Ignore",
+    ]
     data = pd.read_csv("BTCUSDT_newest.csv", names=headers)
     data.head()
 
@@ -49,7 +61,7 @@ if __name__ == '__main__':
     X_test = []
     y_test = data.iloc[:, :]
     for i in range(window, len(test_data)):
-        X_test.append(test_data[i - window:i, 0])
+        X_test.append(test_data[i - window : i, 0])
 
     X_test = np.array(X_test)
     X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))

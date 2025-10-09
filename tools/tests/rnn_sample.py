@@ -43,7 +43,7 @@ if __name__ == "__main__":
     print(len(p2))
 
     # Assuming you have loaded the trained model from a .h5 file
-    model = tf.keras.models.load_model('trained_model4.h5')
+    model = tf.keras.models.load_model("trained_model4.h5")
 
     # Define the desired length of the generated sequence
     desired_length = len(p2)
@@ -53,8 +53,9 @@ if __name__ == "__main__":
     current_sequence = tf.constant([[0, 0]], dtype=tf.int32)  # Start with a single point (e.g., (0, 0))
 
     for _ in range(desired_length):
-        current_sequence_padded = tf.pad(current_sequence,
-                                         [[0, 0], [0, 19 - tf.shape(current_sequence)[1]]])  # Pad the sequence
+        current_sequence_padded = tf.pad(
+            current_sequence, [[0, 0], [0, 19 - tf.shape(current_sequence)[1]]]
+        )  # Pad the sequence
         predictions = model(current_sequence_padded)  # Make predictions using the current sequence
         predicted_point = tf.random.categorical(predictions[:, -1, :], num_samples=1)  # Sample the next point
 

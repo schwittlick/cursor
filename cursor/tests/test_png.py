@@ -1,7 +1,8 @@
-import pytest
 import pathlib
+from unittest.mock import MagicMock, patch
+
 import cairo
-from unittest.mock import patch, MagicMock
+import pytest
 
 from cursor.bb import BoundingBox
 from cursor.collection import Collection
@@ -32,9 +33,11 @@ def test_background(renderer):
 
 
 def test_render(renderer):
-    with patch.object(CairoRenderer, 'render_all_paths') as mock_paths, \
-            patch.object(CairoRenderer, 'render_all_points') as mock_points, \
-            patch.object(CairoRenderer, 'render_frame') as mock_frame:
+    with (
+        patch.object(CairoRenderer, "render_all_paths") as mock_paths,
+        patch.object(CairoRenderer, "render_all_points") as mock_points,
+        patch.object(CairoRenderer, "render_frame") as mock_frame,
+    ):
         renderer.render(scale=2.0, frame=True)
         mock_paths.assert_called_once_with(scale=2.0)
         mock_points.assert_called_once_with(scale=2.0)
@@ -42,8 +45,7 @@ def test_render(renderer):
 
 
 def test_save(renderer):
-    with patch('pathlib.Path.mkdir') as mock_mkdir, \
-            patch('cairo.ImageSurface') as mock_surface_class:
+    with patch("pathlib.Path.mkdir") as mock_mkdir, patch("cairo.ImageSurface") as mock_surface_class:
         mock_surface_instance = MagicMock()
         mock_surface_class.return_value = mock_surface_instance
 
@@ -99,11 +101,7 @@ def test_render_all_points(renderer):
 
 def test_render_points_with_outline(renderer):
     mock_point = MagicMock(spec=Position)
-    mock_point.properties = {
-        Property.RADIUS: 5,
-        Property.COLOR: (0, 255, 0),
-        "outline": (255, 0, 0)
-    }
+    mock_point.properties = {Property.RADIUS: 5, Property.COLOR: (0, 255, 0), "outline": (255, 0, 0)}
     mock_point.x = 50
     mock_point.y = 50
 

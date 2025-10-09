@@ -16,13 +16,9 @@ class VisvalingamWhyatt:
     def _calculate_effective_area(self, idx: int) -> float:
         """Calculate the effective area for a point at given index."""
         if idx <= 0 or idx >= len(self.points) - 1:
-            return float('inf')
+            return float("inf")
 
-        return triangle_area(
-            self.points[idx - 1],
-            self.points[idx],
-            self.points[idx + 1]
-        )
+        return triangle_area(self.points[idx - 1], self.points[idx], self.points[idx + 1])
 
     def _initialize_areas(self):
         """Initialize areas for all points."""
@@ -53,7 +49,7 @@ class VisvalingamWhyatt:
         # Remove points with area <= threshold
         while True:
             # Find point with smallest area
-            min_area = float('inf')
+            min_area = float("inf")
             min_idx = -1
 
             for idx, area in self.areas.items():

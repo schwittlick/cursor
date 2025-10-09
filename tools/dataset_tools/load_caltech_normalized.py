@@ -11,13 +11,13 @@ class ContourLoader:
         """
         Initialize with path to the JSON file containing normalized contour data
         """
-        with open(json_path, 'r') as f:
+        with open(json_path, "r") as f:
             self.data = json.load(f)
 
         # Extract basic information
-        self.points = np.array(self.data['points'])
-        self.original_width = self.data['original_width']
-        self.original_height = self.data['original_height']
+        self.points = np.array(self.data["points"])
+        self.original_width = self.data["original_width"]
+        self.original_height = self.data["original_height"]
 
     def get_denormalized_points(self):
         """
@@ -41,16 +41,16 @@ class ContourLoader:
         fig, ax = plt.subplots(figsize=(10, 10))
 
         # Draw the contour
-        ax.plot(points[:, 0], points[:, 1], 'b-', linewidth=2)
+        ax.plot(points[:, 0], points[:, 1], "b-", linewidth=2)
         ax.fill(points[:, 0], points[:, 1], alpha=0.3)  # Optional: fill the contour
 
         # Set limits and aspect ratio
         ax.set_xlim(0, self.original_width)
         ax.set_ylim(0, self.original_height)
-        ax.set_aspect('equal')
+        ax.set_aspect("equal")
 
         # Set title and labels
-        ax.set_title(f'Contour (Original dimensions: {self.original_width:.1f} x {self.original_height:.1f})')
+        ax.set_title(f"Contour (Original dimensions: {self.original_width:.1f} x {self.original_height:.1f})")
         ax.grid(True)
 
         plt.show(block=block)
@@ -82,17 +82,17 @@ class ContourLoader:
         Load all contours from a collection file
         Returns list of ContourLoader instances
         """
-        with open(collection_path, 'r') as f:
+        with open(collection_path, "r") as f:
             collection = json.load(f)
 
         contours = []
-        for contour_data in collection['contours']:
+        for contour_data in collection["contours"]:
             # Create a temporary file-like object in memory
             loader = cls.__new__(cls)
             loader.data = contour_data
-            loader.points = np.array(contour_data['points'])
-            loader.original_width = contour_data['original_width']
-            loader.original_height = contour_data['original_height']
+            loader.points = np.array(contour_data["points"])
+            loader.original_width = contour_data["original_width"]
+            loader.original_height = contour_data["original_height"]
             contours.append(loader)
 
         return contours
@@ -120,15 +120,15 @@ class ContourLoader:
         for i, contour in enumerate(contours):
             if i < len(axes):
                 points = contour.get_denormalized_points().reshape(-1, 2)
-                axes[i].plot(points[:, 0], points[:, 1], 'b-', linewidth=1)
+                axes[i].plot(points[:, 0], points[:, 1], "b-", linewidth=1)
                 axes[i].fill(points[:, 0], points[:, 1], alpha=0.1)
-                axes[i].set_aspect('equal')
-                axes[i].set_title(f'Contour {contour.data["index"]}')
-                axes[i].grid(True, linestyle='--', alpha=0.3)
+                axes[i].set_aspect("equal")
+                axes[i].set_title(f"Contour {contour.data['index']}")
+                axes[i].grid(True, linestyle="--", alpha=0.3)
 
         # Hide empty subplots
         for i in range(len(contours), len(axes)):
-            axes[i].axis('off')
+            axes[i].axis("off")
 
         plt.tight_layout()
         plt.show(block=block)
@@ -157,15 +157,22 @@ class ContourLoader:
         # Plot each contour
         for i, contour in enumerate(contours):
             points = contour.get_denormalized_points().reshape(-1, 2)
-            ax.plot(points[:, 0], points[:, 1], '-', color=colors[i], linewidth=1, alpha=0.7,
-                    label=f'Contour {contour.data["index"]}')
+            ax.plot(
+                points[:, 0],
+                points[:, 1],
+                "-",
+                color=colors[i],
+                linewidth=1,
+                alpha=0.7,
+                label=f"Contour {contour.data['index']}",
+            )
             ax.fill(points[:, 0], points[:, 1], color=colors[i], alpha=0.1)
 
         ax.set_xlim(-0.05 * max_width, 1.05 * max_width)
         ax.set_ylim(-0.05 * max_height, 1.05 * max_height)
-        ax.set_aspect('equal')
-        ax.grid(True, linestyle='--', alpha=0.3)
-        ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+        ax.set_aspect("equal")
+        ax.grid(True, linestyle="--", alpha=0.3)
+        ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
 
         plt.tight_layout()
         plt.show(block=block)
@@ -243,14 +250,14 @@ if __name__ == "__main__":
 
     # 3. OpenCV visualization
     img = ContourLoader.draw_collection_opencv(contours)
-    cv2.namedWindow('Contours Collection', cv2.WINDOW_NORMAL)
-    cv2.imshow('Contours Collection', img)
+    cv2.namedWindow("Contours Collection", cv2.WINDOW_NORMAL)
+    cv2.imshow("Contours Collection", img)
 
     print("\nPress 'q' to quit OpenCV window")
     while True:
         key = cv2.waitKey(1) & 0xFF
-        if key == ord('q'):
+        if key == ord("q"):
             break
 
     cv2.destroyAllWindows()
-    plt.close('all')
+    plt.close("all")

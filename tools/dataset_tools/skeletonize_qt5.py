@@ -1,6 +1,14 @@
 import sys
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
-                             QHBoxLayout, QPushButton, QLabel, QFileDialog)
+from PyQt5.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QPushButton,
+    QLabel,
+    QFileDialog,
+)
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import Qt, QSettings
 import numpy as np
@@ -56,13 +64,11 @@ class ScalableImageLabel(QLabel):
         else:
             display_image = self.base_image
 
-        display_image = cv2.resize(display_image, (new_width, new_height),
-                                   interpolation=cv2.INTER_NEAREST)
+        display_image = cv2.resize(display_image, (new_width, new_height), interpolation=cv2.INTER_NEAREST)
 
         # Convert to QImage
         bytes_per_line = 3 * new_width
-        qt_image = QImage(display_image.data, new_width, new_height,
-                          bytes_per_line, QImage.Format_RGB888)
+        qt_image = QImage(display_image.data, new_width, new_height, bytes_per_line, QImage.Format_RGB888)
 
         # Convert to QPixmap and display
         pixmap = QPixmap.fromImage(qt_image)
@@ -81,9 +87,9 @@ class ImageSkeletonApp(QMainWindow):
         self.target_height = 174
 
         # Initialize settings
-        self.settings = QSettings('ImageSkeletonApp', 'ImageProcessing')
-        self.last_folder = self.settings.value('last_folder', os.path.expanduser('~'))
-        self.current_rotation = int(self.settings.value('rotation_angle', 0))
+        self.settings = QSettings("ImageSkeletonApp", "ImageProcessing")
+        self.last_folder = self.settings.value("last_folder", os.path.expanduser("~"))
+        self.current_rotation = int(self.settings.value("rotation_angle", 0))
 
         # Create main widget and layout
         main_widget = QWidget()
@@ -119,14 +125,14 @@ class ImageSkeletonApp(QMainWindow):
         self.setFocusPolicy(Qt.StrongFocus)
 
         # Restore window geometry if it exists
-        geometry = self.settings.value('window_geometry')
+        geometry = self.settings.value("window_geometry")
         if geometry:
             self.restoreGeometry(geometry)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_R and self.image is not None:
             self.current_rotation = (self.current_rotation + 90) % 360
-            self.settings.setValue('rotation_angle', self.current_rotation)
+            self.settings.setValue("rotation_angle", self.current_rotation)
             self.rotate_and_update()
         elif event.key() == Qt.Key_V and self.processed_image is not None:
             self.vectorize_skeleton()
@@ -142,12 +148,8 @@ class ImageSkeletonApp(QMainWindow):
             path.pen_select = 1
 
         wrapper = ExportWrapper(
-            coll,
-            PlotterType.HP_7550A_A4,
-            10,
-            "datasets",
-            f"skeletonize_{Timer.timestamp()}",
-            keep_aspect_ratio=True)
+            coll, PlotterType.HP_7550A_A4, 10, "datasets", f"skeletonize_{Timer.timestamp()}", keep_aspect_ratio=True
+        )
         wrapper.fit()
         wrapper.ex()
 
@@ -171,7 +173,7 @@ class ImageSkeletonApp(QMainWindow):
             left = (target_w - resized_image.shape[1]) // 2
 
             # Paste the inverted resized image onto the black background
-            background[top:top + resized_image.shape[0], left:left + resized_image.shape[1]] = 255 - resized_image
+            background[top : top + resized_image.shape[0], left : left + resized_image.shape[1]] = 255 - resized_image
 
             # Save the image
             folder = DataDirHandler().png("datasets")
@@ -201,22 +203,19 @@ class ImageSkeletonApp(QMainWindow):
 
     def closeEvent(self, event):
         # Save window geometry and rotation when closing
-        self.settings.setValue('window_geometry', self.saveGeometry())
-        self.settings.setValue('rotation_angle', self.current_rotation)
+        self.settings.setValue("window_geometry", self.saveGeometry())
+        self.settings.setValue("rotation_angle", self.current_rotation)
         super().closeEvent(event)
 
     def load_image(self):
         file_name, _ = QFileDialog.getOpenFileName(
-            self,
-            "Open Image File",
-            self.last_folder,
-            "Images (*.png *.xpm *.jpg *.bmp)"
+            self, "Open Image File", self.last_folder, "Images (*.png *.xpm *.jpg *.bmp)"
         )
 
         if file_name:
             # Update and save the last used folder
             self.last_folder = os.path.dirname(os.path.abspath(file_name))
-            self.settings.setValue('last_folder', self.last_folder)
+            self.settings.setValue("last_folder", self.last_folder)
 
             # Load image using OpenCV
             self.original_unrotated = cv2.imread(file_name)
@@ -267,7 +266,7 @@ class ImageSkeletonApp(QMainWindow):
             self.skeleton_label.setBaseImage(self.processed_image)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = ImageSkeletonApp()
     window.show()

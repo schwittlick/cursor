@@ -63,9 +63,7 @@ def test_export_wrapper_ex(export_wrapper):
 
 def test_export_wrapper_ex_reversed(export_wrapper):
     export_wrapper.export_reversed = True
-    with patch.object(Exporter, "run") as mock_run, patch.object(
-        Collection, "reverse"
-    ) as mock_reverse:
+    with patch.object(Exporter, "run") as mock_run, patch.object(Collection, "reverse") as mock_reverse:
         export_wrapper.ex()
         assert mock_run.call_count == 2
         mock_reverse.assert_called_once()
@@ -143,9 +141,7 @@ def test_export_source(exporter, tmp_path):
 
 def test_export_copic_color_mapping(exporter):
     exporter.collection.properties["pen_mapping"] = {"layer1": {1: "R27", 2: "B29"}}
-    with patch("cursor.export.PdfRenderer") as mock_pdf_renderer, patch(
-        "cursor.export.Copic"
-    ) as mock_copic:
+    with patch("cursor.export.PdfRenderer") as mock_pdf_renderer, patch("cursor.export.Copic") as mock_copic:
         mock_color = Mock(spec=Color)
         mock_color.as_rgb.return_value = (255, 0, 0)
         mock_copic.return_value.color_by_code.return_value = mock_color

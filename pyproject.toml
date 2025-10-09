@@ -44,3 +44,16 @@ include = ["cursor*"]
 
 [tool.setuptools.package-data]
 cursor = ["*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+# Replicate flake8 ignore rules: E402,W503,E203,E303,E722,E741,E731,W504
+ignore = ["E402", "W505", "E203", "E303", "E722", "E741", "E731"]
+select = ["E", "F", "W"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

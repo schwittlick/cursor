@@ -51,7 +51,6 @@ def test_gradient():
     c2 = Copic().color_by_code(CopicColorCode.Y06)
 
     for i in range(10):
-
         gradient = ColorMath.calc_gradient(c1, c2, 50, True)
         gradient_unique = [v for i, v in enumerate(gradient) if i == 0 or v != gradient[i - 1]]
         # print(gradient)

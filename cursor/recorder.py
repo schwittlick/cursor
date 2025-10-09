@@ -33,15 +33,11 @@ class Recorder:
         self._resolution = pyautogui.size()
 
         log.good("Setting up mouse hook")
-        self.mouse_listener = pynput.mouse.Listener(
-            on_move=self.on_move, on_click=self.on_click
-        )
+        self.mouse_listener = pynput.mouse.Listener(on_move=self.on_move, on_click=self.on_click)
         self.mouse_listener.start()
 
         log.good("Setting up keyboard hook")
-        self.key_listener = pynput.keyboard.Listener(
-            on_press=self.on_press, on_release=self.on_release
-        )
+        self.key_listener = pynput.keyboard.Listener(on_press=self.on_press, on_release=self.on_release)
         self.key_listener.start()
 
         self.__save_async()
@@ -110,16 +106,14 @@ class Recorder:
         save_path = DataDirHandler().recordings()
         save_path.mkdir(parents=True, exist_ok=True)
 
-        recs = {"mouse": self._mouse_recordings,
-                "keys": self._keyboard_recodings}
+        recs = {"mouse": self._mouse_recordings, "keys": self._keyboard_recodings}
 
         filename = str(self._start_time_stamp) + f"_{self._fn_suffix}.json"
         fname_compressed = save_path / filename
 
         log.warn(DateHandler.utc_timestamp())
         log.good(f"Saving mouse recordings: {len(self._mouse_recordings)}")
-        log.good(
-            f"Saving keyboard recordings: {len(self._keyboard_recodings)}")
+        log.good(f"Saving keyboard recordings: {len(self._keyboard_recodings)}")
         log.good(f"{fname_compressed.as_posix()}")
 
         with open(fname_compressed.as_posix(), "w") as fp:

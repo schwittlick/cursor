@@ -66,6 +66,6 @@ def calculate_time(timestamp):
     return dt.fromtimestamp(timestamp / 1000)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # multiple_csv(["BTCUSDT"], client.KLINE_INTERVAL_1HOUR, "1 Januar 2015", "25 July 2023")
     multiple_csv(["BTCUSDT"], client.KLINE_INTERVAL_1HOUR, "1 July 2023", "27 July 2023")

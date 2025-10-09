@@ -21,9 +21,21 @@ def calculate_time(timestamp):
     return dt.fromtimestamp(timestamp / 1000)
 
 
-if __name__ == '__main__':
-    headers = ["Open Time", "Open", "High", "Low", "Close", "Volume", "Close Time", "QAV", "NAT", "TBBAV", "TBQAV",
-               "Ignore"]
+if __name__ == "__main__":
+    headers = [
+        "Open Time",
+        "Open",
+        "High",
+        "Low",
+        "Close",
+        "Volume",
+        "Close Time",
+        "QAV",
+        "NAT",
+        "TBBAV",
+        "TBQAV",
+        "Ignore",
+    ]
     data = pd.read_csv("BTCUSDT.csv", names=headers)
     data.head()
 
@@ -56,12 +68,12 @@ if __name__ == '__main__':
     scaler = MinMaxScaler()
     scaled_data = scaler.fit_transform(close_array)
 
-    train_data = scaled_data[0: train_close_len, :]
+    train_data = scaled_data[0:train_close_len, :]
     # Create X_train and y_train
     X_train = []
     y_train = []
     for i in range(60, len(train_data)):
-        X_train.append(train_data[i - 60: i, 0])
+        X_train.append(train_data[i - 60 : i, 0])
         y_train.append(train_data[i, 0])
         # if i <= 60:
         #    print(X_train)
@@ -69,28 +81,25 @@ if __name__ == '__main__':
 
     X_train, y_train = np.array(X_train), np.array(y_train)
     X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
-    test_data = scaled_data[train_close_len - 60:, :]
+    test_data = scaled_data[train_close_len - 60 :, :]
     # create X_test and y_test
     X_test = []
     y_test = data.iloc[train_close_len:, :]
     for i in range(60, len(test_data)):
-        X_test.append(test_data[i - 60: i, 0])
+        X_test.append(test_data[i - 60 : i, 0])
 
     X_test = np.array(X_test)
     X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
 
     model = Sequential()
 
-    model.add(LSTM(units=512, return_sequences=True, activation='relu', input_shape=(X_train.shape[1], 1)))
+    model.add(LSTM(units=512, return_sequences=True, activation="relu", input_shape=(X_train.shape[1], 1)))
 
-    model.add(LSTM(units=256, activation='relu', return_sequences=False))
+    model.add(LSTM(units=256, activation="relu", return_sequences=False))
 
     model.add(Dense(units=1))
-    model.compile(optimizer="Adam", loss="mean_squared_error", metrics=['mae'])
-    model.fit(X_train, y_train,
-              epochs=3,
-              batch_size=100,
-              verbose=1)
+    model.compile(optimizer="Adam", loss="mean_squared_error", metrics=["mae"])
+    model.fit(X_train, y_train, epochs=3, batch_size=100, verbose=1)
     # model.save("btc_hourly_230725.model")
     predictions = model.predict(X_test)
     # here put the entire history and predict a next step

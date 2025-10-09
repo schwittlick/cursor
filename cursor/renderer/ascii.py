@@ -28,11 +28,7 @@ class AsciiRenderer:
     def intensity(r: int, g: int, b: int, a: int) -> int:
         return (r + g + b) * a
 
-    def render(
-            self,
-            paths: Collection,
-            scale: float = 1.0
-    ):
+    def render(self, paths: Collection, scale: float = 1.0):
         self.jpeg_renderer.add(paths)
         self.jpeg_renderer.render(scale)
 

@@ -34,9 +34,7 @@ def generate_test_path(length: int) -> Path:
 
 
 def generate_test_collection(length_collection: int, length_paths: int) -> Collection:
-    return Collection.from_path_list(
-        [generate_test_path(length_paths) for _ in range(length_collection)]
-    )
+    return Collection.from_path_list([generate_test_path(length_paths) for _ in range(length_collection)])
 
 
 def test_collection_save_load():

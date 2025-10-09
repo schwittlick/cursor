@@ -10,14 +10,14 @@ from cursor.tools.serial_powertools.seriallib import SerialSender
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument('port')
-    parser.add_argument('file')
+    parser.add_argument("port")
+    parser.add_argument("file")
     args = parser.parse_args()
 
     analyzer = HPGLAnalyzer()
     analyzer.analyze(args.file)
 
-    text = ''.join(open(args.file, 'r', encoding='utf-8').readlines())
+    text = "".join(open(args.file, "r", encoding="utf-8").readlines())
     # text = text.replace(" ", '').replace("\n", '').replace("\r", '')
 
     commands = tokenizer(text)
@@ -29,5 +29,5 @@ def main():
     sender.send(plotter, commands)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

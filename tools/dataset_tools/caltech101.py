@@ -39,7 +39,7 @@ class MainWindow(QMainWindow):
         # Enable drop events for the window
         self.setAcceptDrops(True)
 
-        self.setWindowTitle('caltech101')
+        self.setWindowTitle("caltech101")
         self.setGeometry(100, 100, 1200, 800)
 
         # Get all categories
@@ -52,25 +52,25 @@ class MainWindow(QMainWindow):
         combobox1.currentTextChanged.connect(self._update_selected_category)
         combobox1.addItems(list(self.categories_with_counts.keys()))
 
-        buttonLoad = QPushButton('Load Category', self)
+        buttonLoad = QPushButton("Load Category", self)
         buttonLoad.clicked.connect(self._load_viewer)
 
-        buttonSaveCategoryContours = QPushButton('Save Category Contours', self)
+        buttonSaveCategoryContours = QPushButton("Save Category Contours", self)
         buttonSaveCategoryContours.clicked.connect(self._save_contours)
 
-        buttonSaveAllCategoryContours = QPushButton('Save All Category Contours', self)
+        buttonSaveAllCategoryContours = QPushButton("Save All Category Contours", self)
         buttonSaveAllCategoryContours.clicked.connect(self._save_all_contours)
 
-        buttonExportOverview = QPushButton('Export overview', self)
+        buttonExportOverview = QPushButton("Export overview", self)
         buttonExportOverview.clicked.connect(self._save_overview)
 
-        buttonExportSkeletonOverview = QPushButton('Export skeleton overview', self)
+        buttonExportSkeletonOverview = QPushButton("Export skeleton overview", self)
         buttonExportSkeletonOverview.clicked.connect(self._save_skeleton_overview)
 
-        buttonExportNormalizedContours = QPushButton('Export Normalized Contours', self)
+        buttonExportNormalizedContours = QPushButton("Export Normalized Contours", self)
         buttonExportNormalizedContours.clicked.connect(self._export_normalized_contours)
 
-        buttonExportSkeletonGrid = QPushButton('Export Skeleton Grid', self)
+        buttonExportSkeletonGrid = QPushButton("Export Skeleton Grid", self)
         buttonExportSkeletonGrid.clicked.connect(self._export_skeleton_grid)
 
         # Main widget and layout
@@ -103,8 +103,9 @@ class MainWindow(QMainWindow):
         canvas = np.zeros((canvas_size * grid_size, canvas_size * grid_size)) * 255
 
         # Compute contours for the category
-        all_contours = self._compute_contours(category, count, rotate_90=False, target_width=canvas_size,
-                                              target_height=canvas_size)
+        all_contours = self._compute_contours(
+            category, count, rotate_90=False, target_width=canvas_size, target_height=canvas_size
+        )
 
         for i, contour in enumerate(all_contours):
             # Create a blank image for the contour
@@ -117,16 +118,18 @@ class MainWindow(QMainWindow):
             skeleton = sk_skeletonize(img > 0)
 
             # Resize skeleton to fit in the grid
-            resized_skeleton = cv2.resize(skeleton.astype(np.uint8) * 255, (canvas_size, canvas_size),
-                                          interpolation=cv2.INTER_NEAREST)
+            resized_skeleton = cv2.resize(
+                skeleton.astype(np.uint8) * 255, (canvas_size, canvas_size), interpolation=cv2.INTER_NEAREST
+            )
 
             # Calculate position in the grid
             row = i // grid_size
             col = i % grid_size
 
             # Place the skeleton in the canvas
-            canvas[row * canvas_size:(row + 1) * canvas_size,
-                   col * canvas_size:(col + 1) * canvas_size] = resized_skeleton
+            canvas[row * canvas_size : (row + 1) * canvas_size, col * canvas_size : (col + 1) * canvas_size] = (
+                resized_skeleton
+            )
             print(f"Skeleton saved to grid position ({row}, {col})")
 
         # Save the grid image
@@ -148,7 +151,7 @@ class MainWindow(QMainWindow):
         counts = {}
         for category in categories:
             img_path = os.path.join(self.base_path, "101_ObjectCategories", category)
-            count = len([f for f in os.listdir(img_path) if f.endswith('.jpg')])
+            count = len([f for f in os.listdir(img_path) if f.endswith(".jpg")])
             counts[f"{category}"] = (category, count)
         return counts
 
@@ -163,8 +166,8 @@ class MainWindow(QMainWindow):
         self.max_index = count
 
         self.fig, self.ax = plt.subplots()
-        self.fig.canvas.mpl_connect('scroll_event', self.on_scroll)
-        self.fig.canvas.mpl_connect('key_press_event', self.on_key_press)
+        self.fig.canvas.mpl_connect("scroll_event", self.on_scroll)
+        self.fig.canvas.mpl_connect("key_press_event", self.on_key_press)
         self.update_display()
         plt.show()
 
@@ -182,7 +185,7 @@ class MainWindow(QMainWindow):
                 continue
 
             data = loadmat(ann_file)
-            obj_contour = data['obj_contour']
+            obj_contour = data["obj_contour"]
 
             if rotate_90:
                 obj_contour = np.array([obj_contour[1], -obj_contour[0]])
@@ -213,7 +216,7 @@ class MainWindow(QMainWindow):
             for j in range(obj_contour.shape[1]):
                 scaled_contour[j] = [
                     int((obj_contour[0, j] - x_min + padding) * scale) + pad_x,
-                    int((obj_contour[1, j] - y_min + padding) * scale) + pad_y
+                    int((obj_contour[1, j] - y_min + padding) * scale) + pad_y,
                 ]
 
             # Interpolate points to ensure maximum distance of 400 pixels
@@ -266,7 +269,7 @@ class MainWindow(QMainWindow):
             try:
                 # Load contour data
                 data = loadmat(ann_file)
-                obj_contour = data['obj_contour']
+                obj_contour = data["obj_contour"]
 
                 # Convert to numpy array of points
                 points = np.array([obj_contour[0], obj_contour[1]]).T
@@ -284,16 +287,16 @@ class MainWindow(QMainWindow):
 
                 # Convert to list of [x, y] coordinates
                 contour_data = {
-                    'points': normalized_points.tolist(),
-                    'original_width': float(ranges[0]),
-                    'original_height': float(ranges[1]),
-                    'aspect_ratio': float(ranges[1] / ranges[0]),
-                    'index': i
+                    "points": normalized_points.tolist(),
+                    "original_width": float(ranges[0]),
+                    "original_height": float(ranges[1]),
+                    "aspect_ratio": float(ranges[1] / ranges[0]),
+                    "index": i,
                 }
 
                 # Save individual contour file
                 output_file = os.path.join(output_dir, f"normalized_contour_{i:04d}.json")
-                with open(output_file, 'w') as f:
+                with open(output_file, "w") as f:
                     json.dump(contour_data, f, indent=2)
 
                 all_contours.append(contour_data)
@@ -304,13 +307,9 @@ class MainWindow(QMainWindow):
 
         # Save collection file with all contours
         collection_file = os.path.join(output_dir, f"{category}_normalized_contours.json")
-        collection_data = {
-            'category': category,
-            'count': len(all_contours),
-            'contours': all_contours
-        }
+        collection_data = {"category": category, "count": len(all_contours), "contours": all_contours}
 
-        with open(collection_file, 'w') as f:
+        with open(collection_file, "w") as f:
             json.dump(collection_data, f, indent=2)
 
         print(f"Exported {len(all_contours)} normalized contours for category '{category}'")
@@ -338,7 +337,7 @@ class MainWindow(QMainWindow):
 
             # Export CSV with absolute pixel coordinates
             csv_file = os.path.join(output_dir, f"contour_{i:04d}.csv")
-            with open(csv_file, 'w') as f:
+            with open(csv_file, "w") as f:
                 for point in contour:
                     f.write(f"{point[0]};{point[1]}\n")
 
@@ -347,41 +346,42 @@ class MainWindow(QMainWindow):
 
             # Export CSV with absolute pixel coordinates
             csv_file = os.path.join(output_dir_png, f"contour_{i:04d}.csv")
-            with open(csv_file, 'w') as f:
+            with open(csv_file, "w") as f:
                 for point in contour:
                     f.write(f"{point[0]};{point[1]}\n")
 
         print(f"Saved {count} contour images and CSV files for category '{category}' in {output_dir}")
 
     def _save_all_contours(self):
-        categories = [('ant', True),  # landscape
-                      ('bass', True),  # landscape
-                      ('brontosaurus', True),
-                      ('buddha', False),
-                      ('butterfly', True),  # landscape
-                      ('crab', True),  # landscape
-                      ('crayfish', True),
-                      ('crocodile', True),  # landscape
-                      ('dolphin', True),  # landscape
-                      ('dragonfly', False),
-                      ('elephant', True),  # landscape
-                      ('flamingo', False),  # portrait
-                      ('hawksbill', True),  # landscape
-                      ('ibis', False),
-                      ('kangaroo', False),
-                      ('llama', True),  # landscape
-                      ('lobster', False),  # landscape
-                      ('mayfly', False),
-                      ('octopus', False),
-                      ('okapi', False),
-                      ('pigeon', True),  # landscape
-                      ('rhino', True),  # landscape
-                      ('rooster', False),  # portrait
-                      ('scorpion', True),  # landscape
-                      ('sea_horse', False),  # portrait
-                      ('starfish', True),  # portrait / landscape
-                      ('wild_cat', True),  # landscape
-                      ]
+        categories = [
+            ("ant", True),  # landscape
+            ("bass", True),  # landscape
+            ("brontosaurus", True),
+            ("buddha", False),
+            ("butterfly", True),  # landscape
+            ("crab", True),  # landscape
+            ("crayfish", True),
+            ("crocodile", True),  # landscape
+            ("dolphin", True),  # landscape
+            ("dragonfly", False),
+            ("elephant", True),  # landscape
+            ("flamingo", False),  # portrait
+            ("hawksbill", True),  # landscape
+            ("ibis", False),
+            ("kangaroo", False),
+            ("llama", True),  # landscape
+            ("lobster", False),  # landscape
+            ("mayfly", False),
+            ("octopus", False),
+            ("okapi", False),
+            ("pigeon", True),  # landscape
+            ("rhino", True),  # landscape
+            ("rooster", False),  # portrait
+            ("scorpion", True),  # landscape
+            ("sea_horse", False),  # portrait
+            ("starfish", True),  # portrait / landscape
+            ("wild_cat", True),  # landscape
+        ]
         for category in categories:
             category_name = [k for k, v in self.categories_with_counts.items() if category[0] in k][0]
             self.selected_category = category_name
@@ -415,7 +415,8 @@ class MainWindow(QMainWindow):
             "datasets",
             f"overview_contours_{category}",
             keep_aspect_ratio=True,
-            export_jpg_preview=True)
+            export_jpg_preview=True,
+        )
         wrapper2.fit()
         wrapper2.ex()
 
@@ -440,7 +441,7 @@ class MainWindow(QMainWindow):
             # Get contour
             ann_file = os.path.join(self.base_ann_path, f"annotation_{i:04d}.mat")
             data = loadmat(ann_file)
-            obj_contour = data['obj_contour']
+            obj_contour = data["obj_contour"]
 
             # Create scaled contour
             height, width = img.shape[:2]
@@ -466,8 +467,9 @@ class MainWindow(QMainWindow):
 
             # Create filled outline image
             filled_outline = self.generate_filled_outline(scaled_contour, width, height)
-            filled_outline_resized = cv2.resize(filled_outline, (width * 2, height * 2),
-                                                interpolation=cv2.INTER_NEAREST)
+            filled_outline_resized = cv2.resize(
+                filled_outline, (width * 2, height * 2), interpolation=cv2.INTER_NEAREST
+            )
 
             # Skeletonize
             skeleton = skeletonize(255 - filled_outline_resized)
@@ -523,7 +525,7 @@ class MainWindow(QMainWindow):
             10,  # 25mm - 11mm
             "datasets",
             f"overview_skeletons_{category}",
-            keep_aspect_ratio=True
+            keep_aspect_ratio=True,
         )
         wrapper.fit()
         wrapper.ex()
@@ -537,10 +539,7 @@ class MainWindow(QMainWindow):
         for i in range(orig_contour.shape[0]):
             x = orig_contour[i][0] - xmin
             y = orig_contour[i][1] - ymin
-            scaled_contour[i] = [
-                int(x * scale) + x_offset,
-                int(y * scale) + y_offset
-            ]
+            scaled_contour[i] = [int(x * scale) + x_offset, int(y * scale) + y_offset]
         return scaled_contour
 
     def generate_filled_outline(self, scaled_contour, width, height):
@@ -592,8 +591,8 @@ class MainWindow(QMainWindow):
 
         ann_file = os.path.join(self.base_ann_path, f"annotation_{self.current_index:04d}.mat")
         data = loadmat(ann_file)
-        box_coord = data['box_coord'].flatten()
-        obj_contour = data['obj_contour']
+        box_coord = data["box_coord"].flatten()
+        obj_contour = data["obj_contour"]
 
         # Check if height > width and rotate if needed
         # should_rotate = img.shape[0] > img.shape[1]
@@ -607,12 +606,12 @@ class MainWindow(QMainWindow):
                 # For 90-degree rotation: (x,y) -> (y, height-x)
                 orig_contour[i] = [
                     img.shape[1] - (obj_contour[1, i] + box_coord[0]),  # y becomes x
-                    obj_contour[0, i] + box_coord[2]  # x becomes y
+                    obj_contour[0, i] + box_coord[2],  # x becomes y
                 ]
             else:
                 orig_contour[i] = [
                     img.shape[1] - (obj_contour[0, i] + box_coord[2]),
-                    img.shape[0] - (obj_contour[1, i] + box_coord[0])
+                    img.shape[0] - (obj_contour[1, i] + box_coord[0]),
                 ]
 
         # Create binary mask from original contour
@@ -629,8 +628,8 @@ class MainWindow(QMainWindow):
         xmin, xmax = np.where(cols)[0][[0, -1]]
 
         # Extract the masked regions
-        masked_region = masked_img[ymin:ymax + 1, xmin:xmax + 1]
-        mask_region = orig_mask[ymin:ymax + 1, xmin:xmax + 1]
+        masked_region = masked_img[ymin : ymax + 1, xmin : xmax + 1]
+        mask_region = orig_mask[ymin : ymax + 1, xmin : xmax + 1]
 
         # Scale contour for outline and filled versions (126x84)
         scale_x = (OUTLINE_WIDTH - 2 * OUTLINE_MARGIN) / (xmax - xmin)
@@ -663,11 +662,13 @@ class MainWindow(QMainWindow):
         mask_resized = cv2.resize(mask_region, (scaled_width_orig, scaled_height_orig))
 
         # Apply mask to maintain white background
-        region_slice = export_img_original[y_offset_orig:y_offset_orig + scaled_height_orig,
-                                           x_offset_orig:x_offset_orig + scaled_width_orig]
+        region_slice = export_img_original[
+            y_offset_orig : y_offset_orig + scaled_height_orig, x_offset_orig : x_offset_orig + scaled_width_orig
+        ]
         region_slice[mask_resized > 0] = masked_region_resized[mask_resized > 0]
-        export_img_original[y_offset_orig:y_offset_orig + scaled_height_orig,
-                            x_offset_orig:x_offset_orig + scaled_width_orig] = region_slice
+        export_img_original[
+            y_offset_orig : y_offset_orig + scaled_height_orig, x_offset_orig : x_offset_orig + scaled_width_orig
+        ] = region_slice
 
         category = self.selected_category.split(" (")[0]
         folder = DataDirHandler().png("datasets")
@@ -710,7 +711,8 @@ class MainWindow(QMainWindow):
             10,  # 25mm - 11mm
             "datasets",
             fname,
-            keep_aspect_ratio=True)
+            keep_aspect_ratio=True,
+        )
         wrapper.fit()
         wrapper.ex()
 
@@ -721,7 +723,8 @@ class MainWindow(QMainWindow):
             10,  # 25mm - 11mm
             "datasets",
             fname2,
-            keep_aspect_ratio=True)
+            keep_aspect_ratio=True,
+        )
         wrapper2.fit()
         wrapper2.ex()
 
@@ -755,25 +758,26 @@ class MainWindow(QMainWindow):
             20,  # 25mm - 11mm
             "datasets",
             fname,
-            keep_aspect_ratio=True)
+            keep_aspect_ratio=True,
+        )
         wrapper.fit()
         wrapper.ex()
 
     def on_key_press(self, event):
         print(event.key)
-        if event.key == 'e':
+        if event.key == "e":
             self.export_contour()
-        if event.key == 'left':
+        if event.key == "left":
             self.current_index = max(self.current_index - 1, 1)
             self.update_display()
-        if event.key == 'right':
+        if event.key == "right":
             self.current_index = min(self.current_index + 1, self.max_index)
             self.update_display()
-        if event.key == 'w':
-            plt.savefig("butterfly_tight.jpg", bbox_inches='tight')
+        if event.key == "w":
+            plt.savefig("butterfly_tight.jpg", bbox_inches="tight")
 
     def on_scroll(self, event):
-        if event.button == 'up':
+        if event.button == "up":
             self.current_index = min(self.current_index + 1, self.max_index)
         else:
             self.current_index = max(self.current_index - 1, 1)
@@ -786,18 +790,17 @@ class MainWindow(QMainWindow):
         ann_file = os.path.join(self.base_ann_path, f"annotation_{self.current_index:04d}.mat")
 
         if not os.path.exists(img_file) or not os.path.exists(ann_file):
-            self.ax.text(0.5, 0.5, f'Files not found for index {self.current_index}',
-                         ha='center', va='center')
+            self.ax.text(0.5, 0.5, f"Files not found for index {self.current_index}", ha="center", va="center")
             self.fig.canvas.draw_idle()
             return
 
         data = loadmat(ann_file)
-        box_coord = data['box_coord'].flatten()
-        obj_contour = data['obj_contour']
+        box_coord = data["box_coord"].flatten()
+        obj_contour = data["obj_contour"]
 
         img = np.array(PILImage.open(img_file))
         img = np.rot90(img, k=2)
-        self.ax.imshow(img, origin='lower')  # Set origin to 'lower' for bottom-left (0,0)
+        self.ax.imshow(img, origin="lower")  # Set origin to 'lower' for bottom-left (0,0)
 
         if len(img.shape) < 3:
             plt.gray()
@@ -806,9 +809,9 @@ class MainWindow(QMainWindow):
             (img.shape[1] - box_coord[3], img.shape[0] - box_coord[1]),
             box_coord[3] - box_coord[2],
             box_coord[1] - box_coord[0],
-            edgecolor='yellow',
+            edgecolor="yellow",
             linewidth=5,
-            fill=False
+            fill=False,
         )
         self.ax.add_patch(box)
 
@@ -816,29 +819,19 @@ class MainWindow(QMainWindow):
         contour_y = img.shape[0] - (obj_contour[1] + box_coord[0])
 
         for i in range(obj_contour.shape[1] - 1):
-            self.ax.plot(
-                [contour_x[i], contour_x[i + 1]],
-                [contour_y[i], contour_y[i + 1]],
-                'r-',
-                linewidth=4
-            )
+            self.ax.plot([contour_x[i], contour_x[i + 1]], [contour_y[i], contour_y[i + 1]], "r-", linewidth=4)
 
-        self.ax.plot(
-            [contour_x[-1], contour_x[0]],
-            [contour_y[-1], contour_y[0]],
-            'r-',
-            linewidth=4
-        )
+        self.ax.plot([contour_x[-1], contour_x[0]], [contour_y[-1], contour_y[0]], "r-", linewidth=4)
 
-        self.ax.set_title(f'{self.selected_category} - Image {self.current_index}/{self.max_index}')
+        self.ax.set_title(f"{self.selected_category} - Image {self.current_index}/{self.max_index}")
 
         self.ax.set_xticks([])
         self.ax.set_yticks([])
         self.ax.set_xticklabels([])
         self.ax.set_yticklabels([])
-        self.ax.axis('off')
+        self.ax.axis("off")
 
-        self.ax.axis('image')
+        self.ax.axis("image")
         self.fig.canvas.draw_idle()
 
         self.setWindowTitle(self.selected_category)
@@ -851,7 +844,7 @@ def main():
     sys.exit(app.exec_())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # viewer = ImageAnnotationViewer()
 
     main()

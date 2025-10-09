@@ -14,17 +14,17 @@ import threading
 
 import serial.tools.list_ports
 
-from cursor.hpgl import read_until_char, OUTPUT_DIMENSIONS, MODEL_IDENTIFICATION
+from cursor.hpgl import MODEL_IDENTIFICATION, OUTPUT_DIMENSIONS, read_until_char
 
 
 def async_discover(
-        serial_port: str,
-        baudrate: int = 9600,
-        stopbits: tuple = serial.STOPBITS_ONE,
-        bytesize: tuple = serial.EIGHTBITS,
-        parity: str = serial.PARITY_NONE,
-        xonxoff: bool = False,
-        timeout: float = 1.0,
+    serial_port: str,
+    baudrate: int = 9600,
+    stopbits: tuple = serial.STOPBITS_ONE,
+    bytesize: tuple = serial.EIGHTBITS,
+    parity: str = serial.PARITY_NONE,
+    xonxoff: bool = False,
+    timeout: float = 1.0,
 ) -> tuple[str, str] | None:
     ser = serial.Serial(
         port=serial_port,
@@ -66,12 +66,12 @@ def async_discover(
 
 
 def discover(
-        baudrate=9600,
-        stopbits=serial.STOPBITS_ONE,
-        bytesize=serial.EIGHTBITS,
-        parity=serial.PARITY_NONE,
-        xonxoff=False,
-        timeout=0.5,
+    baudrate=9600,
+    stopbits=serial.STOPBITS_ONE,
+    bytesize=serial.EIGHTBITS,
+    parity=serial.PARITY_NONE,
+    xonxoff=False,
+    timeout=0.5,
 ) -> set[tuple[str, str]]:
     ports = list(serial.tools.list_ports.comports())
     data = []
@@ -80,11 +80,7 @@ def discover(
     # better do that instead of troubling the sendhpgl communication protocol
     # >> lsof /dev/ttyUSB0
     # returns nothing when the port is not used by another application
-    ports = [
-        port.device
-        for port in ports
-        if not len(subprocess.getoutput(f"lsof {port.device}")) > 0
-    ]
+    ports = [port.device for port in ports if not len(subprocess.getoutput(f"lsof {port.device}")) > 0]
 
     threads = []
 

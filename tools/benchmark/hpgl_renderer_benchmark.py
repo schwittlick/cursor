@@ -11,9 +11,7 @@ from cursor.renderer.hpgl import HPGLRenderer
 if __name__ == "__main__":
     collection = Collection()
     for _ in range(100000):
-        pa = Path.from_tuple_list(
-            [(random.uniform(-100, 100), random.uniform(-100, 100))]
-        )
+        pa = Path.from_tuple_list([(random.uniform(-100, 100), random.uniform(-100, 100))])
         pa.pen_select = int(random.uniform(1, 8))
         pa.velocity = int(random.uniform(1, 120))
         pa.pen_force = int(random.uniform(1, 8))

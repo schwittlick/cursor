@@ -72,11 +72,7 @@ if __name__ == "__main__":
             collection.add(rose_curve)
 
     export = ExportWrapper(
-        collection,
-        PlotterType.HP_7550A_A3,
-        0,
-        "test_sheet",
-        "hp7550a_lt_all",
-        keep_aspect_ratio=True)
+        collection, PlotterType.HP_7550A_A3, 0, "test_sheet", "hp7550a_lt_all", keep_aspect_ratio=True
+    )
     export.fit()
     export.ex()

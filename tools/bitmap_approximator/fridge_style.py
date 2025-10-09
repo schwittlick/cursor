@@ -4,8 +4,7 @@ import random
 import numpy as np
 from PIL import Image
 
-from bitmap_lib import select_files, process_collection, export_collection, generate_preview, \
-    do_bitmap_approximation
+from bitmap_lib import select_files, process_collection, export_collection, generate_preview, do_bitmap_approximation
 from collection import Collection
 from device import MinmaxMapping
 
@@ -35,7 +34,7 @@ def create_fridge(plotter):
 
 
 def process_image(path):
-    loaded = Image.open(path).rotate(90, expand=True).convert('RGB')
+    loaded = Image.open(path).rotate(90, expand=True).convert("RGB")
     data = np.asarray(loaded) / 255
     collection = do_bitmap_approximation(data)
     # hardcoded styling for copic pen nib sizes

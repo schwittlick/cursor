@@ -31,13 +31,13 @@ from cursor.timer import Timer
 
 class ExportConfig:
     def __init__(
-            self,
-            type: Optional[PlotterType] = None,
-            margin: Optional[int] = None,
-            cutoff: Optional[int] = None,
-            export_source: bool = False,
-            export_jpeg_preview: bool = False,
-            optimize_hpgl_by_tsp: bool = True,
+        self,
+        type: Optional[PlotterType] = None,
+        margin: Optional[int] = None,
+        cutoff: Optional[int] = None,
+        export_source: bool = False,
+        export_jpeg_preview: bool = False,
+        optimize_hpgl_by_tsp: bool = True,
     ):
         self.type: PlotterType = type
         self.margin = margin
@@ -49,18 +49,18 @@ class ExportConfig:
 
 class ExportWrapper:
     def __init__(
-            self,
-            paths: Collection,
-            ptype: PlotterType,
-            margin: int,
-            name: str = "output_name",
-            suffix: str = "",
-            cutoff: Optional[int] = None,
-            gcode_speed: Optional[int] = None,
-            export_reversed: bool = False,
-            keep_aspect_ratio: bool = False,
-            export_jpg_preview: bool = False,
-            optimize: bool = False,
+        self,
+        paths: Collection,
+        ptype: PlotterType,
+        margin: int,
+        name: str = "output_name",
+        suffix: str = "",
+        cutoff: Optional[int] = None,
+        gcode_speed: Optional[int] = None,
+        export_reversed: bool = False,
+        keep_aspect_ratio: bool = False,
+        export_jpg_preview: bool = False,
+        optimize: bool = False,
     ):
         self.paths = paths
         self.ptype = ptype
@@ -72,9 +72,7 @@ class ExportWrapper:
         self.export_reversed = export_reversed
         self.keep_aspect_ratio = keep_aspect_ratio
 
-        self.config = ExportConfig(
-            ptype, margin, cutoff, False, export_jpg_preview, optimize
-        )
+        self.config = ExportConfig(ptype, margin, cutoff, False, export_jpg_preview, optimize)
 
         self.exp = Exporter(paths)
         self.exp.cfg = self.config
@@ -180,9 +178,7 @@ class Exporter:
             file.write(self._file_content_of_caller())
         logging.info(f"Saved source to {source_folder / fname}")
 
-    def export_copic_color_mapping(
-            self, fname: str, layers: Dict[str, Collection]
-    ) -> None:
+    def export_copic_color_mapping(self, fname: str, layers: Dict[str, Collection]) -> None:
         if not self.cfg or not self.cfg.type:
             raise ValueError("Configuration or plotter type is not set")
 
@@ -200,10 +196,7 @@ class Exporter:
                 pdf_renderer.pdf.set_fill_color(0, 0, 0)
                 pdf_renderer.pdf.text(x, y, f"layer {layer}")
                 y += 5
-                if (
-                        "pen_mapping" in self.collection.properties
-                        and layer in self.collection.properties["pen_mapping"]
-                ):
+                if "pen_mapping" in self.collection.properties and layer in self.collection.properties["pen_mapping"]:
                     pen_mapping = self.collection.properties["pen_mapping"][layer]
                     for pen_idx, color_code in pen_mapping.items():
                         try:
@@ -211,9 +204,7 @@ class Exporter:
                             pdf_renderer.pdf.set_fill_color(0, 0, 0)
                             pdf_renderer.pdf.text(x, y, f"Pen {pen_idx} -> {c}")
 
-                            pdf_renderer.pdf.set_fill_color(
-                                c.as_rgb()[0], c.as_rgb()[1], c.as_rgb()[2]
-                            )
+                            pdf_renderer.pdf.set_fill_color(c.as_rgb()[0], c.as_rgb()[1], c.as_rgb()[2])
                             pdf_renderer.circle(x + 60, y - 1, 2)
                             y += 5
                         except KeyError:
@@ -264,8 +255,13 @@ class Exporter:
         hpgl_folder = DataDirHandler().hpgl(self.name)
         hpgl_renderer = HPGLRenderer(hpgl_folder)
 
-        mutohs = {PlotterType.MUTOH_XP500_A1, PlotterType.MUTOH_XP500_A2, PlotterType.MUTOH_XP500_A3,
-                  PlotterType.MUTOH_XP500_100x70cm, PlotterType.MUTOH_XP500_500x297mm}
+        mutohs = {
+            PlotterType.MUTOH_XP500_A1,
+            PlotterType.MUTOH_XP500_A2,
+            PlotterType.MUTOH_XP500_A3,
+            PlotterType.MUTOH_XP500_100x70cm,
+            PlotterType.MUTOH_XP500_500x297mm,
+        }
         if self.cfg.type in mutohs:
             bb = MinmaxMapping.maps[self.cfg.type]
             # rotate drawing 180degrees for MUTOH plotters
@@ -290,9 +286,7 @@ class Exporter:
 
     def _export_gcode(self, pc: Collection, fname: str) -> None:
         gcode_folder = DataDirHandler().gcode(self.name)
-        gcode_renderer = GCodeRenderer(
-            gcode_folder, feedrate_xy=self.gcode_speed or 2000, z_down=-6
-        )
+        gcode_renderer = GCodeRenderer(gcode_folder, feedrate_xy=self.gcode_speed or 2000, z_down=-6)
         gcode_renderer.render(pc)
         gcode_renderer.save(fname)
 

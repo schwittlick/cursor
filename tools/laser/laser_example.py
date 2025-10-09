@@ -3,7 +3,7 @@ from cursor.device import PlotterType, PaperSize
 from cursor.export import ExportWrapper
 from cursor.path import Path
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     c = Collection()
     for i in range(1, 21):
         p = Path()

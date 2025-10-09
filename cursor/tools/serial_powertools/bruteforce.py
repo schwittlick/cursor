@@ -8,15 +8,17 @@ from cursor.tools.serial_powertools.seriallib import send_and_receive
 
 
 class BruteForcer(threading.Thread):
-    def __init__(self,
-                 serial_port: str,
-                 baud_rates: list[int],
-                 parities: list,
-                 xonxoffs: list[bool],
-                 byte_sizes: list,
-                 stopbits: list[int],
-                 timeout: float,
-                 test_message: str):
+    def __init__(
+        self,
+        serial_port: str,
+        baud_rates: list[int],
+        parities: list,
+        xonxoffs: list[bool],
+        byte_sizes: list,
+        stopbits: list[int],
+        timeout: float,
+        test_message: str,
+    ):
         super().__init__()
 
         self.baud_rates = baud_rates
@@ -51,19 +53,24 @@ class BruteForcer(threading.Thread):
                             configuration_index += 1
 
                             logging.info(
-                                f"Checking {self.serial_port}:{baud_rate}. {parity}, {xonxoff}, {byte_size}, {stopbit}")
+                                f"Checking {self.serial_port}:{baud_rate}. {parity}, {xonxoff}, {byte_size}, {stopbit}"
+                            )
 
                             progress_bar_value = configuration_index * self.progress_step_size
                             dpg.set_value("bruteforce_progress", progress_bar_value / 100)
                             try:
-                                with serial.Serial(port=self.serial_port, baudrate=baud_rate,
-                                                   xonxoff=xonxoff, stopbits=stopbit, parity=parity,
-                                                   bytesize=byte_size,
-                                                   timeout=self.timeout) as ser:
+                                with serial.Serial(
+                                    port=self.serial_port,
+                                    baudrate=baud_rate,
+                                    xonxoff=xonxoff,
+                                    stopbits=stopbit,
+                                    parity=parity,
+                                    bytesize=byte_size,
+                                    timeout=self.timeout,
+                                ) as ser:
                                     response = send_and_receive(ser, self.test_message, self.timeout)
                                     if response:
-                                        config = (baud_rate, xonxoff, stopbit, parity,
-                                                  byte_size, response)
+                                        config = (baud_rate, xonxoff, stopbit, parity, byte_size, response)
                                         logging.info(f"Detected {config}")
                                         responses.append(config)
 
@@ -74,33 +81,43 @@ class BruteForcer(threading.Thread):
         logging.info(f"{self.serial_port}: {responses}")
 
 
-def run_brute_force(serial_ports: list[str],
-                    baud_rates: list[int],
-                    parities: list,
-                    stop_bits: list,
-                    xonxoff: list[bool],
-                    byte_sizes: list,
-                    test_message: str,
-                    timeout: float = 1.0) -> list[BruteForcer]:
+def run_brute_force(
+    serial_ports: list[str],
+    baud_rates: list[int],
+    parities: list,
+    stop_bits: list,
+    xonxoff: list[bool],
+    byte_sizes: list,
+    test_message: str,
+    timeout: float = 1.0,
+) -> list[BruteForcer]:
     """Each serial port is tested in its on thread, in parallel"""
 
     # calculate the worst-case duration of the test
-    duration_approximated_seconds = len(baud_rates) * len(parities) * len(stop_bits) * len(xonxoff) * len(
-        byte_sizes) * timeout
+    duration_approximated_seconds = (
+        len(baud_rates) * len(parities) * len(stop_bits) * len(xonxoff) * len(byte_sizes) * timeout
+    )
     logging.info(f"This bruteforce configuration will take ~{duration_approximated_seconds}s")
 
     bruteforcer_threads = []
     for port in serial_ports:
-        thread = BruteForcer(port, baud_rates, parities=parities, xonxoffs=xonxoff, byte_sizes=byte_sizes,
-                             stopbits=stop_bits, timeout=timeout,
-                             test_message=test_message)
+        thread = BruteForcer(
+            port,
+            baud_rates,
+            parities=parities,
+            xonxoffs=xonxoff,
+            byte_sizes=byte_sizes,
+            stopbits=stop_bits,
+            timeout=timeout,
+            test_message=test_message,
+        )
         thread.start()
         bruteforcer_threads.append(thread)
 
     return bruteforcer_threads
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     ports = ["COM3", "COM3", "COM1"]  # List of serial ports to brute force
     baud_rates = [300, 900, 1200, 9600, 19200, 38400, 115200]  # Baud rates to try
     parities = [serial.PARITY_NONE, serial.PARITY_ODD, serial.PARITY_EVEN]

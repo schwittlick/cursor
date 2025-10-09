@@ -20,6 +20,6 @@ class Property(str, Enum):
     COLOR = "color"
     COPIC_COLOR = "copic_color"
     WIDTH = "width"
-    RADIUS = 'radius'
-    TAGS = 'tags'
-    RGB_LED_COLOR = 'rgb_led_color'
+    RADIUS = "radius"
+    TAGS = "tags"
+    RGB_LED_COLOR = "rgb_led_color"

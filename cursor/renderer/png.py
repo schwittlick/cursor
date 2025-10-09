@@ -105,4 +105,5 @@ class CairoRenderer(BaseRenderer):
         # Cairo doesn't have built-in Gaussian blur, so we'll skip the blurring for now
         self.render_points(self.positions, scale)
 
+
 # Note: Gaussian blur is not directly supported in Cairo, so that part of the functionality is omitted

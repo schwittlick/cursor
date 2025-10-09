@@ -5,13 +5,32 @@ import json
 import random
 import os
 import numpy as np
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
-                             QHBoxLayout, QPushButton, QLabel, QFileDialog,
-                             QTabWidget, QSlider, QProgressBar, QScrollArea, QShortcut)
+from PyQt5.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QPushButton,
+    QLabel,
+    QFileDialog,
+    QTabWidget,
+    QSlider,
+    QProgressBar,
+    QScrollArea,
+    QShortcut,
+)
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap, QKeySequence
-from sklearn.cluster import (KMeans, DBSCAN, AgglomerativeClustering,
-                             AffinityPropagation, SpectralClustering, Birch, MeanShift)
+from sklearn.cluster import (
+    KMeans,
+    DBSCAN,
+    AgglomerativeClustering,
+    AffinityPropagation,
+    SpectralClustering,
+    Birch,
+    MeanShift,
+)
 from sklearn.mixture import GaussianMixture
 from hdbscan import HDBSCAN
 from fcmeans import FCM
@@ -55,12 +74,12 @@ class ClusteringWorker(QThread):
                 self.progress.emit(10)
 
                 if self.algorithm == "meanshift":
-                    bandwidth = self.params.get('bandwidth', 0.2)
+                    bandwidth = self.params.get("bandwidth", 0.2)
                     ms = MeanShift(bandwidth=bandwidth, bin_seeding=True)
                     labels = ms.fit_predict(non_white_pixels)
                     clustered_pixels = self.labels_to_colors(labels, exclude_white=True) * 255
                 elif self.algorithm == "fuzzy_cmeans":
-                    n_clusters = int(self.params.get('n_clusters', 8))
+                    n_clusters = int(self.params.get("n_clusters", 8))
                     fcm = FCM(n_clusters=n_clusters)
                     fcm.fit(non_white_pixels)
                     labels = np.argmax(fcm.u, axis=1)
@@ -100,24 +119,23 @@ class ClusteringWorker(QThread):
 
     def get_clusterer(self):
         if self.algorithm == "kmeans":
-            return KMeans(n_clusters=int(self.params.get('n_clusters', 8)))
+            return KMeans(n_clusters=int(self.params.get("n_clusters", 8)))
         elif self.algorithm == "dbscan":
-            return DBSCAN(eps=self.params.get('eps', 0.3),
-                          min_samples=int(self.params.get('min_samples', 5)))
+            return DBSCAN(eps=self.params.get("eps", 0.3), min_samples=int(self.params.get("min_samples", 5)))
         elif self.algorithm == "gmm":
-            return GaussianMixture(n_components=int(self.params.get('n_components', 8)))
+            return GaussianMixture(n_components=int(self.params.get("n_components", 8)))
         elif self.algorithm == "hierarchical":
-            return AgglomerativeClustering(n_clusters=int(self.params.get('n_clusters', 8)))
+            return AgglomerativeClustering(n_clusters=int(self.params.get("n_clusters", 8)))
         elif self.algorithm == "affinity":
-            return AffinityPropagation(damping=self.params.get('damping', 0.5))
+            return AffinityPropagation(damping=self.params.get("damping", 0.5))
         elif self.algorithm == "spectral":
-            return SpectralClustering(n_clusters=int(self.params.get('n_clusters', 8)))
+            return SpectralClustering(n_clusters=int(self.params.get("n_clusters", 8)))
         elif self.algorithm == "birch":
-            return Birch(n_clusters=int(self.params.get('n_clusters', 8)))
+            return Birch(n_clusters=int(self.params.get("n_clusters", 8)))
         elif self.algorithm == "hdbscan":
-            return HDBSCAN(min_cluster_size=int(self.params.get('min_cluster_size', 5)))
+            return HDBSCAN(min_cluster_size=int(self.params.get("min_cluster_size", 5)))
         elif self.algorithm == "fuzzy_cmeans":
-            return FCM(n_clusters=int(self.params.get('n_clusters', 8)))
+            return FCM(n_clusters=int(self.params.get("n_clusters", 8)))
 
     def labels_to_colors(self, labels, exclude_white=False):
         # Create color map for unique labels
@@ -161,11 +179,7 @@ class ImageLabel(QLabel):
 
     def _update_pixmap(self):
         if self._pixmap:
-            scaled_pixmap = self._pixmap.scaled(
-                self.size(),
-                Qt.KeepAspectRatio,
-                Qt.FastTransformation
-            )
+            scaled_pixmap = self._pixmap.scaled(self.size(), Qt.KeepAspectRatio, Qt.FastTransformation)
             super().setPixmap(scaled_pixmap)
 
 
@@ -190,12 +204,12 @@ class AlgorithmTab(QWidget):
             label = QLabel(f"{param_name}: {param_info['default']:.2f}")
 
             slider = QSlider(Qt.Horizontal)
-            slider.setMinimum(int(param_info['min'] * 100))
-            slider.setMaximum(int(param_info['max'] * 100))
-            slider.setValue(int(param_info['default'] * 100))
+            slider.setMinimum(int(param_info["min"] * 100))
+            slider.setMaximum(int(param_info["max"] * 100))
+            slider.setValue(int(param_info["default"] * 100))
             slider.valueChanged.connect(
-                lambda value, label=label, name=param_name:
-                label.setText(f"{name}: {value / 100:.2f}"))
+                lambda value, label=label, name=param_name: label.setText(f"{name}: {value / 100:.2f}")
+            )
 
             self.sliders[param_name] = slider
             slider_layout.addWidget(label)
@@ -223,12 +237,11 @@ class AlgorithmTab(QWidget):
         self.setLayout(layout)
 
     def get_params(self):
-        return {name: slider.value() / 100
-                for name, slider in self.sliders.items()}
+        return {name: slider.value() / 100 for name, slider in self.sliders.items()}
 
     def apply_clustering(self):
         main_window = self.window()
-        if hasattr(main_window, 'current_image'):
+        if hasattr(main_window, "current_image"):
             print(f"Applying {self.algorithm_name} clustering")
             params = self.get_params()
 
@@ -238,11 +251,7 @@ class AlgorithmTab(QWidget):
             # Get the processed image (scaled and blurred)
             processed_image = main_window.get_processed_image(main_window.current_image)
 
-            self.worker = ClusteringWorker(
-                self.algorithm_name,
-                processed_image,
-                params
-            )
+            self.worker = ClusteringWorker(self.algorithm_name, processed_image, params)
             self.worker.progress.connect(self.progress_bar.setValue)
             self.worker.finished.connect(self.update_result)
             self.worker.error.connect(lambda msg: print(f"Error: {msg}"))
@@ -254,8 +263,9 @@ class AlgorithmTab(QWidget):
         result_image = np.clip(result_image, 0, 255).astype(np.uint8)
 
         # Resize the result image to original dimensions
-        result_image = cv2.resize(result_image, (self.original_width, self.original_height),
-                                  interpolation=cv2.INTER_LINEAR)  # Changed to NEAREST
+        result_image = cv2.resize(
+            result_image, (self.original_width, self.original_height), interpolation=cv2.INTER_LINEAR
+        )  # Changed to NEAREST
 
         # Ensure white pixels stay white after resize
         white_mask = np.all(result_image >= 250, axis=2)
@@ -263,8 +273,7 @@ class AlgorithmTab(QWidget):
 
         height, width = result_image.shape[:2]
         bytes_per_line = 3 * width
-        q_img = QImage(result_image.data, width, height,
-                       bytes_per_line, QImage.Format_RGB888)
+        q_img = QImage(result_image.data, width, height, bytes_per_line, QImage.Format_RGB888)
         pixmap = QPixmap.fromImage(q_img)
         self.result_label.setPixmap(pixmap)
 
@@ -282,7 +291,7 @@ class MainWindow(QMainWindow):
         # Enable drop events for the window
         self.setAcceptDrops(True)
 
-        self.setWindowTitle('Image Clustering Tool')
+        self.setWindowTitle("Image Clustering Tool")
         self.setGeometry(100, 100, 1200, 800)
 
         # Main widget and layout
@@ -292,12 +301,12 @@ class MainWindow(QMainWindow):
 
         # Image loading section
         load_layout = QHBoxLayout()
-        self.load_button = QPushButton('Load Image')
+        self.load_button = QPushButton("Load Image")
         self.load_button.clicked.connect(self.load_image)
         load_layout.addWidget(self.load_button)
 
         # Add drop zone label
-        self.drop_label = QLabel('or drag and drop an image here')
+        self.drop_label = QLabel("or drag and drop an image here")
         self.drop_label.setStyleSheet("""
             QLabel {
                 color: #666;
@@ -308,26 +317,26 @@ class MainWindow(QMainWindow):
         load_layout.addWidget(self.drop_label)
 
         # Image processing controls
-        self.scale_label = QLabel('Scale: 100%')
+        self.scale_label = QLabel("Scale: 100%")
         self.scale_slider = QSlider(Qt.Horizontal)
         self.scale_slider.setMinimum(1)
         self.scale_slider.setMaximum(100)
         self.scale_slider.setValue(100)
         self.scale_slider.valueChanged.connect(
-            lambda value: (self.scale_label.setText(f'Scale: {value}%'),
-                           self.update_display_image()))
+            lambda value: (self.scale_label.setText(f"Scale: {value}%"), self.update_display_image())
+        )
         load_layout.addWidget(self.scale_label)
         load_layout.addWidget(self.scale_slider)
 
         # Add blur control
-        self.blur_label = QLabel('Blur: 0')
+        self.blur_label = QLabel("Blur: 0")
         self.blur_slider = QSlider(Qt.Horizontal)
         self.blur_slider.setMinimum(0)
         self.blur_slider.setMaximum(100)  # Max kernel size will be (2*7 + 1) = 15
         self.blur_slider.setValue(0)
         self.blur_slider.valueChanged.connect(
-            lambda value: (self.blur_label.setText(f'Blur: {value}'),
-                           self.update_display_image()))
+            lambda value: (self.blur_label.setText(f"Blur: {value}"), self.update_display_image())
+        )
         load_layout.addWidget(self.blur_label)
         load_layout.addWidget(self.blur_slider)
 
@@ -345,19 +354,19 @@ class MainWindow(QMainWindow):
 
         # Algorithm parameters
         algorithms = {
-            'meanshift': {'bandwidth': {'min': 0.1, 'max': 1.0, 'default': 0.2}},
-            'kmeans': {'n_clusters': {'min': 2, 'max': 160, 'default': 8}},
-            'dbscan': {
-                'eps': {'min': 0.1, 'max': 1.0, 'default': 0.3},
-                'min_samples': {'min': 2, 'max': 20, 'default': 5}
+            "meanshift": {"bandwidth": {"min": 0.1, "max": 1.0, "default": 0.2}},
+            "kmeans": {"n_clusters": {"min": 2, "max": 160, "default": 8}},
+            "dbscan": {
+                "eps": {"min": 0.1, "max": 1.0, "default": 0.3},
+                "min_samples": {"min": 2, "max": 20, "default": 5},
             },
-            'gmm': {'n_components': {'min': 2, 'max': 20, 'default': 8}},
-            'hierarchical': {'n_clusters': {'min': 2, 'max': 20, 'default': 8}},
-            'affinity': {'damping': {'min': 0.5, 'max': 1.0, 'default': 0.5}},
-            'spectral': {'n_clusters': {'min': 2, 'max': 20, 'default': 8}},
-            'birch': {'n_clusters': {'min': 2, 'max': 20, 'default': 8}},
-            'hdbscan': {'min_cluster_size': {'min': 2, 'max': 100, 'default': 5}},
-            'fuzzy_cmeans': {'n_clusters': {'min': 2, 'max': 20, 'default': 8}}
+            "gmm": {"n_components": {"min": 2, "max": 20, "default": 8}},
+            "hierarchical": {"n_clusters": {"min": 2, "max": 20, "default": 8}},
+            "affinity": {"damping": {"min": 0.5, "max": 1.0, "default": 0.5}},
+            "spectral": {"n_clusters": {"min": 2, "max": 20, "default": 8}},
+            "birch": {"n_clusters": {"min": 2, "max": 20, "default": 8}},
+            "hdbscan": {"min_cluster_size": {"min": 2, "max": 100, "default": 5}},
+            "fuzzy_cmeans": {"n_clusters": {"min": 2, "max": 20, "default": 8}},
         }
 
         # Create tabs for each algorithm
@@ -377,7 +386,7 @@ class MainWindow(QMainWindow):
             # Get the first URL
             url = event.mimeData().urls()[0].toLocalFile()
             # Check if it's an image file
-            if url.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.xpm')):
+            if url.lower().endswith((".png", ".jpg", ".jpeg", ".bmp", ".xpm")):
                 event.acceptProposedAction()
                 self.drop_label.setStyleSheet("""
                     QLabel {
@@ -427,54 +436,54 @@ class MainWindow(QMainWindow):
 
     def load_last_directory(self):
         try:
-            config_file = os.path.join(os.path.expanduser('~'), '.watershed_gui_config.json')
+            config_file = os.path.join(os.path.expanduser("~"), ".watershed_gui_config.json")
             if os.path.exists(config_file):
-                with open(config_file, 'r') as f:
+                with open(config_file, "r") as f:
                     config = json.load(f)
-                    return config.get('last_directory', '')
+                    return config.get("last_directory", "")
         except Exception as e:
             print(f"Error loading config: {e}")
-        return ''
+        return ""
 
     def load_last_save_directory(self):
         try:
-            config_file = os.path.join(os.path.expanduser('~'), '.watershed_gui_config.json')
+            config_file = os.path.join(os.path.expanduser("~"), ".watershed_gui_config.json")
             if os.path.exists(config_file):
-                with open(config_file, 'r') as f:
+                with open(config_file, "r") as f:
                     config = json.load(f)
-                    return config.get('last_save_directory', '')
+                    return config.get("last_save_directory", "")
         except Exception as e:
             print(f"Error loading config: {e}")
-        return ''
+        return ""
 
     def save_last_directory(self, directory):
         try:
-            config_file = os.path.join(os.path.expanduser('~'), '.watershed_gui_config.json')
-            config = {'last_directory': directory}
-            if hasattr(self, 'last_save_directory'):
-                config['last_save_directory'] = self.last_save_directory
-            with open(config_file, 'w') as f:
+            config_file = os.path.join(os.path.expanduser("~"), ".watershed_gui_config.json")
+            config = {"last_directory": directory}
+            if hasattr(self, "last_save_directory"):
+                config["last_save_directory"] = self.last_save_directory
+            with open(config_file, "w") as f:
                 json.dump(config, f)
         except Exception as e:
             print(f"Error saving config: {e}")
 
     def save_last_save_directory(self, directory):
         try:
-            config_file = os.path.join(os.path.expanduser('~'), '.watershed_gui_config.json')
-            config = {'last_save_directory': directory}
-            if hasattr(self, 'last_directory'):
-                config['last_directory'] = self.last_directory
-            with open(config_file, 'w') as f:
+            config_file = os.path.join(os.path.expanduser("~"), ".watershed_gui_config.json")
+            config = {"last_save_directory": directory}
+            if hasattr(self, "last_directory"):
+                config["last_directory"] = self.last_directory
+            with open(config_file, "w") as f:
                 json.dump(config, f)
         except Exception as e:
             print(f"Error saving config: {e}")
 
     def setup_shortcuts(self):
-        self.shortcut_apply = QShortcut(QKeySequence('A'), self)
+        self.shortcut_apply = QShortcut(QKeySequence("A"), self)
         self.shortcut_apply.activated.connect(self.trigger_apply)
 
         # Add save shortcut
-        self.shortcut_save = QShortcut(QKeySequence('S'), self)
+        self.shortcut_save = QShortcut(QKeySequence("S"), self)
         self.shortcut_save.activated.connect(self.save_processed_image)
 
     def trigger_apply(self):
@@ -484,8 +493,8 @@ class MainWindow(QMainWindow):
 
     def load_image(self):
         file_name, _ = QFileDialog.getOpenFileName(
-            self, "Open Image File", self.last_directory,
-            "Images (*.png *.xpm *.jpg *.bmp)")
+            self, "Open Image File", self.last_directory, "Images (*.png *.xpm *.jpg *.bmp)"
+        )
 
         if file_name:
             self.current_image_path = file_name
@@ -503,7 +512,7 @@ class MainWindow(QMainWindow):
             self.update_display_image()
 
             # Update the window title with the loaded file name
-            self.setWindowTitle(f'{file_name}')
+            self.setWindowTitle(f"{file_name}")
 
     def get_processed_image(self, image):
         """Apply scale and blur processing to the image"""
@@ -526,7 +535,7 @@ class MainWindow(QMainWindow):
     def save_processed_image(self):
         current_tab = self.tabs.currentWidget()
 
-        if hasattr(self, 'current_image_path'):
+        if hasattr(self, "current_image_path"):
             original_path = pathlib.Path(self.current_image_path)
             new_filename = f"{original_path.stem}_{Timer.timestamp()}.png"
             new_path = original_path.parent / new_filename
@@ -536,10 +545,7 @@ class MainWindow(QMainWindow):
 
             # Adjust scaling to ensure correct width
             scaled_pixmap = pixmap.scaled(
-                current_tab.original_width,
-                current_tab.original_height,
-                Qt.IgnoreAspectRatio,
-                Qt.FastTransformation
+                current_tab.original_width, current_tab.original_height, Qt.IgnoreAspectRatio, Qt.FastTransformation
             )
 
             # Save the image
@@ -554,14 +560,13 @@ class MainWindow(QMainWindow):
             print("No original image loaded. Cannot save.")
 
     def update_display_image(self):
-        if hasattr(self, 'current_image'):
+        if hasattr(self, "current_image"):
             processed_image = self.get_processed_image(self.current_image)
 
             # Convert to QPixmap and display
             height, width = processed_image.shape[:2]
             bytes_per_line = 3 * width
-            q_img = QImage(processed_image.data, width, height,
-                           bytes_per_line, QImage.Format_RGB888)
+            q_img = QImage(processed_image.data, width, height, bytes_per_line, QImage.Format_RGB888)
             self.image_label.setPixmap(QPixmap.fromImage(q_img))
 
 
@@ -572,5 +577,5 @@ def main():
     sys.exit(app.exec_())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

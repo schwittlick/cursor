@@ -3,10 +3,21 @@ import cv2
 import numpy as np
 import json
 import os
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QLabel,
-                             QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog,
-                             QSlider, QComboBox, QGroupBox, QMessageBox,
-                             QProgressDialog)
+from PyQt5.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QWidget,
+    QLabel,
+    QVBoxLayout,
+    QHBoxLayout,
+    QPushButton,
+    QFileDialog,
+    QSlider,
+    QComboBox,
+    QGroupBox,
+    QMessageBox,
+    QProgressDialog,
+)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap
 from scipy import ndimage as ndi
@@ -27,11 +38,7 @@ class ImageLabel(QLabel):
 
     def resizeEvent(self, event):
         if self.original_pixmap:
-            scaled_pixmap = self.original_pixmap.scaled(
-                self.size(),
-                Qt.KeepAspectRatio,
-                Qt.SmoothTransformation
-            )
+            scaled_pixmap = self.original_pixmap.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
             super().setPixmap(scaled_pixmap)
 
 
@@ -48,7 +55,7 @@ class WatershedGUI(QMainWindow):
         self.installEventFilter(self)
 
     def initUI(self):
-        self.setWindowTitle('Watershed Segmentation Tool')
+        self.setWindowTitle("Watershed Segmentation Tool")
         self.setGeometry(100, 100, 1200, 800)
 
         # Create main widget and layout
@@ -62,61 +69,60 @@ class WatershedGUI(QMainWindow):
         control_panel.setFixedWidth(300)
 
         # Load image button
-        load_btn = QPushButton('Load Image', self)
+        load_btn = QPushButton("Load Image", self)
         load_btn.clicked.connect(self.load_image)
         control_layout.addWidget(load_btn)
 
         # Parameters group
-        params_group = QGroupBox('Parameters')
+        params_group = QGroupBox("Parameters")
         params_layout = QVBoxLayout()
 
         # Image scale slider
-        self.scale_slider = self.create_slider(10, 100, 100, 'Image Scale (%):')
-        params_layout.addWidget(QLabel('Image Scale:'))
+        self.scale_slider = self.create_slider(10, 100, 100, "Image Scale (%):")
+        params_layout.addWidget(QLabel("Image Scale:"))
         params_layout.addWidget(self.scale_slider)
-        self.scale_label = QLabel('Scale: 100%')
+        self.scale_label = QLabel("Scale: 100%")
         params_layout.addWidget(self.scale_label)
 
         # Gradient method selector
         self.gradient_method = QComboBox()
-        self.gradient_method.addItems(['sobel', 'scharr', 'prewitt', 'roberts'])
-        params_layout.addWidget(QLabel('Gradient Method:'))
+        self.gradient_method.addItems(["sobel", "scharr", "prewitt", "roberts"])
+        params_layout.addWidget(QLabel("Gradient Method:"))
         params_layout.addWidget(self.gradient_method)
 
         # Min distance slider
-        self.min_distance = self.create_slider(1, 100, 20, 'Min Distance:')
-        params_layout.addWidget(QLabel('Min Distance:'))
+        self.min_distance = self.create_slider(1, 100, 20, "Min Distance:")
+        params_layout.addWidget(QLabel("Min Distance:"))
         params_layout.addWidget(self.min_distance)
-        self.min_distance_label = QLabel('Value: 20')
+        self.min_distance_label = QLabel("Value: 20")
         params_layout.addWidget(self.min_distance_label)
 
         # Min gradient slider
-        self.min_gradient = self.create_slider(1, 50, 10, 'Min Gradient:')
-        params_layout.addWidget(QLabel('Min Gradient:'))
+        self.min_gradient = self.create_slider(1, 50, 10, "Min Gradient:")
+        params_layout.addWidget(QLabel("Min Gradient:"))
         params_layout.addWidget(self.min_gradient)
-        self.min_gradient_label = QLabel('Value: 10')
+        self.min_gradient_label = QLabel("Value: 10")
         params_layout.addWidget(self.min_gradient_label)
 
         # Compactness slider
-        self.compactness = self.create_slider(0, 10, 0, 'Compactness:')
-        params_layout.addWidget(QLabel('Compactness:'))
+        self.compactness = self.create_slider(0, 10, 0, "Compactness:")
+        params_layout.addWidget(QLabel("Compactness:"))
         params_layout.addWidget(self.compactness)
-        self.compactness_label = QLabel('Value: 0.00')
+        self.compactness_label = QLabel("Value: 0.00")
         params_layout.addWidget(self.compactness_label)
 
-        self.blur_slider = self.create_slider(0, 300, 0, 'Blur:')
-        params_layout.addWidget(QLabel('Blur:'))
+        self.blur_slider = self.create_slider(0, 300, 0, "Blur:")
+        params_layout.addWidget(QLabel("Blur:"))
         params_layout.addWidget(self.blur_slider)
-        self.blur_label = QLabel('Blur: 0')
+        self.blur_label = QLabel("Blur: 0")
         params_layout.addWidget(self.blur_label)
 
         # Connect blur slider
         self.blur_slider.valueChanged.connect(self.update_blur)
-        self.blur_slider.valueChanged.connect(
-            lambda v: self.blur_label.setText(f'Blur: {v}'))
+        self.blur_slider.valueChanged.connect(lambda v: self.blur_label.setText(f"Blur: {v}"))
 
         # Process button
-        self.process_btn = QPushButton('Process Image', self)
+        self.process_btn = QPushButton("Process Image", self)
         self.process_btn.clicked.connect(self.update_segmentation)
         self.process_btn.setEnabled(False)
         params_layout.addWidget(self.process_btn)
@@ -144,14 +150,10 @@ class WatershedGUI(QMainWindow):
         layout.addWidget(display_widget)
 
         # Connect slider value changes to label updates
-        self.scale_slider.valueChanged.connect(
-            lambda v: self.scale_label.setText(f'Scale: {v}%'))
-        self.min_distance.valueChanged.connect(
-            lambda v: self.min_distance_label.setText(f'Value: {v}'))
-        self.min_gradient.valueChanged.connect(
-            lambda v: self.min_gradient_label.setText(f'Value: {v}'))
-        self.compactness.valueChanged.connect(
-            lambda v: self.compactness_label.setText(f'Value: {v / 1000:.2f}'))
+        self.scale_slider.valueChanged.connect(lambda v: self.scale_label.setText(f"Scale: {v}%"))
+        self.min_distance.valueChanged.connect(lambda v: self.min_distance_label.setText(f"Value: {v}"))
+        self.min_gradient.valueChanged.connect(lambda v: self.min_gradient_label.setText(f"Value: {v}"))
+        self.compactness.valueChanged.connect(lambda v: self.compactness_label.setText(f"Value: {v / 1000:.2f}"))
 
     def create_slider(self, min_val, max_val, default_val, name):
         slider = QSlider(Qt.Horizontal)
@@ -179,7 +181,7 @@ class WatershedGUI(QMainWindow):
             return
 
         # Store original image if not already stored
-        if not hasattr(self, 'original_image'):
+        if not hasattr(self, "original_image"):
             self.original_image = self.image.copy()
 
         # Get blur value (must be odd)
@@ -197,20 +199,20 @@ class WatershedGUI(QMainWindow):
 
     def load_last_directory(self):
         try:
-            config_file = os.path.join(os.path.expanduser('~'), '.watershed_gui_config.json')
+            config_file = os.path.join(os.path.expanduser("~"), ".watershed_gui_config.json")
             if os.path.exists(config_file):
-                with open(config_file, 'r') as f:
+                with open(config_file, "r") as f:
                     config = json.load(f)
-                    return config.get('last_directory', '')
+                    return config.get("last_directory", "")
         except Exception as e:
             print(f"Error loading config: {e}")
-        return ''
+        return ""
 
     def save_last_directory(self, directory):
         try:
-            config_file = os.path.join(os.path.expanduser('~'), '.watershed_gui_config.json')
-            config = {'last_directory': directory}
-            with open(config_file, 'w') as f:
+            config_file = os.path.join(os.path.expanduser("~"), ".watershed_gui_config.json")
+            config = {"last_directory": directory}
+            with open(config_file, "w") as f:
                 json.dump(config, f)
         except Exception as e:
             print(f"Error saving config: {e}")
@@ -220,10 +222,7 @@ class WatershedGUI(QMainWindow):
     def load_image(self):
         try:
             file_name, _ = QFileDialog.getOpenFileName(
-                self,
-                "Open Image File",
-                self.last_directory,
-                "Images (*.png *.xpm *.jpg *.bmp)"
+                self, "Open Image File", self.last_directory, "Images (*.png *.xpm *.jpg *.bmp)"
             )
 
             if file_name:
@@ -252,11 +251,7 @@ class WatershedGUI(QMainWindow):
                 self.blur_slider.setValue(0)
 
         except Exception as e:
-            QMessageBox.critical(
-                self,
-                "Error",
-                f"Failed to load image: {str(e)}"
-            )
+            QMessageBox.critical(self, "Error", f"Failed to load image: {str(e)}")
 
     def create_progress_dialog(self, max_value):
         progress = QProgressDialog("Processing image...", "Cancel", 0, max_value, self)
@@ -304,11 +299,11 @@ class WatershedGUI(QMainWindow):
             # Step 3: Compute gradient
             progress.setLabelText("Computing gradient...")
             gradient_method = self.gradient_method.currentText()
-            if gradient_method == 'sobel':
+            if gradient_method == "sobel":
                 gradient = filters.sobel(gray)
-            elif gradient_method == 'scharr':
+            elif gradient_method == "scharr":
                 gradient = filters.scharr(gray)
-            elif gradient_method == 'prewitt':
+            elif gradient_method == "prewitt":
                 gradient = filters.prewitt(gray)
             else:  # roberts
                 gradient = filters.roberts(gray)
@@ -320,9 +315,7 @@ class WatershedGUI(QMainWindow):
             # Step 4: Find markers
             progress.setLabelText("Finding markers...")
             coordinates = feature.peak_local_max(
-                gradient,
-                min_distance=self.min_distance.value(),
-                threshold_abs=self.min_gradient.value() / 100.0
+                gradient, min_distance=self.min_distance.value(), threshold_abs=self.min_gradient.value() / 100.0
             )
             marker_image = np.zeros_like(gradient, dtype=bool)
             marker_image[tuple(coordinates.T)] = True
@@ -334,11 +327,7 @@ class WatershedGUI(QMainWindow):
 
             # Step 5: Apply watershed
             progress.setLabelText("Applying watershed...")
-            segments = watershed(
-                -gradient,
-                markers,
-                compactness=self.compactness.value() / 1000.0
-            )
+            segments = watershed(-gradient, markers, compactness=self.compactness.value() / 1000.0)
             progress.setValue(5)
 
             if progress.wasCanceled():
@@ -357,14 +346,9 @@ class WatershedGUI(QMainWindow):
             progress.setValue(6)
 
         except Exception as e:
-            QMessageBox.warning(
-                self,
-                "Warning",
-                f"Error processing image: {str(e)}"
-            )
+            QMessageBox.warning(self, "Warning", f"Error processing image: {str(e)}")
 
-    def parametrized_watershed(self, image, gradient_method='sobel', min_distance=20,
-                               min_gradient=10, compactness=0.0):
+    def parametrized_watershed(self, image, gradient_method="sobel", min_distance=20, min_gradient=10, compactness=0.0):
         # Convert image to float and ensure it's in range [0, 1]
         if image.ndim == 3:
             gray = color.rgb2gray(image.astype(float) / 255.0)
@@ -372,11 +356,11 @@ class WatershedGUI(QMainWindow):
             gray = image.astype(float) / 255.0
 
         # Compute gradient
-        if gradient_method == 'sobel':
+        if gradient_method == "sobel":
             gradient = filters.sobel(gray)
-        elif gradient_method == 'scharr':
+        elif gradient_method == "scharr":
             gradient = filters.scharr(gray)
-        elif gradient_method == 'prewitt':
+        elif gradient_method == "prewitt":
             gradient = filters.prewitt(gray)
         else:  # roberts
             gradient = filters.roberts(gray)
@@ -385,7 +369,7 @@ class WatershedGUI(QMainWindow):
         coordinates = feature.peak_local_max(
             gradient,
             min_distance=min_distance,
-            threshold_abs=min_gradient / 100.0  # Normalize threshold
+            threshold_abs=min_gradient / 100.0,  # Normalize threshold
         )
 
         # Create marker image
@@ -396,11 +380,7 @@ class WatershedGUI(QMainWindow):
         markers = ndi.label(marker_image)[0]
 
         # Apply watershed
-        segments = watershed(
-            -gradient,
-            markers,
-            compactness=compactness
-        )
+        segments = watershed(-gradient, markers, compactness=compactness)
 
         return segments, markers, gradient
 
@@ -423,8 +403,7 @@ class WatershedGUI(QMainWindow):
         try:
             height, width, channel = image.shape
             bytesPerLine = 3 * width
-            qImg = QImage(image.data, width, height, bytesPerLine,
-                          QImage.Format_RGB888).copy()
+            qImg = QImage(image.data, width, height, bytesPerLine, QImage.Format_RGB888).copy()
             label.setScaledPixmap(QPixmap.fromImage(qImg))
 
         except Exception as e:
@@ -443,5 +422,5 @@ def main():
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -7,13 +7,14 @@ from enum import Enum
 import rtmidi
 from rtmidi.midiutil import open_midiinput
 
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
+logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.DEBUG)
 
 
 class MidiqueKnob(Enum):
     """
     ColumnNRRowNR (e.g. C0R2)
     """
+
     C0R0 = 32
     C0R1 = 33
     C0R2 = 34
@@ -151,7 +152,7 @@ class Midique:
         self.thread.start()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     lp = Midique()
     lp.listen()
     # lp.close()

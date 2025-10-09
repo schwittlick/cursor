@@ -1,5 +1,5 @@
-import math
 import logging
+import math
 
 import arcade.color
 
@@ -51,13 +51,7 @@ class Boilerplate(RealtimeRenderer):
 
         c.rot(math.pi / 2)
 
-        wrapper = ExportWrapper(
-            c,
-            PlotterType.HP_7550A_A3,
-            25,
-            f"{self.title}",
-            "version123",
-            keep_aspect_ratio=False)
+        wrapper = ExportWrapper(c, PlotterType.HP_7550A_A3, 25, f"{self.title}", "version123", keep_aspect_ratio=False)
         wrapper.fit()
         wrapper.ex()
 

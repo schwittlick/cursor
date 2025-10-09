@@ -65,8 +65,11 @@ class JpegRenderer(BaseRenderer):
             self.img_draw.line(points, fill=path.color, width=int(path.width), joint="curve")
 
     def render_points(self, points: list[Position], scale: float) -> Image:
-        img: Image = Image.new("RGBA", (self.img.width, self.img.height),
-                               (self._background[0], self._background[1], self._background[2], 0))
+        img: Image = Image.new(
+            "RGBA",
+            (self.img.width, self.img.height),
+            (self._background[0], self._background[1], self._background[2], 0),
+        )
         img_draw = ImageDraw.ImageDraw(img)
 
         for point in points:
@@ -90,7 +93,8 @@ class JpegRenderer(BaseRenderer):
                         ((point.x - rad) * scale, (point.y - rad) * scale),
                         ((point.x + rad) * scale, (point.y + rad) * scale),
                     ],
-                    fill=color)
+                    fill=color,
+                )
         return img
 
     def render_all_points(self, scale: float = 1.0):

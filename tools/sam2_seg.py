@@ -21,9 +21,9 @@ def get_gpu_info():
 
     props = torch.cuda.get_device_properties(0)
     return {
-        'name': props.name,
-        'compute_capability': f"{props.major}.{props.minor}",
-        'total_memory': props.total_memory / 1024 ** 3  # Convert to GB
+        "name": props.name,
+        "compute_capability": f"{props.major}.{props.minor}",
+        "total_memory": props.total_memory / 1024**3,  # Convert to GB
     }
 
 
@@ -82,17 +82,18 @@ np.random.seed(3)
 def show_anns(anns, borders=True):
     if len(anns) == 0:
         return
-    sorted_anns = sorted(anns, key=(lambda x: x['area']), reverse=True)
+    sorted_anns = sorted(anns, key=(lambda x: x["area"]), reverse=True)
     ax = plt.gca()
     ax.set_autoscale_on(False)
-    img = np.ones((sorted_anns[0]['segmentation'].shape[0], sorted_anns[0]['segmentation'].shape[1], 4))
+    img = np.ones((sorted_anns[0]["segmentation"].shape[0], sorted_anns[0]["segmentation"].shape[1], 4))
     img[:, :, 3] = 0
     for ann in sorted_anns:
-        m = ann['segmentation']
+        m = ann["segmentation"]
         color_mask = np.concatenate([np.random.random(3), [0.5]])
         img[m] = color_mask
         if borders:
             import cv2
+
             contours, _ = cv2.findContours(m.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
             contours = [cv2.approxPolyDP(contour, epsilon=0.01, closed=True) for contour in contours]
             cv2.drawContours(img, contours, -1, (0, 0, 1, 0.4), thickness=1)
@@ -133,16 +134,16 @@ def run_the_thing(image_path):
     plt.figure(figsize=(20, 20))
     plt.imshow(white_image)
     show_anns(masks2)
-    plt.axis('off')
+    plt.axis("off")
     # plt.show()
 
-    plt.savefig(DataDirHandler().png("sam2") / f'{image_path.stem}_{Timer.timestamp()}.png')
+    plt.savefig(DataDirHandler().png("sam2") / f"{image_path.stem}_{Timer.timestamp()}.png")
 
 
 # Set up argument parser
-parser = argparse.ArgumentParser(description='Process an image with SAM2.')
-parser.add_argument('--image', type=str, help='Path to the image file')
-parser.add_argument('--loops', type=int, default=1, help='how many times to run')
+parser = argparse.ArgumentParser(description="Process an image with SAM2.")
+parser.add_argument("--image", type=str, help="Path to the image file")
+parser.add_argument("--loops", type=int, default=1, help="how many times to run")
 args = parser.parse_args()
 
 # Your image loading and processing code...
@@ -155,8 +156,8 @@ if args.image:
     run_the_thing(image_path)
 else:
     # Use a random image from the folder
-    image_folder = Path('/home/marcel/Downloads/sam2/')
-    jpg_files = list(image_folder.glob('*.jpg'))
+    image_folder = Path("/home/marcel/Downloads/sam2/")
+    jpg_files = list(image_folder.glob("*.jpg"))
     if not jpg_files:
         raise ValueError(f"No jpg files found in {image_folder}")
 

@@ -2,9 +2,17 @@ import sys
 import cv2
 import numpy as np
 import random
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QComboBox,
-                             QVBoxLayout, QHBoxLayout, QWidget, QPushButton,
-                             QFileDialog)
+from PyQt5.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QLabel,
+    QComboBox,
+    QVBoxLayout,
+    QHBoxLayout,
+    QWidget,
+    QPushButton,
+    QFileDialog,
+)
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import Qt
 
@@ -16,25 +24,25 @@ class ImageColorReplacer(QMainWindow):
 
         # Available colors (RGB format)
         self.colors = {
-            'Death Black': (0, 0, 0),
-            'Bogotà White': (255, 255, 255),
-            'Flash Yellow': (255, 238, 0),
-            'Sunray Yellow': (255, 178, 91),
-            'Clockwork Orange': (254, 100, 7),
-            'Ferrari Red': (207, 37, 37),
-            'Piggy Pink': (236, 122, 178),
-            'Jellyfish Fuchsia': (255, 34, 155),
-            'Goldrake Purple': (67, 50, 154),
-            'Iceberg Blue': (80, 180, 220),
-            'Diving Blue': (0, 45, 176),
-            'Miami Green': (71, 255, 185),
-            'Obitory Green': (0, 186, 116),
-            'Laser Green': (109, 195, 75),
-            'Burning Chrome': (207, 207, 207),
-            'Klondike Gold': (154, 119, 48),
-            'Neon Orange': (255, 125, 102),
-            'Neon Fuchsia': (255, 81, 181),
-            'Neon Green': (0, 249, 0),
+            "Death Black": (0, 0, 0),
+            "Bogotà White": (255, 255, 255),
+            "Flash Yellow": (255, 238, 0),
+            "Sunray Yellow": (255, 178, 91),
+            "Clockwork Orange": (254, 100, 7),
+            "Ferrari Red": (207, 37, 37),
+            "Piggy Pink": (236, 122, 178),
+            "Jellyfish Fuchsia": (255, 34, 155),
+            "Goldrake Purple": (67, 50, 154),
+            "Iceberg Blue": (80, 180, 220),
+            "Diving Blue": (0, 45, 176),
+            "Miami Green": (71, 255, 185),
+            "Obitory Green": (0, 186, 116),
+            "Laser Green": (109, 195, 75),
+            "Burning Chrome": (207, 207, 207),
+            "Klondike Gold": (154, 119, 48),
+            "Neon Orange": (255, 125, 102),
+            "Neon Fuchsia": (255, 81, 181),
+            "Neon Green": (0, 249, 0),
         }
 
         self.image = None
@@ -110,15 +118,13 @@ class ImageColorReplacer(QMainWindow):
         self.process_image()
 
     def load_image(self):
-        file_name, _ = QFileDialog.getOpenFileName(self, "Open Image", "",
-                                                   "Image Files (*.png *.jpg *.jpeg *.bmp)")
+        file_name, _ = QFileDialog.getOpenFileName(self, "Open Image", "", "Image Files (*.png *.jpg *.jpeg *.bmp)")
         if file_name:
             # Load image with OpenCV
             self.image = cv2.imread(file_name)
             if self.image is not None:
                 # Scale image up 2x
-                self.image = cv2.resize(self.image, None, fx=2, fy=2,
-                                        interpolation=cv2.INTER_NEAREST_EXACT)
+                self.image = cv2.resize(self.image, None, fx=2, fy=2, interpolation=cv2.INTER_NEAREST_EXACT)
                 self.process_image()
 
     def process_image(self):
@@ -149,23 +155,20 @@ class ImageColorReplacer(QMainWindow):
         pixmap = QPixmap.fromImage(q_image)
 
         # Scale pixmap to fit label while maintaining aspect ratio
-        scaled_pixmap = pixmap.scaled(self.image_label.size(),
-                                      Qt.KeepAspectRatio,
-                                      Qt.SmoothTransformation)
+        scaled_pixmap = pixmap.scaled(self.image_label.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.image_label.setPixmap(scaled_pixmap)
 
     def save_image(self):
         if self.processed_image is None:
             return
 
-        file_name, _ = QFileDialog.getSaveFileName(self, "Save Image", "",
-                                                   "PNG Files (*.png);;JPEG Files (*.jpg)")
+        file_name, _ = QFileDialog.getSaveFileName(self, "Save Image", "", "PNG Files (*.png);;JPEG Files (*.jpg)")
         if file_name:
             bgr_image = cv2.cvtColor(self.processed_image, cv2.COLOR_RGB2BGR)
             cv2.imwrite(file_name, bgr_image)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = ImageColorReplacer()
     window.show()

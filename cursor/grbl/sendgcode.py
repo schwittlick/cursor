@@ -79,9 +79,11 @@ class GCODEStreamer:
                                 pos_x, pos_y, pos_z = self.current_position()
 
                                 times = 0
-                                while not math.isclose(target_x, pos_x) or \
-                                        not math.isclose(target_y, pos_y) or \
-                                        not math.isclose(target_z, pos_z):
+                                while (
+                                    not math.isclose(target_x, pos_x)
+                                    or not math.isclose(target_y, pos_y)
+                                    or not math.isclose(target_z, pos_z)
+                                ):
                                     pos_x, pos_y, pos_z = self.current_position()
                                     times += 1
                 pbar.update(1)
@@ -113,7 +115,7 @@ class GCODEStreamer:
         return is_ok.startswith("ok"), is_ok
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """
     in order two draw a real 3d path (x, y, z) the hpgl parser needs to be rewritten
     also the hpgl parser/sender
@@ -130,12 +132,12 @@ if __name__ == '__main__':
     $J=X10.0 Y-1.5
     """
     parser = ArgumentParser()
-    parser.add_argument('port')
-    parser.add_argument('psu_port')
-    parser.add_argument('file')
+    parser.add_argument("port")
+    parser.add_argument("psu_port")
+    parser.add_argument("file")
     args = parser.parse_args()
 
-    gcode = open(args.file, 'r').readlines()
+    gcode = open(args.file, "r").readlines()
     plotter = serial.Serial(args.port, 115200)
     psu = PSU(args.psu_port)
 

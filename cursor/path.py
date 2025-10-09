@@ -34,16 +34,14 @@ from cursor.timer import timing
 
 
 class Path:
-    def __init__(
-            self, vertices: list[Position] | None = None, properties: dict | None = None
-    ) -> None:
+    def __init__(self, vertices: list[Position] | None = None, properties: dict | None = None) -> None:
         self._vertices: list[Position] = []
         self.properties = {
             Property.LAYER: "layer1",
             Property.COLOR: (0, 0, 0),
             Property.WIDTH: 1,
             Property.TAGS: [],
-            Property.PEN_SELECT: 1
+            Property.PEN_SELECT: 1,
         }
 
         if vertices is not None:
@@ -58,11 +56,7 @@ class Path:
                 self.width = 1
 
     def __repr__(self) -> str:
-        rep = (
-            f"vertices: {len(self.vertices)} "
-            f"bb: {self.bb()}"
-            f"properties: {self.properties}"
-        )
+        rep = f"vertices: {len(self.vertices)} bb: {self.bb()}properties: {self.properties}"
         return rep
 
     def __eq__(self, other: Path) -> bool:
@@ -312,10 +306,7 @@ class Path:
         self.vertices.clear()
 
     def copy(self) -> Path:
-        return Path(
-            None if self.empty() else copy.deepcopy(
-                self.vertices), copy.deepcopy(self.properties)
-        )
+        return Path(None if self.empty() else copy.deepcopy(self.vertices), copy.deepcopy(self.properties))
 
     def reverse(self) -> None:
         self.vertices.reverse()
@@ -466,9 +457,7 @@ class Path:
 
         self.translate(bb.x, bb.y)
 
-    def morph(
-            self, start: Position | tuple[float, float], end: Position | tuple[float, float]
-    ) -> Path:
+    def morph(self, start: Position | tuple[float, float], end: Position | tuple[float, float]) -> Path:
         if isinstance(start, Position) and isinstance(end, Position):
             start = (start.x, start.y)
             end = (end.x, end.y)
@@ -499,28 +488,18 @@ class Path:
 
         new_start_to_end = np.subtract(new_end_np, new_start_np)
 
-        current_start_to_end = current_start_to_end / np.linalg.norm(
-            current_start_to_end
-        )
+        current_start_to_end = current_start_to_end / np.linalg.norm(current_start_to_end)
         new_start_to_end = new_start_to_end / np.linalg.norm(new_start_to_end)
 
         try:
-            angle = np.arccos(
-                np.clip(
-                    np.dot(current_start_to_end, new_start_to_end), -
-                    math.pi, math.pi
-                )
-            )
+            angle = np.arccos(np.clip(np.dot(current_start_to_end, new_start_to_end), -math.pi, math.pi))
         except RuntimeWarning as w:
             logging.error(w)
 
         # acos can't properly calculate angle more than 180°.
         # solution taken from here:
         # http://www.gamedev.net/topic/556500-angle-between-vectors/
-        if (
-                current_start_to_end[0] * new_start_to_end[1]
-                < current_start_to_end[1] * new_start_to_end[0]
-        ):
+        if current_start_to_end[0] * new_start_to_end[1] < current_start_to_end[1] * new_start_to_end[0]:
             angle = 2 * math.pi - angle
 
         for p in path.vertices:
@@ -547,18 +526,16 @@ class Path:
                 compareA = diffLAx * line1Start.y - diffLAy * line1Start.x
                 compareB = diffLBx * line2Start.y - diffLBy * line2Start.x
                 if ((diffLAx * line2Start.y - diffLAy * line2Start.x) < compareA) ^ (
-                        (diffLAx * line2End.y - diffLAy * line2End.x) < compareA
+                    (diffLAx * line2End.y - diffLAy * line2End.x) < compareA
                 ) and ((diffLBx * line1Start.y - diffLBy * line1Start.x) < compareB) ^ (
-                        (diffLBx * line1End.y - diffLBy * line1End.x) < compareB
+                    (diffLBx * line1End.y - diffLBy * line1End.x) < compareB
                 ):
                     ok = (diffLAx * diffLBy) - (diffLAy * diffLBx)
                     if ok == 0:
                         ok = 0.01
                     lDetDivInv = 1 / ok
-                    i_x = -((diffLAx * compareB) -
-                            (compareA * diffLBx)) * lDetDivInv
-                    i_y = -((diffLAy * compareB) -
-                            (compareA * diffLBy)) * lDetDivInv
+                    i_x = -((diffLAx * compareB) - (compareA * diffLBx)) * lDetDivInv
+                    i_y = -((diffLAy * compareB) - (compareA * diffLBy)) * lDetDivInv
 
                     return True, i_x, i_y
 
@@ -574,12 +551,12 @@ class Path:
                 line2Start = self[p2]
                 line2End = self[p2 + 1]
 
-                intersection = Path.intersect_segment(line1Start.as_tuple(), line1End.as_tuple(),
-                                                      line2Start.as_tuple(), line2End.as_tuple())
+                intersection = Path.intersect_segment(
+                    line1Start.as_tuple(), line1End.as_tuple(), line2Start.as_tuple(), line2End.as_tuple()
+                )
 
                 if intersection:
-                    intersection_points.append(
-                        Position.from_tuple(intersection))
+                    intersection_points.append(Position.from_tuple(intersection))
 
         return intersection_points
 
@@ -644,7 +621,7 @@ class Path:
             return []  # Not enough points to form a line
 
         if self.vertices[0].x == self.vertices[-1].x:
-            general_slope = float('inf')
+            general_slope = float("inf")
         else:
             general_slope = cal_slope(self.vertices[-1], self.vertices[0])
 
@@ -652,17 +629,16 @@ class Path:
         for i in range(len(self.vertices) - 1):
             if self.vertices[i].x == self.vertices[i + 1].x:
                 # Simplify by treating vertical segments as having zero slope
-                segment_slope = float('inf')
+                segment_slope = float("inf")
             else:
-                segment_slope = cal_slope(
-                    self.vertices[i + 1], self.vertices[i])
+                segment_slope = cal_slope(self.vertices[i + 1], self.vertices[i])
 
             # If both slopes are infinite, the normalized slope is considered 0 (parallel lines)
-            if general_slope == float('inf') and segment_slope == float('inf'):
+            if general_slope == float("inf") and segment_slope == float("inf"):
                 normalized_slope = 0
-            elif general_slope == float('inf'):
+            elif general_slope == float("inf"):
                 # If only the general slope is infinite, cannot normalize; set as infinite
-                normalized_slope = float('inf')
+                normalized_slope = float("inf")
             else:
                 normalized_slope = segment_slope - general_slope
 
@@ -690,8 +666,7 @@ class Path:
     def __differential_entropy_wrap(self, values: list[float]) -> float:
         window_length = None  # max(int(len(values) * 0.1), 1)
         if len(values) < 5:
-            logging.error(
-                "Can't compute window_length for such small list of values..")
+            logging.error("Can't compute window_length for such small list of values..")
         try:
             de = stats.differential_entropy(
                 values,
@@ -738,15 +713,9 @@ class Path:
         """
         prev = Position()
 
-        self.vertices = [
-            prev := v for v in self.vertices if prev.x != v.x or prev.y != v.y
-        ]  # noqa: F841
-        self.vertices = [
-            prev := v for v in self.vertices if v.x is not None and v.y is not None
-        ]  # noqa: F841
-        self.vertices = [
-            prev := v for v in self.vertices if v.x is not np.nan and v.y is not np.nan
-        ]  # noqa: F841
+        self.vertices = [prev := v for v in self.vertices if prev.x != v.x or prev.y != v.y]  # noqa: F841
+        self.vertices = [prev := v for v in self.vertices if v.x is not None and v.y is not None]  # noqa: F841
+        self.vertices = [prev := v for v in self.vertices if v.x is not np.nan and v.y is not np.nan]  # noqa: F841
         self.vertices = [
             prev := v  # noqa: F841
             for v in self.vertices
@@ -757,9 +726,7 @@ class Path:
         """
         removes points larger than 1.0
         """
-        self.vertices = [
-            v for v in self.vertices if 1.0 >= v.x >= 0.0 and 1.0 >= v.y >= 0.0
-        ]
+        self.vertices = [v for v in self.vertices if 1.0 >= v.x >= 0.0 and 1.0 >= v.y >= 0.0]
 
     def similarity(self, _path: Path) -> float:
         """
@@ -869,26 +836,23 @@ class Path:
 
     def _extended_line(self, a: Position, b: Position, delta_a: float, delta_b: float) -> list[list[float]]:
         theta = math.atan2(b.y - a.y, b.x - a.x)
-        new_a = [a.x - (delta_a * math.cos(theta)),
-                 a.y - (delta_a * math.sin(theta))]
-        new_b = [b.x + (delta_b * math.cos(theta)),
-                 b.y + (delta_b * math.sin(theta))]
+        new_a = [a.x - (delta_a * math.cos(theta)), a.y - (delta_a * math.sin(theta))]
+        new_b = [b.x + (delta_b * math.cos(theta)), b.y + (delta_b * math.sin(theta))]
 
         return [new_a, new_b]
 
     def _offset_angle(
-            self,
-            p1: Position,
-            p2: Position,
-            p3: Position,
-            offset: float,
+        self,
+        p1: Position,
+        p2: Position,
+        p3: Position,
+        offset: float,
     ) -> Path:
         a = p2.distance(p3)
         b = p1.distance(p2)
         c = p3.distance(p1)
 
-        acos_arg = (math.pow(a, 2) + math.pow(b, 2) -
-                    math.pow(c, 2)) / (2 * a * b)
+        acos_arg = (math.pow(a, 2) + math.pow(b, 2) - math.pow(c, 2)) / (2 * a * b)
         if abs(acos_arg) > 1:
             acos_arg = 0
         gamma = math.acos(acos_arg)
@@ -901,9 +865,7 @@ class Path:
         if cp[2] < 0:
             corner_offset = corner_offset * -1
 
-        ac_offset = self._extended_line(
-            ac_offset.vertices[0], ac_offset.vertices[1], 0, corner_offset
-        )
+        ac_offset = self._extended_line(ac_offset.vertices[0], ac_offset.vertices[1], 0, corner_offset)
         cb_offset = self._parallel(p2, p3, offset)
 
         out_path = Path()
@@ -926,9 +888,7 @@ class Path:
         for i in range(0, len(c) - 2, 1):
             j = i + 1
             k = i + 2
-            offset_angle = self._offset_angle(
-                c.vertices[i], c.vertices[j], c.vertices[k], -offset
-            )
+            offset_angle = self._offset_angle(c.vertices[i], c.vertices[j], c.vertices[k], -offset)
             if i == 0:
                 offset_path.add(offset_angle[0].x, offset_angle[0].y)
                 offset_path.add(offset_angle[1].x, offset_angle[1].y)
@@ -971,10 +931,7 @@ class Path:
 
         return return_paths
 
-    def parallel_offset(
-            self, dist: float, join_style=JOIN_STYLE.mitre, mitre_limit: float = 1.0
-    ) -> list[Path]:
-
+    def parallel_offset(self, dist: float, join_style=JOIN_STYLE.mitre, mitre_limit: float = 1.0) -> list[Path]:
         return_paths = []
 
         line = LineString(self.as_tuple_list())
@@ -1030,11 +987,7 @@ class Path:
             coords_list.append(non_itersecting_ls)
             # coords_list.extend(non_itersecting_ls.coords)
 
-        return [
-            item
-            for item, count in collections.Counter(coords_list).items()
-            if count > 1
-        ]
+        return [item for item, count in collections.Counter(coords_list).items() if count > 1]
         # except TypeError as te:
         #    log.warn("Couldnt calculate intersection points")
         #    log.warn(f"{te}")
@@ -1070,8 +1023,7 @@ class Path:
                 if right_position < n:
                     cur.translate(*self.vertices[right_position].as_tuple())
                     sum += weights[j]
-                result.vertices[i].translate(
-                    cur.x * weights[j], cur.y * weights[j])
+                result.vertices[i].translate(cur.x * weights[j], cur.y * weights[j])
             result.vertices[i].x = result.vertices[i].x / sum
             result.vertices[i].y = result.vertices[i].y / sum
 
@@ -1080,7 +1032,9 @@ class Path:
     def downsample(self, dist: float) -> None:
         prev = Position()
         self.vertices = [
-            prev := v for v in self.vertices if v.distance(prev) > dist  # noqa: F841
+            prev := v
+            for v in self.vertices
+            if v.distance(prev) > dist  # noqa: F841
         ]
 
     def resampled(self, target_dist: float) -> Path:
@@ -1089,7 +1043,7 @@ class Path:
         for i in range(1, len(self)):
             dx = self[i].x - self[i - 1].x
             dy = self[i].y - self[i - 1].y
-            dist = np.sqrt(dx ** 2 + dy ** 2)
+            dist = np.sqrt(dx**2 + dy**2)
             distances.append(distances[-1] + dist)
 
         # Calculate number of intervals based on target_distance
@@ -1097,8 +1051,7 @@ class Path:
         num_intervals = int(total_distance / target_dist)
 
         # Determine the new distances for interpolation
-        new_distances = [0.0] + \
-                        [i * target_dist for i in range(1, num_intervals + 1)]
+        new_distances = [0.0] + [i * target_dist for i in range(1, num_intervals + 1)]
         if new_distances[-1] > total_distance:
             new_distances.pop()
 
@@ -1112,7 +1065,7 @@ class Path:
             new_point = Position(x, y)  # Create a new point with interpolated coordinates
 
             # Example for a property called 'color'
-            if 'color' in self[0].properties.keys():
+            if "color" in self[0].properties.keys():
                 # For RGB colors (assuming color is a tuple of 3 values)
                 r_values = [p.color[0] for p in self]
                 g_values = [p.color[1] for p in self]
@@ -1145,15 +1098,11 @@ class Path:
         return pa
 
     def transform(self, bb: BoundingBox, out: BoundingBox) -> None:
-        fn = misc.transformFn(
-            (bb.x, bb.y), (bb.x2, bb.y2), (out.x, out.y), (out.x2, out.y2)
-        )
+        fn = misc.transformFn((bb.x, bb.y), (bb.x2, bb.y2), (out.x, out.y), (out.x2, out.y2))
         self.vertices = list(map(fn, self.vertices))
 
     def transformed(self, bb: BoundingBox, out: BoundingBox) -> Path:
-        fn = misc.transformFn(
-            (bb.x, bb.y), (bb.x2, bb.y2), (out.x, out.y), (out.x2, out.y2)
-        )
+        fn = misc.transformFn((bb.x, bb.y), (bb.x2, bb.y2), (out.x, out.y), (out.x2, out.y2))
         pa = Path()
         pa.properties = self.properties
         pa.vertices = list(map(fn, self.vertices))
@@ -1161,16 +1110,13 @@ class Path:
 
     def simplify(self, e: float = 1.0) -> None:
         # before = len(self.vertices)
-        self.vertices = Path.from_tuple_list(
-            ramer_douglas_peucker.rdp(self.as_tuple_list(), e)
-        ).vertices
+        self.vertices = Path.from_tuple_list(ramer_douglas_peucker.rdp(self.as_tuple_list(), e)).vertices
         # logging.info(f"Path::simplify({e}) reduced points {before} -> {len(self.vertices)}")
 
     @staticmethod
-    def intersect_segment(p1: tuple[float, float],
-                          p2: tuple[float, float],
-                          p3: tuple[float, float],
-                          p4: tuple[float, float]) -> tuple[float, float] | None:
+    def intersect_segment(
+        p1: tuple[float, float], p2: tuple[float, float], p3: tuple[float, float], p4: tuple[float, float]
+    ) -> tuple[float, float] | None:
         # https://gist.github.com/kylemcdonald/6132fc1c29fd3767691442ba4bc84018
         x1, y1 = p1
         x2, y2 = p2
@@ -1199,15 +1145,11 @@ class Path:
         if not any_inside:
             return
 
-        def get_intersection(
-                segment: Path, paths: list[tuple[float, float, float, float]]
-        ) -> tuple[float, float]:
+        def get_intersection(segment: Path, paths: list[tuple[float, float, float, float]]) -> tuple[float, float]:
             for p in paths:
                 tup1 = segment[0].as_tuple()
                 tup2 = segment[1].as_tuple()
-                intersect = Path.intersect_segment(
-                    (p[0], p[1]), (p[2], p[3]), tup1, tup2
-                )
+                intersect = Path.intersect_segment((p[0], p[1]), (p[2], p[3]), tup1, tup2)
                 if intersect is not None:
                     return intersect[0], intersect[1]
             raise Exception("no intersection with anything")
@@ -1321,8 +1263,7 @@ class Path:
         f_perp_vector = Position(-f_direction_vector.y, f_direction_vector.x)
 
         # normalize perpendicular direction vector
-        mag = math.sqrt((f_perp_vector.x * f_perp_vector.x) +
-                        (f_perp_vector.y * f_perp_vector.y))
+        mag = math.sqrt((f_perp_vector.x * f_perp_vector.x) + (f_perp_vector.y * f_perp_vector.y))
         ray_dir = Position(f_perp_vector.x / mag, f_perp_vector.y / mag)
 
         perc = 0.0
@@ -1344,8 +1285,8 @@ class Path:
                 end = self[p + 1]
 
                 intersection = line_intersection(
-                    ray_origin.as_array(), ray_dir.as_array(),
-                    start.as_array(), end.as_array())
+                    ray_origin.as_array(), ray_dir.as_array(), start.as_array(), end.as_array()
+                )
 
                 if intersection:
                     intersections.add(Position.from_array(intersection))
@@ -1376,8 +1317,7 @@ class Path:
         f_perp_vector = Position(-f_direction_vector.y, f_direction_vector.x)
 
         # normalize perpendicular direction vector
-        mag = math.sqrt((f_perp_vector.x * f_perp_vector.x) +
-                        (f_perp_vector.y * f_perp_vector.y))
+        mag = math.sqrt((f_perp_vector.x * f_perp_vector.x) + (f_perp_vector.y * f_perp_vector.y))
         ray_dir = Position(f_perp_vector.x / mag, f_perp_vector.y / mag)
 
         all_intersections = []
@@ -1398,8 +1338,8 @@ class Path:
                 end = self[p + 1]
 
                 intersection = line_intersection(
-                    ray_origin.as_array(), ray_dir.as_array(),
-                    start.as_array(), end.as_array())
+                    ray_origin.as_array(), ray_dir.as_array(), start.as_array(), end.as_array()
+                )
 
                 if intersection:
                     intersections.add(Position.from_array(intersection))

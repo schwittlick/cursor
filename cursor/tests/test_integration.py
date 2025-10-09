@@ -20,6 +20,7 @@ def test_exporter():
         device.PlotterType.HP_DM_RX_PLUS_A2,
         30,
         "simple_rect_example",
-        "simple_rect", )
+        "simple_rect",
+    )
     wrapper.fit()
     wrapper.ex()

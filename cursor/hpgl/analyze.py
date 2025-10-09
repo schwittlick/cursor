@@ -115,9 +115,7 @@ class HPGLAnalyzer:
         # 80 is the maximum speed on some machines. this is not really accurate in the generally
         data.total_time_to_plot = (collection.calc_pen_up_distance(40) / 100) / 80
         for pa in collection:
-            velocity = (
-                pa.velocity if pa.velocity else 1.0
-            )  # this here assumes a hp7550a
+            velocity = pa.velocity if pa.velocity else 1.0  # this here assumes a hp7550a
             data.total_time_to_plot += ((pa.distance / 40) / 100) / velocity
 
         split_by_pens = {key + 1: Collection() for key in range(8)}
@@ -128,9 +126,7 @@ class HPGLAnalyzer:
             total_pen_down = int(val.calc_pen_down_distance(40) / 1000)
             numer_of_dots = calc_number_of_dots(val)
 
-            data.data_per_pen[Pen(key)] = PenData(
-                total_pen_down, total_pen_up, numer_of_dots
-            )
+            data.data_per_pen[Pen(key)] = PenData(total_pen_down, total_pen_up, numer_of_dots)
 
         return data
 

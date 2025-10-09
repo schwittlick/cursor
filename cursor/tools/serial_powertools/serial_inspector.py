@@ -121,7 +121,7 @@ class SerialInspector:
 
         path_hpgl_file = dpg.get_value("file_path_text")
         logging.info(f"Sending {path_hpgl_file}")
-        hpgl_text = ''.join(open(path_hpgl_file, 'r', encoding='utf-8').readlines())
+        hpgl_text = "".join(open(path_hpgl_file, "r", encoding="utf-8").readlines())
 
         commands = tokenizer(hpgl_text)
 
@@ -155,9 +155,9 @@ class SerialInspector:
 
         message = "OI;"
 
-        self.bruteforce_threads = run_brute_force([serial_port_string], baud_rates, parities, stop_bits, xonxoff,
-                                                  byte_sizes, message,
-                                                  timeout)
+        self.bruteforce_threads = run_brute_force(
+            [serial_port_string], baud_rates, parities, stop_bits, xonxoff, byte_sizes, message, timeout
+        )
 
     def stop_bruteforce_progress(self):
         for thread in self.bruteforce_threads:

@@ -35,9 +35,7 @@ async def query_paths(query: PathQuery):
     filtered_paths = []
     for collection in loaded_collections:
         for path in collection:
-            if len(path) >= query.min_vertices and (
-                query.max_vertices is None or len(path) <= query.max_vertices
-            ):
+            if len(path) >= query.min_vertices and (query.max_vertices is None or len(path) <= query.max_vertices):
                 filtered_paths.append(path)
             if len(filtered_paths) >= query.limit:
                 break
@@ -45,12 +43,9 @@ async def query_paths(query: PathQuery):
             break
 
     if not filtered_paths:
-        raise HTTPException(
-            status_code=404, detail="No paths found matching the criteria"
-        )
+        raise HTTPException(status_code=404, detail="No paths found matching the criteria")
 
-    result_collection = Collection.from_path_list(
-        filtered_paths[: query.limit])
+    result_collection = Collection.from_path_list(filtered_paths[: query.limit])
 
     # Convert paths to a serializable format
     serialized_paths = [

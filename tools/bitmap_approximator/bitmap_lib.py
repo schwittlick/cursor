@@ -48,7 +48,8 @@ def export_collection(coll, plotter, idx):
         f"bitmap_approximator_double_{idx}",
         keep_aspect_ratio=True,
         optimize=True,
-        export_jpg_preview=True)
+        export_jpg_preview=True,
+    )
     wrapper.ex()
 
 

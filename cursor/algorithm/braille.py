@@ -36,7 +36,7 @@ class BrailleTranslator:
         # incoming matrix needs to be 2x3 e.g. [[1, 0, 1], [0, 1, 0]]
         # concatenates the incoming matrix and reverses it
         # like that we end up with an index in the mapping string
-        return int(''.join([str(int(j)) for i in matrix for j in i])[::-1], 2)
+        return int("".join([str(int(j)) for i in matrix for j in i])[::-1], 2)
 
     def to_braille(self, image: Image, mode="ascii") -> list[str]:
         assert image.width % 2 == 0

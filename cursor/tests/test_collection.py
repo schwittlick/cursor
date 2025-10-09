@@ -58,17 +58,11 @@ def test_pathcollection_minmax():
 
 
 def test_collection_equal():
-    assert Collection.from_tuples([[(5, 5111)]]) == Collection.from_tuples(
-        [[(5, 5111)]]
-    )
+    assert Collection.from_tuples([[(5, 5111)]]) == Collection.from_tuples([[(5, 5111)]])
 
-    assert Collection.from_tuples([[(5, 5111)]]) != Collection.from_tuples(
-        [[(5, 5111), (2, 2)]]
-    )
+    assert Collection.from_tuples([[(5, 5111)]]) != Collection.from_tuples([[(5, 5111), (2, 2)]])
 
-    assert Collection.from_tuples([[(5, 5111)]]) != Collection.from_tuples(
-        [[(5, 5111)], [(5, 5111)]]
-    )
+    assert Collection.from_tuples([[(5, 5111)]]) != Collection.from_tuples([[(5, 5111)], [(5, 5111)]])
 
     # different timestamps are *not* used for compare
     assert Collection(123) == Collection(123)

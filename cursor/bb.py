@@ -66,10 +66,7 @@ class BoundingBox:
             self.p1 = Point(self.p1.x, value)
 
     def center(self) -> Point:
-        return Point(
-            (self.p1.x + self.p2.x) / 2,
-            (self.p1.y + self.p2.y) / 2
-        )
+        return Point((self.p1.x + self.p2.x) / 2, (self.p1.y + self.p2.y) / 2)
 
     def scale(self, factor: float) -> None:
         self.scale_x(factor)
@@ -105,7 +102,7 @@ class BoundingBox:
                 self.p1.x + x * w_step,
                 self.p1.y + y * h_step,
                 self.p1.x + (x + 1) * w_step,
-                self.p1.y + (y + 1) * h_step
+                self.p1.y + (y + 1) * h_step,
             )
             for x in range(x_pieces)
             for y in range(y_pieces)
@@ -130,10 +127,8 @@ class BoundingBox:
             bool: True if the other BoundingBox is fully contained within this one, False otherwise.
         """
         return (
-            self.p1.x <= other.p1.x and
-            self.p1.y <= other.p1.y and
-            self.p2.x >= other.p2.x and
-            self.p2.y >= other.p2.y)
+            self.p1.x <= other.p1.x and self.p1.y <= other.p1.y and self.p2.x >= other.p2.x and self.p2.y >= other.p2.y
+        )
 
     def intersects(self, other: BoundingBox) -> bool:
         """
@@ -146,13 +141,11 @@ class BoundingBox:
             bool: True if the bounding boxes intersect, False otherwise.
         """
         # Check if one rectangle is on left side of other
-        if (self.x >= other.x + other.w or
-                other.x >= self.x + self.w):
+        if self.x >= other.x + other.w or other.x >= self.x + self.w:
             return False
 
         # Check if one rectangle is above other
-        if (self.y >= other.y + other.h or
-                other.y >= self.y + self.h):
+        if self.y >= other.y + other.h or other.y >= self.y + self.h:
             return False
 
         return True
@@ -181,22 +174,18 @@ class BoundingBox:
             self.y2 += v
 
     def __repr__(self) -> str:
-        return (f"BoundingBox(x={self.p1.x:.2f}, y={self.p1.y:.2f}, "
-                f"x2={self.p2.x:.2f}, y2={self.p2.y:.2f}, "
-                f"width={self.w:.2f}, height={self.h:.2f})")
+        return (
+            f"BoundingBox(x={self.p1.x:.2f}, y={self.p1.y:.2f}, "
+            f"x2={self.p2.x:.2f}, y2={self.p2.y:.2f}, "
+            f"width={self.w:.2f}, height={self.h:.2f})"
+        )
 
     def __sub__(self, other: BoundingBox) -> BoundingBox:
         return BoundingBox(
-            self.p1.x - other.p1.x,
-            self.p1.y - other.p1.y,
-            self.p2.x - other.p2.x,
-            self.p2.y - other.p2.y
+            self.p1.x - other.p1.x, self.p1.y - other.p1.y, self.p2.x - other.p2.x, self.p2.y - other.p2.y
         )
 
     def __add__(self, other: BoundingBox) -> BoundingBox:
         return BoundingBox(
-            self.p1.x + other.p1.x,
-            self.p1.y + other.p1.y,
-            self.p2.x + other.p2.x,
-            self.p2.y + other.p2.y
+            self.p1.x + other.p1.x, self.p1.y + other.p1.y, self.p2.x + other.p2.x, self.p2.y + other.p2.y
         )

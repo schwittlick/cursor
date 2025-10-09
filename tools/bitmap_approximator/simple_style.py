@@ -25,7 +25,7 @@ def main_approximation():
     if loaded.height < loaded.width:
         loaded = loaded.rotate(90, expand=True)
 
-    loaded = loaded.convert('RGB')
+    loaded = loaded.convert("RGB")
     data = np.asarray(loaded)
     data = data / np.array(255)
 
@@ -49,7 +49,8 @@ def main_approximation():
         "color_interpolation",
         f"bitmap_approximator_{path.name}",
         keep_aspect_ratio=True,
-        optimize=True)
+        optimize=True,
+    )
     wrapper.fit()
     wrapper.ex()
 

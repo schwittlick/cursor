@@ -10,7 +10,7 @@ from fpdf import FPDF
 from io import BytesIO
 
 # suppress verbose log outputs
-logging.getLogger('fontTools.subset').level = logging.WARN
+logging.getLogger("fontTools.subset").level = logging.WARN
 
 
 class PdfRenderer(BaseRenderer):
@@ -39,7 +39,7 @@ class PdfRenderer(BaseRenderer):
         """
         # Convert Pillow Image to bytes
         img_byte_arr = BytesIO()
-        image.save(img_byte_arr, format='PNG')
+        image.save(img_byte_arr, format="PNG")
         img_byte_arr = img_byte_arr.getvalue()
 
         # Add the image to the PDF

@@ -4,6 +4,6 @@ from .position import Position
 
 import logging
 
-__all__ = ['Collection', 'Path', 'Position']
+__all__ = ["Collection", "Path", "Position"]
 
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
+logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)

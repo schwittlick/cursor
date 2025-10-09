@@ -17,8 +17,8 @@ def generate_holders_query(contract: str, token: int) -> str:
 
 
 def get_data(query: str) -> dict:
-    url = 'https://api.teztok.com/v1/graphql'
-    r = requests.post(url, json={'query': query})
+    url = "https://api.teztok.com/v1/graphql"
+    r = requests.post(url, json={"query": query})
     return json.loads(r.text)
 
 
@@ -27,8 +27,8 @@ def parse(data: dict) -> list[str]:
 
     holdings = data["data"]["tokens_by_pk"]["holdings"]
     for holding in holdings:
-        address = holding['holder_address']
-        amount = holding['amount']
+        address = holding["holder_address"]
+        amount = holding["amount"]
         holder_addresses.extend([address for _ in range(amount)])
 
     return holder_addresses
@@ -46,5 +46,5 @@ def do_raffle() -> None:
         print(f"{holder} 🫴 token id {idx + 1}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     do_raffle()

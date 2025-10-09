@@ -19,7 +19,7 @@ COLOR_PROPERTY = Property.COLOR
 
 def parse_position(obj: Dict[str, Any]) -> Position:
     pos = Position(obj["x"], obj["y"], obj["ts"])
-    
+
     if "c" in obj:
         pos.properties[Property.COLOR] = obj["c"]
 
@@ -42,7 +42,7 @@ def parse_collection(obj: Dict[str, Any]) -> Collection:
 
 
 def custom_decoder(
-    obj: Dict[str, Any]
+    obj: Dict[str, Any],
 ) -> Union[Dict, Position, pyautogui.Size, Collection]:
     if isinstance(obj, dict):
         if "x" in obj and "y" in obj:
@@ -104,7 +104,7 @@ class MyJsonDecoder(json.JSONDecoder):
                     c = None
             else:
                 c = None
-            
+
             pos = Position(dct["x"], dct["y"], dct["ts"])
             if c is not None:
                 pos.properties[Property.COLOR] = c

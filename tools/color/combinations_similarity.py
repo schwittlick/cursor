@@ -1,7 +1,17 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, \
-    QComboBox, QLabel, QPushButton, QScrollArea, QGridLayout, QColorDialog, \
-    QStyledItemDelegate
+from PyQt5.QtWidgets import (
+    QApplication,
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QComboBox,
+    QLabel,
+    QPushButton,
+    QScrollArea,
+    QGridLayout,
+    QColorDialog,
+    QStyledItemDelegate,
+)
 from PyQt5.QtGui import QColor
 from PyQt5.QtCore import Qt, pyqtSignal
 
@@ -69,29 +79,27 @@ class ColorCombinationApp(QWidget):
         return combinations
 
     def initUI(self):
-        self.setWindowTitle('Color Combination to Copic')
+        self.setWindowTitle("Color Combination to Copic")
         self.setGeometry(100, 100, 400, 600)
 
         main_layout = QVBoxLayout()
 
         # Combination selection
         self.combo_selector = QComboBox()
-        self.combo_selector.setItemDelegate(
-            ColorComboDelegate(self.combo_selector))
+        self.combo_selector.setItemDelegate(ColorComboDelegate(self.combo_selector))
         for index, colors in sorted(self.combinations.items()):
             color_hexes = [color.hex for color in colors]
             self.combo_selector.addItem(str(index), color_hexes)
 
         self.combo_selector.setCurrentIndex(-1)  # No selection by default
-        self.combo_selector.currentIndexChanged.connect(
-            self.on_combination_selected)
+        self.combo_selector.currentIndexChanged.connect(self.on_combination_selected)
 
-        main_layout.addWidget(QLabel('Select a combination:'))
+        main_layout.addWidget(QLabel("Select a combination:"))
         main_layout.addWidget(self.combo_selector)
 
         # Color Picker
         color_picker_layout = QHBoxLayout()
-        self.color_picker_button = QPushButton('Pick a Color')
+        self.color_picker_button = QPushButton("Pick a Color")
         self.color_picker_button.clicked.connect(self.open_color_picker)
         self.color_display = QLabel()
         self.color_display.setFixedSize(50, 25)
@@ -171,8 +179,7 @@ class ColorCombinationApp(QWidget):
     def find_similar_dissimilar_colors(self, color):
         self.clear_results()
 
-        target_rgb = (color.red() / 255, color.green() /
-                      255, color.blue() / 255)
+        target_rgb = (color.red() / 255, color.green() / 255, color.blue() / 255)
         target_xyz = colour.sRGB_to_XYZ(target_rgb)
         target_lab = colour.XYZ_to_Lab(target_xyz)
 
@@ -181,24 +188,21 @@ class ColorCombinationApp(QWidget):
         for copic_color in self.copic.available_colors.values():
             copic_xyz = colour.sRGB_to_XYZ(copic_color.as_srgb())
             copic_lab = colour.XYZ_to_Lab(copic_xyz)
-            delta = colour.delta_E(target_lab, copic_lab, method='CIE 2000')
+            delta = colour.delta_E(target_lab, copic_lab, method="CIE 2000")
             copic_matches.append((copic_color, delta))
 
         copic_matches.sort(key=lambda x: x[1])
 
         # Display most similar colors
         self.results_layout.addWidget(QLabel("Most Similar Colors:"))
-        self.display_color_matches(
-            "Selected Color", color.name(), copic_matches[:5])
+        self.display_color_matches("Selected Color", color.name(), copic_matches[:5])
 
         # Display least similar colors
         self.results_layout.addWidget(QLabel("Least Similar Colors:"))
-        self.display_color_matches(
-            "Selected Color", color.name(), copic_matches[-5:])
+        self.display_color_matches("Selected Color", color.name(), copic_matches[-5:])
 
     def find_copic_matches(self, color):
-        target_rgb = (color.red() / 255, color.green() /
-                      255, color.blue() / 255)
+        target_rgb = (color.red() / 255, color.green() / 255, color.blue() / 255)
         target_xyz = colour.sRGB_to_XYZ(target_rgb)
         target_lab = colour.XYZ_to_Lab(target_xyz)
 
@@ -207,7 +211,7 @@ class ColorCombinationApp(QWidget):
         for copic_color in self.copic.available_colors.values():
             copic_xyz = colour.sRGB_to_XYZ(copic_color.as_srgb())
             copic_lab = colour.XYZ_to_Lab(copic_xyz)
-            delta = colour.delta_E(target_lab, copic_lab, method='CIE 2000')
+            delta = colour.delta_E(target_lab, copic_lab, method="CIE 2000")
             copic_matches.append((copic_color, delta))
 
         return sorted(copic_matches, key=lambda x: x[1])[:5]
@@ -230,13 +234,13 @@ class ColorCombinationApp(QWidget):
             # Copic color display
             copic_color_display = QLabel()
             copic_color_display.setFixedSize(50, 25)
-            copic_color_display.setStyleSheet(
-                f"background-color: rgb{copic_color.as_rgb()};")
+            copic_color_display.setStyleSheet(f"background-color: rgb{copic_color.as_rgb()};")
             result_layout.addWidget(copic_color_display, i, 0)
 
             # Copic color info
-            result_layout.addWidget(QLabel(f"{copic_color.name} ({copic_color.code.name}) - Delta E: {delta:.2f}"),
-                                    i, 1)
+            result_layout.addWidget(
+                QLabel(f"{copic_color.name} ({copic_color.code.name}) - Delta E: {delta:.2f}"), i, 1
+            )
 
         self.results_layout.addWidget(result_widget)
         self.results_layout.addWidget(QLabel(""))  # Spacer
@@ -248,7 +252,7 @@ class ColorCombinationApp(QWidget):
                 widget.deleteLater()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     ex = ColorCombinationApp()
     ex.show()

@@ -1,6 +1,7 @@
 """
 #python 2.x
 """
+
 import numpy as np
 import math
 import matplotlib.pyplot as plt
@@ -31,13 +32,13 @@ fig, ax = plt.subplots()
 for i in range(1, 360):
     angle = i * math.pi / 180
     pt = sineAroundCircle(cx, cy, radius, amp, angle, frequency)
-    line1, = ax.plot(pt.x, pt.y, 'o')
+    (line1,) = ax.plot(pt.x, pt.y, "o")
 
 frequency = 10
 radius = 50
 for i in range(1, 360):
     angle = i * math.pi / 180
     pt = sineAroundCircle(cx, cy, radius, amp, angle, frequency)
-    line2, = ax.plot(pt.x, pt.y, 'o')
+    (line2,) = ax.plot(pt.x, pt.y, "o")
 
 plt.show()

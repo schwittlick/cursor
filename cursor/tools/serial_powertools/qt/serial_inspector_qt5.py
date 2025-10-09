@@ -1,13 +1,13 @@
 import logging
-from PyQt5.QtCore import QObject, pyqtSignal, QThread
+
 import serial
 import serial.tools.list_ports
+from bruteforce_qt5 import run_brute_force
+from PyQt5.QtCore import QObject, QThread, pyqtSignal
 
 from cursor.hpgl.hpgl_tokenize import tokenizer
 from cursor.hpgl.plotter.plotter import HPGLPlotter
 from cursor.tools.serial_powertools.seriallib import AsyncSerialSender
-
-from bruteforce_qt5 import run_brute_force
 
 
 class SerialInspector(QObject):
@@ -68,14 +68,12 @@ class SerialInspector(QObject):
         logging.info(f"Attempting to connect to {port} at {baud} baud")
 
         if self.check():
-            logging.warning(
-                f"Already connected to {self.serial_connection.port}")
+            logging.warning(f"Already connected to {self.serial_connection.port}")
             return
 
         try:
             self.serial_connection = serial.Serial(port, baud, timeout=1)
-            logging.info(
-                f"Serial connection established to {self.serial_connection.port}")
+            logging.info(f"Serial connection established to {self.serial_connection.port}")
 
             self.connection_status_changed.emit("Connected")
             logging.info(f"Connected to {self.serial_connection.port}")
@@ -97,10 +95,8 @@ class SerialInspector(QObject):
             logging.error(f"Failed to connect to {port}: {str(e)}")
             self.connection_status_changed.emit(f"Connection failed: {str(e)}")
         except Exception as e:
-            logging.error(
-                f"Unexpected error while connecting to {port}: {str(e)}")
-            self.connection_status_changed.emit(
-                "Connection failed: Unexpected error")
+            logging.error(f"Unexpected error while connecting to {port}: {str(e)}")
+            self.connection_status_changed.emit("Connection failed: Unexpected error")
 
         self.async_sender = AsyncSerialSender(plotter)
         self.async_sender.do_software_handshake = True
@@ -127,7 +123,7 @@ class SerialInspector(QObject):
             return
 
         logging.info(f"Sending {file_path}")
-        with open(file_path, 'r', encoding='utf-8') as file:
+        with open(file_path, "r", encoding="utf-8") as file:
             hpgl_text = file.read()
 
         commands = tokenizer(hpgl_text)
@@ -151,8 +147,9 @@ class SerialInspector(QObject):
 
         message = "OI;"
 
-        self.bruteforce_threads = run_brute_force([port], baud_rates, parities, stop_bits, xonxoff,
-                                                  byte_sizes, message, timeout)
+        self.bruteforce_threads = run_brute_force(
+            [port], baud_rates, parities, stop_bits, xonxoff, byte_sizes, message, timeout
+        )
 
     def stop_bruteforce_progress(self):
         for thread in self.bruteforce_threads:

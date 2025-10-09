@@ -1,7 +1,6 @@
 import sys
 import json
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
-                             QPushButton, QFileDialog)
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QPushButton, QFileDialog
 from PyQt5.QtGui import QPixmap, QPainter, QPen, QImage
 from PyQt5.QtCore import Qt, QPoint
 
@@ -64,7 +63,7 @@ class DrawingWidget(QWidget):
     def save_coordinates(self, filename):
         # Convert QPoint objects to (x, y) tuples
         coordinates = [(point.x(), point.y()) for point in self.points]
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             json.dump(coordinates, f)
 
         coll = Collection()
@@ -81,12 +80,13 @@ class DrawingWidget(QWidget):
             10,  # 25mm - 11mm
             "datasets",
             fname,
-            keep_aspect_ratio=True)
+            keep_aspect_ratio=True,
+        )
         wrapper.fit()
         wrapper.ex()
 
     def load_coordinates(self, filename):
-        with open(filename, 'r') as f:
+        with open(filename, "r") as f:
             coordinates = json.load(f)
         self.points = [QPoint(x, y) for x, y in coordinates]
         self.update_drawing()
@@ -128,21 +128,18 @@ class MainWindow(QMainWindow):
         undo_button.clicked.connect(self.undo_last_point)
 
     def load_image(self):
-        filename, _ = QFileDialog.getOpenFileName(self, "Open Image", "",
-                                                  "Image Files (*.png *.jpg *.bmp)")
+        filename, _ = QFileDialog.getOpenFileName(self, "Open Image", "", "Image Files (*.png *.jpg *.bmp)")
         if filename:
             self.drawing_widget.load_image(filename)
             self.resize(self.drawing_widget.size())
 
     def save_coordinates(self):
-        filename, _ = QFileDialog.getSaveFileName(self, "Save Coordinates", "",
-                                                  "JSON Files (*.json)")
+        filename, _ = QFileDialog.getSaveFileName(self, "Save Coordinates", "", "JSON Files (*.json)")
         if filename:
             self.drawing_widget.save_coordinates(filename)
 
     def load_coordinates(self):
-        filename, _ = QFileDialog.getOpenFileName(self, "Load Coordinates", "",
-                                                  "JSON Files (*.json)")
+        filename, _ = QFileDialog.getOpenFileName(self, "Load Coordinates", "", "JSON Files (*.json)")
         if filename:
             self.drawing_widget.load_coordinates(filename)
 
@@ -158,7 +155,7 @@ class MainWindow(QMainWindow):
             self.drawing_widget.update_drawing()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()

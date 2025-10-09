@@ -52,17 +52,19 @@ if __name__ == "__main__":
     num_epochs = 10
     batch_size = 128
 
-    model = tf.keras.models.Sequential([
-        tf.keras.layers.Embedding(input_dim=vocab_size, output_dim=embedding_dim, input_length=max_length - 1),
-        tf.keras.layers.GRU(units=64, return_sequences=True),
-        tf.keras.layers.Dense(units=vocab_size, activation='softmax')
-    ])
+    model = tf.keras.models.Sequential(
+        [
+            tf.keras.layers.Embedding(input_dim=vocab_size, output_dim=embedding_dim, input_length=max_length - 1),
+            tf.keras.layers.GRU(units=64, return_sequences=True),
+            tf.keras.layers.Dense(units=vocab_size, activation="softmax"),
+        ]
+    )
 
     # Compile the model
-    model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.compile(loss="sparse_categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
 
     # Train the model
     model.fit(input_sequences, target_sequences, epochs=num_epochs, batch_size=batch_size)
 
     # Save the trained model
-    model.save('trained_model4.h5')
+    model.save("trained_model4.h5")

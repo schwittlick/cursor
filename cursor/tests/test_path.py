@@ -94,9 +94,7 @@ def test_path_translate():
 
 
 def test_path_bb():
-    p = Path.from_tuple_list(
-        [(0, 0), (140, 11),
-         (23, 141), (141, 4511)])
+    p = Path.from_tuple_list([(0, 0), (140, 11), (23, 141), (141, 4511)])
 
     bb = p.bb()
     assert bb.x == 0
@@ -106,9 +104,7 @@ def test_path_bb():
 
 
 def test_path_bb2():
-    p = Path.from_tuple_list(
-        [(100, 100), (200, 100),
-         (100, 200), (200, 200)])
+    p = Path.from_tuple_list([(100, 100), (200, 100), (100, 200), (200, 200)])
 
     bb = p.bb()
     assert bb.x == 100
@@ -118,17 +114,14 @@ def test_path_bb2():
 
 
 def test_path_oriented_bb():
-    p = Path.from_tuple_list(
-        [(1, 1), (100, 100),
-         (100, 101), (3, 3)])
+    p = Path.from_tuple_list([(1, 1), (100, 100), (100, 101), (3, 3)])
     bb = p.oriented_bb()
     # this test is so lazy..
     assert len(bb) == 5
 
 
 def test_path_morph():
-    p = Path.from_tuple_list(
-        [(19, 34), (10, 10), (600, 10)])
+    p = Path.from_tuple_list([(19, 34), (10, 10), (600, 10)])
 
     pm = p.morph((0, 0), (10, 100))
 
@@ -181,13 +174,9 @@ def test_sort_path():
 
 
 def test_entropy():
-    p1 = Path.from_tuple_list(
-        [(100, 34), (200, 10), (100, 10),
-         (200, 10), (100, 10), (200, 20)])
+    p1 = Path.from_tuple_list([(100, 34), (200, 10), (100, 10), (200, 10), (100, 10), (200, 20)])
 
-    p2 = Path.from_tuple_list(
-        [(200, 10), (200, 10), (200, 10),
-         (200, 10), (200, 10)])
+    p2 = Path.from_tuple_list([(200, 10), (200, 10), (200, 10), (200, 10), (200, 10)])
 
     sx1 = p1.entropy_x
     sx2 = p2.entropy_x
@@ -199,8 +188,7 @@ def test_entropy():
 
 
 def test_entropy_by_position1():
-    p1 = Path.from_tuple_list(
-        [(10, 10), (10, 10), (10, 10), (10, 10)])
+    p1 = Path.from_tuple_list([(10, 10), (10, 10), (10, 10), (10, 10)])
 
     sx1 = p1.entropy_x
     sy1 = p1.entropy_y
@@ -210,8 +198,7 @@ def test_entropy_by_position1():
 
 
 def test_entropy_by_position2():
-    p1 = Path.from_tuple_list(
-        [(10, 10), (11, 10), (12, 10), (13, 10)])
+    p1 = Path.from_tuple_list([(10, 10), (11, 10), (12, 10), (13, 10)])
 
     sx1 = p1.entropy_x
     sy1 = p1.entropy_y
@@ -221,8 +208,7 @@ def test_entropy_by_position2():
 
 
 def test_variation():
-    p1 = Path.from_tuple_list(
-        [(10, 10), (11, 10), (12, 10), (13, 10)])
+    p1 = Path.from_tuple_list([(10, 10), (11, 10), (12, 10), (13, 10)])
 
     sx = p1.variation_x
     sy = p1.variation_y
@@ -279,9 +265,7 @@ def test_entropy_by_position4():
 
 
 def test_path_clean():
-    p = Path.from_tuple_list(
-        [(1, 1), (1, 1), (1, 2), (1, 2),
-         (1, 2), (2, 2), (2, 2), (2, 2)])
+    p = Path.from_tuple_list([(1, 1), (1, 1), (1, 2), (1, 2), (1, 2), (2, 2), (2, 2), (2, 2)])
 
     assert len(p) == 8
 
@@ -291,9 +275,7 @@ def test_path_clean():
 
 
 def test_path_limit():
-    p = Path.from_tuple_list(
-        [(0.9, 0.9), (0.9, 1.0), (0.9, 1.1), (0.1, 0.8),
-         (-0.1, 0.8), (0.0, 0.0), (1.0, 1.0)])
+    p = Path.from_tuple_list([(0.9, 0.9), (0.9, 1.0), (0.9, 1.1), (0.1, 0.8), (-0.1, 0.8), (0.0, 0.0), (1.0, 1.0)])
 
     p.limit()
 
@@ -301,9 +283,7 @@ def test_path_limit():
 
 
 def test_path_parallel_offset_shapely():
-    p = Path.from_tuple_list(
-        [(0.9, 0.9), (0.9, 1.0), (0.9, 1.1), (0.1, 0.8),
-         (-0.1, 0.8), (0.0, 0.0), (1.0, 1.0)])
+    p = Path.from_tuple_list([(0.9, 0.9), (0.9, 1.0), (0.9, 1.1), (0.1, 0.8), (-0.1, 0.8), (0.0, 0.0), (1.0, 1.0)])
     p.scale(10, 10)
 
     p.color = (0, 0, 255)
@@ -316,9 +296,7 @@ def test_path_parallel_offset_shapely():
 
 
 def test_path_curve_offset_shapely():
-    p = Path.from_tuple_list(
-        [(0.9, 0.9), (0.9, 1.0), (0.9, 1.1), (0.1, 0.8),
-         (-0.1, 0.8), (0.0, 0.0), (1.0, 1.0)])
+    p = Path.from_tuple_list([(0.9, 0.9), (0.9, 1.0), (0.9, 1.1), (0.1, 0.8), (-0.1, 0.8), (0.0, 0.0), (1.0, 1.0)])
     p.scale(10, 10)
 
     p.color = (0, 0, 255)
@@ -425,8 +403,7 @@ def test_intersection_all():
 
 
 def test_angles():
-    p = Path.from_tuple_list(
-        [(0, 1), (1, 1), (1, 0), (0.5, 0)])
+    p = Path.from_tuple_list([(0, 1), (1, 1), (1, 0), (0.5, 0)])
 
     changes = p.direction_changes(mapped=True)
     assert math.isclose(changes[0], 45.0, abs_tol=0.00001)
@@ -435,8 +412,7 @@ def test_angles():
 
 
 def test_angles_posneg():
-    p = Path.from_tuple_list(
-        [(0, 1), (1, 1), (1, 0), (1, 1)])
+    p = Path.from_tuple_list([(0, 1), (1, 1), (1, 0), (1, 1)])
 
     changes = p.direction_changes(mapped=False)
     assert math.isclose(changes[0], 45.0, abs_tol=0.00001)
@@ -445,43 +421,35 @@ def test_angles_posneg():
 
 
 def test_slopes():
-    p = Path.from_tuple_list(
-        [(0, 1), (1, 1), (1, 0), (1, 1)])
+    p = Path.from_tuple_list([(0, 1), (1, 1), (1, 0), (1, 1)])
 
     slopes = p.slopes()
-    assert slopes == [0.0, float('inf'), float('inf')]
+    assert slopes == [0.0, float("inf"), float("inf")]
 
 
 def test_slopes2():
-    p = Path.from_tuple_list(
-        [(0, 0), (1, 0), (2, 1), (1, 1), (1, 3), (2, 3), (4, 0)])
+    p = Path.from_tuple_list([(0, 0), (1, 0), (2, 1), (1, 1), (1, 3), (2, 3), (4, 0)])
 
     slopes = p.slopes()
-    assert slopes == [0.0, 1.0, -0.0, float('inf'), 0.0, -1.5]
+    assert slopes == [0.0, 1.0, -0.0, float("inf"), 0.0, -1.5]
 
 
 def disabled_test_similarity():
-    p1 = Path.from_tuple_list(
-        [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4)])
+    p1 = Path.from_tuple_list([(0, 0), (0, 1), (0, 2), (0, 3), (0, 4)])
 
-    p2 = Path.from_tuple_list(
-        [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4)])
+    p2 = Path.from_tuple_list([(0, 0), (0, 1), (0, 2), (0, 3), (0, 4)])
 
     sim = p1.similarity(p2)
     assert sim == 1.0
 
-    p3 = Path.from_tuple_list(
-        [(0, 0), (0, 1), (0, 2),
-         (0, 3.1), (0, 4.1)])
+    p3 = Path.from_tuple_list([(0, 0), (0, 1), (0, 2), (0, 3.1), (0, 4.1)])
 
     sim2 = p1.similarity(p3)
     assert sim2 >= 0.9
 
 
 def test_offset():
-    p1 = Path.from_tuple_list(
-        [(0, 0), (1, 0), (0.5, 1),
-         (3.5, 1), (3, 0), (4, 0)])
+    p1 = Path.from_tuple_list([(0, 0), (1, 0), (0.5, 1), (3.5, 1), (3, 0), (4, 0)])
 
     offset = p1.offset(0.2)
 
@@ -490,9 +458,7 @@ def test_offset():
 
 
 def test_downsample():
-    p1 = Path.from_tuple_list(
-        [(0, 0), (1, 0), (2, 0), (3, 0),
-         (4, 0), (6, 0), (7, 0), (7.2, 0)])
+    p1 = Path.from_tuple_list([(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (6, 0), (7, 0), (7.2, 0)])
 
     p1.downsample(1.1)
 
@@ -500,8 +466,7 @@ def test_downsample():
 
 
 def test_resample():
-    p1 = Path.from_tuple_list(
-        [(0, 0), (1, 0), (0, 1), (1.1, 1.1)])
+    p1 = Path.from_tuple_list([(0, 0), (1, 0), (0, 1), (1.1, 1.1)])
     # using (1.1, 1.1) for the last points in order to not drop the last
     # point because it would not be included (the last two points distance
     # would be below 0.5)
@@ -512,8 +477,7 @@ def test_resample():
 
 
 def test_resampled():
-    p1 = Path.from_tuple_list(
-        [(0, 0), (1, 0), (0, 1), (1.1, 1.1)])
+    p1 = Path.from_tuple_list([(0, 0), (1, 0), (0, 1), (1.1, 1.1)])
     # using (1.1, 1.1) for the last points in order to not drop the last
     # point because it would not be included (the last two points distance
     # would be below 0.5)
@@ -526,9 +490,7 @@ def test_resampled():
 
 
 def test_rdp():
-    p = Path.from_tuple_list(
-        [(0, 0), (1, 0), (2, 0), (3, 0),
-         (4, 0), (6, 0), (7, 0), (7.2, 0)])
+    p = Path.from_tuple_list([(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (6, 0), (7, 0), (7.2, 0)])
 
     p.simplify(0.1)
 
@@ -550,9 +512,7 @@ def test_intersect():
 
 
 def test_clip():
-    p = Path.from_tuple_list(
-        [(5, 5), (5, 15), (6, 15), (6, 5),
-         (5, 5), (11, 5), (12, 5), (5, 5), (7, 5)])
+    p = Path.from_tuple_list([(5, 5), (5, 15), (6, 15), (6, 5), (5, 5), (11, 5), (12, 5), (5, 5), (7, 5)])
 
     p.color = (255, 0, 0)
 
@@ -675,19 +635,29 @@ def test_split_by_color():
     path = Path.from_list([pos1, pos2, pos3, pos4, pos5, pos6])
     paths = path.split_by_color()
 
-    new_path1 = Path.from_list([Position(0, 0, 0, {Property.COLOR: (1, 2, 3)}),
-                                Position(1, 0, 0, {Property.COLOR: (1, 2, 3)}),
-                                Position(2, 1, 0, {Property.COLOR: (1, 2, 3)})])
+    new_path1 = Path.from_list(
+        [
+            Position(0, 0, 0, {Property.COLOR: (1, 2, 3)}),
+            Position(1, 0, 0, {Property.COLOR: (1, 2, 3)}),
+            Position(2, 1, 0, {Property.COLOR: (1, 2, 3)}),
+        ]
+    )
 
-    new_path2 = Path.from_list([Position(2, 1, 0, {Property.COLOR: (100, 200, 300)}),
-                                Position(3, -1, 0, {Property.COLOR: (100, 200, 300)})])
+    new_path2 = Path.from_list(
+        [Position(2, 1, 0, {Property.COLOR: (100, 200, 300)}), Position(3, -1, 0, {Property.COLOR: (100, 200, 300)})]
+    )
 
-    new_path3 = Path.from_list([Position(3, -1, 0, {Property.COLOR: (1, 2, 3)}),
-                                Position(4, 0, 0, {Property.COLOR: (1, 2, 3)}),
-                                Position(5, 0, 0, {Property.COLOR: (1, 2, 3)})])
+    new_path3 = Path.from_list(
+        [
+            Position(3, -1, 0, {Property.COLOR: (1, 2, 3)}),
+            Position(4, 0, 0, {Property.COLOR: (1, 2, 3)}),
+            Position(5, 0, 0, {Property.COLOR: (1, 2, 3)}),
+        ]
+    )
 
-    new_path4 = Path.from_list([Position(5, 0, 0, {Property.COLOR: (100, 200, 300)}),
-                                Position(5, 0, 0, {Property.COLOR: (100, 200, 300)})])
+    new_path4 = Path.from_list(
+        [Position(5, 0, 0, {Property.COLOR: (100, 200, 300)}), Position(5, 0, 0, {Property.COLOR: (100, 200, 300)})]
+    )
     compare_paths = [new_path1, new_path2, new_path3, new_path4]
 
     assert compare_paths == paths

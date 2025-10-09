@@ -9,9 +9,7 @@ from cursor.algorithm.color.copic import Color, Copic
 
 class ColorMath:
     @staticmethod
-    def linear_srgb_to_oklab(
-            c: tuple[float, float, float]
-    ) -> tuple[float, float, float]:
+    def linear_srgb_to_oklab(c: tuple[float, float, float]) -> tuple[float, float, float]:
         l = 0.4122214708 * c[0] + 0.5363325363 * c[1] + 0.0514459929 * c[2]
         m = 0.2119034982 * c[0] + 0.6806995451 * c[1] + 0.1073969566 * c[2]
         s = 0.0883024619 * c[0] + 0.2817188376 * c[1] + 0.6299787005 * c[2]
@@ -27,9 +25,7 @@ class ColorMath:
         )
 
     @staticmethod
-    def oklab_to_linear_srgb(
-            c: tuple[float, float, float]
-    ) -> tuple[float, float, float]:
+    def oklab_to_linear_srgb(c: tuple[float, float, float]) -> tuple[float, float, float]:
         l_ = c[0] + 0.3963377774 * c[1] + 0.2158037573 * c[2]
         m_ = c[0] - 0.1055613458 * c[1] - 0.0638541728 * c[2]
         s_ = c[0] - 0.0894841775 * c[1] - 1.2914855480 * c[2]
@@ -46,9 +42,9 @@ class ColorMath:
 
     @staticmethod
     def lerp(
-            v0: tuple[float, float, float],
-            v1: tuple[float, float, float],
-            percentage: float,
+        v0: tuple[float, float, float],
+        v1: tuple[float, float, float],
+        percentage: float,
     ):
         x = (1 - percentage) * v0[0] + percentage * v1[0]
         y = (1 - percentage) * v0[1] + percentage * v1[1]
@@ -57,10 +53,10 @@ class ColorMath:
 
     @staticmethod
     def interpolate(
-            c1_srgb: tuple[float, float, float],
-            c2_srgb: tuple[float, float, float],
-            perc: float,
-            oklab: bool = True,
+        c1_srgb: tuple[float, float, float],
+        c2_srgb: tuple[float, float, float],
+        perc: float,
+        oklab: bool = True,
     ) -> tuple[float, float, float]:
         if oklab:
             c1_oklab = ColorMath.linear_srgb_to_oklab(c1_srgb)
@@ -75,11 +71,11 @@ class ColorMath:
 
     @staticmethod
     def calc_gradient(
-            c1: Color,
-            c2: Color,
-            steps: int = 100,
-            oklab: bool = True,
-            clamp_to_copic: bool = True,
+        c1: Color,
+        c2: Color,
+        steps: int = 100,
+        oklab: bool = True,
+        clamp_to_copic: bool = True,
     ) -> list[Color]:
         gradient_colors = []
 
@@ -88,9 +84,7 @@ class ColorMath:
             for step in range(steps + 1):
                 pbar.update(1)
                 perc = misc.inv_lerp(0, steps, step)
-                srgb_interpolated = ColorMath.interpolate(
-                    c1.as_srgb(), c2.as_srgb(), perc, oklab
-                )
+                srgb_interpolated = ColorMath.interpolate(c1.as_srgb(), c2.as_srgb(), perc, oklab)
                 if clamp_to_copic:
                     # interpolated_color = Copic().most_similar(srgb_interpolated)
                     interpolated_color = Copic().most_similar_rgb_kdtree(srgb_interpolated)

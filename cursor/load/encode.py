@@ -19,10 +19,7 @@ class MyJsonEncoder(json.JSONEncoder):
             case Path():
                 return o.vertices
             case Position():
-                d = {
-                    "x": round(o.x, 4),
-                    "y": round(o.y, 4)
-                }
+                d = {"x": round(o.x, 4), "y": round(o.y, 4)}
 
                 if o.timestamp:
                     d["ts"] = round(o.timestamp, 2)

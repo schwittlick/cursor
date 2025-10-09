@@ -95,9 +95,7 @@ class Collection:
         match item:
             case int():
                 if len(self.__paths) < item + 1:
-                    raise IndexError(
-                        f"Index {item} too high. Maximum is {len(self.__paths) - 1}"
-                    )
+                    raise IndexError(f"Index {item} too high. Maximum is {len(self.__paths) - 1}")
 
                 return self.__paths[item]
             case slice():
@@ -184,12 +182,9 @@ class Collection:
         [p.clean() for p in self.__paths]
 
         len_before = len(self)
-        self.__paths = [path for path in self.__paths if len(
-            path) > min_vertex_count]
+        self.__paths = [path for path in self.__paths if len(path) > min_vertex_count]
 
-        logging.debug(
-            f"PathCollection: clean: reduced path count from {len_before} to {len(self)}"
-        )
+        logging.debug(f"PathCollection: clean: reduced path count from {len_before} to {len(self)}")
 
     def merge(self) -> Path:
         pa = Path()
@@ -270,15 +265,13 @@ class Collection:
         if isinstance(pathsorter, Sorter):
             pathsorter.sort(self.__paths, reference_path)
         else:
-            raise Exception(
-                f"Cant sort with a class of type {type(pathsorter)}")
+            raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
     def sorted(self, pathsorter: Sorter, reference_path: Path | None = None) -> list[Path]:
         if isinstance(pathsorter, Sorter):
             return pathsorter.sorted(self.__paths, reference_path)
         else:
-            raise Exception(
-                f"Cant sort with a class of type {type(pathsorter)}")
+            raise Exception(f"Cant sort with a class of type {type(pathsorter)}")
 
     def filter(self, pathfilter: Filter) -> None:
         pathfilter.filter(self.__paths)
@@ -289,8 +282,7 @@ class Collection:
             pc.__paths = pathfilter.filtered(self.__paths)
             return pc
         else:
-            raise Exception(
-                f"Cant filter with a class of type {type(pathfilter)}")
+            raise Exception(f"Cant filter with a class of type {type(pathfilter)}")
 
     def timestamp(self) -> float:
         return self._timestamp
@@ -460,8 +452,7 @@ class Collection:
         for p in self:
             p.simplify(e)
 
-        logging.info(
-            f"C::simplify from {count} to {self.point_count()} points.")
+        logging.info(f"C::simplify from {count} to {self.point_count()} points.")
 
     def split_by_color(self) -> None:
         new_paths = []
@@ -519,14 +510,14 @@ class Collection:
         return sum_dist_pen_up
 
     def fit(
-            self,
-            output_bounds: BoundingBox | None = None,
-            xy_factor: tuple[float, float] = (1.0, 1.0),
-            padding_mm: int | None = None,
-            padding_units: int | None = None,
-            padding_percent: int | None = None,
-            cutoff_mm: float | None = None,
-            keep_aspect: bool = False,
+        self,
+        output_bounds: BoundingBox | None = None,
+        xy_factor: tuple[float, float] = (1.0, 1.0),
+        padding_mm: int | None = None,
+        padding_units: int | None = None,
+        padding_percent: int | None = None,
+        cutoff_mm: float | None = None,
+        keep_aspect: bool = False,
     ) -> None:
         """
         fits (scales and centers) a collection of paths into a bounding box. units can be in pixels or mm
@@ -623,24 +614,18 @@ class Collection:
 
     @timing
     def fast_tsp(self, plot_preview: bool = False, duration_seconds: int = 5) -> list[int]:
-        start_positions_float = np.array(
-            [pa.start_pos().as_tuple() for pa in self])
-        end_positions_float = np.array(
-            [pa.end_pos().as_tuple() for pa in self])
+        start_positions_float = np.array([pa.start_pos().as_tuple() for pa in self])
+        end_positions_float = np.array([pa.end_pos().as_tuple() for pa in self])
 
-        dists = spatial.distance.cdist(
-            end_positions_float, start_positions_float, metric="euclidean"
-        )
+        dists = spatial.distance.cdist(end_positions_float, start_positions_float, metric="euclidean")
         int_dists_from_floats = dists.astype(int)
 
-        order = fasttsp.find_tour(
-            int_dists_from_floats, duration_seconds=duration_seconds)
+        order = fasttsp.find_tour(int_dists_from_floats, duration_seconds=duration_seconds)
 
         if plot_preview:
             fig, ax = plt.subplots(1, 1)
             best_points_coordinate = start_positions_float[order, :]
-            ax.plot(best_points_coordinate[:, 0],
-                    best_points_coordinate[:, 1], ".-r")
+            ax.plot(best_points_coordinate[:, 0], best_points_coordinate[:, 1], ".-r")
             plt.show()
 
         final_order = []
@@ -655,28 +640,21 @@ class Collection:
         return final_order
 
     def sort_tsp(
-            self,
-            iters: int = 3000,
-            population_size: int = 50,
-            mutation_probability: float = 0.1,
-            plot_preview: bool = False,
+        self,
+        iters: int = 3000,
+        population_size: int = 50,
+        mutation_probability: float = 0.1,
+        plot_preview: bool = False,
     ) -> list[int]:
         start_positions = np.array([pa.start_pos().as_tuple() for pa in self])
         end_positions = np.array([pa.end_pos().as_tuple() for pa in self])
 
-        distance_matrix = spatial.distance.cdist(
-            end_positions, start_positions, metric="euclidean"
-        )
+        distance_matrix = spatial.distance.cdist(end_positions, start_positions, metric="euclidean")
 
         def calc_dist(routine):
             (num_points,) = routine.shape
             return sum(
-                [
-                    distance_matrix[
-                        routine[i % num_points], routine[(i + 1) % num_points]
-                    ]
-                    for i in range(num_points)
-                ]
+                [distance_matrix[routine[i % num_points], routine[(i + 1) % num_points]] for i in range(num_points)]
             )
 
         ga_tsp = GA_TSP(
@@ -692,9 +670,7 @@ class Collection:
             fig, ax = plt.subplots(1, 2)
             best_points_ = np.concatenate([best_points, [best_points[0]]])
             best_points_coordinate = start_positions[best_points_, :]
-            ax[0].plot(
-                best_points_coordinate[:,
-                                       0], best_points_coordinate[:, 1], "o-r")
+            ax[0].plot(best_points_coordinate[:, 0], best_points_coordinate[:, 1], "o-r")
             ax[1].plot(ga_tsp.generation_best_Y)
             plt.show()
 
@@ -773,8 +749,6 @@ class Collection:
         ss = dict(sorted(best.items(), key=lambda item: item[1]))
 
         elapsed = time.time() - start_benchmark
-        logging.debug(
-            f"reorder_quadrants with x={xq} y={yq} took {round(elapsed * 1000)}ms."
-        )
+        logging.debug(f"reorder_quadrants with x={xq} y={yq} took {round(elapsed * 1000)}ms.")
 
         self.__paths = list(ss.keys())

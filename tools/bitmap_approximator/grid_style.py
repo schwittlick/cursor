@@ -1,5 +1,4 @@
-from bitmap_lib import select_files, generate_preview, export_collection, process_collection, \
-    do_bitmap_approximation
+from bitmap_lib import select_files, generate_preview, export_collection, process_collection, do_bitmap_approximation
 from cursor.collection import Collection
 from device import MinmaxMapping
 
@@ -8,7 +7,7 @@ import numpy as np
 
 
 def process_image(path):
-    loaded = Image.open(path).rotate(90, expand=True).convert('RGB')
+    loaded = Image.open(path).rotate(90, expand=True).convert("RGB")
     data = np.asarray(loaded) / 255
     collection = do_bitmap_approximation(data)
 

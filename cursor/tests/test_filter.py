@@ -14,13 +14,9 @@ import pytest
 def test_bb_filter():
     c = Collection()
 
-    p1 = Path.from_tuple_list(
-        [(5, 51), (10, 11), (11, 11), (20, 20), (30, 31), (40, 41)]
-    )
+    p1 = Path.from_tuple_list([(5, 51), (10, 11), (11, 11), (20, 20), (30, 31), (40, 41)])
 
-    p2 = Path.from_tuple_list(
-        [(545, 54), (160, 11), (11, 171), (20, 20), (30, 31), (940, 941)]
-    )
+    p2 = Path.from_tuple_list([(545, 54), (160, 11), (11, 171), (20, 20), (30, 31), (940, 941)])
     c.add(p1)
     c.add(p2)
 
@@ -40,9 +36,7 @@ def test_bb_filter():
 def test_point_count_filter():
     c = Collection()
 
-    p1 = Path.from_tuple_list(
-        [(5, 51), (10, 11), (11, 11), (20, 20), (30, 31), (40, 41)]
-    )
+    p1 = Path.from_tuple_list([(5, 51), (10, 11), (11, 11), (20, 20), (30, 31), (40, 41)])
     p2 = Path.from_tuple_list([(545, 54), (160, 11), (11, 171), (20, 20), (30, 31)])
 
     c.add(p1)

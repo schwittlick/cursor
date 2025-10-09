@@ -13,7 +13,7 @@ PEN_UP = 0.0
 
 
 def parse_xyz(gcode: str) -> tuple[float, float, float] | None:
-    pattern = r'X(-?\d+\.\d+)\s+Y(-?\d+\.\d+)\s+Z(-?\d+\.\d+)'
+    pattern = r"X(-?\d+\.\d+)\s+Y(-?\d+\.\d+)\s+Z(-?\d+\.\d+)"
     matches = re.search(pattern, gcode)
     if matches:
         x_value = float(matches.group(1))
@@ -24,7 +24,7 @@ def parse_xyz(gcode: str) -> tuple[float, float, float] | None:
 
 
 def parse_xy(gcode: str) -> tuple[float, float] | None:
-    pattern = r'X(-?\d+\.\d+)\s+Y(-?\d+\.\d+)'
+    pattern = r"X(-?\d+\.\d+)\s+Y(-?\d+\.\d+)"
     matches = re.search(pattern, gcode)
     if matches:
         x_value = float(matches.group(1))
@@ -34,7 +34,7 @@ def parse_xy(gcode: str) -> tuple[float, float] | None:
 
 
 def parse_z(gcode: str) -> float | None:
-    pattern = r'Z(-?\d+\.\d+)'
+    pattern = r"Z(-?\d+\.\d+)"
     matches = re.search(pattern, gcode)
     if matches:
         z_value = float(matches.group(1))
@@ -62,7 +62,7 @@ class GCODEParser:
         if type(gcode) is list:
             gcode_cmds = gcode
         else:
-            gcode_cmds = open(gcode.as_posix(), 'r', newline='').readlines()
+            gcode_cmds = open(gcode.as_posix(), "r", newline="").readlines()
 
         c = Collection()
 

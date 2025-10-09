@@ -22,22 +22,21 @@ class ColorDictionary:
     def __init__(self):
         self.colors: Dict[str, Color] = {}
 
-        data_path = pathlib.Path(__file__).parent / \
-            "data" / "color_dictionary.json"
+        data_path = pathlib.Path(__file__).parent / "data" / "color_dictionary.json"
         self.load_colors(data_path.as_posix())
 
     def load_colors(self, json_file: str):
-        with open(json_file, 'r') as f:
+        with open(json_file, "r") as f:
             color_data = json.load(f)
 
         for color in color_data:
-            self.colors[color['name']] = Color(
-                name=color['name'],
-                hex=color['hex'],
-                rgb=color['rgb'],
-                lab=color['lab'],
-                cmyk=color['cmyk'],
-                combinations=color.get('combinations', [])
+            self.colors[color["name"]] = Color(
+                name=color["name"],
+                hex=color["hex"],
+                rgb=color["rgb"],
+                lab=color["lab"],
+                cmyk=color["cmyk"],
+                combinations=color.get("combinations", []),
             )
 
     def get_color(self, name: str) -> Color:
@@ -46,7 +45,7 @@ class ColorDictionary:
     def most_similar(self, target_color: Tuple[float, float, float]) -> Color:
         target_cie = colour.sRGB_to_XYZ(target_color)
 
-        min_delta = float('inf')
+        min_delta = float("inf")
         most_similar_color = None
 
         for color in self.colors.values():
@@ -59,7 +58,7 @@ class ColorDictionary:
 
         return most_similar_color
 
-    def compare_with_copic(self, copic_color: 'Color') -> Tuple[Color, float]:
+    def compare_with_copic(self, copic_color: "Color") -> Tuple[Color, float]:
         target_rgb = copic_color.as_srgb()
         color_dict_match = self.most_similar(target_rgb)
 

@@ -7,7 +7,7 @@ from time import sleep
 import serial
 from tqdm import tqdm
 
-from cursor.hpgl import read_until_char, LB_TERMINATOR
+from cursor.hpgl import LB_TERMINATOR, read_until_char
 from cursor.hpgl.plotter.plotter import HPGLPlotter
 
 
@@ -31,7 +31,7 @@ def send_and_receive(serial_connection: serial.Serial, command: str, timeout: fl
 
 
 def concat_commands(cmd_list: list[str]) -> str:
-    concatenated = ''
+    concatenated = ""
     for cmd in cmd_list:
         if cmd.startswith("LB"):
             concatenated += f"{cmd}{LB_TERMINATOR}"
@@ -90,7 +90,7 @@ class AsyncSerialSender(threading.Thread):
         with self.lock:
             # Insert the new commands at the current position
             logging.info(f"Inserting {len(commands)} into async sender at index: {self.current_command_index}")
-            self.commands[self.current_command_index:self.current_command_index] = commands
+            self.commands[self.current_command_index : self.current_command_index] = commands
 
     def run(self):
         while not self.stopped:
@@ -106,7 +106,7 @@ class AsyncSerialSender(threading.Thread):
                 end_index = min(self.current_command_index + self.command_batch, len(self.commands))
                 with self.lock:
                     logging.info(f"Getting commands from index: {self.current_command_index}, end: {end_index}")
-                    batched_commands = self.commands[self.current_command_index:end_index]
+                    batched_commands = self.commands[self.current_command_index : end_index]
                 cmds = concat_commands(batched_commands)
 
                 if self.do_software_handshake:
@@ -162,7 +162,7 @@ class SerialSender:
             with tqdm(total=len(commands)) as pbar:
                 pbar.update(0)
                 for i in range(0, len(commands), command_batch):
-                    batched_commands = commands[i:i + command_batch]
+                    batched_commands = commands[i : i + command_batch]
                     cmds = concat_commands(batched_commands)
                     wait_for_free_io_memory(plotter, len(cmds))
 

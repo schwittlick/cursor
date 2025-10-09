@@ -44,16 +44,11 @@ def save_collection_to_h5(collection: Collection, filename: str) -> None:
             all_y.extend(y_data)
             all_timestamps.extend(timestamp_data)
             path_properties.append(json.dumps(path.properties))
-            vertex_properties.extend([json.dumps(v.properties)
-                                     for v in path.vertices])
+            vertex_properties.extend([json.dumps(v.properties) for v in path.vertices])
 
         # Save all path data in compressed datasets
-        paths_group.create_dataset(
-            "x", data=np.array(all_x), compression="gzip", compression_opts=9
-        )
-        paths_group.create_dataset(
-            "y", data=np.array(all_y), compression="gzip", compression_opts=9
-        )
+        paths_group.create_dataset("x", data=np.array(all_x), compression="gzip", compression_opts=9)
+        paths_group.create_dataset("y", data=np.array(all_y), compression="gzip", compression_opts=9)
         paths_group.create_dataset(
             "timestamp",
             data=np.array(all_timestamps),
@@ -85,24 +80,18 @@ def save_dict_compressed(group, dictionary):
 def save_long_string(group, key, string_value):
     chunk_size = 1000000  # 1MB chunks
     num_chunks = (len(string_value) - 1) // chunk_size + 1
-    chunks = [
-        string_value[i * chunk_size: (i + 1) * chunk_size] for i in range(num_chunks)
-    ]
+    chunks = [string_value[i * chunk_size : (i + 1) * chunk_size] for i in range(num_chunks)]
 
     chunk_group = group.create_group(key)
     chunk_group.attrs["num_chunks"] = num_chunks
     for i, chunk in enumerate(chunks):
-        chunk_group.create_dataset(
-            f"chunk_{i}", data=chunk, dtype=h5py.special_dtype(vlen=str)
-        )
+        chunk_group.create_dataset(f"chunk_{i}", data=chunk, dtype=h5py.special_dtype(vlen=str))
 
 
 def save_string_list(group, key, string_list):
     chunk_size = 1000  # Number of strings per chunk
     num_chunks = (len(string_list) - 1) // chunk_size + 1
-    chunks = [
-        string_list[i * chunk_size: (i + 1) * chunk_size] for i in range(num_chunks)
-    ]
+    chunks = [string_list[i * chunk_size : (i + 1) * chunk_size] for i in range(num_chunks)]
 
     list_group = group.create_group(key)
     list_group.attrs["num_chunks"] = num_chunks
@@ -117,8 +106,7 @@ def save_string_list(group, key, string_list):
 
 def load_collection_from_h5(filename: str) -> Collection:
     with h5py.File(filename, "r") as f:
-        collection = Collection(
-            name=f.attrs["name"], timestamp=f.attrs["timestamp"])
+        collection = Collection(name=f.attrs["name"], timestamp=f.attrs["timestamp"])
 
         # Load collection properties
         if "properties" in f:
@@ -144,8 +132,7 @@ def load_collection_from_h5(filename: str) -> Collection:
                     y_data[vertex_index],
                     timestamp_data[vertex_index],
                 )
-                position.properties = json.loads(
-                    vertex_properties[vertex_index])
+                position.properties = json.loads(vertex_properties[vertex_index])
                 path.add_position(position)
                 vertex_index += 1
 
@@ -168,9 +155,7 @@ def load_long_string(string_group):
     num_chunks = string_group.attrs["num_chunks"]
     chunks = [string_group[f"chunk_{i}"][()] for i in range(num_chunks)]
     # Decode bytes to string if necessary
-    decoded_chunks = [
-        chunk.decode("utf-8") if isinstance(chunk, bytes) else chunk for chunk in chunks
-    ]
+    decoded_chunks = [chunk.decode("utf-8") if isinstance(chunk, bytes) else chunk for chunk in chunks]
     return "".join(decoded_chunks)
 
 
@@ -179,9 +164,5 @@ def load_string_list(group, key):
     num_chunks = list_group.attrs["num_chunks"]
     chunks = [list_group[f"chunk_{i}"][()] for i in range(num_chunks)]
     # Decode bytes to string if necessary
-    decoded_chunks = [
-        [item.decode("utf-8") if isinstance(item, bytes)
-         else item for item in chunk]
-        for chunk in chunks
-    ]
+    decoded_chunks = [[item.decode("utf-8") if isinstance(item, bytes) else item for item in chunk] for chunk in chunks]
     return [item for sublist in decoded_chunks for item in sublist]

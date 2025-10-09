@@ -26,9 +26,9 @@ class KDTree:
         """
 
         if dist_sq_func is None:
+
             def dist_sq_func(a, b):
-                return sum((x - b[i]) ** 2
-                           for i, x in enumerate(a))
+                return sum((x - b[i]) ** 2 for i, x in enumerate(a))
 
         # Convert points to (point, properties) pairs if they aren't already
         processed_points = []
@@ -48,8 +48,7 @@ class KDTree:
                 points.sort(key=lambda x: x[0][i])  # Sort by the i-th coordinate of the point
                 i = (i + 1) % dim
                 m = len(points) >> 1
-                return [make(points[:m], i), make(points[m + 1:], i),
-                        points[m]]
+                return [make(points[:m], i), make(points[m + 1 :], i), points[m]]
             if len(points) == 1:
                 return [None, None, points[0]]
 
@@ -74,9 +73,8 @@ class KDTree:
                     heapq.heappushpop(heap, (-dist_sq, tiebreaker, node[2]))
                 i = (i + 1) % dim
                 # Goes into the left branch, then the right branch if needed
-                for b in (dx < 0, dx >= 0)[:1 + (dx * dx < -heap[0][0])]:
-                    get_knn(node[b], point, k, return_dist_sq,
-                            heap, i, (tiebreaker << 1) | b)
+                for b in (dx < 0, dx >= 0)[: 1 + (dx * dx < -heap[0][0])]:
+                    get_knn(node[b], point, k, return_dist_sq, heap, i, (tiebreaker << 1) | b)
             if tiebreaker == 1:
                 if return_dist_sq:
                     return [(-h[0], h[2]) for h in sorted(heap)][::-1]

@@ -1,7 +1,7 @@
 import logging
+import pathlib
 import sys
 import tkinter as tk
-import pathlib
 from enum import Enum
 from tkinter import filedialog
 
@@ -58,7 +58,7 @@ def convert(file_path: pathlib.Path) -> list[str]:
     # blocks of e.g. emojis, to be aligned at the bottom
     im = im.transpose(Transpose.ROTATE_180)
 
-    im = im.convert('1')  # binary
+    im = im.convert("1")  # binary
     inverted_im = ImageOps.invert(im)
 
     # braille_image = BrailleTranslator().to_braille(im, "ascii")
@@ -73,7 +73,7 @@ def main():
     root = tk.Tk()
     root.withdraw()
 
-    file_path = filedialog.askopenfilename(initialdir='/home/marcel/braille/')
+    file_path = filedialog.askopenfilename(initialdir="/home/marcel/braille/")
 
     if not file_path:
         logging.warning("Not selected any file. Aborting")

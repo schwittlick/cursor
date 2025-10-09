@@ -23,16 +23,19 @@ arcade.enable_timings(100)
 class RealtimeRenderer(arcade.Window):
     def __init__(self, width, height, title, resizable: bool = False):
         super().__init__(
-            width=int(width), height=int(height), title=title, antialiasing=True, samples=16, gl_version=(4, 5),
-            resizable=resizable
+            width=int(width),
+            height=int(height),
+            title=title,
+            antialiasing=True,
+            samples=16,
+            gl_version=(4, 5),
+            resizable=resizable,
         )
         logging.info(f"RealtimeRenderer started {self.width}x{self.height}")
         arcade.set_background_color(arcade.color.GRAY)
         self.__title = title
         self.colors = [
-            (color, getattr(arcade.color, color))
-            for color in dir(arcade.color)
-            if not color.startswith("__")
+            (color, getattr(arcade.color, color)) for color in dir(arcade.color) if not color.startswith("__")
         ]
 
         self.frame_count = 0
@@ -67,8 +70,7 @@ class RealtimeRenderer(arcade.Window):
 
     def bloom(self):
         bloom_color_attachment = self.ctx.texture((self.width, self.height))
-        bloom_screen = self.ctx.framebuffer(
-            color_attachments=[bloom_color_attachment])
+        bloom_screen = self.ctx.framebuffer(color_attachments=[bloom_color_attachment])
 
         kernel_size = 1
         sigma = 5
@@ -81,9 +83,7 @@ class RealtimeRenderer(arcade.Window):
         return (
             bloom_color_attachment,
             bloom_screen,
-            postprocessing.BloomEffect(
-                (self.width, self.height), kernel_size, sigma, mu, multiplier, step
-            ),
+            postprocessing.BloomEffect((self.width, self.height), kernel_size, sigma, mu, multiplier, step),
         )
 
     @property
@@ -98,8 +98,7 @@ class RealtimeRenderer(arcade.Window):
         folder.mkdir(parents=True, exist_ok=True)
         logging.info(f"saving {fn.as_posix()}")
         try:
-            arcade.get_image(0, 0, self.width, self.height).save(
-                fn.as_posix(), "PNG")
+            arcade.get_image(0, 0, self.width, self.height).save(fn.as_posix(), "PNG")
         except ValueError as ve:
             logging.error(f"Couldn't get image {ve}")
         except OSError as oe:
@@ -117,17 +116,17 @@ class RealtimeRenderer(arcade.Window):
         self._background = arcade.load_texture(p)
 
     def add_slider(
-            self,
-            cb_func: typing.Callable[[float], None],
-            name: str,
-            value: int,
-            min_value: int,
-            max_value: int,
-            x: int = 50,
-            y: int = 50,
-            w: int = 500,
-            h: int = 30,
-            text_color=arcade.color.GRAY,
+        self,
+        cb_func: typing.Callable[[float], None],
+        name: str,
+        value: int,
+        min_value: int,
+        max_value: int,
+        x: int = 50,
+        y: int = 50,
+        w: int = 500,
+        h: int = 30,
+        text_color=arcade.color.GRAY,
     ):
         ui_slider = UISlider(
             x=x,
@@ -138,8 +137,7 @@ class RealtimeRenderer(arcade.Window):
             width=w,
             height=h,
         )
-        ui_label = UILabel(
-            x=x + w, y=y, text=f"{name}: {value}", text_color=text_color)
+        ui_label = UILabel(x=x + w, y=y, text=f"{name}: {value}", text_color=text_color)
 
         @ui_slider.event()
         def on_change(event: UIOnChangeEvent):
@@ -193,8 +191,7 @@ class RealtimeRenderer(arcade.Window):
         _line_width = p.width if p.width else line_width
         _color = p.color if p.color else color
 
-        line_strip = arcade.create_line_strip(
-            p.as_tuple_list(), _color, _line_width)
+        line_strip = arcade.create_line_strip(p.as_tuple_list(), _color, _line_width)
         self.shapes.append(line_strip)
 
         if self.render_points:
@@ -209,9 +206,7 @@ class RealtimeRenderer(arcade.Window):
 
         self.shapes.append(arcade.create_polygon(p.as_tuple_list(), color))
 
-    def add_collection(
-            self, c: Collection, line_width: float = 5, color: arcade.color = None
-    ):
+    def add_collection(self, c: Collection, line_width: float = 5, color: arcade.color = None):
         if not color:
             color = random.choice(self.colors)[1]
         [self.add_path(p, line_width, color) for p in c]
@@ -222,9 +217,7 @@ class RealtimeRenderer(arcade.Window):
         self.camera.use()
 
         if self._background:
-            arcade.draw_lrwh_rectangle_textured(
-                0, 0, self.width, self.height, self._background
-            )
+            arcade.draw_lrwh_rectangle_textured(0, 0, self.width, self.height, self._background)
 
         # self.bloom_screen.use()
         # self.bloom_screen.clear((0, 0, 0, 0))

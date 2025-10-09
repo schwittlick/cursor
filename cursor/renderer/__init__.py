@@ -19,7 +19,7 @@ class PathIterator:
                 yield point
 
     def connections(
-            self,
+        self,
     ) -> typing.Iterator[tuple[Position, Position]]:
         prev = None
 

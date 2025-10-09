@@ -8,11 +8,7 @@ import random
 if __name__ == "__main__":
     collection = Collection()
     for _ in range(10000):
-        collection.add(
-            Path.from_tuple_list(
-                [(random.uniform(-100, 100), random.uniform(-100, 100))]
-            )
-        )
+        collection.add(Path.from_tuple_list([(random.uniform(-100, 100), random.uniform(-100, 100))]))
     collection.fast_tsp(plot_preview=True, duration_seconds=1)
     travel = collection.calc_pen_down_distance(40)
     logging.info(f"Total dist: {travel}")

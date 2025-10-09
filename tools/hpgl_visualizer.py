@@ -1,6 +1,15 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QOpenGLWidget, QPushButton, QVBoxLayout, QHBoxLayout, QWidget, \
-    QSlider, QFileDialog
+from PyQt5.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QOpenGLWidget,
+    QPushButton,
+    QVBoxLayout,
+    QHBoxLayout,
+    QWidget,
+    QSlider,
+    QFileDialog,
+)
 from PyQt5.QtCore import QTimer, Qt
 from OpenGL.GL import *
 import time
@@ -46,15 +55,15 @@ class HPGLVisualizer(QOpenGLWidget):
         glBegin(GL_LINES)
         for i in range(self.current_command):
             cmd = self.commands[i]
-            if cmd[0] == 'PD':
+            if cmd[0] == "PD":
                 # Rotate coordinates 90° clockwise: (x,y) -> (y,-x)
                 glVertex2f(cmd[1][1], cmd[1][0])
                 glVertex2f(cmd[2][1], cmd[2][0])
         glEnd()
 
     def load_hpgl(self, filename):
-        with open(filename, 'r') as file:
-            hpgl_data = file.read().replace('\n', '')
+        with open(filename, "r") as file:
+            hpgl_data = file.read().replace("\n", "")
 
         coll = HPGLParser().parse(hpgl_data)
         self.bb = coll.bb()
@@ -66,19 +75,19 @@ class HPGLVisualizer(QOpenGLWidget):
 
         for token in tokens:
             cmd = token[:2]
-            params = token[2:].split(',')
+            params = token[2:].split(",")
 
-            if cmd == 'PD':
+            if cmd == "PD":
                 self.pen_down = True
-            elif cmd == 'PU':
+            elif cmd == "PU":
                 self.pen_down = False
-            elif cmd == 'PA':
+            elif cmd == "PA":
                 if params and len(params) >= 2:
                     new_pos = (int(params[0]), int(params[1]))
                     if self.pen_down:
-                        self.commands.append(('PD', current_pos, new_pos))
+                        self.commands.append(("PD", current_pos, new_pos))
                     current_pos = new_pos
-            elif cmd == 'VS':
+            elif cmd == "VS":
                 if params:
                     self.speed = int(params[0])
 
@@ -156,7 +165,7 @@ class MainWindow(QMainWindow):
         self.visualizer.change_speed(value)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()

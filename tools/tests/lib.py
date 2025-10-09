@@ -18,9 +18,13 @@ def compute_2d_coordinates(point_3d, basis1, basis2):
     return np.array([coord1, coord2])
 
 
-def project(point_list: list[list[list[float]]], plane_point: np.array = np.array([0, 0, 0]),
-            plane_normal: np.array = np.array([0, 0, 1]), basis1: np.array = np.array([1, 0, 0]),
-            basis2: np.array = np.array([0, 1, 0])):
+def project(
+    point_list: list[list[list[float]]],
+    plane_point: np.array = np.array([0, 0, 0]),
+    plane_normal: np.array = np.array([0, 0, 1]),
+    basis1: np.array = np.array([1, 0, 0]),
+    basis2: np.array = np.array([0, 1, 0]),
+):
     c = Collection()
 
     for line in point_list:

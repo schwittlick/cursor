@@ -48,9 +48,7 @@ class Sender:
     def __init__(self, port: str, baud: int):
         self.__feedback = None
         self.__model = None
-        self.__serial = Serial(
-            port=port, baudrate=baud, parity=serial.PARITY_NONE, timeout=2
-        )
+        self.__serial = Serial(port=port, baudrate=baud, parity=serial.PARITY_NONE, timeout=2)
 
     @staticmethod
     def show_progress(pos, total: int, length: int = 100):
@@ -87,7 +85,7 @@ class Sender:
         if self.__feedback is False:
             return 0, False
 
-        self.__serial.write(b"\x1B.B")
+        self.__serial.write(b"\x1b.B")
         b = b""
         n = 0
 
@@ -169,8 +167,7 @@ def main():
     sender = Sender(args.port, args.baud)
     data, feedback_success = sender.does_feedback()
     log.good(
-        f"plotter at {args.port} ({sender.model()}) w/ "
-        f"baud {args.baud} returned {data}, success={feedback_success}"
+        f"plotter at {args.port} ({sender.model()}) w/ baud {args.baud} returned {data}, success={feedback_success}"
     )
 
     if not args.file:

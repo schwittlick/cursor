@@ -12,6 +12,7 @@ path being cyclic, the tension, and the curl.
 
 # Run `pytest test.py`.
 
+
 def test_cyclic():
     """Test algorithms against each other for different points with cyclic specified."""
     run_and_compare_algorithms(cyclic=True)
@@ -55,6 +56,7 @@ def run_and_compare_algorithms(tension=1, cyclic=False, curl=1):
     """Wrapper for testing running the algorithms against each other."""
     for num_points in range(10, 21):
         input_points = generate_points(num_points)
-        ctrl_points = HobbyCurve(input_points, cyclic=cyclic, tension=tension, begin_curl=curl,
-                                 end_curl=curl).get_ctrl_points()
+        ctrl_points = HobbyCurve(
+            input_points, cyclic=cyclic, tension=tension, begin_curl=curl, end_curl=curl
+        ).get_ctrl_points()
         assert ctrl_points

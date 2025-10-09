@@ -27,10 +27,12 @@ jobs:
           command: Xvfb -ac :99 -screen 0 1920x1080x16 +extension RANDR > /dev/null 2>&1
           background: true
       - run:
-          name: Run Flake8
+          name: Run Ruff
           command: |
             mkdir -p cursor/tests/artifacts
-            flake8 . --count --exit-zero --max-complexity=10 --max-line-length=120 --ignore=E402,W503,E203,E303,E722,E741,E731,W504 --statistics --output-file cursor/tests/artifacts/flake8_report.txt
+            pip3 install ruff
+            ruff check . --output-format=text > cursor/tests/artifacts/ruff_report.txt || true
+            ruff format --check .
       - run:
           name: Run tests
           command: |

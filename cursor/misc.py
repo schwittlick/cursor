@@ -15,9 +15,9 @@ def calc_distance(vec_1: np.ndarray, vec_2: np.ndarray) -> np.ndarray:
     res = np.empty((vec_1.shape[0], vec_2.shape[0]), dtype=np.float64)
     for i in nb.prange(vec_1.shape[0]):
         for j in range(vec_2.shape[0]):
-            res[i, j] = np.sqrt((vec_1[i, 0] - vec_2[j, 0])
-                                ** 2 + (vec_1[i, 1] - vec_2[j, 1])
-                                ** 2 + (vec_1[i, 2] - vec_2[j, 2]) ** 2)
+            res[i, j] = np.sqrt(
+                (vec_1[i, 0] - vec_2[j, 0]) ** 2 + (vec_1[i, 1] - vec_2[j, 1]) ** 2 + (vec_1[i, 2] - vec_2[j, 2]) ** 2
+            )
 
     return res
 
@@ -87,11 +87,11 @@ def convert_pynput_btn_to_key(btn: pynput.keyboard.Key) -> Optional[str]:
 
 def generate_perlin_noise_2d(shape: Tuple[int, int], res: Tuple[int, int]) -> np.ndarray:
     def f(t):
-        return 6 * t ** 5 - 15 * t ** 4 + 10 * t ** 3
+        return 6 * t**5 - 15 * t**4 + 10 * t**3
 
     delta = (res[0] / shape[0], res[1] / shape[1])
     d = (shape[0] // res[0], shape[1] // res[1])
-    grid = np.mgrid[0: res[0]: delta[0], 0: res[1]: delta[1]].transpose(1, 2, 0) % 1
+    grid = np.mgrid[0 : res[0] : delta[0], 0 : res[1] : delta[1]].transpose(1, 2, 0) % 1
     # Gradients
     angles = 2 * np.pi * np.random.rand(res[0] + 1, res[1] + 1)
     gradients = np.dstack((np.cos(angles), np.sin(angles)))
@@ -168,10 +168,9 @@ def current_source(frame: inspect.FrameInfo) -> str:
     return inspect.getsource(inspect.getmodule(frame))
 
 
-def transformFn(stl: Tuple[float, float],
-                sbr: Tuple[float, float],
-                dtl: Tuple[float, float],
-                dbr: Tuple[float, float]) -> Callable[[Position], Position]:
+def transformFn(
+    stl: Tuple[float, float], sbr: Tuple[float, float], dtl: Tuple[float, float], dbr: Tuple[float, float]
+) -> Callable[[Position], Position]:
     """
     ty lars wander
     https://larswander.com/writing/centering-and-scaling/
@@ -199,14 +198,16 @@ def transformFn(stl: Tuple[float, float],
 
 def apply_matrix(pa: List[Tuple[float, float]], _ma: Any) -> List[Tuple[float, float]]:
     l = LineString(pa)
-    xx, yy, = affine_transform(l, _ma).coords.xy
+    (
+        xx,
+        yy,
+    ) = affine_transform(l, _ma).coords.xy
     return zip(yy, xx)
 
 
-def line_intersection(ray_origin: np.ndarray,
-                      ray_direction: np.ndarray,
-                      segment_start: np.ndarray,
-                      segment_end: np.ndarray) -> Optional[List[float]]:
+def line_intersection(
+    ray_origin: np.ndarray, ray_direction: np.ndarray, segment_start: np.ndarray, segment_end: np.ndarray
+) -> Optional[List[float]]:
     # Calculate differences
     d_se = segment_end - segment_start
     d_ro_s_s = ray_origin - segment_start
@@ -249,8 +250,8 @@ def split_list_into_chunks(lst: List[Any], n: int) -> List[List[Any]]:
 
 
 def split_list_into_chunks_of_size(lst: List[Any], chunksize: int) -> List[List[Any]]:
-    """ Splits list into chunks, where each chunk has certain size. Last chunk will contain remaining """
+    """Splits list into chunks, where each chunk has certain size. Last chunk will contain remaining"""
     chunks = []
     for i in range(0, len(lst), chunksize):
-        chunks.append(lst[i:i + chunksize])
+        chunks.append(lst[i : i + chunksize])
     return chunks

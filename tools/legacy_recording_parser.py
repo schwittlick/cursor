@@ -55,9 +55,7 @@ def parse_and_save_v1():
                         rows.append(row)
 
                     for row in rows[1:]:
-                        pos = cursor.position.Position(
-                            int(row[2]) / res[0], int(row[3]) / res[1], int(row[1])
-                        )
+                        pos = cursor.position.Position(int(row[2]) / res[0], int(row[3]) / res[1], int(row[1]))
                         newpath.add_position(pos)
 
                 c.add(newpath)
@@ -91,9 +89,7 @@ def parse_and_save_v2():
                         rows.append(row)
 
                     for row in rows[1:]:
-                        pos = cursor.position.Position(
-                            int(row[2]) / res[0], int(row[3]) / res[1], int(row[1])
-                        )
+                        pos = cursor.position.Position(int(row[2]) / res[0], int(row[3]) / res[1], int(row[1]))
                         newpath.add_position(pos)
 
                 c.add(newpath)
@@ -102,6 +98,5 @@ def parse_and_save_v2():
 
 
 if __name__ == "__main__":
-
     parse_and_save_v1()
     parse_and_save_v2()

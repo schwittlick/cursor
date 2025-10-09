@@ -62,10 +62,7 @@ def main():
 
     def screenshot(renderer: RealtimeRenderer):
         suffix = pymsgbox.prompt("suffix", default="")
-        fn = (
-            DataDirHandler().jpg("svg2hpgl")
-            / f"{DateHandler().utc_timestamp()}_{suffix}.png"
-        )
+        fn = DataDirHandler().jpg("svg2hpgl") / f"{DateHandler().utc_timestamp()}_{suffix}.png"
         arcade.get_image().save(fn, "PNG")
         log.info(f"saved {fn}")
 
