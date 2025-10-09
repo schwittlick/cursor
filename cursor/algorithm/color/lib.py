@@ -1,13 +1,12 @@
 import logging
 import math
 
-from cursor.algorithm.color.copic import Copic, Color
+from cursor.algorithm.color.copic import Color, Copic
 from cursor.algorithm.color.copic_pen_enum import CopicColorCode
 from cursor.collection import Collection
 from cursor.path import Path
-from cursor.properties import Property
 from cursor.position import Position
-
+from cursor.properties import Property
 
 
 def convert_color_coordinates_to_collection(
