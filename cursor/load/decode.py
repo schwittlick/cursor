@@ -19,9 +19,9 @@ COLOR_PROPERTY = Property.COLOR
 
 def parse_position(obj: Dict[str, Any]) -> Position:
     pos = Position(obj["x"], obj["y"], obj["ts"])
-    ob = obj["c"]
+    
     if "c" in obj:
-        pos.properties[Property.COLOR] = ob
+        pos.properties[Property.COLOR] = obj["c"]
 
     return pos
 
