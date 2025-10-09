@@ -7,9 +7,7 @@ from cursor.collection import Collection
 from cursor.path import Path
 from cursor.properties import Property
 from cursor.position import Position
-import math
 
-from cursor.properties import Property
 
 
 def convert_color_coordinates_to_collection(

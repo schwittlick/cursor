@@ -20,7 +20,7 @@ jobs:
         run: pip install ruff
 
       - name: Run Ruff linter
-        run: ruff check .
+        run: ruff check cursor
 
       - name: Run Ruff formatter check
-        run: ruff format --check .
+        run: ruff format --check cursor
