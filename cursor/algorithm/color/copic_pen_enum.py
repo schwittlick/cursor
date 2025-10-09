@@ -108,6 +108,8 @@ class CopicColorCode(IntEnum):
     FYR = auto()
 
     # Yellow
+    Y000 = auto()
+    Y0000 = auto()
     Y00 = auto()
     Y02 = auto()
     Y04 = auto()
