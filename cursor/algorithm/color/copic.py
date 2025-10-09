@@ -14,9 +14,7 @@ from cursor.timer import timing
 
 
 class Color:
-    def __init__(
-            self, rgb: tuple[float, float, float], code: CCC = None, group: CCG = None, name: str = "NoName"
-    ):
+    def __init__(self, rgb: tuple[float, float, float], code: CCC = None, group: CCG = None, name: str = "NoName"):
         self.code = code
         self.group = group
         self.name = name
@@ -79,25 +77,23 @@ class Copic:
             all_data = "".join(copic_data_file.readlines())
             copic_data = json.loads(all_data)
             for element in copic_data:
+                id_str = element["id"]
+
+                if id_str == "110":
+                    id_str = "_110"  # can't use an enum starting with a number in python
                 try:
-                    id_str = element["id"]
-
-                    if id_str == "110":
-                        id_str = (
-                            "_110"  # can't use an enum starting with a number in python
-                        )
                     id = CCC[id_str]
-
-                    for ccg, ccc in self.available_colors_pens.items():
-                        if id in ccc:
-                            rgb = str(element["rgb"]).split(",")
-                            rgb_tup = int(rgb[0]) / 255, int(rgb[1]) / 255, int(rgb[2]) / 255
-                            color = Color(rgb_tup, id, ccg, element["name"])
-                            copic_data_final[id] = color
-                            copic_data_srgb_index_final[color.as_srgb()] = color
                 except KeyError:
                     # only adding colors that have been turned into a pen
-                    pass
+                    continue
+
+                for ccg, ccc in self.available_colors_pens.items():
+                    if id in ccc:
+                        rgb = str(element["rgb"]).split(",")
+                        rgb_tup = int(rgb[0]) / 255, int(rgb[1]) / 255, int(rgb[2]) / 255
+                        color = Color(rgb_tup, id, ccg, element["name"])
+                        copic_data_final[id] = color
+                        copic_data_srgb_index_final[color.as_srgb()] = color
         logging.info(".. done")
         return copic_data_final, copic_data_srgb_index_final
 
@@ -168,79 +164,209 @@ class Copic:
 def init_available_pens() -> dict[CCG, list[CCC]]:
     pens: dict[CCG, list[CCC]] = {}
 
-    pens[CCG.BLACK] = [
-        CCC._110
-    ]
+    pens[CCG.BLACK] = [CCC._110]
 
-    pens[CCG.BV] = [
-        CCC.BV0000, CCC.BV01, CCC.BV04, CCC.BV11, CCC.BV17, CCC.BV20, CCC.BV29, CCC.BV31, CCC.BV34
-    ]
+    pens[CCG.BV] = [CCC.BV0000, CCC.BV01, CCC.BV04, CCC.BV11, CCC.BV17, CCC.BV20, CCC.BV29, CCC.BV31, CCC.BV34]
 
-    pens[CCG.V] = [
-        CCC.V05, CCC.V09, CCC.V12, CCC.V15, CCC.V17, CCC.V20, CCC.V25, CCC.V91, CCC.V99, CCC.FV
-    ]
+    pens[CCG.V] = [CCC.V05, CCC.V09, CCC.V12, CCC.V15, CCC.V17, CCC.V20, CCC.V25, CCC.V91, CCC.V99, CCC.FV]
 
     pens[CCG.RV] = [
-        CCC.RV06, CCC.RV09, CCC.RV11, CCC.RV13, CCC.RV19, CCC.RV29, CCC.RV63, CCC.RV93,
+        CCC.RV06,
+        CCC.RV09,
+        CCC.RV11,
+        CCC.RV13,
+        CCC.RV19,
+        CCC.RV29,
+        CCC.RV63,
+        CCC.RV93,
         CCC.FRV1,
     ]
 
     pens[CCG.R] = [
-        CCC.R00, CCC.R01, CCC.R02, CCC.R05, CCC.R08, CCC.R11, CCC.R12, CCC.R14, CCC.R17, CCC.R20, CCC.R21,
-        CCC.R22, CCC.R24, CCC.R27, CCC.R29, CCC.R30, CCC.R32, CCC.R35, CCC.R37, CCC.R39, CCC.R43, CCC.R46,
-        CCC.R56, CCC.R59, CCC.R81, CCC.R83, CCC.R85, CCC.R89,
+        CCC.R00,
+        CCC.R01,
+        CCC.R02,
+        CCC.R05,
+        CCC.R08,
+        CCC.R11,
+        CCC.R12,
+        CCC.R14,
+        CCC.R17,
+        CCC.R20,
+        CCC.R21,
+        CCC.R22,
+        CCC.R24,
+        CCC.R27,
+        CCC.R29,
+        CCC.R30,
+        CCC.R32,
+        CCC.R35,
+        CCC.R37,
+        CCC.R39,
+        CCC.R43,
+        CCC.R46,
+        CCC.R56,
+        CCC.R59,
+        CCC.R81,
+        CCC.R83,
+        CCC.R85,
+        CCC.R89,
     ]
 
     pens[CCG.YR] = [
-        CCC.YR00, CCC.YR01, CCC.YR02, CCC.YR04, CCC.YR07, CCC.YR12, CCC.YR14, CCC.YR16, CCC.YR18, CCC.YR21,
-        CCC.YR23, CCC.YR24, CCC.YR27, CCC.YR61, CCC.YR68, CCC.FYR,
+        CCC.YR00,
+        CCC.YR01,
+        CCC.YR02,
+        CCC.YR04,
+        CCC.YR07,
+        CCC.YR12,
+        CCC.YR14,
+        CCC.YR16,
+        CCC.YR18,
+        CCC.YR21,
+        CCC.YR23,
+        CCC.YR24,
+        CCC.YR27,
+        CCC.YR61,
+        CCC.YR68,
+        CCC.FYR,
     ]
 
     pens[CCG.Y] = [
-        CCC.Y00, CCC.Y02, CCC.Y04, CCC.Y06, CCC.Y08, CCC.Y11, CCC.Y13, CCC.Y15, CCC.Y17, CCC.Y18, CCC.Y19,
-        CCC.Y21, CCC.Y23, CCC.Y26, CCC.Y28, CCC.Y32, CCC.Y35, CCC.Y38,
+        CCC.Y00,
+        CCC.Y02,
+        CCC.Y04,
+        CCC.Y06,
+        CCC.Y08,
+        CCC.Y11,
+        CCC.Y13,
+        CCC.Y15,
+        CCC.Y17,
+        CCC.Y18,
+        CCC.Y19,
+        CCC.Y21,
+        CCC.Y23,
+        CCC.Y26,
+        CCC.Y28,
+        CCC.Y32,
+        CCC.Y35,
+        CCC.Y38,
         CCC.FY1,
     ]
 
     pens[CCG.YG] = [
-        CCC.YG00, CCC.YG01, CCC.YG05, CCC.YG06, CCC.YG07, CCC.YG11, CCC.YG21, CCC.YG25, CCC.YG45, CCC.YG67,
-        CCC.YG91, CCC.YG99, CCC.FYG1,
+        CCC.YG00,
+        CCC.YG01,
+        CCC.YG05,
+        CCC.YG06,
+        CCC.YG07,
+        CCC.YG11,
+        CCC.YG21,
+        CCC.YG25,
+        CCC.YG45,
+        CCC.YG67,
+        CCC.YG91,
+        CCC.YG99,
+        CCC.FYG1,
     ]
 
     pens[CCG.G] = [
-        CCC.G00, CCC.G02, CCC.G03, CCC.G05, CCC.G07, CCC.G09, CCC.G12, CCC.G14, CCC.G16, CCC.G17, CCC.G19,
-        CCC.G20, CCC.G21, CCC.G24, CCC.G28, CCC.G29, CCC.G40, CCC.G43, CCC.G46, CCC.G82, CCC.G85, CCC.G94,
+        CCC.G00,
+        CCC.G02,
+        CCC.G03,
+        CCC.G05,
+        CCC.G07,
+        CCC.G09,
+        CCC.G12,
+        CCC.G14,
+        CCC.G16,
+        CCC.G17,
+        CCC.G19,
+        CCC.G20,
+        CCC.G21,
+        CCC.G24,
+        CCC.G28,
+        CCC.G29,
+        CCC.G40,
+        CCC.G43,
+        CCC.G46,
+        CCC.G82,
+        CCC.G85,
+        CCC.G94,
         CCC.G99,
         CCC.FYG2,
     ]
 
     pens[CCG.BG] = [
-        CCC.BG01, CCC.BG02, CCC.BG07, CCC.BG09, CCC.BG10, CCC.BG13, CCC.BG15, CCC.BG18, CCC.BG57, CCC.BG72,
+        CCC.BG01,
+        CCC.BG02,
+        CCC.BG07,
+        CCC.BG09,
+        CCC.BG10,
+        CCC.BG13,
+        CCC.BG15,
+        CCC.BG18,
+        CCC.BG57,
+        CCC.BG72,
         CCC.FBG2,
     ]
 
     pens[CCG.B] = [
-        CCC.B0000, CCC.B000, CCC.B00, CCC.B01, CCC.B02, CCC.B04, CCC.B05, CCC.B06, CCC.B12, CCC.B14, CCC.B16,
-        CCC.B18, CCC.B21, CCC.B23, CCC.B24, CCC.B26, CCC.B28, CCC.B29, CCC.B32, CCC.B34, CCC.B37, CCC.B39,
-        CCC.B41, CCC.B45, CCC.B52, CCC.B60, CCC.B63, CCC.B66, CCC.B69, CCC.B79, CCC.B91, CCC.B93, CCC.B95,
-        CCC.B97, CCC.B99,
+        CCC.B0000,
+        CCC.B000,
+        CCC.B00,
+        CCC.B01,
+        CCC.B02,
+        CCC.B04,
+        CCC.B05,
+        CCC.B06,
+        CCC.B12,
+        CCC.B14,
+        CCC.B16,
+        CCC.B18,
+        CCC.B21,
+        CCC.B23,
+        CCC.B24,
+        CCC.B26,
+        CCC.B28,
+        CCC.B29,
+        CCC.B32,
+        CCC.B34,
+        CCC.B37,
+        CCC.B39,
+        CCC.B41,
+        CCC.B45,
+        CCC.B52,
+        CCC.B60,
+        CCC.B63,
+        CCC.B66,
+        CCC.B69,
+        CCC.B79,
+        CCC.B91,
+        CCC.B93,
+        CCC.B95,
+        CCC.B97,
+        CCC.B99,
         CCC.FB2,
     ]
 
     pens[CCG.E] = [
-        CCC.E01, CCC.E04, CCC.E11, CCC.E17, CCC.E23, CCC.E37, CCC.E39, CCC.E53, CCC.E87, CCC.E97,
+        CCC.E01,
+        CCC.E04,
+        CCC.E11,
+        CCC.E17,
+        CCC.E23,
+        CCC.E37,
+        CCC.E39,
+        CCC.E53,
+        CCC.E87,
+        CCC.E97,
     ]
 
-    pens[CCG.W] = [
-        CCC.W1, CCC.W2, CCC.W3, CCC.W4, CCC.W5, CCC.W6, CCC.W8, CCC.W9, CCC.W10
-    ]
+    pens[CCG.W] = [CCC.W1, CCC.W2, CCC.W3, CCC.W4, CCC.W5, CCC.W6, CCC.W8, CCC.W9, CCC.W10]
 
-    pens[CCG.T] = [
-        CCC.T9
-    ]
+    pens[CCG.T] = [CCC.T9]
 
-    pens[CCG.N] = [
-        CCC.N1, CCC.N2, CCC.N3, CCC.N4, CCC.N5, CCC.N6, CCC.N7, CCC.N8, CCC.N9, CCC.N10
-    ]
+    pens[CCG.N] = [CCC.N1, CCC.N2, CCC.N3, CCC.N4, CCC.N5, CCC.N6, CCC.N7, CCC.N8, CCC.N9, CCC.N10]
 
     return pens
