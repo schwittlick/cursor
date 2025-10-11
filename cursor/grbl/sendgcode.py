@@ -1,13 +1,13 @@
+import logging
 import math
 import time
-import logging
 from argparse import ArgumentParser
 
 import serial
 from tqdm import tqdm
 
+from cursor.devices.psu import PSU
 from cursor.grbl.parser import parse_xyz
-from cursor.device.psu import PSU
 
 CHECK_FEEDBACK = True
 
