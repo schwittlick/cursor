@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import pathlib
 import logging
+import pathlib
 
 from cursor.collection import Collection
 
@@ -83,7 +83,7 @@ class GCodeRenderer:
 
                 if "delay" in point.properties.keys():
                     delay = point.properties["delay"]
-                    instructions.append(f"DELAY{delay:.2}")
+                    instructions.append(f"G04 P{delay:.2}")
 
                 if "laser" in point.properties.keys():
                     instructions.append("LASEROFF")
