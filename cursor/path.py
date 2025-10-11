@@ -3,6 +3,7 @@ from __future__ import annotations
 import collections
 import copy
 import hashlib
+import logging
 import math
 import sys
 import typing
@@ -10,10 +11,9 @@ import typing
 import numpy as np
 import pandas as pd
 import shapely
-from scipy import spatial
-from scipy import stats
-from shapely import union_all, Polygon
-from shapely.geometry import LineString, MultiLineString, JOIN_STYLE, Point
+from scipy import spatial, stats
+from shapely import Polygon, union_all
+from shapely.geometry import JOIN_STYLE, LineString, MultiLineString, Point
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import clip_by_rect
 from skimage.transform import estimate_transform
@@ -21,15 +21,11 @@ from skimage.transform import estimate_transform
 from cursor import misc
 from cursor.algorithm import ramer_douglas_peucker
 from cursor.algorithm.entropy import calc_entropy
-from cursor.algorithm.frechet import LinearDiscreteFrechet
-from cursor.algorithm.frechet import euclidean
+from cursor.algorithm.frechet import LinearDiscreteFrechet, euclidean
 from cursor.bb import BoundingBox
 from cursor.misc import apply_matrix, clamp, line_intersection
-from cursor.properties import Property
 from cursor.position import Position
-
-import logging
-
+from cursor.properties import Property
 from cursor.timer import timing
 
 
@@ -1076,6 +1072,8 @@ class Path:
                 new_b = np.interp(new_distances[i], distances, b_values)
 
                 new_point.color = (int(new_r), int(new_g), int(new_b))
+            if Property.LASER_DELAY in self[0].properties.keys():
+                new_point.properties[Property.LASER_DELAY] = self[0].properties[Property.LASER_DELAY]
 
             # Add other properties as needed
             new_points.append(new_point)
