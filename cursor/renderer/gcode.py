@@ -4,6 +4,7 @@ import logging
 import pathlib
 
 from cursor.collection import Collection
+from cursor.properties import Property
 
 
 class GCodeRenderer:
@@ -45,18 +46,18 @@ class GCodeRenderer:
                 # dont skip pen up move if property was set
                 instructions.append(self.g01(x, y, self.z_up))
 
-            if "z" in self.paths[0].properties:
-                z = self.paths[0].properties["z"]
+            if Property.LASER_Z in self.paths[0].properties:
+                z = self.paths[0].properties[Property.LASER_Z]
 
             # instructions.append(self.g01(x, y, z))
 
-            if "laser" in p.properties:
+            if Property.LASER_ONOFF in p.properties:
                 instructions.append("LASERON")
-            if "amp" in p.properties.keys():
-                amp = p.properties["amp"]
+            if Property.LASER_AMP in p.properties.keys():
+                amp = p.properties[Property.LASER_AMP]
                 instructions.append(f"AMP{amp:.3}")
-            if "volt" in p.properties.keys():
-                volt = p.properties["volt"]
+            if Property.LASER_VOLT in p.properties.keys():
+                volt = p.properties[Property.LASER_VOLT]
                 instructions.append(f"VOLT{volt:.3}")
 
             for point in p.vertices:
@@ -66,26 +67,26 @@ class GCodeRenderer:
                     y = -y
                 z = self.z_down
 
-                if "z" in point.properties.keys():
-                    z = point.properties["z"]
+                if Property.LASER_Z in point.properties.keys():
+                    z = point.properties[Property.LASER_Z]
 
-                if "amp" in point.properties.keys():
-                    amp = point.properties["amp"]
+                if Property.LASER_AMP in point.properties.keys():
+                    amp = point.properties[Property.LASER_AMP]
                     instructions.append(f"AMP{amp:.3}")
-                if "volt" in point.properties.keys():
-                    volt = point.properties["volt"]
+                if Property.LASER_VOLT in point.properties.keys():
+                    volt = point.properties[Property.LASER_VOLT]
                     instructions.append(f"VOLT{volt:.3}")
 
                 instructions.append(self.g01(x, y, z))
 
-                if "laser" in point.properties.keys():
+                if Property.LASER_ONOFF in point.properties.keys():
                     instructions.append("LASERON")
 
-                if "delay" in point.properties.keys():
-                    delay = point.properties["delay"]
+                if Property.LASER_DELAY in point.properties.keys():
+                    delay = point.properties[Property.LASER_DELAY]
                     instructions.append(f"G04 P{delay:.2}")
 
-                if "laser" in point.properties.keys():
+                if Property.LASER_ONOFF in point.properties.keys():
                     instructions.append("LASEROFF")
 
             if p.laser_onoff:
