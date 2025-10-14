@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: cursorshop.py (Debug)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/../cursor-data/compositions/composition100/cursorshop.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "python": "${workspaceFolder}/venv311/Scripts/python.exe",
+            "subProcess": true,
+            "env": {
+                "PYDEVD_WARN_EVALUATION_TIMEOUT": "30",
+                "PYDEVD_UNBLOCK_THREADS_TIMEOUT": "30"
+            }
+        }
+    ]
+}
