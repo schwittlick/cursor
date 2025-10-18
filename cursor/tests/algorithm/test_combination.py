@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import colour
 
 from cursor.algorithm.color.combinations import (
@@ -12,32 +10,6 @@ from cursor.algorithm.color.copic import Color as CopicColor
 from cursor.algorithm.color.copic import Copic
 from cursor.algorithm.color.copic_pen_enum import CopicColorCode as CCC
 from cursor.algorithm.color.copic_pen_enum import CopicColorGroup as CCG
-
-
-def find_similar_copic_color(
-    color_dict: ColorDictionary, copic: Copic, target_color_name: str
-) -> Tuple[CopicColor, float]:
-    target_color = color_dict.get_color(target_color_name)
-    if not target_color:
-        raise ValueError(f"Color '{target_color_name}' not found in ColorDictionary")
-
-    target_rgb = tuple(v / 255 for v in target_color.rgb)
-    target_xyz = colour.sRGB_to_XYZ(target_rgb)
-    target_lab = colour.XYZ_to_Lab(target_xyz)
-
-    min_delta = float("inf")
-    most_similar_color = None
-
-    for copic_color in copic.available_colors.values():
-        copic_xyz = colour.sRGB_to_XYZ(copic_color.as_srgb())
-        copic_lab = colour.XYZ_to_Lab(copic_xyz)
-        delta = colour.delta_E(target_lab, copic_lab, method="CIE 2000")
-
-        if delta < min_delta:
-            min_delta = delta
-            most_similar_color = copic_color
-
-    return most_similar_color, min_delta
 
 
 def test_comparison():
@@ -54,7 +26,7 @@ def test_more():
 
     # target_color_name = "Dark Tyrian Blue"
     target_color_name = "Pinkish Cinnamon"
-    similar_copic, delta = find_similar_copic_color(color_dict, copic, target_color_name)
+    similar_copic, delta = color_dict.find_similar_copic_color(target_color_name)
 
     target_color = color_dict.get_color(target_color_name)
     print(f"Target color: {target_color_name} (#{target_color.hex})")
@@ -206,7 +178,6 @@ def test_contrasting_colors_invalid_params():
 
 def test_contrasting_colors_cross_group_basic():
     """Test basic cross-group color selection"""
-    copic = Copic()
     min_contrast = 4
     count = 3
 
@@ -415,7 +386,6 @@ def test_similar_colors_multiple_runs():
 
 def test_parse_copic_code_standard_formats():
     """Test parsing of standard Copic color codes"""
-    from cursor.algorithm.color.copic_pen_enum import CopicColorCode as CCC
 
     # Test standard two-digit codes (saturation + brightness)
     # R05: saturation=0, brightness=5
@@ -431,7 +401,6 @@ def test_parse_copic_code_standard_formats():
 
 def test_parse_copic_code_single_digit():
     """Test parsing of single-digit color codes (brightness only)"""
-    from cursor.algorithm.color.copic_pen_enum import CopicColorCode as CCC
 
     # W4: single digit = brightness only, saturation=0
     result = parse_copic_code(CCC.W4)
@@ -440,7 +409,6 @@ def test_parse_copic_code_single_digit():
 
 def test_parse_copic_code_multi_digit_brightness():
     """Test parsing of codes with multi-digit brightness values"""
-    from cursor.algorithm.color.copic_pen_enum import CopicColorCode as CCC
 
     # Test 4-digit codes: first digit = saturation, remaining = brightness
     # B000: saturation=0, brightness=0
@@ -456,7 +424,6 @@ def test_parse_copic_code_multi_digit_brightness():
 
 def test_parse_copic_code_special_colors():
     """Test parsing of special color codes (non-standard naming)"""
-    from cursor.algorithm.color.copic_pen_enum import CopicColorCode as CCC
 
     # FBG2: special color - saturation should be 5, brightness=2
     result = parse_copic_code(CCC.FBG2)
@@ -474,7 +441,6 @@ def test_parse_copic_code_special_colors():
 
 def test_parse_copic_code_consistency():
     """Test that parsing the same code multiple times gives consistent results for standard codes"""
-    from cursor.algorithm.color.copic_pen_enum import CopicColorCode as CCC
 
     # Standard codes should be deterministic
     result1 = parse_copic_code(CCC.R05)
@@ -488,7 +454,6 @@ def test_parse_copic_code_consistency():
 
 def test_parse_copic_code_various_groups():
     """Test parsing colors from various color groups"""
-    from cursor.algorithm.color.copic_pen_enum import CopicColorCode as CCC
 
     # Test different color groups to ensure letter prefix doesn't affect parsing
     # All should follow same rule: first digit = saturation, rest = brightness

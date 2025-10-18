@@ -48,7 +48,7 @@ class Color:
 class Copic:
     _instance = None
     available_colors_pens = None
-    available_colors = None
+    available_colors = {}
     rgb_kdtree = None
 
     def __new__(cls):

@@ -79,6 +79,29 @@ class ColorDictionary:
 
         return color_dict_match, float(delta)
 
+    def find_similar_copic_color(self, target_color_name: str) -> tuple[CopicColor, float]:
+        target_color = self.get_color(target_color_name)
+        if not target_color:
+            raise ValueError(f"Color '{target_color_name}' not found in ColorDictionary")
+
+        target_rgb = tuple(v / 255 for v in target_color.rgb)
+        target_xyz = colour.sRGB_to_XYZ(target_rgb)
+        target_lab = colour.XYZ_to_Lab(target_xyz)
+
+        min_delta = float("inf")
+        most_similar_color = None
+
+        for copic_color in Copic().available_colors.values():
+            copic_xyz = colour.sRGB_to_XYZ(copic_color.as_srgb())
+            copic_lab = colour.XYZ_to_Lab(copic_xyz)
+            delta = colour.delta_E(target_lab, copic_lab, method="CIE 2000")
+
+            if delta < min_delta:
+                min_delta = delta
+                most_similar_color = copic_color
+
+        return most_similar_color, min_delta  # type: ignore
+
 
 def parse_copic_code(code: CCC) -> tuple[int, int]:
     """
