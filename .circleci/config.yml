@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/cursor
     docker:
-      - image: python:3.11
+      - image: python:3.13.9
     steps:
       - checkout
       - run:
@@ -31,7 +31,7 @@ jobs:
           command: |
             mkdir -p cursor/tests/artifacts
             pip3 install ruff
-            ruff check cursor --output-format=text > cursor/tests/artifacts/ruff_report.txt || true
+            ruff check cursor --output-format=concise > cursor/tests/artifacts/ruff_report.txt || true
             ruff format --check .
       - run:
           name: Run tests

@@ -1,10 +1,10 @@
 import math
-import numpy as np
-from typing import Callable, Dict
-from numba import jit, types, int32, int64
-from numba import typed
+from multiprocessing import Manager, Process
 from timeit import default_timer as timer
-from multiprocessing import Process, Manager
+from typing import Callable, Dict
+
+import numpy as np
+from numba import int32, int64, jit, typed, types
 
 
 def parallel_function(paths, out_array, idx, reference_path):
@@ -179,7 +179,7 @@ class DiscreteFrechet(object):
                     d,
                 )
             else:
-                self.ca[i, j] = np.infty
+                self.ca[i, j] = np.inf
             return self.ca[i, j]
 
         n_p = p.shape[0]
@@ -210,7 +210,7 @@ def _get_linear_frechet(
             elif i == 0 and j == 0:
                 ca[i, j] = d
             else:
-                ca[i, j] = np.infty
+                ca[i, j] = np.inf
     return ca
 
 
@@ -279,7 +279,7 @@ class VectorizedDiscreteFrechet(DiscreteFrechet):
                     d,
                 )
             else:
-                self.ca[i, j] = np.infty
+                self.ca[i, j] = np.inf
             return self.ca[i, j]
 
         n_p = p.shape[0]
