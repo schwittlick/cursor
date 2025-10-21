@@ -9,7 +9,7 @@ import colour
 
 from cursor.algorithm.color.copic_pen_enum import CopicColorCode as CCC
 from cursor.algorithm.color.copic_pen_enum import CopicColorGroup as CCG
-from cursor.algorithm.kd import KDTree
+from cursor.algorithm.kd2 import KDTree
 from cursor.timer import timing
 
 
@@ -125,11 +125,11 @@ class Copic:
         add that data to the json
         """
         if not self.rgb_kdtree:
-            rgb_points = [color.as_srgb() for ccc, color in self.available_colors.items()]
+            rgb_points = [(color.as_srgb(), color) for ccc, color in self.available_colors.items()]
             self.rgb_kdtree = KDTree(rgb_points, 3)
 
-        rgb_dist, closest_color = self.rgb_kdtree.get_nearest(c1_rgbs)
-        closest = self.available_colors_rgb_index[closest_color[0]]
+        rgb_dist, closest_color = self.rgb_kdtree.get_nearest(c1_rgbs, return_distance=True)
+        closest_rgb, closest = closest_color
         return closest
 
     @timing
