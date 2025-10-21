@@ -67,7 +67,7 @@ def test_gradient():
 
     # Basic assertions
     assert len(gradient) == steps + 1, f"Gradient should have {steps + 1} colors (including start and end)"
-    assert all(hasattr(color, 'as_srgb') for color in gradient), "All gradient elements should be Color objects"
+    assert all(hasattr(color, "as_srgb") for color in gradient), "All gradient elements should be Color objects"
 
     # First and last colors should match input colors (when clamped to copic)
     assert gradient[0] == c1, "First color in gradient should match start color"
