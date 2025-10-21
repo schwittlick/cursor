@@ -3,13 +3,13 @@
 [![schwittlick](https://circleci.com/gh/schwittlick/cursor.svg?style=shield)](https://app.circleci.com/pipelines/github/schwittlick/cursor)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/schwittlick/cursor.svg?style=flat-square)
 [![GitHub license](https://img.shields.io/github/license/schwittlick/cursor.svg?style=flat-square)](https://github.com/schwittlick/cursor/blob/master/LICENSE)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/ambv/black)
-[![Python 3.10.14](https://img.shields.io/badge/python-3.10.14-blue.svg)](https://www.python.org/downloads/release/python-31014/)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Python 3.13.9](https://img.shields.io/badge/python-3.13.9-blue.svg)](https://www.python.org/downloads/release/python-3139/)
 
 setup
 
-    pyenv install 3.10.14
-    pyenv virtualenv 3.10.14 cursor
+    pyenv install 3.13.9
+    pyenv virtualenv 3.13.9 cursor
     pyenv activate cursor
     pip install -r requirements.txt
     git submodule update --init
