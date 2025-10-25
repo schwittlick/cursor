@@ -57,6 +57,7 @@ uv venv --python 3.14
 source .venv/bin/activate
 
 uv pip install -r requirements.txt
+uv pip install -e .
 
 git submodule update --init
 ```
