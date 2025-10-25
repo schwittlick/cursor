@@ -1,7 +1,13 @@
+import math
 from multiprocessing import Manager, Process
 from typing import Callable
 
 import numpy as np
+
+
+def euclidean(p: np.ndarray, q: np.ndarray) -> float:
+    d = p - q
+    return math.sqrt(np.dot(d, d))
 
 
 def parallel_function(paths, out_array, idx, reference_path):
