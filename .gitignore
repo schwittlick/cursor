@@ -11,3 +11,4 @@ JetBrainsMono-Regular.pkl
 *.h5
 config_local.ini
 .claude
+uv.lock

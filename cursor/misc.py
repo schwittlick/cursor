@@ -1,25 +1,12 @@
 import inspect
-from typing import List, Tuple, Callable, Optional, Any
+from typing import Any, Callable, List, Optional, Tuple
 
-import numba as nb
 import numpy as np
 import pynput
 from shapely import LineString
 from shapely.affinity import affine_transform
 
 from cursor.position import Position
-
-
-@nb.njit(fastmath=True, parallel=True)
-def calc_distance(vec_1: np.ndarray, vec_2: np.ndarray) -> np.ndarray:
-    res = np.empty((vec_1.shape[0], vec_2.shape[0]), dtype=np.float64)
-    for i in nb.prange(vec_1.shape[0]):
-        for j in range(vec_2.shape[0]):
-            res[i, j] = np.sqrt(
-                (vec_1[i, 0] - vec_2[j, 0]) ** 2 + (vec_1[i, 1] - vec_2[j, 1]) ** 2 + (vec_1[i, 2] - vec_2[j, 2]) ** 2
-            )
-
-    return res
 
 
 def mix(begin: float, end: float, perc: float) -> float:

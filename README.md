@@ -3,8 +3,10 @@
 [![schwittlick](https://circleci.com/gh/schwittlick/cursor.svg?style=shield)](https://app.circleci.com/pipelines/github/schwittlick/cursor)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/schwittlick/cursor.svg?style=flat-square)
 [![GitHub license](https://img.shields.io/github/license/schwittlick/cursor.svg?style=flat-square)](https://github.com/schwittlick/cursor/blob/master/LICENSE)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![Python 3.13.9](https://img.shields.io/badge/python-3.13.9-blue.svg)](https://www.python.org/downloads/release/python-3139/)
+[![Actions status](https://github.com/schwittlick/cursor/actions/workflows/ci.yml/badge.svg)](https://github.com/schwittlick/cursor/actions)
+[![Python 3.14.0](https://img.shields.io/badge/python-3.14.0-blue.svg)](https://www.python.org/downloads/release/python-3140/)
 
 ## Overview
 
@@ -33,7 +35,7 @@ Cursor is a Python project for recording, analyzing, and experimenting with curs
 
 ## Prerequisites
 
-- Python 3.13.9
+- Python 3.14
 - pip and virtualenv (or pyenv)
 - System dependencies:
   - PyQt5
@@ -44,13 +46,19 @@ Cursor is a Python project for recording, analyzing, and experimenting with curs
 
 ## Setup
 
-Install the Python version and create a virtual environment:
+Using uv for setup
 
 ```bash
-pyenv install 3.13.9
-pyenv virtualenv 3.13.9 cursor
-pyenv activate cursor
-pip install -r requirements.txt
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv self update
+
+uv python install 3.14
+uv venv --python 3.14
+
+source .venv/bin/activate
+
+uv pip install -r requirements.txt
+
 git submodule update --init
 ```
 
