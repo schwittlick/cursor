@@ -5,7 +5,6 @@
 [![GitHub license](https://img.shields.io/github/license/schwittlick/cursor.svg?style=flat-square)](https://github.com/schwittlick/cursor/blob/master/LICENSE)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![Actions status](https://github.com/schwittlick/cursor/actions/workflows/ci.yml/badge.svg)](https://github.com/schwittlick/cursor/actions)
 [![Python 3.14.0](https://img.shields.io/badge/python-3.14.0-blue.svg)](https://www.python.org/downloads/release/python-3140/)
 
 ## Overview
