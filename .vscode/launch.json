@@ -5,10 +5,10 @@
             "name": "Python: cursorshop.py (Debug)",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/../cursor-data/compositions/composition100/cursorshop.py",
+            "program": "${workspaceFolder}/../data/compositions/composition100/cursorshop.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "python": "${workspaceFolder}/venv311/Scripts/python.exe",
+            "python": "${command:python.interpreterPath}",
             "subProcess": true,
             "env": {
                 "PYDEVD_WARN_EVALUATION_TIMEOUT": "30",
