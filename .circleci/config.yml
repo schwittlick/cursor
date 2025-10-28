@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/cursor
     docker:
-      - image: python:3.13.9
+      - image: python:3.14.0
     steps:
       - checkout
       - run:
