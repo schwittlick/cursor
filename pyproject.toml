@@ -57,6 +57,7 @@ dependencies = [
     "requests==2.32.3",
     "ruff==0.14.0",
     "scikit-image>=0.25.2",
+    "scikit-opt>=0.6.6",
     "scipy==1.16.2",
     "shapely==2.1.2",
     "svgwrite==1.4.3",
