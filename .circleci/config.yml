@@ -15,6 +15,7 @@ jobs:
           name: Install dependencies
           command: |
             pip3 install --upgrade pip
+            pip3 install --ignore-requires-python colour-science==0.4.6
             pip3 install -e .
       - run:
           name: Install xvfb
