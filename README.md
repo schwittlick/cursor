@@ -53,10 +53,9 @@ uv self update
 
 uv python install 3.14
 uv venv --python 3.14
-
+uv sync
 source .venv/bin/activate
 
-uv pip install -r requirements.txt
 uv pip install -e .
 
 git submodule update --init
