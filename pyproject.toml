@@ -56,6 +56,7 @@ dependencies = [
     "pytest-cov==5.0.0",
     "requests==2.32.3",
     "ruff==0.14.0",
+    "scikit-image>=0.25.2",
     "scipy==1.16.2",
     "shapely==2.1.2",
     "svgwrite==1.4.3",
