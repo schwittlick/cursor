@@ -43,6 +43,7 @@ dependencies = [
     "orjson==3.11.4",
     "pandas==2.3.3",
     "pyautogui==0.9.54",
+    "pycairo>=1.28.0",
     "pycocotools==2.0.10",
     "pyglet==2.0.dev23",
     "pymsgbox==2.0.1",
