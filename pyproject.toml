@@ -25,7 +25,7 @@ dependencies = [
     "coverage==7.6.1",
     "fast-tsp==0.1.2",
     "fastapi==0.120.0",
-    "fonttools==4.60.1",
+    "fonttools==4.61.0",
     "fpdf2==2.7.9",
     "h5py==3.15.1",
     "httpx==0.28.1",
