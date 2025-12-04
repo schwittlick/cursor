@@ -401,7 +401,7 @@ class SerialInspectorGUI(QMainWindow):
             self.connect_btn.setText("Connect")
         logging.info(f"Connection status updated: {status}")
 
-    def seconds_to_readable_timestamp(self, seconds: int) -> str:
+    def seconds_to_timestamp(self, seconds: int) -> str:
         hours = seconds // 3600
         minutes = (seconds % 3600) // 60
         secs = seconds % 60
@@ -413,12 +413,39 @@ class SerialInspectorGUI(QMainWindow):
         else:
             return f"{secs}s"
 
+    def estimate_remaining_time(self, progress: float, elapsed_seconds: int):
+        """
+        Estimate remaining time to reach 100% completion based on current progress.
+
+        Args:
+            progress: Float between 0 and 1 representing current progress (e.g., 0.25 = 25%)
+            elapsed_seconds: Time elapsed so far in seconds
+
+        Returns:
+            Estimated remaining time in seconds, or None if progress is 0 or invalid
+        """
+        if progress <= 0 or progress > 1:
+            return 0.0
+
+        # Calculate total estimated time based on current rate
+        estimated_total_time = elapsed_seconds / progress
+
+        # Return remaining time
+        remaining_time = estimated_total_time - elapsed_seconds
+
+        return remaining_time
+
     def update_file_progress(self, idx, max_length):
         progress = int((idx / max_length) * 100)
         self.send_file_progress.setValue(progress)
 
         elapsed = self.send_file_timer.elapsed()
-        self.elapsed_label.setText(f"Elapsed: {self.seconds_to_readable_timestamp(round(elapsed))}")
+
+        remaining = self.estimate_remaining_time(idx / max_length, round(elapsed))
+        self.elapsed_label.setText(
+            f"Elapsed: {self.seconds_to_timestamp(round(elapsed))} "
+            + f"Remaining: {self.seconds_to_timestamp(round(remaining))}"
+        )
 
     def generate_random_pa(self):
         x = random.randint(0, 10000)
