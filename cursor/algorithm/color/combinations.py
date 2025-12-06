@@ -1,4 +1,5 @@
 import json
+import logging
 import pathlib
 import random
 
@@ -265,9 +266,8 @@ def select_similar_colors(
     max_contrast: int = 3,
 ) -> list[CopicColor]:
     """
-    Select colors with low contrast (similar colors) across all color groups.
+    Select colors with low contrast (similar colors) across different color groups.
     Colors must be similar in either saturation OR brightness (flexible matching).
-    Prefers selecting from different color groups for visual variety.
 
     Args:
         count: Number of colors to select (minimum 2)
@@ -296,12 +296,14 @@ def select_similar_colors(
     selected = [copic.color_by_code(seed_code)]
     selected_groups = {copic.color_by_code(seed_code).group}
 
-    # Find candidates similar to seed (low contrast in saturation OR brightness)
+    # Find all candidates similar to seed (low contrast in saturation OR brightness)
     candidates = [
         (code, sat, bright)
         for code, sat, bright in parsed_colors
         if code != seed_code and (abs(sat - seed_sat) <= max_contrast or abs(bright - seed_bright) <= max_contrast)
     ]
+
+    logging.info(f"Found {len(candidates)} candidates")
 
     if len(candidates) < count - 1:
         raise ValueError(
@@ -310,53 +312,25 @@ def select_similar_colors(
             f"Seed: {seed_code.name} (sat={seed_sat}, bright={seed_bright})"
         )
 
-    # Select remaining colors, preferring different groups
-    while len(selected) < count and candidates:
-        best_candidate = None
-        best_similarity_score = float("inf")
-        best_is_new_group = False
+    # Select remaining colors randomly, excluding same groups
+    while len(selected) < count:
+        # Filter out candidates from already selected groups
+        available = [
+            (code, sat, bright)
+            for code, sat, bright in candidates
+            if copic.color_by_code(code).group not in selected_groups
+        ]
 
-        for candidate_code, cand_sat, cand_bright in candidates:
-            # Calculate similarity to all selected colors (lower is more similar)
-            # Use minimum difference in either saturation or brightness
-            max_diff_to_any_selected = 0
-            for sel_color in selected:
-                sel_sat, sel_bright = parse_copic_code(sel_color.code)
-                # Take the minimum of sat or bright difference (flexible matching)
-                min_diff = min(abs(cand_sat - sel_sat), abs(cand_bright - sel_bright))
-                max_diff_to_any_selected = max(max_diff_to_any_selected, min_diff)
-
-            # Check if candidate is from a new group
-            candidate_color = copic.color_by_code(candidate_code)
-            is_new_group = candidate_color.group not in selected_groups
-
-            # Selection logic: prefer new groups, but maintain similarity
-            is_better = False
-            if is_new_group and not best_is_new_group:
-                # New group is preferred if similarity is reasonable
-                is_better = max_diff_to_any_selected <= max_contrast
-            elif not is_new_group and best_is_new_group:
-                # Already have new group candidate - only replace if significantly more similar
-                is_better = max_diff_to_any_selected < best_similarity_score * 0.5
-            else:
-                # Both new or both not new - prefer more similar
-                is_better = max_diff_to_any_selected < best_similarity_score
-
-            if is_better:
-                best_similarity_score = max_diff_to_any_selected
-                best_candidate = candidate_code
-                best_is_new_group = is_new_group
-
-        if best_candidate and best_similarity_score <= max_contrast:
-            best_color = copic.color_by_code(best_candidate)
-            selected.append(best_color)
-            selected_groups.add(best_color.group)
-            candidates = [(c, s, b) for c, s, b in candidates if c != best_candidate]
-        else:
-            # Could not find enough similar colors
+        if not available:
             raise ValueError(
-                f"Could not find {count} similar colors within max_contrast={max_contrast}. "
-                f"Only found {len(selected)} colors."
+                f"Could not find {count} similar colors from different groups. Only found {len(selected)} colors."
             )
+
+        # Randomly select one
+        chosen_code, _, _ = random.choice(available)
+        chosen_color = copic.color_by_code(chosen_code)
+        selected.append(chosen_color)
+        selected_groups.add(chosen_color.group)
+        candidates = [(c, s, b) for c, s, b in candidates if c != chosen_code]
 
     return selected
