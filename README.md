@@ -27,10 +27,6 @@ Cursor is a Python project for recording, analyzing, and experimenting with curs
   - [Data Handling](#data-handling)
     - [Remove small recording files](#remove-small-recording-files)
     - [Share directory over local network](#share-directory-over-local-network)
-  - [Troubleshooting](#troubleshooting)
-    - [Import errors on Linux/macOS](#import-errors-on-linuxmacos)
-    - [Virtual environment issues](#virtual-environment-issues)
-    - [Test failures on Windows](#test-failures-on-windows)
 
 ## Prerequisites
 
@@ -129,30 +125,3 @@ Share a directory via SSHFS:
 ```bash
 sshfs marcel@plot470s.local:/home/marcel/share/ ./share
 ```
-
-## Troubleshooting
-
-### Import errors on Linux/macOS
-
-If you encounter PyQt5 import errors, ensure system dependencies are installed:
-
-```bash
-# macOS
-brew install pyqt5
-
-# Ubuntu/Debian
-sudo apt install python3-pyqt5 libcairo2-dev pkg-config python3-dev python3-tk
-```
-
-### Virtual environment issues
-
-If you encounter permission or environment conflicts, ensure you're using the correct virtual environment:
-
-```bash
-pyenv activate cursor
-which python  # Should point to your virtualenv
-```
-
-### Test failures on Windows
-
-Make sure to use `python -m pytest` on Windows instead of `py.test` directly.
