@@ -1,4 +1,4 @@
-from cursor.algorithm.kd import KDTree
+from cursor.algorithm.kd.kd import KDTree
 from cursor.path import Path
 
 

@@ -1,8 +1,8 @@
 import time
 import random
 import numpy as np
-from cursor.algorithm.kd import KDTree
-from cursor.algorithm.kd_optimized import OptimizedKDTree
+from cursor.algorithm.kd.kd import KDTree
+from cursor.algorithm.kd.kd_optimized import OptimizedKDTree
 
 
 def generate_random_points(n, dim=2, seed=42):

@@ -9,7 +9,7 @@ import colour
 
 from cursor.algorithm.color.copic_pen_enum import CopicColorCode as CCC
 from cursor.algorithm.color.copic_pen_enum import CopicColorGroup as CCG
-from cursor.algorithm.kd2 import KDTree
+from cursor.algorithm.kd.kd2 import KDTree
 from cursor.timer import timing
 
 

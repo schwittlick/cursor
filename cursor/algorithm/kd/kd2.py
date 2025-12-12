@@ -20,8 +20,21 @@ class KDTree:
         self.root = None
 
         if points:
-            # Build tree from initial points
-            point_data_pairs = [(p[0], p[1]) for p in points]
+            # Convert points to (point, data) pairs if they aren't already
+            point_data_pairs = []
+            for p in points:
+                if isinstance(p, tuple) and len(p) == 2:
+                    # Check if it's a (point, data) pair or just a 2D point
+                    if isinstance(p[1], dict) or p[1] is None:
+                        # Already a (point, data) pair
+                        point_data_pairs.append(p)
+                    else:
+                        # It's a 2D point like (x, y), wrap it
+                        point_data_pairs.append((p, {}))
+                else:
+                    # It's just a point, add empty dict as data
+                    point_data_pairs.append((p, {}))
+
             self.root = self._build_tree(point_data_pairs, 0)
 
     def _build_tree(self, points, depth):

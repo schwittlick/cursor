@@ -21,6 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
+    "annoy==1.17.3",
     "colour-science==0.4.6",
     "coverage==7.6.1",
     "fast-tsp==0.1.2",
@@ -29,6 +30,7 @@ dependencies = [
     "fpdf2==2.7.9",
     "h5py==3.15.1",
     "httpx==0.28.1",
+    "hnswlib==0.8.0",
     "iniconfig==2.0.0",
     "jinja2==3.1.4",
     "joblib==1.4.2",
