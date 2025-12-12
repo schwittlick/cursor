@@ -186,8 +186,8 @@ class Exporter:
         pdf_renderer = PdfRenderer(pdf_dir)
         pdf_renderer.pdf.add_page()
         pdf_renderer.pdf.set_font("Arial", size=10)
-        pdf_renderer.pdf.text(10, 5, f"{fname}")
-        y, x = 10, 10
+        pdf_renderer.pdf.text(10, 10, f"{fname}")
+        y, x = 15, 10
 
         copic = Copic()
 
