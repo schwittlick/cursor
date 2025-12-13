@@ -29,3 +29,30 @@ def test_properties():
 
     nearest = tree.get_nearest((1, 2))
     assert nearest == (0, ((1, 2), {"label": "A"}))
+
+
+def test_size():
+    # Test with empty tree
+    tree = KDTree([], 2)
+    assert tree.size() == 0
+
+    # Test with a few points
+    points = [((0, 0), None), ((1, 1), None), ((2, 2), None)]
+    tree = KDTree(points, 2)
+    assert tree.size() == 3
+
+    # Test adding points
+    tree.add_point((3, 3))
+    assert tree.size() == 4
+
+    # Test with 1,000,000 points
+    import random
+
+    random.seed(42)
+    large_points = [((random.uniform(0, 1000), random.uniform(0, 1000)), {"id": i}) for i in range(1000000)]
+    large_tree = KDTree(large_points, 2)
+    assert large_tree.size() == 1000000
+
+    # Add more points and verify size updates
+    large_tree.add_point((500, 500), {"id": 1000000})
+    assert large_tree.size() == 1000001

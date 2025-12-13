@@ -1,20 +1,71 @@
 import pytest
-from cursor.algorithm.kd.kd_annoy import AnnoyKDTree
-from cursor.path import Path
+
+from cursor import Collection, Path, Position
+from cursor.algorithm.kd.kd_annoy import KDTree
+from cursor.properties import Property
 
 
 def test_empty_tree():
     """Test queries on an empty tree."""
-    annoy_tree = AnnoyKDTree([], 2)
+    annoy_tree = KDTree([], 2)
     nearest = annoy_tree.get_nearest((3, 4), False)
     assert nearest is None
     assert annoy_tree.is_empty()
     assert annoy_tree.size() == 0
 
 
+def test_crash_double():
+    """Test tree with a single point."""
+
+    pos = (28392.234556, 38476.2356)
+    position = Position.from_tuple(pos)
+    annoy_tree = KDTree([], 2)
+    annoy_tree.add_point(position.as_tuple(), {Property.COLOR: (0, 1, 2)})
+
+    nearest = annoy_tree.get_nearest((3, 4), False)
+    assert nearest == (pos, {Property.COLOR: (0, 1, 2)})
+
+    nearest_with_distance = annoy_tree.get_nearest(pos, True)
+    # Distance from (3, 4) to (4, 4) is sqrt(1) = 1, so distance squared is 1
+    # assert nearest_with_distance[0] == pytest.approx(1.0, rel=1e-5)
+    assert nearest_with_distance[1] == (pos, {Property.COLOR: (0, 1, 2)})
+
+
+def test_crash():
+    positions1 = [
+        Position.from_tuple((0, 1)),
+        Position.from_tuple((0, 2)),
+        Position.from_tuple((0, 3)),
+        Position.from_tuple((0, 4)),
+    ]
+    p1 = Path(positions1, {"part_idx": 1})
+
+    positions2 = [
+        Position.from_tuple((1, 1)),
+        Position.from_tuple((1, 2)),
+        Position.from_tuple((1, 3)),
+        Position.from_tuple((1, 4)),
+    ]
+    p2 = Path(positions2, {"part_idx": 2})
+    paths = Collection.from_path_list([p1, p2])
+
+    kd_tree = KDTree([], 2)
+    for path in paths:
+        pending_positions = []
+        for i, position in enumerate(path):
+            nearest = kd_tree.get_nearest(position.as_tuple(), True)
+            if nearest:
+                pass
+            pending_positions.append(position)
+        for position in pending_positions:
+            kd_tree.add_point(position.as_tuple(), position.properties)
+
+    print(kd_tree.size())
+
+
 def test_single_point():
     """Test tree with a single point."""
-    annoy_tree = AnnoyKDTree([], 2)
+    annoy_tree = KDTree([], 2)
     annoy_tree.add_point((4, 4), {})
 
     nearest = annoy_tree.get_nearest((3, 4), False)
@@ -28,7 +79,7 @@ def test_single_point():
 
 def test_simple_points():
     """Test with simple point additions."""
-    annoy_tree = AnnoyKDTree([], 2)
+    annoy_tree = KDTree([], 2)
 
     annoy_tree.add_point((1, 1), {"id": 1})
     annoy_tree.add_point((2, 2), {"id": 2})
@@ -42,7 +93,7 @@ def test_simple_points():
 def test_properties():
     """Test that properties are correctly stored and retrieved."""
     points_with_props = [((0, 0), {"color": "red"}), ((1, 0), {"color": "blue"})]
-    tree = AnnoyKDTree(points_with_props, 2)
+    tree = KDTree(points_with_props, 2)
 
     tree.add_point((1, 2), {"label": "A"})
 
@@ -61,7 +112,7 @@ def test_initialization_with_points():
         ((1.0, 1.0), {"id": 2}),
         ((2.0, 0.0), {"id": 3}),
     ]
-    annoy_tree = AnnoyKDTree(initial_points, 2)
+    annoy_tree = KDTree(initial_points, 2)
 
     nearest = annoy_tree.get_nearest((0.5, 0.5), False)
     # Should be closest to (1.0, 1.0) or (0.0, 0.0)
@@ -74,7 +125,7 @@ def test_initialization_with_points():
 
 def test_knn_single():
     """Test k-nearest neighbors with k=1."""
-    annoy_tree = AnnoyKDTree([], 2)
+    annoy_tree = KDTree([], 2)
     annoy_tree.add_point((1, 1), {"id": 1})
     annoy_tree.add_point((2, 2), {"id": 2})
     annoy_tree.add_point((3, 3), {"id": 3})
@@ -86,7 +137,7 @@ def test_knn_single():
 
 def test_knn_multiple():
     """Test k-nearest neighbors with k>1."""
-    annoy_tree = AnnoyKDTree([], 2)
+    annoy_tree = KDTree([], 2)
     annoy_tree.add_point((0, 0), {"id": 1})
     annoy_tree.add_point((1, 0), {"id": 2})
     annoy_tree.add_point((2, 0), {"id": 3})
@@ -110,7 +161,7 @@ def test_knn_multiple():
 
 def test_knn_with_distance():
     """Test k-nearest neighbors returns correct distances."""
-    annoy_tree = AnnoyKDTree([], 2)
+    annoy_tree = KDTree([], 2)
     annoy_tree.add_point((0, 0), {"id": 1})
     annoy_tree.add_point((3, 4), {"id": 2})  # Distance 5 from origin
 
@@ -126,7 +177,7 @@ def test_knn_with_distance():
 
 def test_knn_exceeds_size():
     """Test k-nearest neighbors when k > number of points."""
-    annoy_tree = AnnoyKDTree([], 2)
+    annoy_tree = KDTree([], 2)
     annoy_tree.add_point((1, 1), {"id": 1})
     annoy_tree.add_point((2, 2), {"id": 2})
 
@@ -137,7 +188,7 @@ def test_knn_exceeds_size():
 
 def test_empty_knn():
     """Test k-nearest neighbors on empty tree."""
-    annoy_tree = AnnoyKDTree([], 2)
+    annoy_tree = KDTree([], 2)
     knn = annoy_tree.get_knn((0, 0), 5, return_dist_sq=False)
     assert knn == []
 
@@ -145,7 +196,7 @@ def test_empty_knn():
 def test_mixed_point_formats():
     """Test that various point formats are handled correctly."""
     # Test with tuples
-    annoy_tree = AnnoyKDTree([((1, 2), {"type": "tuple"})], 2)
+    annoy_tree = KDTree([((1, 2), {"type": "tuple"})], 2)
 
     # Add with list
     annoy_tree.add_point([3, 4], {"type": "list"})
@@ -157,7 +208,7 @@ def test_mixed_point_formats():
 
 def test_none_properties():
     """Test points with None as properties."""
-    annoy_tree = AnnoyKDTree([], 2)
+    annoy_tree = KDTree([], 2)
     annoy_tree.add_point((1, 1), None)
     annoy_tree.add_point((2, 2), None)
 
@@ -172,7 +223,7 @@ def test_iterator():
         ((1, 1), {"id": 2}),
         ((2, 2), {"id": 3}),
     ]
-    annoy_tree = AnnoyKDTree(points, 2)
+    annoy_tree = KDTree(points, 2)
 
     collected = list(annoy_tree)
     assert len(collected) == 3
@@ -184,7 +235,7 @@ def test_iterator():
 
 def test_higher_dimensions():
     """Test with 3D points."""
-    annoy_tree = AnnoyKDTree([], 3)
+    annoy_tree = KDTree([], 3)
 
     annoy_tree.add_point((1, 2, 3), {"id": 1})
     annoy_tree.add_point((4, 5, 6), {"id": 2})
@@ -199,14 +250,14 @@ def test_different_metrics():
     points = [((0, 0), {"id": 1}), ((1, 1), {"id": 2}), ((2, 0), {"id": 3})]
 
     # Test Manhattan distance
-    annoy_tree_manhattan = AnnoyKDTree(points, 2, metric='manhattan')
+    annoy_tree_manhattan = KDTree(points, 2, metric="manhattan")
     nearest = annoy_tree_manhattan.get_nearest((0.1, 0.1), False)
     assert nearest[1] == {"id": 1}
 
     # Test Angular distance - angular distance measures angle between vectors
     # For points (1, 0) and (0, 1), querying with (1, 0.1) should find (1, 0)
     points_angular = [((1, 0), {"id": 1}), ((0, 1), {"id": 2})]
-    annoy_tree_angular = AnnoyKDTree(points_angular, 2, metric='angular')
+    annoy_tree_angular = KDTree(points_angular, 2, metric="angular")
     nearest = annoy_tree_angular.get_nearest((1, 0.1), False)
     assert nearest[1] == {"id": 1}
 
@@ -215,7 +266,7 @@ def test_large_dataset():
     """Test with a larger dataset to verify performance."""
     # Create 1000 points in a grid
     points = [((i % 32, i // 32), {"id": i}) for i in range(1000)]
-    annoy_tree = AnnoyKDTree(points, 2, n_trees=20)
+    annoy_tree = KDTree(points, 2, n_trees=20)
 
     # Query should be fast
     nearest = annoy_tree.get_nearest((10.5, 10.5), False)
@@ -231,7 +282,7 @@ def test_compatibility_with_path():
     path = Path.from_tuple_list([(0, 0), (1, 1), (2, 3), (3, 1), (1, 5)])
 
     # Create tree and add path points
-    annoy_tree = AnnoyKDTree([], 2)
+    annoy_tree = KDTree([], 2)
     for i, point in enumerate(path):
         annoy_tree.add_point((point.x, point.y), {"index": i})
 
@@ -246,7 +297,7 @@ def test_compatibility_with_path():
 
 def test_size_after_additions():
     """Test that size is correctly tracked."""
-    annoy_tree = AnnoyKDTree([], 2)
+    annoy_tree = KDTree([], 2)
     assert annoy_tree.size() == 0
 
     annoy_tree.add_point((1, 1), {})
@@ -256,27 +307,27 @@ def test_size_after_additions():
     assert annoy_tree.size() == 2
 
     # Initialize with points
-    annoy_tree2 = AnnoyKDTree([((0, 0), {}), ((1, 1), {})], 2)
+    annoy_tree2 = KDTree([((0, 0), {}), ((1, 1), {})], 2)
     assert annoy_tree2.size() == 2
 
 
 def test_distance_calculation():
     """Test the get_distance method."""
-    annoy_tree = AnnoyKDTree([], 2, metric='euclidean')
+    annoy_tree = KDTree([], 2, metric="euclidean")
 
     # Distance from (0, 0) to (3, 4) should be 5
     dist = annoy_tree.get_distance((0, 0), (3, 4))
     assert dist == pytest.approx(5.0, rel=1e-5)
 
     # Test Manhattan distance
-    annoy_tree_manhattan = AnnoyKDTree([], 2, metric='manhattan')
+    annoy_tree_manhattan = KDTree([], 2, metric="manhattan")
     dist = annoy_tree_manhattan.get_distance((0, 0), (3, 4))
     assert dist == 7.0
 
 
 def test_return_distance_flag():
     """Test that return_dist_sq flag works correctly."""
-    annoy_tree = AnnoyKDTree([], 2)
+    annoy_tree = KDTree([], 2)
     annoy_tree.add_point((0, 0), {"id": 1})
     annoy_tree.add_point((3, 4), {"id": 2})
 

@@ -16,8 +16,7 @@ class HNSWKDTree:
     while leveraging HNSW's performance benefits.
     """
 
-    def __init__(self, points=None, dim=2, space='l2', max_elements=1000000,
-                 ef_construction=200, M=16):
+    def __init__(self, points=None, dim=2, space="l2", max_elements=1000000, ef_construction=200, M=16):
         """
         Initialize HNSWKDTree.
 
@@ -48,11 +47,7 @@ class HNSWKDTree:
 
         # Create HNSW index
         self._index = hnswlib.Index(space=space, dim=dim)
-        self._index.init_index(
-            max_elements=max_elements,
-            ef_construction=ef_construction,
-            M=M
-        )
+        self._index.init_index(max_elements=max_elements, ef_construction=ef_construction, M=M)
 
         # Set ef (controls recall during search)
         # Higher ef = better accuracy but slower queries
@@ -154,7 +149,7 @@ class HNSWKDTree:
         if return_dist_sq:
             # HNSW returns distance (not squared for L2)
             # For L2 space, the distance is already Euclidean distance, so square it
-            if self.space == 'l2':
+            if self.space == "l2":
                 dist_sq = dist * dist
             else:
                 dist_sq = dist  # For other spaces, just return the distance
@@ -197,7 +192,7 @@ class HNSWKDTree:
             nearest_point, properties = self._points_data[idx]
             if return_dist_sq:
                 # For L2 space, square the distance
-                if self.space == 'l2':
+                if self.space == "l2":
                     dist_sq = dist * dist
                 else:
                     dist_sq = dist
@@ -308,18 +303,19 @@ if __name__ == "__main__":
 
     # Test k-nearest neighbors
     knn = hnsw_tree2.get_knn((0.5, 0.5), 2, return_dist_sq=True)
-    print(f"\n2 nearest neighbors to (0.5, 0.5):")
+    print("\n2 nearest neighbors to (0.5, 0.5):")
     for dist_sq, (pt, props) in knn:
         print(f"  Point: {pt}, Properties: {props}, Distance²: {dist_sq}")
 
     # Test dynamic additions
     print("\n\nTesting dynamic additions (adding 1000 points)...")
     import time
+
     start = time.perf_counter()
     for i in range(1000):
         hnsw_tree2.add_point((i * 0.1, i * 0.2), {"id": i + 100})
     elapsed = time.perf_counter() - start
-    print(f"Added 1000 points in {elapsed*1000:.2f}ms ({elapsed*1000/1000:.4f}ms per point)")
+    print(f"Added 1000 points in {elapsed * 1000:.2f}ms ({elapsed * 1000 / 1000:.4f}ms per point)")
 
     # Query after additions
     print("\nQuerying after additions...")

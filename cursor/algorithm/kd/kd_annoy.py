@@ -1,8 +1,9 @@
-from annoy import AnnoyIndex
 import math
 
+from annoy import AnnoyIndex
 
-class AnnoyKDTree:
+
+class KDTree:
     """
     A drop-in replacement for KDTree using Spotify's Annoy library.
     Annoy (Approximate Nearest Neighbors Oh Yeah) is a C++ library with Python bindings
@@ -13,9 +14,9 @@ class AnnoyKDTree:
     while leveraging Annoy's performance benefits for nearest neighbor search.
     """
 
-    def __init__(self, points=None, dim=2, metric='euclidean', n_trees=10):
+    def __init__(self, points=None, dim=2, metric="euclidean", n_trees=10, n_jobs=16):
         """
-        Initialize AnnoyKDTree.
+        Initialize KDTree.
 
         Parameters
         ----------
@@ -30,10 +31,14 @@ class AnnoyKDTree:
         n_trees : int
             Number of trees to build. More trees give higher precision but use more memory.
             Default is 10.
+        n_jobs : int
+            Number of threads to use for building. Default is 1 (single-threaded).
+            Set to -1 to use all available CPU cores.
         """
         self.dim = dim
         self.metric = metric
         self.n_trees = n_trees
+        self.n_jobs = n_jobs
         self._index = AnnoyIndex(dim, metric)
         self._points_data = []  # Store (point, properties) pairs
         self._built = False
@@ -58,8 +63,16 @@ class AnnoyKDTree:
                 self._add_point_internal(point, properties)
 
             # Build the index after adding all initial points
-            if self._next_id > 0:
-                self._index.build(self.n_trees)
+            # Annoy requires at least 2 items to build
+            if self._next_id >= 2:
+                try:
+                    self._index.build(self.n_trees, n_jobs=self.n_jobs)
+                except TypeError:
+                    # Older Annoy versions don't support n_jobs parameter
+                    self._index.build(self.n_trees)
+                self._built = True
+            elif self._next_id == 1:
+                # With 1 point, mark as built but skip the build call
                 self._built = True
 
     def _add_point_internal(self, point, properties):
@@ -90,12 +103,39 @@ class AnnoyKDTree:
         """Ensure the index is built before querying."""
         if not self._built and self._next_id > 0:
             # Annoy doesn't support rebuilding, so we need to create a new index
-            self._index = AnnoyIndex(self.dim, self.metric)
-            # Re-add all points
-            for idx, (point, _) in enumerate(self._points_data):
-                self._index.add_item(idx, point)
-            self._index.build(self.n_trees)
-            self._built = True
+            try:
+                import sys
+
+                self._index = AnnoyIndex(self.dim, self.metric)
+
+                # Re-add all points
+                for idx, (point, _) in enumerate(self._points_data):
+                    self._index.add_item(idx, point)
+
+                # Annoy requires at least 2 items to build properly
+                # With 1 item, we skip build and handle queries manually
+                if len(self._points_data) >= 2:
+                    # Try with n_jobs parameter, fall back to without if it fails
+                    try:
+                        self._index.build(self.n_trees, n_jobs=self.n_jobs)
+                    except TypeError:
+                        # Older Annoy versions don't support n_jobs parameter
+                        print("DEBUG: n_jobs not supported, calling build without it", file=sys.stderr)
+                        self._index.build(self.n_trees)
+
+                # Reset _next_id to match the rebuilt index
+                self._next_id = len(self._points_data)
+                self._built = True
+            except Exception as e:
+                # Log the error instead of crashing silently
+                import sys
+
+                print(f"ERROR in _ensure_built: {e}", file=sys.stderr)
+                print(f"Points count: {len(self._points_data)}, next_id: {self._next_id}", file=sys.stderr)
+                import traceback
+
+                traceback.print_exc()
+                raise
 
     def get_nearest(self, point, return_dist_sq=False):
         """
@@ -121,10 +161,18 @@ class AnnoyKDTree:
 
         self._ensure_built()
 
+        # Special case: with only 1 point, return it directly
+        if len(self._points_data) == 1:
+            nearest_point, properties = self._points_data[0]
+            if return_dist_sq:
+                # Calculate distance manually
+                dist_sq = sum((a - b) ** 2 for a, b in zip(point, nearest_point))
+                return (dist_sq, (nearest_point, properties))
+            else:
+                return (nearest_point, properties)
+
         # Get 1 nearest neighbor
-        indices, distances = self._index.get_nns_by_vector(
-            point, 1, include_distances=True
-        )
+        indices, distances = self._index.get_nns_by_vector(point, 1, include_distances=True)
 
         if not indices:
             return None
@@ -167,16 +215,23 @@ class AnnoyKDTree:
         # Limit k to the number of points we have
         k = min(k, self._next_id)
 
+        # Special case: with only 1 point, return it directly
+        if len(self._points_data) == 1:
+            nearest_point, properties = self._points_data[0]
+            if return_dist_sq:
+                dist_sq = sum((a - b) ** 2 for a, b in zip(point, nearest_point))
+                return [(dist_sq, (nearest_point, properties))]
+            else:
+                return [(nearest_point, properties)]
+
         # Get k nearest neighbors
-        indices, distances = self._index.get_nns_by_vector(
-            point, k, include_distances=True
-        )
+        indices, distances = self._index.get_nns_by_vector(point, k, include_distances=True)
 
         results = []
         for idx, dist in zip(indices, distances):
             nearest_point, properties = self._points_data[idx]
             if return_dist_sq:
-                dist_sq = dist ** 2
+                dist_sq = dist**2
                 results.append((dist_sq, (nearest_point, properties)))
             else:
                 results.append((nearest_point, properties))
@@ -236,9 +291,9 @@ class AnnoyKDTree:
         float
             Distance between the points.
         """
-        if self.metric == 'euclidean':
+        if self.metric == "euclidean":
             return math.sqrt(sum((a - b) ** 2 for a, b in zip(point1, point2)))
-        elif self.metric == 'manhattan':
+        elif self.metric == "manhattan":
             return sum(abs(a - b) for a, b in zip(point1, point2))
         else:
             # For other metrics, use Annoy's internal distance calculation
@@ -249,7 +304,7 @@ class AnnoyKDTree:
 # Example usage
 if __name__ == "__main__":
     # Test the implementation
-    annoy_tree = AnnoyKDTree([], 2)
+    annoy_tree = KDTree([], 2)
 
     # Add some points
     annoy_tree.add_point((1.0, 2.0), {"color": "red", "value": 10})
@@ -268,7 +323,7 @@ if __name__ == "__main__":
         ((1.0, 1.0), {"id": 2}),
         ((2.0, 0.0), {"id": 3}),
     ]
-    annoy_tree2 = AnnoyKDTree(initial_points, 2)
+    annoy_tree2 = KDTree(initial_points, 2)
 
     nearest2 = annoy_tree2.get_nearest((0.5, 0.5), False)
     if nearest2:
@@ -277,6 +332,6 @@ if __name__ == "__main__":
 
     # Test k-nearest neighbors
     knn = annoy_tree2.get_knn((0.5, 0.5), 2, return_dist_sq=True)
-    print(f"\n2 nearest neighbors to (0.5, 0.5):")
+    print("\n2 nearest neighbors to (0.5, 0.5):")
     for dist_sq, (pt, props) in knn:
         print(f"  Point: {pt}, Properties: {props}, Distance�: {dist_sq}")

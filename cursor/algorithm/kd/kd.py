@@ -9,7 +9,7 @@ class KDTree:
     Points can have associated properties stored with them.
     """
 
-    def __init__(self, points, dim, dist_sq_func=None):
+    def __init__(self, points, dim):
         """Makes the KD-Tree for fast lookup.
 
         Parameters
@@ -25,19 +25,20 @@ class KDTree:
             If omitted, it uses the default implementation.
         """
 
-        if dist_sq_func is None:
-
-            def dist_sq_func(a, b):
-                return sum((x - b[i]) ** 2 for i, x in enumerate(a))
+        def dist_sq_func(a, b):
+            return sum((x - b[i]) ** 2 for i, x in enumerate(a))
 
         # Convert points to (point, properties) pairs if they aren't already
         processed_points = []
         for p in points:
             if isinstance(p, tuple) and len(p) == 2:
-                # Assume it's already a (point, properties) pair
-                if isinstance(p[1], dict):
+                # Check if it's already a (point, properties) pair
+                # by checking if the first element looks like a point (tuple/list) or is numeric
+                if isinstance(p[0], (tuple, list)) and (isinstance(p[1], dict) or p[1] is None):
+                    # Already a (point, properties) pair
                     processed_points.append(p)
                 else:
+                    # It's a 2D point like (x, y), wrap it
                     processed_points.append((p, None))
             else:
                 # It's just a point, add None as properties
@@ -135,6 +136,19 @@ class KDTree:
                 [(point, properties), ...]
         """
         return self._get_knn(self._root, point, k, return_dist_sq, [])
+
+    def size(self):
+        """Return the number of points in the tree.
+
+        Returns
+        -------
+        int
+            The number of points stored in the tree.
+        """
+        count = 0
+        for _ in self:
+            count += 1
+        return count
 
     def get_nearest(self, point, return_dist_sq=True):
         """Returns the nearest neighbor.
