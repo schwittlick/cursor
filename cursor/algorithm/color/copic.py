@@ -125,12 +125,12 @@ class Copic:
         add that data to the json
         """
         if not self.rgb_kdtree:
-            rgb_points = [(color.as_srgb(), color) for ccc, color in self.available_colors.items()]
+            rgb_points = [(color.as_srgb(), {"color": color}) for ccc, color in self.available_colors.items()]
             self.rgb_kdtree = KDTree(rgb_points, 3)
 
-        rgb_dist, closest_color = self.rgb_kdtree.get_nearest(c1_rgbs, return_distance=True)
+        rgb_dist, closest_color = self.rgb_kdtree.get_nearest(c1_rgbs, True)
         closest_rgb, closest = closest_color
-        return closest
+        return closest["color"]
 
     @timing
     def most_similar(self, c1_rgb: tuple[float, float, float]) -> Color:

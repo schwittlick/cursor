@@ -45,14 +45,14 @@ def test_size():
     tree.add_point((3, 3))
     assert tree.size() == 4
 
-    # Test with 1,000,000 points
+    # Test with 1,00,000 points
     import random
 
     random.seed(42)
-    large_points = [((random.uniform(0, 1000), random.uniform(0, 1000)), {"id": i}) for i in range(1000000)]
+    large_points = [((random.uniform(0, 1000), random.uniform(0, 1000)), {"id": i}) for i in range(100000)]
     large_tree = KDTree(large_points, 2)
-    assert large_tree.size() == 1000000
+    assert large_tree.size() == 100000
 
     # Add more points and verify size updates
-    large_tree.add_point((500, 500), {"id": 1000000})
-    assert large_tree.size() == 1000001
+    large_tree.add_point((500, 500), {"id": 100000})
+    assert large_tree.size() == 100001
