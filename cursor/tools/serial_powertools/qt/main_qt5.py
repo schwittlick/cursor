@@ -15,12 +15,12 @@ from PyQt5.QtWidgets import (
     QProgressBar,
     QPushButton,
     QShortcut,
+    QSlider,
     QTextEdit,
     QVBoxLayout,
     QWidget,
 )
 
-# Assuming these imports are available in your project structure
 from cursor.hpgl import ABORT_GRAPHICS, RESET_DEVICE
 from cursor.timer import Timer
 from cursor.tools.discovery import discover
@@ -52,6 +52,7 @@ class SerialInspectorGUI(QMainWindow):
     def __init__(self):
         super().__init__()
         self.inspector = SerialInspector()
+        self.log_handler = None
         self.init_ui()
         self.setup_logging()
         self.setup_shortcuts()
@@ -114,9 +115,9 @@ class SerialInspectorGUI(QMainWindow):
 
     def setup_logging(self):
         logging.basicConfig(level=logging.INFO)
-        log_handler = ThreadSafeLogHandler(self)
-        log_handler.new_log_record.connect(self.print_output)
-        logging.getLogger().addHandler(log_handler)
+        self.log_handler = ThreadSafeLogHandler(self)
+        self.log_handler.new_log_record.connect(self.print_output)
+        logging.getLogger().addHandler(self.log_handler)
 
     def setup_shortcuts(self):
         # Setup ESC key to close the application
@@ -146,6 +147,13 @@ class SerialInspectorGUI(QMainWindow):
         # For example, stopping any other threads, closing file handles, etc.
 
         logging.info("Application shutdown complete.")
+
+        # Remove the log handler to prevent errors during Python shutdown
+        if self.log_handler:
+            logger = logging.getLogger()
+            logger.removeHandler(self.log_handler)
+            self.log_handler.close()
+            self.log_handler = None
 
     def print_output(self, text: str):
         self.output_text.append(text)
@@ -278,6 +286,22 @@ class SerialInspectorGUI(QMainWindow):
         file_layout.addWidget(stop_sending_btn)
 
         layout.addLayout(file_layout)
+
+        slider_layout = QHBoxLayout()
+        slider_label = QLabel("Batch Size:")
+        self.slider = QSlider()
+        self.slider.setOrientation(Qt.Horizontal)
+        self.slider.setMinimum(1)
+        self.slider.setMaximum(20)
+        self.slider.setValue(5)
+        self.slider.setTickPosition(QSlider.TicksBelow)
+        self.slider.setTickInterval(1)
+        self.batch_size_value_label = QLabel("5")
+        self.slider.valueChanged.connect(self.update_batch_size)
+        slider_layout.addWidget(slider_label)
+        slider_layout.addWidget(self.slider)
+        slider_layout.addWidget(self.batch_size_value_label)
+        layout.addLayout(slider_layout)
 
         progress_layout = QHBoxLayout()
         self.send_file_progress = QProgressBar()
@@ -454,6 +478,12 @@ class SerialInspectorGUI(QMainWindow):
         remaining_time = estimated_total_time - elapsed_seconds
 
         return remaining_time
+
+    def update_batch_size(self, value):
+        self.batch_size_value_label.setText(str(value))
+        if self.inspector.async_sender:
+            self.inspector.async_sender.set_batchsize(value)
+            logging.info(f"Batch size updated to {value}")
 
     def update_file_progress(self, idx, max_length):
         progress = int((idx / max_length) * 100)

@@ -77,6 +77,10 @@ class AsyncSerialSender(threading.Thread):
     def stop(self):
         self.stopped = True
 
+    def set_batchsize(self, bsize: int):
+        with self.lock:
+            self.command_batch = bsize
+
     def add_commands(self, commands: list[str], progress_cb: typing.Callable):
         with self.lock:
             self.commands = commands
@@ -116,18 +120,14 @@ class AsyncSerialSender(threading.Thread):
                 self.plotter.write(cmds)
 
                 while self.paused:
-                    # self.lock.release()
                     time.sleep(0.1)
-                    # self.lock.acquire()
 
                 if self.send_single and not self.paused:
                     self.command_batch = 1
                     self.paused = True
 
                 self.current_command_index = end_index
-                # self.lock.release()
                 time.sleep(0.01)
-                # self.lock.acquire()
 
                 # call cb for progress
                 self.progress_cb(self.current_command_index)
