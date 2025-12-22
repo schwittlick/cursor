@@ -204,7 +204,14 @@ class SerialInspectorGUI(QMainWindow):
             ("ESC.K; (abort graphics)", ABORT_GRAPHICS + ";"),
         ]
 
-        vs = [("VS1;", "VS1;"), ("VS10;", "VS10;"), ("VS20;", "VS20;"), ("VS40;", "VS40;"), ("VS80;", "VS80;")]
+        vs = [
+            ("VS1;", "VS1;"),
+            ("VS10;", "VS10;"),
+            ("VS20;", "VS20;"),
+            ("VS40;", "VS40;"),
+            ("VS80;", "VS80;"),
+            ("VS100;", "VS100;"),
+        ]
 
         pen_select = [
             ("SP0;", "SP0;"),
@@ -358,10 +365,23 @@ class SerialInspectorGUI(QMainWindow):
         widget.setLayout(layout)
         return widget
 
+    def clear_output(self):
+        self.output_text.clear()
+
     def create_output_widget(self):
+        widget = QWidget()
+        layout = QVBoxLayout()
+
+        clear_output_button = QPushButton("Clear output")
+        clear_output_button.clicked.connect(self.clear_output)
+
         self.output_text = QTextEdit()
         self.output_text.setReadOnly(True)
-        return self.output_text
+
+        layout.addWidget(self.output_text)
+        layout.addWidget(clear_output_button)
+        widget.setLayout(layout)
+        return widget
 
     def refresh_serial_ports(self):
         logging.info("Starting refresh...")
