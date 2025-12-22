@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "run file",
+      "type": "shell",
+      "command": "uv",
+      "args": ["run", "python", "${file}"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "serial sender",
+      "type": "shell",
+      "command": "uv",
+      "args": ["run", "python", "cursor/tools/serial_powertools/qt/main_qt5.py"],
+      "group": "build"
+    }
+  ]
+}
