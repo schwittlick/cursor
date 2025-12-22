@@ -12,11 +12,11 @@ from PyQt5.QtWidgets import (
     QLabel,
     QLineEdit,
     QMainWindow,
+    QPlainTextEdit,
     QProgressBar,
     QPushButton,
     QShortcut,
     QSlider,
-    QTextEdit,
     QVBoxLayout,
     QWidget,
 )
@@ -156,7 +156,7 @@ class SerialInspectorGUI(QMainWindow):
             self.log_handler = None
 
     def print_output(self, text: str):
-        self.output_text.append(text)
+        self.output_text.appendPlainText(text)
 
     def create_inspector_widget(self):
         widget = QWidget()
@@ -399,7 +399,7 @@ class SerialInspectorGUI(QMainWindow):
         clear_output_button = QPushButton("Clear output")
         clear_output_button.clicked.connect(self.clear_output)
 
-        self.output_text = QTextEdit()
+        self.output_text = QPlainTextEdit()
         self.output_text.setReadOnly(True)
 
         layout.addWidget(self.output_text)
