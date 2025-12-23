@@ -81,18 +81,17 @@ class AsyncSerialSender(threading.Thread):
         with self.lock:
             self.command_batch = bsize
 
-    def add_commands(self, commands: list[str], progress_cb: typing.Callable):
+    def add_commands(self, commands: list[str], progress_cb: typing.Callable, curr_index: int = 0):
         with self.lock:
             self.commands = commands
             self.command_batch = min(5, len(commands))
             self.progress_cb = progress_cb
-            self.current_command_index = 0
+            self.current_command_index = curr_index
 
         logging.info(f"Added {len(commands)} to async sender. batch: {self.command_batch}")
 
     def insert_commands(self, commands: list[str]):
         with self.lock:
-            # Insert the new commands at the current position
             logging.info(f"Inserting {len(commands)} into async sender at index: {self.current_command_index}")
             self.commands[self.current_command_index : self.current_command_index] = commands
 

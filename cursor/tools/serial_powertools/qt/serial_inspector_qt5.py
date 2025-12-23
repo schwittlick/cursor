@@ -117,7 +117,7 @@ class SerialInspector(QObject):
         else:
             logging.warning("No active job to toggle pause.")
 
-    def send_serial_file(self, file_path: str):
+    def send_serial_file(self, file_path: str, start_percentage: float = 0.0):
         if not self.check():
             logging.warning("Serial connection not open.")
             return
@@ -131,7 +131,10 @@ class SerialInspector(QObject):
         def progress_cb(command_idx: int):
             self.file_progress_updated.emit(command_idx, len(commands))
 
-        self.async_sender.add_commands(commands, progress_cb)
+        # Calculate curr_index from percentage
+        curr_index = int((start_percentage / 100.0) * len(commands))
+
+        self.async_sender.add_commands(commands, progress_cb, curr_index)
 
     def start_bruteforce_progress(self, port: str, timeout: float):
         # stopping previously running bruteforce threads

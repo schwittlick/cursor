@@ -301,6 +301,15 @@ class SerialInspectorGUI(QMainWindow):
         slider_layout.addWidget(slider_label)
         slider_layout.addWidget(self.slider)
         slider_layout.addWidget(self.batch_size_value_label)
+
+        # Start percentage input
+        percent_label = QLabel("Start %:")
+        self.start_percentage_input = QLineEdit()
+        self.start_percentage_input.setPlaceholderText("0")
+        self.start_percentage_input.setMaximumWidth(60)
+        slider_layout.addWidget(percent_label)
+        slider_layout.addWidget(self.start_percentage_input)
+
         layout.addLayout(slider_layout)
 
         progress_layout = QHBoxLayout()
@@ -340,7 +349,20 @@ class SerialInspectorGUI(QMainWindow):
     def send_file(self):
         file_path = self.file_path_input.text()
         if file_path:
-            self.inspector.send_serial_file(file_path)
+            # Get start percentage if provided
+            start_percentage = 0.0
+            try:
+                percentage_text = self.start_percentage_input.text().strip()
+                if percentage_text:
+                    start_percentage = float(percentage_text)
+                    if start_percentage < 0 or start_percentage > 100:
+                        logging.warning("Start percentage must be between 0 and 100. Using 0.")
+                        start_percentage = 0.0
+            except ValueError:
+                logging.warning("Invalid start percentage value. Using 0.")
+                start_percentage = 0.0
+
+            self.inspector.send_serial_file(file_path, start_percentage)
             self.send_file_timer.start()
         else:
             logging.warning("No file selected for sending.")
