@@ -1,6 +1,7 @@
 import logging
 import random
 import sys
+import time
 
 from PyQt5.QtCore import QObject, Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QKeySequence
@@ -61,6 +62,10 @@ class SerialInspectorGUI(QMainWindow):
         self.inspector.file_progress_updated.connect(self.update_file_progress)
 
         self.send_file_timer = Timer()
+
+        # Progress tracking for time estimation
+        self.recent_progress_samples = []  # list of (timestamp, progress) tuples
+        self.sample_window = 500
 
     def init_ui(self):
         self.setWindowTitle("Serial Inspector")
@@ -479,27 +484,48 @@ class SerialInspectorGUI(QMainWindow):
         else:
             return f"{secs}s"
 
-    def estimate_remaining_time(self, progress: float, elapsed_seconds: int):
+    def estimate_remaining_time(self, progress: float):
         """
-        Estimate remaining time to reach 100% completion based on current progress.
+        Estimate remaining time to reach 100% completion using a windowed moving average.
+        This approach is robust to progress jumps (like skip functionality) as it only
+        considers recent progress rate rather than total elapsed time.
 
         Args:
             progress: Float between 0 and 1 representing current progress (e.g., 0.25 = 25%)
-            elapsed_seconds: Time elapsed so far in seconds
+            elapsed_seconds: Time elapsed so far in seconds (unused but kept for compatibility)
 
         Returns:
-            Estimated remaining time in seconds, or None if progress is 0 or invalid
+            Estimated remaining time in seconds, or 0.0 if estimation is not possible
         """
-        if progress <= 0 or progress > 1:
+        current_time = time.time()
+        self.recent_progress_samples.append((current_time, progress))
+
+        # Keep only recent samples within the window
+        if len(self.recent_progress_samples) > self.sample_window:
+            self.recent_progress_samples.pop(0)
+
+        # Need at least 2 samples to calculate a rate
+        if len(self.recent_progress_samples) < 2:
             return 0.0
 
-        # Calculate total estimated time based on current rate
-        estimated_total_time = elapsed_seconds / progress
+        # Calculate rate from first to last sample in window
+        first_time, first_progress = self.recent_progress_samples[0]
+        last_time, last_progress = self.recent_progress_samples[-1]
 
-        # Return remaining time
-        remaining_time = estimated_total_time - elapsed_seconds
+        time_diff = last_time - first_time
+        progress_diff = last_progress - first_progress
 
-        return remaining_time
+        # Avoid division by zero and handle negative progress (shouldn't happen)
+        if time_diff <= 0 or progress_diff <= 0:
+            return 0.0
+
+        # Calculate progress rate (progress per second)
+        rate = progress_diff / time_diff
+
+        # Calculate remaining progress and estimated time
+        remaining_progress = 1.0 - progress
+
+        return remaining_progress / rate
 
     def update_batch_size(self, value):
         self.batch_size_value_label.setText(str(value))
@@ -513,7 +539,7 @@ class SerialInspectorGUI(QMainWindow):
 
         elapsed = self.send_file_timer.elapsed()
 
-        remaining = self.estimate_remaining_time(idx / max_length, round(elapsed))
+        remaining = self.estimate_remaining_time(idx / max_length)
         self.elapsed_label.setText(
             f"Elapsed: {self.seconds_to_timestamp(round(elapsed))} "
             + f"Remaining: {self.seconds_to_timestamp(round(remaining))}"
