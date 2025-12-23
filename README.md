@@ -32,12 +32,8 @@ Cursor is a Python project for recording, analyzing, and experimenting with curs
 
 - Python 3.14
 - pip and virtualenv (or pyenv)
-- System dependencies:
-  - PyQt5
-  - libcairo2-dev
-  - pkg-config
-  - python3-dev
-  - python3-tk
+
+  sudo apt install python3-pyqt5 libcairo2-dev pkg-config python3-dev python3-tk
 
 ## Setup
 
