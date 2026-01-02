@@ -120,11 +120,12 @@ class AsyncSerialSender(threading.Thread):
                 if self.do_software_handshake:
                     requested_memory_amount = len(cmds)
                     free_io_memory = self.plotter.free_memory()
-                    free_io_memory = min(free_io_memory, self.memory_limit)
 
                     logging.info(
                         f"Free memory: {free_io_memory} requested: {requested_memory_amount} limit: {self.memory_limit}"
                     )
+
+                    free_io_memory = min(free_io_memory, self.memory_limit)
 
                     if free_io_memory < requested_memory_amount:
                         logging.info("Not enough free memory")
