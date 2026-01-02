@@ -297,7 +297,7 @@ class SerialInspectorGUI(QMainWindow):
         self.slider = QSlider()
         self.slider.setOrientation(Qt.Horizontal)
         self.slider.setMinimum(1)
-        self.slider.setMaximum(20)
+        self.slider.setMaximum(40)
         self.slider.setValue(5)
         self.slider.setTickPosition(QSlider.TicksBelow)
         self.slider.setTickInterval(1)
@@ -316,6 +316,22 @@ class SerialInspectorGUI(QMainWindow):
         slider_layout.addWidget(self.start_percentage_input)
 
         layout.addLayout(slider_layout)
+
+        max_memory_slider_layout = QHBoxLayout()
+        max_memory_slider_label = QLabel("Memory limit:")
+        self.max_memory_slider = QSlider()
+        self.max_memory_slider.setOrientation(Qt.Horizontal)
+        self.max_memory_slider.setMinimum(32)
+        self.max_memory_slider.setMaximum(1024)
+        self.max_memory_slider.setValue(64)
+        self.max_memory_slider.setTickPosition(QSlider.TicksBelow)
+        self.max_memory_slider.setTickInterval(32)
+        self.max_memory_slider_label = QLabel("64")
+        self.max_memory_slider.valueChanged.connect(self.update_memory_limit)
+        max_memory_slider_layout.addWidget(max_memory_slider_label)
+        max_memory_slider_layout.addWidget(self.max_memory_slider)
+        max_memory_slider_layout.addWidget(self.max_memory_slider_label)
+        layout.addLayout(max_memory_slider_layout)
 
         progress_layout = QHBoxLayout()
         self.send_file_progress = QProgressBar()
@@ -532,6 +548,12 @@ class SerialInspectorGUI(QMainWindow):
         if self.inspector.async_sender:
             self.inspector.async_sender.set_batchsize(value)
             logging.info(f"Batch size updated to {value}")
+
+    def update_memory_limit(self, value) -> None:
+        self.max_memory_slider_label.setText(str(value))
+        if self.inspector.async_sender:
+            self.inspector.async_sender.set_memory_limit(value)
+            logging.info(f"Memory limit updated to {value}")
 
     def update_file_progress(self, idx, max_length):
         progress = int((idx / max_length) * 100)

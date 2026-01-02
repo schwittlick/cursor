@@ -59,7 +59,8 @@ class AsyncSerialSender(threading.Thread):
 
         # these parameters are set when commands are added to the sender
         self.commands = []
-        self.command_batch = 1
+        self.command_batch = 5
+        self.memory_limit = 64
         self.progress_cb = None
 
         # default init
@@ -81,10 +82,14 @@ class AsyncSerialSender(threading.Thread):
         with self.lock:
             self.command_batch = bsize
 
+    def set_memory_limit(self, mlimit: int) -> None:
+        with self.lock:
+            self.memory_limit = mlimit
+
     def add_commands(self, commands: list[str], progress_cb: typing.Callable, curr_index: int = 0):
         with self.lock:
             self.commands = commands
-            self.command_batch = min(5, len(commands))
+            self.command_batch = min(self.command_batch, len(commands))
             self.progress_cb = progress_cb
             self.current_command_index = curr_index
 
@@ -113,7 +118,18 @@ class AsyncSerialSender(threading.Thread):
                 cmds = concat_commands(batched_commands)
 
                 if self.do_software_handshake:
-                    wait_for_free_io_memory(self.plotter, len(cmds))
+                    requested_memory_amount = len(cmds)
+                    free_io_memory = self.plotter.free_memory()
+                    free_io_memory = min(free_io_memory, self.memory_limit)
+
+                    logging.info(
+                        f"Free memory: {free_io_memory} requested: {requested_memory_amount} limit: {self.memory_limit}"
+                    )
+
+                    if free_io_memory < requested_memory_amount:
+                        logging.info("Not enough free memory")
+                        time.sleep(0.05)
+                        continue
 
                 logging.info(cmds)
                 self.plotter.write(cmds)
