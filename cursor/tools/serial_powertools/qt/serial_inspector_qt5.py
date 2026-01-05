@@ -98,11 +98,6 @@ class SerialInspector(QObject):
             logging.error(f"Unexpected error while connecting to {port}: {str(e)}")
             self.connection_status_changed.emit("Connection failed: Unexpected error")
 
-        self.async_sender = AsyncSerialSender(plotter)
-        self.async_sender.do_software_handshake = True
-        self.async_sender.command_batch = 1
-        self.async_sender.start()
-
     def stop_send_serial_file(self):
         if self.async_sender:
             self.async_sender.abort()

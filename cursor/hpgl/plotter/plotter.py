@@ -4,13 +4,13 @@ import time
 from serial import Serial, SerialException
 
 from cursor.hpgl import (
-    read_until_char,
-    CR,
-    OUTPUT_IDENTIFICATION,
-    WAIT,
     ABORT_GRAPHICS,
+    CR,
     OUTBUT_BUFFER_SPACE,
+    OUTPUT_IDENTIFICATION,
     OUTPUT_POSITION,
+    WAIT,
+    read_until_char,
 )
 from cursor.hpgl.plotter.memory_config import HP7550AMemoryConfig
 from cursor.position import Position
@@ -37,6 +37,11 @@ class HPGLPlotter:
         #    logging.info(plotter_config)
         #    self.apply_config(memory_config, plotter_config)
 
+        self.max_mem = self.free_memory()
+        self.free_io_buffer = self.send_wait()
+
+        logging.info(f"mem_free: {self.max_mem} free_io_buffer: {self.free_io_buffer}")
+
     def write(self, data):
         self.serial.write(data.encode())
 
@@ -44,6 +49,11 @@ class HPGLPlotter:
         self.write(ABORT_GRAPHICS)
         self.write(WAIT)
         self.read_until()
+
+    def send_wait(self):
+        self.write(WAIT)
+        io_buffer = self.read_until()
+        return io_buffer
 
     def identify(self):
         self.write(OUTPUT_IDENTIFICATION)
