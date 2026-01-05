@@ -78,6 +78,12 @@ class AsyncSerialSender(threading.Thread):
     def stop(self):
         self.stopped = True
 
+    def abort(self):
+        self.abort_queue = True
+
+    def toggle_pause(self):
+        self.paused = not self.paused
+
     def set_batchsize(self, bsize: int):
         with self.lock:
             self.command_batch = bsize
@@ -108,7 +114,7 @@ class AsyncSerialSender(threading.Thread):
                     self.commands = []
                     self.current_command_index = 0
                     self.abort_queue = False
-                    logging.info("Stopped AsyncSerialSender")
+                    logging.info("Aborted AsyncSerialSender")
                     break
 
                 end_index = min(self.current_command_index + self.command_batch, len(self.commands))

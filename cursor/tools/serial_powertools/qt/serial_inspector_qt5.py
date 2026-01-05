@@ -105,14 +105,13 @@ class SerialInspector(QObject):
 
     def stop_send_serial_file(self):
         if self.async_sender:
-            self.async_sender.stop()
-            logging.info(f"Stopped async sender. {self.async_sender.plotter}")
+            self.async_sender.abort()
         else:
-            logging.warning("No active job to stop.")
+            logging.warning("No active job to abort.")
 
     def toggle_pause(self):
         if self.async_sender:
-            self.async_sender.paused = not self.async_sender.paused
+            self.async_sender.toggle_pause()
             logging.info(f"Pause {self.async_sender.paused} on async sender. {self.async_sender.plotter}")
         else:
             logging.warning("No active job to toggle pause.")
