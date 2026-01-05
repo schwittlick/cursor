@@ -134,8 +134,9 @@ class AsyncSerialSender(threading.Thread):
                     free_io_memory = min(free_io_memory, self.memory_limit)
 
                     if free_io_memory < requested_memory_amount:
-                        logging.info("Not enough free memory")
-                        time.sleep(0.05)
+                        sleep_time_seconds = 1
+                        logging.info(f"Not enough free memory. Waiting {sleep_time_seconds}s")
+                        time.sleep(sleep_time_seconds)
                         continue
 
                 logging.info(cmds)
