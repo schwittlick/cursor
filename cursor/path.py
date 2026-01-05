@@ -52,7 +52,7 @@ class Path:
                 self.width = 1
 
     def __repr__(self) -> str:
-        rep = f"vertices: {len(self.vertices)} bb: {self.bb()}properties: {self.properties}"
+        rep = f"vertices: {len(self.vertices)} bb: {self.bb()} properties: {self.properties}"
         return rep
 
     def __eq__(self, other: Path) -> bool:
