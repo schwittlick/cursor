@@ -68,7 +68,7 @@ class SerialInspectorGUI(QMainWindow):
         self.sample_window = 500
 
     def init_ui(self):
-        self.setWindowTitle("Serial Inspector")
+        self.setWindowTitle("Plotter Power Tools")
         self.setGeometry(100, 100, 1550, 900)
 
         main_widget = QWidget()
@@ -475,10 +475,12 @@ class SerialInspectorGUI(QMainWindow):
     def toggle_connection(self):
         if self.inspector.check():
             self.inspector.disconnect_serial()
+            self.setWindowTitle("Disconnected")
         else:
             port = self.port_combo.currentText().split(" ")[0]
             baud = int(self.baud_combo.currentText())
             self.inspector.connect_serial(port, baud)
+            self.setWindowTitle(self.port_combo.currentText())
 
     def update_connection_status(self, status):
         self.connection_status.setText(f"Status: {status}")
