@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import json
-import orjson
 import re
 from typing import Any, Dict, Union
 
-import pyautogui
+import orjson
 
 from cursor.collection import Collection
 from cursor.path import Path
@@ -26,8 +25,8 @@ def parse_position(obj: Dict[str, Any]) -> Position:
     return pos
 
 
-def parse_size(obj: Dict[str, Any]) -> pyautogui.Size:
-    return pyautogui.Size(obj["w"], obj["h"])
+def parse_size(obj: Dict[str, Any]) -> tuple[int, int]:
+    return obj["w"], obj["h"]
 
 
 def parse_collection(obj: Dict[str, Any]) -> Collection:
@@ -43,7 +42,7 @@ def parse_collection(obj: Dict[str, Any]) -> Collection:
 
 def custom_decoder(
     obj: Dict[str, Any],
-) -> Union[Dict, Position, pyautogui.Size, Collection]:
+) -> Union[Dict, Position, tuple[int, int], Collection]:
     if isinstance(obj, dict):
         if "x" in obj and "y" in obj:
             return parse_position(obj)
@@ -110,7 +109,7 @@ class MyJsonDecoder(json.JSONDecoder):
                 pos.properties[Property.COLOR] = c
             return pos
         if "w" in dct and "h" in dct:
-            s = pyautogui.Size(dct["w"], dct["h"])
+            s = dct["w"], dct["h"]
             return s
         if "paths" in dct and "timestamp" in dct:
             ts = dct["timestamp"]

@@ -1,23 +1,81 @@
-from cursor.path import Path
-from cursor.collection import Collection
-from cursor.load.compress import JsonCompressor
-from cursor.data import DataDirHandler
-from cursor.misc import convert_pynput_btn_to_key
+import sys
+import threading
 
 import pyautogui
-import wasabi
-import pystray
-import pynput
 import pymsgbox
-import threading
-import sys
+import pynput
+import pystray
+import wasabi
 from PIL import Image
 
+from cursor.collection import Collection
+from cursor.data import DataDirHandler
+from cursor.load.compress import JsonCompressor
+from cursor.path import Path
 from cursor.position import Position
 from cursor.properties import Property
 from cursor.timer import DateHandler
 
 log = wasabi.Printer()
+
+
+def convert_pynput_btn_to_key(btn: pynput.keyboard.Key) -> Optional[str]:
+    """
+    these keyboard keys dont have char representation
+    we make it ourselves
+    """
+    if btn == pynput.keyboard.Key.space:
+        return " "
+
+    if btn == pynput.keyboard.Key.delete:
+        return "DEL"
+
+    if btn == pynput.keyboard.Key.cmd:
+        return "CMD"
+
+    if btn == pynput.keyboard.Key.cmd_l:
+        return "CMD_L"
+
+    if btn == pynput.keyboard.Key.cmd_r:
+        return "CMD_R"
+
+    if btn == pynput.keyboard.Key.alt:
+        return "ALT"
+
+    if btn == pynput.keyboard.Key.alt_l:
+        return "ALT_L"
+
+    if btn == pynput.keyboard.Key.alt_r:
+        return "ALT_R"
+
+    if btn == pynput.keyboard.Key.enter:
+        return "ENTER"
+
+    if btn == pynput.keyboard.Key.backspace:
+        return "BACKSPACE"
+
+    if btn == pynput.keyboard.Key.shift:
+        return "SHIFT"
+
+    if btn == pynput.keyboard.Key.shift_l:
+        return "SHIFT_L"
+
+    if btn == pynput.keyboard.Key.shift_r:
+        return "SHIFT_R"
+
+    if btn == pynput.keyboard.Key.ctrl:
+        return "CTRL"
+
+    if btn == pynput.keyboard.Key.ctrl_l:
+        return "CTRL_L"
+
+    if btn == pynput.keyboard.Key.ctrl_r:
+        return "CTRL_R"
+
+    if btn == pynput.keyboard.Key.tab:
+        return "TAB"
+
+    return None
 
 
 class Recorder:

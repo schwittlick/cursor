@@ -1,32 +1,31 @@
 import configparser
-import pathlib
-from typing import Optional
-import os
 import logging
+import os
+import pathlib
 
 
-def load_cursor_config(config_path: str = "config.ini") -> str:
+def load_cursor_config(config_path: pathlib.Path) -> str:
     config: configparser.ConfigParser = configparser.ConfigParser()
 
-    # Try to read the config file, if it exists
-    if os.path.exists(config_path):
-        config.read(config_path)
+    config_path_abs = config_path.absolute().as_posix()
+    if os.path.exists(config_path_abs):
+        config.read(config_path_abs)
     else:
-        # Use default values if the config file doesn't exist
         logging.warning(f"Config file '{config_path}' not found. Using default values.")
         config["cursor"] = {"data_dir": "/tmp/cursor_data", "log_level": "INFO"}
 
     if "cursor" not in config:
         raise ValueError("The 'cursor' section is missing from the config file.")
 
-    data_dir: Optional[str] = config["cursor"].get("data_dir")
-    log_level: Optional[str] = config["cursor"].get("log_level")
+    data_dir: str = config["cursor"].get("data_dir", "")
+    log_level: str = config["cursor"].get("log_level", "")
 
     if log_level:
         log_level = log_level.upper()
         numeric_level: int = getattr(logging, log_level, logging.INFO)
         logging.basicConfig(level=numeric_level, format="%(asctime)s - %(levelname)s - %(message)s")
 
+    data_dir = pathlib.Path(data_dir).resolve().as_posix()
     if data_dir and not os.path.isdir(data_dir):
         logging.warning(f"The specified data_dir '{data_dir}' does not exist.")
 
@@ -37,7 +36,7 @@ class DataDirHandler:
     def __init__(self):
         self.base_dir = pathlib.Path(__file__).resolve().parent.parent
         ini_path = self.base_dir / "config_local.ini"
-        data_dir_cfg = load_cursor_config(ini_path.as_posix())
+        data_dir_cfg = load_cursor_config(ini_path)
 
         self.data_dir = pathlib.Path(data_dir_cfg)
 
