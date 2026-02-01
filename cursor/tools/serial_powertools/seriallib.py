@@ -121,39 +121,40 @@ class AsyncSerialSender(threading.Thread):
                 with self.lock:
                     logging.info(f"Getting commands from index: {self.current_command_index}, end: {end_index}")
                     batched_commands = self.commands[self.current_command_index : end_index]
-                cmds = concat_commands(batched_commands)
+                    cmds = concat_commands(batched_commands)
 
-                if self.do_software_handshake:
-                    requested_memory_amount = len(cmds)
-                    free_io_memory = self.plotter.free_memory()
+                    if self.do_software_handshake:
+                        requested_memory_amount = len(cmds)
+                        free_io_memory = self.plotter.free_memory()
 
-                    logging.info(
-                        f"Free memory: {free_io_memory} requested: {requested_memory_amount} limit: {self.memory_limit}"
-                    )
+                        logging.info(
+                            f"Free memory: {free_io_memory} requested: {requested_memory_amount} limit: {self.memory_limit}"
+                        )
 
-                    free_io_memory = min(free_io_memory, self.memory_limit)
+                        free_io_memory = min(free_io_memory, self.memory_limit)
 
-                    if free_io_memory < requested_memory_amount:
-                        sleep_time_seconds = 1
-                        logging.info(f"Not enough free memory. Waiting {sleep_time_seconds}s")
-                        time.sleep(sleep_time_seconds)
-                        continue
+                        if free_io_memory < requested_memory_amount:
+                            sleep_time_seconds = 1
+                            logging.info(f"Not enough free memory. Waiting {sleep_time_seconds}s")
+                            time.sleep(sleep_time_seconds)
+                            continue
 
-                logging.info(cmds)
-                self.plotter.write(cmds)
+                    logging.info(cmds)
+                    self.plotter.write(cmds)
 
-                while self.paused:
-                    time.sleep(0.1)
+                    while self.paused:
+                        time.sleep(0.1)
 
-                if self.send_single and not self.paused:
-                    self.command_batch = 1
-                    self.paused = True
+                    if self.send_single and not self.paused:
+                        self.command_batch = 1
+                        self.paused = True
 
-                self.current_command_index = end_index
-                time.sleep(0.01)
+                    self.current_command_index = end_index
+                    time.sleep(0.01)
 
-                # call cb for progress
-                self.progress_cb(self.current_command_index)
+                    # call cb for progress
+                    if self.progress_cb:
+                        self.progress_cb(self.current_command_index)
 
             # after the currently set commands are done
             # empty the queue and reset the index
