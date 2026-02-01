@@ -167,15 +167,6 @@ class AsyncSerialSender(threading.Thread):
 
 
 class SerialSender:
-    def __init__(self):
-        pass
-        # parser = HPGLParser()
-        # collection = parser.parse(hpgl_data)
-        # collection.sort(Sorter(param=SortParameter.PEN_SELECT, reverse=False))
-        # now the problem is the scaling, we don't know the export parameters
-        # self.commands = tokenizer(hpgl_data)
-        # self.plotter = HPGLPlotter(serialport)
-
     @staticmethod
     def send(plotter: HPGLPlotter, commands: list[str]):
         command_batch = 20
