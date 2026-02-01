@@ -69,7 +69,7 @@ class SerialInspectorGUI(QMainWindow):
 
     def init_ui(self):
         self.setWindowTitle("Plotter Power Tools")
-        self.setGeometry(100, 100, 1550, 900)
+        # self.setGeometry(100, 100, 1550, 900)
 
         main_widget = QWidget()
         main_layout = QHBoxLayout()
@@ -89,14 +89,6 @@ class SerialInspectorGUI(QMainWindow):
 
         self.inspector.command_sent.connect(self.update_command_log)
 
-        # Bruteforce section
-        bruteforce_widget = self.create_bruteforce_widget()
-        left_layout.addWidget(bruteforce_widget)
-
-        # Plotter Info section
-        plotter_info_widget = self.create_plotter_info_widget()
-        left_layout.addWidget(plotter_info_widget)
-
         # Add a stretch factor to push all widgets to the top
         left_layout.addStretch(1)
 
@@ -104,8 +96,8 @@ class SerialInspectorGUI(QMainWindow):
         output_widget = self.create_output_widget()
         right_layout.addWidget(output_widget)
 
-        main_layout.addLayout(left_layout)
-        main_layout.addLayout(right_layout)
+        main_layout.addLayout(left_layout, 1)
+        main_layout.addLayout(right_layout, 3)
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
 
@@ -137,19 +129,11 @@ class SerialInspectorGUI(QMainWindow):
     def shutdown(self):
         logging.info("Shutting down the application...")
 
-        # Stop the serial connection if it's open
         if self.inspector.check():
             self.inspector.disconnect_serial()
 
-        # Stop any running bruteforce threads
-        self.inspector.stop_bruteforce_progress()
-
-        # Stop the async sender if it's running
         if self.inspector.async_sender:
             self.inspector.async_sender.stop()
-
-        # Add any other cleanup code here
-        # For example, stopping any other threads, closing file handles, etc.
 
         logging.info("Application shutdown complete.")
 
@@ -195,7 +179,7 @@ class SerialInspectorGUI(QMainWindow):
         cmd_layout = QHBoxLayout()
         self.command_input = QLineEdit()
         self.command_input.returnPressed.connect(self.send_command)
-        send_btn = QPushButton("Send")
+        send_btn = QPushButton("Send CMD")
         send_btn.clicked.connect(self.send_command)
         cmd_layout.addWidget(self.command_input)
         cmd_layout.addWidget(send_btn)
@@ -238,27 +222,34 @@ class SerialInspectorGUI(QMainWindow):
             ("SP8;", "SP8;"),
         ]
 
-        for i in range(0, len(cmd_buttons), 5):
+        elements_per_line = 2
+        for i in range(0, len(cmd_buttons), elements_per_line):
             btn_layout = QHBoxLayout()
-            for label, command in cmd_buttons[i : i + 5]:
+            for label, command in cmd_buttons[i : i + elements_per_line]:
                 btn = QPushButton(label)
                 btn.clicked.connect(lambda _, cmd=command: self.send_command(cmd))
                 btn_layout.addWidget(btn)
             layout.addLayout(btn_layout)
 
-        sp_layout = QHBoxLayout()
-        for label, command in pen_select:
-            btn = QPushButton(label)
-            btn.clicked.connect(lambda _, cmd=command: self.send_command(cmd))
-            sp_layout.addWidget(btn)
-        layout.addLayout(sp_layout)
+        elements_per_line = 3
 
-        vs_layout = QHBoxLayout()
-        for label, command in vs:
-            btn = QPushButton(label)
-            btn.clicked.connect(lambda _, cmd=command: self.send_command(cmd))
-            vs_layout.addWidget(btn)
-        layout.addLayout(vs_layout)
+        for i in range(0, len(pen_select), elements_per_line):
+            btn_layout = QHBoxLayout()
+            for label, command in pen_select[i : i + elements_per_line]:
+                btn = QPushButton(label)
+                btn.clicked.connect(lambda _, cmd=command: self.send_command(cmd))
+                btn_layout.addWidget(btn)
+            layout.addLayout(btn_layout)
+
+        elements_per_line = 3
+
+        for i in range(0, len(vs), elements_per_line):
+            btn_layout = QHBoxLayout()
+            for label, command in vs[i : i + elements_per_line]:
+                btn = QPushButton(label)
+                btn.clicked.connect(lambda _, cmd=command: self.send_command(cmd))
+                btn_layout.addWidget(btn)
+            layout.addLayout(btn_layout)
 
         widget.setLayout(layout)
         return widget
@@ -395,43 +386,6 @@ class SerialInspectorGUI(QMainWindow):
     def stop_send_file(self):
         self.send_file_progress.setValue(0)
         self.inspector.stop_send_serial_file()
-
-    def create_bruteforce_widget(self):
-        widget = QWidget()
-        layout = QVBoxLayout()
-
-        self.bruteforce_progress = QProgressBar()
-        layout.addWidget(self.bruteforce_progress)
-
-        btn_layout = QHBoxLayout()
-        start_bruteforce_btn = QPushButton("Bruteforce")
-        start_bruteforce_btn.clicked.connect(self.inspector.start_bruteforce_progress)
-        stop_bruteforce_btn = QPushButton("Stop Bruteforce")
-        stop_bruteforce_btn.clicked.connect(self.inspector.stop_bruteforce_progress)
-        self.timeout_combo = QComboBox()
-        self.timeout_combo.addItems(["0.1", "0.3", "0.7", "1.0", "2.0"])
-        self.timeout_combo.setCurrentText("1.0")
-        btn_layout.addWidget(start_bruteforce_btn)
-        btn_layout.addWidget(stop_bruteforce_btn)
-        btn_layout.addWidget(QLabel("Timeout:"))
-        btn_layout.addWidget(self.timeout_combo)
-        layout.addLayout(btn_layout)
-
-        widget.setLayout(layout)
-        return widget
-
-    def create_plotter_info_widget(self):
-        widget = QWidget()
-        layout = QHBoxLayout()
-
-        get_model_btn = QPushButton("Get model")
-        get_model_btn.clicked.connect(self.inspector.get_plotter_model)
-        self.plotter_model_label = QLabel("Plotter Model: ")
-        layout.addWidget(get_model_btn)
-        layout.addWidget(self.plotter_model_label)
-
-        widget.setLayout(layout)
-        return widget
 
     def clear_output(self):
         self.output_text.clear()
