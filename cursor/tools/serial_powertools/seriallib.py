@@ -128,7 +128,8 @@ class AsyncSerialSender(threading.Thread):
                         free_io_memory = self.plotter.free_memory()
 
                         logging.info(
-                            f"Free memory: {free_io_memory} requested: {requested_memory_amount} limit: {self.memory_limit}"
+                            f"Free memory: {free_io_memory} requested: \
+                            {requested_memory_amount} limit: {self.memory_limit}"
                         )
 
                         free_io_memory = min(free_io_memory, self.memory_limit)
