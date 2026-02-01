@@ -540,3 +540,33 @@ class Paper:
         PaperSize.PHOTO_PAPER_400_300_LANDSCAPE: BB(0, 0, 400, 300),
         PaperSize.PHOTO_PAPER_600_500_LANDSCAPE: BB(0, 0, 600, 500),
     }
+
+
+class NewPlotterConfig:
+    def __init__(
+        self,
+        name: str,
+        shortname: str,
+        format: ExportFormat,
+        hpgl_name: str,
+        output_sizes: list[BB],
+        units: tuple[int, int],
+        max_speed: int,
+        buffer_size: int,
+    ) -> None:
+        self.name = name
+
+
+if __name__ == "__main__":
+    import logging
+    import pathlib
+
+    import yaml
+
+    plotter_config_path = pathlib.Path(__file__).resolve().parent / "data" / "plotters"
+    config_files = [
+        file for file in plotter_config_path.iterdir() if file.is_file() and file.as_posix().endswith(".yaml")
+    ]
+
+    logging.info(config_files)
+    yaml.parse(None)
