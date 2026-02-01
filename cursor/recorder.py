@@ -1,5 +1,6 @@
 import sys
 import threading
+from typing import Optional
 
 import pyautogui
 import pymsgbox
