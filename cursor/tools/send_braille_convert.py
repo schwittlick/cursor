@@ -81,7 +81,7 @@ class BrailleConverterGUI(QMainWindow):
                 s = serial.Serial(port)
                 s.close()
                 available_ports.append(port)
-            except (OSError, serial.SerialException):
+            except OSError, serial.SerialException:
                 continue
 
         self.port_combo.addItems(available_ports)

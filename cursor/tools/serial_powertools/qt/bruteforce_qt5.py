@@ -76,7 +76,7 @@ class BruteForcer(QThread):
                                         self.result_found.emit(config)
                                         responses.append(config)
 
-                            except (serial.SerialException, serial.SerialTimeoutException):
+                            except serial.SerialException, serial.SerialTimeoutException:
                                 pass
 
         logging.info(f"{self.serial_port}: {responses}")
