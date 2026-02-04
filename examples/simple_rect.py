@@ -12,6 +12,7 @@ if __name__ == "__main__":
 
     c.add(p)
 
-    wrapper = ExportWrapper(c, PlotterType.MUTOH_XP500_500x297mm, 0, "simple_rect_example", "test")
-    wrapper.fit()
-    wrapper.ex()
+    for plotter_type in PlotterType:
+        wrapper = ExportWrapper(c, plotter_type, 0, "simple_rect_example", "test")
+        wrapper.fit()
+        wrapper.ex()
