@@ -1,5 +1,6 @@
 import logging
 import math
+from collections import defaultdict
 
 from cursor.algorithm.color.copic import Color, Copic
 from cursor.algorithm.color.copic_pen_enum import CopicColorCode
@@ -56,7 +57,7 @@ def create_legend_path(
     layer_index: int,
     pen_index: int,
     path_color: Color,
-    radius: float,
+    radius: int,
 ) -> Path:
     legend_path = Path([Position(x, y), Position(x, y)])
     legend_path.layer = layer_index
@@ -98,130 +99,98 @@ def add_legende_all_corners(collection_bb, layer_index, c, pen_index, path_color
         c.add(legend_path)
 
 
+_PENS_PER_LAYER = 8
+_LEGEND_POINTS = 3
+_LEGEND_OFFSET = 400  # 400 units = 1mm in plotter space
+
+
+def _group_paths_by_color_code(collection: Collection) -> dict[CopicColorCode, Collection]:
+    groups: dict[CopicColorCode, Collection] = defaultdict(Collection)
+    for path in collection:
+        code = path.properties[Property.COPIC_COLOR].code
+        groups[code].add(path)
+    return groups
+
+
+def _build_legend_paths(
+    bb,
+    pen_index: int,
+    layer_index: int,
+    path_color: Color,
+    radius: int,
+    legende_x: bool,
+    legende_y: bool,
+    legende_scale: float,
+) -> Collection:
+    x = (bb.x2 + _LEGEND_OFFSET if legende_x else bb.x - _LEGEND_OFFSET) + pen_index * legende_scale
+    y = (bb.y2 if legende_y else bb.y) + layer_index * legende_scale
+
+    legend = Collection()
+    for _ in range(_LEGEND_POINTS):
+        legend.add(create_legend_path(x, y, layer_index, pen_index, path_color, radius))
+    return legend
+
+
 def sort_collection_by_copic_color_group(
     collection: Collection,
     legende_x: bool = False,
     legende_y: bool = False,
     legende_scale: float = 1,
+    draw_legend: bool = True,
 ) -> Collection:
     """
-    the coordinates of the paths are in pixel space, not in hpgl/plotter space
+    Sorts paths into layers and pens by copic color code.
+    Coordinates are in pixel space, not hpgl/plotter space.
     """
-    out_color_names_pen_mapping = {}
-    color_names_pen_mapping = {}
-
-    c = Collection()
-
-    # toggle to separate each pen in a new layer
-    separate_sp_to_layer = True
-
+    result = Collection()
+    pen_mapping: dict[int, dict[int, CopicColorCode]] = {}
+    layer_pen_mapping: dict[int, CopicColorCode] = {}
     pen_index = 1
     layer_index = 0
-    pens = {}
 
-    radius = collection.paths[0][0].radius
+    radius = collection.paths[0][0].radius or 0
+    bb = collection.bb()
+    paths_by_code = _group_paths_by_color_code(collection)
 
-    # separating app paths by the copic color code
-    for path in collection:
-        path_copic_color = path.properties[Property.COPIC_COLOR]
-        if path_copic_color.code not in pens.keys():
-            pens[path_copic_color.code] = Collection()
+    logging.info(f"{len(paths_by_code)} colors detected")
 
-        pens[path_copic_color.code].add(path)
+    for paths_same_code in paths_by_code.values():
+        for path_color, paths_same_color in sort_collection_by_copic_color(paths_same_code).items():
+            layer_pen_mapping[pen_index] = path_color.code
 
-    logging.info(f"{len(pens)} colors detected")
-    collection_bb = collection.bb()
+            legend = (
+                _build_legend_paths(bb, pen_index, layer_index, path_color, radius, legende_x, legende_y, legende_scale)
+                if draw_legend
+                else Collection()
+            )
 
-    for _, paths in pens.items():
-        sorted_by_colors = sort_collection_by_copic_color(paths)
-
-        for path_color, paths_same_color in sorted_by_colors.items():
-            color_names_pen_mapping[pen_index] = path_color.code
-
-            # logging.info(f"travel pen up distance before tsp: {paths_same_color.calc_pen_up_distance(40):.2f} mm")
-            # paths_same_color.fast_tsp(plot_preview=False, duration_seconds=1)
-            # logging.info(f"travel pen up distance after tsp: {paths_same_color.calc_pen_up_distance(40):.2f} mm")
-
-            legend_paths = Collection()
-            wtf = True
-            if wtf:
-                all_corners = False
-                if all_corners:
-                    add_legende_all_corners(
-                        collection_bb,
-                        layer_index,
-                        legend_paths,
-                        pen_index,
-                        path_color,
-                        legende_scale,
-                        radius,
-                    )
-                else:
-                    num_legend_points = 3
-
-                    absolute = False
-                    absolute_offset = (400, 400)  # 40 = 1mm
-
-                    if absolute:
-                        x = absolute_offset[0] + layer_index * legende_scale
-                        y = absolute_offset[1] + pen_index * legende_scale
-                        for _ in range(num_legend_points):
-                            legend_path = create_legend_path(x, y, layer_index, pen_index, path_color, radius)
-                            legend_paths.add(legend_path)
-                    else:
-                        # adding legende of used colors
-                        if legende_x:
-                            x = (
-                                collection_bb.x2 + absolute_offset[0] + pen_index * legende_scale
-                            )  # left side for legende
-                        else:
-                            x = (
-                                collection_bb.x - absolute_offset[0] + pen_index * legende_scale
-                            )  # legende on right side
-                        if legende_y:
-                            y = collection_bb.y2 + layer_index * legende_scale
-                        else:
-                            y = collection_bb.y + layer_index * legende_scale
-
-                        for _ in range(num_legend_points):
-                            legend_path = create_legend_path(x, y, layer_index, pen_index, path_color, radius)
-                            legend_paths.add(legend_path)
-
-            # adds legend paths at beginning of layer
-            for path in legend_paths:
-                c.add(path.copy())
+            for path in legend:
+                result.add(path.copy())
 
             for path in paths_same_color:
                 path.pen_select = pen_index
                 path.layer = layer_index
-                # path.color = path_color.as_rgb()
-                # path.properties[Property.COPIC_COLOR] = path_color
+                result.add(path)
 
-                c.add(path)
-
-            # adds legend paths at end of layer
-            for path in legend_paths:
-                c.add(path.copy())
+            for path in legend:
+                result.add(path.copy())
 
             pen_index += 1
 
-            if pen_index == 9:
-                out_color_names_pen_mapping[layer_index] = color_names_pen_mapping.copy()
-                color_names_pen_mapping = {}
+            if pen_index > _PENS_PER_LAYER:
+                pen_mapping[layer_index] = layer_pen_mapping.copy()
+                layer_pen_mapping = {}
                 pen_index = 1
                 layer_index += 1
 
-        if separate_sp_to_layer:
-            out_color_names_pen_mapping[layer_index] = color_names_pen_mapping.copy()
-            layer_index += 1
-            pen_index = 1
+        pen_mapping[layer_index] = layer_pen_mapping.copy()
+        layer_pen_mapping = {}
+        layer_index += 1
+        pen_index = 1
 
-    if not separate_sp_to_layer:
-        out_color_names_pen_mapping[layer_index] = color_names_pen_mapping.copy()
+    result.properties["pen_mapping"] = pen_mapping
 
-    c.properties["pen_mapping"] = out_color_names_pen_mapping
-
-    return c
+    return result
 
 
 if __name__ == "__main__":
