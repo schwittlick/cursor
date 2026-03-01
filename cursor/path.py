@@ -55,7 +55,9 @@ class Path:
         rep = f"vertices: {len(self.vertices)} properties: {self.properties}"
         return rep
 
-    def __eq__(self, other: Path) -> bool:
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Path):
+            return NotImplemented
         if len(self) != len(other):
             return False
 
