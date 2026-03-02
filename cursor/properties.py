@@ -23,3 +23,5 @@ class Property(str, Enum):
     RADIUS = "radius"
     TAGS = "tags"
     RGB_LED_COLOR = "rgb_led_color"
+    # below used for pdf renderer
+    NOTES = "notes"
