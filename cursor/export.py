@@ -1,24 +1,24 @@
+import hashlib
+import inspect
+import logging
+import pathlib
 import random
 import string
-import logging
-import inspect
-import hashlib
-import pathlib
-from typing import Optional, Dict
+from typing import Dict, Optional
 
-from cursor.bb import BoundingBox
 from cursor.algorithm.color.copic import Copic
+from cursor.bb import BoundingBox
 from cursor.collection import Collection
 from cursor.data import DataDirHandler
 from cursor.device import (
-    PlotterType,
-    PlotterName,
-    MinmaxMapping,
-    XYFactors,
-    ExportFormatMappings,
     ExportFormat,
+    ExportFormatMappings,
+    MinmaxMapping,
+    PlotterName,
+    PlotterType,
+    XYFactors,
 )
-
+from cursor.properties import Property
 from cursor.renderer.digi import DigiplotRenderer
 from cursor.renderer.gcode import GCodeRenderer
 from cursor.renderer.hpgl import HPGLRenderer
@@ -178,9 +178,12 @@ class Exporter:
             file.write(self._file_content_of_caller())
         logging.info(f"Saved source to {source_folder / fname}")
 
-    def export_copic_color_mapping(self, fname: str, layers: Dict[str, Collection]) -> None:
+    def export_pdf_annotations(self, fname: str, layers: Dict[str, Collection]) -> None:
         if not self.cfg or not self.cfg.type:
             raise ValueError("Configuration or plotter type is not set")
+
+        if "pen_mapping" not in self.collection.properties:
+            return
 
         pdf_dir = DataDirHandler().pdf(self.name)
         pdf_renderer = PdfRenderer(pdf_dir)
@@ -214,6 +217,15 @@ class Exporter:
             if y > 250:
                 x += 65
                 y = 10
+
+        x = 100
+        y = 20
+        if Property.NOTES in self.collection.properties:
+            pdf_renderer.pdf.set_fill_color(0, 0, 0)
+            for note in self.collection.properties[Property.NOTES]:
+                pdf_renderer.pdf.text(x, y, note)
+                y += 5
+
         pdf_renderer.save(fname)
 
     def run(self) -> None:
@@ -234,8 +246,7 @@ class Exporter:
 
         separate_layers = self.collection.get_layers()
 
-        if "pen_mapping" in self.collection.properties:
-            self.export_copic_color_mapping(fname, separate_layers)
+        self.export_pdf_annotations(fname, separate_layers)
 
         for layer, pc in separate_layers.items():
             layer_fname = f"{fname}_{layer}"
