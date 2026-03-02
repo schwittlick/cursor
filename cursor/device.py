@@ -170,12 +170,12 @@ class MinmaxMapping:
         PlotterType.HP_DM_II_A0: BB(-23036, -16598, 23036, 16598),
         PlotterType.HP_DM_II_A1: BB(-16080, -11660, 16080, 11660),
         PlotterType.HP_DM_II_A3: BB(-7656, -5740, 7656, 5740),
-        PlotterType.MUTOH_XP500_100x70cm: BB(-19370, -13728, 19370, 13728) - BB(0, 0, 20 * 40, 0),
-        # one more cm padding on bottom
-        PlotterType.MUTOH_XP500_500x297mm: BB(-9452, -5722, 9452, 5722),
-        PlotterType.MUTOH_XP500_A1: BB(-16200, -11645, 16200, 11645),
-        PlotterType.MUTOH_XP500_A2: BB(-11284, -8149, 11285, 8149),
-        PlotterType.MUTOH_XP500_A3: BB(-7815, -5716, 7815, 5716),
+        PlotterType.MUTOH_XP500_100x70cm: BB(-19370, -13728, 19370, 13728) - BB(0, 0, 15 * 40, 0),
+        # two more cm padding on bottom
+        PlotterType.MUTOH_XP500_500x297mm: BB(-9452, -5722, 9452, 5722) - BB(0, 0, 15 * 40, 0),
+        PlotterType.MUTOH_XP500_A1: BB(-16200, -11645, 16200, 11645) - BB(0, 0, 15 * 40, 0),
+        PlotterType.MUTOH_XP500_A2: BB(-11284, -8149, 11285, 8149) - BB(0, 0, 15 * 40, 0),
+        PlotterType.MUTOH_XP500_A3: BB(-7815, -5716, 7815, 5716) - BB(0, 0, 15 * 40, 0),
         PlotterType.DIY_PLOTTER: BB(0, 0, 3350, -1715),  # A1
         # deprecated bc grbl changed
         PlotterType.DIY_PLOTTER_A2: BB(0, 0, 1720, -1220),
