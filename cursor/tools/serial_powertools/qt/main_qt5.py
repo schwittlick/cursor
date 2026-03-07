@@ -358,6 +358,7 @@ class SerialInspectorGUI(QMainWindow):
         file_path, _ = QFileDialog.getOpenFileName(self, "Select File")
         if file_path:
             self.file_path_input.setText(file_path)
+            self._update_window_title()
 
     def send_file(self):
         file_path = self.file_path_input.text()
@@ -430,12 +431,10 @@ class SerialInspectorGUI(QMainWindow):
     def toggle_connection(self):
         if self.inspector.check():
             self.inspector.disconnect_serial()
-            self.setWindowTitle("Disconnected")
         else:
             port = self.port_combo.currentText().split(" ")[0]
             baud = int(self.baud_combo.currentText())
             self.inspector.connect_serial(port, baud)
-            self.setWindowTitle(self.port_combo.currentText())
 
     def update_connection_status(self, status):
         self.connection_status.setText(f"Status: {status}")
@@ -444,6 +443,18 @@ class SerialInspectorGUI(QMainWindow):
         else:
             self.connect_btn.setText("Connect")
         logging.info(f"Connection status updated: {status}")
+        self._update_window_title()
+
+    def _update_window_title(self):
+        parts = ["Plotter Power Tools"]
+        if self.inspector.check():
+            port = self.port_combo.currentText().split(" ")[0]
+            baud = self.baud_combo.currentText()
+            parts.append(f"{port} @ {baud}")
+        file_path = self.file_path_input.text()
+        if file_path:
+            parts.append(file_path)
+        self.setWindowTitle(" - ".join(parts))
 
     def seconds_to_timestamp(self, seconds: int) -> str:
         hours = seconds // 3600
