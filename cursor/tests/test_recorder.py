@@ -1,5 +1,6 @@
-import pynput
 import pytest
+
+pynput = pytest.importorskip("pynput")
 
 from cursor.recorder import Recorder
 
