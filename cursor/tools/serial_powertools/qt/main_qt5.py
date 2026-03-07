@@ -5,7 +5,7 @@ import sys
 import time
 
 from PyQt5.QtCore import QObject, Qt, QThread, pyqtSignal
-from PyQt5.QtGui import QKeySequence
+from PyQt5.QtGui import QFont, QKeySequence
 from PyQt5.QtWidgets import (
     QApplication,
     QComboBox,
@@ -409,6 +409,7 @@ class SerialInspectorGUI(QMainWindow):
 
         self.output_text = QPlainTextEdit()
         self.output_text.setReadOnly(True)
+        self.output_text.setFont(QFont("Monospace", 8))
 
         layout.addWidget(self.output_text)
         layout.addWidget(clear_output_button)
