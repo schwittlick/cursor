@@ -29,12 +29,6 @@ def test_single_color_pen_and_layer():
     c = make_collection(CopicColorCode.B0000)
     result = sort_collection_by_copic_color_group(c)
 
-    data_paths = [
-        p
-        for p in result
-        if p.properties.get(Property.COPIC_COLOR) == Copic().color_by_code(CopicColorCode.B0000)
-        and p.pen_select is not None
-    ]
     # only the actual data path (not legend paths) — legend paths also have the color set
     # easier: find paths that originated from input (have non-equal x+1 offset)
     # just verify at least one path has pen=1, layer=0
