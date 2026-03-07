@@ -1,7 +1,7 @@
-from cursor.collection import Collection
-from cursor.path import Path
-from cursor.export import ExportWrapper
 from cursor import device
+from cursor.collection import Collection
+from cursor.export import ExportWrapper
+from cursor.path import Path
 
 
 def test_exporter():
@@ -17,7 +17,7 @@ def test_exporter():
 
     wrapper = ExportWrapper(
         pc,
-        device.PlotterType.HP_DM_RX_PLUS_A2,
+        device.PlotterType.HP_7550A_A3,
         30,
         "simple_rect_example",
         "simple_rect",

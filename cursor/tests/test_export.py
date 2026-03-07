@@ -1,11 +1,12 @@
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 
 from cursor.algorithm.color.copic import Color
 from cursor.collection import Collection
-from cursor.path import Path as CursorPath
 from cursor.device import PlotterType
-from cursor.export import ExportWrapper, Exporter, ExportConfig
+from cursor.export import ExportConfig, Exporter, ExportWrapper
+from cursor.path import Path as CursorPath
 
 
 @pytest.fixture
@@ -145,7 +146,7 @@ def test_export_copic_color_mapping(exporter):
         mock_color = Mock(spec=Color)
         mock_color.as_rgb.return_value = (255, 0, 0)
         mock_copic.return_value.color_by_code.return_value = mock_color
-        exporter.export_copic_color_mapping("test", {"layer1": exporter.collection})
+        exporter.export_pdf_annotations("test", {"layer1": exporter.collection})
     mock_pdf_renderer.assert_called_once()
     mock_copic.return_value.color_by_code.assert_called()
 
