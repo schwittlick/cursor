@@ -1,4 +1,5 @@
 import logging
+import os
 import random
 import sys
 import time
@@ -25,6 +26,7 @@ from PyQt5.QtWidgets import (
 from cursor.hpgl import ABORT_GRAPHICS, RESET_DEVICE
 from cursor.timer import Timer
 from cursor.tools.discovery import discover
+from cursor.tools.serial_powertools.qt.progress_reporter import ProgressReporter
 from cursor.tools.serial_powertools.qt.serial_inspector_qt5 import SerialInspector
 
 
@@ -62,6 +64,7 @@ class SerialInspectorGUI(QMainWindow):
         self.inspector.file_progress_updated.connect(self.update_file_progress)
 
         self.send_file_timer = Timer()
+        self._progress_reporter: ProgressReporter | None = None
 
         # Progress tracking for time estimation
         self.recent_progress_samples = []  # list of (timestamp, progress) tuples
@@ -376,6 +379,9 @@ class SerialInspectorGUI(QMainWindow):
                 logging.warning("Invalid start percentage value. Using 0.")
                 start_percentage = 0.0
 
+            self._progress_reporter = ProgressReporter(
+                label=os.path.basename(file_path)
+            ).start()
             self.inspector.send_serial_file(file_path, start_percentage)
             self.send_file_timer.start()
         else:
@@ -526,6 +532,13 @@ class SerialInspectorGUI(QMainWindow):
     def update_file_progress(self, idx, max_length):
         progress = int((idx / max_length) * 100)
         self.send_file_progress.setValue(progress)
+        if self._progress_reporter:
+            ratio = idx / max_length
+            if ratio >= 1.0:
+                self._progress_reporter.finish()
+                self._progress_reporter = None
+            else:
+                self._progress_reporter.report(ratio)
 
         elapsed = self.send_file_timer.elapsed()
 
