@@ -266,12 +266,16 @@ class SerialInspectorGUI(QMainWindow):
         widget = QWidget()
         layout = QVBoxLayout()
 
-        file_layout = QHBoxLayout()
         self.file_path_input = QLineEdit()
         self.file_path_input.setReadOnly(True)
+        self.file_path_input.setVisible(False)  # hidden, keeps path for logic
+
+        self.selected_file_label = QLabel("No file selected")
+        layout.addWidget(self.selected_file_label)
+
+        file_layout = QHBoxLayout()
         select_file_btn = QPushButton("Select File")
         select_file_btn.clicked.connect(self.select_file)
-        file_layout.addWidget(self.file_path_input)
         file_layout.addWidget(select_file_btn)
 
         send_async_btn = QPushButton("Send")
@@ -361,6 +365,7 @@ class SerialInspectorGUI(QMainWindow):
         file_path, _ = QFileDialog.getOpenFileName(self, "Select File")
         if file_path:
             self.file_path_input.setText(file_path)
+            self.selected_file_label.setText(os.path.basename(file_path))
             self._update_window_title()
 
     def send_file(self):
@@ -459,7 +464,7 @@ class SerialInspectorGUI(QMainWindow):
             parts.append(f"{port} @ {baud}")
         file_path = self.file_path_input.text()
         if file_path:
-            parts.append(file_path)
+            parts.append(os.path.basename(file_path))
         self.setWindowTitle(" - ".join(parts))
 
     def seconds_to_timestamp(self, seconds: int) -> str:
