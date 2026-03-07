@@ -384,9 +384,7 @@ class SerialInspectorGUI(QMainWindow):
                 logging.warning("Invalid start percentage value. Using 0.")
                 start_percentage = 0.0
 
-            self._progress_reporter = ProgressReporter(
-                label=os.path.basename(file_path)
-            ).start()
+            self._progress_reporter = ProgressReporter(label=os.path.basename(file_path)).start()
             self.inspector.send_serial_file(file_path, start_percentage)
             self.send_file_timer.start()
         else:
