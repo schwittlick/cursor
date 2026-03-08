@@ -190,7 +190,7 @@ class Exporter:
         pdf_renderer.pdf.add_page()
         pdf_renderer.pdf.set_font("Arial", size=10)
         pdf_renderer.pdf.text(10, 10, f"{fname}")
-        y, x = 15, 10
+        y, x = 20, 10
 
         copic = Copic()
 
@@ -216,10 +216,10 @@ class Exporter:
 
             if y > 250:
                 x += 65
-                y = 10
+                y = 20
 
         x = 100
-        y = 20
+        y = 50
         if Property.NOTES in self.collection.properties:
             pdf_renderer.pdf.set_fill_color(0, 0, 0)
             for note in self.collection.properties[Property.NOTES]:
