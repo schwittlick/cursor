@@ -396,6 +396,9 @@ class SerialInspectorGUI(QMainWindow):
     def stop_send_file(self):
         self.send_file_progress.setValue(0)
         self.inspector.stop_send_serial_file()
+        if self._progress_reporter:
+            self._progress_reporter.finish()
+            self._progress_reporter = None
 
     def clear_output(self):
         self.output_text.clear()
