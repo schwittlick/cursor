@@ -2,23 +2,21 @@ from __future__ import annotations
 
 import copy
 import math
-from decimal import Decimal, getcontext
+
 import numpy as np
 
 from cursor.bb import BoundingBox
 from cursor.properties import Property
 
-# determines the precision of the Decimals
-getcontext().prec = 5
-
 
 class Position:
+    __slots__ = ("_x", "_y", "timestamp", "properties")
+
     def __init__(self, x: float = 0.0, y: float = 0.0, timestamp: int = 0, properties: dict | None = None) -> None:
         if properties is None:
             properties = {}
-        else:
-            pass
-        self._pos = np.array([Decimal(x), Decimal(y)], dtype=Decimal)
+        self._x = float(x)
+        self._y = float(y)
         self.timestamp = timestamp
         self.properties = properties
 
@@ -32,22 +30,22 @@ class Position:
 
     @property
     def x(self) -> float:
-        return float(self._pos[0])
+        return self._x
 
-    def pos(self) -> tuple[Decimal, Decimal]:
-        return self._pos[0], self._pos[1]
+    def pos(self) -> tuple[float, float]:
+        return self._x, self._y
 
     @x.setter
     def x(self, v: float) -> None:
-        self._pos[0] = Decimal(v)
+        self._x = float(v)
 
     @property
     def y(self) -> float:
-        return float(self._pos[1])
+        return self._y
 
     @y.setter
     def y(self, v: float) -> None:
-        self._pos[1] = Decimal(v)
+        self._y = float(v)
 
     @property
     def color(self) -> tuple[int, ...] | None:
@@ -75,7 +73,7 @@ class Position:
         return self.x, self.y
 
     def as_array(self) -> np.ndarray:
-        return self._pos.astype(float)
+        return np.array([self._x, self._y])
 
     def time(self) -> int:
         return self.timestamp
@@ -118,7 +116,8 @@ class Position:
         self.y = qy
 
     def translate(self, x: float, y: float) -> None:
-        self._pos += Decimal(x), Decimal(y)
+        self._x += x
+        self._y += y
 
     def translated(self, x: float, y: float) -> Position:
         _p = self.copy()
@@ -126,7 +125,8 @@ class Position:
         return _p
 
     def scale(self, x: float, y: float) -> None:
-        self._pos = np.multiply(self._pos, [Decimal(x), Decimal(y)])
+        self._x *= x
+        self._y *= y
 
     def scaled(self, x: float, y: float) -> Position:
         _p = self.copy()
