@@ -90,6 +90,29 @@ def custom_decode(data: Any) -> Any:
         return data
 
 
+def decode_recording(data: dict) -> dict:
+    """Decode raw orjson output into a recording dict.
+
+    Replaces data["mouse"] with a Collection built directly from the raw dicts,
+    avoiding the per-object Python callback overhead of json.loads + object_hook.
+    Keys and other fields are left as-is (plain lists).
+    """
+    mouse_raw = data["mouse"]
+    ts = mouse_raw["timestamp"]
+    pc = Collection(ts)
+    for path_raw in mouse_raw.get("paths", []):
+        path = Path()
+        for pos_raw in path_raw:
+            pos = Position(pos_raw["x"], pos_raw["y"], pos_raw["ts"])
+            c = pos_raw.get("c")
+            if c is not None:
+                pos.properties[COLOR_PROPERTY] = tuple(c)
+            path.add_position(pos)
+        pc.add(path)
+    data["mouse"] = pc
+    return data
+
+
 class MyJsonDecoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
         json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
