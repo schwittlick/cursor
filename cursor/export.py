@@ -188,7 +188,9 @@ class Exporter:
         pdf_dir = DataDirHandler().pdf(self.name)
         pdf_renderer = PdfRenderer(pdf_dir)
         pdf_renderer.pdf.add_page()
-        pdf_renderer.pdf.set_font("Arial", size=10)
+        _font_path = pathlib.Path(__file__).parent / "data" / "JetBrainsMono-Regular.ttf"
+        pdf_renderer.pdf.add_font("JetBrainsMono", fname=str(_font_path))
+        pdf_renderer.pdf.set_font("JetBrainsMono", size=10)
         pdf_renderer.pdf.text(10, 10, f"{fname}")
         y, x = 20, 10
 
@@ -208,7 +210,7 @@ class Exporter:
                             pdf_renderer.pdf.text(x, y, f"Pen {pen_idx} -> {c}")
 
                             pdf_renderer.pdf.set_fill_color(c.as_rgb()[0], c.as_rgb()[1], c.as_rgb()[2])
-                            pdf_renderer.circle(x + 60, y - 1, 2)
+                            pdf_renderer.circle(x + 70, y - 1, 2)
                             y += 5
                         except KeyError:
                             logging.warning(f"Invalid color code: {color_code}")
