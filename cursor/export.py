@@ -157,18 +157,17 @@ class Exporter:
         timestamp = Timer.timestamp()
         return f"{self.name}_{self.suffix}_{machinename}_{layer}_{hash_short}_{timestamp}"
 
-    def export_jpeg_preview(self, separate_layers: Dict[str, Collection]) -> None:
-        for layer, pc in separate_layers.items():
-            fname = self._generate_filename(layer)
-            jpeg_folder = DataDirHandler().jpg(self.name)
-            bb = self.collection.bb()
-            bb.scale(0.1)
-            transformed = pc.transformed(BoundingBox(0, 0, bb.w, bb.h))
-            jpeg_renderer = JpegRenderer(jpeg_folder, w=int(bb.w), h=int(bb.h))
-            jpeg_renderer.background((255, 255, 255))
-            jpeg_renderer.add(transformed)
-            jpeg_renderer.render()
-            jpeg_renderer.save(fname)
+    def export_jpeg_preview(self) -> None:
+        jpeg_folder = DataDirHandler().jpg(self.name)
+        bb = self.collection.bb()
+        bb.scale(0.5)
+        transformed = self.collection.transformed(BoundingBox(0, 0, bb.w, bb.h))
+        transformed.move_to_origin()
+        jpeg_renderer = JpegRenderer(jpeg_folder, w=int(bb.w), h=int(bb.h))
+        jpeg_renderer.background((255, 255, 255))
+        jpeg_renderer.add(transformed)
+        jpeg_renderer.render()
+        jpeg_renderer.save(self._generate_filename())
 
     def export_source(self) -> None:
         source_folder = DataDirHandler().source(self.name)
@@ -236,7 +235,7 @@ class Exporter:
             return
 
         if self.cfg.export_jpg_preview:
-            self.export_jpeg_preview(self.collection.get_layers())
+            self.export_jpeg_preview()
 
         if self.cfg.export_source:
             self.export_source()
