@@ -8,7 +8,7 @@ import zlib
 
 import orjson
 
-from cursor.load.decode import MyJsonDecoder, decode_recording
+from cursor.load.decode import decode_recording
 from cursor.load.encode import MyJsonEncoder
 
 
@@ -47,7 +47,7 @@ class JsonCompressor:
             t3 = time.perf_counter()
             result = decode_recording(parsed)
             t4 = time.perf_counter()
-        except (TypeError, orjson.JSONDecodeError):
+        except TypeError, orjson.JSONDecodeError:
             raise RuntimeError("Could interpret the unzipped contents")
 
         n_paths = len(result["mouse"])
