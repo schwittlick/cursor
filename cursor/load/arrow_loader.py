@@ -64,9 +64,7 @@ def collection_to_table(collection: Collection, keys: list[KeyPress]) -> pa.Tabl
                 bs.append(0)
                 has_colors.append(False)
 
-    keys_serialized = json.dumps(
-        [[k.key, k.timestamp, k.is_down] for k in keys]
-    )
+    keys_serialized = json.dumps([[k.key, k.timestamp, k.is_down] for k in keys])
     metadata = {
         "recording_ts": str(collection._timestamp),
         "keys": keys_serialized,
@@ -174,9 +172,7 @@ class ArrowLoader:
             t0 = time.perf_counter()
             collection, keys = read_recording(f)
             t1 = time.perf_counter()
-            logging.info(
-                f"  {f.stem}: {len(collection)} paths in {int((t1 - t0) * 1000)}ms"
-            )
+            logging.info(f"  {f.stem}: {len(collection)} paths in {int((t1 - t0) * 1000)}ms")
             collection.clean()
             self._recordings.append(collection)
             if load_keys:
@@ -184,8 +180,7 @@ class ArrowLoader:
 
         total_paths = sum(len(c) for c in self._recordings)
         logging.info(
-            f"Loaded {total_paths} paths from {len(self._recordings)} recordings "
-            f"in {round(t.elapsed() * 1000)}ms"
+            f"Loaded {total_paths} paths from {len(self._recordings)} recordings in {round(t.elapsed() * 1000)}ms"
         )
 
     def load_file(self, path: pathlib.Path, load_keys: bool = True) -> None:

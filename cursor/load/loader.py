@@ -17,12 +17,10 @@ from cursor.load import KeyPress
 from cursor.load.compress import JsonCompressor
 from cursor.load.decode import MyJsonDecoder
 from cursor.path import Path
-from cursor.timer import Timer, DateHandler
+from cursor.timer import Timer
 
 
-def _load_file_worker(
-    path: pathlib.Path, load_keys: bool, verbose: bool
-) -> tuple[Collection, list[KeyPress]]:
+def _load_file_worker(path: pathlib.Path, load_keys: bool, verbose: bool) -> tuple[Collection, list[KeyPress]]:
     """Module-level worker for ProcessPoolExecutor.
 
     Must be a module-level function (not a bound method) so it can be pickled
@@ -47,11 +45,7 @@ def _load_file_worker(
     t3 = time.perf_counter()
 
     if verbose:
-        logging.info(
-            f"  read={int((t1 - t0) * 1000)}ms "
-            f"eval={int((t2 - t1) * 1000)}ms "
-            f"total={int((t3 - t0) * 1000)}ms"
-        )
+        logging.info(f"  read={int((t1 - t0) * 1000)}ms eval={int((t2 - t1) * 1000)}ms total={int((t3 - t0) * 1000)}ms")
 
     collection = _data["mouse"]
     new_keys: list[KeyPress] = []
