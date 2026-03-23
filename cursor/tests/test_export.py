@@ -129,7 +129,7 @@ def test_exporter_generate_filename(exporter):
 
 def test_export_jpeg_preview(exporter):
     with patch("cursor.export.JpegRenderer") as mock_jpeg_renderer:
-        exporter.export_jpeg_preview({"layer1": exporter.collection})
+        exporter.export_jpeg_preview()
         mock_jpeg_renderer.assert_called_once()
 
 
