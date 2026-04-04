@@ -33,12 +33,20 @@ class Color:
         if self.code:
             return f"{self.code.name}: {self.name}"
         else:
-            return f"{self.__rgb}"
+            return f"{self.__rgb}: {self.name}"
 
     def __eq__(self, other: Color):
+        if self.code is None and other.code is None:
+            return self.__rgb == other.__rgb
         return self.code == other.code
 
     def __lt__(self, other: Color):
+        if self.code is None and other.code is None:
+            return self.__rgb < other.__rgb
+        if self.code is None:
+            return True
+        if other.code is None:
+            return False
         return self.code.value < other.code.value
 
     def __hash__(self):

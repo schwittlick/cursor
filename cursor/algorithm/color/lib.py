@@ -104,11 +104,17 @@ _LEGEND_POINTS = 3
 _LEGEND_OFFSET = 400  # 400 units = 1mm in plotter space
 
 
-def _group_paths_by_color_code(collection: Collection) -> dict[CopicColorCode, Collection]:
-    groups: dict[CopicColorCode, Collection] = defaultdict(Collection)
+def legend_x_extent(legende_scale: float) -> float:
+    """Return the max x space (in plotter units) the legend adds to the right of content bb.x2."""
+    return _LEGEND_OFFSET + _PENS_PER_LAYER * legende_scale
+
+
+def _group_paths_by_color_code(collection: Collection) -> dict:
+    groups = defaultdict(Collection)
     for path in collection:
-        code = path.properties[Property.COPIC_COLOR].code
-        groups[code].add(path)
+        color = path.properties[Property.COPIC_COLOR]
+        key = color.code if color.code is not None else color
+        groups[key].add(path)
     return groups
 
 
@@ -143,8 +149,8 @@ def sort_collection_by_copic_color_group(
     Coordinates are in pixel space, not hpgl/plotter space.
     """
     result = Collection()
-    pen_mapping: dict[int, dict[int, CopicColorCode]] = {}
-    layer_pen_mapping: dict[int, CopicColorCode] = {}
+    pen_mapping: dict[int, dict[int, Color]] = {}
+    layer_pen_mapping: dict[int, Color] = {}
     pen_index = 1
     layer_index = 0
 
@@ -156,7 +162,7 @@ def sort_collection_by_copic_color_group(
 
     for paths_same_code in paths_by_code.values():
         for path_color, paths_same_color in sort_collection_by_copic_color(paths_same_code).items():
-            layer_pen_mapping[pen_index] = path_color.code
+            layer_pen_mapping[pen_index] = path_color
 
             legend = (
                 _build_legend_paths(bb, pen_index, layer_index, path_color, radius, legende_x, legende_y, legende_scale)
