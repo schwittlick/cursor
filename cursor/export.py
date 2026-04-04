@@ -6,7 +6,6 @@ import random
 import string
 from typing import Dict, Optional
 
-from cursor.algorithm.color.copic import Copic
 from cursor.bb import BoundingBox
 from cursor.collection import Collection
 from cursor.data import DataDirHandler
@@ -193,8 +192,6 @@ class Exporter:
         pdf_renderer.pdf.text(10, 10, f"{fname}")
         y, x = 20, 10
 
-        copic = Copic()
-
         for layer, pc in layers.items():
             if ExportFormatMappings.maps[self.cfg.type] is ExportFormat.HPGL:
                 pdf_renderer.pdf.set_fill_color(0, 0, 0)
@@ -202,18 +199,13 @@ class Exporter:
                 y += 5
                 if "pen_mapping" in self.collection.properties and layer in self.collection.properties["pen_mapping"]:
                     pen_mapping = self.collection.properties["pen_mapping"][layer]
-                    for pen_idx, color_code in pen_mapping.items():
-                        try:
-                            c = copic.color_by_code(color_code)
-                            pdf_renderer.pdf.set_fill_color(0, 0, 0)
-                            pdf_renderer.pdf.text(x, y, f"Pen {pen_idx} -> {c}")
+                    for pen_idx, c in pen_mapping.items():
+                        pdf_renderer.pdf.set_fill_color(0, 0, 0)
+                        pdf_renderer.pdf.text(x, y, f"Pen {pen_idx} -> {c}")
 
-                            pdf_renderer.pdf.set_fill_color(c.as_rgb()[0], c.as_rgb()[1], c.as_rgb()[2])
-                            pdf_renderer.circle(x + 70, y - 1, 2)
-                            y += 5
-                        except KeyError:
-                            logging.warning(f"Invalid color code: {color_code}")
-                            continue
+                        pdf_renderer.pdf.set_fill_color(c.as_rgb()[0], c.as_rgb()[1], c.as_rgb()[2])
+                        pdf_renderer.circle(x + 80, y - 1, 2)
+                        y += 5
 
             if y > 250:
                 x += 65
