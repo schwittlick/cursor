@@ -112,23 +112,25 @@ def test_pen_mapping_contains_color_code():
     result = sort_collection_by_copic_color_group(c)
 
     pen_mapping = result.properties["pen_mapping"]
-    all_codes = [code for layer_map in pen_mapping.values() for code in layer_map.values()]
+    all_codes = [color.code for layer_map in pen_mapping.values() for color in layer_map.values()]
     assert CopicColorCode.B23 in all_codes
 
 
 def test_pen_mapping_structure():
-    """pen_mapping[layer][pen] = CopicColorCode."""
+    """pen_mapping[layer][pen] = Color."""
     codes = [CopicColorCode.B0000, CopicColorCode.R01]
     c = make_collection(*codes)
     result = sort_collection_by_copic_color_group(c)
+
+    from cursor.algorithm.color.copic import Color
 
     pen_mapping = result.properties["pen_mapping"]
     assert isinstance(pen_mapping, dict)
     for layer_map in pen_mapping.values():
         assert isinstance(layer_map, dict)
-        for pen, code in layer_map.items():
+        for pen, color in layer_map.items():
             assert isinstance(pen, int)
-            assert isinstance(code, CopicColorCode)
+            assert isinstance(color, Color)
 
 
 def test_pen_mapping_covers_all_input_colors():
@@ -137,7 +139,7 @@ def test_pen_mapping_covers_all_input_colors():
     result = sort_collection_by_copic_color_group(c)
 
     pen_mapping = result.properties["pen_mapping"]
-    all_mapped_codes = {code for layer_map in pen_mapping.values() for code in layer_map.values()}
+    all_mapped_codes = {color.code for layer_map in pen_mapping.values() for color in layer_map.values()}
     for code in codes:
         assert code in all_mapped_codes
 
