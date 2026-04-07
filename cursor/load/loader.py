@@ -57,49 +57,6 @@ def _load_file_worker(path: pathlib.Path, load_keys: bool, verbose: bool) -> tup
     return collection, new_keys
 
 
-def _load_file_worker(
-    path: pathlib.Path, load_keys: bool, verbose: bool
-) -> tuple[Collection, list[KeyPress]]:
-    """Module-level worker for ProcessPoolExecutor.
-
-    Must be a module-level function (not a bound method) so it can be pickled
-    by the process pool. Each worker process runs in its own GIL, so multiple
-    files are decoded in true parallel.
-    """
-    assert "_" in path.stem
-
-    if verbose:
-        logging.info(f"Loading {path.stem}.json")
-
-    t0 = time.perf_counter()
-    json_string = path.read_text()
-    t1 = time.perf_counter()
-    try:
-        jd = ast.literal_eval(json_string)
-        t2 = time.perf_counter()
-        _data = JsonCompressor().json_unzip(jd)
-    except RuntimeError:
-        t2 = time.perf_counter()
-        _data = json.loads(json_string, cls=MyJsonDecoder)
-    t3 = time.perf_counter()
-
-    if verbose:
-        logging.info(
-            f"  read={int((t1 - t0) * 1000)}ms "
-            f"eval={int((t2 - t1) * 1000)}ms "
-            f"total={int((t3 - t0) * 1000)}ms"
-        )
-
-    collection = _data["mouse"]
-    new_keys: list[KeyPress] = []
-    if load_keys:
-        for key in _data["keys"]:
-            is_down = bool(key[2]) if len(key) > 2 else True
-            new_keys.append(KeyPress(key[0], key[1], is_down))
-
-    return collection, new_keys
-
-
 class Loader:
     def __init__(
         self,
