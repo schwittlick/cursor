@@ -141,14 +141,12 @@ def test_export_source(exporter, tmp_path):
 
 
 def test_export_copic_color_mapping(exporter):
-    exporter.collection.properties["pen_mapping"] = {"layer1": {1: "R27", 2: "B29"}}
-    with patch("cursor.export.PdfRenderer") as mock_pdf_renderer, patch("cursor.export.Copic") as mock_copic:
-        mock_color = Mock(spec=Color)
-        mock_color.as_rgb.return_value = (255, 0, 0)
-        mock_copic.return_value.color_by_code.return_value = mock_color
+    mock_color = Mock(spec=Color)
+    mock_color.as_rgb.return_value = (255, 0, 0)
+    exporter.collection.properties["pen_mapping"] = {"layer1": {1: mock_color, 2: mock_color}}
+    with patch("cursor.export.PdfRenderer") as mock_pdf_renderer:
         exporter.export_pdf_annotations("test", {"layer1": exporter.collection})
     mock_pdf_renderer.assert_called_once()
-    mock_copic.return_value.color_by_code.assert_called()
 
 
 if __name__ == "__main__":
