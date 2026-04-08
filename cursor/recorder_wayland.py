@@ -1,5 +1,6 @@
 import argparse
 import json
+import logging
 import os
 import signal
 import subprocess
@@ -9,8 +10,6 @@ from typing import Optional
 
 import evdev
 from evdev import ecodes
-
-import logging
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 log = logging.getLogger(__name__)
@@ -22,7 +21,6 @@ from cursor.path import Path
 from cursor.position import Position
 from cursor.properties import Property
 from cursor.timer import DateHandler
-
 
 # Maps evdev key codes to the string representation used in recordings.
 # Printable characters fall through to the generic handler at the bottom.
@@ -106,8 +104,11 @@ def _get_monitor_resolution() -> tuple[int, int]:
 def _sample_color_at(x: float, y: float) -> tuple[int, int, int]:
     """Capture a 1x1 pixel at screen coordinates (x, y) via grim."""
     try:
+        import os
+        import tempfile
+
         from PIL import Image
-        import tempfile, os
+
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
             tmp = f.name
         subprocess.run(
@@ -229,8 +230,7 @@ class RecorderWayland:
             kbd_count = len(self._keyboard_recordings)
             log.info(f"mouse: {mouse_count}  keys: {kbd_count}")
             subprocess.Popen(
-                ["notify-send", "-t", "2000", "Cursor Recorder",
-                 f"mouse: {mouse_count}  keys: {kbd_count}"],
+                ["notify-send", "-t", "2000", "Cursor Recorder", f"mouse: {mouse_count}  keys: {kbd_count}"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
