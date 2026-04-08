@@ -55,10 +55,10 @@ class GCodeRenderer:
                 instructions.append("LASERON")
             if Property.LASER_AMP in p.properties.keys():
                 amp = p.properties[Property.LASER_AMP]
-                instructions.append(f"AMP{amp:.3}")
+                instructions.append(f"AMP{amp:.3f}")
             if Property.LASER_VOLT in p.properties.keys():
                 volt = p.properties[Property.LASER_VOLT]
-                instructions.append(f"VOLT{volt:.3}")
+                instructions.append(f"VOLT{volt:.3f}")
 
             for point in p.vertices:
                 x = point.x
@@ -72,10 +72,10 @@ class GCodeRenderer:
 
                 if Property.LASER_AMP in point.properties.keys():
                     amp = point.properties[Property.LASER_AMP]
-                    instructions.append(f"AMP{amp:.3}")
+                    instructions.append(f"AMP{amp:.3f}")
                 if Property.LASER_VOLT in point.properties.keys():
                     volt = point.properties[Property.LASER_VOLT]
-                    instructions.append(f"VOLT{volt:.3}")
+                    instructions.append(f"VOLT{volt:.3f}")
 
                 instructions.append(self.g01(x, y, z))
 
@@ -84,7 +84,7 @@ class GCodeRenderer:
 
                 if Property.LASER_DELAY in point.properties.keys():
                     delay = point.properties[Property.LASER_DELAY]
-                    instructions.append(f"G04 P{delay:.2}")
+                    instructions.append(f"G04 P{int(delay)}")
 
                 if Property.LASER_ONOFF in point.properties.keys():
                     instructions.append("LASEROFF")
