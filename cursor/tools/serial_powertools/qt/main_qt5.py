@@ -46,8 +46,13 @@ class SerialPortDiscoveryWorker(QObject):
     finished = pyqtSignal(list)
 
     def discover_ports(self):
-        discovered_ports = discover(timeout=0.5)
-        ports_with_model = [f"{port[0]} -> {port[1]}" for port in discovered_ports]
+        try:
+            discovered_ports = discover(timeout=0.5)
+            ports_with_model = [f"{port[0]} -> {port[1]}" for port in discovered_ports]
+        except Exception as e:
+            logging.error(f"Discovery failed: {e}")
+            ports_with_model = []
+        # Always emit so the UI re-enables even if discovery errors out.
         self.finished.emit(ports_with_model)
 
 
@@ -168,12 +173,12 @@ class SerialInspectorGUI(QMainWindow):
 
         # Connection buttons
         conn_layout = QHBoxLayout()
-        refresh_btn = QPushButton("Refresh")
-        refresh_btn.clicked.connect(self.refresh_serial_ports)
+        self.refresh_btn = QPushButton("Refresh")
+        self.refresh_btn.clicked.connect(self.refresh_serial_ports)
         self.connect_btn = QPushButton("Connect")
         self.connect_btn.clicked.connect(self.toggle_connection)
         self.connection_status = QLabel("Status: Disconnected")
-        conn_layout.addWidget(refresh_btn)
+        conn_layout.addWidget(self.refresh_btn)
         conn_layout.addWidget(self.connect_btn)
         conn_layout.addWidget(self.connection_status)
         layout.addLayout(conn_layout)
@@ -421,6 +426,12 @@ class SerialInspectorGUI(QMainWindow):
 
     def refresh_serial_ports(self):
         logging.info("Starting refresh...")
+        # Discovery runs on a worker thread and takes a couple of seconds (it waits out
+        # non-responsive ports). Reflect that in the UI so the empty port list isn't
+        # mistaken for "nothing found" and Connect can't be clicked before it populates.
+        self.refresh_btn.setEnabled(False)
+        self.refresh_btn.setText("Refreshing…")
+        self.connect_btn.setEnabled(False)
         self.thread = QThread()
         self.worker = SerialPortDiscoveryWorker()
         self.worker.moveToThread(self.thread)
@@ -440,12 +451,22 @@ class SerialInspectorGUI(QMainWindow):
     def update_port_combo(self, ports_with_model):
         self.port_combo.clear()
         self.port_combo.addItems(ports_with_model)
+        self.refresh_btn.setEnabled(True)
+        self.refresh_btn.setText("Refresh")
+        self.connect_btn.setEnabled(True)
+        if ports_with_model:
+            logging.info(f"Found {len(ports_with_model)} port(s): {', '.join(ports_with_model)}")
+        else:
+            logging.info("No ports found.")
 
     def toggle_connection(self):
         if self.inspector.check():
             self.inspector.disconnect_serial()
         else:
             port = self.port_combo.currentText().split(" ")[0]
+            if not port:
+                logging.warning("No port selected. Run Refresh first.")
+                return
             baud = int(self.baud_combo.currentText())
             self.inspector.connect_serial(port, baud)
 

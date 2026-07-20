@@ -11,6 +11,7 @@ The script will print a list of available plotters, it's serial ports and model 
 import logging
 import subprocess
 import threading
+import time
 
 import serial.tools.list_ports
 
@@ -26,16 +27,16 @@ def async_discover(
     xonxoff: bool = False,
     timeout: float = 1.0,
 ) -> tuple[str, str] | None:
-    ser = serial.Serial(
-        port=serial_port,
-        baudrate=baudrate,
-        stopbits=stopbits,
-        bytesize=bytesize,
-        parity=parity,
-        xonxoff=xonxoff,
-        timeout=timeout,
-    )
     try:
+        ser = serial.Serial(
+            port=serial_port,
+            baudrate=baudrate,
+            stopbits=stopbits,
+            bytesize=bytesize,
+            parity=parity,
+            xonxoff=xonxoff,
+            timeout=timeout,
+        )
         ser.write(f"{MODEL_IDENTIFICATION}".encode())
         """
         Using another command like @OUTPUT_IDENTIFICATION is not possible, because models
@@ -45,11 +46,11 @@ def async_discover(
         setting up. In the case of a HP7550 the machine will not reply it's model before the
         paper is loaded.
         """
-        ret = read_until_char(ser, timeout)
+        ret = read_until_char(ser, timeout=timeout)
         model = ret.strip()
         if len(model) > 0:
             ser.write(f"{OUTPUT_DIMENSIONS}".encode())
-            ret = read_until_char(ser, timeout)
+            ret = read_until_char(ser, timeout=timeout)
             space = ret.strip()
 
             ser.close()
@@ -80,15 +81,19 @@ def discover(
     # better do that instead of troubling the sendhpgl communication protocol
     # >> lsof /dev/ttyUSB0
     # returns nothing when the port is not used by another application
-    ports = [port.device for port in ports if not len(subprocess.getoutput(f"lsof {port.device}")) > 0]
+    ports = [
+        port.device
+        for port in ports
+        if subprocess.call(["fuser", port.device], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) != 0
+    ]
 
     threads = []
 
     for port in ports:
         thread = threading.Thread(
-            target=lambda: data.append(
+            target=lambda p=port: data.append(
                 async_discover(
-                    port,
+                    p,
                     baudrate,
                     stopbits=stopbits,
                     bytesize=bytesize,
@@ -96,16 +101,25 @@ def discover(
                     xonxoff=xonxoff,
                     timeout=timeout,
                 )
-            )
+            ),
+            daemon=True,
         )
 
         threads.append(thread)
         thread.start()
 
+    # Bound the total wait. The probe threads run in parallel and each is internally
+    # bounded by its own read timeout, so a well-behaved port resolves within roughly
+    # 2 * timeout (one read for the model, one for the dimensions). A single misbehaving
+    # port (e.g. a phantom /dev/ttyS* that opens but then stops honoring its read
+    # timeout) must not be able to freeze discovery indefinitely, so we abandon
+    # stragglers after a hard deadline. Threads are daemons, so an abandoned one won't
+    # block process shutdown.
+    deadline = time.monotonic() + timeout * 3 + 0.5
     for thread in threads:
-        thread.join()
+        thread.join(timeout=max(0.0, deadline - time.monotonic()))
 
-    data = set(list(filter(lambda x: x is not None, data)))
+    data = set(filter(None, list(data)))
 
     return data
 
