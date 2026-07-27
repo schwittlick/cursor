@@ -1,43 +1,1189 @@
-[
-  {
-    "name": "Roland DPX 3300",
-    "shortname": "dpx3300",
-    "data_format": "hpgl",
-    "bounding_boxes": [
-      {
-        "size": "a1",
-        "bb": [
-          -16920,
-          -11180,
-          16340,
-          11180
-        ]
+{
+  "schema_version": 1,
+  "_comment": "Shared plotter/paper registry. Source of truth for cursor (cursor/device.py loads this) and hpgl-viewer. All coordinates are in native plotter units; 'units_per_mm' converts to millimetres. 'max_area' is the machine's maximum plot area; 'margin' is a deliberate per-edge inset applied on top of it (positive shrinks that edge inward, negative extends past the maximum). The effective plot area is max_area inset by margin. Plotters sharing an 'hpgl_model' are alternate configs of the same machine; the one flagged 'default_for_model' is the expected default.",
+  "plotters": [
+    {
+      "id": "ROLAND_DPX3300_A1",
+      "name": "dpx3300_a1",
+      "hpgl_model": "DPX-3300",
+      "default_for_model": true,
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -16920,
+        "y": -11180,
+        "x2": 16340,
+        "y2": 11180
       },
-      {
-        "size": "a2",
-        "bb": [
-          -16920,
-          -11180,
-          5440,
-          4629
-        ]
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
       },
-      {
-        "size": "a3",
-        "bb": [
-          -16920,
-          -11180,
-          -1112,
-          -3276
-        ]
+      "max_speed": 40,
+      "buffer_size": 0
+    },
+    {
+      "id": "ROLAND_DPX3300_A2",
+      "name": "dpx3300_a2",
+      "hpgl_model": "DPX-3300",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -16920,
+        "y": -11180,
+        "x2": 5440,
+        "y2": 4629
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 40,
+      "buffer_size": 0
+    },
+    {
+      "id": "ROLAND_DPX3300_A3",
+      "name": "dpx3300_a3",
+      "hpgl_model": "DPX-3300",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -16920,
+        "y": -11180,
+        "x2": -1112,
+        "y2": -3276
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 40,
+      "buffer_size": 0
+    },
+    {
+      "id": "ROLAND_DPX3300_65_48",
+      "name": "dpx3300_65_48cm",
+      "hpgl_model": "DPX-3300",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -16920,
+        "y": -11180,
+        "x2": 8600,
+        "y2": 7100
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 40,
+      "buffer_size": 0
+    },
+    {
+      "id": "HP_7550A_A3",
+      "name": "hp7550a_a3",
+      "hpgl_model": "7550A",
+      "default_for_model": true,
+      "export_format": "HPGL",
+      "max_area": {
+        "x": 0,
+        "y": 0,
+        "x2": 15970,
+        "y2": 10870
+      },
+      "margin": {
+        "left": 0,
+        "bottom": 0,
+        "right": 320,
+        "top": 0
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 80,
+      "buffer_size": 512,
+      "note": "8 mm of extra space subtracted from the edge"
+    },
+    {
+      "id": "HP_7550A_A4",
+      "name": "hp7550a_a4",
+      "hpgl_model": "7550A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": 0,
+        "y": 0,
+        "x2": 10870,
+        "y2": 7600
+      },
+      "margin": {
+        "left": 0,
+        "bottom": 560,
+        "right": 0,
+        "top": 0
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 80,
+      "buffer_size": 512,
+      "note": "560 units padding subtracted from bottom"
+    },
+    {
+      "id": "HP_7475A_A4",
+      "name": "hp7475a_a4",
+      "hpgl_model": "7475A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": 0,
+        "y": 0,
+        "x2": 11040,
+        "y2": 7721
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 40,
+      "buffer_size": 512
+    },
+    {
+      "id": "HP_7475A_A3",
+      "name": "hp7475a_a3",
+      "hpgl_model": "7475A",
+      "default_for_model": true,
+      "export_format": "HPGL",
+      "max_area": {
+        "x": 0,
+        "y": 0,
+        "x2": 16158,
+        "y2": 11040
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 40,
+      "buffer_size": 512
+    },
+    {
+      "id": "HP_7470A_A4",
+      "name": "hp7470a_a4",
+      "hpgl_model": "7470A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": 0,
+        "y": 0,
+        "x2": 10900,
+        "y2": 7650
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 40,
+      "buffer_size": 256
+    },
+    {
+      "id": "HP_DM_II_A0",
+      "name": "hpdm_ii_a0",
+      "hpgl_model": "7596A",
+      "default_for_model": true,
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -23036,
+        "y": -16598,
+        "x2": 23036,
+        "y2": 16598
+      },
+      "units_per_mm": {
+        "x": 39.948,
+        "y": 40
+      },
+      "max_speed": 110,
+      "buffer_size": 1024
+    },
+    {
+      "id": "HP_DM_II_A1",
+      "name": "hpdm_ii_a1",
+      "hpgl_model": "7596A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -16080,
+        "y": -11660,
+        "x2": 16080,
+        "y2": 11660
+      },
+      "units_per_mm": {
+        "x": 39.948,
+        "y": 40
+      },
+      "max_speed": 110,
+      "buffer_size": 1024
+    },
+    {
+      "id": "HP_DM_II_A3",
+      "name": "hpdm_ii_a3",
+      "hpgl_model": "7596A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -7656,
+        "y": -5740,
+        "x2": 7656,
+        "y2": 5740
+      },
+      "units_per_mm": {
+        "x": 39.948,
+        "y": 40
+      },
+      "max_speed": 110,
+      "buffer_size": 1024
+    },
+    {
+      "id": "HP_DM_SX_A1",
+      "name": "hpdm_sx_a1",
+      "hpgl_model": "7595A",
+      "default_for_model": true,
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -16100,
+        "y": -11600,
+        "x2": 16100,
+        "y2": 11600
+      },
+      "margin": {
+        "left": 1000,
+        "bottom": 200,
+        "right": 0,
+        "top": 200
+      },
+      "units_per_mm": {
+        "x": 40.0,
+        "y": 40.0
+      },
+      "max_speed": 110,
+      "buffer_size": 1024,
+      "note": "25 mm left, 5 mm top/bottom margin"
+    },
+    {
+      "id": "HP_DM_SX_A3",
+      "name": "hpdm_sx_a3",
+      "hpgl_model": "7595A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -7690,
+        "y": -5744,
+        "x2": 7690,
+        "y2": 5744
+      },
+      "units_per_mm": {
+        "x": 40.0,
+        "y": 40.0
+      },
+      "max_speed": 110
+    },
+    {
+      "id": "HP_DM_RX_PLUS_A0",
+      "name": "hpdm_rx_plus_a0",
+      "hpgl_model": "7596A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -21760,
+        "y": -15400,
+        "x2": 22880,
+        "y2": 15480
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 110,
+      "buffer_size": 1024
+    },
+    {
+      "id": "HP_DM_RX_PLUS_A1",
+      "name": "hpdm_rx_plus_a1",
+      "hpgl_model": "7596A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -16090,
+        "y": -11684,
+        "x2": 16090,
+        "y2": 11684
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 110,
+      "buffer_size": 1024
+    },
+    {
+      "id": "HP_DM_RX_PLUS_A2",
+      "name": "hpdm_rx_plus_a2",
+      "hpgl_model": "7596A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -10740,
+        "y": -8230,
+        "x2": 10740,
+        "y2": 8230
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 110,
+      "buffer_size": 1024
+    },
+    {
+      "id": "HP_DM_RX_PLUS_A3",
+      "name": "hpdm_rx_plus_a3",
+      "hpgl_model": "7596A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -7302,
+        "y": -5820,
+        "x2": 7302,
+        "y2": 5820
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 110,
+      "buffer_size": 1024
+    },
+    {
+      "id": "HP_DM_RX_PLUS_1000x700",
+      "name": "hpdm_rx_plus_1000x700",
+      "hpgl_model": "7596A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -19230,
+        "y": -13791,
+        "x2": 19230,
+        "y2": 13791
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 110,
+      "buffer_size": 1024
+    },
+    {
+      "id": "HP_DM_RX_PLUS_30x50",
+      "name": "hpdm_rx_plus_30x50",
+      "hpgl_model": "7596A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -8925,
+        "y": -5813,
+        "x2": 8925,
+        "y2": 5813
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 110,
+      "buffer_size": 1024
+    },
+    {
+      "id": "MUTOH_XP500_100x70cm",
+      "name": "mutoh_xp500_100x70cm",
+      "hpgl_model": "7595A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -19370,
+        "y": -13728,
+        "x2": 19370,
+        "y2": 13728
+      },
+      "margin": {
+        "left": 0,
+        "bottom": 0,
+        "right": 600,
+        "top": 0
+      },
+      "units_per_mm": {
+        "x": 40.0,
+        "y": 40.0
+      },
+      "max_speed": 110,
+      "buffer_size": 1024,
+      "note": "two more cm padding on bottom"
+    },
+    {
+      "id": "MUTOH_XP500_500x297mm",
+      "name": "mutoh_xp500_500x297mm",
+      "hpgl_model": "7595A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -9452,
+        "y": -5722,
+        "x2": 9452,
+        "y2": 5722
+      },
+      "margin": {
+        "left": 0,
+        "bottom": 0,
+        "right": 600,
+        "top": 0
+      },
+      "units_per_mm": {
+        "x": 40.0,
+        "y": 40.0
+      },
+      "max_speed": 110,
+      "buffer_size": 1024
+    },
+    {
+      "id": "MUTOH_XP500_A1",
+      "name": "mutoh_xp500_a1",
+      "hpgl_model": "7595A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -16200,
+        "y": -11645,
+        "x2": 16200,
+        "y2": 11645
+      },
+      "margin": {
+        "left": 0,
+        "bottom": 0,
+        "right": 600,
+        "top": 0
+      },
+      "units_per_mm": {
+        "x": 40.0,
+        "y": 40.0
+      },
+      "max_speed": 110,
+      "buffer_size": 1024
+    },
+    {
+      "id": "MUTOH_XP500_A2",
+      "name": "mutoh_xp500_a2",
+      "hpgl_model": "7595A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -11284,
+        "y": -8149,
+        "x2": 11285,
+        "y2": 8149
+      },
+      "margin": {
+        "left": 0,
+        "bottom": 0,
+        "right": 600,
+        "top": 0
+      },
+      "units_per_mm": {
+        "x": 40.0,
+        "y": 40.0
+      },
+      "max_speed": 110,
+      "buffer_size": 1024
+    },
+    {
+      "id": "MUTOH_XP500_A3",
+      "name": "mutoh_xp500_a3",
+      "hpgl_model": "7595A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -7815,
+        "y": -5716,
+        "x2": 7815,
+        "y2": 5716
+      },
+      "margin": {
+        "left": 0,
+        "bottom": 0,
+        "right": 600,
+        "top": 0
+      },
+      "units_per_mm": {
+        "x": 40.0,
+        "y": 40.0
+      },
+      "max_speed": 110,
+      "buffer_size": 1024
+    },
+    {
+      "id": "DIY_PLOTTER",
+      "name": "custom",
+      "export_format": "GCODE",
+      "max_area": {
+        "x": 0,
+        "y": -1715,
+        "x2": 3350,
+        "y2": 0
+      },
+      "units_per_mm": {
+        "x": 2.85714,
+        "y": 2.90572
+      },
+      "max_speed": 1,
+      "buffer_size": 1,
+      "note": "A1 sized"
+    },
+    {
+      "id": "DIY_PLOTTER_A2",
+      "name": "custom_a2",
+      "export_format": "GCODE",
+      "max_area": {
+        "x": 0,
+        "y": -1220,
+        "x2": 1720,
+        "y2": 0
+      },
+      "units_per_mm": {
+        "x": 2.896,
+        "y": 2.905
+      },
+      "max_speed": 1,
+      "buffer_size": 1,
+      "note": "deprecated bc grbl changed"
+    },
+    {
+      "id": "DIY_PLOTTER_A1",
+      "name": "custom_a1",
+      "export_format": "GCODE",
+      "max_area": {
+        "x": 0,
+        "y": -1800,
+        "x2": 2900,
+        "y2": 0
+      },
+      "units_per_mm": {
+        "x": 2.896,
+        "y": 2.905
+      },
+      "max_speed": 1,
+      "buffer_size": 1,
+      "note": "deprecated bc grbl changed"
+    },
+    {
+      "id": "DIY_PLOTTER_100x59",
+      "name": "custom_100x59",
+      "export_format": "GCODE",
+      "max_area": {
+        "x": -1330,
+        "y": -630,
+        "x2": 0,
+        "y2": 0
+      },
+      "units_per_mm": {
+        "x": 1.33,
+        "y": 1.085
+      },
+      "max_speed": 1,
+      "buffer_size": 1
+    },
+    {
+      "id": "DIY_PLOTTER_70x50",
+      "name": "custom_70x50",
+      "export_format": "GCODE",
+      "max_area": {
+        "x": -931,
+        "y": -533,
+        "x2": 0,
+        "y2": 0
+      },
+      "units_per_mm": {
+        "x": 1.33,
+        "y": 1.085
+      },
+      "max_speed": 1,
+      "buffer_size": 1
+    },
+    {
+      "id": "DIY_PLOTTER_60x60",
+      "name": "custom_60x60",
+      "export_format": "GCODE",
+      "max_area": {
+        "x": -798,
+        "y": -640,
+        "x2": 0,
+        "y2": 0
+      },
+      "units_per_mm": {
+        "x": 1.33,
+        "y": 1.085
+      },
+      "max_speed": 1,
+      "buffer_size": 1
+    },
+    {
+      "id": "DIY_PLOTTER_65x48",
+      "name": "custom_65x48",
+      "export_format": "GCODE",
+      "max_area": {
+        "x": -865,
+        "y": -510,
+        "x2": 0,
+        "y2": 0
+      },
+      "units_per_mm": {
+        "x": 1.33,
+        "y": 1.085
+      },
+      "max_speed": 1,
+      "buffer_size": 1
+    },
+    {
+      "id": "AXIDRAW",
+      "name": "axidraw",
+      "export_format": "SVG",
+      "max_area": {
+        "x": 0,
+        "y": 0,
+        "x2": 0,
+        "y2": 0
+      },
+      "units_per_mm": {
+        "x": 3.704,
+        "y": 3.704
+      },
+      "max_speed": 1,
+      "buffer_size": 1,
+      "note": "todo: missing real bounds"
+    },
+    {
+      "id": "ROLAND_DXY885",
+      "name": "dxy885",
+      "hpgl_model": "DXY-885",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": 0,
+        "y": 0,
+        "x2": 16158,
+        "y2": 11040
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 40,
+      "buffer_size": 1024,
+      "note": "taken from operator handbook"
+    },
+    {
+      "id": "ROLAND_DXY980",
+      "name": "dxy980",
+      "hpgl_model": "DXY-980",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": 0,
+        "y": 0,
+        "x2": 15200,
+        "y2": 10800
+      },
+      "margin": {
+        "left": 200,
+        "bottom": 520,
+        "right": 0,
+        "top": 320
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 40,
+      "buffer_size": 1024,
+      "note": "taken from manual; 5 mm left, 13 mm bottom, 8 mm top margin"
+    },
+    {
+      "id": "ROLAND_DXY990",
+      "name": "dxy990",
+      "hpgl_model": "DXY-990",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": 0,
+        "y": 0,
+        "x2": 16640,
+        "y2": 11040
+      },
+      "margin": {
+        "left": 240,
+        "bottom": 160,
+        "right": 480,
+        "top": 0
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 40,
+      "buffer_size": 1024,
+      "note": "taken from manual; 6 mm left, 4 mm bottom, 12 mm right margin"
+    },
+    {
+      "id": "ROLAND_DXY1200_A3",
+      "name": "dxy1200_a3",
+      "hpgl_model": "DXY-1200",
+      "default_for_model": true,
+      "export_format": "HPGL",
+      "max_area": {
+        "x": 0,
+        "y": 0,
+        "x2": 16158,
+        "y2": 11040
+      },
+      "margin": {
+        "left": 0,
+        "bottom": 0,
+        "right": 240,
+        "top": 240
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 40,
+      "buffer_size": 1024,
+      "note": "taken from operator handbook; removed 6mm*40units on both directions"
+    },
+    {
+      "id": "ROLAND_DXY1200_A5",
+      "name": "dxy1200_a5",
+      "hpgl_model": "DXY-1200",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": 0,
+        "y": 0,
+        "x2": 8400,
+        "y2": 5950
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 40,
+      "buffer_size": 1024,
+      "note": "taken from operator addendum"
+    },
+    {
+      "id": "ROLAND_DXY1200_A3_EXPANDED",
+      "name": "dxy1200_expanded",
+      "hpgl_model": "DXY-1200",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": 0,
+        "y": 0,
+        "x2": 17272,
+        "y2": 11880
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 40,
+      "buffer_size": 1024
+    },
+    {
+      "id": "ROLAND_DXY1300",
+      "name": "dxy1300",
+      "hpgl_model": "DXY-1300",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": 0,
+        "y": 0,
+        "x2": 16158,
+        "y2": 11040
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 40,
+      "buffer_size": 1024,
+      "note": "taken from operator handbook"
+    },
+    {
+      "id": "ROLAND_PNC1000",
+      "name": "roland_camm1",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": 0,
+        "y": 0,
+        "x2": 18800,
+        "y2": 40000
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 40,
+      "buffer_size": 0,
+      "note": "unlimited y; value is a practical max"
+    },
+    {
+      "id": "ROLAND_PNC1000_50x100",
+      "name": "roland_pnc1000",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": 260,
+        "y": 560,
+        "x2": 18700,
+        "y2": 39000
+      },
+      "units_per_mm": {
+        "x": 40.04,
+        "y": 40.04
+      },
+      "max_speed": 40,
+      "buffer_size": 0,
+      "note": "for 50x100cm paper, centered"
+    },
+    {
+      "id": "TEKTRONIX_4662",
+      "name": "tektronix4662",
+      "export_format": "TEK",
+      "max_area": {
+        "x": 0,
+        "y": 0,
+        "x2": 4095,
+        "y2": 2731
+      },
+      "units_per_mm": {
+        "x": 9.75,
+        "y": 9.19525
+      },
+      "max_speed": 1,
+      "buffer_size": 0,
+      "note": "10x15 inches (25.4 x 38.1 cm)"
+    },
+    {
+      "id": "DIGIPLOT_A1",
+      "name": "digiplot_a1",
+      "export_format": "DIGI",
+      "max_area": {
+        "x": 0,
+        "y": 0,
+        "x2": 33600,
+        "y2": 23700
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 1,
+      "buffer_size": 0
+    },
+    {
+      "id": "HP_7570A_A1",
+      "name": "hp7570a_draftpro",
+      "hpgl_model": "7570A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -16134,
+        "y": -11663,
+        "x2": 16134,
+        "y2": 11663
+      },
+      "units_per_mm": {
+        "x": 40.0,
+        "y": 40.0
+      },
+      "max_speed": 80,
+      "buffer_size": 512
+    },
+    {
+      "id": "GRAPHTEC_MP2000",
+      "name": "graphtec_mp2000",
+      "hpgl_model": "7475A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": 0,
+        "y": 0,
+        "x2": 16000,
+        "y2": 11400
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 40,
+      "buffer_size": 512
+    },
+    {
+      "id": "GRAPHTEC_MP3100",
+      "name": "graphtec_mp3100",
+      "hpgl_model": "7475A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": 0,
+        "y": 0,
+        "x2": 16160,
+        "y2": 11400
+      },
+      "units_per_mm": {
+        "x": 40,
+        "y": 40
+      },
+      "max_speed": 40
+    }
+  ],
+  "paper_sizes": [
+    {
+      "id": "PORTRAIT_36_48",
+      "name": "portrait_36_48",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 360,
+        "y2": 480
       }
-    ],
-    "units_per_cm": [
-      40,
-      40
-    ],
-    "max_speed": 40,
-    "default_buffer_size": "nan"
-  },
-  {}
-]
+    },
+    {
+      "id": "LANDSCAPE_48_36",
+      "name": "landscape_48_36",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 480,
+        "y2": 360
+      }
+    },
+    {
+      "id": "PORTRAIT_42_56",
+      "name": "portrait_42_56",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 420,
+        "y2": 560
+      }
+    },
+    {
+      "id": "LANDSCAPE_56_42",
+      "name": "landscape_56_42",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 560,
+        "y2": 420
+      }
+    },
+    {
+      "id": "PORTRAIT_50_70",
+      "name": "portrait_50_70",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 500,
+        "y2": 700
+      }
+    },
+    {
+      "id": "LANDSCAPE_70_50",
+      "name": "landscape_70_50",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 700,
+        "y2": 500
+      }
+    },
+    {
+      "id": "SQUARE_70_70",
+      "name": "square_70_70",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 700,
+        "y2": 700
+      }
+    },
+    {
+      "id": "PORTRAIT_70_100",
+      "name": "portrait_70_100",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 700,
+        "y2": 1000
+      }
+    },
+    {
+      "id": "LANDSCAPE_100_70",
+      "name": "landscape_100_70",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 1000,
+        "y2": 700
+      }
+    },
+    {
+      "id": "LANDSCAPE_A4",
+      "name": "landscape_a4",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 297,
+        "y2": 210
+      }
+    },
+    {
+      "id": "PORTRAIT_A4",
+      "name": "portrait_a4",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 210,
+        "y2": 297
+      }
+    },
+    {
+      "id": "LANDSCAPE_A1",
+      "name": "landscape_a1",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 841,
+        "y2": 594
+      }
+    },
+    {
+      "id": "LANDSCAPE_A0",
+      "name": "landscape_a0",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 1119,
+        "y2": 771
+      }
+    },
+    {
+      "id": "PORTRAIT_A3",
+      "name": "portrait_a3",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 297,
+        "y2": 420
+      }
+    },
+    {
+      "id": "LANDSCAPE_A3",
+      "name": "landscape_a3",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 420,
+        "y2": 297
+      }
+    },
+    {
+      "id": "LANDSCAPE_80_50",
+      "name": "landscape_80x50",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 800,
+        "y2": 500
+      }
+    },
+    {
+      "id": "PORTRAIT_50_80",
+      "name": "portrait_50_80",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 500,
+        "y2": 800
+      }
+    },
+    {
+      "id": "LANDSCAPE_A2",
+      "name": "landscape_a2",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 594,
+        "y2": 420
+      }
+    },
+    {
+      "id": "SQUARE_59_59",
+      "name": "square_59_59",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 590,
+        "y2": 590
+      }
+    },
+    {
+      "id": "SQUARE_25_25",
+      "name": "square_25_25",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 215,
+        "y2": 170
+      }
+    },
+    {
+      "id": "LANDSCAPE_A1_HP_7596B",
+      "name": "landscape_a1",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 776,
+        "y2": 555
+      }
+    },
+    {
+      "id": "PORTRAIT_50_100",
+      "name": "portrait_50x100",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 460,
+        "y2": 960
+      }
+    },
+    {
+      "id": "PHOTO_PAPER_240_178_LANDSCAPE",
+      "name": "photo_paper_240x178",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 240,
+        "y2": 178
+      }
+    },
+    {
+      "id": "PHOTO_PAPER_250_200_LANDSCAPE",
+      "name": "photo_paper_250x200",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 250,
+        "y2": 200
+      }
+    },
+    {
+      "id": "PHOTO_PAPER_400_300_LANDSCAPE",
+      "name": "photo_paper_400x300",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 400,
+        "y2": 300
+      }
+    },
+    {
+      "id": "PHOTO_PAPER_600_500_LANDSCAPE",
+      "name": "photo_paper_600x500",
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "x2": 600,
+        "y2": 500
+      }
+    }
+  ]
+}

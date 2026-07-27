@@ -41,7 +41,7 @@ where = ["."]
 include = ["cursor*"]
 
 [tool.setuptools.package-data]
-cursor = ["*"]
+cursor = ["*", "data/*", "data/**/*"]
 
 [tool.ruff]
 line-length = 120
