@@ -35,6 +35,7 @@ class PlotterType(IntEnum):
     HP_DM_II_A1 = auto()
     HP_DM_II_A3 = auto()
 
+    HP_DM_SX_A0 = auto()
     HP_DM_SX_A1 = auto()
     HP_DM_SX_A3 = auto()
 
@@ -46,6 +47,7 @@ class PlotterType(IntEnum):
     HP_DM_RX_PLUS_30x50 = auto()
 
     MUTOH_XP500_100x70cm = auto()
+    MUTOH_XP500_102x72cm = auto()
     MUTOH_XP500_500x297mm = auto()
     MUTOH_XP500_A1 = auto()
     MUTOH_XP500_A2 = auto()
