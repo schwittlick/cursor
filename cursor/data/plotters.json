@@ -237,6 +237,24 @@
       "buffer_size": 1024
     },
     {
+      "id": "HP_DM_SX_A0",
+      "name": "hpdm_sx_a0",
+      "hpgl_model": "7595A",
+      "export_format": "HPGL",
+      "max_area": {
+        "x": -23036,
+        "y": -16598,
+        "x2": 23036,
+        "y2": 16598
+      },
+      "units_per_mm": {
+        "x": 40.0,
+        "y": 40.0
+      },
+      "max_speed": 110,
+      "buffer_size": 1024
+    },
+    {
       "id": "HP_DM_SX_A1",
       "name": "hpdm_sx_a1",
       "hpgl_model": "7595A",
