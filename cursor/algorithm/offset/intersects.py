@@ -11,27 +11,26 @@ The offset engine needs two things from this module:
   * ``find_intersects`` — everywhere two polylines cross, used for the dual-offset
     clipping of open / self-intersecting inputs.
 
-Deferred spatial index
-----------------------
-The crate drives the global search with a Hilbert R-tree. We deferred that
-(see the package README): here the candidate segment pairs come from a brute-force
-scan, but the expensive part — testing which bounding boxes overlap — is done once
-in vectorized numpy (:func:`_candidate_pairs`), so only genuinely-near pairs reach
-the exact per-segment intersection test. That keeps this close to linear on the
-gently-curved paths this library is aimed at, and the R-tree can be dropped in
-later behind the same interface without touching the offset engine.
+Spatial index
+-------------
+The crate drives the global search with a Hilbert R-tree; we use the grid index in
+:mod:`cursor.algorithm.offset.spatial` instead (simpler, dependency-free, and a good
+fit for roughly-uniform plotter geometry). Each segment queries the grid for the few
+others whose bounding boxes are near it, and only those reach the exact per-segment
+intersection test — turning the naive O(n^2) all-pairs scan into roughly linear work.
+The grid returns a superset of the truly-near segments, so the result is identical to
+the brute-force scan.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-import numpy as np
-
 from .geom import FUZZY_EPS, Vector2
 from .pline import Pline, PlineVertex
 from .seg_intersect import pline_seg_intr
 from .segment import segment_bboxes
+from .spatial import SpatialGrid
 
 
 @dataclass(frozen=True, slots=True)
@@ -61,34 +60,6 @@ class IntersectsCollection:
 
 def _seg_endpoints(pline: Pline) -> list[tuple[PlineVertex, PlineVertex]]:
     return list(pline.iter_segments())
-
-
-def _candidate_pairs(boxes_a: np.ndarray, boxes_b: np.ndarray, eps: float, same: bool) -> list[tuple[int, int]]:
-    """
-    Indices ``(i, j)`` whose (epsilon-expanded) bounding boxes overlap.
-
-    The overlap test is fully vectorized: for modest segment counts the full
-    ``(A, B)`` boolean matrix is cheap, and it replaces the R-tree's job of not
-    handing every pair to the exact intersection routine. ``same=True`` restricts
-    to ``j > i`` for a self-scan.
-    """
-    if len(boxes_a) == 0 or len(boxes_b) == 0:
-        return []
-
-    ax0 = boxes_a[:, 0][:, None] - eps
-    ay0 = boxes_a[:, 1][:, None] - eps
-    ax1 = boxes_a[:, 2][:, None] + eps
-    ay1 = boxes_a[:, 3][:, None] + eps
-    bx0 = boxes_b[:, 0][None, :]
-    by0 = boxes_b[:, 1][None, :]
-    bx1 = boxes_b[:, 2][None, :]
-    by1 = boxes_b[:, 3][None, :]
-
-    overlap = (ax0 <= bx1) & (ax1 >= bx0) & (ay0 <= by1) & (ay1 >= by0)
-    if same:
-        overlap &= np.triu(np.ones_like(overlap, dtype=bool), k=1)
-    ii, jj = np.nonzero(overlap)
-    return list(zip(ii.tolist(), jj.tolist()))
 
 
 def visit_local_self_intersects(pline: Pline, pos_eps: float) -> IntersectsCollection:
@@ -147,40 +118,43 @@ def visit_global_self_intersects(pline: Pline, pos_eps: float) -> IntersectsColl
 
     segs = _seg_endpoints(pline)
     boxes = segment_bboxes(pline)
-    # Segment s starts at vertex s; its end vertex is next_wrapping_index(s).
-    starts = list(range(len(segs)))
+    grid = SpatialGrid(boxes)
+    # Segment i starts at vertex i; its end vertex is next_wrapping_index(i).
 
-    for i, j in _candidate_pairs(boxes, boxes, pos_eps, same=True):
-        # i, j index into segs; segment k spans vertices (k, next_wrapping_index(k)).
-        si, sj = starts[i], starts[j]
-        ni = pline.next_wrapping_index(si)
-        nj = pline.next_wrapping_index(sj)
-        # Skip segments that share a vertex — those are the local case.
-        if si == sj or si == nj or ni == sj or ni == nj:
-            continue
+    for i, (v1, v2) in enumerate(segs):
+        bb = boxes[i]
+        for j in grid.query(bb[0] - pos_eps, bb[1] - pos_eps, bb[2] + pos_eps, bb[3] + pos_eps):
+            # Each unordered pair once, and never a segment against itself.
+            if j <= i:
+                continue
+            ni = pline.next_wrapping_index(i)
+            nj = pline.next_wrapping_index(j)
+            # Skip segments that share a vertex — those are the local case.
+            if i == nj or ni == j or ni == nj:
+                continue
 
-        v1, v2 = segs[i]
-        u1, u2 = segs[j]
+            u1, u2 = segs[j]
 
-        def skip_at_end(pt: Vector2) -> bool:
-            # An intersect at both segments' end vertices is found again by their
-            # successors with it as a start point, so drop it here.
-            return v2.pos.fuzzy_eq_eps(pt, pos_eps) and u2.pos.fuzzy_eq_eps(pt, pos_eps)
+            def skip_at_end(pt: Vector2, v2=v2, u2=u2) -> bool:
+                # An intersect at both segments' end vertices is found again by their
+                # successors with it as a start point, so drop it here.
+                return v2.pos.fuzzy_eq_eps(pt, pos_eps) and u2.pos.fuzzy_eq_eps(pt, pos_eps)
 
-        res = pline_seg_intr(v1, v2, u1, u2, pos_eps)
-        if res.kind == "none":
-            continue
-        if res.kind in ("tangent", "one"):
-            if not skip_at_end(res.point1):
-                coll.basic.append(BasicIntersect(si, sj, res.point1))
-        elif res.kind == "two":
-            if not skip_at_end(res.point1):
-                coll.basic.append(BasicIntersect(si, sj, res.point1))
-            if not skip_at_end(res.point2):
-                coll.basic.append(BasicIntersect(si, sj, res.point2))
-        else:  # overlapping
-            if not skip_at_end(res.point1):
-                coll.overlapping.append(OverlappingIntersect(si, sj, res.point1, res.point2))
+            res = pline_seg_intr(v1, v2, u1, u2, pos_eps)
+            si, sj = i, j
+            if res.kind == "none":
+                continue
+            if res.kind in ("tangent", "one"):
+                if not skip_at_end(res.point1):
+                    coll.basic.append(BasicIntersect(si, sj, res.point1))
+            elif res.kind == "two":
+                if not skip_at_end(res.point1):
+                    coll.basic.append(BasicIntersect(si, sj, res.point1))
+                if not skip_at_end(res.point2):
+                    coll.basic.append(BasicIntersect(si, sj, res.point2))
+            else:  # overlapping
+                if not skip_at_end(res.point1):
+                    coll.overlapping.append(OverlappingIntersect(si, sj, res.point1, res.point2))
 
     return coll
 
@@ -224,6 +198,7 @@ def find_intersects(pline1: Pline, pline2: Pline, pos_eps: float) -> IntersectsC
     segs2 = _seg_endpoints(pline2)
     boxes1 = segment_bboxes(pline1)
     boxes2 = segment_bboxes(pline2)
+    grid1 = SpatialGrid(boxes1)
 
     open1_last = len(pline1) - 2
     open2_last = len(pline2) - 2
@@ -231,32 +206,33 @@ def find_intersects(pline1: Pline, pline2: Pline, pos_eps: float) -> IntersectsC
     dup1: set[int] = set()
     dup2: set[int] = set()
 
-    for i1, i2 in _candidate_pairs(boxes1, boxes2, pos_eps, same=False):
-        v1, v2 = segs1[i1]
-        u1, u2 = segs2[i2]
+    for i2, (u1, u2) in enumerate(segs2):
+        bb = boxes2[i2]
+        for i1 in grid1.query(bb[0] - pos_eps, bb[1] - pos_eps, bb[2] + pos_eps, bb[3] + pos_eps):
+            v1, v2 = segs1[i1]
 
-        def skip_at_end(pt: Vector2) -> bool:
-            return (v2.pos.fuzzy_eq_eps(pt, pos_eps) and (pline1.is_closed or i1 != open1_last)) or (
-                u2.pos.fuzzy_eq_eps(pt, pos_eps) and (pline2.is_closed or i2 != open2_last)
-            )
+            def skip_at_end(pt: Vector2, v2=v2, u2=u2, i1=i1) -> bool:
+                return (v2.pos.fuzzy_eq_eps(pt, pos_eps) and (pline1.is_closed or i1 != open1_last)) or (
+                    u2.pos.fuzzy_eq_eps(pt, pos_eps) and (pline2.is_closed or i2 != open2_last)
+                )
 
-        res = pline_seg_intr(v1, v2, u1, u2, pos_eps)
-        if res.kind == "none":
-            continue
-        if res.kind in ("tangent", "one"):
-            if not skip_at_end(res.point1):
-                result.basic.append(BasicIntersect(i1, i2, res.point1))
-        elif res.kind == "two":
-            if not skip_at_end(res.point1):
-                result.basic.append(BasicIntersect(i1, i2, res.point1))
-            if not skip_at_end(res.point2):
-                result.basic.append(BasicIntersect(i1, i2, res.point2))
-        else:  # overlapping
-            result.overlapping.append(OverlappingIntersect(i1, i2, res.point1, res.point2))
-            if v2.pos.fuzzy_eq_eps(res.point1, pos_eps) or v2.pos.fuzzy_eq_eps(res.point2, pos_eps):
-                dup1.add(pline1.next_wrapping_index(i1))
-            if u2.pos.fuzzy_eq_eps(res.point1, pos_eps) or u2.pos.fuzzy_eq_eps(res.point2, pos_eps):
-                dup2.add(pline2.next_wrapping_index(i2))
+            res = pline_seg_intr(v1, v2, u1, u2, pos_eps)
+            if res.kind == "none":
+                continue
+            if res.kind in ("tangent", "one"):
+                if not skip_at_end(res.point1):
+                    result.basic.append(BasicIntersect(i1, i2, res.point1))
+            elif res.kind == "two":
+                if not skip_at_end(res.point1):
+                    result.basic.append(BasicIntersect(i1, i2, res.point1))
+                if not skip_at_end(res.point2):
+                    result.basic.append(BasicIntersect(i1, i2, res.point2))
+            else:  # overlapping
+                result.overlapping.append(OverlappingIntersect(i1, i2, res.point1, res.point2))
+                if v2.pos.fuzzy_eq_eps(res.point1, pos_eps) or v2.pos.fuzzy_eq_eps(res.point2, pos_eps):
+                    dup1.add(pline1.next_wrapping_index(i1))
+                if u2.pos.fuzzy_eq_eps(res.point1, pos_eps) or u2.pos.fuzzy_eq_eps(res.point2, pos_eps):
+                    dup2.add(pline2.next_wrapping_index(i2))
 
     if not dup1 and not dup2:
         return result

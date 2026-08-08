@@ -28,10 +28,11 @@ Because everything is arc-native, the joins in step 1 are exact arcs — the rea
 this beats a straight-segment offset for repeated/nested offsetting, where chord
 error would otherwise accumulate.
 
-Spatial queries are brute-force here (the R-tree is deferred, see the package
-README); the distance and intersection scans loop over the original polyline's
-segments. The interfaces are shaped so an index can be slotted in later without
-changing the algorithm.
+The distance and intersection tests against the original polyline go through a
+grid spatial index (:class:`cursor.algorithm.offset.spatial.PlineSegmentIndex`),
+built once per offset call, so each test touches only the handful of nearby
+segments rather than scanning the whole input — the difference between quadratic
+and roughly linear on a several-hundred-segment line.
 """
 
 from __future__ import annotations
@@ -55,7 +56,8 @@ from .geom import (
 from .intersects import all_self_intersects, find_intersects
 from .pline import Pline, PlineVertex
 from .seg_intersect import pline_seg_intr
-from .segment import seg_arc_radius_and_center, seg_closest_point, seg_midpoint
+from .segment import seg_arc_radius_and_center, seg_closest_point, seg_fast_approx_bounding_box, seg_midpoint
+from .spatial import PlineSegmentIndex
 from .view import PlineViewData
 
 
@@ -385,33 +387,64 @@ def create_raw_offset_polyline(pline: Pline, offset: float, pos_eps: float) -> P
 # ---------------------------------------------------------------------------
 
 
-def point_valid_for_offset(original: Pline, offset: float, point: Vector2, pos_eps: float, offset_tol: float) -> bool:
+def point_valid_for_offset(
+    original: Pline,
+    offset: float,
+    point: Vector2,
+    pos_eps: float,
+    offset_tol: float,
+    index: PlineSegmentIndex | None = None,
+) -> bool:
     """
     Is ``point`` at least ``|offset|`` (minus tolerance) from every segment of the
     original polyline? Points closer than that belong to overshoot loops and are cut.
+
+    With ``index`` given, only the segments whose bounding box reaches within
+    ``|offset|`` of the point are tested — every other segment is provably farther, so
+    the answer is identical to the full scan.
     """
     abs_offset = abs(offset) - offset_tol
     min_dist = abs_offset * abs_offset
-    for v1, v2 in original.iter_segments():
+    if index is None:
+        candidates = original.iter_segments()
+    else:
+        candidates = (index.segments[i] for i in index.query_point(point.x, point.y, abs_offset))
+    for v1, v2 in candidates:
         closest = seg_closest_point(v1, v2, point, pos_eps)
         if dist_squared(closest, point) <= min_dist:
             return False
     return True
 
 
-def _intersects_original(original: Pline, v1: PlineVertex, v2: PlineVertex, pos_eps: float) -> bool:
-    for o1, o2 in original.iter_segments():
+def _intersects_original(
+    original: Pline, v1: PlineVertex, v2: PlineVertex, pos_eps: float, index: PlineSegmentIndex | None = None
+) -> bool:
+    if index is None:
+        candidates = original.iter_segments()
+    else:
+        bb = seg_fast_approx_bounding_box(v1, v2)
+        candidates = (
+            index.segments[i] for i in index.query(bb[0] - pos_eps, bb[1] - pos_eps, bb[2] + pos_eps, bb[3] + pos_eps)
+        )
+    for o1, o2 in candidates:
         if pline_seg_intr(v1, v2, o1, o2, pos_eps).kind != "none":
             return True
     return False
 
 
-def _slice_is_valid(slice_data: PlineViewData, raw: Pline, original: Pline, offset: float, opts: OffsetOptions) -> bool:
+def _slice_is_valid(
+    slice_data: PlineViewData,
+    raw: Pline,
+    original: Pline,
+    offset: float,
+    opts: OffsetOptions,
+    index: PlineSegmentIndex | None = None,
+) -> bool:
     pos_eps = opts.pos_equal_eps
     offset_tol = opts.offset_dist_eps
 
     def point_ok(p: Vector2) -> bool:
-        return point_valid_for_offset(original, offset, p, pos_eps, offset_tol)
+        return point_valid_for_offset(original, offset, p, pos_eps, offset_tol, index)
 
     if slice_data.end_index_offset == 0:
         v1 = slice_data.updated_start
@@ -422,7 +455,7 @@ def _slice_is_valid(slice_data: PlineViewData, raw: Pline, original: Pline, offs
             return False
         if not point_ok(seg_midpoint(v1, v2)):
             return False
-        return not _intersects_original(original, v1, v2, pos_eps)
+        return not _intersects_original(original, v1, v2, pos_eps, index)
 
     start_seg_mid = seg_midpoint(slice_data.updated_start, raw[raw.next_wrapping_index(slice_data.start_index)])
     if not point_ok(start_seg_mid):
@@ -439,7 +472,7 @@ def _slice_is_valid(slice_data: PlineViewData, raw: Pline, original: Pline, offs
     for v1, v2 in slice_data.iter_segments(raw):
         if not point_ok(v1.pos):
             return False
-        if _intersects_original(original, v1, v2, pos_eps):
+        if _intersects_original(original, v1, v2, pos_eps, index):
             return False
     return point_ok(slice_data.end_point)
 
@@ -480,6 +513,9 @@ def slices_from_raw_offset(original: Pline, raw: Pline, offset: float, opts: Off
     lookup = _build_intersect_lookup(raw, entries)
     sorted_keys = sorted(lookup)
 
+    # Built once; every slice's validity test queries it instead of scanning the input.
+    index = PlineSegmentIndex(original)
+
     def next_list(start_index: int) -> tuple[int, list[Vector2]]:
         nxt = raw.next_wrapping_index(start_index)
         for k in sorted_keys:
@@ -491,12 +527,12 @@ def slices_from_raw_offset(original: Pline, raw: Pline, offset: float, opts: Off
         intr_list = lookup[start_index]
         for a in range(len(intr_list) - 1):
             s = PlineViewData.from_slice_points(raw, intr_list[a], start_index, intr_list[a + 1], start_index, pos_eps)
-            if s is not None and _slice_is_valid(s, raw, original, offset, opts):
+            if s is not None and _slice_is_valid(s, raw, original, offset, opts, index):
                 result.append(s)
 
         found_index, next_intr = next_list(start_index)
         s = PlineViewData.from_slice_points(raw, intr_list[-1], start_index, next_intr[0], found_index, pos_eps)
-        if s is not None and _slice_is_valid(s, raw, original, offset, opts):
+        if s is not None and _slice_is_valid(s, raw, original, offset, opts, index):
             result.append(s)
 
     return result
@@ -571,18 +607,21 @@ def slices_from_dual_raw_offsets(
     lookup = _build_intersect_lookup(raw, entries)
     sorted_keys = sorted(lookup)
 
+    # Built once; every slice's validity test queries it instead of scanning the input.
+    index = PlineSegmentIndex(original)
+
     if not original.is_closed:
         # First slice: raw start up to the first intersect (no wrap-around to capture it).
         first_idx = sorted_keys[0]
         s = PlineViewData.from_slice_points(raw, raw[0].pos, 0, lookup[first_idx][0], first_idx, pos_eps)
-        if s is not None and _slice_is_valid(s, raw, original, offset, opts):
+        if s is not None and _slice_is_valid(s, raw, original, offset, opts, index):
             result.append(s)
 
     for start_index in sorted_keys:
         intr_list = lookup[start_index]
         for a in range(len(intr_list) - 1):
             s = PlineViewData.from_slice_points(raw, intr_list[a], start_index, intr_list[a + 1], start_index, pos_eps)
-            if s is not None and _slice_is_valid(s, raw, original, offset, opts):
+            if s is not None and _slice_is_valid(s, raw, original, offset, opts, index):
                 result.append(s)
 
         nxt = raw.next_wrapping_index(start_index)
@@ -599,12 +638,12 @@ def slices_from_dual_raw_offsets(
                 s = PlineViewData.from_slice_points(
                     raw, intr_list[-1], start_index, raw.last().pos, len(raw) - 1, pos_eps
                 )
-                if s is not None and _slice_is_valid(s, raw, original, offset, opts):
+                if s is not None and _slice_is_valid(s, raw, original, offset, opts, index):
                     result.append(s)
                 return result
 
         s = PlineViewData.from_slice_points(raw, intr_list[-1], start_index, lookup[found][0], found, pos_eps)
-        if s is not None and _slice_is_valid(s, raw, original, offset, opts):
+        if s is not None and _slice_is_valid(s, raw, original, offset, opts, index):
             result.append(s)
 
     return result
