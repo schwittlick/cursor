@@ -2,37 +2,34 @@ from __future__ import annotations
 
 import logging
 import math
+from dataclasses import replace
 
-from cursor.hpgl import LB_TERMINATOR
-
-
-def rotate(origin, point, angle):
-    """
-    Rotate a point counterclockwise by a given angle around a given origin.
-
-    The angle should be given in radians.
-    """
-    ox, oy = origin
-    px, py = point
-
-    qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
-    qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
-    return qx, qy
+from cursor.hpgl import CR, LB_TERMINATOR, LF
+from cursor.hpgl.metrics import (
+    DEFAULT_LABEL_ORIGIN,
+    DEFAULT_PLOTTER_UNIT,
+    LABEL_ORIGINS,
+    MAX_LABEL_LENGTH,
+    FontMetrics,
+    label_origin_offset,
+    rotate,
+)
 
 
 class HPGL:
     def __init__(self):
-        self.terminator = LB_TERMINATOR
-        self.plotter_unit = 40
-
-        self.pos = (0, 0)
-        self.char_size_mm = (2.85, 3.75)
-
-        self.char_spacing = 1.5
-        self.line_spacing = 2.0
-        self.degree = 0
-
+        self.plotter_unit = DEFAULT_PLOTTER_UNIT
         self.__data: list[str] = []
+
+        self.__reset()
+
+    def __reset(self) -> None:
+        """The state a plotter comes up in, and returns to on IN."""
+        self.terminator = LB_TERMINATOR
+        self.pos = (0, 0)
+        self.metrics = FontMetrics.default(self.plotter_unit)
+        self.degree = 0
+        self.label_origin = DEFAULT_LABEL_ORIGIN
 
     @property
     def data(self) -> str:
@@ -52,13 +49,7 @@ class HPGL:
     def IN(self) -> None:
         self.__data.append("IN;")
 
-        self.terminator = LB_TERMINATOR
-        self.pos = (0, 0)
-        self.char_size_mm = (2.85, 3.75)
-
-        self.char_spacing = 1.5
-        self.line_spacing = 2.0
-        self.degree = 0
+        self.__reset()
 
     def SP(self, pen: int) -> None:
         self.__data.append(f"SP{pen};")
@@ -101,27 +92,52 @@ class HPGL:
 
     def LB(self, label: str) -> None:
         """
-        todo:
-        chr(10) is LF (line feed), moves control point down 1 line from current pos
-        chr(13) is CR (carriage return), moves the carriage return point (control point when LB command was encountered)
-        e.g. to make a new line within a LB statement: f"LBline1{chr(13)}{chr(10)}line2{chr(3)}"
+        Plot a label, and track where it leaves the pen.
+
+        A label may carry its own line breaks: chr(13) is CR, returning to the column the
+        label started in, and chr(10) is LF, dropping one line. So a two line label reads
+        f"LBline1{chr(13)}{chr(10)}line2{chr(3)}".
         """
         if len(label) == 0:
             logging.warning("Empty Label, discarding")
             return
 
-        if len(label) > 150:
-            logging.warning(f"Label too long: {len(label)} > 150")
+        if len(label) > MAX_LABEL_LENGTH:
+            logging.warning(f"Label too long: {len(label)} > {MAX_LABEL_LENGTH}")
             logging.warning(label)
 
         self.__data.append(f"LB{label}{self.terminator}")
 
-        assert chr(10) not in label or chr(13) not in label
-        # for now the internal LF/CR commands are not being calculated
+        self.pos = self.label_end(label)
 
-        new_x = self.pos[0] + len(label) * self.char_size_mm[0] * self.plotter_unit * self.char_spacing
-        new_y = self.pos[1]
-        self.pos = rotate(self.pos, (new_x, new_y), math.radians(self.degree))
+    def label_width(self, label: str) -> float:
+        """The widest line of a label, in plotter units."""
+        widest = run = 0
+        for char in label:
+            run = 0 if char in (CR, LF) else run + 1
+            widest = max(widest, run)
+
+        return widest * self.metrics.advance_x
+
+    def label_end(self, label: str) -> tuple[float, float]:
+        """
+        Where the pen ends up after plotting label from the current position.
+
+        Worked out in the text's own frame -- along the baseline, dropping a line per LF
+        -- and then turned by DI, so it holds for rotated text too.
+        """
+        origin_x, origin_y = label_origin_offset(self.label_origin, self.label_width(label), self.metrics)
+
+        x, y = origin_x, origin_y
+        for char in label:
+            if char == CR:
+                x = origin_x
+            elif char == LF:
+                y -= self.metrics.line_height
+            else:
+                x += self.metrics.advance_x
+
+        return rotate(self.pos, (self.pos[0] + x, self.pos[1] + y), math.radians(self.degree))
 
     def SL(self, degree: float) -> None:
         if degree <= -90 or degree >= 90:
@@ -143,17 +159,23 @@ class HPGL:
         A3: 0.285, 0.375
         A4: 0.187, 0.269
         """
-        self.char_size_mm = (x_cm * 10, y_cm * 10)
+        self.metrics = replace(self.metrics, char_width_cm=x_cm, char_height_cm=y_cm)
         self.__data.append(f"SI{x_cm:.3f},{y_cm:.3f};")
 
     def ES(self, spaces: float = 0, line: float = 0) -> None:
-        self.char_spacing = spaces
-        self.line_spacing = line
+        """
+        Extra space between characters and lines, as a fraction of the character cell.
+
+        Negative values tighten the setting. The cell is 1.5x the character wide, so
+        -0.33 is roughly where neighbouring glyphs start to touch.
+        """
+        self.metrics = replace(self.metrics, extra_space=spaces, extra_line=line)
         self.__data.append(f"ES{spaces:.3f},{line:.3f};")
 
-    def LO(self, lo: int = 1):
+    def LO(self, lo: int = DEFAULT_LABEL_ORIGIN):
         """
-        Label Origin
+        Label Origin, where the label sits relative to the point it is plotted at.
+
         1: left bottom (default)
         2: left center
         3: left top
@@ -163,11 +185,12 @@ class HPGL:
         7: right bottom
         8: right center
         9: right top
-        10-19: half char width/height offset
+        11-19: as 1-9, with half a character of clearance from the point
         """
-        if lo == 10 or lo <= 0 or lo >= 20:
-            raise ValueError(f"LO; may not be 10 or <=0 or >= 20. Used={lo}")
+        if lo not in LABEL_ORIGINS:
+            raise ValueError(f"LO; must be one of {LABEL_ORIGINS}. Used={lo}")
 
+        self.label_origin = lo
         self.__data.append(f"LO{lo};")
 
     def SR(self):

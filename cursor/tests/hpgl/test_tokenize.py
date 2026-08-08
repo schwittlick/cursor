@@ -89,3 +89,22 @@ def test_tokenize2():
     ]
     commands = tokenizer(string)
     assert expected_commands == commands
+
+
+def test_tokenize_label_containing_semicolons():
+    """A label is text, not commands -- prose is full of semicolons."""
+    tokens = tokenizer(f"PA0,0;LBfirst{chr(3)}LBwait; then this{chr(3)}")
+
+    assert tokens == ["PA0,0", "LBfirst", "LBwait; then this"]
+
+
+def test_tokenize_consecutive_labels():
+    tokens = tokenizer(f"LBone{chr(3)}LBtwo{chr(3)}")
+
+    assert tokens == ["LBone", "LBtwo"]
+
+
+def test_tokenize_label_containing_lb():
+    tokens = tokenizer(f"PA0,0;LBsee LB2 below{chr(3)}")
+
+    assert tokens == ["PA0,0", "LBsee LB2 below"]

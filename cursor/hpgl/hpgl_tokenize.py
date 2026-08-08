@@ -1,26 +1,29 @@
+from cursor.hpgl import LB_TERMINATOR
+
+LABEL = "LB"
+
+
 def tokenizer(hpgl: str) -> list[str]:
     """
-    pass a full hpgl file in one line in here
+    Split a full HPGL file into one command per entry.
 
-    all of this is necessary because within a hpgl text command
-
-    e.g. LB1234LB
-    this should extract the label 1234LB
-
+    Labels are why this is not a plain split on ";": everything between LB and the label
+    terminator is text, and prose is full of semicolons and can contain "LB" itself. So
+    the terminator is cut first, and only the part of each batch ahead of its label is
+    split into commands -- the label is handed back whole.
     """
-    label_terminator = chr(3)
-
     commands = []
 
-    split_by_label_terminator = [x for x in hpgl.split(label_terminator) if x]
-    for command_batch in split_by_label_terminator:
-        label_index = command_batch.find("LB")
-        other_part = command_batch[:label_index]
-        label_part = command_batch[label_index:]
-        if label_index > 0:
-            commands.extend([x for x in other_part.split(";") if x])
-            commands.append(label_part)
-        else:
-            commands.extend([x for x in command_batch.split(";") if x])
+    for batch in hpgl.split(LB_TERMINATOR):
+        if not batch:
+            continue
+
+        label_index = batch.find(LABEL)
+        if label_index < 0:
+            commands.extend([command for command in batch.split(";") if command])
+            continue
+
+        commands.extend([command for command in batch[:label_index].split(";") if command])
+        commands.append(batch[label_index:])
 
     return commands

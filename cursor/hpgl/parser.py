@@ -1,9 +1,18 @@
 import math
 import pathlib
 import logging
+from dataclasses import replace
 
 from cursor.collection import Collection
+from cursor.hpgl import CR, LF
 from cursor.hpgl.hpgl_tokenize import tokenizer
+from cursor.hpgl.metrics import (
+    DEFAULT_LABEL_ORIGIN,
+    DEFAULT_PLOTTER_UNIT,
+    FontMetrics,
+    label_origin_offset,
+    rotate,
+)
 from cursor.path import Path
 from cursor.position import Position
 
@@ -19,20 +28,7 @@ PU = "PU"
 
 DI = "DI"
 ES = "ES"
-
-
-def rotate(origin, point, angle):
-    """
-    Rotate a point counterclockwise by a given angle around a given origin.
-
-    The angle should be given in radians.
-    """
-    ox, oy = origin
-    px, py = point
-
-    qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
-    qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
-    return qx, qy
+LO = "LO"
 
 
 class HPGLParser:
@@ -51,6 +47,7 @@ class HPGLParser:
             PU: self.__parse_pen_up,
             DI: self.__parse_direction_absolute,
             ES: self.__parse_spacing,
+            LO: self.__parse_label_origin,
             VS: self.__parse_velocity,
         }
 
@@ -78,13 +75,18 @@ class HPGLParser:
         self.pen_down = False
         self.cur_pen = 0
         self.pos = (0, 0)
-        self.char_size_mm = 2.85, 3.75
+        self.metrics = FontMetrics.default(DEFAULT_PLOTTER_UNIT)
         self.velocity = None
 
         self.run = 1
         self.rise = 0
 
-        self.spacing = 0, 0
+        self.label_origin = DEFAULT_LABEL_ORIGIN
+
+    @property
+    def direction(self) -> float:
+        """The angle DI put the text at, in radians."""
+        return math.atan2(self.rise, self.run)
 
     def __parse_pen_select(self, cmd: str):
         self.cur_pen = int(cmd[2:])
@@ -113,45 +115,57 @@ class HPGLParser:
             self.paths.add(path)
 
     def __parse_label(self, cmd: str):
-        for char in cmd[2:]:
+        label = cmd[2:]
+        angle = self.direction
+
+        # LO moves the label off the point it was issued at, in the text's own frame
+        start = rotate(self.pos, self.__label_start(label), angle)
+        carriage = start
+
+        for char in label:
+            if char == CR:
+                start = carriage
+                continue
+            if char == LF:
+                start = rotate(start, (start[0], start[1] - self.metrics.line_height), angle)
+                carriage = start
+                continue
+
             if char in stick_font:
-                chr_paths = stick_font[char]
-                for pts in chr_paths:
+                for pts in stick_font[char]:
                     path = Path()
                     path.pen_select = self.cur_pen
                     for p in pts:
                         pos = Position.from_tuple(
                             (
-                                (p[0] / 4) * self.char_size_mm[0] * 40 + self.pos[0],
-                                (p[1] / 8) * self.char_size_mm[1] * 40 + self.pos[1],
+                                (p[0] / 4) * self.metrics.char_width + start[0],
+                                (p[1] / 8) * self.metrics.char_height + start[1],
                             )
                         )
                         path.add_position(pos)
-                    try:
-                        angle = self.rise / self.run
-                    except ZeroDivisionError:
-                        angle = float("inf")
-                    path.rot(math.atan(angle), self.pos)
+                    path.rot(angle, start)
                     path.properties["label"] = self.cur_pen
                     self.paths.add(path)
             else:
                 logging.warning(f"Char not in stick-font: {char} (ord:{ord(char)})")
 
-            if self.run == 0.0 and self.rise > 0.0:
-                degree = 90
-            elif self.run == 0.0 and self.rise < 0.0:
-                degree = -90
-            else:
-                degree = math.degrees(self.rise / self.run)
+            start = rotate(start, (start[0] + self.metrics.advance_x, start[1]), angle)
 
-            spaces_x = (self.char_size_mm[0] * 40 * 1.5) * self.spacing[0]
-            # spaces_y = (self.char_size_mm[1] * 40 * 2.0) * self.spacing[1]
-            newpos = self.pos[0] + self.char_size_mm[0] * 40 * 1.5 + spaces_x, self.pos[1]
-            self.pos = rotate(self.pos, newpos, math.radians(degree))
+        self.pos = start
+
+    def __label_start(self, label: str) -> tuple[float, float]:
+        """Where the first character lands, given the label origin, before rotation."""
+        widest = run = 0
+        for char in label:
+            run = 0 if char in (CR, LF) else run + 1
+            widest = max(widest, run)
+
+        dx, dy = label_origin_offset(self.label_origin, widest * self.metrics.advance_x, self.metrics)
+        return self.pos[0] + dx, self.pos[1] + dy
 
     def __parse_font_size(self, cmd: str):
         _size = cmd[2:].split(",")
-        self.char_size_mm = float(_size[0]) * 10, float(_size[1]) * 10
+        self.metrics = replace(self.metrics, char_width_cm=float(_size[0]), char_height_cm=float(_size[1]))
 
     def __parse_pen_down(self, cmd: str):
         self.pen_down = True
@@ -169,7 +183,10 @@ class HPGLParser:
 
     def __parse_spacing(self, cmd: str):
         _size = cmd[2:].split(",")
-        self.spacing = float(_size[0]), float(_size[1])
+        self.metrics = replace(self.metrics, extra_space=float(_size[0]), extra_line=float(_size[1]))
+
+    def __parse_label_origin(self, cmd: str):
+        self.label_origin = int(cmd[2:])
 
     def __parse_velocity(self, cmd: str):
         self.velocity = int(cmd[2:])
