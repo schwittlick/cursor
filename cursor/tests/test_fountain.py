@@ -7,8 +7,13 @@ import msgpack
 import numpy as np
 import pytest
 
-from cursor.filter import (DirectionChangeEntropyFilter, EntropyMaxFilter, EntropyMinFilter, MaxPointCountFilter,
-                           MinPointCountFilter)
+from cursor.filter import (
+    DirectionChangeEntropyFilter,
+    EntropyMaxFilter,
+    EntropyMinFilter,
+    MaxPointCountFilter,
+    MinPointCountFilter,
+)
 from cursor.load.fountain import Fountain, FountainError, decode_collection
 from cursor.properties import Property
 
@@ -18,20 +23,37 @@ def canned_document():
     x = np.array([0.1, 0.2, 0.3, 0.5, 0.5, 0.6], dtype="<f4")
     y = np.array([0.1, 0.1, 0.2, 0.5, 0.6, 0.6], dtype="<f4")
     return {
-        "v": 1, "coord": "norm", "took_ms": 0.1, "total": 2, "n": 2, "m": 6,
-        "offsets": np.array([0, 3, 6], dtype="<u4").tobytes(), "x": x.tobytes(), "y": y.tobytes(),
+        "v": 1,
+        "coord": "norm",
+        "took_ms": 0.1,
+        "total": 2,
+        "n": 2,
+        "m": 6,
+        "offsets": np.array([0, 3, 6], dtype="<u4").tobytes(),
+        "x": x.tobytes(),
+        "y": y.tobytes(),
         "t": np.array([0, 10, 20, 0, 1000, 2000], dtype="<i4").tobytes(),
         "rgb": np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0], dtype="u1").tobytes(),
         "id": np.array([7 << 32 | 0, 7 << 32 | 1], dtype="<i8").tobytes(),
         "t0_ns": np.array([1_700_000_000 * 10**9, 1_700_000_100 * 10**9], dtype="<i8").tobytes(),
-        "screen_w": np.array([2560, 0], dtype="<u2").tobytes(), "screen_h": np.array([1440, 0], dtype="<u2").tobytes(),
-        "has_color": np.array([1, 0], dtype="u1").tobytes(), "open": np.array([0, 0], dtype="u1").tobytes(),
-        "source": np.array([1, 0], dtype="u1").tobytes(), "machine": np.array([1, 0], dtype="<u2").tobytes(),
-        "app": np.array([2, 0], dtype="<u2").tobytes(), "recording": np.array([0, 1], dtype="<u2").tobytes(),
-        "dict": {"source": ["legacy", "mouse_logger"], "machine": ["", "lush"], "app": ["", "kitty", "firefox"],
-                 "recording": ["lush/2026-01-01", "1700000100.0_old"]},
-        "metrics": {"n_points": np.array([3, 3], dtype="<u4").tobytes(),
-                    "distance": np.array([0.2414, 0.2], dtype="<f8").tobytes()},
+        "screen_w": np.array([2560, 0], dtype="<u2").tobytes(),
+        "screen_h": np.array([1440, 0], dtype="<u2").tobytes(),
+        "has_color": np.array([1, 0], dtype="u1").tobytes(),
+        "open": np.array([0, 0], dtype="u1").tobytes(),
+        "source": np.array([1, 0], dtype="u1").tobytes(),
+        "machine": np.array([1, 0], dtype="<u2").tobytes(),
+        "app": np.array([2, 0], dtype="<u2").tobytes(),
+        "recording": np.array([0, 1], dtype="<u2").tobytes(),
+        "dict": {
+            "source": ["legacy", "mouse_logger"],
+            "machine": ["", "lush"],
+            "app": ["", "kitty", "firefox"],
+            "recording": ["lush/2026-01-01", "1700000100.0_old"],
+        },
+        "metrics": {
+            "n_points": np.array([3, 3], dtype="<u4").tobytes(),
+            "distance": np.array([0.2414, 0.2], dtype="<f8").tobytes(),
+        },
     }
 
 
@@ -50,11 +72,34 @@ def test_decode_collection():
 
 
 def test_params_mirror_filters():
-    p = Fountain._params(min_points=50, max_points=100, entropy_min=(3.5, 4.0), entropy_dc=(5, 10), aspect=0.5,
-                         bbox=(0, 0, 1, 1), app=["kitty", "code"], sort="distance", order="desc", seed=3, limit=0)
-    assert p == {"min_points": 50, "max_points": 100, "entropy_x_min": 3.5, "entropy_y_min": 4.0,
-                 "entropy_dc_min": 5, "entropy_dc_max": 10, "aspect_min": 0.5, "bbox": "0.0,0.0,1.0,1.0",
-                 "app": "kitty,code", "sort": "distance", "order": "desc", "seed": 3, "limit": 0}
+    p = Fountain._params(
+        min_points=50,
+        max_points=100,
+        entropy_min=(3.5, 4.0),
+        entropy_dc=(5, 10),
+        aspect=0.5,
+        bbox=(0, 0, 1, 1),
+        app=["kitty", "code"],
+        sort="distance",
+        order="desc",
+        seed=3,
+        limit=0,
+    )
+    assert p == {
+        "min_points": 50,
+        "max_points": 100,
+        "entropy_x_min": 3.5,
+        "entropy_y_min": 4.0,
+        "entropy_dc_min": 5,
+        "entropy_dc_max": 10,
+        "aspect_min": 0.5,
+        "bbox": "0.0,0.0,1.0,1.0",
+        "app": "kitty,code",
+        "sort": "distance",
+        "order": "desc",
+        "seed": 3,
+        "limit": 0,
+    }
 
 
 def _fountain_or_skip() -> Fountain:
@@ -111,8 +156,10 @@ def test_parity_with_file_loader():
 
     # the composition filter chains agree with server-side counts
     chains = [
-        ([MinPointCountFilter(50), MaxPointCountFilter(100), EntropyMinFilter(3.5, 3.5)],
-         dict(min_points=50, max_points=100, entropy_min=(3.5, 3.5))),
+        (
+            [MinPointCountFilter(50), MaxPointCountFilter(100), EntropyMinFilter(3.5, 3.5)],
+            dict(min_points=50, max_points=100, entropy_min=(3.5, 3.5)),
+        ),
         ([EntropyMaxFilter(2.0, 2.0)], dict(entropy_max=(2.0, 2.0))),
         ([DirectionChangeEntropyFilter(5, 10)], dict(entropy_dc=(5, 10))),
     ]
@@ -122,3 +169,30 @@ def test_parity_with_file_loader():
             pc = pc.filtered(flt)
         n_server = f.count(recording=stem, **kw)
         assert len(pc) == n_server, (kw, len(pc), n_server)
+
+
+def test_decode_frame():
+    from cursor.load.fountain import decode_frame
+
+    d = msgpack.unpackb(msgpack.packb(canned_document(), use_bin_type=True), raw=False)
+    f = decode_frame(d)
+    assert len(f) == 2 and f.n_points_total == 6 and f.total == 2
+    assert f.labels["app"].tolist() == ["firefox", ""] and f.labels["source"].tolist() == ["mouse_logger", "legacy"]
+    assert f.rgb.shape == (6, 3) and f.rgb[1].tolist() == [4, 5, 6]
+    x, y = f.points(1)
+    assert x.tolist() == pytest.approx([0.5, 0.5, 0.6]) and y.tolist() == pytest.approx([0.5, 0.6, 0.6])
+    assert f.timestamps(0).tolist() == pytest.approx([1_700_000_000.0, 1_700_000_000.01, 1_700_000_000.02])
+    # the same paths as decode_collection builds, with the same metadata
+    pc = decode_collection(d)
+    for k in range(2):
+        assert f.info(k) == pc[k].properties["fountain"]
+        assert f.path(k) == pc[k]
+    assert f.collection("x").name == "x"
+    # codes the string table does not know come back as None instead of raising
+    d["app"] = np.array([99, 0], dtype="<u2").tobytes()
+    assert decode_frame(d).labels["app"].tolist() == [None, ""]
+
+
+def test_params_half_open_pairs():
+    p = Fountain._params(entropy_min=(3.5, None), entropy_max=(None, 2.0), aspect=(None, 2.0), duration=(1, None))
+    assert p == {"entropy_x_min": 3.5, "entropy_y_max": 2.0, "aspect_max": 2.0, "duration_min": 1, "limit": 200}

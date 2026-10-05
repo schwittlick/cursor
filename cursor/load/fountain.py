@@ -10,8 +10,12 @@ is the `url` argument, else $CURSOR_FOUNTAIN_URL, else `fountain_url` under
 Filter keywords mirror the Filter classes: entropy_min=(3.5, 3.5) means
 EntropyMinFilter(3.5, 3.5), entropy_dc=(5, 10) means
 DirectionChangeEntropyFilter(5, 10), min_points=50 means MinPointCountFilter(50).
+A None inside a pair leaves that side open: entropy_min=(3.5, None) bounds only x.
 The server filters on the same formulas Path computes, so the Collection that
 comes back passes those filters again.
+
+Fountain.frame() returns the same answer as numpy columns (a Frame) for code
+that draws or analyses many paths without building Path objects first.
 """
 
 from __future__ import annotations
@@ -20,6 +24,7 @@ import configparser
 import json
 import os
 import pathlib
+from dataclasses import dataclass
 from typing import Any, Iterator
 
 import httpx
@@ -33,9 +38,25 @@ from cursor.position import Position
 from cursor.properties import Property
 
 DEFAULT_URL = "http://127.0.0.1:7777"
-DTYPES = {"offsets": "<u4", "x": "<f4", "y": "<f4", "t": "<i4", "rgb": "u1", "id": "<i8", "t0_ns": "<i8",
-          "screen_w": "<u2", "screen_h": "<u2", "has_color": "u1", "open": "u1", "source": "u1",
-          "machine": "<u2", "app": "<u2", "recording": "<u2", "n_points": "<u4"}
+DTYPES = {
+    "offsets": "<u4",
+    "x": "<f4",
+    "y": "<f4",
+    "t": "<i4",
+    "rgb": "u1",
+    "id": "<i8",
+    "t0_ns": "<i8",
+    "screen_w": "<u2",
+    "screen_h": "<u2",
+    "has_color": "u1",
+    "open": "u1",
+    "source": "u1",
+    "machine": "<u2",
+    "app": "<u2",
+    "recording": "<u2",
+    "n_points": "<u4",
+}
+LABELS = ("source", "machine", "app", "recording")
 
 
 class FountainError(RuntimeError):
@@ -89,22 +110,56 @@ class Fountain:
         return d
 
     @staticmethod
-    def _params(*, min_points=None, max_points=None, entropy_min=None, entropy_max=None, entropy_dc=None,
-                distance_min=None, distance_max=None, aspect=None, variation_x=None, variation_y=None,
-                duration=None, bbox=None, bbox_mode=None, since=None, until=None, source=None, machine=None,
-                app=None, recording=None, has_color=None, ids=None, include_open=False, sort=None,
-                order="asc", seed=None, limit=200, offset=0, resample=None) -> dict:
+    def _params(
+        *,
+        min_points=None,
+        max_points=None,
+        entropy_min=None,
+        entropy_max=None,
+        entropy_dc=None,
+        distance_min=None,
+        distance_max=None,
+        aspect=None,
+        variation_x=None,
+        variation_y=None,
+        duration=None,
+        bbox=None,
+        bbox_mode=None,
+        since=None,
+        until=None,
+        source=None,
+        machine=None,
+        app=None,
+        recording=None,
+        has_color=None,
+        ids=None,
+        include_open=False,
+        sort=None,
+        order="asc",
+        seed=None,
+        limit=200,
+        offset=0,
+        resample=None,
+    ) -> dict:
         p: dict = {}
         if min_points is not None:
             p["min_points"] = int(min_points)
         if max_points is not None:
             p["max_points"] = int(max_points)
-        if entropy_min is not None:
-            p["entropy_x_min"], p["entropy_y_min"] = entropy_min
-        if entropy_max is not None:
-            p["entropy_x_max"], p["entropy_y_max"] = entropy_max
-        for name, val in (("entropy_dc", entropy_dc), ("aspect", aspect), ("variation_x", variation_x),
-                          ("variation_y", variation_y), ("duration", duration)):
+        for side, val in (("min", entropy_min), ("max", entropy_max)):
+            if val is not None:
+                ex, ey = val
+                if ex is not None:
+                    p[f"entropy_x_{side}"] = ex
+                if ey is not None:
+                    p[f"entropy_y_{side}"] = ey
+        for name, val in (
+            ("entropy_dc", entropy_dc),
+            ("aspect", aspect),
+            ("variation_x", variation_x),
+            ("variation_y", variation_y),
+            ("duration", duration),
+        ):
             lo, hi = _pair(val)
             if lo is not None:
                 p[f"{name}_min"] = lo
@@ -145,6 +200,13 @@ class Fountain:
             p["resample"] = int(resample)
         return p
 
+    @staticmethod
+    def _request(timestamps: bool, colors: bool, meta: bool, filters: dict) -> dict:
+        params = Fountain._params(**filters)
+        params["fields"] = "xytc" if colors else ("xyt" if timestamps else "xy")
+        params["meta"] = 1 if meta else 0
+        return params
+
     # ---- queries
     def health(self) -> dict:
         return self._require("/health")
@@ -168,13 +230,16 @@ class Fountain:
         params.pop("limit", None)
         return int(self._require("/paths/count", params)["total"])
 
+    def frame(self, *, timestamps: bool = True, colors: bool = False, meta: bool = True, **filters) -> Frame:
+        """Matching paths as numpy columns; Frame.collection() turns them into Paths when needed."""
+        params = self._request(timestamps, colors, meta, filters)
+        return decode_frame(self._require("/paths", params, binary=True))
+
     def paths(self, *, timestamps: bool = True, colors: bool = False, meta: bool = True, **filters) -> Collection:
         """Matching paths as a Collection. Each Path keeps the server's metadata in properties["fountain"]."""
-        params = self._params(**filters)
-        params["fields"] = "xytc" if colors else ("xyt" if timestamps else "xy")
-        params["meta"] = 1 if meta else 0
-        d = self._require("/paths", params, binary=True)
-        return decode_collection(d, name="fountain " + " ".join(f"{k}={v}" for k, v in params.items()))
+        params = self._request(timestamps, colors, meta, filters)
+        frame = decode_frame(self._require("/paths", params, binary=True))
+        return frame.collection(name="fountain " + " ".join(f"{k}={v}" for k, v in params.items()))
 
     def path(self, path_id: int, **kw) -> Path:
         pc = self.paths(ids=[path_id], include_open=True, limit=1, **kw)
@@ -195,12 +260,94 @@ class Fountain:
                 yield msgpack.unpackb(msg, raw=False) if isinstance(msg, bytes) else json.loads(msg)
 
 
-def decode_collection(d: dict, name: str = "fountain") -> Collection:
-    """Turn a /paths response (msgpack document) into a Collection of Paths."""
+@dataclass
+class Frame:
+    """A /paths answer as columns: path k is the points [offsets[k], offsets[k+1]).
+
+    x, y are normalised to the primary monitor, t is milliseconds since the path's
+    t0_ns (None when not requested), rgb is (m, 3) uint8 or None. labels holds
+    source, machine, app and recording as strings per path (None when unknown);
+    metrics the server's per-path metrics (n_points, distance, duration_s, x0, y0,
+    x1, y1, aspect, entropy_x, entropy_y, entropy_dc, variation_x, variation_y);
+    dicts the server's complete string tables, handy for listing every app or recording.
+    """
+
+    total: int
+    took_ms: float
+    offsets: np.ndarray
+    x: np.ndarray
+    y: np.ndarray
+    t: np.ndarray | None
+    rgb: np.ndarray | None
+    id: np.ndarray
+    t0_ns: np.ndarray
+    screen_w: np.ndarray
+    screen_h: np.ndarray
+    has_color: np.ndarray
+    open: np.ndarray
+    labels: dict[str, np.ndarray]
+    metrics: dict[str, np.ndarray]
+    dicts: dict[str, list[str]]
+
+    def __len__(self) -> int:
+        return len(self.id)
+
+    @property
+    def n_points_total(self) -> int:
+        return len(self.x)
+
+    def points(self, k: int) -> tuple[np.ndarray, np.ndarray]:
+        s, e = int(self.offsets[k]), int(self.offsets[k + 1])
+        return self.x[s:e], self.y[s:e]
+
+    def timestamps(self, k: int) -> np.ndarray | None:
+        """Float seconds per point of path k, or None when the frame has no t column."""
+        if self.t is None:
+            return None
+        s, e = int(self.offsets[k]), int(self.offsets[k + 1])
+        return self.t0_ns[k] / 1e9 + self.t[s:e] / 1000.0
+
+    def info(self, k: int) -> dict:
+        """What Path.properties["fountain"] holds for path k."""
+        return {
+            "id": int(self.id[k]),
+            "t0_ns": int(self.t0_ns[k]),
+            "open": bool(self.open[k]),
+            "has_color": bool(self.has_color[k]),
+            "screen_w": int(self.screen_w[k]),
+            "screen_h": int(self.screen_h[k]),
+            **{key: self.labels[key][k] for key in LABELS},
+            **{mk: (int(mv[k]) if mk == "n_points" else float(mv[k])) for mk, mv in self.metrics.items()},
+        }
+
+    def path(self, k: int) -> Path:
+        s, e = int(self.offsets[k]), int(self.offsets[k + 1])
+        xl, yl = self.x[s:e].tolist(), self.y[s:e].tolist()
+        ts = self.timestamps(k)
+        if ts is not None:
+            verts = [Position(a, b, c) for a, b, c in zip(xl, yl, ts.tolist())]
+        else:
+            verts = [Position(a, b) for a, b in zip(xl, yl)]
+        if self.rgb is not None and self.has_color[k]:
+            for v, c in zip(verts, self.rgb[s:e].tolist()):
+                v.properties[Property.COLOR] = tuple(c)
+        p = Path(verts)
+        p.properties["fountain"] = self.info(k)
+        return p
+
+    def collection(self, name: str = "fountain") -> Collection:
+        pc = Collection(name=name)
+        for k in range(len(self)):
+            pc.add(self.path(k))
+        return pc
+
+
+def decode_frame(d: dict) -> Frame:
+    """Turn a /paths response (msgpack document) into a Frame."""
     n = int(d["n"])
 
     def arr(v, dtype: str) -> np.ndarray:
-        return np.frombuffer(v, dtype) if isinstance(v, (bytes, bytearray)) else np.asarray(v)
+        return np.frombuffer(v, dtype) if isinstance(v, (bytes, bytearray)) else np.asarray(v, dtype=dtype)
 
     def opt(key: str) -> np.ndarray | None:
         """A column the server may leave out (t, rgb)."""
@@ -214,41 +361,34 @@ def decode_collection(d: dict, name: str = "fountain") -> Collection:
             raise FountainError(f"/paths response has no {key!r} column")
         return v
 
-    off = col("offsets").astype(np.int64)
-    x, y = col("x"), col("y")
-    t = opt("t")
     rgb = opt("rgb")
-    ids, t0 = col("id"), col("t0_ns")
-    has_color, is_open = col("has_color"), col("open")
-    codes = {k: col(k) for k in ("source", "machine", "app", "recording")}
     dicts = d.get("dict", {})
-    metrics = {k: arr(v, "<u4" if k == "n_points" else "<f8") for k, v in d.get("metrics", {}).items()}
-    screen_w, screen_h = col("screen_w"), col("screen_h")
+    labels = {}
+    for key in LABELS:
+        codes = col(key).astype(np.int64)
+        table = list(dicts.get(key) or [])
+        names = np.array(table + [None], dtype=object)
+        labels[key] = names[np.where((codes >= 0) & (codes < len(table)), codes, len(table))]
+    return Frame(
+        total=int(d.get("total", n)),
+        took_ms=float(d.get("took_ms", 0.0)),
+        offsets=col("offsets").astype(np.int64),
+        x=col("x"),
+        y=col("y"),
+        t=opt("t"),
+        rgb=None if rgb is None else rgb.reshape(-1, 3),
+        id=col("id"),
+        t0_ns=col("t0_ns"),
+        screen_w=col("screen_w"),
+        screen_h=col("screen_h"),
+        has_color=col("has_color").astype(bool),
+        open=col("open").astype(bool),
+        labels=labels,
+        metrics={k: arr(v, "<u4" if k == "n_points" else "<f8") for k, v in d.get("metrics", {}).items()},
+        dicts={k: list(v) for k, v in dicts.items()},
+    )
 
-    xl, yl = x.tolist(), y.tolist()
-    tl = None
-    if t is not None and n:
-        pid = np.repeat(np.arange(n), np.diff(off))
-        tl = (t0[pid] / 1e9 + t / 1000.0).tolist()
-    rgbl = rgb.reshape(-1, 3).tolist() if rgb is not None else None
 
-    pc = Collection(name=name)
-    for k in range(n):
-        s, e = int(off[k]), int(off[k + 1])
-        if tl is not None:
-            verts = [Position(a, b, c) for a, b, c in zip(xl[s:e], yl[s:e], tl[s:e])]
-        else:
-            verts = [Position(a, b) for a, b in zip(xl[s:e], yl[s:e])]
-        if rgbl is not None and has_color[k]:
-            for v, c in zip(verts, rgbl[s:e]):
-                v.properties[Property.COLOR] = tuple(c)
-        info = {
-            "id": int(ids[k]), "t0_ns": int(t0[k]), "open": bool(is_open[k]), "has_color": bool(has_color[k]),
-            "screen_w": int(screen_w[k]), "screen_h": int(screen_h[k]),
-            **{key: dicts.get(key, [None] * 65536)[int(codes[key][k])] for key in codes},
-            **{mk: (int(mv[k]) if mk == "n_points" else float(mv[k])) for mk, mv in metrics.items()},
-        }
-        p = Path(verts)
-        p.properties["fountain"] = info
-        pc.add(p)
-    return pc
+def decode_collection(d: dict, name: str = "fountain") -> Collection:
+    """Turn a /paths response (msgpack document) into a Collection of Paths."""
+    return decode_frame(d).collection(name)
