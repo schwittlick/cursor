@@ -32,3 +32,8 @@ converts image to plottable copic grid
 the best segmentation tool here.
 
 press 'a' to run
+
+[**explorer.py**](../cursor/tools/explorer.py)
+interactive browser for the data fountain: filters with histograms, overlay and grid views, colour by any metric, the query as Python for a composition
+
+    PYTHONPATH=. .venv/bin/python -m cursor.tools.explorer

@@ -99,6 +99,20 @@ cd experiments
 python file.py
 ```
 
+### Explorer
+
+Browse the recorded paths interactively (needs the mouse_logger data fountain
+serving on 127.0.0.1:7777, see `~/dev/mouse_logger`): filter by source, app,
+recording, time, point count, distance, duration, entropy, aspect, variation and
+screen area, with a histogram per metric; see the matches overlaid in the screen
+frame or as a grid, coloured by time, app or any metric; click a path for its
+numbers. The panel shows the matching `QUERY = dict(...)` for a composition.
+
+```bash
+PYTHONPATH=. .venv/bin/python -m cursor.tools.explorer          # or cursor_explorer once installed
+PYTHONPATH=. .venv/bin/python -m cursor.tools.explorer --limit 2000 --fountain http://127.0.0.1:7777
+```
+
 ## Tools
 
 See [tools](tools/README.md) for more information on available tools.
