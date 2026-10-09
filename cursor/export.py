@@ -28,6 +28,9 @@ from cursor.renderer.tektronix import TektronixRenderer
 from cursor.timer import Timer
 
 
+SVG_PREVIEW_STROKE_MM = 0.3  # roughly a fineliner
+
+
 class ExportConfig:
     def __init__(
         self,
@@ -37,6 +40,8 @@ class ExportConfig:
         export_source: bool = False,
         export_jpeg_preview: bool = False,
         optimize_hpgl_by_tsp: bool = True,
+        export_svg_preview: bool = False,
+        svg_preview_stroke_mm: float = SVG_PREVIEW_STROKE_MM,
     ):
         self.type: PlotterType = type
         self.margin = margin
@@ -44,6 +49,8 @@ class ExportConfig:
         self.export_source = export_source
         self.export_jpg_preview = export_jpeg_preview
         self.optimize_hpgl_by_tsp = optimize_hpgl_by_tsp
+        self.export_svg_preview = export_svg_preview
+        self.svg_preview_stroke_mm = svg_preview_stroke_mm
 
 
 class ExportWrapper:
@@ -60,6 +67,8 @@ class ExportWrapper:
         keep_aspect_ratio: bool = False,
         export_jpg_preview: bool = False,
         optimize: bool = False,
+        export_svg_preview: bool = False,
+        svg_preview_stroke_mm: float = SVG_PREVIEW_STROKE_MM,
     ):
         self.paths = paths
         self.ptype = ptype
@@ -71,7 +80,16 @@ class ExportWrapper:
         self.export_reversed = export_reversed
         self.keep_aspect_ratio = keep_aspect_ratio
 
-        self.config = ExportConfig(ptype, margin, cutoff, False, export_jpg_preview, optimize)
+        self.config = ExportConfig(
+            ptype,
+            margin,
+            cutoff,
+            False,
+            export_jpg_preview,
+            optimize,
+            export_svg_preview=export_svg_preview,
+            svg_preview_stroke_mm=svg_preview_stroke_mm,
+        )
 
         self.exp = Exporter(paths)
         self.exp.cfg = self.config
@@ -168,6 +186,40 @@ class Exporter:
         jpeg_renderer.render()
         jpeg_renderer.save(self._generate_filename())
 
+    def export_svg_preview(self) -> None:
+        """
+        A preview of the whole plot area, written in millimetres, with the
+        drawing sitting where it will land on the sheet.
+
+        The renderer draws y downward while a fitted collection is in plotter
+        space with y upward, so the flip is undone here. Every path is drawn
+        with the same stroke, since the pen width is a property of the nib in
+        the carousel rather than of the geometry.
+        """
+        if not self.cfg or not self.cfg.type:
+            raise ValueError("Configuration or plotter type is not set")
+
+        bb = MinmaxMapping.maps[self.cfg.type]
+        unit_to_mm_factor = XYFactors.fac[self.cfg.type][0]
+
+        preview = Collection()
+        for path in self.collection:
+            flipped = path.scaled(1, -1)
+            # scaled() shares the properties dict with the original, so rebind
+            # rather than mutate - the stroke is a preview concern only
+            flipped.properties = {**path.properties, Property.WIDTH: self.cfg.svg_preview_stroke_mm}
+            preview.add(flipped)
+        preview.translate(-bb.x, bb.y2)
+
+        svg_renderer = SvgRenderer(
+            DataDirHandler().svg(self.name),
+            round(bb.w / unit_to_mm_factor),
+            round(bb.h / unit_to_mm_factor),
+        )
+        svg_renderer.add(preview)
+        svg_renderer.render(scale=1 / unit_to_mm_factor)
+        svg_renderer.save(self._generate_filename())
+
     def export_source(self) -> None:
         source_folder = DataDirHandler().source(self.name)
         fname = self._generate_filename() + ".py"
@@ -228,6 +280,9 @@ class Exporter:
 
         if self.cfg.export_jpg_preview:
             self.export_jpeg_preview()
+
+        if self.cfg.export_svg_preview:
+            self.export_svg_preview()
 
         if self.cfg.export_source:
             self.export_source()

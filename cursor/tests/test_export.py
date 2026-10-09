@@ -133,6 +133,19 @@ def test_export_jpeg_preview(exporter):
         mock_jpeg_renderer.assert_called_once()
 
 
+def test_export_svg_preview(exporter):
+    with patch("cursor.export.SvgRenderer") as mock_svg_renderer:
+        exporter.export_svg_preview()
+        mock_svg_renderer.assert_called_once()
+
+
+def test_export_svg_preview_leaves_widths_alone(exporter):
+    widths = [path.width for path in exporter.collection]
+    with patch("cursor.export.SvgRenderer"):
+        exporter.export_svg_preview()
+    assert [path.width for path in exporter.collection] == widths
+
+
 def test_export_source(exporter, tmp_path):
     with patch("cursor.export.DataDirHandler") as mock_data_dir_handler:
         mock_data_dir_handler().source.return_value = tmp_path
