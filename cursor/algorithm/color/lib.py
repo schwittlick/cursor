@@ -137,6 +137,67 @@ def _build_legend_paths(
     return legend
 
 
+def _color_of(path: Path) -> Color:
+    """The path's copic pen if it has one, otherwise its plain rgb colour."""
+    copic = path.properties.get(Property.COPIC_COLOR)
+    if isinstance(copic, Color):
+        return copic
+
+    r, g, b = path.properties.get(Property.COLOR, (0, 0, 0))
+    return Color((r / 255.0, g / 255.0, b / 255.0), name=f"rgb({r}, {g}, {b})")
+
+
+def pen_mapping_of(collection: Collection) -> dict:
+    """
+    Reads the {layer: {pen: Color}} mapping back off a collection's paths.
+
+    Every path already knows its layer, the pen that draws it and the colour
+    that pen should be, so the mapping the pdf legend wants is derivable rather
+    than something a caller has to assemble by hand while sorting - which is
+    what sort_collection_by_copic_color_group does, because it is building the
+    layers in the first place.
+
+    Assign it to collection.properties["pen_mapping"] and the export writes a
+    legend sheet naming the pen to load for each layer's file.
+    """
+    mapping: dict = {}
+    for path in collection:
+        color = _color_of(path)
+        pens = mapping.setdefault(path.layer, {})
+        if pens.setdefault(path.pen_select, color) != color:
+            logging.warning(
+                f"layer {path.layer} draws pen {path.pen_select} in two colours, "
+                f"{pens[path.pen_select]} and {color}; keeping the first"
+            )
+    return mapping
+
+
+def collapse_to_single_pen(collection: Collection, pen: int = 1) -> None:
+    """
+    Points every path at one pen, in place.
+
+    For the workflow where each layer is plotted as its own file: you load one
+    pen, send that layer's file, swap the pen, send the next. Every file wants
+    the same carousel slot, so the pen number stops carrying any information and
+    the colour lives in the layer instead - see pen_mapping_of, which then reads
+    back one entry per layer naming the pen to load for it.
+
+    Warns if a layer used several pens, because collapsing those loses the
+    distinction: split them into their own layers first if it mattered.
+    """
+    pens_seen: dict = {}
+    for path in collection:
+        pens_seen.setdefault(path.layer, set()).add(path.pen_select)
+        path.pen_select = pen
+
+    for layer, pens in pens_seen.items():
+        if len(pens) > 1:
+            logging.warning(
+                f"layer {layer} drew with pens {sorted(p for p in pens if p is not None)}, "
+                f"now all pen {pen}; split them into separate layers to keep them apart"
+            )
+
+
 def sort_collection_by_copic_color_group(
     collection: Collection,
     legende_x: bool = False,
