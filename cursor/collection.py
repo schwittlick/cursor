@@ -342,7 +342,9 @@ class Collection:
             pa.layer = layer_name
 
     def layer_names(self) -> list[str]:
-        return list(set([p.layer for p in self]))
+        # sorted, not just deduplicated: the export writes one file per layer in
+        # this order, and a set would shuffle it from run to run
+        return sorted(set([p.layer for p in self]))
 
     def get_layers(self) -> dict[str, Collection]:
         layers = {key: [] for key in self.layer_names()}
