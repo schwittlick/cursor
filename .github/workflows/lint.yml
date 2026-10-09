@@ -9,15 +9,15 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v7
         with:
-          python-version: 3.14.6
+          python-version: "3.14"
 
-      - name: Install Python dependencies
-        run: pip install ruff
+      - name: Install ruff
+        run: pip install "$(grep -E '^ruff==' requirements.txt)"
 
       - name: Run Ruff linter
         run: ruff check cursor

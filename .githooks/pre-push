@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Enable once per clone:  git config core.hooksPath .githooks
+set -euo pipefail
+
+root=$(git rev-parse --show-toplevel)
+
+ruff="$root/.venv/bin/ruff"
+if [ ! -x "$ruff" ]; then
+    ruff=$(command -v ruff) || { echo "pre-push: ruff not found, install requirements.txt" >&2; exit 1; }
+fi
+
+pinned=$(grep -E '^ruff==' "$root/requirements.txt" | cut -d= -f3 || true)
+have=$("$ruff" --version | cut -d' ' -f2)
+if [ -n "$pinned" ] && [ "$have" != "$pinned" ]; then
+    echo "pre-push: warning, ruff $have here but CI uses $pinned from requirements.txt" >&2
+fi
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+failed=0
+while read -r local_ref local_sha remote_ref remote_sha; do
+    [[ $local_sha =~ ^0+$ ]] && continue
+
+    rm -rf "${tmp:?}"/*
+    git archive "$local_sha" pyproject.toml cursor | tar -x -C "$tmp"
+
+    echo "pre-push: linting ${local_ref#refs/heads/} at ${local_sha:0:7}"
+    (cd "$tmp" && "$ruff" check --no-cache cursor && "$ruff" format --no-cache --check cursor) || failed=1
+done
+
+if [ "$failed" -ne 0 ]; then
+    echo "pre-push: blocked, fix with 'ruff check --fix cursor && ruff format cursor', commit, push again" >&2
+    exit 1
+fi
