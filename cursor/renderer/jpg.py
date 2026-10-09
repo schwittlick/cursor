@@ -15,8 +15,20 @@ class JpegRenderer(BaseRenderer):
 
         logging.debug(f"Creating image with size=({w}, {h})")
         self._background = (0, 0, 0)
-        self.img: Image = Image.new("RGBA", (w, h), self._background)
-        self.img_draw = ImageDraw.ImageDraw(self.img)
+        self.img = Image.new("RGBA", (w, h), self._background)
+
+    @property
+    def img(self) -> Image.Image:
+        return self._img
+
+    @img.setter
+    def img(self, image: Image.Image) -> None:
+        # A draw handle is bound to one image object. Compositing and rotating
+        # replace the image rather than mutating it, so the handle has to be
+        # rebound: otherwise everything drawn after a render() lands on an
+        # orphaned image and is silently lost.
+        self._img = image
+        self.img_draw = ImageDraw.ImageDraw(image)
 
     def background(self, color: tuple[int, int, int]):
         self._background = color
