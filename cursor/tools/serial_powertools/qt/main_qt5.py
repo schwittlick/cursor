@@ -315,6 +315,10 @@ class SerialInspectorGUI(QMainWindow):
         percent_label = QLabel("Start %:")
         self.start_percentage_input = QLineEdit()
         self.start_percentage_input.setPlaceholderText("0")
+        self.start_percentage_input.setToolTip(
+            "Resume part-way through the file: starts at the next pen-up and first replays the pen, speed, force "
+            "and other settings the file made before that point"
+        )
         self.start_percentage_input.setMaximumWidth(60)
         slider_layout.addWidget(percent_label)
         slider_layout.addWidget(self.start_percentage_input)

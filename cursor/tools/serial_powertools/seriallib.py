@@ -40,6 +40,33 @@ def concat_commands(cmd_list: list[str]) -> str:
     return concatenated
 
 
+MODAL = set("IN DF AP SP VS FS AS LT PT CT CV GM GP SG IP SC IW RO DI DR SI SR SL LO ES DT CS CA SS SA".split())
+
+
+def _mnemonic(command: str) -> str:
+    return command[:2].upper()
+
+
+def state_before(commands: list[str], index: int) -> list[str]:
+    """
+    The modal instructions a plotter would be carrying at `index` had the file
+    been sent from the start: the last IN and, after it, the last occurrence of
+    every mode-setting mnemonic, in file order. Replayed before resuming
+    part-way through a file so pen, speed, force, line type and the like match.
+    """
+    start = next((i for i in range(index - 1, -1, -1) if _mnemonic(commands[i]) == "IN"), 0)
+    latest: dict[str, int] = {}
+    for i in range(start, index):
+        if _mnemonic(commands[i]) in MODAL:
+            latest[_mnemonic(commands[i])] = i
+    return [commands[i] for i in sorted(latest.values())]
+
+
+def resume_point(commands: list[str], index: int) -> int:
+    """The first pen-up at or after index, so a resumed plot never draws from wherever the pen happens to be."""
+    return next((i for i in range(index, len(commands)) if _mnemonic(commands[i]) == "PU"), index)
+
+
 def wait_for_free_io_memory(plotter: HPGLPlotter, memory_amount: int, limit: int = 64) -> None:
     free_io_memory = plotter.free_memory()
     free_io_memory = min(free_io_memory, limit)

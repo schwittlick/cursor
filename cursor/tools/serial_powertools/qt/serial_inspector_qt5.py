@@ -7,7 +7,7 @@ from PyQt5.QtCore import QObject, QThread, pyqtSignal
 
 from cursor.hpgl.hpgl_tokenize import tokenizer
 from cursor.hpgl.plotter.plotter import HPGLPlotter
-from cursor.tools.serial_powertools.seriallib import AsyncSerialSender
+from cursor.tools.serial_powertools.seriallib import AsyncSerialSender, concat_commands, resume_point, state_before
 
 
 class SerialInspector(QObject):
@@ -125,8 +125,12 @@ class SerialInspector(QObject):
         def progress_cb(command_idx: int):
             self.file_progress_updated.emit(command_idx, len(commands))
 
-        # Calculate curr_index from percentage
         curr_index = int((start_percentage / 100.0) * len(commands))
+        if curr_index > 0:
+            curr_index = resume_point(commands, curr_index)
+            state = state_before(commands, curr_index)
+            commands[curr_index:curr_index] = state
+            logging.info(f"Resuming at command {curr_index} of {len(commands)}, replaying {concat_commands(state)}")
 
         self.async_sender.add_commands(commands, progress_cb, curr_index)
 

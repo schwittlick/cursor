@@ -36,6 +36,9 @@ HPGL Basics
     AP default unless the front panel changed it, so emit AP after IN to be sure.
     c106 plots the DraftMaster SX with AP11 (no sort, no deferred pickup, no bidirectional)
     and the front-panel View pause keeps working.
+    The serial powertools sender, started part-way through a file, resumes at the next
+    pen-up and first replays the modal instructions the file made up to there (IN, AP,
+    SP, VS, FS, LT and so on).
 
 ###Plotter handling
 
