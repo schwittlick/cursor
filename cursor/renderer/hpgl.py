@@ -10,11 +10,19 @@ from cursor.timer import Timer
 
 
 class HPGLRenderer(BaseRenderer):
-    def __init__(self, folder: pathlib.Path, auto_pen_ops: int | None = None) -> None:
+    def __init__(
+        self,
+        folder: pathlib.Path,
+        auto_pen_ops: int | None = None,
+        acceleration: int | None = None,
+        travel_acceleration: int | None = None,
+    ) -> None:
         super().__init__(folder)
 
         self.__save_path = folder
         self.auto_pen_ops = auto_pen_ops
+        self.acceleration = acceleration
+        self.travel_acceleration = travel_acceleration
 
     def estimated_duration(self, speed) -> int:
         s = 0
@@ -46,17 +54,31 @@ class HPGLRenderer(BaseRenderer):
         self.collection = optimized
 
     @staticmethod
-    def generate_string(collection: Collection, auto_pen_ops: int | None = None) -> str:
+    def generate_string(
+        collection: Collection,
+        auto_pen_ops: int | None = None,
+        acceleration: int | None = None,
+        travel_acceleration: int | None = None,
+    ) -> str:
+        """
+        acceleration is the AS for pen-down moves (a path's own acceleration property wins),
+        travel_acceleration the AS for the pen-up moves between paths. Both are modal, so
+        they are only re-sent when they change.
+        """
         _hpgl = HPGL()
 
         _prev_line_type = 0
         _prev_velocity = 0
         _prev_force = 0
         _prev_pen = 0
+        _prev_acceleration = None
 
         _hpgl.IN()
         if auto_pen_ops is not None:
             _hpgl.AP(auto_pen_ops)
+        if acceleration is not None:
+            _hpgl.AS(acceleration)
+            _prev_acceleration = acceleration
 
         for p in collection:
             x = p.start_pos().x
@@ -104,9 +126,18 @@ class HPGLRenderer(BaseRenderer):
             if p.laser_amp:
                 _hpgl.custom(f"AMP{p.laser_amp:.3};")
 
+            if travel_acceleration is not None and travel_acceleration != _prev_acceleration:
+                _hpgl.AS(travel_acceleration)
+                _prev_acceleration = travel_acceleration
+
             _hpgl.PA(int(x), int(y))
             if p.is_polygon:
                 _hpgl.custom("PM0;")
+
+            _as = p.acceleration if p.acceleration is not None else acceleration
+            if _as is not None and _as != _prev_acceleration:
+                _hpgl.AS(_as)
+                _prev_acceleration = _as
 
             _hpgl.PD()
 
@@ -128,6 +159,8 @@ class HPGLRenderer(BaseRenderer):
                 _hpgl.custom("PM2;")  # switch to PM2; to close and safe
                 _hpgl.custom("FP;")
 
+        if travel_acceleration is not None and travel_acceleration != _prev_acceleration:
+            _hpgl.AS(travel_acceleration)
         _hpgl.PA(0, 0)
         _hpgl.SP(0)
 
@@ -137,7 +170,9 @@ class HPGLRenderer(BaseRenderer):
         pathlib.Path(self.__save_path).mkdir(parents=True, exist_ok=True)
         fname = self.__save_path / (filename + ".hpgl")
 
-        _hpgl_string = HPGLRenderer.generate_string(self.collection, self.auto_pen_ops)
+        _hpgl_string = HPGLRenderer.generate_string(
+            self.collection, self.auto_pen_ops, self.acceleration, self.travel_acceleration
+        )
 
         with open(fname.as_posix(), "w") as file:
             file.write(_hpgl_string)

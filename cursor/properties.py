@@ -8,6 +8,7 @@ class Property(str, Enum):
     LINE_TYPE = "linetype"
     VELOCITY = "velocity"
     PEN_FORCE = "penforce"
+    ACCELERATION = "acceleration"
     PEN_SELECT = "penselect"
     IS_POLY = "ispoly"
     LASER_PWM = "pwm"

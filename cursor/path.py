@@ -180,6 +180,17 @@ class Path:
         self.properties[Property.VELOCITY] = pen_velocity
 
     @property
+    def acceleration(self) -> int | None:
+        if Property.ACCELERATION not in self.properties.keys():
+            return None
+
+        return self.properties[Property.ACCELERATION]
+
+    @acceleration.setter
+    def acceleration(self, acceleration: int) -> None:
+        self.properties[Property.ACCELERATION] = acceleration
+
+    @property
     def tags(self) -> list[str] | None:
         if Property.TAGS not in self.properties.keys():
             return None
