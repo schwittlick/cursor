@@ -29,7 +29,6 @@ Repository = "https://github.com/schwittlick/cursor"
 [project.scripts]
 cursor_recorder = "cursor.recorder:main"
 discovery = "cursor.tools.discovery:discover"
-sendhpgl = "cursor.tools.sendhpgl:main"
 braille_convert = "cursor.tools.braille_converter:main"
 cursor_explorer = "cursor.tools.explorer:main"
 

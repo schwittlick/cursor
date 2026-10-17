@@ -162,7 +162,7 @@ def _hpgl_names() -> Dict[str, List[PlotterType]]:
     """Group plotters by the HPGL model they report.
 
     Callers rely on the first entry being the expected default config for that model
-    (see serial_powertools), so plotters flagged "default_for_model" are sorted first.
+    (see the serial-powertools repo), so plotters flagged "default_for_model" are sorted first.
     """
     grouped: Dict[str, List[Dict]] = {}
     for p in _plotters:

@@ -1,1 +1,0 @@
-A tool to explore available serial ports. Has a few handy tools to interactively control a plotter
