@@ -19,6 +19,16 @@ WAIT = f"{ESC}.L"  # returns io buffer size when its empty. read it and wait for
 OUTPUT_DIMENSIONS = "OH;"
 OUTPUT_POSITION = "OA;"
 
+# AP, Automatic Pen Operations: DraftMaster Programmer's Reference 10-4
+AP_LIFT_IDLE = 1
+AP_STORE_IDLE = 2
+AP_DEFER_PICKUP = 4
+AP_MERGE_PEN_UP = 8
+AP_PEN_SORT = 16
+AP_BIDIRECTIONAL = 64
+AP_SP_AS_SG = 128
+AP_DEFAULT = AP_LIFT_IDLE | AP_STORE_IDLE | AP_DEFER_PICKUP | AP_MERGE_PEN_UP | AP_PEN_SORT | AP_BIDIRECTIONAL
+
 
 def read_until_char(port: serial.Serial, char: chr = CR, timeout: float = 1.0) -> str:
     timer = Timer()

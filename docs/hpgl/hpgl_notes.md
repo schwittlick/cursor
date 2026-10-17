@@ -27,6 +27,16 @@ HPGL Basics
     OF; Output factor, number of plotter units per millimeter per axis
     OI; plotter model!
 
+    AP: Automatic Pen Operations (DraftMaster, Programmer's Reference 10-4), sum of
+    1 lift pen when idle, 2 store pen when idle, 4 pick up a pen selected by SP only
+    when it has to draw, 8 merge pen-up moves, 16 pen sort, 64 bidirectional plotting
+    (the plotter may draw a line backwards), 128 treat SP as SG. Default 95, all but 128.
+    Sort and bidirectional are also on the front panel: Next Display > Set Pens > Sort (f2),
+    f4 toggles, Enter stores it across power cycles (User's Guide 2-31). IN restores the
+    AP default unless the front panel changed it, so emit AP after IN to be sure.
+    c106 plots the DraftMaster SX with AP11 (no sort, no deferred pickup, no bidirectional)
+    and the front-panel View pause keeps working.
+
 ###Plotter handling
 
 hard limits of the plotting area as measured by the machine, in plotter steps

@@ -10,10 +10,11 @@ from cursor.timer import Timer
 
 
 class HPGLRenderer(BaseRenderer):
-    def __init__(self, folder: pathlib.Path) -> None:
+    def __init__(self, folder: pathlib.Path, auto_pen_ops: int | None = None) -> None:
         super().__init__(folder)
 
         self.__save_path = folder
+        self.auto_pen_ops = auto_pen_ops
 
     def estimated_duration(self, speed) -> int:
         s = 0
@@ -45,7 +46,7 @@ class HPGLRenderer(BaseRenderer):
         self.collection = optimized
 
     @staticmethod
-    def generate_string(collection: Collection) -> str:
+    def generate_string(collection: Collection, auto_pen_ops: int | None = None) -> str:
         _hpgl = HPGL()
 
         _prev_line_type = 0
@@ -54,6 +55,8 @@ class HPGLRenderer(BaseRenderer):
         _prev_pen = 0
 
         _hpgl.IN()
+        if auto_pen_ops is not None:
+            _hpgl.AP(auto_pen_ops)
 
         for p in collection:
             x = p.start_pos().x
@@ -134,7 +137,7 @@ class HPGLRenderer(BaseRenderer):
         pathlib.Path(self.__save_path).mkdir(parents=True, exist_ok=True)
         fname = self.__save_path / (filename + ".hpgl")
 
-        _hpgl_string = HPGLRenderer.generate_string(self.collection)
+        _hpgl_string = HPGLRenderer.generate_string(self.collection, self.auto_pen_ops)
 
         with open(fname.as_posix(), "w") as file:
             file.write(_hpgl_string)

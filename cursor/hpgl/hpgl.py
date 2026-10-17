@@ -54,6 +54,9 @@ class HPGL:
     def SP(self, pen: int) -> None:
         self.__data.append(f"SP{pen};")
 
+    def AP(self, ops: int) -> None:
+        self.__data.append(f"AP{ops};")
+
     def VS(self, speed: int) -> None:
         self.__data.append(f"VS{speed};")
 

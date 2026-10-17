@@ -42,6 +42,7 @@ class ExportConfig:
         optimize_hpgl_by_tsp: bool = True,
         export_svg_preview: bool = False,
         svg_preview_stroke_mm: float = SVG_PREVIEW_STROKE_MM,
+        hpgl_auto_pen_ops: Optional[int] = None,
     ):
         self.type: PlotterType = type
         self.margin = margin
@@ -51,6 +52,7 @@ class ExportConfig:
         self.optimize_hpgl_by_tsp = optimize_hpgl_by_tsp
         self.export_svg_preview = export_svg_preview
         self.svg_preview_stroke_mm = svg_preview_stroke_mm
+        self.hpgl_auto_pen_ops = hpgl_auto_pen_ops
 
 
 class ExportWrapper:
@@ -69,6 +71,7 @@ class ExportWrapper:
         optimize: bool = False,
         export_svg_preview: bool = False,
         svg_preview_stroke_mm: float = SVG_PREVIEW_STROKE_MM,
+        auto_pen_ops: Optional[int] = None,
     ):
         self.paths = paths
         self.ptype = ptype
@@ -89,6 +92,7 @@ class ExportWrapper:
             optimize,
             export_svg_preview=export_svg_preview,
             svg_preview_stroke_mm=svg_preview_stroke_mm,
+            hpgl_auto_pen_ops=auto_pen_ops,
         )
 
         self.exp = Exporter(paths)
@@ -312,7 +316,7 @@ class Exporter:
 
     def _export_hpgl(self, pc: Collection, fname: str) -> None:
         hpgl_folder = DataDirHandler().hpgl(self.name)
-        hpgl_renderer = HPGLRenderer(hpgl_folder)
+        hpgl_renderer = HPGLRenderer(hpgl_folder, auto_pen_ops=self.cfg.hpgl_auto_pen_ops)
 
         mutohs = {
             PlotterType.MUTOH_XP500_A1,
